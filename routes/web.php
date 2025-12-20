@@ -28,6 +28,9 @@ Route::middleware('auth')->group(function () {
 // App routes (authenticated + tenancy)
 Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->group(function () {
     Route::apiResource('customers', CustomerController::class);
+    
+    // API endpoint for testing
+    Route::get('/api/customers', [CustomerController::class, 'apiIndex']);
 });
 
 // Test routes for tenancy middleware (testing environment only)

@@ -16,5 +16,20 @@
         "toggle": "تبديل المظهر",
         "light": "مضيء",
         "dark": "داكن"
+    },
+    "customers": {
+        "title": "إدارة العملاء",
+        "empty": "لا يوجد عملاء حالياً",
+        "showing": "عرض",
+        "of": "من",
+        "columns": {
+            "name": "الاسم",
+            "phone": "الهاتف",
+            "type": "النوع"
+        },
+        "type": {
+            "individual": "فرد",
+            "company": "شركة"
+        }
     }
 }

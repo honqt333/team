@@ -71,7 +71,7 @@ class CustomersCrudTest extends TestCase
         $response->assertJsonFragment(['name' => 'John Doe']);
 
         // List customers
-        $listResponse = $this->actingAs($user)->getJson('/app/customers');
+        $listResponse = $this->actingAs($user)->getJson('/app/api/customers');
         $listResponse->assertStatus(200);
         $listResponse->assertJsonFragment(['name' => 'John Doe']);
     }

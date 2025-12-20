@@ -16,5 +16,20 @@
         "toggle": "Toggle Theme",
         "light": "Light",
         "dark": "Dark"
+    },
+    "customers": {
+        "title": "Customer Management",
+        "empty": "No customers yet",
+        "showing": "Showing",
+        "of": "of",
+        "columns": {
+            "name": "Name",
+            "phone": "Phone",
+            "type": "Type"
+        },
+        "type": {
+            "individual": "Individual",
+            "company": "Company"
+        }
     }
 }

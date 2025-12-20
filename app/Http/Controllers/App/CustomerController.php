@@ -7,18 +7,29 @@ use App\Http\Requests\CustomerUpdateRequest;
 use App\Models\Customer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class CustomerController
 {
     use AuthorizesRequests;
 
-    public function index(): JsonResponse
+    public function index(): Response
     {
         $this->authorize('viewAny', Customer::class);
 
         $customers = Customer::paginate(15);
 
-        return response()->json($customers);
+        return Inertia::render('Customers/Index', [
+            'customers' => $customers,
+        ]);
+    }
+
+    public function apiIndex(): JsonResponse
+    {
+        $this->authorize('viewAny', Customer::class);
+
+        return response()->json(Customer::query()->paginate(15));
     }
 
     public function store(CustomerStoreRequest $request): JsonResponse
