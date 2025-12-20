@@ -1,0 +1,20 @@
+{
+    "common": {
+        "save": "حفظ",
+        "cancel": "إلغاء",
+        "create": "إنشاء",
+        "update": "تحديث",
+        "delete": "حذف",
+        "search": "بحث",
+        "loading": "جار التحميل..."
+    },
+    "nav": {
+        "dashboard": "لوحة التحكم",
+        "customers": "العملاء"
+    },
+    "theme": {
+        "toggle": "تبديل المظهر",
+        "light": "مضيء",
+        "dark": "داكن"
+    }
+}
