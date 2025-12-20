@@ -15,6 +15,20 @@ class CustomersCrudTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Reset permission cache
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Create all required permissions for guard 'web'
+        Permission::findOrCreate('crm.customers.view', 'web');
+        Permission::findOrCreate('crm.customers.create', 'web');
+        Permission::findOrCreate('crm.customers.update', 'web');
+        Permission::findOrCreate('crm.customers.delete', 'web');
+    }
+
     protected function createUserWithPermissions(array $permissions): User
     {
         $tenant = Tenant::factory()->create();
@@ -27,16 +41,10 @@ class CustomersCrudTest extends TestCase
 
         $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
 
-        // Create and assign permissions with correct guard
+        // Assign permissions to user
         foreach ($permissions as $permissionName) {
-            $permission = Permission::firstOrCreate(
-                ['name' => $permissionName, 'guard_name' => 'web']
-            );
-            $user->givePermissionTo($permission);
+            $user->givePermissionTo($permissionName);
         }
-
-        // Reset cached permissions
-        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Refresh user to load permissions
         $user->refresh();
@@ -70,6 +78,7 @@ class CustomersCrudTest extends TestCase
 
     public function test_user_without_permission_cannot_create(): void
     {
+        // User with NO permissions
         $user = $this->createUserWithPermissions([]);
 
         $response = $this->actingAs($user)->postJson('/app/customers', [
