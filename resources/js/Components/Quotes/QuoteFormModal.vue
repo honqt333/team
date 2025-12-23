@@ -312,13 +312,20 @@ const IconDepartments = {
     template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>`
 };
 
-// Tabs
-const tabs = computed(() => [
+// Tabs - hide departments tab when editing (managed in Show.vue)
+const allTabs = [
     { key: 'main_info', label: t('quotes.tabs.main_info'), icon: IconInfo },
     { key: 'customer_complaint', label: t('quotes.tabs.customer_complaint'), icon: IconComplaint },
     { key: 'initial_assessment', label: t('quotes.tabs.initial_assessment'), icon: IconAssessment },
     { key: 'departments', label: t('quotes.tabs.departments'), icon: IconDepartments },
-]);
+];
+const tabs = computed(() => {
+    if (props.quote) {
+        // Edit mode: hide departments tab
+        return allTabs.filter(tab => tab.key !== 'departments');
+    }
+    return allTabs;
+});
 
 const activeTab = ref('main_info');
 
@@ -341,6 +348,26 @@ const form = useForm({
     departments: props.quote?.departments?.map(d => d.id) || [],
     notes: props.quote?.notes || '',
     lines: [],
+});
+
+// Watch for modal opening to reinitialize form values (for edit mode)
+watch(() => props.show, (newVal) => {
+    if (newVal && props.quote) {
+        // Reset form with quote data when opening in edit mode
+        form.customer_id = props.quote.customer_id || '';
+        form.vehicle_id = props.quote.vehicle_id || '';
+        form.customer_complaint = props.quote.customer_complaint || '';
+        form.initial_assessment = props.quote.initial_assessment || '';
+        form.departments = props.quote.departments?.map(d => d.id) || [];
+        form.notes = props.quote.notes || '';
+        form.lines = [];
+        
+        // Set selected vehicle for display
+        if (props.quote.vehicle) {
+            selectedVehicle.value = props.quote.vehicle;
+            searchQuery.value = props.quote.vehicle.plate_number || '';
+        }
+    }
 });
 
 // Debounce search

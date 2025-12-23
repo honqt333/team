@@ -179,6 +179,8 @@ class QuoteController extends Controller
         $quote->update([
             'customer_id' => $request->customer_id,
             'vehicle_id' => $request->vehicle_id,
+            'customer_complaint' => $request->customer_complaint,
+            'initial_assessment' => $request->initial_assessment,
             'notes' => $request->notes,
         ]);
 

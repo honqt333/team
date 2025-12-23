@@ -25,6 +25,11 @@ class QuoteApprovalController extends Controller
             abort(403, 'This quote cannot be approved.');
         }
 
+        // Cannot approve a quote without services
+        if ($quote->lines()->count() === 0) {
+            abort(400, 'Cannot approve a quote without services.');
+        }
+
         // First, mark as approved
         $quote->update([
             'status' => Quote::STATUS_APPROVED,
@@ -58,6 +63,11 @@ class QuoteApprovalController extends Controller
 
         if (!$quote->canBeRejected()) {
             abort(403, 'This quote cannot be rejected.');
+        }
+
+        // Cannot reject a quote without services
+        if ($quote->lines()->count() === 0) {
+            abort(400, 'Cannot reject a quote without services.');
         }
 
         $quote->update([

@@ -496,6 +496,8 @@
             "subtotal": "Subtotal",
             "total_discount": "Total Discount",
             "net_total": "Net Total",
+            "customer_complaint": "Customer Complaint",
+            "initial_assessment": "Initial Assessment",
             "departments_services": "Departments & Services",
             "add_department": "Add Department",
             "add_service": "Add Service",

@@ -496,6 +496,8 @@
             "subtotal": "الإجمالي",
             "total_discount": "إجمالي الخصم",
             "net_total": "الصافي",
+            "customer_complaint": "شكوى العميل",
+            "initial_assessment": "التقييم المبدئي",
             "departments_services": "الأقسام والخدمات",
             "add_department": "إضافة قسم",
             "add_service": "إضافة خدمة",

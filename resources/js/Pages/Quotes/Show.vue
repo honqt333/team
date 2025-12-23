@@ -139,8 +139,8 @@
 
                     <div class="flex-1"></div>
 
-                    <!-- Status Actions -->
-                    <template v-if="quote.status === 'draft' || quote.status === 'sent'">
+                    <!-- Status Actions (only show if quote has services) -->
+                    <template v-if="(quote.status === 'draft' || quote.status === 'sent') && quote.lines?.length > 0">
                         <button
                             @click="approveQuote"
                             class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg hover:from-green-600 hover:to-emerald-600 shadow-sm transition-all"
@@ -176,6 +176,32 @@
                         <div class="bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('quotes.show.net_total') }}</p>
                             <p class="text-lg font-bold text-green-600 dark:text-green-400">{{ formatPrice(quote.total) }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Complaint & Initial Assessment -->
+                <div 
+                    v-if="quote.customer_complaint || quote.initial_assessment" 
+                    class="px-6 py-4 border-b border-gray-200 dark:border-gray-700"
+                >
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Customer Complaint -->
+                        <div v-if="quote.customer_complaint" class="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4 border border-orange-200 dark:border-orange-700/50">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">💬</span>
+                                <h4 class="font-semibold text-orange-700 dark:text-orange-300">{{ $t('quotes.show.customer_complaint') }}</h4>
+                            </div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ quote.customer_complaint }}</p>
+                        </div>
+                        
+                        <!-- Initial Assessment -->
+                        <div v-if="quote.initial_assessment" class="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-4 border border-teal-200 dark:border-teal-700/50">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">📋</span>
+                                <h4 class="font-semibold text-teal-700 dark:text-teal-300">{{ $t('quotes.show.initial_assessment') }}</h4>
+                            </div>
+                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ quote.initial_assessment }}</p>
                         </div>
                     </div>
                 </div>

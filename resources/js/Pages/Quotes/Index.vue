@@ -412,10 +412,10 @@ watch(activeTab, (newTab) => {
     localStorage.setItem('quotesActiveTab', newTab);
 });
 
-// Computed: Count of quotes without work card (not converted)
+// Computed: Count of quotes without work card (not converted and not rejected)
 const pendingCount = computed(() => {
     if (!props.quotes?.data) return 0;
-    return props.quotes.data.filter(q => q.status !== 'converted').length;
+    return props.quotes.data.filter(q => q.status !== 'converted' && q.status !== 'rejected').length;
 });
 
 // Computed: Total count
@@ -436,7 +436,8 @@ const filteredQuotes = computed(() => {
     
     // Tab filter
     if (activeTab.value === 'pending') {
-        result = result.filter(q => q.status !== 'converted');
+        // Pending = quotes that need action (not converted and not rejected)
+        result = result.filter(q => q.status !== 'converted' && q.status !== 'rejected');
     }
     
     // Comprehensive Search Filter (Code, Customer Name, Phone, Vehicle Plate)
