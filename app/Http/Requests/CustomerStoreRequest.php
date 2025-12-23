@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Support\TenancyContext;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,13 +23,39 @@ class CustomerStoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        $tenantId = TenancyContext::tenantId();
+        $centerId = TenancyContext::centerId();
+
         return [
             'type' => ['required', 'string', Rule::in(['individual', 'company'])],
             'name' => ['required', 'string', 'max:255'],
             'contact_name' => ['nullable', 'string', 'max:255', 'required_if:type,company'],
-            'phone' => ['required', 'string', 'max:30'],
+            'phone' => [
+                'required',
+                'string',
+                'max:30',
+                'regex:/^\+?966\d{9}$/',
+                Rule::unique('customers')
+                    ->where(fn ($q) => $q->where('tenant_id', $tenantId)->where('center_id', $centerId)),
+            ],
+            'whatsapp' => [
+                'nullable',
+                'string',
+                'max:30',
+                'regex:/^\+?966\d{9}$/',
+            ],
             'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string'],
+            'tax_number' => ['nullable', 'string', 'max:50', 'required_if:type,company'],
+            'address_line' => ['nullable', 'string', 'max:500'],
+            'building_number' => ['nullable', 'string', 'max:50'],
+            'postal_code' => ['nullable', 'string', 'max:20'],
+            'district' => ['nullable', 'string', 'max:100'],
+            'city' => ['nullable', 'string', 'max:100'],
+            'region' => ['nullable', 'string', 'max:100'],
+            'country' => ['nullable', 'string', 'max:100'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 
@@ -39,6 +66,9 @@ class CustomerStoreRequest extends FormRequest
     {
         return [
             'contact_name.required_if' => 'The contact name field is required when type is company.',
+            'phone.unique' => 'This phone number already exists for another customer.',
+            'phone.regex' => 'Please enter a valid Saudi phone number (e.g., 05xxxxxxxx or +966xxxxxxxxx).',
+            'whatsapp.regex' => 'Please enter a valid Saudi phone number (e.g., 05xxxxxxxx or +966xxxxxxxxx).',
         ];
     }
 }

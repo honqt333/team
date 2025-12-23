@@ -6,11 +6,57 @@
         "update": "Update",
         "delete": "Delete",
         "search": "Search",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "na": "—",
+        "choose": "Choose...",
+        "other": "Other",
+        "call": "Call",
+        "add": "Add",
+        "remove": "Remove",
+        "total": "Total",
+        "active": "Active",
+        "inactive": "Inactive",
+        "actions": "Actions",
+        "confirm_delete_title": "Confirm Delete",
+        "confirm_delete_message": "Are you sure you want to delete this item? This action cannot be undone.",
+        "confirm": "Confirm",
+        "deleted_success": "Deleted successfully",
+        "saved_success": "Saved successfully",
+        "lang": {
+            "ar": "Arabic",
+            "en": "English"
+        },
+        "coming_soon": "Coming Soon",
+        "no_data": "No data available",
+        "edit": "Edit",
+        "error": "Error",
+        "system": "System",
+        "cannot_modify_system_data": "Cannot modify system data",
+        "cannot_delete_system_data": "Cannot delete system data",
+        "selected": "Selected",
+        "back": "Back",
+        "currency": "SAR",
+        "unsaved_changes": "Unsaved Changes",
+        "unsaved_changes_message": "Changes have not been saved. Are you sure you want to close this form?",
+        "yes_close": "Yes, Close",
+        "discard": "Discard"
     },
     "nav": {
+        "brand": "Carag",
         "dashboard": "Dashboard",
-        "customers": "Customers"
+        "customers": "Customers",
+        "vehicles": "Vehicles",
+        "work_orders": "Work Orders",
+        "departments": "Departments",
+        "services": "Services",
+        "user": "User",
+        "menu": "Menu",
+        "close": "Close",
+        "language": "Change Language",
+        "profile": "Edit Profile",
+        "logout": "Logout",
+        "settings": "Settings",
+        "quotes": "Quotes"
     },
     "theme": {
         "toggle": "Toggle Theme",
@@ -19,17 +65,463 @@
     },
     "customers": {
         "title": "Customer Management",
+        "add": "Add Customer",
+        "search": "Search...",
         "empty": "No customers yet",
+        "empty_hint": "Start by adding your first customer using the add button.",
         "showing": "Showing",
         "of": "of",
+        "total_count": "customers",
+        "view": {
+            "grid": "Grid",
+            "list": "List"
+        },
+        "create": {
+            "title": "Create Customer"
+        },
+        "edit": {
+            "title": "Edit Customer"
+        },
+        "form": {
+            "type": "Type",
+            "name": "Name",
+            "contact_name": "Contact Name",
+            "phone": "Phone",
+            "whatsapp": "WhatsApp",
+            "copy_from_phone": "Copy from Phone",
+            "email": "Email",
+            "notes": "Notes",
+            "submit": "Save",
+            "individual": "Individual",
+            "company": "Company",
+            "tax_number": "Tax Number",
+            "tax_placeholder": "Tax registration number...",
+            "address": "Address",
+            "address_line": "Address Details",
+            "address_placeholder": "Street, building number...",
+            "building_number": "Building No.",
+            "postal_code": "Postal Code",
+            "district": "District",
+            "city": "City",
+            "region": "Region",
+            "country": "Country",
+            "country_placeholder": "Saudi Arabia",
+            "lat": "Latitude",
+            "lng": "Longitude",
+            "clear_address": "Clear"
+        },
         "columns": {
             "name": "Name",
             "phone": "Phone",
-            "type": "Type"
+            "type": "Type",
+            "contact_name": "Contact Name"
         },
         "type": {
             "individual": "Individual",
             "company": "Company"
+        },
+        "quick": {
+            "call": "Call",
+            "whatsapp": "WhatsApp",
+            "email": "Email"
+        },
+        "map": {
+            "hint": "Enter coordinates to display location on map",
+            "click_hint": "Click on the map to set location"
+        }
+    },
+    "vehicles": {
+        "title": "Vehicle Management",
+        "add": "Add Vehicle",
+        "search": "Search...",
+        "empty": "No vehicles yet",
+        "empty_hint": "Start by adding your first vehicle using the add button.",
+        "total_count": "vehicles",
+        "plate_number": "Plate Number",
+        "quick_add_customer": "Add Customer",
+        "create": {
+            "title": "Add Vehicle"
+        },
+        "edit": {
+            "title": "Edit Vehicle"
+        },
+        "form": {
+            "customer": "Customer",
+            "plate": "Plate Number",
+            "plate_placeholder": "ABC 1234",
+            "make": "Make",
+            "make_other": "Make Name",
+            "model": "Model",
+            "model_other": "Model Name",
+            "year": "Year",
+            "color": "Color",
+            "color_placeholder": "White, Black...",
+            "vin": "VIN",
+            "vin_placeholder": "Vehicle Identification Number",
+            "odometer": "Odometer",
+            "odometer_placeholder": "km",
+            "notes": "Notes",
+            "details": "Vehicle Details"
+        },
+        "plate": {
+            "choose_letters": "Choose Plate Letters",
+            "choose_numbers": "Choose Plate Numbers",
+            "country": "Registration Country",
+            "skip_format": "Enter plate format manually",
+            "letters": "Letters",
+            "numbers": "Numbers",
+            "free_input": "Plate Number",
+            "countries": {
+                "sa": "Saudi Arabia",
+                "other": "Other"
+            }
+        }
+    },
+    "work_orders": {
+        "title": "Work Orders",
+        "add": "Create Work Order",
+        "search": "Search...",
+        "empty": "No work orders yet",
+        "empty_hint": "Start by creating your first work order using the add button.",
+        "total_count": "work orders",
+        "create": {
+            "title": "Create Work Order"
+        },
+        "edit": {
+            "title": "Edit Work Order"
+        },
+        "form": {
+            "customer": "Customer",
+            "search_customer": "Search customer...",
+            "vehicle": "Vehicle",
+            "status": "Status",
+            "notes": "Notes",
+            "items": "Service Items",
+            "services": "Predefined Services",
+            "item_title": "Service Description",
+            "item_qty": "Qty",
+            "item_price": "Price",
+            "item_total": "Total",
+            "add_item": "Add Item",
+            "select_customer_first": "Select customer first",
+            "add_new_customer": "Add new customer if not found"
+        },
+        "columns": {
+            "code": "Order #",
+            "customer": "Customer",
+            "vehicle": "Vehicle",
+            "status": "Status",
+            "total": "Total",
+            "created_at": "Date"
+        },
+        "status": {
+            "draft": "Draft",
+            "open": "Open",
+            "in_progress": "In Progress",
+            "done": "Completed",
+            "cancelled": "Cancelled"
+        },
+        "service_categories": {
+            "maintenance": "Maintenance",
+            "electrical": "Electrical",
+            "mechanical": "Mechanical",
+            "body_paint": "Body & Paint",
+            "washing": "Washing & Polishing",
+            "other": "Other"
+        }
+    },
+    "departments": {
+        "title": "Departments Management",
+        "add": "Add Department",
+        "edit": "Edit Department",
+        "search": "Search departments...",
+        "total_count": "departments",
+        "services": "services",
+        "empty": "No departments yet",
+        "empty_hint": "Start by adding your first department to organize services.",
+        "cannot_delete_has_services": "Cannot delete this department because it has services assigned to it.",
+        "columns": {
+            "name": "Name",
+            "description": "Description",
+            "services_count": "Services",
+            "status": "Status"
+        },
+        "form": {
+            "name_ar": "Name in Arabic",
+            "name_ar_placeholder": "Example: الكهرباء",
+            "name_en": "Name in English",
+            "name_en_placeholder": "Example: Electrical",
+            "description": "Description",
+            "sort_order": "Sort Order",
+            "is_active": "Active"
+        }
+    },
+    "services_management": {
+        "title": "Services Management",
+        "add": "Add Service",
+        "edit": "Edit Service",
+        "search": "Search services...",
+        "total_count": "services",
+        "services": "services",
+        "minutes": "min",
+        "unassigned": "Unassigned",
+        "no_services": "No services in this department",
+        "empty": "No services yet",
+        "empty_hint": "Start by adding your first service.",
+        "coming_soon": "Coming Soon",
+        "types": {
+            "internal": "Internal Service",
+            "external": "External Service"
+        },
+        "duration_units": {
+            "minutes": "Minute",
+            "hours": "Hour",
+            "days": "Day",
+            "weeks": "Week"
+        },
+        "warranty_units": {
+            "days": "Day",
+            "weeks": "Week",
+            "months": "Month",
+            "years": "Year"
+        },
+        "form": {
+            "department": "Department",
+            "no_department": "No Department",
+            "name_ar": "Name in Arabic",
+            "name_ar_placeholder": "Example: فحص كمبيوتر",
+            "name_en": "Name in English",
+            "name_en_placeholder": "Example: Computer Check",
+            "description_ar": "Description in Arabic",
+            "description_en": "Description in English",
+            "base_price": "Price",
+            "estimated_duration": "Service Duration",
+            "warranty": "Warranty",
+            "estimated_minutes": "Estimated Duration",
+            "type": "Service Type",
+            "is_active": "Active"
+        }
+    },
+    "settings": {
+        "title": "Settings",
+        "subtitle": "Manage system settings and configuration",
+        "cards": {
+            "system": {
+                "title": "System Settings",
+                "description": "Makes, Models, Colors"
+            },
+            "departments": {
+                "title": "Departments",
+                "description": "Manage work departments"
+            },
+            "services": {
+                "title": "Services",
+                "description": "Manage available services"
+            }
+        }
+    },
+    "system_settings": {
+        "title": "System Settings",
+        "sections": {
+            "makes": "Makes",
+            "models": "Models",
+            "colors": "Colors",
+            "service_types": "Service Types",
+            "payment_methods": "Payment Methods"
+        },
+        "makes": {
+            "subtitle": "Manage vehicle makes",
+            "add": "Add Make",
+            "edit": "Edit Make"
+        },
+        "models": {
+            "subtitle": "Manage vehicle models",
+            "add": "Add Model",
+            "edit": "Edit Model",
+            "all_makes": "All Makes"
+        },
+        "colors": {
+            "subtitle": "Manage vehicle colors",
+            "add": "Add Color",
+            "edit": "Edit Color"
+        },
+        "columns": {
+            "name_ar": "Name (Arabic)",
+            "name_en": "Name (English)",
+            "is_active": "Status",
+            "updated_at": "Last Updated",
+            "updated_by": "Updated By",
+            "make": "Make",
+            "color": "Color"
+        },
+        "form": {
+            "name_ar": "Name (Arabic)",
+            "name_ar_placeholder": "Enter name in Arabic",
+            "name_en": "Name (English)",
+            "name_en_placeholder": "Enter name in English",
+            "make": "Make",
+            "hex_code": "Color Code",
+            "is_active": "Active"
+        }
+    },
+    "pricing": {
+        "base_price": "Base Price",
+        "min_price": "Minimum Selling Price",
+        "min_price_hint": "Service cannot be sold below this price",
+        "default_discount": "Default Discount",
+        "discount_type": "Discount Type",
+        "discount_value": "Discount Value",
+        "discount_types": {
+            "none": "No Discount",
+            "percentage": "Percentage",
+            "fixed": "Fixed Amount"
+        },
+        "allow_price_override": "Allow Price Override",
+        "allow_price_override_hint": "When enabled, reception can modify price or discount when adding service to work card",
+        "price_locked": "Price Locked",
+        "unit_price": "Unit Price",
+        "discount_amount": "Discount Amount",
+        "final_price": "Final Price",
+        "line_total": "Line Total",
+        "subtotal": "Subtotal",
+        "total_discount": "Total Discounts",
+        "total_due": "Total Due",
+        "final_price_below_minimum": "Final price ({final}) is below minimum ({min})",
+        "coming_soon": {
+            "invoice_discount": "Invoice Extra Discount - Coming Soon",
+            "line_discount_ui": "Line Discount Edit - Coming Soon"
+        }
+    },
+    "quotes": {
+        "title": "Quotes",
+        "add": "Add Quote",
+        "edit": "Edit Quote",
+        "search": "Search quotes...",
+        "empty": "No quotes found",
+        "empty_hint": "Start by adding your first quote using the add button.",
+        "total_count": "quotes",
+        "showing": "Showing",
+        "of": "of",
+        "status": {
+            "draft": "Draft",
+            "sent": "Sent",
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "converted": "Converted"
+        },
+        "form": {
+            "customer": "Customer",
+            "vehicle": "Vehicle",
+            "select_customer_first": "Select customer first",
+            "services": "Services",
+            "add_line": "Add Line",
+            "description": "Description",
+            "qty": "Qty",
+            "unit_price": "Unit Price",
+            "discount": "Discount",
+            "line_total": "Total",
+            "notes": "Notes",
+            "subtotal": "Subtotal",
+            "total_discount": "Total Discounts",
+            "grand_total": "Grand Total"
+        },
+        "columns": {
+            "code": "Code",
+            "customer": "Customer",
+            "vehicle": "Vehicle",
+            "total": "Total",
+            "status": "Status",
+            "created_at": "Created At"
+        },
+        "actions": {
+            "view": "View",
+            "edit": "Edit",
+            "approve": "Approve",
+            "reject": "Reject",
+            "delete": "Delete"
+        },
+        "messages": {
+            "approved_success": "Quote approved and converted to work card",
+            "rejected_success": "Quote rejected",
+            "deleted_success": "Quote deleted",
+            "confirm_approve": "Approve this quote and convert to work card?",
+            "confirm_reject": "Reject this quote?",
+            "confirm_delete": "Delete this quote permanently?",
+            "confirm_remove_department": "Remove this department from the quote?",
+            "cannot_edit": "This quote cannot be edited",
+            "cannot_delete": "This quote cannot be deleted"
+        },
+        "converted_to": "Converted to Work Card",
+        "tabs": {
+            "without_card": "Quotes Without Card",
+            "all": "All Quotes",
+            "main_info": "Main Info",
+            "customer_complaint": "Customer Complaint",
+            "initial_assessment": "Initial Assessment",
+            "departments": "Departments & Services"
+        },
+        "filters": {
+            "code_placeholder": "Quote number...",
+            "all_statuses": "All Statuses",
+            "date_range": "Date",
+            "all_time": "All Time",
+            "today": "Today",
+            "last_week": "Last Week",
+            "last_month": "Last Month",
+            "last_30_days": "Last 30 Days",
+            "clear": "Clear Filters",
+            "search_placeholder": "Search name, phone, vehicle..."
+        },
+        "form_tabs": {
+            "search_placeholder": "Search by plate, customer name, or phone...",
+            "add_vehicle": "Add Vehicle",
+            "customer_name": "Customer Name",
+            "phone": "Phone",
+            "responsible": "Responsible",
+            "customer_complaint": "Customer Complaint",
+            "customer_complaint_placeholder": "Write the customer complaint here...",
+            "initial_assessment": "Initial Assessment",
+            "initial_assessment_placeholder": "Write the initial vehicle assessment...",
+            "select_departments": "Select required departments",
+            "no_results": "No results found",
+            "has_open_quote": "This vehicle has an open quote",
+            "view_open_quote": "View Quote"
+        },
+        "show": {
+            "services": "Services",
+            "price": "Price",
+            "discount": "Discount",
+            "amount": "Amount",
+            "total": "Total",
+            "subtotal": "Subtotal",
+            "total_discount": "Total Discount",
+            "net_total": "Net Total",
+            "departments_services": "Departments & Services",
+            "add_department": "Add Department",
+            "add_service": "Add Service",
+            "services_count": "services",
+            "no_services": "No services in this department",
+            "no_departments": "No departments, add one to start",
+            "all_departments_added": "All departments added",
+            "print": "Print",
+            "share": "Share",
+            "copy_link": "Copy Link",
+            "tabs": {
+                "services": "Services",
+                "spare_parts": "Spare Parts"
+            }
+        },
+        "service_modal": {
+            "service": "Service",
+            "description": "Service Description",
+            "description_placeholder": "Enter service description...",
+            "qty": "Quantity",
+            "price": "Service Price",
+            "discount_method": "Discount Method",
+            "no_discount": "No Discount",
+            "fixed": "Fixed Amount",
+            "discount_value": "Discount Value",
+            "total_cost": "Service Cost"
         }
     }
 }

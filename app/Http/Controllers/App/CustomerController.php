@@ -7,6 +7,7 @@ use App\Http\Requests\CustomerUpdateRequest;
 use App\Models\Customer;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -32,13 +33,13 @@ class CustomerController
         return response()->json(Customer::query()->paginate(15));
     }
 
-    public function store(CustomerStoreRequest $request): JsonResponse
+    public function store(CustomerStoreRequest $request): RedirectResponse
     {
         $this->authorize('create', Customer::class);
 
         $customer = Customer::create($request->validated());
 
-        return response()->json($customer, 201);
+        return redirect()->back()->with('customer', $customer);
     }
 
     public function show(Customer $customer): JsonResponse
@@ -48,21 +49,21 @@ class CustomerController
         return response()->json($customer);
     }
 
-    public function update(CustomerUpdateRequest $request, Customer $customer): JsonResponse
+    public function update(CustomerUpdateRequest $request, Customer $customer): RedirectResponse
     {
         $this->authorize('update', $customer);
 
         $customer->update($request->validated());
 
-        return response()->json($customer);
+        return redirect()->back();
     }
 
-    public function destroy(Customer $customer): JsonResponse
+    public function destroy(Customer $customer): RedirectResponse
     {
         $this->authorize('delete', $customer);
 
         $customer->delete();
 
-        return response()->json(null, 204);
+        return redirect()->back();
     }
 }

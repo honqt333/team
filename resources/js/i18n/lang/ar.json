@@ -6,11 +6,57 @@
         "update": "تحديث",
         "delete": "حذف",
         "search": "بحث",
-        "loading": "جار التحميل..."
+        "loading": "جار التحميل...",
+        "na": "—",
+        "choose": "اختر...",
+        "other": "أخرى",
+        "call": "اتصال",
+        "add": "إضافة",
+        "remove": "إزالة",
+        "total": "الإجمالي",
+        "active": "مفعّل",
+        "inactive": "معطّل",
+        "actions": "الإجراءات",
+        "confirm_delete_title": "تأكيد الحذف",
+        "confirm_delete_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
+        "confirm": "تأكيد",
+        "deleted_success": "تم الحذف بنجاح",
+        "saved_success": "تم الحفظ بنجاح",
+        "lang": {
+            "ar": "عربي",
+            "en": "English"
+        },
+        "coming_soon": "قريباً",
+        "no_data": "لا توجد بيانات",
+        "edit": "تعديل",
+        "error": "خطأ",
+        "system": "نظام",
+        "cannot_modify_system_data": "لا يمكن تعديل بيانات النظام",
+        "cannot_delete_system_data": "لا يمكن حذف بيانات النظام",
+        "selected": "تم الاختيار",
+        "back": "رجوع",
+        "currency": "ر.س",
+        "unsaved_changes": "تغييرات غير محفوظة",
+        "unsaved_changes_message": "لم يتم حفظ التغييرات. هل أنت متأكد من إغلاق هذا النموذج؟",
+        "yes_close": "نعم، إغلاق",
+        "discard": "تجاهل"
     },
     "nav": {
+        "brand": "Carag",
         "dashboard": "لوحة التحكم",
-        "customers": "العملاء"
+        "customers": "العملاء",
+        "vehicles": "المركبات",
+        "work_orders": "كروت العمل",
+        "departments": "الأقسام",
+        "services": "الخدمات",
+        "user": "مستخدم",
+        "menu": "القائمة",
+        "close": "إغلاق",
+        "language": "تغيير اللغة",
+        "profile": "تعديل الملف الشخصي",
+        "logout": "تسجيل الخروج",
+        "settings": "الإعدادات",
+        "quotes": "التقييمات"
     },
     "theme": {
         "toggle": "تبديل المظهر",
@@ -19,17 +65,463 @@
     },
     "customers": {
         "title": "إدارة العملاء",
+        "add": "إضافة عميل",
+        "search": "بحث...",
         "empty": "لا يوجد عملاء حالياً",
+        "empty_hint": "ابدأ بإضافة أول عميل باستخدام زر الإضافة.",
         "showing": "عرض",
         "of": "من",
+        "total_count": "عميل",
+        "view": {
+            "grid": "شبكي",
+            "list": "قائمة"
+        },
+        "create": {
+            "title": "إضافة عميل"
+        },
+        "edit": {
+            "title": "تعديل عميل"
+        },
+        "form": {
+            "type": "النوع",
+            "name": "الاسم",
+            "contact_name": "اسم المسؤول",
+            "phone": "الجوال",
+            "whatsapp": "الواتساب",
+            "copy_from_phone": "نسخ من الهاتف",
+            "email": "البريد",
+            "notes": "ملاحظات",
+            "submit": "حفظ",
+            "individual": "فرد",
+            "company": "شركة",
+            "tax_number": "الرقم الضريبي",
+            "tax_placeholder": "رقم التسجيل الضريبي...",
+            "address": "العنوان",
+            "address_line": "تفاصيل العنوان",
+            "address_placeholder": "الشارع، رقم المبنى...",
+            "building_number": "رقم المبنى",
+            "postal_code": "الرمز البريدي",
+            "district": "الحي",
+            "city": "المدينة",
+            "region": "المنطقة",
+            "country": "الدولة",
+            "country_placeholder": "السعودية",
+            "lat": "خط العرض",
+            "lng": "خط الطول",
+            "clear_address": "تفريغ"
+        },
         "columns": {
             "name": "الاسم",
             "phone": "الهاتف",
-            "type": "النوع"
+            "type": "النوع",
+            "contact_name": "اسم المسؤول"
         },
         "type": {
             "individual": "فرد",
             "company": "شركة"
+        },
+        "quick": {
+            "call": "اتصال",
+            "whatsapp": "واتساب",
+            "email": "إيميل"
+        },
+        "map": {
+            "hint": "أدخل الإحداثيات لعرض الموقع على الخريطة",
+            "click_hint": "اضغط على الخريطة لتحديد الموقع"
+        }
+    },
+    "vehicles": {
+        "title": "إدارة المركبات",
+        "add": "إضافة مركبة",
+        "search": "بحث...",
+        "empty": "لا توجد مركبات حالياً",
+        "empty_hint": "ابدأ بإضافة أول مركبة باستخدام زر الإضافة.",
+        "total_count": "مركبة",
+        "plate_number": "رقم اللوحة",
+        "quick_add_customer": "إضافة عميل",
+        "create": {
+            "title": "إضافة مركبة"
+        },
+        "edit": {
+            "title": "تعديل مركبة"
+        },
+        "form": {
+            "customer": "العميل",
+            "plate": "رقم اللوحة",
+            "plate_placeholder": "أ ب ج 1234",
+            "make": "الماركة",
+            "make_other": "اسم الماركة",
+            "model": "الموديل",
+            "model_other": "اسم الموديل",
+            "year": "سنة الصنع",
+            "color": "اللون",
+            "color_placeholder": "أبيض، أسود...",
+            "vin": "رقم الهيكل",
+            "vin_placeholder": "VIN",
+            "odometer": "عداد الكيلومترات",
+            "odometer_placeholder": "كم",
+            "notes": "ملاحظات",
+            "details": "تفاصيل المركبة"
+        },
+        "plate": {
+            "choose_letters": "اختر حروف اللوحة",
+            "choose_numbers": "اختر أرقام اللوحة",
+            "country": "تسجيل البلد",
+            "skip_format": "إدخال التنسيق من صيغة اللوحة",
+            "letters": "الحروف",
+            "numbers": "الأرقام",
+            "free_input": "رقم اللوحة",
+            "countries": {
+                "sa": "السعودية",
+                "other": "أخرى"
+            }
+        }
+    },
+    "work_orders": {
+        "title": "كروت العمل",
+        "add": "إنشاء كرت عمل",
+        "search": "بحث...",
+        "empty": "لا توجد كروت عمل حالياً",
+        "empty_hint": "ابدأ بإنشاء أول كرت عمل باستخدام زر الإضافة.",
+        "total_count": "كرت عمل",
+        "create": {
+            "title": "إنشاء كرت عمل"
+        },
+        "edit": {
+            "title": "تعديل كرت عمل"
+        },
+        "form": {
+            "customer": "العميل",
+            "search_customer": "ابحث عن عميل...",
+            "vehicle": "المركبة",
+            "status": "الحالة",
+            "notes": "ملاحظات",
+            "items": "بنود الخدمة",
+            "services": "الخدمات المُعرّفة",
+            "item_title": "وصف الخدمة",
+            "item_qty": "الكمية",
+            "item_price": "السعر",
+            "item_total": "الإجمالي",
+            "add_item": "إضافة بند",
+            "select_customer_first": "اختر العميل أولاً",
+            "add_new_customer": "أضف عميل جديد إذا لم يكن موجوداً"
+        },
+        "columns": {
+            "code": "رقم الكرت",
+            "customer": "العميل",
+            "vehicle": "المركبة",
+            "status": "الحالة",
+            "total": "الإجمالي",
+            "created_at": "التاريخ"
+        },
+        "status": {
+            "draft": "مسودة",
+            "open": "مفتوح",
+            "in_progress": "قيد التنفيذ",
+            "done": "مكتمل",
+            "cancelled": "ملغي"
+        },
+        "service_categories": {
+            "maintenance": "الصيانة",
+            "electrical": "الكهرباء",
+            "mechanical": "الميكانيكا",
+            "body_paint": "السمكرة والدهان",
+            "washing": "الغسيل والتلميع",
+            "other": "أخرى"
+        }
+    },
+    "departments": {
+        "title": "إدارة الأقسام",
+        "add": "إضافة قسم",
+        "edit": "تعديل قسم",
+        "search": "بحث في الأقسام...",
+        "total_count": "قسم",
+        "services": "خدمة",
+        "empty": "لا توجد أقسام",
+        "empty_hint": "ابدأ بإضافة أول قسم لتنظيم الخدمات.",
+        "cannot_delete_has_services": "لا يمكن حذف هذا القسم لأنه يحتوي على خدمات",
+        "columns": {
+            "name": "الاسم",
+            "description": "الوصف",
+            "services_count": "الخدمات",
+            "status": "الحالة"
+        },
+        "form": {
+            "name_ar": "الاسم بالعربية",
+            "name_ar_placeholder": "مثال: الكهرباء",
+            "name_en": "الاسم بالإنجليزية",
+            "name_en_placeholder": "Example: Electrical",
+            "description": "الوصف",
+            "sort_order": "الترتيب",
+            "is_active": "مفعّل"
+        }
+    },
+    "services_management": {
+        "title": "إدارة الخدمات",
+        "add": "إضافة خدمة",
+        "edit": "تعديل خدمة",
+        "search": "بحث في الخدمات...",
+        "total_count": "خدمة",
+        "services": "خدمة",
+        "minutes": "دقيقة",
+        "unassigned": "غير مصنف",
+        "no_services": "لا توجد خدمات في هذا القسم",
+        "empty": "لا توجد خدمات",
+        "empty_hint": "ابدأ بإضافة أول خدمة.",
+        "coming_soon": "قريباً",
+        "types": {
+            "internal": "خدمة داخلية",
+            "external": "خدمة خارجية"
+        },
+        "duration_units": {
+            "minutes": "دقيقة",
+            "hours": "ساعة",
+            "days": "يوم",
+            "weeks": "أسبوع"
+        },
+        "warranty_units": {
+            "days": "يوم",
+            "weeks": "أسبوع",
+            "months": "شهر",
+            "years": "سنة"
+        },
+        "form": {
+            "department": "القسم",
+            "no_department": "بدون قسم",
+            "name_ar": "الاسم بالعربية",
+            "name_ar_placeholder": "مثال: فحص كمبيوتر",
+            "name_en": "الاسم بالإنجليزية",
+            "name_en_placeholder": "Example: Computer Check",
+            "description_ar": "الوصف بالعربية",
+            "description_en": "الوصف بالإنجليزية",
+            "base_price": "السعر",
+            "estimated_duration": "مدة الخدمة",
+            "warranty": "الضمان",
+            "estimated_minutes": "المدة التقريبية",
+            "type": "نوع الخدمة",
+            "is_active": "مفعّل"
+        }
+    },
+    "settings": {
+        "title": "الإعدادات",
+        "subtitle": "إدارة إعدادات النظام والتهيئة",
+        "cards": {
+            "system": {
+                "title": "إعدادات النظام",
+                "description": "الماركات، الموديلات، الألوان"
+            },
+            "departments": {
+                "title": "الأقسام",
+                "description": "إدارة أقسام العمل"
+            },
+            "services": {
+                "title": "الخدمات",
+                "description": "إدارة الخدمات المقدمة"
+            }
+        }
+    },
+    "system_settings": {
+        "title": "إعدادات النظام",
+        "sections": {
+            "makes": "الماركات",
+            "models": "الموديلات",
+            "colors": "الألوان",
+            "service_types": "أنواع الخدمات",
+            "payment_methods": "طرق الدفع"
+        },
+        "makes": {
+            "subtitle": "إدارة ماركات السيارات",
+            "add": "إضافة ماركة",
+            "edit": "تعديل الماركة"
+        },
+        "models": {
+            "subtitle": "إدارة موديلات السيارات",
+            "add": "إضافة موديل",
+            "edit": "تعديل الموديل",
+            "all_makes": "جميع الماركات"
+        },
+        "colors": {
+            "subtitle": "إدارة ألوان السيارات",
+            "add": "إضافة لون",
+            "edit": "تعديل اللون"
+        },
+        "columns": {
+            "name_ar": "الاسم بالعربية",
+            "name_en": "الاسم بالإنجليزية",
+            "is_active": "الحالة",
+            "updated_at": "آخر تحديث",
+            "updated_by": "آخر تعديل بواسطة",
+            "make": "الماركة",
+            "color": "اللون"
+        },
+        "form": {
+            "name_ar": "الاسم بالعربية",
+            "name_ar_placeholder": "أدخل الاسم بالعربية",
+            "name_en": "الاسم بالإنجليزية",
+            "name_en_placeholder": "Enter name in English",
+            "make": "الماركة",
+            "hex_code": "كود اللون",
+            "is_active": "فعّال"
+        }
+    },
+    "pricing": {
+        "base_price": "السعر الأساسي",
+        "min_price": "أدنى سعر للبيع",
+        "min_price_hint": "لا يمكن بيع الخدمة بأقل من هذا السعر",
+        "default_discount": "الخصم الافتراضي",
+        "discount_type": "نوع الخصم",
+        "discount_value": "قيمة الخصم",
+        "discount_types": {
+            "none": "بدون خصم",
+            "percentage": "نسبة مئوية",
+            "fixed": "مبلغ ثابت"
+        },
+        "allow_price_override": "السماح بتغيير السعر",
+        "allow_price_override_hint": "عند التفعيل، يمكن للاستقبال تعديل السعر أو الخصم عند إضافة الخدمة لكرت الصيانة",
+        "price_locked": "السعر مقفل",
+        "unit_price": "سعر الوحدة",
+        "discount_amount": "مبلغ الخصم",
+        "final_price": "السعر النهائي",
+        "line_total": "إجمالي السطر",
+        "subtotal": "المجموع الفرعي",
+        "total_discount": "إجمالي الخصومات",
+        "total_due": "المبلغ المستحق",
+        "final_price_below_minimum": "السعر النهائي ({final}) أقل من الحد الأدنى ({min})",
+        "coming_soon": {
+            "invoice_discount": "خصم الفاتورة الإضافي - قريباً",
+            "line_discount_ui": "تعديل خصم البند - قريباً"
+        }
+    },
+    "quotes": {
+        "title": "التقييمات",
+        "add": "إضافة تقييم",
+        "edit": "تعديل التقييم",
+        "search": "بحث في التقييمات...",
+        "empty": "لا توجد تقييمات",
+        "empty_hint": "ابدأ بإضافة أول تقييم باستخدام زر الإضافة.",
+        "total_count": "تقييم",
+        "showing": "عرض",
+        "of": "من",
+        "status": {
+            "draft": "مسودة",
+            "sent": "مرسل",
+            "approved": "معتمد",
+            "rejected": "مرفوض",
+            "converted": "محول"
+        },
+        "form": {
+            "customer": "العميل",
+            "vehicle": "المركبة",
+            "select_customer_first": "اختر العميل أولاً",
+            "services": "الخدمات",
+            "add_line": "إضافة بند",
+            "description": "الوصف",
+            "qty": "الكمية",
+            "unit_price": "سعر الوحدة",
+            "discount": "الخصم",
+            "line_total": "الإجمالي",
+            "notes": "ملاحظات",
+            "subtotal": "المجموع الفرعي",
+            "total_discount": "إجمالي الخصومات",
+            "grand_total": "الإجمالي الكلي"
+        },
+        "columns": {
+            "code": "الرقم",
+            "customer": "العميل",
+            "vehicle": "المركبة",
+            "total": "الإجمالي",
+            "status": "الحالة",
+            "created_at": "تاريخ الإنشاء"
+        },
+        "actions": {
+            "view": "عرض",
+            "edit": "تعديل",
+            "approve": "اعتماد",
+            "reject": "رفض",
+            "delete": "حذف"
+        },
+        "messages": {
+            "approved_success": "تم اعتماد التقييم وتحويله لكرت عمل",
+            "rejected_success": "تم رفض التقييم",
+            "deleted_success": "تم حذف التقييم",
+            "confirm_approve": "هل تريد اعتماد هذا التقييم وتحويله لكرت عمل؟",
+            "confirm_reject": "هل تريد رفض هذا التقييم؟",
+            "confirm_delete": "هل تريد حذف هذا التقييم نهائياً؟",
+            "confirm_remove_department": "هل تريد إزالة هذا القسم من التقييم؟",
+            "cannot_edit": "لا يمكن تعديل هذا التقييم",
+            "cannot_delete": "لا يمكن حذف هذا التقييم"
+        },
+        "converted_to": "تم التحويل إلى كرت عمل",
+        "tabs": {
+            "without_card": "تقييمات بدون كرت",
+            "all": "جميع التقييمات",
+            "main_info": "المعلومات الرئيسية",
+            "customer_complaint": "شكوى العميل",
+            "initial_assessment": "التقييم المبدئي",
+            "departments": "الأقسام والخدمات"
+        },
+        "filters": {
+            "code_placeholder": "رقم التقييم...",
+            "all_statuses": "جميع الحالات",
+            "date_range": "التاريخ",
+            "all_time": "الكل",
+            "today": "اليوم",
+            "last_week": "آخر أسبوع",
+            "last_month": "آخر شهر",
+            "last_30_days": "آخر 30 يوماً",
+            "clear": "مسح الفلاتر",
+            "search_placeholder": "بحث بالاسم، الجوال، المركبة..."
+        },
+        "form_tabs": {
+            "search_placeholder": "ابحث برقم اللوحة، اسم العميل، أو رقم الجوال...",
+            "add_vehicle": "إضافة مركبة",
+            "customer_name": "اسم العميل",
+            "phone": "رقم التواصل",
+            "responsible": "المسؤول",
+            "customer_complaint": "شكوى العميل",
+            "customer_complaint_placeholder": "اكتب شكوى العميل هنا...",
+            "initial_assessment": "التقييم المبدئي",
+            "initial_assessment_placeholder": "اكتب التقييم المبدئي للمركبة...",
+            "select_departments": "اختر الأقسام المطلوبة",
+            "no_results": "لا توجد نتائج",
+            "has_open_quote": "هذه المركبة لديها تقييم مفتوح",
+            "view_open_quote": "عرض التقييم"
+        },
+        "show": {
+            "services": "الخدمات",
+            "price": "السعر",
+            "discount": "الخصم",
+            "amount": "المبلغ",
+            "total": "المجموع",
+            "subtotal": "الإجمالي",
+            "total_discount": "إجمالي الخصم",
+            "net_total": "الصافي",
+            "departments_services": "الأقسام والخدمات",
+            "add_department": "إضافة قسم",
+            "add_service": "إضافة خدمة",
+            "services_count": "خدمات",
+            "no_services": "لا توجد خدمات في هذا القسم",
+            "no_departments": "لا توجد أقسام، قم بإضافة قسم للبدء",
+            "all_departments_added": "تم إضافة جميع الأقسام",
+            "print": "طباعة",
+            "share": "مشاركة",
+            "copy_link": "نسخ الرابط",
+            "tabs": {
+                "services": "الخدمات",
+                "spare_parts": "قطع الغيار"
+            }
+        },
+        "service_modal": {
+            "service": "الخدمة",
+            "description": "وصف الخدمة",
+            "description_placeholder": "أدخل وصف الخدمة...",
+            "qty": "الكمية",
+            "price": "سعر الخدمة",
+            "discount_method": "طريقة حساب الخصم",
+            "no_discount": "بدون خصم",
+            "fixed": "مبلغ ثابت",
+            "discount_value": "قيمة الخصم",
+            "total_cost": "تكلفة الخدمة"
         }
     }
 }

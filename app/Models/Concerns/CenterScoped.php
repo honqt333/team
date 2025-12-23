@@ -17,11 +17,28 @@ trait CenterScoped
         static::addGlobalScope('center_scoped', function (Builder $builder) {
             $tenantId = TenancyContext::tenantId();
             $centerId = TenancyContext::centerId();
+            $model = $builder->getModel();
+            $table = $model->getTable();
 
             // Only apply scope if both tenant and center context are available
             if ($tenantId !== null && $centerId !== null) {
-                $builder->where($builder->getModel()->getTable() . '.tenant_id', $tenantId)
-                    ->where($builder->getModel()->getTable() . '.center_id', $centerId);
+                // Check if model has 'source' column (via fillable or explicit property)
+                $hasSourceColumn = in_array('source', $model->getFillable()) 
+                    || (property_exists($model, 'hasSourceColumn') && $model->hasSourceColumn);
+
+                if ($hasSourceColumn) {
+                    // Include center-scoped data OR system-level data (source = 'system')
+                    $builder->where(function ($query) use ($table, $tenantId, $centerId) {
+                        $query->where(function ($q) use ($table, $tenantId, $centerId) {
+                            $q->where($table . '.tenant_id', $tenantId)
+                              ->where($table . '.center_id', $centerId);
+                        })->orWhere($table . '.source', 'system');
+                    });
+                } else {
+                    // Standard center scope without source check
+                    $builder->where($table . '.tenant_id', $tenantId)
+                            ->where($table . '.center_id', $centerId);
+                }
             }
         });
 

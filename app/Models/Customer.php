@@ -19,8 +19,19 @@ class Customer extends Model
         'name',
         'contact_name',
         'phone',
+        'whatsapp',
         'email',
         'notes',
+        'tax_number',
+        'address_line',
+        'building_number',
+        'postal_code',
+        'district',
+        'city',
+        'region',
+        'country',
+        'lat',
+        'lng',
     ];
 
     public function tenant(): BelongsTo

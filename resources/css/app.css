@@ -1,3 +1,47 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   Vue Tel Input - Global Styling
+   ============================================ */
+.vue-tel-input {
+    border-radius: 0.75rem !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.dark .vue-tel-input {
+    border-color: #4b5563 !important;
+    background-color: #1f2937 !important;
+}
+
+.vue-tel-input:focus-within {
+    box-shadow: 0 0 0 2px #6366f1 !important;
+    border-color: transparent !important;
+}
+
+.vti__input {
+    background-color: transparent !important;
+}
+
+.dark .vti__input {
+    color: #f3f4f6 !important;
+}
+
+.vti__dropdown {
+    border-radius: 0.75rem 0 0 0.75rem !important;
+}
+
+.dark .vti__dropdown-list {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+}
+
+.dark .vti__dropdown-item.highlighted {
+    background-color: #374151 !important;
+}
+
+.dark .vti__dropdown-item strong,
+.dark .vti__dropdown-item span {
+    color: #f3f4f6 !important;
+}

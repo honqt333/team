@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Quote;
+use App\Models\User;
+use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
+use App\Support\TenancyContext;
+use Illuminate\Support\Facades\DB;
+
+class QuoteConversionService
+{
+    /**
+     * Convert an approved quote to a work order.
+     *
+     * @throws \InvalidArgumentException If quote cannot be converted
+     * @throws \RuntimeException If conversion fails
+     */
+    public function convert(Quote $quote, User $user): WorkOrder
+    {
+        // Validate quote can be converted
+        if ($quote->isConverted()) {
+            throw new \InvalidArgumentException('Quote has already been converted.');
+        }
+
+        if (!$quote->isApproved()) {
+            throw new \InvalidArgumentException('Quote must be approved before conversion.');
+        }
+
+        return DB::transaction(function () use ($quote, $user) {
+            // Generate work order code
+            $code = WorkOrder::generateCode($quote->tenant_id, $quote->center_id);
+
+            // Create work order
+            $workOrder = WorkOrder::create([
+                'tenant_id' => $quote->tenant_id,
+                'center_id' => $quote->center_id,
+                'customer_id' => $quote->customer_id,
+                'vehicle_id' => $quote->vehicle_id,
+                'quote_id' => $quote->id,
+                'code' => $code,
+                'status' => WorkOrder::STATUS_OPEN,
+                'notes' => $quote->notes,
+                'opened_at' => now(),
+            ]);
+
+            // Copy quote lines to work order items
+            foreach ($quote->lines as $quoteLine) {
+                WorkOrderItem::create([
+                    'work_order_id' => $workOrder->id,
+                    'service_id' => $quoteLine->service_id,
+                    'tenant_id' => $quote->tenant_id,
+                    'center_id' => $quote->center_id,
+                    'title' => $quoteLine->description,
+                    'qty' => $quoteLine->qty,
+                    'unit_price' => $quoteLine->unit_price,
+                    'base_price_snapshot' => $quoteLine->base_price_snapshot,
+                    'min_price_snapshot' => $quoteLine->min_price_snapshot,
+                    'discount_type' => $quoteLine->discount_type,
+                    'discount_value' => $quoteLine->discount_value,
+                    'discount_amount' => $quoteLine->discount_amount,
+                    'final_unit_price' => $quoteLine->final_unit_price,
+                    'line_total' => $quoteLine->line_total,
+                    'price_locked' => true, // Lock prices from quote
+                    'total' => $quoteLine->line_total, // Legacy field
+                ]);
+            }
+
+            // Update quote status
+            $quote->update([
+                'status' => Quote::STATUS_CONVERTED,
+                'converted_at' => now(),
+                'converted_work_order_id' => $workOrder->id,
+            ]);
+
+            return $workOrder;
+        });
+    }
+}
