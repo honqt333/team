@@ -180,6 +180,7 @@
     "work_orders": {
         "title": "Work Orders",
         "add": "Create Work Order",
+        "edit": "Edit Work Order",
         "search": "Search...",
         "empty": "No work orders yet",
         "empty_hint": "Start by creating your first work order using the add button.",
@@ -187,8 +188,10 @@
         "create": {
             "title": "Create Work Order"
         },
-        "edit": {
-            "title": "Edit Work Order"
+        "tabs": {
+            "main_info": "Work Order Info",
+            "condition_report": "Vehicle Condition Report",
+            "photos": "Vehicle Photos"
         },
         "form": {
             "customer": "Customer",
@@ -204,7 +207,15 @@
             "item_total": "Total",
             "add_item": "Add Item",
             "select_customer_first": "Select customer first",
-            "add_new_customer": "Add new customer if not found"
+            "add_new_customer": "Add new customer if not found",
+            "mileage": "Mileage",
+            "mileage_placeholder": "km",
+            "contact_name": "Contact Name",
+            "contact_name_placeholder": "Responsible person name...",
+            "contact_phone": "Contact Phone",
+            "contact_phone_placeholder": "+966...",
+            "entry_date": "Entry Date",
+            "expected_end_date": "Expected Completion Date"
         },
         "columns": {
             "code": "Order #",
@@ -228,6 +239,36 @@
             "body_paint": "Body & Paint",
             "washing": "Washing & Polishing",
             "other": "Other"
+        },
+        "condition_report": {
+            "select_color": "Select marker color",
+            "click_to_mark": "Click on the diagram to add a damage marker",
+            "front": "Front",
+            "rear": "Rear",
+            "left": "Left",
+            "right": "Right",
+            "marks_list": "Marks List",
+            "description_placeholder": "Describe the damage...",
+            "legend": {
+                "damage": "Damage",
+                "scratch": "Scratch",
+                "note": "Note"
+            }
+        },
+        "photos": {
+            "title": "Vehicle Photos",
+            "images": "images",
+            "drag_or": "Drag photos here or",
+            "browse": "browse",
+            "formats": "PNG, JPG, JPEG up to 10MB",
+            "add_caption": "Add caption...",
+            "no_photos": "No photos",
+            "types": {
+                "general": "General",
+                "before": "Before",
+                "after": "After",
+                "damage": "Damage"
+            }
         }
     },
     "departments": {

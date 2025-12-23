@@ -50,22 +50,40 @@ class WorkOrderStoreRequest extends FormRequest
                 Rule::in(WorkOrder::STATUSES),
             ],
             'notes' => ['nullable', 'string', 'max:2000'],
-            'items' => ['required', 'array', 'min:1'],
-            'items.*.title' => ['required', 'string', 'max:255'],
-            'items.*.qty' => ['required', 'numeric', 'min:0.01'],
-            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            
+            // New fields
+            'customer_complaint' => ['nullable', 'string', 'max:5000'],
+            'initial_assessment' => ['nullable', 'string', 'max:5000'],
+            'mileage' => ['nullable', 'integer', 'min:0'],
+            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:20'],
+            'entry_date' => ['nullable', 'date'],
+            'expected_end_date' => ['nullable', 'date', 'after_or_equal:entry_date'],
+            
+            // Departments
+            'departments' => ['nullable', 'array'],
+            'departments.*' => [
+                'integer',
+                Rule::exists('departments', 'id')
+                    ->where('tenant_id', $tenantId)
+                    ->where('center_id', $centerId),
+            ],
+            
+            // Damage marks
+            'damage_marks' => ['nullable', 'array'],
+            'damage_marks.*.x' => ['required', 'numeric'],
+            'damage_marks.*.y' => ['required', 'numeric'],
+            'damage_marks.*.color' => ['nullable', 'string', Rule::in(['red', 'blue', 'gray'])],
+            'damage_marks.*.description' => ['nullable', 'string', 'max:500'],
         ];
     }
 
     public function messages(): array
     {
         return [
-            'items.required' => __('validation.work_order_items_required'),
-            'items.min' => __('validation.work_order_items_min'),
-            'items.*.title.required' => __('validation.item_title_required'),
-            'items.*.qty.required' => __('validation.item_qty_required'),
-            'items.*.qty.min' => __('validation.item_qty_min'),
-            'items.*.unit_price.required' => __('validation.item_price_required'),
+            'customer_id.required' => __('validation.customer_required'),
+            'vehicle_id.required' => __('validation.vehicle_required'),
+            'expected_end_date.after_or_equal' => __('validation.expected_end_date_after_entry'),
         ];
     }
 }

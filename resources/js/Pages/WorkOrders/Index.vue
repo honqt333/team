@@ -214,9 +214,11 @@
         <!-- Create Modal -->
         <WorkOrderFormModal
             :show="showCreateModal"
-            :services="services"
             :customers="customers"
+            :departments="departments"
             :makes="makes"
+            :colors="colors"
+            :modelsByMake="modelsByMake"
             @close="showCreateModal = false"
             @saved="handleSaved"
         />
@@ -226,8 +228,12 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import WorkOrderFormModal from '@/Components/WorkOrderFormModal.vue';
+import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
+import { useToast } from '@/Composables/useToast';
+
+const { t } = useI18n();
 
 const props = defineProps({
     workOrders: {
@@ -242,11 +248,25 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    colors: {
+        type: Array,
+        default: () => [],
+    },
+    modelsByMake: {
+        type: Object,
+        default: () => ({}),
+    },
+    departments: {
+        type: Array,
+        default: () => [],
+    },
     services: {
         type: Object,
         default: () => ({}),
     },
 });
+
+const { success } = useToast();
 
 const showCreateModal = ref(false);
 const viewMode = ref(localStorage.getItem('workOrdersViewMode') || 'grid');
@@ -299,6 +319,7 @@ function formatDate(dateString) {
 
 function handleSaved() {
     showCreateModal.value = false;
+    success(t('common.saved_success'));
     router.reload({ only: ['workOrders'] });
 }
 </script>

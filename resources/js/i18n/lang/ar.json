@@ -180,6 +180,7 @@
     "work_orders": {
         "title": "كروت العمل",
         "add": "إنشاء كرت عمل",
+        "edit": "تعديل كرت عمل",
         "search": "بحث...",
         "empty": "لا توجد كروت عمل حالياً",
         "empty_hint": "ابدأ بإنشاء أول كرت عمل باستخدام زر الإضافة.",
@@ -187,8 +188,10 @@
         "create": {
             "title": "إنشاء كرت عمل"
         },
-        "edit": {
-            "title": "تعديل كرت عمل"
+        "tabs": {
+            "main_info": "معلومات كرت الصيانة",
+            "condition_report": "تقرير حالة المركبة",
+            "photos": "صور المركبة"
         },
         "form": {
             "customer": "العميل",
@@ -204,7 +207,15 @@
             "item_total": "الإجمالي",
             "add_item": "إضافة بند",
             "select_customer_first": "اختر العميل أولاً",
-            "add_new_customer": "أضف عميل جديد إذا لم يكن موجوداً"
+            "add_new_customer": "أضف عميل جديد إذا لم يكن موجوداً",
+            "mileage": "عداد الكيلومترات",
+            "mileage_placeholder": "كم",
+            "contact_name": "اسم المسؤول",
+            "contact_name_placeholder": "اسم الشخص المسؤول...",
+            "contact_phone": "رقم الاتصال",
+            "contact_phone_placeholder": "+966...",
+            "entry_date": "تاريخ الدخول",
+            "expected_end_date": "تاريخ الانتهاء المتوقع"
         },
         "columns": {
             "code": "رقم الكرت",
@@ -228,6 +239,36 @@
             "body_paint": "السمكرة والدهان",
             "washing": "الغسيل والتلميع",
             "other": "أخرى"
+        },
+        "condition_report": {
+            "select_color": "اختر لون العلامة",
+            "click_to_mark": "انقر على الرسم لإضافة علامة ضرر",
+            "front": "أمام",
+            "rear": "خلف",
+            "left": "يسار",
+            "right": "يمين",
+            "marks_list": "قائمة العلامات",
+            "description_placeholder": "وصف الضرر...",
+            "legend": {
+                "damage": "ضرر",
+                "scratch": "خدش",
+                "note": "ملاحظة"
+            }
+        },
+        "photos": {
+            "title": "صور المركبة",
+            "images": "صورة",
+            "drag_or": "اسحب الصور هنا أو",
+            "browse": "تصفح",
+            "formats": "PNG, JPG, JPEG حتى 10MB",
+            "add_caption": "أضف وصف...",
+            "no_photos": "لا توجد صور",
+            "types": {
+                "general": "عامة",
+                "before": "قبل",
+                "after": "بعد",
+                "damage": "ضرر"
+            }
         }
     },
     "departments": {

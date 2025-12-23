@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
@@ -38,11 +39,22 @@ class WorkOrder extends Model
         'opened_at',
         'closed_at',
         'notes',
+        // New fields
+        'entry_date',
+        'expected_end_date',
+        'customer_complaint',
+        'initial_assessment',
+        'mileage',
+        'contact_name',
+        'contact_phone',
     ];
 
     protected $casts = [
         'opened_at' => 'datetime',
         'closed_at' => 'datetime',
+        'entry_date' => 'date',
+        'expected_end_date' => 'date',
+        'mileage' => 'integer',
     ];
 
     public function tenant(): BelongsTo
@@ -76,6 +88,31 @@ class WorkOrder extends Model
     }
 
     /**
+     * Get the damage marks for the vehicle condition report.
+     */
+    public function damageMarks(): HasMany
+    {
+        return $this->hasMany(WorkOrderDamageMark::class);
+    }
+
+    /**
+     * Get the photos for this work order.
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(WorkOrderPhoto::class);
+    }
+
+    /**
+     * Get the departments associated with this work order.
+     */
+    public function departments(): BelongsToMany
+    {
+        return $this->belongsToMany(Department::class, 'work_order_departments')
+            ->withTimestamps();
+    }
+
+    /**
      * Generate a sequential code for the work order.
      * Uses DB locking to ensure uniqueness in concurrent scenarios.
      */
@@ -106,5 +143,21 @@ class WorkOrder extends Model
     public function getTotalAttribute(): float
     {
         return $this->items->sum('total');
+    }
+
+    /**
+     * Check if work order can be edited.
+     */
+    public function canBeEdited(): bool
+    {
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_OPEN]);
+    }
+
+    /**
+     * Check if work order is in draft status.
+     */
+    public function isDraft(): bool
+    {
+        return $this->status === self::STATUS_DRAFT;
     }
 }

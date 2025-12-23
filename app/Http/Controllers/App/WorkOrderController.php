@@ -24,25 +24,28 @@ class WorkOrderController
     {
         $this->authorize('viewAny', WorkOrder::class);
 
-        $workOrders = WorkOrder::with(['customer', 'vehicle.make', 'items'])
+        $workOrders = WorkOrder::with(['customer', 'vehicle.make', 'items', 'damageMarks', 'photos'])
             ->orderByDesc('created_at')
             ->paginate(15);
 
         $customers = Customer::select('id', 'name', 'phone')->get();
-        $makes = VehicleMake::ordered()->get();
+        $makes = \App\Models\VehicleMake::ordered()->get();
+        $colors = \App\Models\VehicleColor::active()->ordered()->get();
+        $departments = \App\Models\Department::active()->ordered()->get();
         
-        // Get services grouped by department
-        $services = Service::active()
-            ->orderBy('department_id')
-            ->orderBy('sort_order')
+        // Group models by make
+        $modelsByMake = \App\Models\VehicleModel::query()
+            ->select('id', 'make_id', 'name_ar', 'name_en')
             ->get()
-            ->groupBy('department_id');
+            ->groupBy('make_id');
 
         return Inertia::render('WorkOrders/Index', [
             'workOrders' => $workOrders,
             'customers' => $customers,
             'makes' => $makes,
-            'services' => $services,
+            'colors' => $colors,
+            'modelsByMake' => $modelsByMake,
+            'departments' => $departments,
         ]);
     }
 
@@ -97,14 +100,14 @@ class WorkOrderController
         return response()->json($vehicles);
     }
 
-    public function store(WorkOrderStoreRequest $request): JsonResponse
+    public function store(WorkOrderStoreRequest $request): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('create', WorkOrder::class);
 
         $user = $request->user();
         $validated = $request->validated();
 
-        $workOrder = DB::transaction(function () use ($validated, $user) {
+        DB::transaction(function () use ($validated, $user) {
             // Generate sequential code with locking
             $code = WorkOrder::generateCode($user->tenant_id, $user->current_center_id);
 
@@ -113,28 +116,39 @@ class WorkOrderController
                 'customer_id' => $validated['customer_id'],
                 'vehicle_id' => $validated['vehicle_id'],
                 'code' => $code,
-                'status' => $validated['status'] ?? WorkOrder::STATUS_OPEN,
+                'status' => $validated['status'] ?? WorkOrder::STATUS_DRAFT,
                 'notes' => $validated['notes'] ?? null,
+                'customer_complaint' => $validated['customer_complaint'] ?? null,
+                'initial_assessment' => $validated['initial_assessment'] ?? null,
+                'mileage' => $validated['mileage'] ?? null,
+                'contact_name' => $validated['contact_name'] ?? null,
+                'contact_phone' => $validated['contact_phone'] ?? null,
+                'entry_date' => $validated['entry_date'] ?? now()->toDateString(),
+                'expected_end_date' => $validated['expected_end_date'] ?? null,
                 'opened_at' => now(),
             ]);
 
-            // Create items
-            foreach ($validated['items'] as $itemData) {
-                $workOrder->items()->create([
-                    'tenant_id' => $user->tenant_id,
-                    'center_id' => $user->current_center_id,
-                    'title' => $itemData['title'],
-                    'qty' => $itemData['qty'],
-                    'unit_price' => $itemData['unit_price'],
-                ]);
+            // Attach departments
+            if (!empty($validated['departments'])) {
+                $workOrder->departments()->attach($validated['departments']);
             }
 
-            return $workOrder;
+            // Create damage marks
+            if (!empty($validated['damage_marks'])) {
+                foreach ($validated['damage_marks'] as $mark) {
+                    $workOrder->damageMarks()->create([
+                        'x' => $mark['x'],
+                        'y' => $mark['y'],
+                        'color' => $mark['color'] ?? 'red',
+                        'description' => $mark['description'] ?? null,
+                    ]);
+                }
+            }
+
+            // TODO: Handle photos upload separately via dedicated endpoint
         });
 
-        $workOrder->load(['customer', 'vehicle', 'items']);
-
-        return response()->json($workOrder, 201);
+        return redirect()->back();
     }
 
     public function show(WorkOrder $workOrder): JsonResponse
