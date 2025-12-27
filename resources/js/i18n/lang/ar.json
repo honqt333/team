@@ -26,7 +26,7 @@
             "ar": "عربي",
             "en": "English"
         },
-        "coming_soon": "قريباً",
+        "coming_soon": "قريباً...",
         "no_data": "لا توجد بيانات",
         "edit": "تعديل",
         "error": "خطأ",
@@ -39,7 +39,9 @@
         "unsaved_changes": "تغييرات غير محفوظة",
         "unsaved_changes_message": "لم يتم حفظ التغييرات. هل أنت متأكد من إغلاق هذا النموذج؟",
         "yes_close": "نعم، إغلاق",
-        "discard": "تجاهل"
+        "discard": "تجاهل",
+        "print": "طباعة",
+        "qty": "الكمية"
     },
     "nav": {
         "brand": "Carag",
@@ -128,6 +130,31 @@
         "map": {
             "hint": "أدخل الإحداثيات لعرض الموقع على الخريطة",
             "click_hint": "اضغط على الخريطة لتحديد الموقع"
+        },
+        "vehicles": "المركبات",
+        "quotes": "التقييمات",
+        "work_orders": "كروت العمل",
+        "no_vehicles": "لا توجد مركبات مسجلة",
+        "no_quotes": "لا توجد تقييمات",
+        "no_work_orders": "لا توجد كروت عمل",
+        "delete_confirm_title": "حذف العميل",
+        "delete_confirm_message": "هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع عن هذا الإجراء.",
+        "cannot_delete_has_data": "لا يمكن الحذف - يوجد مركبات أو تقييمات مرتبطة",
+        "invoices": "الفواتير",
+        "payments": "المدفوعات",
+        "merge": {
+            "title": "دمج البيانات من",
+            "with": "مع",
+            "button": "دمج",
+            "from": "من",
+            "to": "إلى",
+            "after_merge": "بعد الدمج",
+            "same_type_only": "نفس نوع العميل فقط",
+            "no_customers": "لا يوجد عملاء للدمج",
+            "change_target": "تغيير",
+            "execute": "تنفيذ الدمج",
+            "confirm_message": "سيتم دمج جميع البيانات المتعلقة بـ {source} مع {target} وسيتم إزالة {source} من النظام",
+            "confirm_no_undo": "أوافق على هذه العملية ولا يمكن تراجعها"
         }
     },
     "vehicles": {
@@ -136,6 +163,8 @@
         "search": "بحث...",
         "empty": "لا توجد مركبات حالياً",
         "empty_hint": "ابدأ بإضافة أول مركبة باستخدام زر الإضافة.",
+        "showing": "عرض",
+        "of": "من",
         "total_count": "مركبة",
         "plate_number": "رقم اللوحة",
         "quick_add_customer": "إضافة عميل",
@@ -181,10 +210,43 @@
         "title": "كروت العمل",
         "add": "إنشاء كرت عمل",
         "edit": "تعديل كرت عمل",
+        "details": "تفاصيل كرت العمل",
+        "created_at": "تاريخ الإنشاء",
         "search": "بحث...",
         "empty": "لا توجد كروت عمل حالياً",
         "empty_hint": "ابدأ بإنشاء أول كرت عمل باستخدام زر الإضافة.",
         "total_count": "كرت عمل",
+        "showing": "عرض",
+        "of": "من",
+        "back_to_hub": "رجوع",
+        "hub": {
+            "title": "كروت العمل",
+            "subtitle": "اختر من الخيارات أدناه",
+            "new_card": "كرت جديد",
+            "new_card_hint": "إنشاء كرت صيانة جديد",
+            "open_cards": "كروت الصيانة المفتوحة",
+            "open_cards_hint": "عرض الكروت قيد التنفيذ",
+            "closed_cards": "كروت الصيانة المغلقة",
+            "closed_cards_hint": "عرض الكروت المكتملة والملغاة"
+        },
+        "list": {
+            "open_title": "كروت الصيانة المفتوحة",
+            "closed_title": "كروت الصيانة المغلقة",
+            "all_title": "جميع كروت العمل"
+        },
+        "due_date": "الاستحقاق",
+        "closed_date": "الإغلاق",
+        "invoice_total": "الفاتورة",
+        "paid": "المدفوع",
+        "remaining": "المتبقي",
+        "has_open_work_order": "يوجد كرت عمل مفتوح",
+        "go_to_work_order": "الانتقال للكرت",
+        "filters": {
+            "open": "المفتوحة",
+            "draft": "معلقة",
+            "overdue": "متأخرة",
+            "pending_payment": "مستحقة الدفع"
+        },
         "create": {
             "title": "إنشاء كرت عمل"
         },
@@ -232,6 +294,28 @@
             "done": "مكتمل",
             "cancelled": "ملغي"
         },
+        "show": {
+            "no_services": "لا توجد خدمات",
+            "tabs": {
+                "services": "الخدمات",
+                "parts": "قطع الغيار",
+                "technicians": "الفنيون",
+                "payments": "المدفوعات",
+                "condition": "تقرير الحالة",
+                "photos": "الصور",
+                "activities": "الأنشطة",
+                "attachments": "المرفقات"
+            },
+            "add_service": "إضافة خدمة"
+        },
+        "actions": {
+            "start_work": "بدء العمل",
+            "complete": "إنهاء الكرت",
+            "cancel": "إلغاء"
+        },
+        "messages": {
+            "confirm_status_change": "هل أنت متأكد من تغيير حالة الكرت؟"
+        },
         "service_categories": {
             "maintenance": "الصيانة",
             "electrical": "الكهرباء",
@@ -260,9 +344,11 @@
             "images": "صورة",
             "drag_or": "اسحب الصور هنا أو",
             "browse": "تصفح",
-            "formats": "PNG, JPG, JPEG حتى 10MB",
+            "formats": "PNG, JPG, JPEG حتى 5MB",
             "add_caption": "أضف وصف...",
             "no_photos": "لا توجد صور",
+            "error_size": "حجم الملف {file} يتجاوز الحد المسموح {size} ميجابايت",
+            "error_max_files": "لقد وصلت للحد الأقصى لعدد الملفات وهو {max}",
             "types": {
                 "general": "عامة",
                 "before": "قبل",
@@ -348,7 +434,7 @@
         "subtitle": "إدارة إعدادات النظام والتهيئة",
         "cards": {
             "system": {
-                "title": "إعدادات النظام",
+                "title": "إعدادات المركبات",
                 "description": "الماركات، الموديلات، الألوان"
             },
             "departments": {
@@ -362,7 +448,7 @@
         }
     },
     "system_settings": {
-        "title": "إعدادات النظام",
+        "title": "إعدادات المركبات",
         "sections": {
             "makes": "الماركات",
             "models": "الموديلات",
@@ -393,7 +479,8 @@
             "updated_at": "آخر تحديث",
             "updated_by": "آخر تعديل بواسطة",
             "make": "الماركة",
-            "color": "اللون"
+            "color": "اللون",
+            "logo": "الشعار"
         },
         "form": {
             "name_ar": "الاسم بالعربية",
@@ -402,6 +489,7 @@
             "name_en_placeholder": "Enter name in English",
             "make": "الماركة",
             "hex_code": "كود اللون",
+            "logo": "شعار الماركة",
             "is_active": "فعّال"
         }
     },
@@ -494,6 +582,7 @@
         },
         "converted_to": "تم التحويل إلى كرت عمل",
         "tabs": {
+            "pending": "تقييمات قيد المعالجة",
             "without_card": "تقييمات بدون كرت",
             "all": "جميع التقييمات",
             "main_info": "المعلومات الرئيسية",
@@ -511,7 +600,9 @@
             "last_month": "آخر شهر",
             "last_30_days": "آخر 30 يوماً",
             "clear": "مسح الفلاتر",
-            "search_placeholder": "بحث بالاسم، الجوال، المركبة..."
+            "search_placeholder": "بحث بالاسم، الجوال، المركبة...",
+            "status_placeholder": "كل الحالات",
+            "date_range_placeholder": "كل الأوقات"
         },
         "form_tabs": {
             "search_placeholder": "ابحث برقم اللوحة، اسم العميل، أو رقم الجوال...",

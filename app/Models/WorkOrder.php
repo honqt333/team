@@ -52,8 +52,8 @@ class WorkOrder extends Model
     protected $casts = [
         'opened_at' => 'datetime',
         'closed_at' => 'datetime',
-        'entry_date' => 'date',
-        'expected_end_date' => 'date',
+        'entry_date' => 'date:Y-m-d',
+        'expected_end_date' => 'date:Y-m-d',
         'mileage' => 'integer',
     ];
 

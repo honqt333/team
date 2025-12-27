@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\Storage;
 
 class VehicleMakeController extends Controller
 {
@@ -44,7 +45,12 @@ class VehicleMakeController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
             'is_active' => 'boolean',
+            'logo' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $validated['logo_path'] = $request->file('logo')->store('makes', 'public');
+        }
 
         // New items are always center-level
         $validated['source'] = 'center';
@@ -69,7 +75,15 @@ class VehicleMakeController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
             'is_active' => 'boolean',
+            'logo' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('logo')) {
+            if ($make->logo_path) {
+                Storage::disk('public')->delete($make->logo_path);
+            }
+            $validated['logo_path'] = $request->file('logo')->store('makes', 'public');
+        }
 
         $validated['updated_by'] = auth()->id();
         $make->update($validated);

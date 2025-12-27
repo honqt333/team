@@ -32,9 +32,29 @@ Route::middleware('auth')->group(function () {
 
 // App routes (authenticated + tenancy)
 Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->group(function () {
-    Route::apiResource('customers', CustomerController::class);
+    Route::resource('customers', CustomerController::class);
+    // Customer merge routes
+    Route::get('/customers/{customer}/merge', [CustomerController::class, 'mergeData'])->name('customers.merge-data');
+    Route::post('/customers/{source}/merge/{target}', [CustomerController::class, 'executeMerge'])->name('customers.execute-merge');
+
     Route::apiResource('vehicles', VehicleController::class);
-    Route::apiResource('work-orders', WorkOrderController::class);
+    
+    // Work Orders - Hub and Index
+    Route::get('/work-orders', [WorkOrderController::class, 'hub'])->name('work-orders.hub');
+    Route::get('/work-orders/list', [WorkOrderController::class, 'index'])->name('work-orders.index');
+    Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
+    Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
+    Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update');
+    Route::delete('/work-orders/{workOrder}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy');
+    
+    // Work Order Items (Services)
+    Route::post('/work-orders/{work_order}/items', [WorkOrderController::class, 'addItem'])->name('work-orders.items.store');
+    Route::put('/work-orders/{work_order}/items/{item}', [WorkOrderController::class, 'updateItem'])->name('work-orders.items.update');
+    Route::delete('/work-orders/{work_order}/items/{item}', [WorkOrderController::class, 'deleteItem'])->name('work-orders.items.destroy');
+    
+    // Work Order Departments
+    Route::post('/work-orders/{work_order}/departments', [WorkOrderController::class, 'addDepartment'])->name('work-orders.departments.store');
+    Route::delete('/work-orders/{work_order}/departments/{department}', [WorkOrderController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
     
     // Quotes
     Route::get('/quotes', [QuoteController::class, 'index'])->name('app.quotes.index');
@@ -86,11 +106,12 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     Route::apiResource('services', \App\Http\Controllers\App\ServiceController::class);
     Route::patch('/services/{service}/toggle-active', [\App\Http\Controllers\App\ServiceController::class, 'toggleActive']);
     
-    // API endpoints
+    // API endpoints (Refactored to separate Controller)
     Route::get('/api/customers', [CustomerController::class, 'apiIndex']);
-    Route::get('/api/customers/search', [WorkOrderController::class, 'apiCustomerSearch']);
-    Route::get('/api/vehicles', [WorkOrderController::class, 'apiVehicles']);
-    Route::get('/api/work-orders', [WorkOrderController::class, 'apiIndex']);
+    Route::get('/api/customers/search', [\App\Http\Controllers\Api\WorkOrderController::class, 'customerSearch']);
+    Route::get('/api/vehicles', [\App\Http\Controllers\Api\WorkOrderController::class, 'customerVehicles']);
+    Route::get('/api/vehicles/search', [\App\Http\Controllers\Api\WorkOrderController::class, 'vehicleSearch']);
+    Route::get('/api/work-orders', [\App\Http\Controllers\Api\WorkOrderController::class, 'index']);
     Route::get('/api/services', [\App\Http\Controllers\App\ServiceController::class, 'apiList']);
     Route::get('/api/makes', [\App\Http\Controllers\App\VehicleMakeController::class, 'apiList']);
 });

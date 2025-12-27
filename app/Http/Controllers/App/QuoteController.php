@@ -26,11 +26,50 @@ class QuoteController extends Controller
      */
     public function index(Request $request): Response
     {
-        $this->authorize('viewAny', Quote::class);
+        $this->authorize("viewAny", Quote::class);
 
-        $quotes = Quote::with(['customer', 'vehicle.make', 'vehicle.model', 'lines'])
-            ->orderByDesc('created_at')
-            ->paginate(20);
+        // Calculate counts for filter tabs
+        $filterCounts = [
+            'all' => Quote::count(),
+            'pending' => Quote::whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT])->count(),
+            'approved' => Quote::where('status', Quote::STATUS_APPROVED)->count(),
+            'converted' => Quote::where('status', Quote::STATUS_CONVERTED)->count(),
+            'rejected' => Quote::where('status', Quote::STATUS_REJECTED)->count(),
+        ];
+
+        $quotes = Quote::with(["customer", "vehicle.make",
+            "vehicle.customer", "vehicle.model", "lines"])
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where("id", "like", "%{$search}%")
+                      ->orWhere("code", "like", "%{$search}%")
+                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
+                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                });
+            })
+            ->when($request->status && $request->status !== 'all', function ($query) use ($request) {
+                if ($request->status === 'pending') {
+                    $query->whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT]);
+                } else {
+                    $query->where('status', $request->status);
+                }
+            })
+            ->when($request->date_range && $request->date_range !== 'all', function ($query, $range) {
+                $now = now();
+                $date = match($range) {
+                    'today' => $now->startOfDay(),
+                    'week' => $now->subDays(7),
+                    'month' => $now->subMonth(),
+                    '30days' => $now->subDays(30),
+                    default => null
+                };
+                if ($date) {
+                    $query->where('created_at', '>=', $date);
+                }
+            })
+            ->orderByDesc("created_at")
+            ->paginate(20)
+            ->withQueryString();
 
         $customers = Customer::orderBy('name')->get();
         
@@ -64,6 +103,8 @@ class QuoteController extends Controller
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
+            'filters' => $request->only(['search', 'status', 'date_range']),
+            'filterCounts' => $filterCounts,
         ]);
     }
 
@@ -162,7 +203,7 @@ class QuoteController extends Controller
         $quote->recalculateTotals();
         $quote->save();
 
-        return redirect()->back();
+        return redirect()->route("app.quotes.show", $quote);
     }
 
     /**
@@ -240,6 +281,7 @@ class QuoteController extends Controller
         $quote->load([
             'customer',
             'vehicle.make',
+            'vehicle.customer',
             'vehicle.model',
             'lines.service.department',
             'departments',

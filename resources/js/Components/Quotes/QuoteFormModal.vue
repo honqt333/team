@@ -472,18 +472,23 @@ function handleCustomerCreated(savedCustomer) {
 }
 
 function submitForm() {
-    const method = props.quote ? 'put' : 'post';
-    const url = props.quote 
+    const isEdit = !!props.quote;
+    const method = isEdit ? 'put' : 'post';
+    const url = isEdit 
         ? `/app/quotes/${props.quote.id}` 
         : '/app/quotes';
     
-    form[method](url, {
+    // For new quotes, let server redirect to show page
+    // For edits, close modal and stay on page
+    const options = isEdit ? {
         onSuccess: () => {
             form.reset();
             emit('saved');
             emit('close');
         },
-    });
+    } : {};
+    
+    form[method](url, options);
 }
 
 // Close results when clicking outside

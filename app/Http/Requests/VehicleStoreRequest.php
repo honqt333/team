@@ -35,25 +35,33 @@ class VehicleStoreRequest extends FormRequest
                     ->where('center_id', $centerId),
             ],
             'make_id' => [
-                'nullable', 
-                'integer', 
-                'exists:vehicle_makes,id',
-                // Require either make_id or make_other
+                'nullable',
                 function ($attribute, $value, $fail) {
-                    if (empty($value) && $value !== '__other__' && empty($this->make_other)) {
-                        $fail('يجب اختيار الماركة');
+                    // Accept __other__ as valid
+                    if ($value === '__other__') {
+                        return;
+                    }
+                    // If numeric, must exist in database
+                    if (!empty($value) && is_numeric($value)) {
+                        if (!\App\Models\VehicleMake::find($value)) {
+                            $fail(__('validation.exists', ['attribute' => __('vehicles.form.make')]));
+                        }
                     }
                 },
             ],
             'model_id' => [
                 'nullable',
-                'integer',
-                'exists:vehicle_models,id',
-                // Ensure model belongs to make
                 function ($attribute, $value, $fail) {
-                    if ($value && $this->make_id) {
+                    // Accept __other__ as valid
+                    if ($value === '__other__') {
+                        return;
+                    }
+                    // If numeric, must exist in database and belong to selected make
+                    if (!empty($value) && is_numeric($value)) {
                         $model = \App\Models\VehicleModel::find($value);
-                        if ($model && $model->make_id != $this->make_id) {
+                        if (!$model) {
+                            $fail(__('validation.exists', ['attribute' => __('vehicles.form.model')]));
+                        } elseif ($this->make_id && is_numeric($this->make_id) && $model->make_id != $this->make_id) {
                             $fail(__('validation.model_make_mismatch'));
                         }
                     }
@@ -63,13 +71,17 @@ class VehicleStoreRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:100',
-                'required_if:make_id,null,__other__',
+                function ($attribute, $value, $fail) {
+                    // Required if make_id is __other__ or empty
+                    if (($this->make_id === '__other__' || empty($this->make_id)) && empty($value)) {
+                        $fail(__('validation.required', ['attribute' => __('vehicles.form.make_other')]));
+                    }
+                },
             ],
             'model_other' => [
                 'nullable',
                 'string',
                 'max:100',
-                'required_if:model_id,null,__other__',
             ],
             'year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
             'color' => ['nullable', 'string', 'max:50'],

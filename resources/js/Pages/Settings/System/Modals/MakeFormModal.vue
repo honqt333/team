@@ -50,6 +50,25 @@
                     />
                     <p v-if="form.errors.name_en" class="mt-1 text-sm text-red-500">{{ form.errors.name_en }}</p>
                 </div>
+                
+                <!-- Logo -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('system_settings.form.logo') }}
+                    </label>
+                    <div class="flex items-center gap-4">
+                        <div v-if="form.logo_path || previewUrl" class="w-16 h-16 rounded-lg border border-gray-200 dark:border-gray-700 flex items-center justify-center p-2 bg-white dark:bg-gray-800">
+                            <img :src="previewUrl || `/storage/${form.logo_path}`" class="w-full h-full object-contain" />
+                        </div>
+                        <input
+                            type="file"
+                            @change="handleFileChange"
+                            accept="image/*"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                        />
+                    </div>
+                    <p v-if="form.errors.logo" class="mt-1 text-sm text-red-500">{{ form.errors.logo }}</p>
+                </div>
 
                 <!-- Is Active -->
                 <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -98,6 +117,7 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -110,16 +130,28 @@ const form = useForm({
     name_ar: props.make?.name_ar || '',
     name_en: props.make?.name_en || '',
     is_active: props.make?.is_active ?? true,
+    logo: null,
+    logo_path: props.make?.logo_path || '',
+    _method: props.make ? 'put' : undefined,
 });
+
+const previewUrl = ref(null);
+
+function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (file) {
+        form.logo = file;
+        previewUrl.value = URL.createObjectURL(file);
+    }
+}
 
 function submit() {
     const url = props.make 
         ? `/app/settings/makes/${props.make.id}` 
         : '/app/settings/makes';
     
-    const method = props.make ? 'put' : 'post';
-
-    form[method](url, {
+    // Always use post for file uploads (Laravel handles _method: put)
+    form.post(url, {
         onSuccess: () => {
             emit('saved');
         },

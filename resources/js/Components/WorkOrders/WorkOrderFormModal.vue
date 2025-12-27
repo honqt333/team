@@ -84,17 +84,41 @@
                             <div
                                 v-for="vehicle in searchResults"
                                 :key="vehicle.id"
-                                class="w-full px-4 py-3 text-start flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
-                                @click="selectVehicle(vehicle)"
+                                :class="[
+                                    'w-full px-4 py-3 text-start flex items-center gap-3 border-b border-gray-100 dark:border-gray-700 last:border-0',
+                                    vehicle.has_open_work_order 
+                                        ? 'bg-red-50 dark:bg-red-900/20 cursor-not-allowed opacity-75' 
+                                        : 'hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer'
+                                ]"
+                                @click="!vehicle.has_open_work_order && selectVehicle(vehicle)"
                             >
-                                <div class="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                                <div :class="[
+                                    'w-10 h-10 rounded-lg flex items-center justify-center',
+                                    vehicle.has_open_work_order 
+                                        ? 'bg-red-200 dark:bg-red-800' 
+                                        : 'bg-gray-200 dark:bg-gray-600'
+                                ]">
+                                    <svg class="w-5 h-5" :class="vehicle.has_open_work_order ? 'text-red-600' : 'text-gray-500'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path v-if="vehicle.has_open_work_order" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                        <path v-else stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
                                     </svg>
                                 </div>
                                 <div class="flex-1">
                                     <p class="font-medium text-gray-900 dark:text-white" dir="ltr">{{ vehicle.plate_number }}</p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ vehicle.customer?.name }} - {{ vehicle.customer?.phone }}</p>
+                                    <!-- Open Work Order Warning -->
+                                    <div v-if="vehicle.has_open_work_order" class="mt-1 flex items-center gap-2">
+                                        <span class="text-xs text-red-600 dark:text-red-400 font-medium">
+                                            {{ $t('work_orders.has_open_work_order') }} ({{ vehicle.open_work_order?.code }})
+                                        </span>
+                                        <a 
+                                            :href="route('work-orders.show', vehicle.open_work_order?.id)"
+                                            @click.stop
+                                            class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
+                                        >
+                                            {{ $t('work_orders.go_to_work_order') }}
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -230,6 +254,7 @@
                             <input
                                 v-model="form.expected_end_date"
                                 type="date"
+                                :min="form.entry_date"
                                 class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500"
                             />
                         </div>
@@ -439,18 +464,48 @@ watch(() => props.show, (newVal) => {
         form.mileage = props.workOrder.mileage || '';
         form.contact_name = props.workOrder.contact_name || '';
         form.contact_phone = props.workOrder.contact_phone || '';
-        form.entry_date = props.workOrder.entry_date || '';
-        form.expected_end_date = props.workOrder.expected_end_date || '';
+        // Format dates to YYYY-MM-DD for input fields
+        form.entry_date = formatDateForInput(props.workOrder.entry_date);
+        form.expected_end_date = formatDateForInput(props.workOrder.expected_end_date);
         form.departments = props.workOrder.departments?.map(d => d.id) || [];
         form.damage_marks = props.workOrder.damage_marks || [];
+        form.photos = props.workOrder.photos?.map(photo => ({
+            id: photo.id,
+            url: photo.url, // Assuming Accessor exists or full path
+            type: photo.type,
+            caption: photo.caption
+        })) || [];
         form.notes = props.workOrder.notes || '';
         
         if (props.workOrder.vehicle) {
             selectedVehicle.value = props.workOrder.vehicle;
             searchQuery.value = props.workOrder.vehicle.plate_number || '';
+            // Ensure customer is set if not already matched
+            if (!form.customer_id && props.workOrder.vehicle.customer_id) {
+                 form.customer_id = props.workOrder.vehicle.customer_id;
+            }
         }
     }
 });
+
+// Helper function to format date for input (preserves local timezone)
+function formatDateForInput(dateStr) {
+    if (!dateStr) return '';
+    
+    // If already in YYYY-MM-DD format, return as-is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+        return dateStr;
+    }
+    
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return '';
+    
+    // Use local date parts to avoid timezone shift
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
 
 // Debounce search
 let debounceTimer = null;
@@ -469,7 +524,7 @@ async function performSearch() {
     
     searching.value = true;
     try {
-        const response = await axios.get('/app/quotes/search', {
+        const response = await axios.get('/app/api/vehicles/search', {
             params: { q: searchQuery.value }
         });
         searchResults.value = response.data;
@@ -482,19 +537,17 @@ async function performSearch() {
 }
 
 function selectVehicle(vehicle) {
-    let vehicleWithCustomer = { ...vehicle };
+    selectedVehicle.value = vehicle;
+    form.customer_id = vehicle.customer_id || (vehicle.customer ? vehicle.customer.id : '');
+    form.vehicle_id = vehicle.id;
     
-    if (!vehicleWithCustomer.customer && vehicleWithCustomer.customer_id && props.customers) {
-        const customerData = props.customers.find(c => c.id === vehicleWithCustomer.customer_id);
-        if (customerData) {
-            vehicleWithCustomer.customer = customerData;
-        }
+    // Auto-fill contact info from customer if available
+    if (vehicle.customer) {
+        form.contact_name = vehicle.customer.name;
+        form.contact_phone = vehicle.customer.phone;
     }
     
-    selectedVehicle.value = vehicleWithCustomer;
-    form.customer_id = vehicleWithCustomer.customer_id;
-    form.vehicle_id = vehicleWithCustomer.id;
-    searchQuery.value = vehicleWithCustomer.plate_number;
+    searchQuery.value = vehicle.plate_number;
     showResults.value = false;
 }
 
@@ -502,6 +555,8 @@ function clearSelection() {
     selectedVehicle.value = null;
     form.customer_id = '';
     form.vehicle_id = '';
+    form.contact_name = '';
+    form.contact_phone = '';
     searchQuery.value = '';
 }
 
@@ -512,34 +567,33 @@ function onVehicleSaved(newVehicle) {
     }
 }
 
-function handleCustomerCreated(savedCustomer) {
-    const customerPhone = savedCustomer?.phone;
-    router.reload({
-        only: ['customers'],
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: async () => {
-            await nextTick();
-            window.dispatchEvent(new CustomEvent('customer-reloaded', { 
-                detail: { customerPhone } 
-            }));
-        },
-    });
+function handleCustomerCreated() {
+    router.reload({ only: ['customers'] });
 }
 
 function submitForm() {
-    const method = props.workOrder ? 'put' : 'post';
-    const url = props.workOrder 
+    const isEdit = !!props.workOrder;
+    const url = isEdit
         ? `/app/work-orders/${props.workOrder.id}` 
         : '/app/work-orders';
     
-    form[method](url, {
+    const options = {
         onSuccess: () => {
             form.reset();
             emit('saved');
             emit('close');
         },
-    });
+        forceFormData: true, 
+    };
+
+    if (isEdit) {
+        form.transform((data) => ({
+            ...data,
+            _method: 'PUT',
+        })).post(url, options);
+    } else {
+        form.post(url, options);
+    }
 }
 
 // Reset form when modal opens for new work order

@@ -18,6 +18,7 @@ class VehicleMake extends Model
         'center_id',
         'name_ar',
         'name_en',
+        'logo_path',
         'is_active',
         'sort_order',
         'updated_by',

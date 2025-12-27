@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\App;
 
+use App\Actions\WorkOrder\CreateWorkOrderAction;
+use App\Actions\WorkOrder\UpdateWorkOrderAction;
 use App\Http\Requests\WorkOrderStoreRequest;
 use App\Http\Requests\WorkOrderUpdateRequest;
 use App\Models\Customer;
 use App\Models\Service;
-use App\Models\Vehicle;
 use App\Models\VehicleMake;
 use App\Models\WorkOrder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,197 +20,281 @@ class WorkOrderController
 {
     use AuthorizesRequests;
 
-    public function index(): Response
+    /**
+     * Hub page with quick-access cards
+     */
+    public function hub(): Response
     {
-        $this->authorize('viewAny', WorkOrder::class);
+        $this->authorize("viewAny", WorkOrder::class);
 
-        $workOrders = WorkOrder::with(['customer', 'vehicle.make', 'items', 'damageMarks', 'photos'])
-            ->orderByDesc('created_at')
-            ->paginate(15);
+        // Count open work orders (open, in_progress, draft)
+        $openCount = WorkOrder::whereIn('status', ['open', 'in_progress', 'draft'])->count();
+        
+        // Count closed work orders (done, cancelled)
+        $closedCount = WorkOrder::whereIn('status', ['done', 'cancelled'])->count();
 
-        $customers = Customer::select('id', 'name', 'phone')->get();
-        $makes = \App\Models\VehicleMake::ordered()->get();
+        $customers = Customer::select("id", "name", "phone")->get();
+        $makes = VehicleMake::ordered()->get();
         $colors = \App\Models\VehicleColor::active()->ordered()->get();
         $departments = \App\Models\Department::active()->ordered()->get();
         
-        // Group models by make
         $modelsByMake = \App\Models\VehicleModel::query()
             ->select('id', 'make_id', 'name_ar', 'name_en')
             ->get()
             ->groupBy('make_id');
 
-        return Inertia::render('WorkOrders/Index', [
-            'workOrders' => $workOrders,
+        return Inertia::render("WorkOrders/Hub", [
+            "openCount" => $openCount,
+            "closedCount" => $closedCount,
+            "customers" => $customers,
+            "makes" => $makes,
+            "colors" => $colors,
+            "modelsByMake" => $modelsByMake,
+            "departments" => $departments,
+        ]);
+    }
+
+    public function index(): Response
+    {
+        $this->authorize("viewAny", WorkOrder::class);
+
+        $status = request("status");
+        $subFilter = request("sub_filter"); // New sub-filter for tabs
+
+        // Base query for counting
+        $baseQuery = WorkOrder::query();
+        
+        // Calculate counts for filter tabs (only for open status)
+        $filterCounts = [];
+        if ($status === 'open') {
+            $filterCounts = [
+                'open' => WorkOrder::whereIn('status', ['open', 'in_progress'])->count(),
+                'draft' => WorkOrder::where('status', 'draft')->count(),
+                'overdue' => WorkOrder::whereIn('status', ['open', 'in_progress'])
+                    ->whereNotNull('expected_end_date')
+                    ->where('expected_end_date', '<', now()->startOfDay())
+                    ->count(),
+                'pending_payment' => 0, // TODO: Add when payment columns exist
+            ];
+        }
+
+        $workOrders = WorkOrder::with(["customer", "vehicle.make", "items"])
+            ->when($status === 'open', function ($query) use ($subFilter) {
+                if ($subFilter === 'overdue') {
+                    $query->whereIn('status', ['open', 'in_progress'])
+                        ->whereNotNull('expected_end_date')
+                        ->where('expected_end_date', '<', now()->startOfDay());
+                } elseif ($subFilter === 'pending_payment') {
+                    // TODO: Filter by pending payment when columns exist
+                    $query->whereIn('status', ['open', 'in_progress', 'done']);
+                } elseif ($subFilter === 'draft') {
+                    $query->where('status', 'draft');
+                } elseif ($subFilter === 'in_progress') {
+                    $query->whereIn('status', ['open', 'in_progress']);
+                } else {
+                    // Default: all open statuses
+                    $query->whereIn('status', ['open', 'in_progress', 'draft']);
+                }
+            })
+            ->when($status === 'closed', function ($query) {
+                $query->whereIn('status', ['done', 'cancelled']);
+            })
+            ->when(request("search"), function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where("id", "like", "%{$search}%")
+                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
+                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                });
+            })
+            ->orderByDesc("created_at")
+            ->paginate(15)
+            ->withQueryString();
+
+        $customers = Customer::select("id", "name", "phone")->get();
+        $makes = VehicleMake::ordered()->get();
+        $colors = \App\Models\VehicleColor::active()->ordered()->get();
+        $departments = \App\Models\Department::active()->ordered()->get();
+        
+        $modelsByMake = \App\Models\VehicleModel::query()
+            ->select('id', 'make_id', 'name_ar', 'name_en')
+            ->get()
+            ->groupBy('make_id');
+        
+        // Get services grouped by department
+        $services = Service::active()
+            ->orderBy("department_id")
+            ->orderBy("sort_order")
+            ->get()
+            ->groupBy("department_id");
+
+        return Inertia::render("WorkOrders/Index", [
+            "workOrders" => $workOrders,
+            "customers" => $customers,
+            "makes" => $makes,
+            "colors" => $colors,
+            "modelsByMake" => $modelsByMake,
+            "departments" => $departments,
+            "services" => $services,
+            "filters" => request()->only(["search", "status", "sub_filter"]),
+            "statusFilter" => $status,
+            "subFilter" => $subFilter,
+            "filterCounts" => $filterCounts,
+        ]);
+    }
+    
+    public function store(WorkOrderStoreRequest $request, CreateWorkOrderAction $createWorkOrder): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('create', WorkOrder::class);
+
+        // Files are included in validated() if rules exist for them
+        $workOrder = $createWorkOrder->execute($request->user(), $request->validated());
+
+        // Redirect to the newly created work order's show page
+        return redirect()->route('work-orders.show', $workOrder)->with('success', __('messages.work_order_created'));
+    }
+
+    public function show(WorkOrder $workOrder): Response
+    {
+        $this->authorize('view', $workOrder);
+
+        $workOrder->load(['customer', 'vehicle.make', 'vehicle.customer', 'items.service.department', 'damageMarks', 'photos', 'departments']);
+
+        // Group items by department_id for accordion display
+        $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
+            return $item->service?->department_id ?? 0;
+        });
+
+        $customers = \App\Models\Customer::select('id', 'name', 'phone')->get();
+        $makes = \App\Models\VehicleMake::ordered()->get();
+        $colors = \App\Models\VehicleColor::active()->ordered()->get();
+        $departments = \App\Models\Department::active()->ordered()->get();
+        $services = \App\Models\Service::active()->ordered()->get();
+        
+        $modelsByMake = \App\Models\VehicleModel::query()
+            ->select('id', 'make_id', 'name_ar', 'name_en')
+            ->get()
+            ->groupBy('make_id');
+
+        return Inertia::render('WorkOrders/Show', [
+            'workOrder' => $workOrder,
+            'itemsByDepartment' => $itemsByDepartment,
             'customers' => $customers,
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
             'departments' => $departments,
+            'services' => $services,
         ]);
     }
 
-    public function apiIndex(): JsonResponse
-    {
-        $this->authorize('viewAny', WorkOrder::class);
-
-        $workOrders = WorkOrder::with(['customer', 'vehicle.make', 'items'])
-            ->orderByDesc('created_at')
-            ->paginate(15);
-
-        return response()->json($workOrders);
-    }
-
-    /**
-     * Search customers by name or phone (for autocomplete).
-     */
-    public function apiCustomerSearch(Request $request): JsonResponse
-    {
-        $query = $request->input('q', '');
-        
-        if (strlen($query) < 2) {
-            return response()->json([]);
-        }
-
-        $customers = Customer::where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('phone', 'like', "%{$query}%");
-            })
-            ->select('id', 'name', 'phone', 'type')
-            ->limit(10)
-            ->get();
-
-        return response()->json($customers);
-    }
-
-    /**
-     * Get vehicles for a specific customer (for modal filtering).
-     */
-    public function apiVehicles(Request $request): JsonResponse
-    {
-        $customerId = $request->input('customer_id');
-
-        if (!$customerId) {
-            return response()->json([]);
-        }
-
-        $vehicles = Vehicle::where('customer_id', $customerId)
-            ->with(['make', 'model'])
-            ->get(['id', 'plate_number', 'make_id', 'model_id', 'make_other', 'model_other', 'year']);
-
-        return response()->json($vehicles);
-    }
-
-    public function store(WorkOrderStoreRequest $request): \Illuminate\Http\RedirectResponse
-    {
-        $this->authorize('create', WorkOrder::class);
-
-        $user = $request->user();
-        $validated = $request->validated();
-
-        DB::transaction(function () use ($validated, $user) {
-            // Generate sequential code with locking
-            $code = WorkOrder::generateCode($user->tenant_id, $user->current_center_id);
-
-            // Create work order
-            $workOrder = WorkOrder::create([
-                'customer_id' => $validated['customer_id'],
-                'vehicle_id' => $validated['vehicle_id'],
-                'code' => $code,
-                'status' => $validated['status'] ?? WorkOrder::STATUS_DRAFT,
-                'notes' => $validated['notes'] ?? null,
-                'customer_complaint' => $validated['customer_complaint'] ?? null,
-                'initial_assessment' => $validated['initial_assessment'] ?? null,
-                'mileage' => $validated['mileage'] ?? null,
-                'contact_name' => $validated['contact_name'] ?? null,
-                'contact_phone' => $validated['contact_phone'] ?? null,
-                'entry_date' => $validated['entry_date'] ?? now()->toDateString(),
-                'expected_end_date' => $validated['expected_end_date'] ?? null,
-                'opened_at' => now(),
-            ]);
-
-            // Attach departments
-            if (!empty($validated['departments'])) {
-                $workOrder->departments()->attach($validated['departments']);
-            }
-
-            // Create damage marks
-            if (!empty($validated['damage_marks'])) {
-                foreach ($validated['damage_marks'] as $mark) {
-                    $workOrder->damageMarks()->create([
-                        'x' => $mark['x'],
-                        'y' => $mark['y'],
-                        'color' => $mark['color'] ?? 'red',
-                        'description' => $mark['description'] ?? null,
-                    ]);
-                }
-            }
-
-            // TODO: Handle photos upload separately via dedicated endpoint
-        });
-
-        return redirect()->back();
-    }
-
-    public function show(WorkOrder $workOrder): JsonResponse
-    {
-        $this->authorize('view', $workOrder);
-
-        $workOrder->load(['customer', 'vehicle', 'items']);
-
-        return response()->json($workOrder);
-    }
-
-    public function update(WorkOrderUpdateRequest $request, WorkOrder $workOrder): JsonResponse
+    public function update(WorkOrderUpdateRequest $request, WorkOrder $workOrder, UpdateWorkOrderAction $updateWorkOrder): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $workOrder);
 
-        $validated = $request->validated();
-        $user = $request->user();
+        $updateWorkOrder->execute($workOrder, $request->user(), $request->validated());
 
-        DB::transaction(function () use ($validated, $workOrder, $user) {
-            // Update main work order fields
-            $workOrder->update([
-                'customer_id' => $validated['customer_id'] ?? $workOrder->customer_id,
-                'vehicle_id' => $validated['vehicle_id'] ?? $workOrder->vehicle_id,
-                'status' => $validated['status'] ?? $workOrder->status,
-                'notes' => $validated['notes'] ?? $workOrder->notes,
-            ]);
-
-            // Handle status transitions
-            if (isset($validated['status'])) {
-                if ($validated['status'] === WorkOrder::STATUS_DONE && !$workOrder->closed_at) {
-                    $workOrder->update(['closed_at' => now()]);
-                }
-            }
-
-            // Update items if provided
-            if (isset($validated['items'])) {
-                // Delete existing items and recreate
-                $workOrder->items()->delete();
-
-                foreach ($validated['items'] as $itemData) {
-                    $workOrder->items()->create([
-                        'tenant_id' => $user->tenant_id,
-                        'center_id' => $user->current_center_id,
-                        'title' => $itemData['title'],
-                        'qty' => $itemData['qty'],
-                        'unit_price' => $itemData['unit_price'],
-                    ]);
-                }
-            }
-        });
-
-        $workOrder->load(['customer', 'vehicle', 'items']);
-
-        return response()->json($workOrder);
+        return redirect()->back()->with('success', __('messages.work_order_updated'));
     }
 
-    public function destroy(WorkOrder $workOrder): JsonResponse
+    public function destroy(WorkOrder $workOrder): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('delete', $workOrder);
 
+        // Delete photos from disk
+        foreach ($workOrder->photos as $photo) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($photo->path);
+        }
+
         $workOrder->delete();
 
-        return response()->json(null, 204);
+        return redirect()->route('work-orders.index')->with('success', __('messages.work_order_deleted'));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Work Order Items (Services)
+    // ─────────────────────────────────────────────────────────────
+
+    public function addItem(Request $request, WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'service_id' => 'required|exists:services,id',
+            'title' => 'nullable|string|max:255',
+            'qty' => 'required|numeric|min:0.01',
+            'unit_price' => 'required|numeric|min:0',
+            'discount_type' => 'nullable|string|in:none,fixed,percentage',
+            'discount_value' => 'nullable|numeric|min:0',
+        ]);
+
+        $service = \App\Models\Service::find($validated['service_id']);
+
+        $work_order->items()->create([
+            'tenant_id' => $work_order->tenant_id,
+            'center_id' => $work_order->center_id,
+            'service_id' => $validated['service_id'],
+            'title' => $validated['title'] ?? $service->name_ar,
+            'qty' => $validated['qty'],
+            'unit_price' => $validated['unit_price'],
+            'base_price_snapshot' => $service->base_price ?? 0,
+            'min_price_snapshot' => $service->min_price ?? 0,
+            'discount_type' => $validated['discount_type'] ?? 'none',
+            'discount_value' => $validated['discount_value'] ?? 0,
+        ]);
+
+        return redirect()->back()->with('success', __('messages.service_added'));
+    }
+
+    public function updateItem(Request $request, WorkOrder $work_order, \App\Models\WorkOrderItem $item): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'qty' => 'required|numeric|min:0.01',
+            'unit_price' => 'required|numeric|min:0',
+            'discount_type' => 'nullable|string|in:none,fixed,percentage',
+            'discount_value' => 'nullable|numeric|min:0',
+        ]);
+
+        $item->update($validated);
+
+        return redirect()->back()->with('success', __('messages.service_updated'));
+    }
+
+    public function deleteItem(WorkOrder $work_order, \App\Models\WorkOrderItem $item): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $item->delete();
+
+        return redirect()->back()->with('success', __('messages.service_deleted'));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Work Order Departments
+    // ─────────────────────────────────────────────────────────────
+
+    public function addDepartment(Request $request, WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'department_id' => 'required|exists:departments,id',
+        ]);
+
+        // Sync without detaching
+        $work_order->departments()->syncWithoutDetaching([$validated['department_id']]);
+
+        return redirect()->back()->with('success', __('messages.department_added'));
+    }
+
+    public function removeDepartment(WorkOrder $work_order, \App\Models\Department $department): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $work_order->departments()->detach($department->id);
+
+        return redirect()->back()->with('success', __('messages.department_removed'));
     }
 }

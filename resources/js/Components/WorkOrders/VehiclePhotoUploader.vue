@@ -44,6 +44,7 @@
                 type="file"
                 multiple
                 accept="image/*"
+                capture="environment"
                 class="hidden"
                 @change="handleFileSelect"
             />
@@ -127,17 +128,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();
+const toast = useToast();
+const page = usePage();
 
 const photos = defineModel('photos', { default: () => [] });
+
+const props = defineProps({
+    maxSizeInMB: { type: Number, default: 5 },
+});
 
 const fileInput = ref(null);
 const isDragging = ref(false);
 const selectedType = ref('general');
 const maxPhotos = 20;
+
+const serverConfig = computed(() => page.props.config || { upload_max_filesize: 2 * 1024 * 1024, post_max_size: 2 * 1024 * 1024 });
+const effectiveMaxFileSize = computed(() => Math.min(props.maxSizeInMB * 1024 * 1024, serverConfig.value.upload_max_filesize));
+const currentTotalUploadSize = computed(() => photos.value.reduce((total, photo) => total + (photo.file ? photo.file.size : 0), 0));
 
 const photoTypes = [
     { value: 'general', label: t('work_orders.photos.types.general') },
@@ -183,9 +196,34 @@ function handleDrop(event) {
 function addFiles(files) {
     const imageFiles = files.filter(file => file.type.startsWith('image/'));
     const remaining = maxPhotos - photos.value.length;
+    
+    if (remaining <= 0) {
+        toast.error(t('work_orders.photos.error_max_files', { max: maxPhotos }));
+        return;
+    }
+
     const filesToAdd = imageFiles.slice(0, remaining);
     
     filesToAdd.forEach(file => {
+        // Check individual file size against server limit or prop limit
+        if (file.size > effectiveMaxFileSize.value) {
+             const sizeMB = (effectiveMaxFileSize.value / (1024 * 1024)).toFixed(1);
+             toast.error(t('work_orders.photos.error_size', { size: sizeMB, file: file.name }));
+             
+             // Warn about server limit if relevant
+             if (serverConfig.value.upload_max_filesize < props.maxSizeInMB * 1024 * 1024) {
+                 toast.warning(`Server limit is ${sizeMB}MB. Check PHP settings.`);
+             }
+             return;
+        }
+
+        // Check total POST size
+        if (currentTotalUploadSize.value + file.size > serverConfig.value.post_max_size) {
+             const limitMB = (serverConfig.value.post_max_size / (1024 * 1024)).toFixed(1);
+             toast.error(`Total upload exceeds server limit (${limitMB} MB).`);
+             return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e) => {
             photos.value.push({

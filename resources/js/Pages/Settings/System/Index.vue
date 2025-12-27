@@ -1,19 +1,34 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header Section -->
+            <!-- Back Button & Header Section -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('system_settings.title') }}</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ currentSectionTitle }}
-                        </p>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <!-- Back Button -->
+                        <Link
+                            href="/app/settings"
+                            class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                        >
+                            <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            {{ $t('common.back') }}
+                        </Link>
+                        
+                        <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+                        
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('system_settings.title') }}</h1>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ currentSectionTitle }}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -128,6 +143,9 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ $t('system_settings.columns.logo') }}
+                                </th>
+                                <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('system_settings.columns.name_ar') }}
                                 </th>
                                 <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -146,6 +164,14 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="make in makesData" :key="make.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div v-if="make.logo_path" class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center p-1 border border-gray-200 dark:border-gray-600">
+                                        <img :src="`/storage/${make.logo_path}`" class="w-full h-full object-contain" />
+                                    </div>
+                                    <div v-else class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-400 font-bold border border-gray-200 dark:border-gray-600">
+                                        {{ make.name_ar.charAt(0) }}
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                                     {{ make.name_ar }}
                                 </td>
@@ -461,7 +487,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import MakeFormModal from './Modals/MakeFormModal.vue';
 import ModelFormModal from './Modals/ModelFormModal.vue';

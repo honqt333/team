@@ -6,158 +6,135 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                     <!-- Title + Count -->
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-600 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30 text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
                         </div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('quotes.title') }}</h1>
+                        <div>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('quotes.title') }}</h1>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ toEnglish(quotes?.total || 0) }} {{ $t('quotes.total_count') }}</p>
+                        </div>
                     </div>
 
-                    <!-- Add Button -->
-                    <button
-                        @click="openCreateModal"
-                        class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base w-full sm:w-auto bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span>{{ $t('quotes.add') }}</span>
-                    </button>
-                </div>
-
-                <!-- Tabs Section -->
-                <div class="mt-6 flex flex-wrap items-center gap-2">
-                    <button
-                        @click="activeTab = 'pending'"
-                        :class="[
-                            'flex items-center gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium transition-all',
-                            activeTab === 'pending'
-                                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 shadow-sm'
-                                : 'bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800'
-                        ]"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        {{ $t('quotes.tabs.without_card') }}
-                        <span class="px-1.5 py-0.5 text-xs rounded-full bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200">
-                            {{ pendingCount }}
-                        </span>
-                    </button>
-                    <button
-                        @click="activeTab = 'all'"
-                        :class="[
-                            'flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
-                            activeTab === 'all'
-                                ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 shadow-sm'
-                                : 'bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800'
-                        ]"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                        </svg>
-                        {{ $t('quotes.tabs.all') }}
-                        <span class="px-1.5 py-0.5 text-xs rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
-                            {{ allCount }}
-                        </span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filters Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col md:flex-row gap-3 md:gap-4">
-                    <!-- Comprehensive Search -->
-                    <div class="relative w-full lg:flex-1">
-                        <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                        </div>
-                        <input
-                            type="text"
-                            v-model="filters.search"
-                            :placeholder="$t('quotes.filters.search_placeholder')"
-                            class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                        />
-                    </div>
-
-                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
-                        <!-- Status Filter -->
-                        <SelectInput
-                            v-model="filters.status"
-                            color="amber"
-                            class="w-full sm:w-auto sm:min-w-[150px]"
-                        >
-                            <option value="">{{ $t('quotes.filters.all_statuses') }}</option>
-                            <option value="draft">{{ $t('quotes.status.draft') }}</option>
-                            <option value="sent">{{ $t('quotes.status.sent') }}</option>
-                            <option value="approved">{{ $t('quotes.status.approved') }}</option>
-                            <option value="rejected">{{ $t('quotes.status.rejected') }}</option>
-                            <option value="converted">{{ $t('quotes.status.converted') }}</option>
-                        </SelectInput>
-
-                        <!-- Date Range Filter -->
-                        <div class="flex items-center gap-2 w-full sm:w-auto">
-                            <span class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap hidden sm:inline">{{ $t('quotes.filters.date_range') }}</span>
-                            <SelectInput
-                                v-model="filters.dateRange"
-                                color="amber"
-                                class="w-full sm:w-auto min-w-[140px]"
-                            >
-                                <option value="all">{{ $t('quotes.filters.all_time') }}</option>
-                                <option value="today">{{ $t('quotes.filters.today') }}</option>
-                                <option value="week">{{ $t('quotes.filters.last_week') }}</option>
-                                <option value="month">{{ $t('quotes.filters.last_month') }}</option>
-                                <option value="30days">{{ $t('quotes.filters.last_30_days') }}</option>
-                            </SelectInput>
-                        </div>
-
-                        <!-- Actions Group -->
-                        <div class="flex items-center gap-2 ms-auto w-auto">
-                            <!-- Clear Filters -->
-                            <button
-                                v-if="hasActiveFilters"
-                                @click="clearFilters"
-                                class="px-3 py-2 text-sm text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors whitespace-nowrap"
-                            >
-                                {{ $t('quotes.filters.clear') }}
-                            </button>
-        
-                            <!-- View Toggle -->
-                            <div class="flex rounded-lg bg-gray-100 dark:bg-gray-900 p-1">
-                                <button
-                                    @click="viewMode = 'grid'"
-                                    :class="[
-                                        'p-2 rounded-md transition-all',
-                                        viewMode === 'grid'
-                                            ? 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                    ]"
-                                >
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
-                                    </svg>
-                                </button>
-                                <button
-                                    @click="viewMode = 'list'"
-                                    :class="[
-                                        'p-2 rounded-md transition-all',
-                                        viewMode === 'list'
-                                            ? 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                    ]"
-                                >
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
-                                    </svg>
-                                </button>
+                    <!-- Actions Row -->
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <!-- Search -->
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
                             </div>
+                            <input
+                                type="text"
+                                v-model="searchQuery"
+                                :placeholder="$t('quotes.search')"
+                                class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                            />
                         </div>
+
+                        <!-- View Toggle -->
+                        <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
+                            <button
+                                @click="viewMode = 'grid'"
+                                :class="[
+                                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                    viewMode === 'grid'
+                                        ? 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 shadow-sm'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                ]"
+                            >
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+                                </svg>
+                            </button>
+                            <button
+                                @click="viewMode = 'list'"
+                                :class="[
+                                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                    viewMode === 'list'
+                                        ? 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 shadow-sm'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                ]"
+                            >
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Add Button -->
+                        <button
+                            @click="openCreateModal"
+                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ $t('quotes.add') }}</span>
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <!-- Filter Tabs - Modern Compact Design -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+                <div class="flex flex-wrap gap-3">
+                    <button
+                        v-for="tab in filterTabs"
+                        :key="tab.key"
+                        @click="setStatusFilter(tab.key)"
+                        :class="[
+                            'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
+                            currentStatus === tab.key
+                                ? 'text-white shadow-lg'
+                                : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700'
+                        ]"
+                        :style="currentStatus === tab.key ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})` : ''"
+                    >
+                        <!-- Icon -->
+                        <div :class="[
+                            'w-8 h-8 rounded-lg flex items-center justify-center',
+                            currentStatus === tab.key
+                                ? 'bg-white/20'
+                                : tab.bgColor
+                        ]">
+                            <component 
+                                :is="tab.icon" 
+                                :class="[
+                                    'w-4 h-4',
+                                    currentStatus === tab.key ? 'text-white' : tab.iconColor
+                                ]" 
+                            />
+                        </div>
+                        
+                        <!-- Label & Count -->
+                        <div class="flex items-center gap-2">
+                            <span :class="[
+                                'font-medium text-sm',
+                                currentStatus === tab.key ? 'text-white' : 'text-gray-700 dark:text-gray-300'
+                            ]">
+                                {{ tab.label }}
+                            </span>
+                            <span :class="[
+                                'px-2 py-0.5 rounded-full text-xs font-bold',
+                                currentStatus === tab.key 
+                                    ? 'bg-white/20 text-white' 
+                                    : tab.bgColor + ' ' + tab.iconColor
+                            ]">
+                                {{ toEnglish(tab.count) }}
+                            </span>
+                        </div>
+                        
+                        <!-- Selected Check -->
+                        <svg v-if="currentStatus === tab.key" class="w-4 h-4 text-white/80" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
 
             <!-- Loading State -->
             <div v-if="!quotes" class="flex flex-col items-center justify-center py-16">
@@ -189,59 +166,81 @@
             </div>
 
             <!-- Grid View -->
-            <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 <div
                     v-for="quote in filteredQuotes"
                     :key="quote.id"
-                    class="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-lg cursor-pointer transition-all overflow-hidden"
+                    @click="navigateToShow(quote)"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
                 >
-                    <!-- Header -->
-                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900/50 dark:to-gray-800/50 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-gray-900 dark:text-white">{{ quote.code }}</span>
-                                <span class="text-xs text-gray-400">{{ formatDate(quote.created_at) }}</span>
-                            </div>
+                    <!-- Background Logo Watermark -->
+                    <div 
+                        v-if="quote.vehicle?.make?.logo_path"
+                        class="absolute inset-x-0 bottom-0 top-12 flex items-center justify-center opacity-[0.06] dark:opacity-[0.2] pointer-events-none select-none z-0 overflow-hidden"
+                    >
+                        <img 
+                            :src="`/storage/${quote.vehicle.make.logo_path}`" 
+                            class="w-3/4 h-3/4 object-contain grayscale dark:brightness-150 transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700"
+                            alt=""
+                        />
+                    </div>
+
+                    <!-- Card Content -->
+                    <div class="relative z-10 flex flex-col h-full">
+                        <!-- Header: Code & Status -->
+                        <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-900/50">
+                            <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 tracking-widest uppercase">
+                                {{ toEnglish(quote.code) }}
+                            </span>
                             <span
-                                class="px-2 py-1 text-xs font-medium rounded-full"
+                                class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider"
                                 :class="getStatusClass(quote.status)"
                             >
                                 {{ $t(`quotes.status.${quote.status}`) }}
                             </span>
                         </div>
-                    </div>
 
-                    <!-- Card Body -->
-                    <div class="p-4 space-y-3" @click="navigateToShow(quote)">
-                        <!-- Vehicle Info -->
-                        <div class="flex items-center gap-3 text-sm">
-                            <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
+                        <!-- Body: Quote Info -->
+                        <div class="p-5 flex-1 flex flex-col items-center text-center">
+                            <!-- Vehicle Plate (Main Title) -->
+                            <div class="mb-4">
+                                <span class="inline-block px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-xl font-black tracking-wider rounded-lg border border-gray-200 dark:border-gray-600 font-mono">
+                                    {{ toEnglish(quote.vehicle?.plate_number) || $t('common.na') }}
+                                </span>
                             </div>
-                            <div class="min-w-0">
-                                <p class="font-semibold text-gray-900 dark:text-white truncate">{{ quote.vehicle?.plate_number }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ getVehicleName(quote.vehicle) }}</p>
+
+                            <!-- Vehicle Details -->
+                            <div class="space-y-1 mb-4">
+                                <h3 class="text-base font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                                    {{ getVehicleName(quote.vehicle) }}
+                                </h3>
+                                <div class="flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                    <span>{{ quote.customer?.name || $t('common.unknown') }}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-auto">
+                                <span class="px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[11px] font-bold rounded-lg border border-blue-100 dark:border-blue-800/50 shadow-sm">
+                                    {{ formatDate(quote.created_at) }}
+                                </span>
                             </div>
                         </div>
 
-                        <!-- Customer Info -->
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
-                            <span class="truncate">{{ quote.customer?.name }}</span>
-                        </div>
-
-                        <!-- Total -->
-                        <div class="pt-3 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('quotes.form.grand_total') }}</span>
-                            <span class="text-lg font-bold text-amber-600 dark:text-amber-400">{{ formatCurrency(quote.total) }}</span>
+                        <!-- Footer: Total Section -->
+                        <div class="px-5 py-4 bg-gradient-to-t from-gray-50/80 to-transparent dark:from-gray-900/40 border-t border-gray-100 dark:border-gray-700/50 flex items-center justify-between">
+                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 italic">
+                                {{ $t('quotes.form.grand_total') }}
+                            </span>
+                            <div class="flex flex-col items-end">
+                                <span class="text-xl font-black text-amber-600 dark:text-amber-400">
+                                    {{ formatCurrency(quote.total) }}
+                                </span>
+                            </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
 
@@ -261,13 +260,10 @@
                                     {{ $t('quotes.columns.customer') }}
                                 </th>
                                 <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('quotes.columns.total') }}
-                                </th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('quotes.columns.status') }}
                                 </th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('common.actions') }}
+                                <th class="px-5 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ $t('quotes.columns.total') }}
                                 </th>
                             </tr>
                         </thead>
@@ -275,47 +271,35 @@
                             <tr
                                 v-for="quote in filteredQuotes"
                                 :key="quote.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
+                                @click="navigateToShow(quote)"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
                             >
                                 <td class="px-5 py-4">
-                                    <div>
-                                        <span class="font-medium text-gray-900 dark:text-white">{{ quote.code }}</span>
-                                        <p class="text-xs text-gray-400">{{ formatDate(quote.created_at) }}</p>
-                                    </div>
+                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                        {{ quote.code }}
+                                    </span>
                                 </td>
                                 <td class="px-5 py-4">
-                                    <div>
-                                        <p class="font-medium text-gray-900 dark:text-white">{{ quote.vehicle?.plate_number }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ getVehicleName(quote.vehicle) }}</p>
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-900 dark:text-gray-100">{{ quote.vehicle?.plate_number }}</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ getVehicleName(quote.vehicle) }}</span>
                                     </div>
                                 </td>
                                 <td class="px-5 py-4 text-gray-700 dark:text-gray-300">
                                     {{ quote.customer?.name }}
                                 </td>
                                 <td class="px-5 py-4">
-                                    <span class="font-semibold text-amber-600 dark:text-amber-400">{{ formatCurrency(quote.total) }}</span>
-                                </td>
-                                <td class="px-5 py-4">
                                     <span
-                                        class="px-2 py-1 text-xs font-medium rounded-full"
+                                        class="px-2 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider"
                                         :class="getStatusClass(quote.status)"
                                     >
                                         {{ $t(`quotes.status.${quote.status}`) }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <button
-                                            @click="navigateToShow(quote)"
-                                            class="p-1.5 text-gray-500 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
-                                            :title="$t('common.view')"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                            </svg>
-                                        </button>
-                                    </div>
+                                <td class="px-5 py-4 text-end">
+                                    <span class="text-sm font-bold text-amber-600 dark:text-amber-400">
+                                        {{ formatCurrency(quote.total) }}
+                                    </span>
                                 </td>
                             </tr>
                         </tbody>
@@ -323,12 +307,27 @@
                 </div>
             </div>
 
-            <!-- Pagination Info -->
-            <div v-if="quotes && filteredQuotes.length > 0" class="text-sm text-gray-500 dark:text-gray-400">
-                {{ $t('quotes.showing') }} 
-                <span class="font-medium text-gray-900 dark:text-white">{{ filteredQuotes.length }}</span>
-                {{ $t('quotes.of') }}
-                <span class="font-medium text-gray-900 dark:text-white">{{ quotes.total }}</span>
+            <!-- Pagination -->
+            <div v-if="quotes && quotes.data.length > 0" class="flex items-center justify-between mt-6">
+                <div class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ $t('quotes.showing') }} 
+                    <span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(quotes.from) }}</span>-<span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(quotes.to) }}</span>
+                    {{ $t('quotes.of') }}
+                    <span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(quotes.total) }}</span>
+                </div>
+                <div class="flex gap-2">
+                    <Link
+                        v-for="link in quotes.links"
+                        :key="link.label"
+                        :href="link.url || '#'"
+                        v-html="link.label"
+                        :class="[
+                            'px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm',
+                            link.active ? 'bg-amber-600 text-white shadow-amber-500/20' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700',
+                            !link.url ? 'opacity-50 cursor-not-allowed' : ''
+                        ]"
+                    />
+                </div>
             </div>
         </div>
 
@@ -349,13 +348,12 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import SelectInput from '@/Components/SelectInput.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 
 const props = defineProps({
@@ -387,22 +385,125 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    filters: {
+        type: Object,
+        default: () => ({}),
+    },
+    filterCounts: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 const { t } = useI18n();
 const { success } = useToast();
 const { confirm } = useConfirm();
-const { formatCurrency: formatCurrencyEN } = useNumberFormat();
+const { formatCurrency: formatCurrencyEN, toEnglish } = useNumberFormat();
 const showModal = ref(false);
 const selectedQuote = ref(null);
 const activeTab = ref(localStorage.getItem('quotesActiveTab') || 'pending');
 const viewMode = ref(localStorage.getItem('quotesViewMode') || 'grid');
 
+// Icons for filter tabs
+const IconAll = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>` };
+const IconPending = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
+const IconApproved = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
+const IconConverted = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>` };
+const IconRejected = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
+
+const filterTabs = computed(() => [
+    { 
+        key: 'pending', 
+        label: t('quotes.tabs.without_card'), 
+        icon: IconPending, 
+        iconColor: 'text-amber-500', 
+        bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+        gradientFrom: '#f59e0b',
+        gradientTo: '#d97706',
+        count: props.filterCounts.pending || 0 
+    },
+    { 
+        key: 'all', 
+        label: t('quotes.tabs.all'), 
+        icon: IconAll, 
+        iconColor: 'text-slate-500', 
+        bgColor: 'bg-slate-100 dark:bg-slate-900/30',
+        gradientFrom: '#64748b',
+        gradientTo: '#475569',
+        count: props.filterCounts.all || 0 
+    },
+    { 
+        key: 'approved', 
+        label: t('quotes.status.approved'), 
+        icon: IconApproved, 
+        iconColor: 'text-emerald-500', 
+        bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+        gradientFrom: '#10b981',
+        gradientTo: '#059669',
+        count: props.filterCounts.approved || 0 
+    },
+    { 
+        key: 'converted', 
+        label: t('quotes.status.converted'), 
+        icon: IconConverted, 
+        iconColor: 'text-blue-500', 
+        bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+        gradientFrom: '#3b82f6',
+        gradientTo: '#2563eb',
+        count: props.filterCounts.converted || 0 
+    },
+    { 
+        key: 'rejected', 
+        label: t('quotes.status.rejected'), 
+        icon: IconRejected, 
+        iconColor: 'text-red-500', 
+        bgColor: 'bg-red-100 dark:bg-red-900/30',
+        gradientFrom: '#ef4444',
+        gradientTo: '#dc2626',
+        count: props.filterCounts.rejected || 0 
+    },
+]);
+
+// Determine current status from URL filters
+const currentStatus = computed(() => props.filters.status || 'pending');
+
+const searchQuery = ref(props.filters.search || '');
+
+function setStatusFilter(status) {
+    router.get(route('app.quotes.index'), { 
+        status: status,
+        search: searchQuery.value,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+}
+
 const filters = ref({
-    search: '',
+    search: props.filters.search || '',
     status: '',
     dateRange: 'all',
 });
+
+const debounce = (fn, delay) => {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(...args), delay);
+    };
+};
+
+watch(searchQuery, debounce((value) => {
+    router.get(route('app.quotes.index'), { 
+        search: value,
+        status: currentStatus.value,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+}, 300));
 
 watch(viewMode, (newMode) => {
     localStorage.setItem('quotesViewMode', newMode);
@@ -428,62 +529,10 @@ const hasActiveFilters = computed(() => {
     return filters.value.search || filters.value.status || filters.value.dateRange !== 'all';
 });
 
-// Computed: Filter quotes based on tab and filters
+// Computed: Filter quotes - server handles main filtering, this is just for page data
 const filteredQuotes = computed(() => {
     if (!props.quotes?.data) return [];
-    
-    let result = [...props.quotes.data];
-    
-    // Tab filter
-    if (activeTab.value === 'pending') {
-        // Pending = quotes that need action (not converted and not rejected)
-        result = result.filter(q => q.status !== 'converted' && q.status !== 'rejected');
-    }
-    
-    // Comprehensive Search Filter (Code, Customer Name, Phone, Vehicle Plate)
-    if (filters.value.search) {
-        const searchTerm = filters.value.search.toLowerCase();
-        result = result.filter(q => {
-            const matchesCode = q.code?.toLowerCase().includes(searchTerm);
-            const matchesCustomer = q.customer?.name?.toLowerCase().includes(searchTerm) || 
-                                  q.customer?.phone?.includes(searchTerm);
-            const matchesVehicle = q.vehicle?.plate_number?.toLowerCase().includes(searchTerm);
-            
-            return matchesCode || matchesCustomer || matchesVehicle;
-        });
-    }
-    
-    // Status filter
-    if (filters.value.status) {
-        result = result.filter(q => q.status === filters.value.status);
-    }
-    
-    // Date range filter
-    if (filters.value.dateRange !== 'all') {
-        const now = new Date();
-        let startDate;
-        
-        switch (filters.value.dateRange) {
-            case 'today':
-                startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                break;
-            case 'week':
-                startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                break;
-            case 'month':
-                startDate = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-                break;
-            case '30days':
-                startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-                break;
-        }
-        
-        if (startDate) {
-            result = result.filter(q => new Date(q.created_at) >= startDate);
-        }
-    }
-    
-    return result;
+    return props.quotes.data;
 });
 
 function clearFilters() {
@@ -520,11 +569,18 @@ function formatCurrency(amount) {
 
 function formatDate(dateString) {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('ar-SA');
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    });
 }
 
-function canShowActions(quote) {
-    return quote.status === 'draft' || quote.status === 'sent';
+function getWhatsAppNumber(customer) {
+    if (!customer) return null;
+    const phone = customer.whatsapp || customer.phone;
+    if (!phone) return null;
+    return phone.replace(/[^\d+]/g, "").replace(/^\+/, "");
 }
 
 function openCreateModal() {
@@ -553,45 +609,5 @@ function handleSaved() {
     closeModal();
     success(t('common.saved_success'));
     router.reload({ only: ['quotes'] });
-}
-
-async function approveQuote(quote) {
-    const confirmed = await confirm({
-        title: t('quotes.actions.approve'),
-        message: t('quotes.messages.confirm_approve'),
-        confirmText: t('quotes.actions.approve'),
-        cancelText: t('common.cancel'),
-        type: 'success',
-    });
-
-    if (confirmed) {
-        router.post(`/app/quotes/${quote.id}/approve`, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                success(t('quotes.messages.approved_success'));
-                router.reload({ only: ['quotes'] });
-            },
-        });
-    }
-}
-
-async function rejectQuote(quote) {
-    const confirmed = await confirm({
-        title: t('quotes.actions.reject'),
-        message: t('quotes.messages.confirm_reject'),
-        confirmText: t('quotes.actions.reject'),
-        cancelText: t('common.cancel'),
-        type: 'danger',
-    });
-
-    if (confirmed) {
-        router.post(`/app/quotes/${quote.id}/reject`, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                success(t('quotes.messages.rejected_success'));
-                router.reload({ only: ['quotes'] });
-            },
-        });
-    }
 }
 </script>

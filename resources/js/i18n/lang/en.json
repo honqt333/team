@@ -26,7 +26,7 @@
             "ar": "Arabic",
             "en": "English"
         },
-        "coming_soon": "Coming Soon",
+        "coming_soon": "Coming Soon...",
         "no_data": "No data available",
         "edit": "Edit",
         "error": "Error",
@@ -39,7 +39,9 @@
         "unsaved_changes": "Unsaved Changes",
         "unsaved_changes_message": "Changes have not been saved. Are you sure you want to close this form?",
         "yes_close": "Yes, Close",
-        "discard": "Discard"
+        "discard": "Discard",
+        "print": "Print",
+        "qty": "Qty"
     },
     "nav": {
         "brand": "Carag",
@@ -128,6 +130,25 @@
         "map": {
             "hint": "Enter coordinates to display location on map",
             "click_hint": "Click on the map to set location"
+        },
+        "vehicles": "Vehicles",
+        "quotes": "Quotes",
+        "work_orders": "Work Orders",
+        "invoices": "Invoices",
+        "payments": "Payments",
+        "merge": {
+            "title": "Merge data from",
+            "with": "with",
+            "button": "Merge",
+            "from": "From",
+            "to": "To",
+            "after_merge": "After Merge",
+            "same_type_only": "Same customer type only",
+            "no_customers": "No customers to merge with",
+            "change_target": "Change",
+            "execute": "Execute Merge",
+            "confirm_message": "All data related to {source} will be merged with {target} and {source} will be removed from the system",
+            "confirm_no_undo": "I agree to this operation and it cannot be undone"
         }
     },
     "vehicles": {
@@ -136,6 +157,8 @@
         "search": "Search...",
         "empty": "No vehicles yet",
         "empty_hint": "Start by adding your first vehicle using the add button.",
+        "showing": "Showing",
+        "of": "of",
         "total_count": "vehicles",
         "plate_number": "Plate Number",
         "quick_add_customer": "Add Customer",
@@ -181,10 +204,43 @@
         "title": "Work Orders",
         "add": "Create Work Order",
         "edit": "Edit Work Order",
+        "details": "Work Order Details",
+        "created_at": "Created At",
         "search": "Search...",
         "empty": "No work orders yet",
         "empty_hint": "Start by creating your first work order using the add button.",
         "total_count": "work orders",
+        "showing": "Showing",
+        "of": "of",
+        "back_to_hub": "Back",
+        "hub": {
+            "title": "Work Orders",
+            "subtitle": "Choose from the options below",
+            "new_card": "New Card",
+            "new_card_hint": "Create a new work order",
+            "open_cards": "Open Work Orders",
+            "open_cards_hint": "View orders in progress",
+            "closed_cards": "Closed Work Orders",
+            "closed_cards_hint": "View completed and cancelled orders"
+        },
+        "list": {
+            "open_title": "Open Work Orders",
+            "closed_title": "Closed Work Orders",
+            "all_title": "All Work Orders"
+        },
+        "due_date": "Due",
+        "closed_date": "Closed",
+        "invoice_total": "Total",
+        "paid": "Paid",
+        "remaining": "Remaining",
+        "has_open_work_order": "Has open work order",
+        "go_to_work_order": "Go to work order",
+        "filters": {
+            "open": "Open",
+            "draft": "Draft",
+            "overdue": "Overdue",
+            "pending_payment": "Pending Payment"
+        },
         "create": {
             "title": "Create Work Order"
         },
@@ -232,6 +288,28 @@
             "done": "Completed",
             "cancelled": "Cancelled"
         },
+        "show": {
+            "no_services": "No services",
+            "tabs": {
+                "services": "Services",
+                "parts": "Spare Parts",
+                "technicians": "Technicians",
+                "payments": "Payments",
+                "condition": "Condition Report",
+                "photos": "Photos",
+                "activities": "Activities",
+                "attachments": "Attachments"
+            },
+            "add_service": "Add Service"
+        },
+        "actions": {
+            "start_work": "Start Work",
+            "complete": "Complete",
+            "cancel": "Cancel"
+        },
+        "messages": {
+            "confirm_status_change": "Are you sure you want to change the status?"
+        },
         "service_categories": {
             "maintenance": "Maintenance",
             "electrical": "Electrical",
@@ -260,9 +338,11 @@
             "images": "images",
             "drag_or": "Drag photos here or",
             "browse": "browse",
-            "formats": "PNG, JPG, JPEG up to 10MB",
+            "formats": "PNG, JPG, JPEG up to 5MB",
             "add_caption": "Add caption...",
             "no_photos": "No photos",
+            "error_size": "File {file} exceeds the limit of {size}MB",
+            "error_max_files": "You have reached the maximum limit of {max} files",
             "types": {
                 "general": "General",
                 "before": "Before",
@@ -348,7 +428,7 @@
         "subtitle": "Manage system settings and configuration",
         "cards": {
             "system": {
-                "title": "System Settings",
+                "title": "Vehicle Settings",
                 "description": "Makes, Models, Colors"
             },
             "departments": {
@@ -362,7 +442,7 @@
         }
     },
     "system_settings": {
-        "title": "System Settings",
+        "title": "Vehicle Settings",
         "sections": {
             "makes": "Makes",
             "models": "Models",
@@ -393,7 +473,8 @@
             "updated_at": "Last Updated",
             "updated_by": "Updated By",
             "make": "Make",
-            "color": "Color"
+            "color": "Color",
+            "logo": "Logo"
         },
         "form": {
             "name_ar": "Name (Arabic)",
@@ -402,6 +483,7 @@
             "name_en_placeholder": "Enter name in English",
             "make": "Make",
             "hex_code": "Color Code",
+            "logo": "Brand Logo",
             "is_active": "Active"
         }
     },
@@ -494,6 +576,7 @@
         },
         "converted_to": "Converted to Work Card",
         "tabs": {
+            "pending": "Pending Quotes",
             "without_card": "Quotes Without Card",
             "all": "All Quotes",
             "main_info": "Main Info",
@@ -511,7 +594,9 @@
             "last_month": "Last Month",
             "last_30_days": "Last 30 Days",
             "clear": "Clear Filters",
-            "search_placeholder": "Search name, phone, vehicle..."
+            "search_placeholder": "Search name, phone, vehicle...",
+            "status_placeholder": "All Statuses",
+            "date_range_placeholder": "All Time"
         },
         "form_tabs": {
             "search_placeholder": "Search by plate, customer name, or phone...",

@@ -43,6 +43,17 @@ class WorkOrderStoreRequest extends FormRequest
                         }
                     }
                 },
+                // Prevent creating work order for vehicle with open work order
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $hasOpenWorkOrder = \App\Models\WorkOrder::where('vehicle_id', $value)
+                            ->whereIn('status', ['draft', 'open', 'in_progress'])
+                            ->exists();
+                        if ($hasOpenWorkOrder) {
+                            $fail(__('validation.vehicle_has_open_work_order'));
+                        }
+                    }
+                },
             ],
             'status' => [
                 'sometimes',
@@ -75,6 +86,12 @@ class WorkOrderStoreRequest extends FormRequest
             'damage_marks.*.y' => ['required', 'numeric'],
             'damage_marks.*.color' => ['nullable', 'string', Rule::in(['red', 'blue', 'gray'])],
             'damage_marks.*.description' => ['nullable', 'string', 'max:500'],
+
+            // Photos - file is only required for NEW photos (no id)
+            'photos' => ['nullable', 'array', 'max:20'],
+            'photos.*.file' => ['nullable', 'file', 'image', 'max:5120'], // Max 5MB, nullable for existing photos
+            'photos.*.type' => ['nullable', 'string', Rule::in(['general', 'before', 'after', 'damage'])],
+            'photos.*.caption' => ['nullable', 'string', 'max:255'],
         ];
     }
 
