@@ -167,6 +167,32 @@ protected $casts = [
 ];
 ```
 
+### إدارة الصلاحيات (Permissions):
+
+1. **Backend**:
+   - استخدم `App\Support\Permissions` constants دائماً.
+   - لا تستخدم strings يدوياً.
+
+```php
+// ✅ صحيح
+use App\Support\Permissions;
+$this->authorize(Permissions::WORK_ORDERS_CREATE);
+
+// ❌ خطأ
+$this->authorize('create work order');
+```
+
+2. **Frontend (Vue)**:
+   - استخدم `usePermission` composable.
+
+```js
+import { usePermission } from '@/Composables/usePermission';
+const { can } = usePermission();
+
+// في الـ template
+<button v-if="can('work_orders.create')">...
+```
+
 ---
 
 ## 🌍 الترجمة (i18n)
