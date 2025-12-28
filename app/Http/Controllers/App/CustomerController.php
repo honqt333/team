@@ -36,6 +36,10 @@ class CustomerController
             });
         }
 
+        if (request('type')) {
+            $query->where('type', request('type'));
+        }
+
         $customers = $query->withCount(['vehicles', 'quotes', 'workOrders'])
             ->orderBy('id', 'desc')
             ->paginate(15)
@@ -43,15 +47,48 @@ class CustomerController
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers,
-            'filters' => request()->only(['search']),
+            'filters' => request()->only(['search', 'type']),
         ]);
+    }
+
+    public function print()
+    {
+        $this->authorize('viewAny', Customer::class);
+
+        $query = Customer::query();
+
+        if (request('search')) {
+            $search = request('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        
     }
 
     public function apiIndex(): JsonResponse
     {
         $this->authorize('viewAny', Customer::class);
 
-        return response()->json(Customer::query()->paginate(15));
+        $query = Customer::query();
+
+        if (request('search')) {
+            $search = request('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if (request('type')) {
+            $query->where('type', request('type'));
+        }
+
+        return response()->json($query->orderBy('id', 'desc')->paginate(15));
     }
 
     public function store(CustomerStoreRequest $request): RedirectResponse
@@ -199,5 +236,71 @@ class CustomerController
         $action->execute($source, $target);
 
         return redirect()->route('customers.show', $target)->with('success', __('messages.customer_merged'));
+    }
+
+    /**
+     * Export customers to XLSX.
+     */
+    public function export()
+    {
+        $this->authorize('viewAny', Customer::class);
+
+        $type = request('type');
+        $filename = 'customers_' . date('Y-m-d_His') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\CustomersExport($type),
+            $filename
+        );
+    }
+
+    /**
+     * Download import template.
+     */
+    public function downloadTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\CustomersTemplateExport(),
+            'customers_template.xlsx'
+        );
+    }
+
+    /**
+     * Import customers from XLSX/CSV.
+     */
+    public function import(): JsonResponse
+    {
+        $this->authorize('create', Customer::class);
+
+        $file = request()->file('file');
+        
+        if (!$file) {
+            return response()->json(['message' => 'لم يتم رفع ملف'], 400);
+        }
+
+        $extension = strtolower($file->getClientOriginalExtension());
+        if (!in_array($extension, ['xlsx', 'xls', 'csv'])) {
+            return response()->json(['message' => 'صيغة الملف غير مدعومة. الصيغ المدعومة: XLSX, XLS, CSV'], 400);
+        }
+
+        try {
+            $import = new \App\Imports\CustomersImport();
+            $import->import($file);
+
+            return response()->json([
+                'imported' => $import->getImportedCount(),
+                'errors' => $import->getImportErrors(),
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Customer Import Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            return response()->json([
+                'message' => 'حدث خطأ أثناء الاستيراد: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

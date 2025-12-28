@@ -42,7 +42,7 @@ class CustomerUpdateRequest extends FormRequest
             'whatsapp' => ['nullable', 'string', 'max:30'],
             'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'tax_number' => ['nullable', 'string', 'max:50', 'required_if:type,company'],
+            'tax_number' => ['nullable', 'string', 'max:50'],
             'address_line' => ['nullable', 'string', 'max:500'],
             'building_number' => ['nullable', 'string', 'max:50'],
             'postal_code' => ['nullable', 'string', 'max:20'],

@@ -21,6 +21,14 @@ class RolesSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
+        // Assign Super Admin to User 1 if exists
+        $user = \App\Models\User::find(1);
+        if ($user) {
+            // Set context to user's tenant to create/assign role in that tenant scope
+            app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+            $this->command->info("Assigning Super Admin to User 1 (Tenant: {$user->tenant_id})...");
+        }
+
         // Define default roles with their permissions
         $roles = [
             'super_admin' => [
@@ -168,6 +176,12 @@ class RolesSeeder extends Seeder
 
             // Sync permissions
             $role->syncPermissions($roleData['permissions']);
+
+            // Special Case: Assign Super Admin to User 1
+            if ($roleName === 'super_admin' && isset($user)) {
+                $user->assignRole($role);
+                $this->command->info("User 1 assigned to Super Admin Role.");
+            }
 
             $this->command->info("Role '{$roleName}' created with " . count($roleData['permissions']) . ' permissions.');
         }

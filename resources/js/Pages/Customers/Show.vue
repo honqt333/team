@@ -183,7 +183,7 @@
                             <div
                                 v-for="vehicle in filteredVehicles"
                                 :key="vehicle.id"
-                                @click="openVehicleEditModal(vehicle)"
+                                @click="router.visit(route('vehicles.show', vehicle.id))"
                                 class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
                             >
                                 <!-- Background Logo Watermark -->
@@ -256,7 +256,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="vehicle in filteredVehicles" :key="vehicle.id" @click="openVehicleEditModal(vehicle)" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                    <tr v-for="vehicle in filteredVehicles" :key="vehicle.id" @click="router.visit(route('vehicles.show', vehicle.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
                                         <td class="px-4 py-3 font-bold text-gray-800 dark:text-gray-200"><span dir="ltr">{{ vehicle.plate_number }}</span></td>
                                         <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ getMakeName(vehicle) }}</td>
                                         <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ getModelName(vehicle) }}</td>

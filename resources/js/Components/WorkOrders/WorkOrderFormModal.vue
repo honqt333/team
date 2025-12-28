@@ -35,8 +35,8 @@
             <div class="min-h-[350px]">
                 <!-- Tab 1: Main Info -->
                 <div v-show="activeTab === 'main_info'" class="space-y-4">
-                    <!-- Search Section -->
-                    <div class="relative bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <!-- Search Section (Hide if pre-selected vehicle exists and not editing) -->
+                    <div v-if="!vehicle && !workOrder" class="relative bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ $t('quotes.form_tabs.search_placeholder') }}
@@ -365,7 +365,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -378,6 +378,7 @@ import axios from 'axios';
 const props = defineProps({
     show: Boolean,
     workOrder: Object,
+    vehicle: Object, // Pre-selected vehicle for creation
     customers: Array,
     departments: Array,
     makes: Array,
@@ -439,15 +440,15 @@ const showVehicleModal = ref(false);
 
 // Form
 const form = useForm({
-    customer_id: props.workOrder?.customer_id || '',
-    vehicle_id: props.workOrder?.vehicle_id || '',
+    customer_id: props.workOrder?.customer_id || props.vehicle?.customer_id || '',
+    vehicle_id: props.workOrder?.vehicle_id || props.vehicle?.id || '',
     customer_complaint: props.workOrder?.customer_complaint || '',
     initial_assessment: props.workOrder?.initial_assessment || '',
     mileage: props.workOrder?.mileage || '',
     contact_name: props.workOrder?.contact_name || '',
     contact_phone: props.workOrder?.contact_phone || '',
     entry_date: props.workOrder?.entry_date || new Date().toISOString().split('T')[0],
-    expected_end_date: props.workOrder?.expected_end_date || '',
+    expected_end_date: props.workOrder?.expected_end_date || new Date().toISOString().split('T')[0],
     departments: props.workOrder?.departments?.map(d => d.id) || [],
     damage_marks: props.workOrder?.damage_marks || [],
     photos: [],
@@ -464,14 +465,13 @@ watch(() => props.show, (newVal) => {
         form.mileage = props.workOrder.mileage || '';
         form.contact_name = props.workOrder.contact_name || '';
         form.contact_phone = props.workOrder.contact_phone || '';
-        // Format dates to YYYY-MM-DD for input fields
         form.entry_date = formatDateForInput(props.workOrder.entry_date);
         form.expected_end_date = formatDateForInput(props.workOrder.expected_end_date);
         form.departments = props.workOrder.departments?.map(d => d.id) || [];
         form.damage_marks = props.workOrder.damage_marks || [];
         form.photos = props.workOrder.photos?.map(photo => ({
             id: photo.id,
-            url: photo.url, // Assuming Accessor exists or full path
+            url: photo.url,
             type: photo.type,
             caption: photo.caption
         })) || [];
@@ -485,6 +485,24 @@ watch(() => props.show, (newVal) => {
                  form.customer_id = props.workOrder.vehicle.customer_id;
             }
         }
+    }
+}, { immediate: true });
+
+// Watch for vehicle prop (pre-selection)
+watch(() => props.vehicle, (val) => {
+    if (val && !props.workOrder) { // Only if not editing an existing order
+        selectedVehicle.value = val;
+        form.vehicle_id = val.id;
+        form.customer_id = val.customer_id;
+    }
+}, { immediate: true });
+
+// Initial Load for Edit Mode or Pre-selection
+onMounted(() => {
+    if (props.workOrder?.vehicle) {
+        selectedVehicle.value = props.workOrder.vehicle;
+    } else if (props.vehicle) {
+        selectedVehicle.value = props.vehicle;
     }
 });
 
@@ -598,7 +616,7 @@ function submitForm() {
 
 // Reset form when modal opens for new work order
 function resetForm() {
-    form.reset();
+    const today = new Date().toISOString().split('T')[0];
     form.customer_id = '';
     form.vehicle_id = '';
     form.customer_complaint = '';
@@ -606,12 +624,13 @@ function resetForm() {
     form.mileage = '';
     form.contact_name = '';
     form.contact_phone = '';
-    form.entry_date = new Date().toISOString().split('T')[0];
-    form.expected_end_date = '';
+    form.entry_date = today;
+    form.expected_end_date = today;
     form.departments = [];
     form.damage_marks = [];
     form.photos = [];
     form.notes = '';
+    form.clearErrors();
     selectedVehicle.value = null;
     searchQuery.value = '';
     searchResults.value = [];

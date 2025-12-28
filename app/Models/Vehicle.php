@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Vehicle extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'tenant_id',
         'center_id',
@@ -90,7 +93,18 @@ class Vehicle extends Model
                 }
                 
                 return $name ?: $this->plate_number;
+                return $name ?: $this->plate_number;
             },
         );
+    }
+
+    public function workOrders(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkOrder::class);
+    }
+
+    public function quotes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Quote::class);
     }
 }

@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Service extends Model
 {
-    use CenterScoped, SoftDeletes;
+    use HasFactory, CenterScoped, SoftDeletes;
 
     // Service types
     public const TYPE_INTERNAL = 'internal';

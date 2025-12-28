@@ -17,45 +17,77 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                     {{ $t('customers.form.type') }}
                 </label>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                     <label
                         :class="[
-                            'relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                            'relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all text-center',
                             form.type === 'individual'
                                 ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                         ]"
                     >
                         <input type="radio" v-model="form.type" value="individual" class="sr-only" />
-                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center flex-shrink-0">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center flex-shrink-0 mb-2">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                             </svg>
                         </div>
-                        <span class="font-medium text-gray-900 dark:text-white">{{ $t('customers.form.individual') }}</span>
+                        <span class="text-xs font-medium text-gray-900 dark:text-white truncate w-full">{{ $t('customers.type.individual') }}</span>
                     </label>
                     <label
                         :class="[
-                            'relative flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all',
+                            'relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all text-center',
                             form.type === 'company'
                                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                         ]"
                     >
                         <input type="radio" v-model="form.type" value="company" class="sr-only" />
-                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mb-2">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                         </div>
-                        <span class="font-medium text-gray-900 dark:text-white">{{ $t('customers.form.company') }}</span>
+                        <span class="text-xs font-medium text-gray-900 dark:text-white truncate w-full">{{ $t('customers.type.company') }}</span>
+                    </label>
+                    <label
+                        :class="[
+                            'relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all text-center',
+                            form.type === 'government'
+                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                        ]"
+                    >
+                        <input type="radio" v-model="form.type" value="government" class="sr-only" />
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-lime-500 flex items-center justify-center flex-shrink-0 mb-2">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-900 dark:text-white truncate w-full">{{ $t('customers.type.government') }}</span>
+                    </label>
+                    <label
+                        :class="[
+                            'relative flex flex-col items-center p-3 rounded-xl border-2 cursor-pointer transition-all text-center',
+                            form.type === 'vip'
+                                ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                        ]"
+                    >
+                        <input type="radio" v-model="form.type" value="vip" class="sr-only" />
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center flex-shrink-0 mb-2">
+                            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xs font-medium text-gray-900 dark:text-white truncate w-full">{{ $t('customers.type.vip') }}</span>
                     </label>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Name -->
-                <div :class="form.type === 'company' ? '' : 'md:col-span-2'">
+                <div :class="['company', 'government'].includes(form.type) ? '' : 'md:col-span-2'">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('customers.form.name') }} <span class="text-red-500">*</span>
                     </label>
@@ -67,10 +99,10 @@
                     <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name }}</p>
                 </div>
 
-                <!-- Contact Name (Companies Only) -->
-                <div v-if="form.type === 'company'">
+                <!-- Contact Name (Companies & Government) -->
+                <div v-if="['company', 'government'].includes(form.type)">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('customers.form.contact_name') }} <span class="text-red-500">*</span>
+                        {{ $t('customers.form.contact_name') }}
                     </label>
                     <input 
                         type="text" 
@@ -80,7 +112,7 @@
                     <p v-if="form.errors.contact_name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.contact_name }}</p>
                 </div>
 
-                <!-- Tax Number (Companies Only) -->
+                <!-- Tax Number (Companies Only - Optional) -->
                 <div v-if="form.type === 'company'" class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('customers.form.tax_number') }}

@@ -32,11 +32,20 @@ Route::middleware('auth')->group(function () {
 
 // App routes (authenticated + tenancy)
 Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->group(function () {
+    // Customer export/import routes (must be before resource routes)
+    Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
+    Route::get('/customers/print', [CustomerController::class, 'print'])->name('customers.print');
+    Route::get('/customers/import/template', [CustomerController::class, 'downloadTemplate'])->name('customers.import.template');
+    Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
+    
     Route::resource('customers', CustomerController::class);
     // Customer merge routes
     Route::get('/customers/{customer}/merge', [CustomerController::class, 'mergeData'])->name('customers.merge-data');
     Route::post('/customers/{source}/merge/{target}', [CustomerController::class, 'executeMerge'])->name('customers.execute-merge');
 
+    // Vehicle export/print routes
+    Route::get('/vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
+    Route::get('/vehicles/print', [VehicleController::class, 'print'])->name('vehicles.print');
     Route::apiResource('vehicles', VehicleController::class);
     
     // Work Orders - Hub and Index
@@ -108,6 +117,9 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     
     // API endpoints (Refactored to separate Controller)
     Route::get('/api/customers', [CustomerController::class, 'apiIndex']);
+    Route::get('/api/vehicles-index', [VehicleController::class, 'apiIndex'])->name('vehicles.api.index');
+    Route::get('/api/quotes-index', [QuoteController::class, 'apiIndex'])->name('quotes.api.index');
+    Route::get('/api/work-orders-index', [WorkOrderController::class, 'apiIndex'])->name('work-orders.api.index');
     Route::get('/api/customers/search', [\App\Http\Controllers\Api\WorkOrderController::class, 'customerSearch']);
     Route::get('/api/vehicles', [\App\Http\Controllers\Api\WorkOrderController::class, 'customerVehicles']);
     Route::get('/api/vehicles/search', [\App\Http\Controllers\Api\WorkOrderController::class, 'vehicleSearch']);

@@ -41,6 +41,9 @@ class CustomersCrudTest extends TestCase
 
         $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
 
+        // Set the team id for permissions based on the user's tenant
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+
         // Assign permissions to user
         foreach ($permissions as $permissionName) {
             $user->givePermissionTo($permissionName);
@@ -59,18 +62,24 @@ class CustomersCrudTest extends TestCase
             'crm.customers.create',
         ]);
 
-        // Create customer
+        // Create customer with valid Saudi phone number (966 + 9 digits)
         $response = $this->actingAs($user)->postJson('/app/customers', [
             'type' => 'individual',
             'name' => 'John Doe',
-            'phone' => '1234567890',
+            'phone' => '+966501234567',
             'email' => 'john@example.com',
         ]);
 
-        $response->assertStatus(201);
-        $response->assertJsonFragment(['name' => 'John Doe']);
+        // Web controller returns redirect on successful creation
+        $response->assertRedirect();
 
-        // List customers
+        // Verify customer was created
+        $this->assertDatabaseHas('customers', [
+            'name' => 'John Doe',
+            'phone' => '+966501234567',
+        ]);
+
+        // List customers via API
         $listResponse = $this->actingAs($user)->getJson('/app/api/customers');
         $listResponse->assertStatus(200);
         $listResponse->assertJsonFragment(['name' => 'John Doe']);
@@ -84,7 +93,7 @@ class CustomersCrudTest extends TestCase
         $response = $this->actingAs($user)->postJson('/app/customers', [
             'type' => 'individual',
             'name' => 'Jane Doe',
-            'phone' => '0987654321',
+            'phone' => '+966509876543',
         ]);
 
         $response->assertStatus(403);

@@ -37,6 +37,31 @@
                             />
                         </div>
 
+                        <!-- Export/Print Buttons -->
+                        <div class="flex gap-2">
+                            <!-- Export -->
+                            <button
+                                @click="exportVehicles"
+                                :disabled="exporting"
+                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
+                                :title="$t('common.export')"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </button>
+                            <!-- Print -->
+                            <button
+                                @click="printVehicles"
+                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                                :title="$t('common.print')"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                </svg>
+                            </button>
+                        </div>
+
                         <!-- View Toggle -->
                         <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
                             <button
@@ -114,9 +139,9 @@
             <!-- Grid View -->
             <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 gap-4">
                 <div
-                    v-for="vehicle in vehicles.data"
+                    v-for="vehicle in allVehicles"
                     :key="vehicle.id"
-                    @click="openEditModal(vehicle)"
+                    @click="visitShowPage(vehicle)"
                     class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
                 >
                     <!-- Background Logo Watermark -->
@@ -241,9 +266,9 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr
-                                v-for="vehicle in vehicles.data"
+                                v-for="(vehicle, index) in allVehicles"
                                 :key="vehicle.id"
-                                @click="openEditModal(vehicle)"
+                                @click="visitShowPage(vehicle)"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
                             >
                                 <td class="px-5 py-4">
@@ -272,26 +297,17 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div v-if="vehicles && vehicles.data.length > 0" class="flex items-center justify-between mt-6">
-                <div class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ $t('vehicles.showing') }} 
-                    <span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(vehicles.from) }}</span>-<span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(vehicles.to) }}</span>
-                    {{ $t('vehicles.of') }}
-                    <span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(vehicles.total) }}</span>
+            <!-- Infinite Scroll Sentinel -->
+            <div ref="loadMoreSentinel" class="py-6 flex justify-center w-full">
+                <div v-if="loadingMore" class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
                 </div>
-                <div class="flex gap-2">
-                    <Link
-                        v-for="link in vehicles.links"
-                        :key="link.label"
-                        :href="link.url || '#'"
-                        v-html="link.label"
-                        :class="[
-                            'px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm',
-                            link.active ? 'bg-blue-600 text-white shadow-blue-500/20' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700',
-                            !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                        ]"
-                    />
+                <div v-else-if="allVehicles.length >= vehicles.total && vehicles.total > 0" class="text-sm text-gray-400 dark:text-gray-600">
+                    {{ $t('vehicles.all_loaded') || 'All vehicles loaded' }}
                 </div>
             </div>
         </div>
@@ -306,15 +322,63 @@
             :modelsByMake="modelsByMake"
             @close="closeModal"
             @saved="handleSaved"
-            @customer-created="handleCustomerCreated"
         />
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <!-- Header -->
+                <div class="print-header">
+                    <h1 v-if="$page.props.auth.center">{{ $page.props.auth.center.name }}</h1>
+                    <h1 v-else>Carag</h1>
+                    <p class="text-sm" v-if="$page.props.auth.center?.address">{{ $page.props.auth.center.address }}</p>
+                    <p class="text-sm" v-if="$page.props.auth.center?.phone">{{ $page.props.auth.center.phone }}</p>
+                    <div class="mt-4 border-t pt-4 w-1/2 mx-auto border-gray-200">
+                        <h2 class="text-xl font-bold">{{ $t('vehicles.title') }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString('ar-SA') }}</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ $t('vehicles.form.plate') }}</th>
+                            <th>{{ $t('vehicles.form.make') }}</th>
+                            <th>{{ $t('vehicles.form.model') }}</th>
+                            <th>{{ $t('vehicles.form.year') }}</th>
+                            <th>{{ $t('vehicles.form.customer') }}</th>
+                            <th>{{ $t('customers.form.phone') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(vehicle, index) in allVehicles" :key="vehicle.id">
+                            <td>{{ index + 1 }}</td>
+                            <td class="text-left font-bold" dir="ltr">{{ toEnglish(vehicle.plate_number) }}</td>
+                            <td>{{ vehicle.display_make || '-' }}</td>
+                            <td>{{ vehicle.display_model || '-' }}</td>
+                            <td>{{ toEnglish(vehicle.year) || '-' }}</td>
+                            <td>{{ vehicle.customer?.name || '-' }}</td>
+                            <td dir="ltr" class="text-left font-sans">
+                                {{ toEnglish(vehicle.customer?.phone) || '-' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="mt-8 text-center text-xs text-gray-400">
+                    {{ $page.props.auth.user.name }} - {{ new Date().toLocaleString('ar-SA') }}
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted, onUnmounted } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import { useI18n } from "vue-i18n";
+import axios from "axios";
 import { useToast } from "@/Composables/useToast";
 import { useNumberFormat } from "@/Composables/useNumberFormat";
 import AppLayout from "@/Layouts/AppLayout.vue";
@@ -354,6 +418,108 @@ const showModal = ref(false);
 const selectedVehicle = ref(null);
 const searchQuery = ref(props.filters.search || "");
 const viewMode = ref(localStorage.getItem("vehiclesViewMode") || "grid");
+const exporting = ref(false);
+
+// Infinite Scroll Refs
+const allVehicles = ref(props.vehicles.data || []);
+const nextPageUrl = ref(props.vehicles.next_page_url);
+const loadingMore = ref(false);
+const loadMoreSentinel = ref(null);
+let observer = null;
+
+// Watch props change (filters)
+watch(() => props.vehicles, (newVal) => {
+    allVehicles.value = newVal.data;
+    nextPageUrl.value = newVal.next_page_url;
+});
+
+// Load more data
+const loadMore = async () => {
+    if (loadingMore.value || !nextPageUrl.value) return;
+
+    loadingMore.value = true;
+    try {
+        // Extract page number and use API endpoint
+        const url = new URL(nextPageUrl.value, window.location.origin);
+        const page = url.searchParams.get('page') || 2;
+        
+        const params = new URLSearchParams();
+        params.set('page', page);
+        if (searchQuery.value) params.set('search', searchQuery.value);
+        // Add other filters if any
+        
+        const apiUrl = '/app/api/vehicles-index?' + params.toString();
+        
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+        
+        allVehicles.value.push(...data.data);
+        nextPageUrl.value = data.next_page_url;
+    } catch (e) {
+        console.error('Failed to load more vehicles', e);
+    } finally {
+        loadingMore.value = false;
+    }
+};
+
+// Intersection Observer Setup
+onMounted(() => {
+    observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && nextPageUrl.value) {
+            loadMore();
+        }
+    }, {
+        root: null,
+        threshold: 0.1,
+    });
+
+    if (loadMoreSentinel.value) {
+        observer.observe(loadMoreSentinel.value);
+    }
+});
+
+watch(loadMoreSentinel, (el) => {
+    if (el && observer) observer.observe(el);
+});
+
+onUnmounted(() => {
+    if (observer) observer.disconnect();
+});
+
+function exportVehicles() {
+    exporting.value = true;
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = route('vehicles.export', params.toString());
+    setTimeout(() => {
+        exporting.value = false;
+    }, 2000);
+}
+
+const printVehicles = async () => {
+    // If more pages exist, load them all first
+    if (nextPageUrl.value) {
+        // Show loading indication
+        const loadingToast = useToast().info(t('vehicles.loading_all_printing') || 'Loading all vehicles for printing...', { timeout: 0 }); // persistent toast
+        
+        try {
+            while (nextPageUrl.value) {
+                await loadMore();
+                // Add small delay to prevent UI freezing
+                await new Promise(resolve => setTimeout(resolve, 50));
+            }
+            // All loaded
+            useToast().clear(); 
+            // Small delay to ensure DOM updates before print
+            setTimeout(() => window.print(), 100);
+        } catch (e) {
+            console.error('Error loading all vehicles', e);
+            error(t('common.error'));
+        }
+    } else {
+        // Already loaded all
+        window.print();
+    }
+};
 
 const debounce = (fn, delay) => {
     let timeoutId;
@@ -374,6 +540,11 @@ watch(searchQuery, debounce((value) => {
 watch(viewMode, (newMode) => {
     localStorage.setItem("vehiclesViewMode", newMode);
 });
+
+// Navigation handler
+function visitShowPage(vehicle) {
+    router.visit(route("vehicles.show", vehicle.id));
+}
 
 function openCreateModal() {
     selectedVehicle.value = null;
@@ -438,3 +609,5 @@ function getColorHex(colorName) {
     return colorMap[colorName.toLowerCase()] || colorMap[colorName] || "#9ca3af";
 }
 </script>
+
+

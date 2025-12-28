@@ -5,11 +5,11 @@
         <!-- Global Confirm Modal -->
         <ConfirmModal />
         
-        <div class="flex min-h-screen">
+        <div class="flex h-screen overflow-hidden print:!overflow-visible print:!h-auto">
             <!-- Desktop Sidebar -->
             <aside
                 :class="[
-                    'hidden md:flex md:w-64 md:shrink-0 md:flex-col bg-white dark:bg-gray-800',
+                    'hidden md:flex md:w-64 md:shrink-0 md:flex-col bg-white dark:bg-gray-800 print:hidden',
                     isRtl ? 'border-l border-gray-200 dark:border-gray-700' : 'border-r border-gray-200 dark:border-gray-700'
                 ]"
             >
@@ -143,7 +143,7 @@
                 </nav>
             </aside>
 
-            <!-- Main Content Area -->
+            <!-- Main Content -->
             <div class="flex-1 min-w-0 flex flex-col">
                 <!-- Top bar -->
                 <header class="h-14 flex items-center justify-between px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -228,7 +228,7 @@
                     </div>
                 </header>
 
-                <main class="flex-1 px-4 py-6 overflow-auto">
+                <main class="flex-1 px-4 py-6 overflow-auto print:!overflow-visible">
                     <slot />
                 </main>
             </div>

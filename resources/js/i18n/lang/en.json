@@ -28,6 +28,9 @@
         },
         "coming_soon": "Coming Soon...",
         "no_data": "No data available",
+        "import": "Import",
+        "export": "Export",
+        "print": "Print",
         "edit": "Edit",
         "error": "Error",
         "system": "System",
@@ -110,23 +113,42 @@
             "country_placeholder": "Saudi Arabia",
             "lat": "Latitude",
             "lng": "Longitude",
-            "clear_address": "Clear"
+            "clear_address": "Clear",
+            "manager": "Manager Name",
+            "balance": "Balance"
         },
         "columns": {
-            "name": "Name",
+            "name": "Customer Name",
             "phone": "Phone",
             "type": "Type",
-            "contact_name": "Contact Name"
+            "contact_name": "Contact Name",
+            "email": "Email",
+            "balance": "Balance",
+            "classification": "Classification"
         },
         "type": {
             "individual": "Individual",
-            "company": "Company"
+            "company": "Company",
+            "government": "Government",
+            "vip": "VIP"
+        },
+        "classification": {
+            "potential": "Potential",
+            "new": "New",
+            "regular": "Regular",
+            "vip": "VIP",
+            "inactive": "Inactive"
         },
         "quick": {
             "call": "Call",
             "whatsapp": "WhatsApp",
             "email": "Email"
         },
+        "filter": {
+            "all_types": "All Types"
+        },
+        "all_loaded": "All customers loaded",
+        "loading_all_printing": "Loading all data for printing...",
         "map": {
             "hint": "Enter coordinates to display location on map",
             "click_hint": "Click on the map to set location"
@@ -149,6 +171,26 @@
             "execute": "Execute Merge",
             "confirm_message": "All data related to {source} will be merged with {target} and {source} will be removed from the system",
             "confirm_no_undo": "I agree to this operation and it cannot be undone"
+        },
+        "import": {
+            "title": "Import Customers",
+            "subtitle": "Import customer data from Excel file",
+            "instructions_title": "Import Instructions",
+            "step_1": "Download the Excel template",
+            "step_2": "Fill in the data according to the specified columns",
+            "step_3": "Upload the file to import",
+            "required_fields": "Required Fields",
+            "required": "Required",
+            "required_unique": "Required (Unique)",
+            "download_template": "Download Excel Template",
+            "drag_drop": "Drag file here or click to select",
+            "uploading": "Uploading...",
+            "processing": "Processing...",
+            "success": "Successfully imported {count} customers",
+            "error": "An error occurred during import",
+            "supported_formats": "xlsx, xls, csv",
+            "errors": "Import Errors",
+            "start_import": "Start Import"
         }
     },
     "vehicles": {
@@ -198,7 +240,8 @@
                 "sa": "Saudi Arabia",
                 "other": "Other"
             }
-        }
+        },
+        "all_loaded": "All vehicles loaded"
     },
     "work_orders": {
         "title": "Work Orders",
@@ -513,7 +556,8 @@
         "coming_soon": {
             "invoice_discount": "Invoice Extra Discount - Coming Soon",
             "line_discount_ui": "Line Discount Edit - Coming Soon"
-        }
+        },
+        "all_loaded": "All work orders loaded"
     },
     "quotes": {
         "title": "Quotes",
@@ -650,6 +694,7 @@
             "fixed": "Fixed Amount",
             "discount_value": "Discount Value",
             "total_cost": "Service Cost"
-        }
+        },
+        "all_loaded": "All quotes loaded"
     }
 }

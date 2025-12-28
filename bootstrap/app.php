@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\ConvertArabicNumerals::class,
+            \App\Http\Middleware\SetPermissionsTeam::class, // Must be after auth session
         ]);
 
         $middleware->alias([

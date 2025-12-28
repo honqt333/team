@@ -35,8 +35,8 @@
             <div class="min-h-[350px]">
                 <!-- Tab 1: Main Info -->
                 <div v-show="activeTab === 'main_info'" class="space-y-4">
-                    <!-- Search Section -->
-                    <div class="relative bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <!-- Search Section (Hide if pre-selected vehicle exists and not editing) -->
+                    <div v-if="!vehicle && !quote" class="relative bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ $t('quotes.form_tabs.search_placeholder') }}
@@ -276,7 +276,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -287,13 +287,14 @@ import axios from 'axios';
 const props = defineProps({
     show: Boolean,
     quote: Object,
+    vehicle: Object, // Pre-selected vehicle for creation
     customers: Array,
     departments: Array,
     makes: Array,
     colors: Array,
     modelsByMake: Object,
+    services: Array,
 });
-
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName } = useLocalized();
@@ -341,9 +342,9 @@ const showVehicleModal = ref(false);
 
 // Form
 const form = useForm({
-    customer_id: props.quote?.customer_id || '',
-    vehicle_id: props.quote?.vehicle_id || '',
-    customer_complaint: props.quote?.customer_complaint || '',
+    customer_id: props.quote?.customer_id || props.vehicle?.customer_id || '',
+    vehicle_id: props.quote?.vehicle_id || props.vehicle?.id || '',
+    department_id: props.quote?.department_id || '',
     initial_assessment: props.quote?.initial_assessment || '',
     departments: props.quote?.departments?.map(d => d.id) || [],
     notes: props.quote?.notes || '',
@@ -529,11 +530,29 @@ watch(() => props.quote, (newQuote) => {
         form.vehicle_id = newQuote.vehicle_id;
         form.customer_complaint = newQuote.customer_complaint || '';
         form.initial_assessment = newQuote.initial_assessment || '';
-        form.notes = newQuote.notes || '';
-        if (newQuote.vehicle) {
-            selectedVehicle.value = newQuote.vehicle;
-            searchQuery.value = newQuote.vehicle.plate_number;
+        form.notes = props.quote.notes || '';
+        if (props.quote.vehicle) {
+            selectedVehicle.value = props.quote.vehicle;
+            searchQuery.value = props.quote.vehicle.plate_number || '';
         }
     }
 }, { immediate: true });
+
+// Watch for vehicle prop (pre-selection)
+watch(() => props.vehicle, (val) => {
+    if (val && !props.quote) { // Only if not editing
+        selectedVehicle.value = val;
+        form.vehicle_id = val.id;
+        form.customer_id = val.customer_id;
+    }
+}, { immediate: true });
+
+// Initial Load for Edit Mode or Pre-selection
+onMounted(() => {
+    if (props.quote?.vehicle) {
+        selectedVehicle.value = props.quote.vehicle;
+    } else if (props.vehicle) {
+        selectedVehicle.value = props.vehicle;
+    }
+});
 </script>

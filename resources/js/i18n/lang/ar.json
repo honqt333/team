@@ -28,6 +28,9 @@
         },
         "coming_soon": "قريباً...",
         "no_data": "لا توجد بيانات",
+        "import": "استيراد",
+        "export": "تصدير",
+        "print": "طباعة",
         "edit": "تعديل",
         "error": "خطأ",
         "system": "نظام",
@@ -110,23 +113,42 @@
             "country_placeholder": "السعودية",
             "lat": "خط العرض",
             "lng": "خط الطول",
-            "clear_address": "تفريغ"
+            "clear_address": "تفريغ",
+            "manager": "اسم المسؤول",
+            "balance": "الباقي"
         },
         "columns": {
-            "name": "الاسم",
-            "phone": "الهاتف",
+            "name": "اسم العميل",
+            "phone": "رقم الاتصال",
             "type": "النوع",
-            "contact_name": "اسم المسؤول"
+            "contact_name": "اسم المسؤول",
+            "email": "البريد الإلكتروني",
+            "balance": "الباقي",
+            "classification": "تصنيف العميل"
         },
         "type": {
             "individual": "فرد",
-            "company": "شركة"
+            "company": "شركة",
+            "government": "حكومي",
+            "vip": "مميز"
+        },
+        "classification": {
+            "potential": "محتمل",
+            "new": "جديد",
+            "regular": "منتظم",
+            "vip": "مميز",
+            "inactive": "غير نشط"
         },
         "quick": {
             "call": "اتصال",
             "whatsapp": "واتساب",
             "email": "إيميل"
         },
+        "filter": {
+            "all_types": "جميع الأنواع"
+        },
+        "all_loaded": "تم تحميل جميع العملاء",
+        "loading_all_printing": "جاري تحميل جميع البيانات للطباعة...",
         "map": {
             "hint": "أدخل الإحداثيات لعرض الموقع على الخريطة",
             "click_hint": "اضغط على الخريطة لتحديد الموقع"
@@ -155,6 +177,26 @@
             "execute": "تنفيذ الدمج",
             "confirm_message": "سيتم دمج جميع البيانات المتعلقة بـ {source} مع {target} وسيتم إزالة {source} من النظام",
             "confirm_no_undo": "أوافق على هذه العملية ولا يمكن تراجعها"
+        },
+        "import": {
+            "title": "استيراد العملاء",
+            "subtitle": "استيراد بيانات العملاء من ملف Excel",
+            "instructions_title": "تعليمات الاستيراد",
+            "step_1": "قم بتحميل قالب Excel",
+            "step_2": "املأ البيانات حسب الأعمدة المحددة",
+            "step_3": "ارفع الملف للاستيراد",
+            "required_fields": "الحقول المطلوبة",
+            "required": "مطلوب",
+            "required_unique": "مطلوب (فريد)",
+            "download_template": "تحميل قالب Excel",
+            "drag_drop": "اسحب الملف هنا أو اضغط للاختيار",
+            "uploading": "جاري الرفع...",
+            "processing": "جاري المعالجة...",
+            "success": "تم استيراد {count} عميل بنجاح",
+            "error": "حدث خطأ أثناء الاستيراد",
+            "supported_formats": "xlsx, xls, csv",
+            "errors": "أخطاء الاستيراد",
+            "start_import": "بدء الاستيراد"
         }
     },
     "vehicles": {
@@ -204,7 +246,8 @@
                 "sa": "السعودية",
                 "other": "أخرى"
             }
-        }
+        },
+        "all_loaded": "تم تحميل جميع المركبات"
     },
     "work_orders": {
         "title": "كروت العمل",
@@ -519,7 +562,8 @@
         "coming_soon": {
             "invoice_discount": "خصم الفاتورة الإضافي - قريباً",
             "line_discount_ui": "تعديل خصم البند - قريباً"
-        }
+        },
+        "all_loaded": "تم تحميل جميع كروت العمل"
     },
     "quotes": {
         "title": "التقييمات",
@@ -656,6 +700,7 @@
             "fixed": "مبلغ ثابت",
             "discount_value": "قيمة الخصم",
             "total_cost": "تكلفة الخدمة"
-        }
+        },
+        "all_loaded": "تم تحميل جميع التقييمات"
     }
 }

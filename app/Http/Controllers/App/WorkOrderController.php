@@ -30,8 +30,11 @@ class WorkOrderController
         // Count open work orders (open, in_progress, draft)
         $openCount = WorkOrder::whereIn('status', ['open', 'in_progress', 'draft'])->count();
         
-        // Count closed work orders (done, cancelled)
-        $closedCount = WorkOrder::whereIn('status', ['done', 'cancelled'])->count();
+        // Count completed work orders (done but not closed)
+        $completedCount = WorkOrder::where('status', 'done')->count();
+        
+        // Count closed work orders (closed, cancelled)
+        $closedCount = WorkOrder::whereIn('status', ['closed', 'cancelled'])->count();
 
         $customers = Customer::select("id", "name", "phone")->get();
         $makes = VehicleMake::ordered()->get();
@@ -45,6 +48,7 @@ class WorkOrderController
 
         return Inertia::render("WorkOrders/Hub", [
             "openCount" => $openCount,
+            "completedCount" => $completedCount,
             "closedCount" => $closedCount,
             "customers" => $customers,
             "makes" => $makes,
@@ -52,6 +56,48 @@ class WorkOrderController
             "modelsByMake" => $modelsByMake,
             "departments" => $departments,
         ]);
+    }
+
+    public function apiIndex(): JsonResponse
+    {
+        $this->authorize("viewAny", WorkOrder::class);
+
+        $status = request("status");
+        $subFilter = request("sub_filter");
+
+        $workOrders = WorkOrder::with(["customer", "vehicle.make", "items"])
+            ->when($status === 'open', function ($query) use ($subFilter) {
+                if ($subFilter === 'overdue') {
+                    $query->whereIn('status', ['open', 'in_progress'])
+                        ->whereNotNull('expected_end_date')
+                        ->where('expected_end_date', '<', now()->startOfDay());
+                } elseif ($subFilter === 'pending_payment') {
+                    // TODO: Filter by pending payment when columns exist
+                    $query->whereIn('status', ['open', 'in_progress', 'done']);
+                } elseif ($subFilter === 'draft') {
+                    $query->where('status', 'draft');
+                } elseif ($subFilter === 'in_progress') {
+                    $query->whereIn('status', ['open', 'in_progress']);
+                } else {
+                    // Default: all open statuses
+                    $query->whereIn('status', ['open', 'in_progress', 'draft']);
+                }
+            })
+            ->when($status === 'closed', function ($query) {
+                $query->whereIn('status', ['done', 'cancelled', 'closed']);
+            })
+            ->when(request("search"), function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where("id", "like", "%{$search}%")
+                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
+                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                });
+            })
+            ->orderByDesc("created_at")
+            ->paginate(15)
+            ->withQueryString();
+
+        return response()->json($workOrders);
     }
 
     public function index(): Response
@@ -142,12 +188,20 @@ class WorkOrderController
         ]);
     }
     
-    public function store(WorkOrderStoreRequest $request, CreateWorkOrderAction $createWorkOrder): \Illuminate\Http\RedirectResponse
+    public function store(WorkOrderStoreRequest $request, CreateWorkOrderAction $createWorkOrder): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
     {
         $this->authorize('create', WorkOrder::class);
 
         // Files are included in validated() if rules exist for them
         $workOrder = $createWorkOrder->execute($request->user(), $request->validated());
+
+        // Return JSON for API requests, redirect for web requests
+        if ($request->expectsJson()) {
+            // Refresh to get items (created within transaction)
+            $workOrder->refresh();
+            $workOrder->load('items');
+            return response()->json($workOrder, 201);
+        }
 
         // Redirect to the newly created work order's show page
         return redirect()->route('work-orders.show', $workOrder)->with('success', __('messages.work_order_created'));

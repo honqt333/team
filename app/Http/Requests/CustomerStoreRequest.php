@@ -27,9 +27,9 @@ class CustomerStoreRequest extends FormRequest
         $centerId = TenancyContext::centerId();
 
         return [
-            'type' => ['required', 'string', Rule::in(['individual', 'company'])],
+            'type' => ['required', 'string', Rule::in(['individual', 'company', 'government', 'vip'])],
             'name' => ['required', 'string', 'max:255'],
-            'contact_name' => ['nullable', 'string', 'max:255', 'required_if:type,company'],
+            'contact_name' => ['nullable', 'string', 'max:255', 'required_if:type,company', 'required_if:type,government'],
             'phone' => [
                 'required',
                 'string',
@@ -46,7 +46,7 @@ class CustomerStoreRequest extends FormRequest
             ],
             'email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'tax_number' => ['nullable', 'string', 'max:50', 'required_if:type,company'],
+            'tax_number' => ['nullable', 'string', 'max:50'],
             'address_line' => ['nullable', 'string', 'max:500'],
             'building_number' => ['nullable', 'string', 'max:50'],
             'postal_code' => ['nullable', 'string', 'max:20'],

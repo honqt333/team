@@ -22,6 +22,50 @@ use Inertia\Response;
 class QuoteController extends Controller
 {
     /**
+     * Display a listing of quotes (API).
+     */
+    public function apiIndex(Request $request): JsonResponse
+    {
+        $this->authorize("viewAny", Quote::class);
+
+        $quotes = Quote::with(["customer", "vehicle.make",
+            "vehicle.customer", "vehicle.model", "lines"])
+            ->when($request->search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where("id", "like", "%{$search}%")
+                      ->orWhere("code", "like", "%{$search}%")
+                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
+                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                });
+            })
+            ->when($request->status && $request->status !== 'all', function ($query) use ($request) {
+                if ($request->status === 'pending') {
+                    $query->whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT]);
+                } else {
+                    $query->where('status', $request->status);
+                }
+            })
+            ->when($request->date_range && $request->date_range !== 'all', function ($query, $range) {
+                $now = now();
+                $date = match($range) {
+                    'today' => $now->startOfDay(),
+                    'week' => $now->subDays(7),
+                    'month' => $now->subMonth(),
+                    '30days' => $now->subDays(30),
+                    default => null
+                };
+                if ($date) {
+                    $query->where('created_at', '>=', $date);
+                }
+            })
+            ->orderByDesc("created_at")
+            ->paginate(20)
+            ->withQueryString();
+
+        return response()->json($quotes);
+    }
+
+    /**
      * Display a listing of quotes.
      */
     public function index(Request $request): Response

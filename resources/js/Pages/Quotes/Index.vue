@@ -307,26 +307,17 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div v-if="quotes && quotes.data.length > 0" class="flex items-center justify-between mt-6">
-                <div class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ $t('quotes.showing') }} 
-                    <span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(quotes.from) }}</span>-<span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(quotes.to) }}</span>
-                    {{ $t('quotes.of') }}
-                    <span class="font-medium text-gray-900 dark:text-white">{{ toEnglish(quotes.total) }}</span>
+            <!-- Infinite Scroll Sentinel -->
+            <div ref="loadMoreSentinel" class="py-6 flex justify-center w-full">
+                <div v-if="loadingMore" class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
                 </div>
-                <div class="flex gap-2">
-                    <Link
-                        v-for="link in quotes.links"
-                        :key="link.label"
-                        :href="link.url || '#'"
-                        v-html="link.label"
-                        :class="[
-                            'px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm',
-                            link.active ? 'bg-amber-600 text-white shadow-amber-500/20' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700',
-                            !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                        ]"
-                    />
+                <div v-else-if="allQuotes.length >= (quotes?.total || 0) && (quotes?.total || 0) > 0" class="text-sm text-gray-400 dark:text-gray-600">
+                    {{ $t('quotes.all_loaded') || 'All quotes loaded' }}
                 </div>
             </div>
         </div>
@@ -347,9 +338,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -403,6 +395,69 @@ const showModal = ref(false);
 const selectedQuote = ref(null);
 const activeTab = ref(localStorage.getItem('quotesActiveTab') || 'pending');
 const viewMode = ref(localStorage.getItem('quotesViewMode') || 'grid');
+
+// Infinite Scroll Refs
+const allQuotes = ref(props.quotes?.data || []);
+const nextPageUrl = ref(props.quotes?.next_page_url);
+const loadingMore = ref(false);
+const loadMoreSentinel = ref(null);
+let observer = null;
+
+// Watch props change (filters, etc)
+watch(() => props.quotes, (newVal) => {
+    if (newVal) {
+        allQuotes.value = newVal.data;
+        nextPageUrl.value = newVal.next_page_url;
+    }
+});
+
+// Load more data
+const loadMore = async () => {
+    if (loadingMore.value || !nextPageUrl.value) return;
+
+    loadingMore.value = true;
+    try {
+        const url = new URL(nextPageUrl.value);
+        // Map to API endpoint
+        const apiUrl = url.toString().replace('/app/quotes', '/app/api/quotes-index');
+        
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+        
+        allQuotes.value.push(...data.data);
+        nextPageUrl.value = data.next_page_url;
+    } catch (e) {
+        console.error('Failed to load more quotes', e);
+    } finally {
+        loadingMore.value = false;
+    }
+};
+
+// Intersection Observer Setup
+onMounted(() => {
+    observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && nextPageUrl.value) {
+            loadMore();
+        }
+    }, {
+        root: null,
+        threshold: 0.1,
+    });
+
+    if (loadMoreSentinel.value) {
+        observer.observe(loadMoreSentinel.value);
+    }
+    
+    // Check sentinel ref changes (in case of tab switch/v-if)
+    watch(loadMoreSentinel, (el) => {
+        if (observer) observer.disconnect();
+        if (el) observer.observe(el);
+    });
+});
+
+onUnmounted(() => {
+    if (observer) observer.disconnect();
+});
 
 // Icons for filter tabs
 const IconAll = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>` };
@@ -529,10 +584,9 @@ const hasActiveFilters = computed(() => {
     return filters.value.search || filters.value.status || filters.value.dateRange !== 'all';
 });
 
-// Computed: Filter quotes - server handles main filtering, this is just for page data
+// Computed: Filter quotes - using allQuotes ref for infinite scroll
 const filteredQuotes = computed(() => {
-    if (!props.quotes?.data) return [];
-    return props.quotes.data;
+    return allQuotes.value;
 });
 
 function clearFilters() {

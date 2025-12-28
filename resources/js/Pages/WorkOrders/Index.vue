@@ -181,7 +181,7 @@
             <!-- Grid View -->
             <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 <div
-                    v-for="order in workOrders.data"
+                    v-for="order in allWorkOrders"
                     :key="order.id"
                     @click="router.visit(route('work-orders.show', order.id))"
                     class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
@@ -285,7 +285,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr
-                                v-for="order in workOrders.data"
+                                v-for="order in allWorkOrders"
                                 :key="order.id"
                                 @click="router.visit(route('work-orders.show', order.id))"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
@@ -318,26 +318,17 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div v-if="workOrders && workOrders.data.length > 0" class="flex items-center justify-between">
-                <div class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ $t('customers.showing') }} 
-                    <span class="font-medium text-gray-900 dark:text-white">{{ workOrders.from }}</span>-<span class="font-medium text-gray-900 dark:text-white">{{ workOrders.to }}</span>
-                    {{ $t('customers.of') }}
-                    <span class="font-medium text-gray-900 dark:text-white">{{ workOrders.total }}</span>
+            <!-- Infinite Scroll Sentinel -->
+            <div ref="loadMoreSentinel" class="py-6 flex justify-center w-full">
+                <div v-if="loadingMore" class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
                 </div>
-                <div class="flex gap-2">
-                    <Link
-                        v-for="link in workOrders.links"
-                        :key="link.label"
-                        :href="link.url || '#'"
-                        v-html="link.label"
-                        :class="[
-                            'px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm',
-                            link.active ? 'bg-indigo-600 text-white shadow-indigo-500/20' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700',
-                            !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                        ]"
-                    />
+                <div v-else-if="allWorkOrders.length >= (workOrders?.total || 0) && (workOrders?.total || 0) > 0" class="text-sm text-gray-400 dark:text-gray-600">
+                    {{ $t('work_orders.all_loaded') || 'All work orders loaded' }}
                 </div>
             </div>
         </div>
@@ -357,9 +348,10 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import { useToast } from '@/Composables/useToast';
@@ -414,6 +406,69 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+});
+
+// Infinite Scroll Refs
+const allWorkOrders = ref(props.workOrders?.data || []);
+const nextPageUrl = ref(props.workOrders?.next_page_url);
+const loadingMore = ref(false);
+const loadMoreSentinel = ref(null);
+let observer = null;
+
+// Watch props change (filters, etc)
+watch(() => props.workOrders, (newVal) => {
+    if (newVal) {
+        allWorkOrders.value = newVal.data;
+        nextPageUrl.value = newVal.next_page_url;
+    }
+});
+
+// Load more data
+const loadMore = async () => {
+    if (loadingMore.value || !nextPageUrl.value) return;
+
+    loadingMore.value = true;
+    try {
+        const url = new URL(nextPageUrl.value);
+        // Map to API endpoint
+        const apiUrl = url.toString().replace('/app/work-orders', '/app/api/work-orders-index');
+        
+        const response = await axios.get(apiUrl);
+        const data = response.data;
+        
+        allWorkOrders.value.push(...data.data);
+        nextPageUrl.value = data.next_page_url;
+    } catch (e) {
+        console.error('Failed to load more work orders', e);
+    } finally {
+        loadingMore.value = false;
+    }
+};
+
+// Intersection Observer Setup
+onMounted(() => {
+    observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && nextPageUrl.value) {
+            loadMore();
+        }
+    }, {
+        root: null,
+        threshold: 0.1,
+    });
+
+    if (loadMoreSentinel.value) {
+        observer.observe(loadMoreSentinel.value);
+    }
+    
+    // Check sentinel ref changes
+    watch(loadMoreSentinel, (el) => {
+        if (observer) observer.disconnect();
+        if (el) observer.observe(el);
+    });
+});
+
+onUnmounted(() => {
+    if (observer) observer.disconnect();
 });
 
 // Icons for filter tabs

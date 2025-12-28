@@ -80,6 +80,13 @@ class WorkOrderStoreRequest extends FormRequest
                     ->where('center_id', $centerId),
             ],
             
+            // Items (Services)
+            'items' => ['nullable', 'array'],
+            'items.*.service_id' => ['nullable', 'integer', Rule::exists('services', 'id')],
+            'items.*.title' => ['required', 'string', 'max:255'],
+            'items.*.qty' => ['required', 'numeric', 'min:0.01'],
+            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            
             // Damage marks
             'damage_marks' => ['nullable', 'array'],
             'damage_marks.*.x' => ['required', 'numeric'],

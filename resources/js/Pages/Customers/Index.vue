@@ -36,6 +36,53 @@
                             />
                         </div>
 
+                        <!-- Type Filter -->
+                        <select
+                            v-model="typeFilter"
+                            class="px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        >
+                            <option value="">{{ $t('customers.filter.all_types') }}</option>
+                            <option value="individual">{{ $t('customers.type.individual') }}</option>
+                            <option value="company">{{ $t('customers.type.company') }}</option>
+                            <option value="government">{{ $t('customers.type.government') }}</option>
+                            <option value="vip">{{ $t('customers.type.vip') }}</option>
+                        </select>
+
+                        <!-- Export/Import/Print Buttons -->
+                        <div class="flex gap-2">
+                            <!-- Export -->
+                            <button
+                                @click="exportCustomers"
+                                :disabled="exporting"
+                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
+                                :title="$t('common.export')"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </button>
+                            <!-- Import -->
+                            <button
+                                @click="showImportModal = true"
+                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                                :title="$t('common.import')"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                                </svg>
+                            </button>
+                            <!-- Print -->
+                            <button
+                                @click="printCustomers"
+                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                                :title="$t('common.print')"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                </svg>
+                            </button>
+                        </div>
+
                         <!-- View Toggle -->
                         <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
                             <button
@@ -112,10 +159,10 @@
             <!-- Grid View -->
             <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 gap-4">
                 <div
-                    v-for="customer in customers.data"
+                    v-for="customer in allCustomers"
                     :key="customer.id"
                     @click="goToCustomer(customer)"
-                    class="group relative flex flex-col h-[320px] bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-[0_40px_80px_-20px_rgba(79,70,229,0.2)] transition-all duration-500 cursor-pointer overflow-hidden"
+                    class="group relative flex flex-col h-[340px] bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-[0_40px_80px_-20px_rgba(79,70,229,0.2)] transition-all duration-500 cursor-pointer overflow-hidden"
                 >
                     <!-- Background Elements -->
                     <div class="absolute inset-0 bg-gradient-to-br from-indigo-50/10 via-transparent to-purple-50/10 dark:from-indigo-900/5 dark:to-transparent pointer-events-none"></div>
@@ -139,6 +186,13 @@
                                         : 'bg-emerald-50/50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-800/30'"
                                 >
                                     {{ $t(`customers.type.${customer.type}`) }}
+                                </div>
+                                <div 
+                                    v-if="customer.classification"
+                                    class="mt-1.5 ms-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest uppercase border"
+                                    :class="getClassificationBadgeClass(customer.classification)"
+                                >
+                                    {{ $t(`customers.classification.${customer.classification}`) }}
                                 </div>
                                 <div v-if="customer.type === 'company' && customer.contact_name" class="mt-2.5 flex items-center gap-2 px-2.5 py-1.5 rounded-xl bg-indigo-50/50 dark:bg-indigo-900/30 border border-indigo-100/50 dark:border-indigo-800/30">
                                     <svg class="w-3.5 h-3.5 text-indigo-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
@@ -186,7 +240,7 @@
                         </div>
 
                         <!-- 4. Fixed Actions Footer -->
-                        <div class="mt-auto grid grid-cols-2 gap-2">
+                        <div class="mt-auto grid grid-cols-2 gap-2 mb-2">
                             <a 
                                 :href="`tel:${customer.phone}`"
                                 @click.stop
@@ -211,84 +265,76 @@
             </div>
 
             <!-- List View -->
-            <div v-else class="w-full bg-white dark:bg-gray-800 rounded-[2rem] border border-gray-100 dark:border-gray-700/50 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
+            <div v-else class="w-full bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-xl shadow-gray-200/50 dark:shadow-none overflow-hidden">
                 <div class="w-full overflow-x-auto">
-                    <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
+                    <table class="w-full min-w-[1000px] divide-y divide-gray-100 dark:divide-gray-700/50">
                         <thead>
                             <tr class="bg-gray-50/50 dark:bg-gray-900/80">
-                                <th class="px-8 py-5 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                                    {{ $t('customers.columns.name') }}
-                                </th>
-                                <th class="px-8 py-5 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                                    {{ $t('customers.columns.type') }}
-                                </th>
-                                <th class="px-8 py-5 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                                    {{ $t('customers.columns.phone') }}
-                                </th>
-                                <th class="px-8 py-5 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                                    {{ $t('common.actions') }}
-                                </th>
+                                <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] w-12">#</th>
+                                <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('customers.columns.classification') }}</th>
+                                <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('customers.columns.name') }}</th>
+                                <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('customers.columns.contact_name') }}</th>
+                                <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('customers.columns.email') }}</th>
+                                <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('customers.columns.phone') }}</th>
+                                <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('customers.columns.balance') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
                             <tr
-                                v-for="customer in customers.data"
+                                v-for="(customer, index) in allCustomers"
                                 :key="customer.id"
                                 @click="goToCustomer(customer)"
                                 class="group hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 cursor-pointer transition-all duration-300"
                             >
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-black text-white flex-shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-500"
-                                            :class="customer.type === 'company' 
-                                                ? 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-blue-500/20' 
-                                                : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/20'">
-                                            {{ customer.name.charAt(0).toUpperCase() }}
-                                        </div>
-                                        <div class="min-w-0">
-                                            <p class="font-black text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ customer.name }}</p>
-                                            <p v-if="customer.email" class="text-xs font-bold text-gray-400 dark:text-gray-500 truncate mt-0.5">{{ customer.email }}</p>
-                                        </div>
-                                    </div>
+                                <!-- # -->
+                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    {{ index + 1 }}
                                 </td>
-                                <td class="px-8 py-5">
+                                <!-- Classification (shows Type) -->
+                                <td class="px-4 py-4">
                                     <span
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-black rounded-full border shadow-sm uppercase tracking-tighter"
-                                        :class="customer.type === 'company' 
-                                            ? 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30' 
-                                            : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30'"
+                                        v-if="customer.type"
+                                        class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black rounded-lg border shadow-sm uppercase"
+                                        :class="{
+                                            'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30': customer.type === 'individual',
+                                            'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30': customer.type === 'company',
+                                            'bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/30': customer.type === 'government',
+                                            'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30': customer.type === 'vip',
+                                        }"
                                     >
-                                        <span class="w-1 h-1 rounded-full" :class="customer.type === 'company' ? 'bg-blue-400' : 'bg-emerald-400'"></span>
                                         {{ $t(`customers.type.${customer.type}`) }}
                                     </span>
+                                    <span v-else class="text-gray-400 text-sm">-</span>
                                 </td>
-                                <td class="px-8 py-5">
-                                    <div class="text-sm font-black text-gray-700 dark:text-gray-300 tracking-wider" dir="ltr">
+                                <!-- Name -->
+                                <td class="px-4 py-4">
+                                    <p class="font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                        {{ customer.name }}
+                                    </p>
+                                </td>
+                                <!-- Contact Name -->
+                                <td class="px-4 py-4">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                        {{ customer.contact_name || '-' }}
+                                    </p>
+                                </td>
+                                <!-- Email -->
+                                <td class="px-4 py-4">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
+                                        {{ customer.email || '-' }}
+                                    </p>
+                                </td>
+                                <!-- Phone -->
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wider">
                                         {{ customer.phone }}
-                                    </div>
+                                    </p>
                                 </td>
-                                <td class="px-8 py-5">
-                                    <div class="flex items-center justify-center gap-3">
-                                        <button
-                                            @click.stop="openEditModal(customer)"
-                                            class="p-2.5 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900/50"
-                                        >
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-                                        <a
-                                            v-if="customer.whatsapp"
-                                            :href="'https://wa.me/' + customer.whatsapp.replace(/\D/g, '')"
-                                            target="_blank"
-                                            @click.stop
-                                            class="p-2.5 text-gray-400 hover:text-emerald-500 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm border border-transparent hover:border-emerald-100 dark:hover:border-emerald-900/50"
-                                        >
-                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-                                            </svg>
-                                        </a>
-                                    </div>
+                                <!-- Balance -->
+                                <td class="px-4 py-4">
+                                    <p class="text-sm font-bold" :class="(customer.balance || 0) > 0 ? 'text-red-600' : 'text-green-600'">
+                                        {{ (customer.balance || 0).toLocaleString() }}
+                                    </p>
                                 </td>
                             </tr>
                         </tbody>
@@ -296,30 +342,17 @@
                 </div>
             </div>
 
-            <!-- Pagination -->
-            <div v-if="customers && customers.data.length > 0" class="flex items-center justify-between">
-                <div class="text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    {{ $t('customers.showing') }} 
-                    <span class="text-gray-900 dark:text-white">{{ customers.from }}</span>
-                    -
-                    <span class="text-gray-900 dark:text-white">{{ customers.to }}</span>
-                    {{ $t('customers.of') }}
-                    <span class="text-gray-900 dark:text-white">{{ customers.total }}</span>
+            <!-- Infinite Scroll Sentinel -->
+            <div ref="loadMoreSentinel" class="py-8 flex justify-center">
+                <div v-if="loadingMore" class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                    <svg class="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ $t('common.loading') }}</span>
                 </div>
-                
-                <!-- Inertia Pagination (If you have a component, use it. Otherwise, simple links) -->
-                <div class="flex gap-2">
-                    <Link
-                        v-for="link in customers.links"
-                        :key="link.label"
-                        :href="link.url || '#'"
-                        v-html="link.label"
-                        :class="[
-                            'px-4 py-2 rounded-xl text-sm font-medium transition-all shadow-sm',
-                            link.active ? 'bg-indigo-600 text-white shadow-indigo-500/20' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700',
-                            !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                        ]"
-                    />
+                <div v-else-if="!nextPageUrl && allCustomers.length > 0" class="text-sm text-gray-400 dark:text-gray-500">
+                    {{ $t('customers.all_loaded') || 'تم تحميل جميع العملاء' }}
                 </div>
             </div>
         </div>
@@ -331,16 +364,77 @@
             @close="closeModal"
             @saved="handleSaved"
         />
+        
+        <!-- Customer Import Modal -->
+        <CustomerImportModal
+            :show="showImportModal"
+            @close="showImportModal = false"
+            @imported="router.reload()"
+        />
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <!-- Header -->
+                <div class="print-header">
+                    <h1 v-if="$page.props.auth.center">{{ $page.props.auth.center.name }}</h1>
+                    <h1 v-else>Carag</h1>
+                    <p class="text-sm" v-if="$page.props.auth.center?.address">{{ $page.props.auth.center.address }}</p>
+                    <p class="text-sm" v-if="$page.props.auth.center?.phone">{{ $page.props.auth.center.phone }}</p>
+                    <div class="mt-4 border-t pt-4 w-1/2 mx-auto border-gray-200">
+                        <h2 class="text-xl font-bold">{{ $t('customers.title') }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString('ar-SA') }}</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ $t('customers.form.name') }}</th>
+                            <th>{{ $t('customers.form.manager') }}</th>
+                            <th>{{ $t('customers.form.type') }}</th>
+                            <th>{{ $t('customers.form.phone') }}</th>
+                            <th>{{ $t('customers.form.balance') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(customer, index) in allCustomers" :key="customer.id">
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ customer.name }}</td>
+                            <td>{{ customer.manager_name || '-' }}</td>
+                            <td>
+                                <span class="print-badge">
+                                    {{ customer.type ? $t(`customers.type.${customer.type}`) : '-' }}
+                                </span>
+                            </td>
+                            <td dir="ltr" class="text-left font-sans">
+                                {{ customer.phone }}
+                            </td>
+                            <td>
+                                {{ (customer.balance || 0).toLocaleString() }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="mt-8 text-center text-xs text-gray-400">
+                    {{ $page.props.auth.user.name }} - {{ new Date().toLocaleString('ar-SA') }}
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
+import CustomerImportModal from '@/Components/Customers/CustomerImportModal.vue';
 
 const props = defineProps({
     customers: {
@@ -354,11 +448,81 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
-const { success } = useToast();
+const { success, error, info } = useToast();
 const showModal = ref(false);
 const selectedCustomer = ref(null);
 const searchQuery = ref(props.filters.search || '');
+const typeFilter = ref(props.filters.type || '');
 const viewMode = ref(localStorage.getItem('customersViewMode') || 'grid');
+const exporting = ref(false);
+const showImportModal = ref(false);
+
+// Infinite Scroll Refs
+const allCustomers = ref(props.customers?.data || []);
+const nextPageUrl = ref(props.customers?.next_page_url);
+const loadingMore = ref(false);
+const loadMoreSentinel = ref(null);
+let observer = null;
+
+// Watch props change (filters)
+watch(() => props.customers, (newVal) => {
+    if (newVal) {
+        allCustomers.value = newVal.data;
+        nextPageUrl.value = newVal.next_page_url;
+    }
+});
+
+// Load more data
+const loadMore = async () => {
+    if (loadingMore.value || !nextPageUrl.value) return;
+
+    loadingMore.value = true;
+    try {
+        // Extract page number from next_page_url and build API URL
+        const url = new URL(nextPageUrl.value, window.location.origin);
+        const page = url.searchParams.get('page') || 2;
+        
+        // Build API URL with current filters
+        const params = new URLSearchParams();
+        params.set('page', page);
+        if (searchQuery.value) params.set('search', searchQuery.value);
+        if (typeFilter.value) params.set('type', typeFilter.value);
+        
+        const response = await axios.get('/app/api/customers?' + params.toString());
+        const data = response.data;
+        
+        allCustomers.value.push(...data.data);
+        nextPageUrl.value = data.next_page_url;
+    } catch (e) {
+        console.error('Failed to load more customers', e);
+    } finally {
+        loadingMore.value = false;
+    }
+};
+
+// Intersection Observer Setup
+onMounted(() => {
+    observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && nextPageUrl.value) {
+            loadMore();
+        }
+    }, {
+        root: null,
+        threshold: 0.1,
+    });
+
+    if (loadMoreSentinel.value) {
+        observer.observe(loadMoreSentinel.value);
+    }
+});
+
+watch(loadMoreSentinel, (el) => {
+    if (el && observer) observer.observe(el);
+});
+
+onUnmounted(() => {
+    if (observer) observer.disconnect();
+});
 
 const debounce = (fn, delay) => {
     let timeoutId;
@@ -379,6 +543,65 @@ watch(searchQuery, debounce((value) => {
 watch(viewMode, (newMode) => {
     localStorage.setItem('customersViewMode', newMode);
 });
+
+// Type filter watcher
+watch(typeFilter, (value) => {
+    router.get(route('customers.index'), { search: searchQuery.value, type: value || undefined }, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+});
+
+// Export customers to Excel
+function exportCustomers() {
+    exporting.value = true;
+    const params = new URLSearchParams();
+    if (searchQuery.value) params.set('search', searchQuery.value);
+    if (typeFilter.value) params.set('type', typeFilter.value);
+    window.location.href = route('customers.export') + '?' + params.toString();
+    setTimeout(() => {
+        exporting.value = false;
+    }, 2000);
+}
+
+// Print customers list - Load All & Print
+async function printCustomers() {
+    // If there's more data to load, load it all first
+    if (nextPageUrl.value) {
+        info(t('customers.loading_all_printing') || 'جاري تحميل جميع البيانات للطباعة...');
+        
+        while (nextPageUrl.value) {
+            try {
+                // Extract page number and use API endpoint
+                const url = new URL(nextPageUrl.value, window.location.origin);
+                const page = url.searchParams.get('page') || 2;
+                
+                const params = new URLSearchParams();
+                params.set('page', page);
+                if (searchQuery.value) params.set('search', searchQuery.value);
+                if (typeFilter.value) params.set('type', typeFilter.value);
+                
+                const response = await axios.get('/app/api/customers?' + params.toString());
+                const data = response.data;
+                
+                if (data.data && Array.isArray(data.data)) {
+                    allCustomers.value.push(...data.data);
+                }
+                nextPageUrl.value = data.next_page_url;
+            } catch (e) {
+                console.error('Failed to load all customers for print', e);
+                break;
+            }
+        }
+        
+        // Allow DOM to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Trigger print
+    window.print();
+}
 
 function openCreateModal() {
     selectedCustomer.value = null;
@@ -411,4 +634,18 @@ function getWhatsAppNumber(customer) {
     if (!phone) return null;
     return phone.replace(/[^\d+]/g, '').replace(/^\+/, '');
 }
+
+// Classification badge class helper
+function getClassificationBadgeClass(classification) {
+    const classes = {
+        potential: 'bg-sky-50/50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 border-sky-100/50 dark:border-sky-800/30',
+        new: 'bg-green-50/50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-100/50 dark:border-green-800/30',
+        regular: 'bg-gray-50/50 dark:bg-gray-900/20 text-gray-600 dark:text-gray-400 border-gray-100/50 dark:border-gray-700/30',
+        vip: 'bg-amber-50/50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-100/50 dark:border-amber-800/30',
+        inactive: 'bg-red-50/50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-100/50 dark:border-red-800/30',
+    };
+    return classes[classification] || classes.regular;
+}
 </script>
+
+
