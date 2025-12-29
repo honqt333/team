@@ -42,7 +42,7 @@ class CenterSettingsController extends Controller
                 'manager_name' => $center->manager_name,
                 'center_type' => $center->center_type,
                 'license_number' => $center->license_number,
-                'vat_number' => $center->vat_number,
+                'vat_number' => $center->tenant->vat_number, // Read-only from tenant
             ],
             'contact' => [
                 'phone' => $center->phone,
@@ -159,6 +159,28 @@ class CenterSettingsController extends Controller
             'working_hours.*.open_time' => 'nullable|date_format:H:i',
             'working_hours.*.close_time' => 'nullable|date_format:H:i',
         ]);
+
+        $workingHours = $validated['working_hours'];
+
+        // Validate logic: Close time must be after open time if both present
+        foreach ($workingHours as $wh) {
+            if ($wh['is_open'] && $wh['open_time'] && $wh['close_time']) {
+                $open = \Carbon\Carbon::createFromFormat('H:i', $wh['open_time']);
+                $close = \Carbon\Carbon::createFromFormat('H:i', $wh['close_time']);
+                
+                // If close is before or equal open (and not covering next day logic which we imply for now is same day)
+                // Assuming simple same-day shifts for now.
+                if ($close->lte($open)) {
+                     // For shifts crossing midnight, logic differs, but user asked for "close > open" check
+                     // Check if users meant cross-midnight? Usually shops close same day.
+                     // But if 10 PM to 2 AM? 
+                     // User said: "add check (close>open)". This strictly implies close MUST be greater.
+                     throw \Illuminate\Validation\ValidationException::withMessages([
+                        'working_hours' => __('Ensure close time is after open time')
+                     ]);
+                }
+            }
+        }
 
         foreach ($validated['working_hours'] as $wh) {
             CenterWorkingHour::updateOrCreate(

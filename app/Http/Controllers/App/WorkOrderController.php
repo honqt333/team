@@ -247,6 +247,18 @@ class WorkOrderController
             ->get()
             ->groupBy('make_id');
 
+        // Get warehouses for addPartModal
+        $warehouses = \App\Models\Warehouse::where('center_id', $workOrder->center_id)
+            ->orWhereNull('center_id') // Global warehouses if any
+            ->select('id', 'name')
+            ->get();
+
+        // Get parts for addPartModal
+        $inventoryParts = \App\Models\Part::where('tenant_id', $workOrder->tenant_id)
+            ->where('is_active', true)
+            ->select('id', 'sku', 'name_ar', 'name_en')
+            ->get();
+
         return Inertia::render('WorkOrders/Show', [
             'workOrder' => $workOrder,
             'itemsByDepartment' => $itemsByDepartment,
@@ -257,6 +269,8 @@ class WorkOrderController
             'departments' => $departments,
             'services' => $services,
             'technicians' => $technicians,
+            'warehouses' => $warehouses,
+            'inventoryParts' => $inventoryParts,
         ]);
     }
 

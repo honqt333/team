@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class WorkOrder extends Model
 {
-    use SoftDeletes, CenterScoped, HasTaxSnapshot;
+    use HasFactory, SoftDeletes, CenterScoped, HasTaxSnapshot;
 
     // Status constants
     public const STATUS_DRAFT = 'draft';

@@ -109,8 +109,25 @@
                                 <input v-model="form.profile.license_number" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.profile.vat_number') }}</label>
-                                <input v-model="form.profile.vat_number" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {{ $t('center_settings.profile.vat_number') }}
+                                    <span class="text-xs text-gray-400 font-normal">({{ $t('common.read_only') }})</span>
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        :value="props.profile.vat_number" 
+                                        disabled
+                                        type="text" 
+                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed" 
+                                        dir="ltr"
+                                    />
+                                    <div class="absolute inset-y-0 rtl:right-auto rtl:left-0 ltr:right-0 flex items-center px-3 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p class="mt-1 text-xs text-gray-400">{{ $t('center_settings.profile.vat_help') }}</p>
                             </div>
                         </div>
 

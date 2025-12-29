@@ -71,7 +71,11 @@ class Center extends Model
 
     public function getLogoDarkUrlAttribute(): ?string
     {
-        return $this->logo_dark_path ? Storage::url($this->logo_dark_path) : null;
+        if ($this->logo_dark_path) {
+            return Storage::url($this->logo_dark_path);
+        }
+        // Fallback to light logo if dark is not set
+        return $this->logo_light_path ? Storage::url($this->logo_light_path) : null;
     }
 
     public function getLogoInvoiceUrlAttribute(): ?string

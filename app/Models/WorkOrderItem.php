@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
 use App\Support\PricingHelper;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkOrderItem extends Model
 {
-    use CenterScoped;
+    use HasFactory, CenterScoped;
 
     // Status constants
     public const STATUS_PENDING = 'pending';
