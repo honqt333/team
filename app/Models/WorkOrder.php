@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Models\Concerns\HasTaxSnapshot;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,11 +13,13 @@ use Illuminate\Support\Facades\DB;
 
 class WorkOrder extends Model
 {
-    use SoftDeletes, CenterScoped;
+    use SoftDeletes, CenterScoped, HasTaxSnapshot;
 
+    // Status constants
     public const STATUS_DRAFT = 'draft';
     public const STATUS_OPEN = 'open';
     public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_ON_HOLD = 'on_hold';
     public const STATUS_DONE = 'done';
     public const STATUS_CANCELLED = 'cancelled';
 
@@ -24,6 +27,7 @@ class WorkOrder extends Model
         self::STATUS_DRAFT,
         self::STATUS_OPEN,
         self::STATUS_IN_PROGRESS,
+        self::STATUS_ON_HOLD,
         self::STATUS_DONE,
         self::STATUS_CANCELLED,
     ];
@@ -47,6 +51,16 @@ class WorkOrder extends Model
         'mileage',
         'contact_name',
         'contact_phone',
+        // Tax Snapshots
+        'tax_enabled_snapshot',
+        'pricing_mode_snapshot',
+        'tax_rate_snapshot',
+        'currency_code',
+        'total_excl_tax',
+        'total_tax',
+        'total_incl_tax',
+        'total_taxable_amount',
+        'tax_breakdown',
     ];
 
     protected $casts = [
@@ -55,7 +69,10 @@ class WorkOrder extends Model
         'entry_date' => 'date:Y-m-d',
         'expected_end_date' => 'date:Y-m-d',
         'mileage' => 'integer',
+        'tax_breakdown' => 'array',
     ];
+
+    // ==================== Relationships ====================
 
     public function tenant(): BelongsTo
     {
@@ -112,6 +129,136 @@ class WorkOrder extends Model
             ->withTimestamps();
     }
 
+    // ==================== Business Rules ====================
+
+    /**
+     * Check if work order can be cancelled.
+     * Rule R5: Cannot cancel if any item has technicians
+     * Rule R6: Cannot cancel if any item has parts
+     */
+    public function canBeCancelled(): bool
+    {
+        // Check if any item has technicians
+        $hasTechnicians = $this->items()
+            ->whereHas('technicians')
+            ->exists();
+
+        if ($hasTechnicians) {
+            return false;
+        }
+
+        // Check if any item has parts
+        $hasParts = $this->items()
+            ->whereHas('parts')
+            ->exists();
+
+        if ($hasParts) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if work order can be put on hold.
+     */
+    public function canBeOnHold(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_OPEN,
+            self::STATUS_IN_PROGRESS,
+        ]);
+    }
+
+    /**
+     * Put work order on hold.
+     * Rule R7: Putting on hold suspends all items.
+     */
+    public function putOnHold(): bool
+    {
+        if (!$this->canBeOnHold()) {
+            return false;
+        }
+
+        // Suspend all pending/in-progress items
+        $this->items()
+            ->whereIn('status', [
+                WorkOrderItem::STATUS_PENDING,
+                WorkOrderItem::STATUS_IN_PROGRESS,
+            ])
+            ->update(['status' => WorkOrderItem::STATUS_ON_HOLD]);
+
+        $this->update(['status' => self::STATUS_ON_HOLD]);
+
+        return true;
+    }
+
+    /**
+     * Resume work order from hold.
+     */
+    public function resume(): bool
+    {
+        if ($this->status !== self::STATUS_ON_HOLD) {
+            return false;
+        }
+
+        // Resume all on-hold items to pending
+        $this->items()
+            ->where('status', WorkOrderItem::STATUS_ON_HOLD)
+            ->update(['status' => WorkOrderItem::STATUS_PENDING]);
+
+        $this->update(['status' => self::STATUS_IN_PROGRESS]);
+
+        return true;
+    }
+
+    /**
+     * Check if all items are completed.
+     * Rule R8: Vehicle exit button appears when all items completed.
+     */
+    public function allItemsCompleted(): bool
+    {
+        if ($this->items()->count() === 0) {
+            return false;
+        }
+
+        return $this->items()
+            ->whereNotIn('status', [
+                WorkOrderItem::STATUS_COMPLETED,
+                WorkOrderItem::STATUS_CANCELLED,
+            ])
+            ->count() === 0;
+    }
+
+    /**
+     * Check if vehicle can exit.
+     */
+    public function canVehicleExit(): bool
+    {
+        return $this->allItemsCompleted() 
+            && $this->status !== self::STATUS_ON_HOLD
+            && $this->status !== self::STATUS_CANCELLED;
+    }
+
+    /**
+     * Mark vehicle as exited (done).
+     */
+    public function markAsCompleted(): bool
+    {
+        if (!$this->canVehicleExit()) {
+            return false;
+        }
+
+        $this->update([
+            'status' => self::STATUS_DONE,
+            'closed_at' => now(),
+        ]);
+
+        return true;
+    }
+
+    // ==================== Helpers ====================
+
     /**
      * Generate a sequential code for the work order.
      * Uses DB locking to ensure uniqueness in concurrent scenarios.
@@ -138,11 +285,12 @@ class WorkOrder extends Model
     }
 
     /**
-     * Calculate total amount of all items.
+     * Calculate total amount of all items (Service + Parts).
      */
     public function getTotalAttribute(): float
     {
-        return $this->items->sum('total');
+        // Sum the grand_total accessor of each item
+        return $this->items->sum('grand_total');
     }
 
     /**
@@ -150,7 +298,7 @@ class WorkOrder extends Model
      */
     public function canBeEdited(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_OPEN]);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_OPEN, self::STATUS_IN_PROGRESS]);
     }
 
     /**
@@ -159,5 +307,29 @@ class WorkOrder extends Model
     public function isDraft(): bool
     {
         return $this->status === self::STATUS_DRAFT;
+    }
+
+    /**
+     * Check if work order is on hold.
+     */
+    public function isOnHold(): bool
+    {
+        return $this->status === self::STATUS_ON_HOLD;
+    }
+
+    /**
+     * Check if work order is completed/done.
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === self::STATUS_DONE;
+    }
+
+    /**
+     * Check if work order is cancelled.
+     */
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
     }
 }

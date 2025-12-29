@@ -21,6 +21,13 @@ class QuoteLine extends Model
         'discount_amount',
         'final_unit_price',
         'line_total',
+        // New Tax Fields
+        'is_taxable',
+        'tax_category_code',
+        'tax_rate_snapshot',
+        'tax_amount',
+        'line_total_excl_tax',
+        'line_total_incl_tax',
     ];
 
     protected $casts = [
@@ -32,6 +39,12 @@ class QuoteLine extends Model
         'discount_amount' => 'decimal:2',
         'final_unit_price' => 'decimal:2',
         'line_total' => 'decimal:2',
+        // New Tax Fields
+        'tax_rate_snapshot' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'line_total_excl_tax' => 'decimal:2',
+        'line_total_incl_tax' => 'decimal:2',
+        'is_taxable' => 'boolean',
     ];
 
     protected static function booted(): void

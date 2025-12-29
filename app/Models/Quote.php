@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Models\Concerns\HasTaxSnapshot;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class Quote extends Model
 {
-    use SoftDeletes, CenterScoped;
+    use SoftDeletes, CenterScoped, HasTaxSnapshot;
 
     public const STATUS_DRAFT = 'draft';
     public const STATUS_SENT = 'sent';
@@ -48,6 +49,16 @@ class Quote extends Model
         'created_by',
         'approved_by',
         'converted_work_order_id',
+        // Tax Snapshots
+        'tax_enabled_snapshot',
+        'pricing_mode_snapshot',
+        'tax_rate_snapshot',
+        'currency_code',
+        'total_excl_tax',
+        'total_tax',
+        'total_incl_tax',
+        'total_taxable_amount',
+        'tax_breakdown',
     ];
 
     protected $casts = [
@@ -58,6 +69,7 @@ class Quote extends Model
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
         'converted_at' => 'datetime',
+        'tax_breakdown' => 'array', // JSON cast
     ];
 
     // ─────────────────────────────────────────────────────────────

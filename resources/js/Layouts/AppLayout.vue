@@ -15,12 +15,30 @@
             >
                 <!-- Brand -->
                 <div class="h-14 flex items-center gap-3 px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    <!-- Logo -->
+                    <div class="w-9 h-9 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <img 
+                            v-if="page.props.tenant?.logo_url" 
+                            :src="page.props.tenant.logo_url" 
+                            :alt="page.props.tenant?.name" 
+                            class="w-full h-full object-contain"
+                        />
+                        <svg v-else class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                         </svg>
                     </div>
-                    <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('nav.brand') }}</span>
+                    <!-- Name & ID -->
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
+                            {{ page.props.tenant?.trade_name || page.props.tenant?.name || $t('nav.brand') }}
+                        </p>
+                        <p v-if="page.props.center?.id" class="text-xs text-gray-500 dark:text-gray-400">
+                            #{{ page.props.center.id }}
+                        </p>
+                        <p v-else-if="page.props.tenant?.id" class="text-xs text-gray-500 dark:text-gray-400">
+                            #{{ page.props.tenant.id }}
+                        </p>
+                    </div>
                 </div>
 
                 <!-- Navigation -->
@@ -253,17 +271,33 @@
                 ]"
             >
                 <div class="h-14 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
-                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="w-9 h-9 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            <img 
+                                v-if="page.props.tenant?.logo_url" 
+                                :src="page.props.tenant.logo_url" 
+                                :alt="page.props.tenant?.name" 
+                                class="w-full h-full object-contain"
+                            />
+                            <svg v-else class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                         </div>
-                        <span class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('nav.brand') }}</span>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                {{ page.props.tenant?.trade_name || page.props.tenant?.name || $t('nav.brand') }}
+                            </p>
+                            <p v-if="page.props.center?.id" class="text-xs text-gray-500 dark:text-gray-400">
+                                #{{ page.props.center.id }}
+                            </p>
+                            <p v-else-if="page.props.tenant?.id" class="text-xs text-gray-500 dark:text-gray-400">
+                                #{{ page.props.tenant.id }}
+                            </p>
+                        </div>
                     </div>
                     <button
                         @click="mobileMenuOpen = false"
-                        class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700"
+                        class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 flex-shrink-0"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

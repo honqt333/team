@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -30,6 +31,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $tenant = $user?->tenant;
 
         return [
             ...parent::share($request),
@@ -37,6 +39,26 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
                 'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
             ],
+            'tenant' => $tenant ? [
+                'id' => $tenant->id,
+                'name' => $tenant->trade_name ?: $tenant->legal_name ?: $tenant->name,
+                'legal_name' => $tenant->legal_name,
+                'trade_name' => $tenant->trade_name,
+                'owner_name' => $tenant->owner_name,
+                'phone' => $tenant->phone,
+                'email' => $tenant->email,
+                'cr_number' => $tenant->cr_number,
+                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : null,
+            ] : null,
+            'center' => $user?->currentCenter ? [
+                'id' => $user->currentCenter->id,
+                'name' => $user->currentCenter->name, // Accessor handles lang
+                'name_ar' => $user->currentCenter->name_ar,
+                'name_en' => $user->currentCenter->name_en,
+                'type' => $user->currentCenter->center_type,
+                'phone' => $user->currentCenter->phone,
+                'email' => $user->currentCenter->email,
+            ] : null,
         ];
     }
 }

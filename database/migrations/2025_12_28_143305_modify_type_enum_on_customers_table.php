@@ -12,6 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            Schema::table('customers', function (Blueprint $table) {
+                $table->string('type', 20)->default('individual')->change();
+            });
+            return;
+        }
+
         // MySQL requires dropping and recreating the enum
         // First change column to string temporarily
         Schema::table('customers', function (Blueprint $table) {
@@ -27,6 +34,11 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+             DB::table('customers')->whereIn('type', ['government', 'vip'])->update(['type' => 'individual']);
+             return;
+        }
+
         // Update any government/vip back to individual before reverting
         DB::table('customers')->whereIn('type', ['government', 'vip'])->update(['type' => 'individual']);
         

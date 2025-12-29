@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Tenant extends Model
@@ -14,6 +15,18 @@ class Tenant extends Model
     protected $fillable = [
         'name',
         'slug',
+        // Company Profile
+        'legal_name',
+        'legal_name_en',
+        'trade_name',
+        'owner_name',
+        'vat_number',
+        'cr_number',
+        'iban',
+        'phone',
+        'email',
+        'logo_path',
+        'invoice_number_format',
     ];
 
     public function centers(): HasMany
@@ -24,5 +37,20 @@ class Tenant extends Model
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
+    }
+
+    public function taxSettings(): HasOne
+    {
+        return $this->hasOne(TenantTaxSetting::class);
+    }
+
+    public function address(): HasOne
+    {
+        return $this->hasOne(TenantAddress::class);
+    }
+
+    public function zatcaSettings(): HasOne
+    {
+        return $this->hasOne(TenantZatcaSetting::class);
     }
 }

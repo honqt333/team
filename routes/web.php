@@ -65,6 +65,28 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     Route::post('/work-orders/{work_order}/departments', [WorkOrderController::class, 'addDepartment'])->name('work-orders.departments.store');
     Route::delete('/work-orders/{work_order}/departments/{department}', [WorkOrderController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
     
+    // Work Order Status Management
+    Route::post('/work-orders/{work_order}/hold', [WorkOrderController::class, 'putOnHold'])->name('work-orders.hold');
+    Route::post('/work-orders/{work_order}/resume', [WorkOrderController::class, 'resume'])->name('work-orders.resume');
+    Route::post('/work-orders/{work_order}/cancel', [WorkOrderController::class, 'cancel'])->name('work-orders.cancel');
+    Route::post('/work-orders/{work_order}/complete', [WorkOrderController::class, 'complete'])->name('work-orders.complete');
+    
+    // Work Order Item Status
+    Route::patch('/work-orders/{work_order}/items/{item}/status', [WorkOrderController::class, 'updateItemStatus'])->name('work-orders.items.status');
+    
+    // Work Order Item Technicians
+    Route::post('/work-orders/{work_order}/items/{item}/technicians', [WorkOrderController::class, 'assignTechnician'])->name('work-orders.items.technicians.store');
+    Route::delete('/work-orders/{work_order}/items/{item}/technicians/{user}', [WorkOrderController::class, 'removeTechnician'])->name('work-orders.items.technicians.destroy');
+    
+    // Work Order Item Parts
+    Route::post('/work-orders/{work_order}/items/{item}/parts', [WorkOrderController::class, 'addPart'])->name('work-orders.items.parts.store');
+    Route::put('/work-orders/{work_order}/items/{item}/parts/{part}', [WorkOrderController::class, 'updatePart'])->name('work-orders.items.parts.update');
+    Route::delete('/work-orders/{work_order}/items/{item}/parts/{part}', [WorkOrderController::class, 'deletePart'])->name('work-orders.items.parts.destroy');
+    
+    // Work Order Item Notes
+    Route::post('/work-orders/{work_order}/items/{item}/notes', [WorkOrderController::class, 'addNote'])->name('work-orders.items.notes.store');
+    Route::delete('/work-orders/{work_order}/items/{item}/notes/{note}', [WorkOrderController::class, 'deleteNote'])->name('work-orders.items.notes.destroy');
+    
     // Quotes
     Route::get('/quotes', [QuoteController::class, 'index'])->name('app.quotes.index');
     Route::post('/quotes', [QuoteController::class, 'store'])->name('app.quotes.store');
@@ -82,6 +104,24 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    
+    // Company Profile Settings
+    Route::get('/settings/company', [\App\Http\Controllers\App\CompanyProfileController::class, 'index'])->name('settings.company');
+    Route::put('/settings/company', [\App\Http\Controllers\App\CompanyProfileController::class, 'update'])->name('settings.company.update');
+    Route::put('/settings/company/admin-user', [\App\Http\Controllers\App\CompanyProfileController::class, 'updateAdminUser'])->name('settings.company.admin-user');
+    Route::post('/settings/company/logo', [\App\Http\Controllers\App\CompanyProfileController::class, 'uploadLogo'])->name('settings.company.logo.upload');
+    Route::delete('/settings/company/logo', [\App\Http\Controllers\App\CompanyProfileController::class, 'deleteLogo'])->name('settings.company.logo.delete');
+    
+    // Branches Settings
+    Route::get('/settings/branches', [\App\Http\Controllers\App\BranchesController::class, 'index'])->name('settings.branches');
+    
+    // Center Settings
+    Route::get('/settings/centers/{center}', [\App\Http\Controllers\App\CenterSettingsController::class, 'index'])->name('settings.centers.show');
+    Route::put('/settings/centers/{center}', [\App\Http\Controllers\App\CenterSettingsController::class, 'update'])->name('settings.centers.update');
+    Route::post('/settings/centers/{center}/logo', [\App\Http\Controllers\App\CenterSettingsController::class, 'uploadLogo'])->name('settings.centers.logo.upload');
+    Route::delete('/settings/centers/{center}/logo', [\App\Http\Controllers\App\CenterSettingsController::class, 'deleteLogo'])->name('settings.centers.logo.delete');
+    Route::post('/settings/centers/{center}/stamp', [\App\Http\Controllers\App\CenterSettingsController::class, 'uploadStamp'])->name('settings.centers.stamp.upload');
+    Route::delete('/settings/centers/{center}/stamp', [\App\Http\Controllers\App\CenterSettingsController::class, 'deleteStamp'])->name('settings.centers.stamp.delete');
     
     // System Settings
     Route::get('/settings/system', [\App\Http\Controllers\App\SystemSettingsController::class, 'index'])->name('settings.system');

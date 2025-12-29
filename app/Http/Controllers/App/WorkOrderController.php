@@ -211,7 +211,18 @@ class WorkOrderController
     {
         $this->authorize('view', $workOrder);
 
-        $workOrder->load(['customer', 'vehicle.make', 'vehicle.customer', 'items.service.department', 'damageMarks', 'photos', 'departments']);
+        $workOrder->load([
+            'customer', 
+            'vehicle.make', 
+            'vehicle.customer', 
+            'items.service.department',
+            'items.technicians',
+            'items.parts',
+            'items.itemNotes.user',
+            'damageMarks', 
+            'photos', 
+            'departments'
+        ]);
 
         // Group items by department_id for accordion display
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
@@ -223,6 +234,13 @@ class WorkOrderController
         $colors = \App\Models\VehicleColor::active()->ordered()->get();
         $departments = \App\Models\Department::active()->ordered()->get();
         $services = \App\Models\Service::active()->ordered()->get();
+        
+        // Get technicians (users strictly belonging to the work order's center)
+        $technicians = \App\Models\User::whereHas('centers', function ($q) use ($workOrder) {
+                $q->where('centers.id', $workOrder->center_id);
+            })
+            ->select('users.id', 'users.name')
+            ->get();
         
         $modelsByMake = \App\Models\VehicleModel::query()
             ->select('id', 'make_id', 'name_ar', 'name_en')
@@ -238,6 +256,7 @@ class WorkOrderController
             'modelsByMake' => $modelsByMake,
             'departments' => $departments,
             'services' => $services,
+            'technicians' => $technicians,
         ]);
     }
 
@@ -309,6 +328,7 @@ class WorkOrderController
             'unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
             'discount_value' => 'nullable|numeric|min:0',
+            'status' => 'nullable|in:' . implode(',', \App\Models\WorkOrderItem::STATUSES),
         ]);
 
         $item->update($validated);
@@ -347,8 +367,291 @@ class WorkOrderController
     {
         $this->authorize('update', $work_order);
 
+        // Rule R11: Can only remove department if no items belong to it
+        $hasItems = $work_order->items()
+            ->whereHas('service', fn($q) => $q->where('department_id', $department->id))
+            ->exists();
+
+        if ($hasItems) {
+            return redirect()->back()->with('error', __('messages.cannot_remove_department_has_items'));
+        }
+
         $work_order->departments()->detach($department->id);
 
         return redirect()->back()->with('success', __('messages.department_removed'));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Work Order Status Management
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Put work order on hold.
+     * Rule R7: Suspends all items.
+     */
+    public function putOnHold(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        if (!$work_order->canBeOnHold()) {
+            return redirect()->back()->with('error', __('messages.cannot_put_on_hold'));
+        }
+
+        $work_order->putOnHold();
+
+        return redirect()->back()->with('success', __('messages.work_order_on_hold'));
+    }
+
+    /**
+     * Resume work order from hold.
+     */
+    public function resume(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        if (!$work_order->resume()) {
+            return redirect()->back()->with('error', __('messages.cannot_resume'));
+        }
+
+        return redirect()->back()->with('success', __('messages.work_order_resumed'));
+    }
+
+    /**
+     * Cancel work order.
+     * Rules R5, R6: Cannot cancel if items have technicians or parts.
+     */
+    public function cancel(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        if (!$work_order->canBeCancelled()) {
+            return redirect()->back()->with('error', __('messages.cannot_cancel_has_technicians_or_parts'));
+        }
+
+        $work_order->update(['status' => WorkOrder::STATUS_CANCELLED]);
+
+        return redirect()->back()->with('success', __('messages.work_order_cancelled'));
+    }
+
+    /**
+     * Mark as completed (vehicle exit).
+     * Rule R8: Only when all items completed.
+     */
+    public function complete(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        if (!$work_order->markAsCompleted()) {
+            return redirect()->back()->with('error', __('messages.cannot_complete_items_pending'));
+        }
+
+        return redirect()->back()->with('success', __('messages.work_order_completed'));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Work Order Item Status Management
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Update item status.
+     * Rules R1, R2: Cannot cancel if has technicians or parts.
+     */
+    public function updateItemStatus(Request $request, WorkOrder $work_order, \App\Models\WorkOrderItem $item): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'status' => 'required|in:' . implode(',', \App\Models\WorkOrderItem::STATUSES),
+        ]);
+
+        $newStatus = $validated['status'];
+
+        // Check business rules
+        if (!$item->canChangeStatusTo($newStatus)) {
+            $message = __('messages.cannot_change_item_status');
+            return $request->expectsJson()
+                ? response()->json(['error' => $message], 422)
+                : redirect()->back()->with('error', $message);
+        }
+
+        $item->update(['status' => $newStatus]);
+
+        $message = __('messages.item_status_updated');
+        return $request->expectsJson()
+            ? response()->json(['success' => $message, 'item' => $item->fresh()])
+            : redirect()->back()->with('success', $message);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Work Order Item Technicians
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Assign technician to item.
+     */
+    public function assignTechnician(Request $request, WorkOrder $work_order, \App\Models\WorkOrderItem $item): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        // Security Check: Technician must belong to the Work Order's center
+        $techExistsInCenter = \App\Models\User::where('id', $validated['user_id'])
+            ->whereHas('centers', function ($q) use ($work_order) {
+                $q->where('centers.id', $work_order->center_id);
+            })
+            ->exists();
+
+        if (!$techExistsInCenter) {
+            $message = __('messages.technician_not_belong_to_center');
+            return $request->expectsJson()
+                ? response()->json(['error' => $message], 403)
+                : redirect()->back()->with('error', $message);
+        }
+
+        // Attach technician (ignore if already assigned)
+        $item->technicians()->syncWithoutDetaching([
+            $validated['user_id'] => [
+                'assigned_at' => now(),
+                'notes' => $validated['notes'] ?? null,
+            ]
+        ]);
+
+        $message = __('messages.technician_assigned');
+        return $request->expectsJson()
+            ? response()->json(['success' => $message, 'technicians' => $item->technicians])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Remove technician from item.
+     */
+    public function removeTechnician(WorkOrder $work_order, \App\Models\WorkOrderItem $item, \App\Models\User $user): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $item->technicians()->detach($user->id);
+
+        $message = __('messages.technician_removed');
+        return request()->expectsJson()
+            ? response()->json(['success' => $message])
+            : redirect()->back()->with('success', $message);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Work Order Item Parts
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Add part to item.
+     */
+    public function addPart(Request $request, WorkOrder $work_order, \App\Models\WorkOrderItem $item): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'part_number' => 'nullable|string|max:100',
+            'source' => 'required|in:' . implode(',', \App\Models\WorkOrderItemPart::SOURCES),
+            'qty' => 'required|numeric|min:0.01',
+            'unit_price' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $part = $item->parts()->create([
+            'tenant_id' => $work_order->tenant_id,
+            'center_id' => $work_order->center_id,
+            ...$validated,
+        ]);
+
+        $message = __('messages.part_added');
+        return $request->expectsJson()
+            ? response()->json(['success' => $message, 'part' => $part])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Update part.
+     */
+    public function updatePart(Request $request, WorkOrder $work_order, \App\Models\WorkOrderItem $item, \App\Models\WorkOrderItemPart $part): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'part_number' => 'nullable|string|max:100',
+            'source' => 'required|in:' . implode(',', \App\Models\WorkOrderItemPart::SOURCES),
+            'qty' => 'required|numeric|min:0.01',
+            'unit_price' => 'required|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $part->update($validated);
+
+        $message = __('messages.part_updated');
+        return $request->expectsJson()
+            ? response()->json(['success' => $message, 'part' => $part->fresh()])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Delete part.
+     */
+    public function deletePart(WorkOrder $work_order, \App\Models\WorkOrderItem $item, \App\Models\WorkOrderItemPart $part): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $part->delete();
+
+        $message = __('messages.part_deleted');
+        return request()->expectsJson()
+            ? response()->json(['success' => $message])
+            : redirect()->back()->with('success', $message);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Work Order Item Notes
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Add note to item.
+     */
+    public function addNote(Request $request, WorkOrder $work_order, \App\Models\WorkOrderItem $item): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'content' => 'required|string|max:2000',
+        ]);
+
+        $note = $item->itemNotes()->create([
+            'user_id' => $request->user()->id,
+            'content' => $validated['content'],
+        ]);
+
+        $note->load('user');
+
+        $message = __('messages.note_added');
+        return $request->expectsJson()
+            ? response()->json(['success' => $message, 'note' => $note])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Delete note.
+     */
+    public function deleteNote(WorkOrder $work_order, \App\Models\WorkOrderItem $item, \App\Models\WorkOrderItemNote $note): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $note->delete();
+
+        $message = __('messages.note_deleted');
+        return request()->expectsJson()
+            ? response()->json(['success' => $message])
+            : redirect()->back()->with('success', $message);
     }
 }

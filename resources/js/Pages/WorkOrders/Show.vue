@@ -283,6 +283,17 @@
                                     </button>
                                     
                                     <div class="flex items-center gap-2">
+                                        <!-- Remove Department Button -->
+                                        <button
+                                            v-if="getDepartmentItems(dept.id).length === 0"
+                                            @click.stop="removeDepartment(dept.id)"
+                                            class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
+                                            :title="$t('common.delete')"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                            </svg>
+                                        </button>
                                         <!-- Expand/Collapse Arrow -->
                                         <button
                                             @click="toggleDepartment(dept.id)"
@@ -304,41 +315,101 @@
                                 <!-- Department Content -->
                                 <div v-show="expandedDepartments.includes(dept.id)" class="p-4 space-y-2 bg-gray-50/50 dark:bg-gray-900/30">
                                     <!-- Services List -->
-                                    <div
-                                        v-for="item in getDepartmentItems(dept.id)"
-                                        :key="item.id"
-                                        class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:shadow-sm transition-shadow"
-                                    >
-                                        <div class="flex-1">
-                                            <p class="font-medium text-gray-900 dark:text-white">{{ item.title || getName(item.service) }}</p>
-                                            <div class="flex items-center gap-4 mt-1 text-sm">
-                                                <span class="text-gray-600 dark:text-gray-400">{{ formatPrice(item.unit_price) }}</span>
-                                                <span v-if="item.discount_amount > 0" class="text-red-500 flex items-center gap-1">
-                                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-                                                    </svg>
-                                                    -{{ formatPrice(item.discount_amount) }}
-                                                </span>
+                                    <div class="flex flex-col gap-3">
+                                        <div
+                                            v-for="(item, index) in getDepartmentItems(dept.id)"
+                                            :key="item.id"
+                                            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 transition-all hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 group relative"
+                                        >
+                                            <div class="flex items-center justify-between">
+                                                <!-- Right Side: Status + Title + Meta -->
+                                                <div class="flex items-start gap-4 flex-1">
+                                                    <!-- Status Icon (Large) -->
+                                                    <div 
+                                                        class="mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                                                        :class="{
+                                                            'bg-gray-50 text-gray-400 dark:bg-gray-700 dark:text-gray-500': item.status === 'pending',
+                                                            'bg-blue-50 text-blue-500 dark:bg-blue-900/20 dark:text-blue-400': item.status === 'in_progress',
+                                                            'bg-green-50 text-green-500 dark:bg-green-900/20 dark:text-green-400': item.status === 'completed',
+                                                            'bg-yellow-50 text-yellow-500 dark:bg-yellow-900/20 dark:text-yellow-400': item.status === 'on_hold',
+                                                            'bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400': item.status === 'cancelled'
+                                                        }"
+                                                    >
+                                                        <svg v-if="item.status === 'completed'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                        <svg v-else-if="item.status === 'in_progress'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                        <svg v-else-if="item.status === 'cancelled'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                    </div>
+
+                                                    <div class="flex-1 min-w-0">
+                                                        <!-- Title Row - CLICKABLE -->
+                                                        <div class="flex items-baseline gap-2 mb-1">
+                                                            <span class="text-gray-400 font-medium font-mono text-sm leading-none">{{ index + 1 }}.</span>
+                                                            <button 
+                                                                @click.stop="openEditServiceModal(item)"
+                                                                type="button"
+                                                                class="font-bold text-gray-900 dark:text-white text-lg hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-tight"
+                                                            >
+                                                                {{ item.title || getName(item.service) }}
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- Meta Row: Price | Technician -->
+                                                        <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                                            <!-- Prices Group -->
+                                                            <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-md">
+                                                                <!-- Labor -->
+                                                                <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium" :title="$t('work_orders.item.service_cost')">
+                                                                    <span class="text-indigo-500">🔧</span>
+                                                                    <span>{{ formatPrice(item.line_total || item.total) }}</span>
+                                                                </div>
+                                                                <!-- Parts (if any) -->
+                                                                <div v-if="item.parts_total > 0" class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium border-s border-gray-200 dark:border-gray-600 ps-3" :title="$t('work_orders.item.parts_cost')">
+                                                                    <span class="text-amber-500">🔩</span>
+                                                                    <span>{{ formatPrice(item.parts_total) }}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div v-if="item.technicians && item.technicians.length" class="flex items-center gap-1.5">
+                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                                                <div class="flex items-center gap-1">
+                                                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                                                                    <span>{{ item.technicians[0].name }}</span>
+                                                                </div>
+                                                            </div>
+                                                            <div v-else class="flex items-center gap-1.5 text-amber-500">
+                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                                                <span>{{ $t('work_orders.item.assign_technician') }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Left Side: Actions + Date -->
+                                                <div class="flex items-center gap-4 pl-2">
+                                                    <!-- Date Badge (Red Style) -->
+                                                    <span class="hidden sm:inline-flex bg-red-500 text-white text-xs px-2.5 py-1 rounded-md font-bold shadow-sm">
+                                                        {{ formatDate(item.created_at) }}
+                                                    </span>
+
+                                                    <div class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700 ps-3">
+                                                        <button 
+                                                            @click.stop="openEditServiceModal(item)"
+                                                            class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                            :title="$t('common.edit')"
+                                                        >
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                        </button>
+                                                        <button 
+                                                            @click.stop="deleteServiceItem(item)"
+                                                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                            :title="$t('common.delete')"
+                                                        >
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <p class="font-bold text-gray-900 dark:text-white">{{ formatPrice(item.line_total || item.total) }}</p>
-                                            <button
-                                                @click="openEditServiceModal(item)"
-                                                class="p-2 text-gray-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                            >
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                </svg>
-                                            </button>
-                                            <button
-                                                @click="deleteServiceItem(item)"
-                                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                            >
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                </svg>
-                                            </button>
                                         </div>
                                     </div>
 
@@ -456,12 +527,23 @@
             @saved="handleSaved"
         />
 
-        <!-- Service Modal -->
-        <WorkOrderServiceModal
-            v-if="showServiceModal"
-            :show="showServiceModal"
+        <!-- Item Edit Modal (comprehensive with tabs) -->
+        <WorkOrderItemModal
+            v-if="showItemModal"
+            :show="showItemModal"
             :work-order="workOrder"
             :item="selectedItem"
+            :technicians="technicians"
+            @close="closeItemModal"
+            @saved="handleItemSaved"
+        />
+
+        <!-- Service Add Modal (simple add) -->
+        <WorkOrderServiceModal
+            v-if="showServiceModal && !selectedItem"
+            :show="showServiceModal"
+            :work-order="workOrder"
+            :item="null"
             :department-id="selectedDepartmentId"
             :services="departmentServices"
             @close="closeServiceModal"
@@ -482,6 +564,7 @@ import { useConfirm } from '@/Composables/useConfirm';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import WorkOrderServiceModal from '@/Components/WorkOrders/WorkOrderServiceModal.vue';
+import WorkOrderItemModal from '@/Components/WorkOrders/WorkOrderItemModal.vue';
 
 const props = defineProps({
     workOrder: Object,
@@ -492,6 +575,7 @@ const props = defineProps({
     modelsByMake: { type: Object, default: () => ({}) },
     departments: { type: Array, default: () => [] },
     services: { type: Array, default: () => [] },
+    technicians: { type: Array, default: () => [] },
 });
 
 const { t } = useI18n();
@@ -574,11 +658,10 @@ function openAddServiceModal(deptId) {
     showServiceModal.value = true;
 }
 
-// Open edit service modal
+// Open edit service modal (advanced modal with tabs)
 function openEditServiceModal(item) {
-    selectedDepartmentId.value = item.service?.department_id;
     selectedItem.value = item;
-    showServiceModal.value = true;
+    showItemModal.value = true;
 }
 
 // Close service modal
@@ -592,6 +675,20 @@ function closeServiceModal() {
 function handleServiceSaved() {
     closeServiceModal();
     success(t('common.saved_success'));
+    router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+}
+
+// Item Modal state
+const showItemModal = ref(false);
+
+// Close item modal
+function closeItemModal() {
+    showItemModal.value = false;
+    selectedItem.value = null;
+}
+
+// Handle item saved
+function handleItemSaved() {
     router.reload({ only: ['workOrder', 'itemsByDepartment'] });
 }
 
@@ -674,6 +771,25 @@ function handleSaved() {
     showEditModal.value = false;
     success(t('common.saved_success'));
     router.reload();
+}
+
+// Remove department
+async function removeDepartment(deptId) {
+    const confirmed = await confirm({
+        title: t('common.confirm_delete_title'),
+        message: t('common.confirm_delete_message'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+
+    if (confirmed) {
+        router.delete(route('work-orders.departments.destroy', { work_order: props.workOrder.id, department: deptId }), {
+            onSuccess: () => {
+                success(t('common.deleted_success'));
+            },
+        });
+    }
 }
 
 async function changeStatus(newStatus) {

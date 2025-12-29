@@ -42,8 +42,9 @@
         "unsaved_changes": "Unsaved Changes",
         "unsaved_changes_message": "Changes have not been saved. Are you sure you want to close this form?",
         "yes_close": "Yes, Close",
+        "close": "Close",
+        "logged_in": "You're logged in!",
         "discard": "Discard",
-        "print": "Print",
         "qty": "Qty"
     },
     "nav": {
@@ -102,7 +103,7 @@
             "tax_number": "Tax Number",
             "tax_placeholder": "Tax registration number...",
             "address": "Address",
-            "address_line": "Address Details",
+            "address_line": "Street Name",
             "address_placeholder": "Street, building number...",
             "building_number": "Building No.",
             "postal_code": "Postal Code",
@@ -392,7 +393,42 @@
                 "after": "After",
                 "damage": "Damage"
             }
-        }
+        },
+        "item": {
+            "tab_service": "Service",
+            "tab_parts": "Spare Parts",
+            "tab_technicians": "Technicians",
+            "tab_notes": "Notes",
+            "description": "Service Description",
+            "description_placeholder": "Enter service description...",
+            "price": "Service Price",
+            "discount": "Discount",
+            "qty": "Quantity",
+            "total_cost": "Total Cost",
+            "service_cost": "Service Cost",
+            "parts_cost": "Parts Cost",
+            "status": "Status",
+            "status_pending": "Pending",
+            "status_in_progress": "In Progress",
+            "status_completed": "Completed",
+            "status_on_hold": "On Hold",
+            "status_cancelled": "Cancelled",
+            "add_part": "Add Part",
+            "part_name": "Part Name",
+            "part_source": {
+                "warehouse": "From Warehouse",
+                "external": "External Purchase",
+                "customer": "From Customer"
+            },
+            "no_parts": "No parts added",
+            "assign_technician": "Assign Technician",
+            "no_technicians": "No technicians assigned",
+            "assigned_at": "Assigned At",
+            "add_note": "Add Note",
+            "note_placeholder": "Write your note here...",
+            "no_notes": "No notes"
+        },
+        "all_loaded": "All work orders loaded"
     },
     "departments": {
         "title": "Departments Management",
@@ -470,6 +506,14 @@
         "title": "Settings",
         "subtitle": "Manage system settings and configuration",
         "cards": {
+            "company": {
+                "title": "Company Profile",
+                "description": "Company data, taxes, invoicing"
+            },
+            "branches": {
+                "title": "Branches",
+                "description": "Manage company branches and centers"
+            },
             "system": {
                 "title": "Vehicle Settings",
                 "description": "Makes, Models, Colors"
@@ -696,5 +740,135 @@
             "total_cost": "Service Cost"
         },
         "all_loaded": "All quotes loaded"
+    },
+    "company_profile": {
+        "title": "Company Profile",
+        "subtitle": "Company settings, taxes and invoicing",
+        "tenant_level": "Company Level",
+        "tabs": {
+            "profile": "Company Profile",
+            "contact": "Contact & Address",
+            "branches": "Branches",
+            "vat": "VAT Settings",
+            "zatca": "ZATCA",
+            "numbering": "Numbering",
+            "admin_user": "Admin User",
+            "subscription": "Subscription",
+            "subscription_history": "Subscription History",
+            "revenue_expenses": "Revenue & Expenses"
+        },
+        "branches": {
+            "title": "Branches",
+            "subtitle": "Manage company branches and service centers",
+            "add": "Add Branch",
+            "edit": "Edit Branch",
+            "settings": "Settings",
+            "empty": "No branches yet",
+            "empty_hint": "Add your first branch to get started",
+            "coming_soon": "Full branch management (add/edit/delete) coming soon"
+        },
+        "profile": {
+            "legal_name": "Legal Name",
+            "legal_name_en": "Legal Name (English)",
+            "trade_name": "Trade Name",
+            "owner_name": "Owner Name",
+            "vat_number": "VAT Number",
+            "cr_number": "Commercial Registration",
+            "iban": "IBAN",
+            "phone": "Phone",
+            "email": "Email",
+            "country": "Country",
+            "currency": "Currency",
+            "saudi_arabia": "Saudi Arabia"
+        },
+        "contact": {
+            "title": "Contact Information",
+            "phone": "Phone Number",
+            "email": "Email",
+            "save_button": "Save Contact Info"
+        },
+        "logo": {
+            "title": "Company Logo",
+            "hint": "PNG, JPG or WebP - max 2MB",
+            "alt": "Company Logo",
+            "upload": "Upload Logo",
+            "remove": "Remove",
+            "uploaded": "Logo uploaded successfully",
+            "deleted": "Logo deleted",
+            "error_size": "File size must be less than 2MB",
+            "error_type": "Unsupported file type. Use PNG, JPG or WebP",
+            "error_upload": "Failed to upload logo",
+            "error_delete": "Failed to delete logo"
+        },
+        "vat": {
+            "notice": "VAT settings affect all invoices",
+            "vat_enabled": "Enable VAT",
+            "vat_enabled_hint": "Apply VAT to all invoices",
+            "vat_rate": "VAT Rate",
+            "pricing_mode": "Pricing Mode",
+            "exclusive": "Exclusive (add VAT)",
+            "inclusive": "Inclusive (VAT included)"
+        },
+        "map": {
+            "click_hint": "Click on the map to set location"
+        },
+        "admin_user": {
+            "title": "Admin User",
+            "info": "Admin user information",
+            "name": "Name",
+            "email": "Email",
+            "password": "Password",
+            "password_confirm": "Confirm Password",
+            "password_hint": "Leave blank to keep current password"
+        }
+    },
+    "center_settings": {
+        "title": "Center Settings",
+        "tabs": {
+            "profile": "Information",
+            "contact": "Contact & Address",
+            "branding": "Branding",
+            "working_hours": "Working Hours"
+        },
+        "profile": {
+            "name_ar": "Center Name (Arabic)",
+            "name_en": "Center Name (English)",
+            "manager_name": "Manager Name",
+            "center_type": "Center Type",
+            "center_type_placeholder": "Main center, Riyadh branch...",
+            "license_number": "License Number",
+            "vat_number": "VAT Number"
+        },
+        "contact": {
+            "phone": "Phone Number",
+            "email": "Email"
+        },
+        "address": {
+            "title": "Address",
+            "street": "Street Name",
+            "address_line": "Address Details",
+            "city": "City",
+            "district": "District",
+            "building_number": "Building Number",
+            "postal_code": "Postal Code"
+        },
+        "branding": {
+            "logo_light": "Light Mode Logo",
+            "logo_light_hint": "Displayed on website and app in light mode",
+            "logo_dark": "Dark Mode Logo",
+            "logo_dark_hint": "Displayed on website and app in dark mode",
+            "logo_invoice": "Invoice Logo",
+            "logo_invoice_hint": "Displayed on printed invoices (optional - if you want a different logo)",
+            "stamp": "Official Stamp",
+            "stamp_hint": "Displayed on invoices and official documents",
+            "stamp_uploaded": "Stamp uploaded successfully",
+            "stamp_deleted": "Stamp deleted",
+            "stamp_error": "Failed to upload/delete stamp"
+        },
+        "working_hours": {
+            "hint": "Set working hours for each day of the week",
+            "open": "Open",
+            "closed": "Closed"
+        }
     }
 }

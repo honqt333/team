@@ -42,9 +42,14 @@
         "unsaved_changes": "تغييرات غير محفوظة",
         "unsaved_changes_message": "لم يتم حفظ التغييرات. هل أنت متأكد من إغلاق هذا النموذج؟",
         "yes_close": "نعم، إغلاق",
+        "close": "إغلاق",
+        "logged_in": "لقد قمت بتسجيل الدخول!",
         "discard": "تجاهل",
-        "print": "طباعة",
-        "qty": "الكمية"
+        "qty": "الكمية",
+        "validation": {
+            "required": "حقل {field} مطلوب",
+            "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
+        }
     },
     "nav": {
         "brand": "Carag",
@@ -398,7 +403,42 @@
                 "after": "بعد",
                 "damage": "ضرر"
             }
-        }
+        },
+        "item": {
+            "tab_service": "الخدمة",
+            "tab_parts": "قطع الغيار",
+            "tab_technicians": "الفنيون",
+            "tab_notes": "الملاحظات",
+            "description": "وصف الخدمة",
+            "description_placeholder": "أدخل وصف الخدمة...",
+            "price": "سعر الخدمة",
+            "discount": "الخصم",
+            "qty": "الكمية",
+            "total_cost": "إجمالي التكلفة",
+            "service_cost": "تكلفة الخدمة",
+            "parts_cost": "تكلفة القطع",
+            "status": "الحالة",
+            "status_pending": "قيد الانتظار",
+            "status_in_progress": "جاري",
+            "status_completed": "مكتمل",
+            "status_on_hold": "معلق",
+            "status_cancelled": "ملغاة",
+            "add_part": "إضافة قطعة غيار",
+            "part_name": "اسم القطعة",
+            "part_source": {
+                "warehouse": "من المخزن",
+                "external": "شراء خارجي",
+                "customer": "من العميل"
+            },
+            "no_parts": "لا توجد قطع غيار",
+            "assign_technician": "تعيين فني",
+            "no_technicians": "لا يوجد فنيون معينون",
+            "assigned_at": "تاريخ التعيين",
+            "add_note": "إضافة ملاحظة",
+            "note_placeholder": "اكتب ملاحظتك هنا...",
+            "no_notes": "لا توجد ملاحظات"
+        },
+        "all_loaded": "تم تحميل جميع كروت العمل"
     },
     "departments": {
         "title": "إدارة الأقسام",
@@ -476,6 +516,14 @@
         "title": "الإعدادات",
         "subtitle": "إدارة إعدادات النظام والتهيئة",
         "cards": {
+            "company": {
+                "title": "ملف الشركة",
+                "description": "بيانات الشركة، الضرائب، فاتورة"
+            },
+            "branches": {
+                "title": "الفروع",
+                "description": "إدارة فروع ومراكز الشركة"
+            },
             "system": {
                 "title": "إعدادات المركبات",
                 "description": "الماركات، الموديلات، الألوان"
@@ -488,6 +536,126 @@
                 "title": "الخدمات",
                 "description": "إدارة الخدمات المقدمة"
             }
+        }
+    },
+    "company_profile": {
+        "title": "ملف الشركة",
+        "subtitle": "إعدادات الشركة والضرائب وفاتورة",
+        "tenant_level": "على مستوى الشركة",
+        "tabs": {
+            "profile": "ملف الشركة",
+            "contact": "التواصل والعنوان",
+            "branches": "الفروع",
+            "vat": "الضرائب VAT",
+            "zatca": "ZATCA",
+            "numbering": "الترقيم",
+            "admin_user": "المستخدم الرئيسي",
+            "subscription": "الاشتراك",
+            "subscription_history": "سجل الاشتراك",
+            "revenue_expenses": "الإيرادات والنفقات"
+        },
+        "branches": {
+            "title": "الفروع",
+            "subtitle": "إدارة فروع الشركة ومراكز الخدمة",
+            "add": "إضافة فرع",
+            "edit": "تعديل الفرع",
+            "settings": "الإعدادات",
+            "empty": "لا توجد فروع",
+            "empty_hint": "أضف فرعك الأول للبدء",
+            "coming_soon": "إدارة الفروع بشكل كامل (إضافة/تعديل/حذف) ستكون متاحة قريباً"
+        },
+        "profile": {
+            "legal_name": "الاسم القانوني",
+            "legal_name_en": "الاسم القانوني بالإنجليزية",
+            "trade_name": "الاسم التجاري",
+            "owner_name": "اسم المالك",
+            "vat_number": "الرقم الضريبي",
+            "cr_number": "السجل التجاري",
+            "iban": "رقم الآيبان",
+            "phone": "الهاتف",
+            "email": "البريد الإلكتروني",
+            "country": "الدولة",
+            "currency": "العملة",
+            "saudi_arabia": "المملكة العربية السعودية",
+            "address": "العنوان",
+            "street": "اسم الشارع",
+            "address_line": "تفاصيل العنوان",
+            "city": "المدينة",
+            "district": "الحي",
+            "building_number": "رقم المبنى",
+            "postal_code": "الرمز البريدي"
+        },
+        "logo": {
+            "title": "شعار الشركة",
+            "hint": "PNG, JPG أو WebP - بحد أقصى 2 ميجابايت",
+            "alt": "شعار الشركة",
+            "upload": "رفع شعار",
+            "remove": "حذف",
+            "uploaded": "تم رفع الشعار بنجاح",
+            "deleted": "تم حذف الشعار",
+            "error_size": "حجم الملف يجب أن يكون أقل من 2 ميجابايت",
+            "error_type": "نوع الملف غير مدعوم. استخدم PNG, JPG أو WebP",
+            "error_upload": "فشل رفع الشعار",
+            "error_delete": "فشل حذف الشعار"
+        },
+        "contact": {
+            "title": "بيانات التواصل",
+            "phone": "رقم الهاتف",
+            "email": "البريد الإلكتروني",
+            "save_button": "حفظ معلومات التواصل"
+        },
+        "address": {
+            "address_placeholder": "حي، اسم الشارع، رقم المبنى",
+            "city_placeholder": "جدة",
+            "district_placeholder": "حكمة الخضيرة"
+        },
+        "map": {
+            "click_hint": "اضغط على الخريطة لتحديد الموقع، أو اسحب العلامة لتغيير الموقع"
+        },
+        "vat": {
+            "notice": "تُطبّق هذه الإعدادات على جميع الفروع، وتؤثر على المستندات الجديدة فقط (المستندات السابقة محفوظة Snapshots).",
+            "vat_enabled": "تفعيل ضريبة القيمة المضافة",
+            "vat_enabled_hint": "عند التفعيل، سيتم احتساب الضريبة على جميع الفواتير",
+            "vat_rate": "نسبة الضريبة",
+            "pricing_mode": "طريقة التسعير",
+            "inclusive": "شامل الضريبة",
+            "exclusive": "غير شامل الضريبة",
+            "vat_number_required": "يجب إدخال الرقم الضريبي لتفعيل الضريبة",
+            "go_to_profile": "انتقل لملف الشركة"
+        },
+        "zatca": {
+            "phase1_title": "المرحلة الأولى (QR Code)",
+            "qr_enabled": "تفعيل QR في الفاتورة",
+            "qr_enabled_hint": "سيتم إضافة رمز QR لجميع الفواتير",
+            "complete_vat_first": "أكمل إعدادات الضريبة أولاً",
+            "open_vat": "فتح إعدادات الضريبة",
+            "phase2_title": "التكامل مع فاتورة - قريباً",
+            "phase2_description": "ربط مباشر مع منصة فاتورة لإصدار الفواتير الإلكترونية",
+            "setup_integration": "إعداد التكامل (قريباً)"
+        },
+        "numbering": {
+            "format": "صيغة رقم الفاتورة",
+            "tokens_hint": "الرموز المتاحة: {SEQ}, {YYYY}, {YY}, {MM}, {DD}, {CENTER}",
+            "example": "مثال",
+            "notice": "العداد الفعلي لكل فرع محفوظ في center_sequences ولا يتم تعديله من هنا.",
+            "seq_required": "يجب أن تحتوي الصيغة على {SEQ}",
+            "invalid_tokens": "الصيغة تحتوي على رموز غير مسموح بها"
+        },
+        "admin_user": {
+            "title": "المستخدم الرئيسي",
+            "admin_label": "مدير النظام",
+            "email": "البريد الإلكتروني",
+            "change_email": "تغيير البريد الإلكتروني",
+            "change_password": "تغيير كلمة المرور",
+            "current_password": "كلمة المرور الحالية",
+            "new_password": "كلمة المرور الجديدة",
+            "confirm_password": "تأكيد كلمة المرور",
+            "password_hint": "اترك حقول كلمة المرور فارغة إذا كنت لا تريد تغييرها",
+            "email_invalid": "البريد الإلكتروني غير صالح",
+            "email_taken": "البريد الإلكتروني مستخدم بالفعل",
+            "current_password_wrong": "كلمة المرور الحالية غير صحيحة",
+            "password_min": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
+            "password_confirm_mismatch": "كلمة المرور الجديدة غير متطابقة"
         }
     },
     "system_settings": {
@@ -702,5 +870,54 @@
             "total_cost": "تكلفة الخدمة"
         },
         "all_loaded": "تم تحميل جميع التقييمات"
+    },
+    "center_settings": {
+        "title": "إعدادات المركز",
+        "tabs": {
+            "profile": "المعلومات",
+            "contact": "التواصل والعنوان",
+            "branding": "الهوية البصرية",
+            "working_hours": "أوقات العمل"
+        },
+        "profile": {
+            "name_ar": "اسم المركز بالعربي",
+            "name_en": "اسم المركز بالإنجليزي",
+            "manager_name": "اسم مدير المركز",
+            "center_type": "نوع المركز",
+            "center_type_placeholder": "مركز رئيسي، فرع الرياض...",
+            "license_number": "رقم الرخصة",
+            "vat_number": "الرقم الضريبي"
+        },
+        "contact": {
+            "phone": "رقم الهاتف",
+            "email": "البريد الإلكتروني"
+        },
+        "address": {
+            "title": "العنوان",
+            "street": "اسم الشارع",
+            "address_line": "تفاصيل العنوان",
+            "city": "المدينة",
+            "district": "الحي",
+            "building_number": "رقم المبنى",
+            "postal_code": "الرمز البريدي"
+        },
+        "branding": {
+            "logo_light": "شعار الوضع الفاتح",
+            "logo_light_hint": "يظهر في الموقع والتطبيق عند استخدام الوضع الفاتح",
+            "logo_dark": "شعار الوضع الداكن",
+            "logo_dark_hint": "يظهر في الموقع والتطبيق عند استخدام الوضع الداكن",
+            "logo_invoice": "شعار الفواتير",
+            "logo_invoice_hint": "يظهر على الفواتير المطبوعة (اختياري - إذا أردت شعار مختلف)",
+            "stamp": "الختم الرسمي",
+            "stamp_hint": "يظهر على الفواتير والمستندات الرسمية",
+            "stamp_uploaded": "تم رفع الختم بنجاح",
+            "stamp_deleted": "تم حذف الختم",
+            "stamp_error": "فشل في رفع/حذف الختم"
+        },
+        "working_hours": {
+            "hint": "حدد أوقات عمل المركز لكل يوم من أيام الأسبوع",
+            "open": "مفتوح",
+            "closed": "مغلق"
+        }
     }
 }
