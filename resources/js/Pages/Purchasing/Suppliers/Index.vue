@@ -15,16 +15,16 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('purchasing.suppliers.subtitle') }}</p>
                         </div>
                     </div>
-                    <Link
+                    <button
                         v-if="can('purchasing.suppliers.create')"
-                        :href="route('app.purchasing.suppliers.create')"
+                        @click="createSupplier"
                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                         {{ $t('purchasing.suppliers.add') }}
-                    </Link>
+                    </button>
                 </div>
             </div>
 
@@ -90,15 +90,15 @@
                                 </td>
                                 <td class="px-4 py-3 text-end">
                                     <div class="flex items-center justify-end gap-2">
-                                        <Link
+                                        <button
                                             v-if="can('purchasing.suppliers.update')"
-                                            :href="route('app.purchasing.suppliers.edit', supplier.id)"
+                                            @click="editSupplier(supplier)"
                                             class="p-2 text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
-                                        </Link>
+                                        </button>
                                         <button
                                             v-if="can('purchasing.suppliers.deactivate')"
                                             @click="toggleActive(supplier)"
@@ -126,6 +126,13 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Create/Edit Modal -->
+            <CreateModal
+                :show="showCreateModal"
+                :supplier="editingSupplier"
+                @close="closeModal"
+            />
         </div>
     </AppLayout>
 </template>
@@ -135,6 +142,7 @@ import { ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
+import CreateModal from './CreateModal.vue';
 
 const props = defineProps({
     suppliers: Object,
@@ -148,6 +156,24 @@ const localFilters = ref({
     search: props.filters?.search || '',
     status: props.filters?.status || '',
 });
+
+const showCreateModal = ref(false);
+const editingSupplier = ref(null);
+
+const createSupplier = () => {
+    editingSupplier.value = null;
+    showCreateModal.value = true;
+};
+
+const editSupplier = (supplier) => {
+    editingSupplier.value = supplier;
+    showCreateModal.value = true;
+};
+
+const closeModal = () => {
+    showCreateModal.value = false;
+    editingSupplier.value = null;
+};
 
 const applyFilters = () => {
     router.get(route('app.purchasing.suppliers.index'), {

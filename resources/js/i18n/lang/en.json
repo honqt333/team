@@ -54,7 +54,8 @@
         "updated_at": "Updated At",
         "notes": "Notes",
         "select": "Select",
-        "all": "All"
+        "all": "All",
+        "name": "Name"
     },
     "nav": {
         "brand": "Carag",
@@ -894,6 +895,27 @@
     },
     "inventory": {
         "title": "Inventory Management",
+        "hub": {
+            "title": "Inventory Management",
+            "subtitle": "Overview of inventory, parts, and transfers",
+            "parts_hint": "Manage spare parts and consumables",
+            "stock_hint": "View stock balances in warehouses",
+            "moves_hint": "Daily inventory movements log",
+            "transfers_hint": "Inter-center transfers",
+            "settings_hint": "Units and categories settings"
+        },
+        "settings": {
+            "title": "Inventory Settings",
+            "subtitle": "Manage measurement units and part categories",
+            "units": {
+                "title": "Measurement Units",
+                "unit": "Unit"
+            },
+            "categories": {
+                "title": "Part Categories",
+                "category": "Category"
+            }
+        },
         "warehouses": {
             "title": "Warehouses"
         },
@@ -921,7 +943,11 @@
             "created": "Part added successfully",
             "updated": "Part updated successfully",
             "activated": "Part activated",
-            "deactivated": "Part deactivated"
+            "deactivated": "Part deactivated",
+            "basic_info": "Basic Information",
+            "inventory_pricing": "Inventory & Pricing",
+            "additional_info": "Additional Information",
+            "description_placeholder": "Add any additional details or notes about this part..."
         },
         "units": {
             "piece": "Piece",
@@ -1036,7 +1062,21 @@
             "created": "Supplier added successfully",
             "updated": "Supplier updated successfully",
             "activated": "Supplier activated",
-            "deactivated": "Supplier deactivated"
+            "deactivated": "Supplier deactivated",
+            "type": "Supplier Type",
+            "type_parts": "Parts Supplier",
+            "type_parts_desc": "Supplies spare parts and inventory items",
+            "type_services": "Service Provider",
+            "type_services_desc": "Provides maintenance services or labor",
+            "address_details": "Address Details",
+            "address_line": "Address Line",
+            "building_number": "Building No.",
+            "postal_code": "Postal Code",
+            "district": "District",
+            "city": "City",
+            "region": "Region",
+            "country": "Country",
+            "clear_address": "Clear Address"
         },
         "orders": {
             "title": "Purchase Orders",

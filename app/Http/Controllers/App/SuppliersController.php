@@ -25,9 +25,35 @@ class SuppliersController extends Controller
 
         $suppliers = $query->paginate(25)->withQueryString();
 
+        // Add placeholder balance
+        $suppliers->getCollection()->transform(function ($supplier) {
+            $supplier->balance = 0; // Placeholder
+            return $supplier;
+        });
+
         return Inertia::render('Purchasing/Suppliers/Index', [
             'suppliers' => $suppliers,
             'filters' => $request->only(['search', 'status']),
+        ]);
+    }
+
+    public function show(Supplier $supplier)
+    {
+        $this->authorize('view', $supplier);
+        
+        $supplier->loadCount('purchaseOrders');
+        
+        // Placeholders for future modules
+        $counts = [
+            'orders' => $supplier->purchase_orders_count,
+            'invoices' => 0,
+            'payments' => 0,
+        ];
+
+        return Inertia::render('Purchasing/Suppliers/Show', [
+            'supplier' => $supplier,
+            'counts' => $counts,
+            'balance' => 0, // Placeholder
         ]);
     }
 
@@ -54,10 +80,20 @@ class SuppliersController extends Controller
                 'max:30',
                 Rule::unique('suppliers')->where('tenant_id', $tenantId),
             ],
+            'type' => 'required|in:parts,services',
             'contact_person' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:1000',
+            'city' => 'nullable|string|max:255',
+            'region' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'building_number' => 'nullable|string|max:20',
+            'district' => 'nullable|string|max:255',
+            'street' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lng' => 'nullable|numeric|between:-180,180',
             'tax_number' => 'nullable|string|max:20',
             'cr_number' => 'nullable|string|max:20',
             'bank_name' => 'nullable|string|max:255',
@@ -96,10 +132,20 @@ class SuppliersController extends Controller
                 'max:30',
                 Rule::unique('suppliers')->where('tenant_id', $tenantId)->ignore($supplier->id),
             ],
+            'type' => 'required|in:parts,services',
             'contact_person' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:1000',
+            'city' => 'nullable|string|max:255',
+            'region' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|string|max:20',
+            'building_number' => 'nullable|string|max:20',
+            'district' => 'nullable|string|max:255',
+            'street' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'lat' => 'nullable|numeric|between:-90,90',
+            'lng' => 'nullable|numeric|between:-180,180',
             'tax_number' => 'nullable|string|max:20',
             'cr_number' => 'nullable|string|max:20',
             'bank_name' => 'nullable|string|max:255',

@@ -178,6 +178,18 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     // Inventory Module
     // ───────────────────────────────────────────────────────────────
     Route::prefix('inventory')->name('app.inventory.')->group(function () {
+        // Hub (main dashboard)
+        Route::get('/', [\App\Http\Controllers\App\InventorySettingsController::class, 'hub'])->name('hub');
+        
+        // Settings (units, categories)
+        Route::get('/settings', [\App\Http\Controllers\App\InventorySettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings/units', [\App\Http\Controllers\App\InventorySettingsController::class, 'storeUnit'])->name('settings.units.store');
+        Route::put('/settings/units/{unit}', [\App\Http\Controllers\App\InventorySettingsController::class, 'updateUnit'])->name('settings.units.update');
+        Route::delete('/settings/units/{unit}', [\App\Http\Controllers\App\InventorySettingsController::class, 'destroyUnit'])->name('settings.units.destroy');
+        Route::post('/settings/categories', [\App\Http\Controllers\App\InventorySettingsController::class, 'storeCategory'])->name('settings.categories.store');
+        Route::put('/settings/categories/{category}', [\App\Http\Controllers\App\InventorySettingsController::class, 'updateCategory'])->name('settings.categories.update');
+        Route::delete('/settings/categories/{category}', [\App\Http\Controllers\App\InventorySettingsController::class, 'destroyCategory'])->name('settings.categories.destroy');
+        
         // Parts
         Route::get('/parts', [\App\Http\Controllers\App\PartsController::class, 'index'])->name('parts.index');
         Route::get('/parts/create', [\App\Http\Controllers\App\PartsController::class, 'create'])->name('parts.create');

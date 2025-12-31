@@ -142,100 +142,162 @@
 
                     <!-- Divider: Inventory & Purchasing -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
-                    <p class="px-3 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.title') }}</p>
+                    
+                    <!-- Inventory Collapsible Section -->
+                    <div>
+                        <a
+                            href="/app/inventory"
+                            @click="inventoryExpanded = true"
+                            :class="[
+                                'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
+                                isActive('/app/inventory')
+                                    ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]"
+                        >
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                {{ $t('inventory.title') }}
+                            </div>
+                            <svg 
+                                @click.prevent.stop="inventoryExpanded = !inventoryExpanded"
+                                :class="['w-4 h-4 transition-transform cursor-pointer hover:text-emerald-600', inventoryExpanded ? 'rotate-180' : '']" 
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </a>
+                        
+                        <div v-show="inventoryExpanded" class="ps-4 mt-1 space-y-1">
+                            <a
+                                href="/app/inventory/parts"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/inventory/parts')
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                                {{ $t('inventory.parts.title') }}
+                            </a>
+                            <a
+                                href="/app/inventory/stock"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/inventory/stock')
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                                {{ $t('inventory.stock.title') }}
+                            </a>
+                            <a
+                                href="/app/inventory/moves"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/inventory/moves')
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                                </svg>
+                                {{ $t('inventory.moves.title') }}
+                            </a>
+                            <a
+                                href="/app/inventory/transfers"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/inventory/transfers')
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                                </svg>
+                                {{ $t('inventory.transfers.title') }}
+                            </a>
+                            <a
+                                href="/app/inventory/settings"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/inventory/settings')
+                                        ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                {{ $t('inventory.settings.title') }}
+                            </a>
+                        </div>
+                    </div>
 
-                    <a
-                        href="/app/inventory/parts"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/inventory/parts')
-                                ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                        {{ $t('inventory.parts.title') }}
-                    </a>
-
-                    <a
-                        href="/app/inventory/stock"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/inventory/stock')
-                                ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        {{ $t('inventory.stock.title') }}
-                    </a>
-
-                    <a
-                        href="/app/inventory/moves"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/inventory/moves')
-                                ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
-                        </svg>
-                        {{ $t('inventory.moves.title') }}
-                    </a>
-
-                    <a
-                        href="/app/inventory/transfers"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/inventory/transfers')
-                                ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                        </svg>
-                        {{ $t('inventory.transfers.title') }}
-                    </a>
-
-                    <!-- Purchasing Section -->
-                    <p class="px-3 py-1 mt-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('purchasing.title') }}</p>
-
-                    <a
-                        href="/app/purchasing/suppliers"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/purchasing/suppliers')
-                                ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                        </svg>
-                        {{ $t('purchasing.suppliers.title') }}
-                    </a>
-
-                    <a
-                        href="/app/purchasing/orders"
-                        :class="[
-                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
-                            isActive('/app/purchasing/orders')
-                                ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]"
-                    >
-                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                        </svg>
-                        {{ $t('purchasing.orders.title') }}
-                    </a>
+                    <!-- Purchasing Collapsible Section -->
+                    <div class="mt-2">
+                        <button
+                            @click="purchasingExpanded = !purchasingExpanded; inventoryExpanded = false"
+                            :class="[
+                                'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
+                                isActive('/app/purchasing')
+                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]"
+                        >
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                                {{ $t('purchasing.title') }}
+                            </div>
+                            <svg :class="['w-4 h-4 transition-transform', purchasingExpanded ? 'rotate-180' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        
+                        <div v-show="purchasingExpanded" class="ps-4 mt-1 space-y-1">
+                            <a
+                                href="/app/purchasing/suppliers"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/purchasing/suppliers')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                {{ $t('purchasing.suppliers.title') }}
+                            </a>
+                            <a
+                                href="/app/purchasing/orders"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/purchasing/orders')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                </svg>
+                                {{ $t('purchasing.orders.title') }}
+                            </a>
+                        </div>
+                    </div>
 
                     <!-- Divider -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
@@ -548,6 +610,31 @@ const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
 const isDark = ref(false);
 const currentLocale = ref('ar');
+
+// Persist sidebar expanded state in localStorage
+const getStoredState = (key, defaultValue) => {
+    if (typeof window !== 'undefined') {
+        const stored = localStorage.getItem(key);
+        return stored !== null ? stored === 'true' : defaultValue;
+    }
+    return defaultValue;
+};
+
+const inventoryExpanded = ref(getStoredState('inventoryExpanded', true));
+const purchasingExpanded = ref(getStoredState('purchasingExpanded', false));
+
+// Watch and persist changes
+watch(inventoryExpanded, (val) => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('inventoryExpanded', val.toString());
+    }
+});
+
+watch(purchasingExpanded, (val) => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('purchasingExpanded', val.toString());
+    }
+});
 
 const isRtl = computed(() => currentLocale.value === 'ar');
 const userInitial = computed(() => {

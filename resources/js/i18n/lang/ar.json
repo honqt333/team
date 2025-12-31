@@ -55,6 +55,7 @@
         "notes": "ملاحظات",
         "select": "اختر",
         "all": "الكل",
+        "name": "الاسم",
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
@@ -939,6 +940,27 @@
     },
     "inventory": {
         "title": "إدارة المخزون",
+        "hub": {
+            "title": "إدارة المخزون",
+            "subtitle": "نظرة شاملة على المخزون والقطع والتحويلات",
+            "parts_hint": "إدارة قطع الغيار والمواد الاستهلاكية",
+            "stock_hint": "عرض أرصدة المخزون في المستودعات",
+            "moves_hint": "سجل حركات المخزون اليومية",
+            "transfers_hint": "التحويلات بين المراكز",
+            "settings_hint": "إعدادات الوحدات والفئات"
+        },
+        "settings": {
+            "title": "إعدادات المخزون",
+            "subtitle": "إدارة وحدات القياس وفئات القطع",
+            "units": {
+                "title": "وحدات القياس",
+                "unit": "وحدة"
+            },
+            "categories": {
+                "title": "فئات القطع",
+                "category": "فئة"
+            }
+        },
         "warehouses": {
             "title": "المستودعات"
         },
@@ -975,7 +997,11 @@
                 "pending": "معلق",
                 "issued": "مصروف",
                 "reversed": "معكوس"
-            }
+            },
+            "basic_info": "البيانات الأساسية",
+            "inventory_pricing": "المخزون والتسعير",
+            "additional_info": "معلومات إضافية",
+            "description_placeholder": "أضف أي تفاصيل أو ملاحظات إضافية..."
         },
         "units": {
             "piece": "قطعة",
@@ -1091,7 +1117,21 @@
             "created": "تم إضافة المورد بنجاح",
             "updated": "تم تحديث المورد بنجاح",
             "activated": "تم تفعيل المورد",
-            "deactivated": "تم تعطيل المورد"
+            "deactivated": "تم تعطيل المورد",
+            "type": "نوع المورد",
+            "type_parts": "مورد قطع غيار",
+            "type_parts_desc": "تويفير قطع الغيار ومواد المخزون",
+            "type_services": "مقدم خدمات",
+            "type_services_desc": "تقديم خدمات صيانة أو عمالة",
+            "address_details": "تفاصيل العنوان",
+            "address_line": "العنوان والشارع",
+            "building_number": "رقم المبنى",
+            "postal_code": "الرمز البريدي",
+            "district": "الحي",
+            "city": "المدينة",
+            "region": "المنطقة",
+            "country": "الدولة",
+            "clear_address": "مسح العنوان"
         },
         "orders": {
             "title": "أوامر الشراء",

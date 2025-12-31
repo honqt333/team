@@ -26,15 +26,14 @@ class PartsController extends Controller
 
         $parts = $query->paginate(25)->withQueryString();
 
-        // Get unique categories for filter
-        $categories = Part::forTenant($tenantId)
-            ->whereNotNull('category')
-            ->distinct()
-            ->pluck('category');
+
+        $units = \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get();
+        $categories = \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get();
 
         return Inertia::render('Inventory/Parts/Index', [
             'parts' => $parts,
-            'categories' => $categories,
+            'categories' => $categories, // Passing full objects now instead of just strings
+            'units' => $units,
             'filters' => $request->only(['search', 'status', 'category']),
         ]);
     }

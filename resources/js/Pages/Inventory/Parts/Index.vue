@@ -15,16 +15,16 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.subtitle') }}</p>
                         </div>
                     </div>
-                    <Link
+                    <button
                         v-if="can('inventory.parts.create')"
-                        :href="route('app.inventory.parts.create')"
+                        @click="createPart"
                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                     >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
                         {{ $t('inventory.parts.add') }}
-                    </Link>
+                    </button>
                 </div>
             </div>
 
@@ -109,15 +109,15 @@
                                 </td>
                                 <td class="px-4 py-3 text-end">
                                     <div class="flex items-center justify-end gap-2">
-                                        <Link
-                                            v-if="can('inventory.parts.update')"
-                                            :href="route('app.inventory.parts.edit', part.id)"
+                                        <button
+                                            v-if="can('inventory.parts.edit')"
+                                            @click="editPart(part)"
                                             class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
-                                        </Link>
+                                        </button>
                                         <button
                                             v-if="can('inventory.parts.deactivate')"
                                             @click="toggleActive(part)"
@@ -170,19 +170,36 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Create/Edit Modal -->
+            <CreateModal
+                :show="showCreateModal"
+                :part="editingPart"
+                :units="units"
+                :categories="categories"
+                @close="closeModal"
+            />
         </div>
     </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
+import CreateModal from './CreateModal.vue';
 
 const props = defineProps({
     parts: Object,
-    categories: Array,
+    categories: {
+        type: Array,
+        default: () => [],
+    },
+    units: {
+        type: Array,
+        default: () => [],
+    },
     filters: Object,
 });
 
@@ -191,19 +208,34 @@ const can = (permission) => page.props.auth?.permissions?.includes(permission) ?
 
 const localFilters = ref({
     search: props.filters?.search || '',
-    status: props.filters?.status || '',
     category: props.filters?.category || '',
+    status: props.filters?.status || '',
 });
+
+const showCreateModal = ref(false);
+const editingPart = ref(null);
+
+const createPart = () => {
+    editingPart.value = null;
+    showCreateModal.value = true;
+};
+
+const editPart = (part) => {
+    editingPart.value = part;
+    showCreateModal.value = true;
+};
+
+const closeModal = () => {
+    showCreateModal.value = false;
+    editingPart.value = null;
+};
 
 const applyFilters = () => {
     router.get(route('app.inventory.parts.index'), {
         search: localFilters.value.search || undefined,
-        status: localFilters.value.status || undefined,
         category: localFilters.value.category || undefined,
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-    });
+        status: localFilters.value.status || undefined,
+    }, { preserveState: true, preserveScroll: true });
 };
 
 const debouncedSearch = debounce(applyFilters, 300);
