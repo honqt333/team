@@ -53,7 +53,8 @@
         "created_by": "Created By",
         "updated_at": "Updated At",
         "notes": "Notes",
-        "select": "Select"
+        "select": "Select",
+        "all": "All"
     },
     "nav": {
         "brand": "Carag",

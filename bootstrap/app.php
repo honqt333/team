@@ -12,11 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
+            \App\Http\Middleware\SetPermissionsTeam::class, // Must be FIRST - sets team before permissions are loaded
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\ConvertArabicNumerals::class,
-            \App\Http\Middleware\SetPermissionsTeam::class, // Must be after auth session
         ]);
 
         $middleware->alias([

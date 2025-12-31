@@ -54,6 +54,7 @@
         "updated_at": "تاريخ التحديث",
         "notes": "ملاحظات",
         "select": "اختر",
+        "all": "الكل",
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
