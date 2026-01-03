@@ -20,7 +20,9 @@ class PartsController extends Controller
             ->search($request->input('search'))
             ->when($request->input('status') === 'active', fn($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
-            ->when($request->input('category'), fn($q, $cat) => $q->where('category', $cat))
+            ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
+            ->when($request->input('category'), fn($q, $catId) => $q->where('category_id', $catId))
+            ->with(['unit', 'category'])
             ->withSum('inventoryBalances', 'qty_on_hand')
             ->orderBy('name_ar');
 
@@ -42,8 +44,12 @@ class PartsController extends Controller
     {
         $this->authorize('create', Part::class);
 
+        $tenantId = auth()->user()->tenant_id;
+
         return Inertia::render('Inventory/Parts/Form', [
             'part' => null,
+            'units' => \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+            'categories' => \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
         ]);
     }
 
@@ -62,8 +68,8 @@ class PartsController extends Controller
             ],
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'unit' => 'required|string|max:20',
-            'category' => 'nullable|string|max:100',
+            'unit_id' => 'required|exists:inventory_units,id',
+            'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'min_qty' => 'nullable|numeric|min:0',
             'reorder_qty' => 'nullable|numeric|min:0',
@@ -82,8 +88,12 @@ class PartsController extends Controller
     {
         $this->authorize('update', $part);
 
+        $tenantId = auth()->user()->tenant_id;
+
         return Inertia::render('Inventory/Parts/Form', [
             'part' => $part,
+            'units' => \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+            'categories' => \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
         ]);
     }
 
@@ -102,8 +112,8 @@ class PartsController extends Controller
             ],
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'unit' => 'required|string|max:20',
-            'category' => 'nullable|string|max:100',
+            'unit_id' => 'required|exists:inventory_units,id',
+            'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'min_qty' => 'nullable|numeric|min:0',
             'reorder_qty' => 'nullable|numeric|min:0',
@@ -139,7 +149,8 @@ class PartsController extends Controller
         $parts = Part::forTenant($tenantId)
             ->active()
             ->search($request->input('q'))
-            ->select('id', 'sku', 'name_ar', 'name_en', 'unit', 'default_sale_price')
+            ->with(['unit'])
+            ->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'default_sale_price')
             ->withSum('inventoryBalances', 'qty_on_hand')
             ->limit(20)
             ->get();

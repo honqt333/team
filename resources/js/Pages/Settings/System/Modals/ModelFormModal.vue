@@ -53,20 +53,16 @@
 
                 <!-- Make -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('system_settings.form.make') }} <span class="text-red-500">*</span>
-                    </label>
-                    <select
+                    <SearchableSelect
                         v-model="form.make_id"
+                        :options="makeOptions"
+                        option-label="label"
+                        option-value="value"
+                        :label="$t('system_settings.form.make')"
+                        :placeholder="$t('common.choose')"
                         required
-                        class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    >
-                        <option value="">{{ $t('common.choose') }}</option>
-                        <option v-for="make in makes" :key="make.id" :value="make.id">
-                            {{ getName(make) }}
-                        </option>
-                    </select>
-                    <p v-if="form.errors.make_id" class="mt-1 text-sm text-red-500">{{ form.errors.make_id }}</p>
+                        :error="form.errors.make_id"
+                    />
                 </div>
 
                 <!-- Is Active -->
@@ -116,8 +112,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useLocalized } from '@/Composables/useLocalized';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { getName } = useLocalized();
 
@@ -127,6 +125,13 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'saved']);
+
+const makeOptions = computed(() => {
+    return (props.makes || []).map(make => ({
+        value: make.id,
+        label: getName(make)
+    }));
+});
 
 const form = useForm({
     name_ar: props.model?.name_ar || '',

@@ -110,6 +110,43 @@ info: blue-500
 <button class="relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200">
 ```
 
+### 🖨️ قالب الطباعة الموحد (Print Template)
+
+```vue
+<!-- استخدم PrintHeader في جميع صفحات الطباعة -->
+<template>
+    <div class="print-container bg-white min-h-screen p-8" :dir="isRtl ? 'rtl' : 'ltr'">
+        <PrintHeader 
+            :title="isRtl ? 'عنوان التقرير' : 'Report Title'"
+            :subtitle="referenceNumber"
+            :work-order="workOrder"
+        />
+        <!-- محتوى الصفحة -->
+    </div>
+</template>
+
+<script setup>
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
+</script>
+
+<style>
+@media print {
+    @page { size: A4; margin: 1cm; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .print-container { padding: 0; }
+}
+</style>
+```
+
+**الـ PrintHeader يحتوي على:**
+- شعار الشركة/الفرع
+- اسم الشركة التجاري
+- الهاتف + البريد
+- السجل التجاري + الرقم الضريبي
+- عنوان التقرير (مركز)
+- تاريخ الطباعة
+- دعم RTL/LTR تلقائي
+
 ### ✅ إلزامي في كل صفحة:
 - دعم Dark Mode
 - دعم RTL

@@ -14,5 +14,11 @@ class InventoryUnit extends Model
         'name_ar',
         'name_en',
         'is_active',
+        'updated_by',
     ];
+
+    public function updatedBy()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
 }

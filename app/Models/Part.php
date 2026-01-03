@@ -17,8 +17,8 @@ class Part extends Model
         'sku',
         'name_ar',
         'name_en',
-        'unit',
-        'category',
+        'unit_id',
+        'category_id',
         'description',
         'min_qty',
         'reorder_qty',
@@ -40,6 +40,16 @@ class Part extends Model
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(InventoryUnit::class, 'unit_id');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(InventoryCategory::class, 'category_id');
     }
 
     public function inventoryBalances(): HasMany

@@ -4,9 +4,11 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
+use App\Http\Requests\App\Purchasing\SupplierRequest;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SuppliersController extends Controller
 {
@@ -57,51 +59,14 @@ class SuppliersController extends Controller
         ]);
     }
 
-    public function create()
+
+
+    public function store(SupplierRequest $request)
     {
         $this->authorize('create', Supplier::class);
 
-        return Inertia::render('Purchasing/Suppliers/Form', [
-            'supplier' => null,
-        ]);
-    }
-
-    public function store(Request $request)
-    {
-        $this->authorize('create', Supplier::class);
-
-        $tenantId = auth()->user()->tenant_id;
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => [
-                'nullable',
-                'string',
-                'max:30',
-                Rule::unique('suppliers')->where('tenant_id', $tenantId),
-            ],
-            'type' => 'required|in:parts,services',
-            'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string|max:1000',
-            'city' => 'nullable|string|max:255',
-            'region' => 'nullable|string|max:255',
-            'postal_code' => 'nullable|string|max:20',
-            'building_number' => 'nullable|string|max:20',
-            'district' => 'nullable|string|max:255',
-            'street' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:255',
-            'lat' => 'nullable|numeric|between:-90,90',
-            'lng' => 'nullable|numeric|between:-180,180',
-            'tax_number' => 'nullable|string|max:20',
-            'cr_number' => 'nullable|string|max:20',
-            'bank_name' => 'nullable|string|max:255',
-            'iban' => 'nullable|string|max:34',
-            'notes' => 'nullable|string|max:1000',
-        ]);
-
-        $validated['tenant_id'] = $tenantId;
+        $validated = $request->validated();
+        $validated['tenant_id'] = auth()->user()->tenant_id;
 
         Supplier::create($validated);
 
@@ -109,54 +74,29 @@ class SuppliersController extends Controller
             ->with('success', __('purchasing.suppliers.created'));
     }
 
-    public function edit(Supplier $supplier)
+
+
+    public function update(SupplierRequest $request, Supplier $supplier)
     {
         $this->authorize('update', $supplier);
 
-        return Inertia::render('Purchasing/Suppliers/Form', [
-            'supplier' => $supplier,
-        ]);
+        $supplier->update($request->validated());
+
+        return redirect()->back()->with('success', __('purchasing.suppliers.updated'));
     }
 
-    public function update(Request $request, Supplier $supplier)
+    public function destroy(Supplier $supplier)
     {
-        $this->authorize('update', $supplier);
+        $this->authorize('delete', $supplier);
 
-        $tenantId = auth()->user()->tenant_id;
+        if ($supplier->purchaseOrders()->exists()) {
+            return back()->with('error', __('common.cannot_delete_system_data'));
+        }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => [
-                'nullable',
-                'string',
-                'max:30',
-                Rule::unique('suppliers')->where('tenant_id', $tenantId)->ignore($supplier->id),
-            ],
-            'type' => 'required|in:parts,services',
-            'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'address' => 'nullable|string|max:1000',
-            'city' => 'nullable|string|max:255',
-            'region' => 'nullable|string|max:255',
-            'postal_code' => 'nullable|string|max:20',
-            'building_number' => 'nullable|string|max:20',
-            'district' => 'nullable|string|max:255',
-            'street' => 'nullable|string|max:255',
-            'country' => 'nullable|string|max:255',
-            'lat' => 'nullable|numeric|between:-90,90',
-            'lng' => 'nullable|numeric|between:-180,180',
-            'tax_number' => 'nullable|string|max:20',
-            'cr_number' => 'nullable|string|max:20',
-            'bank_name' => 'nullable|string|max:255',
-            'iban' => 'nullable|string|max:34',
-            'notes' => 'nullable|string|max:1000',
-        ]);
-
-        $supplier->update($validated);
+        $supplier->delete();
 
         return redirect()->route('app.purchasing.suppliers.index')
-            ->with('success', __('purchasing.suppliers.updated'));
+            ->with('success', __('common.deleted_success'));
     }
 
     public function toggleActive(Supplier $supplier)
@@ -187,5 +127,84 @@ class SuppliersController extends Controller
             ->get();
 
         return response()->json($suppliers);
+    }
+
+    /**
+     * Export suppliers to Excel (XLSX).
+     */
+    public function export(Request $request)
+    {
+        $this->authorize('viewAny', Supplier::class);
+
+        // Set locale from request if provided
+        if ($request->has('locale') && in_array($request->input('locale'), ['ar', 'en'])) {
+            app()->setLocale($request->input('locale'));
+        }
+
+        $tenantId = auth()->user()->tenant_id;
+
+        $suppliers = Supplier::forTenant($tenantId)
+            ->search($request->input('search'))
+            ->when($request->input('status') === 'active', fn($q) => $q->active())
+            ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
+            ->orderBy('name')
+            ->get(['id', 'name', 'code', 'phone', 'email', 'type', 'tax_number', 'is_active']);
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        
+        // Set RTL for Arabic
+        $sheet->setRightToLeft(app()->getLocale() === 'ar');
+
+        // Headers
+        $headers = [
+            '#',
+            __('purchasing.suppliers.name'),
+            __('purchasing.suppliers.code'),
+            __('purchasing.suppliers.phone'),
+            __('purchasing.suppliers.email'),
+            __('purchasing.suppliers.type'),
+            __('purchasing.suppliers.tax_number'),
+            __('common.status'),
+        ];
+        
+        $sheet->fromArray($headers, null, 'A1');
+        
+        // Style headers
+        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:H1')->getFill()
+            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('E5E7EB');
+
+        // Data
+        $row = 2;
+        foreach ($suppliers as $index => $supplier) {
+            $sheet->fromArray([
+                $index + 1,
+                $supplier->name,
+                $supplier->code,
+                $supplier->phone,
+                $supplier->email,
+                $supplier->type === 'parts' ? __('purchasing.suppliers.type_parts') : __('purchasing.suppliers.type_services'),
+                $supplier->tax_number,
+                $supplier->is_active ? __('common.active') : __('common.inactive'),
+            ], null, 'A' . $row);
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'H') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'suppliers_' . date('Y-m-d_His') . '.xlsx';
+        
+        $writer = new Xlsx($spreadsheet);
+        
+        return response()->streamDownload(function() use ($writer) {
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
     }
 }

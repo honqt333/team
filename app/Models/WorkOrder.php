@@ -50,6 +50,7 @@ class WorkOrder extends Model
         'customer_complaint',
         'initial_assessment',
         'mileage',
+        'fuel_level',
         'contact_name',
         'contact_phone',
         // Tax Snapshots
@@ -70,6 +71,7 @@ class WorkOrder extends Model
         'entry_date' => 'date:Y-m-d',
         'expected_end_date' => 'date:Y-m-d',
         'mileage' => 'integer',
+        'fuel_level' => 'float',
         'tax_breakdown' => 'array',
     ];
 
@@ -128,6 +130,43 @@ class WorkOrder extends Model
     {
         return $this->belongsToMany(Department::class, 'work_order_departments')
             ->withTimestamps();
+    }
+
+    /**
+     * Get the payments for this work order.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class)->orderByDesc('payment_date');
+    }
+
+    // ==================== Payment Helpers ====================
+
+    /**
+     * Get total paid amount.
+     */
+    public function getTotalPaidAttribute(): float
+    {
+        $payments = $this->payments()->where('type', Payment::TYPE_PAYMENT)->sum('amount');
+        $refunds = $this->payments()->where('type', Payment::TYPE_REFUND)->sum('amount');
+        
+        return (float) ($payments - $refunds);
+    }
+
+    /**
+     * Get remaining balance.
+     */
+    public function getBalanceAttribute(): float
+    {
+        return $this->total - $this->total_paid;
+    }
+
+    /**
+     * Check if fully paid.
+     */
+    public function isFullyPaid(): bool
+    {
+        return $this->balance <= 0;
     }
 
     // ==================== Business Rules ====================
@@ -293,6 +332,8 @@ class WorkOrder extends Model
         // Sum the grand_total accessor of each item
         return $this->items->sum('grand_total');
     }
+
+
 
     /**
      * Check if work order can be edited.

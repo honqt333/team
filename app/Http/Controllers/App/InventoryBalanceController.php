@@ -26,7 +26,7 @@ class InventoryBalanceController extends Controller
         }
 
         $query = InventoryBalance::forWarehouse($warehouse->id)
-            ->with(['part' => fn($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit', 'category', 'min_qty')])
+            ->with(['part' => fn($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'min_qty')->with(['category'])])
             ->when($request->input('search'), function ($q, $search) {
                 $q->whereHas('part', fn($pq) => 
                     $pq->where('sku', 'like', "%{$search}%")
@@ -34,8 +34,8 @@ class InventoryBalanceController extends Controller
                        ->orWhere('name_en', 'like', "%{$search}%")
                 );
             })
-            ->when($request->input('category'), function ($q, $cat) {
-                $q->whereHas('part', fn($pq) => $pq->where('category', $cat));
+            ->when($request->input('category'), function ($q, $catId) {
+                $q->whereHas('part', fn($pq) => $pq->where('category_id', $catId));
             })
             ->when($request->input('stock_status') === 'in_stock', fn($q) => $q->withStock())
             ->when($request->input('stock_status') === 'low_stock', fn($q) => $q->lowStock())
@@ -45,10 +45,16 @@ class InventoryBalanceController extends Controller
         $balances = $query->paginate(25)->withQueryString();
 
         // Get categories for filter
-        $categories = Part::forTenant($user->tenant_id)
-            ->whereNotNull('category')
-            ->distinct()
-            ->pluck('category');
+        $categories = \App\Models\InventoryCategory::where('tenant_id', $user->tenant_id)
+            ->where('is_active', true)
+            ->select('id', 'name_ar', 'name_en')
+            ->get()
+            ->map(function ($cat) {
+                return [
+                    'id' => $cat->id,
+                    'name' => app()->getLocale() === 'ar' ? $cat->name_ar : ($cat->name_en ?? $cat->name_ar),
+                ];
+            });
 
         // Summary stats
         $stats = [

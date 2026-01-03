@@ -49,8 +49,12 @@
                     </div>
                     <!-- Numbers -->
                     <div class="flex-1 flex flex-col justify-center items-center px-1">
-                        <span class="text-sm font-bold text-gray-800" dir="rtl">{{ displayNumbersAr }}</span>
-                        <span class="text-[9px] text-gray-500" dir="ltr">{{ displayNumbersEn }}</span>
+                        <div class="flex flex-row gap-0.5" dir="ltr">
+                            <span v-for="(char, i) in displayNumbersAr.split(' ')" :key="i" class="text-sm font-bold text-gray-800">{{ char }}</span>
+                        </div>
+                        <div class="flex flex-row gap-0.5" dir="ltr">
+                            <span v-for="(char, i) in displayNumbersEn.split(' ')" :key="i" class="text-[9px] text-gray-500">{{ char }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -59,26 +63,54 @@
             <div class="grid grid-cols-2 gap-2">
                 <!-- Letters Input -->
                 <div>
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.plate.letters') }} (3)</label>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        {{ $t('vehicles.plate.letters') }} <span class="text-red-500">*</span> (3)
+                    </label>
                     <div class="flex gap-1">
-                        <select v-model="letter1" class="flex-1 px-1 py-1.5 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                            <option value="">-</option>
-                            <option v-for="l in plateLetters" :key="l.en" :value="l.en">{{ l.ar }}</option>
-                        </select>
-                        <select v-model="letter2" class="flex-1 px-1 py-1.5 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                            <option value="">-</option>
-                            <option v-for="l in plateLetters" :key="l.en" :value="l.en">{{ l.ar }}</option>
-                        </select>
-                        <select v-model="letter3" class="flex-1 px-1 py-1.5 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                            <option value="">-</option>
-                            <option v-for="l in plateLetters" :key="l.en" :value="l.en">{{ l.ar }}</option>
-                        </select>
+                        <div class="flex-1">
+                            <SearchableSelect
+                                v-model="letter1"
+                                :options="plateLetters"
+                                :option-label="l => `${l.ar} - ${l.en}`"
+                                option-value="en"
+                                :placeholder="'-'"
+                                :label="''"
+                                :compact="true"
+                                :error="error && !letter1"
+                            />
+                        </div>
+                        <div class="flex-1">
+                            <SearchableSelect
+                                v-model="letter2"
+                                :options="plateLetters"
+                                :option-label="l => `${l.ar} - ${l.en}`"
+                                option-value="en"
+                                :placeholder="'-'"
+                                :label="''"
+                                :compact="true"
+                                :error="error && !letter2"
+                            />
+                        </div>
+                        <div class="flex-1">
+                            <SearchableSelect
+                                v-model="letter3"
+                                :options="plateLetters"
+                                :option-label="l => `${l.ar} - ${l.en}`"
+                                option-value="en"
+                                :placeholder="'-'"
+                                :label="''"
+                                :compact="true"
+                                :error="error && !letter3"
+                            />
+                        </div>
                     </div>
                 </div>
 
                 <!-- Numbers Input -->
                 <div>
-                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.plate.numbers') }} (1-4)</label>
+                    <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        {{ $t('vehicles.plate.numbers') }} <span class="text-red-500">*</span> (1-4)
+                    </label>
                     <input 
                         type="text"
                         :value="plateNumbers"
@@ -86,7 +118,8 @@
                         inputmode="numeric"
                         placeholder="1234"
                         dir="ltr"
-                        class="w-full px-3 py-1.5 text-sm text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-teal-500"
+                        class="w-full px-3 py-1.5 text-sm text-center border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-teal-500"
+                        :class="error && !plateNumbers ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
                         @input="onNumbersInput($event)"
                     />
                 </div>
@@ -95,13 +128,16 @@
 
         <!-- Free Text Input (when skipped or other country) -->
         <div v-else>
-            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.plate.free_input') }}</label>
+            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                {{ $t('vehicles.plate.free_input') }} <span class="text-red-500">*</span>
+            </label>
             <input 
                 type="text"
                 :value="freeTextPlate"
                 :placeholder="$t('vehicles.form.plate_placeholder')"
                 dir="ltr"
-                class="w-full px-3 py-2 text-center font-semibold border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-teal-500"
+                class="w-full px-3 py-2 text-center font-semibold border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-teal-500"
+                :class="error && !freeTextPlate ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
                 @input="onFreeTextInput($event)"
             />
         </div>
@@ -110,11 +146,16 @@
 
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     modelValue: {
         type: String,
         default: '',
+    },
+    error: {
+        type: [String, Boolean],
+        default: false,
     },
 });
 
@@ -209,6 +250,19 @@ function onFreeTextInput(e) {
     };
     freeTextPlate.value = value.split('').map(char => arabicToEnglish[char] || char).join('');
 }
+
+// Validate the input
+function validate() {
+    if (selectedCountry.value === 'SA' && !skipFormat.value) {
+        // In Saudi Mode, allow 1-4 digits for numbers (e.g. "1" is valid plate 1, "9999" is valid)
+        // Letters MUST be 3.
+        return !!(letter1.value && letter2.value && letter3.value && plateNumbers.value);
+    }
+    // In Free Text mode, just require something
+    return !!freeTextPlate.value;
+}
+
+defineExpose({ validate });
 
 // Emit changes when internal values change
 watch(plateString, (newVal) => {

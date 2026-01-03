@@ -18,14 +18,15 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ $t('services_management.form.department') }} <span class="text-red-500">*</span>
                 </label>
-                <SelectInput
+                <SearchableSelect
                     v-model="form.department_id"
-                    color="teal"
+                    :options="departments"
+                    :label="''"
+                    :placeholder="$t('common.choose')"
+                    option-label="name"
+                    option-value="id"
                     :error="form.errors.department_id"
-                >
-                    <option value="" disabled>{{ $t('common.choose') }}</option>
-                    <option v-for="dept in departments" :key="dept.id" :value="dept.id">{{ dept.name }}</option>
-                </SelectInput>
+                />
                 <p v-if="form.errors.department_id" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.department_id }}</p>
             </div>
 
@@ -149,14 +150,18 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             {{ $t('pricing.discount_type') }}
                         </label>
-                        <SelectInput
+                        <SearchableSelect
                             v-model="form.default_discount_type"
-                            color="teal"
-                        >
-                            <option value="none">{{ $t('pricing.discount_types.none') }}</option>
-                            <option value="percentage">{{ $t('pricing.discount_types.percentage') }}</option>
-                            <option value="fixed">{{ $t('pricing.discount_types.fixed') }}</option>
-                        </SelectInput>
+                            :options="[
+                                {id: 'none', name: $t('pricing.discount_types.none')},
+                                {id: 'percentage', name: $t('pricing.discount_types.percentage')},
+                                {id: 'fixed', name: $t('pricing.discount_types.fixed')}
+                            ]"
+                            option-label="name"
+                            option-value="id"
+                            placeholder=""
+                            :label="''"
+                        />
                     </div>
 
                     <div v-if="form.default_discount_type !== 'none'">
@@ -208,15 +213,19 @@
                             class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                         />
                         <div class="w-32">
-                            <SelectInput
+                            <SearchableSelect
                                 v-model="form.duration_unit"
-                                color="teal"
-                            >
-                                <option value="minutes">{{ $t('services_management.duration_units.minutes') }}</option>
-                                <option value="hours">{{ $t('services_management.duration_units.hours') }}</option>
-                                <option value="days">{{ $t('services_management.duration_units.days') }}</option>
-                                <option value="weeks">{{ $t('services_management.duration_units.weeks') }}</option>
-                            </SelectInput>
+                                :options="[
+                                    {id: 'minutes', name: $t('services_management.duration_units.minutes')},
+                                    {id: 'hours', name: $t('services_management.duration_units.hours')},
+                                    {id: 'days', name: $t('services_management.duration_units.days')},
+                                    {id: 'weeks', name: $t('services_management.duration_units.weeks')}
+                                ]"
+                                option-label="name"
+                                option-value="id"
+                                placeholder=""
+                                :label="''"
+                            />
                         </div>
                     </div>
                 </div>
@@ -235,15 +244,19 @@
                             class="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                         />
                         <div class="w-32">
-                            <SelectInput
+                            <SearchableSelect
                                 v-model="form.warranty_unit"
-                                color="teal"
-                            >
-                                <option value="days">{{ $t('services_management.warranty_units.days') }}</option>
-                                <option value="weeks">{{ $t('services_management.warranty_units.weeks') }}</option>
-                                <option value="months">{{ $t('services_management.warranty_units.months') }}</option>
-                                <option value="years">{{ $t('services_management.warranty_units.years') }}</option>
-                            </SelectInput>
+                                :options="[
+                                    {id: 'days', name: $t('services_management.warranty_units.days')},
+                                    {id: 'weeks', name: $t('services_management.warranty_units.weeks')},
+                                    {id: 'months', name: $t('services_management.warranty_units.months')},
+                                    {id: 'years', name: $t('services_management.warranty_units.years')}
+                                ]"
+                                option-label="name"
+                                option-value="id"
+                                placeholder=""
+                                :label="''"
+                            />
                         </div>
                     </div>
                 </div>
@@ -326,7 +339,7 @@
 import { watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
-import SelectInput from '@/Components/SelectInput.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 const props = defineProps({
     show: {
         type: Boolean,

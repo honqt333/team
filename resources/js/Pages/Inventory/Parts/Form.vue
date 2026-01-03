@@ -42,20 +42,13 @@
 
                     <!-- Unit -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('inventory.parts.unit') }} <span class="text-red-500">*</span>
-                        </label>
-                        <select
-                            v-model="form.unit"
-                            :class="['w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500', form.errors.unit ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                        >
-                            <option value="piece">{{ $t('inventory.units.piece') }}</option>
-                            <option value="liter">{{ $t('inventory.units.liter') }}</option>
-                            <option value="kg">{{ $t('inventory.units.kg') }}</option>
-                            <option value="meter">{{ $t('inventory.units.meter') }}</option>
-                            <option value="box">{{ $t('inventory.units.box') }}</option>
-                            <option value="set">{{ $t('inventory.units.set') }}</option>
-                        </select>
+                        <SearchableSelect
+                            v-model="form.unit_id"
+                            :options="unitOptions"
+                            :label="$t('inventory.parts.unit')"
+                            required
+                            :error="form.errors.unit_id"
+                        />
                     </div>
 
                     <!-- Name AR -->
@@ -86,14 +79,12 @@
 
                     <!-- Category -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('inventory.parts.category') }}
-                        </label>
-                        <input
-                            v-model="form.category"
-                            type="text"
+                        <SearchableSelect
+                            v-model="form.category_id"
+                            :options="categoryOptions"
+                            :label="$t('inventory.parts.category')"
                             :placeholder="$t('inventory.parts.category_placeholder')"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                            :error="form.errors.category_id"
                         />
                     </div>
 
@@ -178,19 +169,45 @@
 </template>
 
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { Link, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { computed } from 'vue';
 
 const props = defineProps({
     part: Object,
+    units: {
+        type: Array,
+        default: () => [],
+    },
+    categories: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+const page = usePage();
+
+const unitOptions = computed(() => {
+    return props.units.map(unit => ({
+        value: unit.id,
+        label: page.props.auth.user.locale === 'ar' ? unit.name_ar : (unit.name_en || unit.name_ar)
+    }));
+});
+
+const categoryOptions = computed(() => {
+    return props.categories.map(cat => ({
+        value: cat.id,
+        label: page.props.auth.user.locale === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)
+    }));
 });
 
 const form = useForm({
     sku: props.part?.sku || '',
     name_ar: props.part?.name_ar || '',
     name_en: props.part?.name_en || '',
-    unit: props.part?.unit || 'piece',
-    category: props.part?.category || '',
+    unit_id: props.part?.unit_id || '',
+    category_id: props.part?.category_id || '',
     description: props.part?.description || '',
     min_qty: props.part?.min_qty || 0,
     reorder_qty: props.part?.reorder_qty || 0,

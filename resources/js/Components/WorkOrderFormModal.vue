@@ -31,16 +31,17 @@
                 </div>
                 
                 <!-- Customer Select -->
-                <SelectInput
+                <SearchableSelect
                     v-model="form.customer_id"
                     @change="onCustomerChange"
+                    :options="customers"
+                    :label="''"
+                    :placeholder="$t('common.choose')"
+                    :option-label="c => `${c.name} - ${c.phone}`"
+                    option-value="id"
                     :error="form.errors.customer_id"
-                >
-                    <option value="">{{ $t('common.choose') }}</option>
-                    <option v-for="customer in customers" :key="customer.id" :value="customer.id">
-                        {{ customer.name }} - {{ customer.phone }}
-                    </option>
-                </SelectInput>
+                    required
+                />
             </div>
 
             <!-- Vehicle Section -->
@@ -61,18 +62,17 @@
                         {{ $t('vehicles.add') }}
                     </button>
                 </div>
-                <SelectInput
+                <SearchableSelect
                     v-model="form.vehicle_id"
-                    :disabled="!form.customer_id || loadingVehicles"
+                    :options="vehicles"
+                    :label="''"
+                    :placeholder="form.customer_id ? $t('common.choose') : $t('work_orders.form.select_customer_first')"
+                    :option-label="v => `${v.plate_number} - ${getVehicleName(v)}`"
+                    option-value="id"
                     :error="form.errors.vehicle_id"
-                >
-                    <option value="">
-                        {{ form.customer_id ? $t('common.choose') : $t('work_orders.form.select_customer_first') }}
-                    </option>
-                    <option v-for="vehicle in vehicles" :key="vehicle.id" :value="vehicle.id">
-                        {{ vehicle.plate_number }} - {{ getVehicleName(vehicle) }}
-                    </option>
-                </SelectInput>
+                    required
+                    :disabled="!form.customer_id || loadingVehicles"
+                />
             </div>
 
             <!-- Services Checkboxes Section -->
@@ -250,7 +250,7 @@
 import { ref, computed, watch } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import BaseModal from '@/Components/BaseModal.vue';
-import SelectInput from '@/Components/SelectInput.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 

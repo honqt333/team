@@ -221,7 +221,8 @@ class WorkOrderController
             'items.itemNotes.user',
             'damageMarks', 
             'photos', 
-            'departments'
+            'departments',
+            'payments.receivedBy',
         ]);
 
         // Group items by department_id for accordion display
@@ -295,6 +296,42 @@ class WorkOrderController
         $workOrder->delete();
 
         return redirect()->route('work-orders.index')->with('success', __('messages.work_order_deleted'));
+    }
+
+    /**
+     * Update condition report (fuel level and damage marks).
+     */
+    public function updateCondition(Request $request, WorkOrder $workOrder)
+    {
+        $this->authorize('update', $workOrder);
+        
+        if (!$workOrder->canBeEdited()) {
+            return back()->withErrors(['error' => __('messages.work_order_locked')]);
+        }
+
+        $validated = $request->validate([
+            'fuel_level' => 'nullable|numeric|min:0|max:100',
+            'damage_marks' => 'nullable|array',
+        ]);
+
+        $workOrder->update([
+            'fuel_level' => $validated['fuel_level'] ?? $workOrder->fuel_level,
+        ]);
+
+        // Update damage marks through relationship
+        if (isset($validated['damage_marks'])) {
+            $workOrder->damageMarks()->delete();
+            foreach ($validated['damage_marks'] as $mark) {
+                $workOrder->damageMarks()->create([
+                    'x' => $mark['x'] ?? 0,
+                    'y' => $mark['y'] ?? 0,
+                    'color' => $mark['color'] ?? 'red',
+                    'description' => $mark['description'] ?? '',
+                ]);
+            }
+        }
+
+        return back();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -667,5 +704,262 @@ class WorkOrderController
         return request()->expectsJson()
             ? response()->json(['success' => $message])
             : redirect()->back()->with('success', $message);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Print Views
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Print vehicle condition report.
+     */
+    public function printCondition(WorkOrder $workOrder): Response
+    {
+        $this->authorize('view', $workOrder);
+
+        $workOrder->load([
+            'customer',
+            'vehicle.make',
+            'vehicle.model',
+            'damageMarks',
+            'photos',
+            'center',
+            'tenant',
+        ]);
+
+        return Inertia::render('WorkOrders/Print/Condition', [
+            'workOrder' => $workOrder,
+        ]);
+    }
+
+    /**
+     * Print work order services list.
+     */
+    public function printServices(WorkOrder $workOrder): Response
+    {
+        $this->authorize('view', $workOrder);
+
+        $workOrder->load([
+            'customer',
+            'vehicle.make',
+            'vehicle.model',
+            'items.service.department',
+            'items.technicians',
+            'center',
+            'tenant',
+        ]);
+
+        // Group items by department
+        $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
+            return $item->service?->department_id ?? 0;
+        });
+
+        $departments = \App\Models\Department::active()->ordered()->get()->keyBy('id');
+
+        return Inertia::render('WorkOrders/Print/Services', [
+            'workOrder' => $workOrder,
+            'itemsByDepartment' => $itemsByDepartment,
+            'departments' => $departments,
+        ]);
+    }
+
+    /**
+     * Print proforma invoice.
+     */
+    public function printProforma(WorkOrder $workOrder): Response
+    {
+        $this->authorize('view', $workOrder);
+
+        $workOrder->load([
+            'customer',
+            'vehicle.make',
+            'vehicle.model',
+            'items.service.department',
+            'items.parts',
+            'center',
+            'tenant',
+        ]);
+
+        // Calculate totals
+        $servicesTotal = $workOrder->items->sum(function ($item) {
+            return $item->line_total ?? ($item->qty * $item->unit_price);
+        });
+
+        $partsTotal = $workOrder->items->sum(function ($item) {
+            return $item->parts->sum(function ($part) {
+                return $part->qty * $part->unit_price;
+            });
+        });
+
+        $totalPaid = $workOrder->total_paid ?? 0;
+        $grandTotal = $servicesTotal + $partsTotal;
+        $balance = $grandTotal - $totalPaid;
+
+        // Group items by department
+        $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
+            return $item->service?->department_id ?? 0;
+        });
+
+        // Collect all parts
+        $allParts = $workOrder->items->flatMap(function ($item) {
+            return $item->parts;
+        });
+
+        $departments = \App\Models\Department::active()->ordered()->get()->keyBy('id');
+
+        // Get tax settings
+        $taxSettings = \App\Models\TenantTaxSetting::where('tenant_id', $workOrder->tenant_id)->first();
+
+        return Inertia::render('WorkOrders/Print/Proforma', [
+            'workOrder' => $workOrder,
+            'itemsByDepartment' => $itemsByDepartment,
+            'allParts' => $allParts,
+            'departments' => $departments,
+            'servicesTotal' => $servicesTotal,
+            'partsTotal' => $partsTotal,
+            'grandTotal' => $grandTotal,
+            'totalPaid' => $totalPaid,
+            'balance' => $balance,
+            'taxSettings' => $taxSettings,
+        ]);
+    }
+
+    /**
+     * Print payments receipt.
+     */
+    public function printPayments(WorkOrder $workOrder): Response
+    {
+        $this->authorize('view', $workOrder);
+
+        $workOrder->load([
+            'customer',
+            'vehicle.make',
+            'vehicle.model',
+            'center',
+            'tenant',
+        ]);
+
+        // Get payments related to this work order
+        $payments = $workOrder->payments()->with('receivedBy')->get();
+
+        // Calculate totals
+        $servicesTotal = $workOrder->items->sum(function ($item) {
+            return $item->line_total ?? ($item->qty * $item->unit_price);
+        });
+
+        $partsTotal = $workOrder->items->sum(function ($item) {
+            return $item->parts?->sum(function ($part) {
+                return $part->qty * $part->unit_price;
+            }) ?? 0;
+        });
+
+        $grandTotal = $servicesTotal + $partsTotal;
+        $totalPaid = $payments->sum('amount');
+        $balance = $grandTotal - $totalPaid;
+
+        return Inertia::render('WorkOrders/Print/Payments', [
+            'workOrder' => $workOrder,
+            'payments' => $payments,
+            'grandTotal' => $grandTotal,
+            'totalPaid' => $totalPaid,
+            'balance' => $balance,
+        ]);
+    }
+
+    // ==================== Payment Methods ====================
+
+    /**
+     * Store a new payment for a work order.
+     */
+    public function storePayment(Request $request, WorkOrder $workOrder)
+    {
+        $this->authorize('update', $workOrder);
+
+        $validated = $request->validate([
+            'payment_method' => 'required|in:' . implode(',', \App\Models\Payment::METHODS),
+            'type' => 'required|in:' . implode(',', \App\Models\Payment::TYPES),
+            'amount' => 'required|numeric|min:0.01',
+            'payment_date' => 'required|date',
+            'reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $workOrder->payments()->create([
+            'tenant_id' => $workOrder->tenant_id,
+            'center_id' => $workOrder->center_id,
+            'type' => $validated['type'],
+            'payment_method' => $validated['payment_method'],
+            'amount' => $validated['amount'],
+            'payment_date' => $validated['payment_date'],
+            'reference' => $validated['reference'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'received_by' => auth()->id(),
+        ]);
+
+        return back()->with('success', __('payments.saved_successfully'));
+    }
+
+    /**
+     * Update an existing payment.
+     */
+    public function updatePayment(Request $request, WorkOrder $workOrder, \App\Models\Payment $payment)
+    {
+        $this->authorize('update', $workOrder);
+
+        // Ensure payment belongs to this work order
+        if ($payment->work_order_id !== $workOrder->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'payment_method' => 'required|in:' . implode(',', \App\Models\Payment::METHODS),
+            'type' => 'required|in:' . implode(',', \App\Models\Payment::TYPES),
+            'amount' => 'required|numeric|min:0.01',
+            'payment_date' => 'required|date',
+            'reference' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $payment->update($validated);
+
+        return back()->with('success', __('payments.updated_successfully'));
+    }
+
+    /**
+     * Delete a payment.
+     */
+    public function destroyPayment(WorkOrder $workOrder, \App\Models\Payment $payment)
+    {
+        $this->authorize('update', $workOrder);
+
+        // Ensure payment belongs to this work order
+        if ($payment->work_order_id !== $workOrder->id) {
+            abort(403);
+        }
+
+        $payment->delete();
+
+        return back()->with('success', __('payments.deleted_successfully'));
+    }
+
+    /**
+     * Delete a photo from work order.
+     */
+    public function deletePhoto(WorkOrder $workOrder, \App\Models\WorkOrderPhoto $photo)
+    {
+        $this->authorize('update', $workOrder);
+
+        // Verify photo belongs to this work order
+        if ($photo->work_order_id !== $workOrder->id) {
+            abort(403);
+        }
+
+        // Delete file from storage
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($photo->path);
+        
+        // Delete record
+        $photo->delete();
+
+        return back()->with('success', __('messages.photo_deleted'));
     }
 }

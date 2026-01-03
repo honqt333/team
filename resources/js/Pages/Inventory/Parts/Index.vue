@@ -40,24 +40,32 @@
                             @input="debouncedSearch"
                         />
                     </div>
-                    <select
-                        v-model="localFilters.status"
-                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    >
-                        <option value="">{{ $t('common.all') }}</option>
-                        <option value="active">{{ $t('common.active') }}</option>
-                        <option value="inactive">{{ $t('common.inactive') }}</option>
-                    </select>
-                    <select
-                        v-if="categories.length"
-                        v-model="localFilters.category"
-                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    >
-                        <option value="">{{ $t('inventory.parts.all_categories') }}</option>
-                        <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-                    </select>
+                    <div class="w-48">
+                        <SearchableSelect
+                            v-model="localFilters.status"
+                            :options="[
+                                {value: '', label: $t('common.all')},
+                                {value: 'active', label: $t('common.active')},
+                                {value: 'inactive', label: $t('common.inactive')}
+                            ]"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('common.all')"
+                            :label="''"
+                            @change="applyFilters"
+                        />
+                    </div>
+                    <div class="w-64" v-if="categories.length">
+                        <SearchableSelect
+                            v-model="localFilters.category"
+                            :options="computedCategories"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('inventory.parts.all_categories')"
+                            :label="''"
+                            @change="applyFilters"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -83,8 +91,8 @@
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ part.name_ar }}</div>
                                     <div v-if="part.name_en" class="text-xs text-gray-500 dark:text-gray-400">{{ part.name_en }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ part.unit }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ part.category || '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ part.unit?.name_ar || '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ part.category?.name_ar || '-' }}</td>
                                 <td class="px-4 py-3">
                                     <span :class="[
                                         'inline-flex px-2 py-1 rounded-full text-xs font-medium',
@@ -184,11 +192,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
 import CreateModal from './CreateModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     parts: Object,
@@ -205,6 +214,15 @@ const props = defineProps({
 
 const page = usePage();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
+
+const computedCategories = computed(() => {
+    const allOption = { id: '', name: page.props.auth.user.locale === 'ar' ? 'جميع التصنيفات' : 'All Categories' };
+    const cats = props.categories.map(cat => ({
+        ...cat,
+        name: page.props.auth.user.locale === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)
+    }));
+    return [allOption, ...cats];
+});
 
 const localFilters = ref({
     search: props.filters?.search || '',

@@ -110,17 +110,17 @@
                         </div>
 
                         <!-- Make Filter (for models only) -->
-                        <div v-if="activeSection === 'models'" class="flex items-center gap-3">
-                            <select
+                        <div v-if="activeSection === 'models'" class="w-64">
+                            <SearchableSelect
                                 v-model="selectedMake"
+                                :options="makeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :placeholder="$t('system_settings.models.all_makes')"
+                                :label="''"
                                 @change="handleMakeFilter"
-                                class="px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                            >
-                                <option value="">{{ $t('system_settings.models.all_makes') }}</option>
-                                <option v-for="make in makesForFilter" :key="make.id" :value="make.id">
-                                    {{ getName(make) }}
-                                </option>
-                            </select>
+                                :compact="false"
+                            />
                         </div>
                         
                         <!-- Add Button -->
@@ -485,7 +485,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -495,6 +495,7 @@ import ColorFormModal from './Modals/ColorFormModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useLocalized } from '@/Composables/useLocalized';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { t } = useI18n();
 const { success } = useToast();
@@ -514,7 +515,12 @@ const props = defineProps({
 
 // Search & Filters
 const search = ref(props.filters?.search || '');
-const selectedMake = ref(props.filters?.make_id || '');
+const selectedMake = ref(props.filters?.make_id ? Number(props.filters.make_id) : '');
+
+// Sync local state with props (e.g. browser back/forward)
+watch(() => props.filters?.make_id, (newVal) => {
+    selectedMake.value = newVal ? Number(newVal) : '';
+});
 
 // Modal state
 const showMakeModal = ref(false);
@@ -530,6 +536,15 @@ const modelsData = computed(() => props.models?.data || []);
 const colorsData = computed(() => props.colors?.data || []);
 const makesForFilter = computed(() => props.makes?.data || props.makes || []);
 
+const makeOptions = computed(() => {
+    const allOption = { value: '', label: t('system_settings.models.all_makes') };
+    const mappedMakes = makesForFilter.value.map(make => ({
+        value: make.id,
+        label: getName(make)
+    }));
+    return [allOption, ...mappedMakes];
+});
+
 const currentSectionTitle = computed(() => {
     const section = props.activeSection || 'makes';
     return t(`system_settings.${section}.subtitle`) || t(`system_settings.sections.${section}`);
@@ -543,9 +558,11 @@ const currentPagination = computed(() => {
 
 // Handlers
 function handleSearch() {
-    const params = { search: search.value };
-    if (props.activeSection === 'models' && selectedMake.value) {
-        params.make_id = selectedMake.value;
+    const params = { 
+        search: search.value || undefined 
+    };
+    if (props.activeSection === 'models') {
+        params.make_id = selectedMake.value || undefined;
     }
     router.get(`/app/settings/${props.activeSection}`, params, { preserveState: true });
 }

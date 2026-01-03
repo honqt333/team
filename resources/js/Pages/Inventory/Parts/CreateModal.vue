@@ -1,5 +1,5 @@
 <template>
-    <DialogModal :show="show" @close="close">
+    <DialogModal :show="show" @close="handleClose">
         <template #title>
             {{ form.id ? $t('inventory.parts.edit') : $t('inventory.parts.add') }}
         </template>
@@ -25,8 +25,8 @@
                             <input
                                 v-model="form.name_ar"
                                 type="text"
-                                :class="['w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow', form.errors.name_ar ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
-                                placeholder="مثال: فلتر زيت تويوتا"
+                                :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.name_ar ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
+                                :placeholder="$t('inventory.parts.name_ar_placeholder')"
                             />
                             <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">{{ form.errors.name_ar }}</p>
                         </div>
@@ -40,8 +40,8 @@
                                 v-model="form.name_en"
                                 type="text"
                                 dir="ltr"
-                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow"
-                                placeholder="e.g. Toyota Oil Filter"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all"
+                                :placeholder="$t('inventory.parts.name_en_placeholder')"
                             />
                         </div>
 
@@ -55,7 +55,7 @@
                                     v-model="form.sku"
                                     type="text"
                                     dir="ltr"
-                                    :class="['w-full pl-4 pr-10 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow', form.errors.sku ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
+                                    :class="['w-full pl-4 pr-10 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.sku ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
                                     :placeholder="$t('inventory.parts.sku_placeholder')"
                                 />
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
@@ -69,18 +69,13 @@
 
                         <!-- Category -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('inventory.parts.category') }}
-                            </label>
-                            <select
-                                 v-model="form.category"
-                                 class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow"
-                            >
-                                <option value="">{{ $t('common.select') }}</option>
-                                <option v-for="cat in categories" :key="cat.id" :value="cat.name_ar">
-                                    {{ cat.name_ar }} / {{ cat.name_en }}
-                                </option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.category_id"
+                                :options="categoryOptions"
+                                :label="$t('inventory.parts.category')"
+                                :placeholder="$t('common.select')"
+                                :error="form.errors.category_id"
+                            />
                         </div>
                     </div>
                 </div>
@@ -100,17 +95,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Unit -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('inventory.parts.unit') }} <span class="text-red-500">*</span>
-                            </label>
-                            <select
-                                v-model="form.unit"
-                                :class="['w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow', form.errors.unit ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
-                            >
-                                <option v-for="unit in units" :key="unit.id" :value="unit.name_ar">
-                                    {{ unit.name_ar }} / {{ unit.name_en }}
-                                </option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.unit_id"
+                                :options="unitOptions"
+                                :label="$t('inventory.parts.unit')"
+                                :placeholder="$t('common.select')"
+                                :error="form.errors.unit_id"
+                                required
+                            />
                         </div>
 
                         <!-- Default Sale Price -->
@@ -125,10 +117,10 @@
                                     step="0.01"
                                     min="0"
                                     dir="ltr"
-                                    class="w-full pl-4 pr-12 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow"
+                                    class="w-full pl-4 pr-12 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all"
                                 />
                                 <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500 dark:text-gray-400 text-sm">
-                                    SAR
+                                    {{ $t('common.currency_sar') }}
                                 </div>
                             </div>
                         </div>
@@ -147,7 +139,7 @@
                                     dir="ltr"
                                     :title="$t('inventory.parts.min_qty')"
                                     :placeholder="$t('inventory.parts.min_qty')"
-                                    class="w-1/2 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow"
+                                    class="w-1/2 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-shadow"
                                 />
                                 <input
                                     v-model.number="form.reorder_qty"
@@ -157,7 +149,7 @@
                                     dir="ltr"
                                     :title="$t('inventory.parts.reorder_qty')"
                                     :placeholder="$t('inventory.parts.reorder_qty')"
-                                    class="w-1/2 px-3 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow"
+                                    class="w-1/2 px-3 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all"
                                 />
                             </div>
                              <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.min_qty_hint') }}</p>
@@ -182,7 +174,7 @@
                             v-model="form.description"
                             rows="3"
                             :placeholder="$t('inventory.parts.description_placeholder')"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-shadow resize-none"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all resize-none"
                         ></textarea>
                     </div>
                 </div>
@@ -199,7 +191,7 @@
             <button
                 @click="submit"
                 :disabled="form.processing"
-                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
             >
                 {{ form.processing ? $t('common.saving') : $t('common.save') }}
             </button>
@@ -208,9 +200,12 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
-import { watch } from 'vue';
+import { ref, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useConfirm } from '@/Composables/useConfirm';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     show: Boolean,
@@ -226,14 +221,34 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
+const { t } = useI18n();
+const { confirm } = useConfirm();
+const page = usePage();
+
+const unitOptions = computed(() => {
+    return props.units.map(unit => ({
+        value: unit.id,
+        label: page.props.auth.user.locale === 'ar' ? unit.name_ar : (unit.name_en || unit.name_ar)
+    }));
+});
+
+const categoryOptions = computed(() => {
+    return props.categories.map(cat => ({
+        value: cat.id,
+        label: page.props.auth.user.locale === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)
+    }));
+});
+
+const isDirty = ref(false);
+const initialFormData = ref(null);
 
 const form = useForm({
     id: null,
     sku: '',
     name_ar: '',
     name_en: '',
-    unit: '',
-    category: '',
+    unit_id: '',
+    category_id: '',
     description: '',
     min_qty: 0,
     reorder_qty: 0,
@@ -246,8 +261,8 @@ watch(() => props.part, (part) => {
         form.sku = part.sku;
         form.name_ar = part.name_ar;
         form.name_en = part.name_en;
-        form.unit = part.unit || 'piece';
-        form.category = part.category;
+        form.unit_id = part.unit_id;
+        form.category_id = part.category_id;
         form.description = part.description;
         form.min_qty = part.min_qty;
         form.reorder_qty = part.reorder_qty;
@@ -255,15 +270,49 @@ watch(() => props.part, (part) => {
     } else {
         form.reset();
         form.id = null;
-        form.unit = props.units.length > 0 ? props.units[0].name_ar : '';
+        form.unit_id = props.units.length > 0 ? props.units[0].id : '';
     }
 }, { immediate: true });
+
+// Handle modal open
+watch(() => props.show, (open) => {
+    if (open) {
+        setTimeout(() => {
+            initialFormData.value = JSON.stringify(form.data());
+            isDirty.value = false;
+        }, 100);
+    }
+});
+
+// Track form changes
+watch(() => form.data(), (newData) => {
+    if (initialFormData.value) {
+        const currentData = JSON.stringify(newData);
+        isDirty.value = currentData !== initialFormData.value;
+    }
+}, { deep: true });
 
 const close = () => {
     emit('close');
     form.reset();
     form.clearErrors();
+    isDirty.value = false;
+    initialFormData.value = null;
 };
+
+async function handleClose() {
+    if (isDirty.value) {
+        const confirmed = await confirm({
+            title: t('common.unsaved_changes'),
+            message: t('common.unsaved_changes_message'),
+            confirmText: t('common.yes_close'),
+            cancelText: t('common.cancel'),
+            type: 'warning',
+        });
+        if (!confirmed) return;
+    }
+    close();
+}
 
 const submit = () => {
     if (form.id) {

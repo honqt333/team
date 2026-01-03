@@ -46,6 +46,11 @@ class WorkOrderPolicy
             return false;
         }
 
+        // Cannot edit closed/done/cancelled work orders
+        if (!$workOrder->canBeEdited()) {
+            return false;
+        }
+
         // Defense in depth: enforce tenant/center ownership
         return $workOrder->tenant_id === $user->tenant_id
             && $workOrder->center_id === $user->current_center_id;
@@ -57,6 +62,11 @@ class WorkOrderPolicy
     public function delete(User $user, WorkOrder $workOrder): bool
     {
         if (!$user->hasPermissionTo('crm.work_orders.delete')) {
+            return false;
+        }
+
+        // Cannot delete closed/done/cancelled work orders
+        if (!$workOrder->canBeEdited()) {
             return false;
         }
 

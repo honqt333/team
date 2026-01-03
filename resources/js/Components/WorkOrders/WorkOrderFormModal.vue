@@ -295,6 +295,7 @@
                 <div v-show="activeTab === 'condition_report'" class="space-y-4">
                     <VehicleConditionReport
                         v-model:damageMarks="form.damage_marks"
+                        v-model:fuelLevel="form.fuel_level"
                     />
                 </div>
 
@@ -451,6 +452,7 @@ const form = useForm({
     expected_end_date: props.workOrder?.expected_end_date || new Date().toISOString().split('T')[0],
     departments: props.workOrder?.departments?.map(d => d.id) || [],
     damage_marks: props.workOrder?.damage_marks || [],
+    fuel_level: props.workOrder?.fuel_level ?? 50,
     photos: [],
     notes: props.workOrder?.notes || '',
 });
@@ -469,6 +471,7 @@ watch(() => props.show, (newVal) => {
         form.expected_end_date = formatDateForInput(props.workOrder.expected_end_date);
         form.departments = props.workOrder.departments?.map(d => d.id) || [];
         form.damage_marks = props.workOrder.damage_marks || [];
+        form.fuel_level = props.workOrder.fuel_level ?? 50;
         form.photos = props.workOrder.photos?.map(photo => ({
             id: photo.id,
             url: photo.url,
@@ -628,6 +631,7 @@ function resetForm() {
     form.expected_end_date = today;
     form.departments = [];
     form.damage_marks = [];
+    form.fuel_level = 50;
     form.photos = [];
     form.notes = '';
     form.clearErrors();

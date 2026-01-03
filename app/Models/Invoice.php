@@ -25,6 +25,7 @@ class Invoice extends Model
         'type', // invoice, credit_note, debit_note
         'subtype', // simplified, standard
         'status', // draft, valid, reported, cancelled
+        'payment_status', // unpaid, partial, paid
         
         // Snapshots
         'customer_name_snapshot',
@@ -41,6 +42,7 @@ class Invoice extends Model
         'total_tax',
         'total_incl_tax',
         'total_taxable_amount',
+        'total_paid',
         'tax_breakdown',
         
         // ZATCA
@@ -60,12 +62,22 @@ class Invoice extends Model
         'total_tax' => 'decimal:2',
         'total_incl_tax' => 'decimal:2',
         'total_taxable_amount' => 'decimal:2',
+        'total_paid' => 'decimal:2',
         'tax_breakdown' => 'array',
     ];
+
+    // ─────────────────────────────────────────────────────────────
+    // Relationships
+    // ─────────────────────────────────────────────────────────────
 
     public function lines(): HasMany
     {
         return $this->hasMany(InvoiceLine::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 
     public function workOrder(): BelongsTo
@@ -81,5 +93,81 @@ class Invoice extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function tenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Accessors
+    // ─────────────────────────────────────────────────────────────
+
+    public function getBalanceAttribute(): float
+    {
+        return (float) $this->total_incl_tax - (float) $this->total_paid;
+    }
+
+    public function getIsPaidAttribute(): bool
+    {
+        return $this->payment_status === 'paid';
+    }
+
+    public function getPaymentStatusLabelAttribute(): string
+    {
+        return match($this->payment_status) {
+            'unpaid' => __('invoices.status.unpaid'),
+            'partial' => __('invoices.status.partial'),
+            'paid' => __('invoices.status.paid'),
+            default => $this->payment_status,
+        };
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Recalculate payment status based on payments
+     */
+    public function updatePaymentStatus(): void
+    {
+        $totalPaid = $this->payments()->sum('amount');
+        $this->total_paid = $totalPaid;
+
+        if ($totalPaid <= 0) {
+            $this->payment_status = 'unpaid';
+        } elseif ($totalPaid >= $this->total_incl_tax) {
+            $this->payment_status = 'paid';
+        } else {
+            $this->payment_status = 'partial';
+        }
+
+        $this->save();
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Scopes
+    // ─────────────────────────────────────────────────────────────
+
+    public function scopeUnpaid($query)
+    {
+        return $query->where('payment_status', 'unpaid');
+    }
+
+    public function scopePartiallyPaid($query)
+    {
+        return $query->where('payment_status', 'partial');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('payment_status', 'paid');
+    }
+
+    public function scopeWithBalance($query)
+    {
+        return $query->whereIn('payment_status', ['unpaid', 'partial']);
     }
 }

@@ -32,17 +32,17 @@
                         class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                         @input="debouncedSearch"
                     />
-                    <select
-                        v-model="statusFilter"
-                        class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    >
-                        <option value="">{{ $t('inventory.transfers.all_statuses') }}</option>
-                        <option value="draft">{{ $t('inventory.transfers.statuses.draft') }}</option>
-                        <option value="sent">{{ $t('inventory.transfers.statuses.sent') }}</option>
-                        <option value="received">{{ $t('inventory.transfers.statuses.received') }}</option>
-                        <option value="cancelled">{{ $t('inventory.transfers.statuses.cancelled') }}</option>
-                    </select>
+                    <div class="w-48">
+                        <SearchableSelect
+                            v-model="statusFilter"
+                            :options="statusOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('inventory.transfers.all_statuses')"
+                            :label="''"
+                            @change="applyFilters"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -120,18 +120,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     transfers: Object,
     filters: Object,
 });
 
+const { t } = useI18n();
 const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || '');
+
+const statusOptions = computed(() => [
+    { value: '', label: t('inventory.transfers.all_statuses') },
+    { value: 'draft', label: t('inventory.transfers.statuses.draft') },
+    { value: 'sent', label: t('inventory.transfers.statuses.sent') },
+    { value: 'received', label: t('inventory.transfers.statuses.received') },
+    { value: 'cancelled', label: t('inventory.transfers.statuses.cancelled') },
+]);
 
 const applyFilters = () => {
     router.get(route('app.inventory.transfers.index'), {

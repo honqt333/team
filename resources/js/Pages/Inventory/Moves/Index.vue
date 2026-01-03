@@ -52,16 +52,17 @@
                             @input="debouncedSearch"
                         />
                     </div>
-                    <select
-                        v-model="localFilters.type"
-                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    >
-                        <option value="">{{ $t('inventory.moves.all_types') }}</option>
-                        <option v-for="type in moveTypes" :key="type" :value="type">
-                            {{ getMoveTypeLabel(type) }}
-                        </option>
-                    </select>
+                    <div class="w-64">
+                        <SearchableSelect
+                            v-model="localFilters.type"
+                            :options="moveTypeOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('inventory.moves.all_types')"
+                            :label="''"
+                            @change="applyFilters"
+                        />
+                    </div>
                     <input
                         v-model="localFilters.date_from"
                         type="date"
@@ -184,11 +185,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { t } = useI18n();
 const page = usePage();
@@ -256,6 +258,15 @@ const getMoveTypeLabel = (type) => {
     };
     return labels[type] || type;
 };
+
+const moveTypeOptions = computed(() => {
+    const allOption = { value: '', label: t('inventory.moves.all_types') };
+    const types = props.moveTypes.map(type => ({
+        value: type,
+        label: getMoveTypeLabel(type)
+    }));
+    return [allOption, ...types];
+});
 
 const getMoveTypeBadgeClass = (type) => {
     const classes = {

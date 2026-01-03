@@ -40,16 +40,17 @@
                             @input="debouncedSearch"
                         />
                     </div>
-                    <select
-                        v-model="localFilters.status"
-                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    >
-                        <option value="">{{ $t('purchasing.orders.all_statuses') }}</option>
-                        <option v-for="status in statuses" :key="status" :value="status">
-                            {{ getStatusLabel(status) }}
-                        </option>
-                    </select>
+                    <div class="w-64">
+                        <SearchableSelect
+                            v-model="localFilters.status"
+                            :options="statusOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('purchasing.orders.all_statuses')"
+                            :label="''"
+                            @change="applyFilters"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -112,11 +113,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const { t } = useI18n();
 const page = usePage();
@@ -171,4 +173,13 @@ const getStatusBadgeClass = (status) => {
     };
     return `inline-flex px-2 py-1 rounded-full text-xs font-medium ${classes[status] || 'bg-gray-100'}`;
 };
+
+const statusOptions = computed(() => {
+    const allOption = { value: '', label: t('purchasing.orders.all_statuses') };
+    const mappedStatuses = props.statuses.map(status => ({
+        value: status,
+        label: getStatusLabel(status)
+    }));
+    return [allOption, ...mappedStatuses];
+});
 </script>

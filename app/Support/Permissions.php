@@ -39,6 +39,16 @@ class Permissions
     public const WORK_ORDERS_CREATE = 'crm.work_orders.create';
     public const WORK_ORDERS_UPDATE = 'crm.work_orders.update';
     public const WORK_ORDERS_DELETE = 'crm.work_orders.delete';
+
+    // ========================================
+    // PURCHASING MODULE
+    // ========================================
+
+    /** Suppliers */
+    public const SUPPLIERS_VIEW = 'purchasing.suppliers.view';
+    public const SUPPLIERS_CREATE = 'purchasing.suppliers.create';
+    public const SUPPLIERS_UPDATE = 'purchasing.suppliers.update';
+    public const SUPPLIERS_DESTROY = 'purchasing.suppliers.destroy';
     
     // ========================================
     // QUOTES MODULE
@@ -146,6 +156,12 @@ class Permissions
                 self::INVOICES_CREATE,
                 self::INVOICES_EXTRA_DISCOUNT,
             ],
+            'Purchasing - Suppliers' => [
+                self::SUPPLIERS_VIEW,
+                self::SUPPLIERS_CREATE,
+                self::SUPPLIERS_UPDATE,
+                self::SUPPLIERS_DESTROY,
+            ],
             'Work Cards (Legacy)' => [
                 self::WORKCARDS_VIEW,
                 self::WORKCARDS_CREATE,
@@ -204,6 +220,12 @@ class Permissions
             self::INVOICES_VIEW => 'View invoices',
             self::INVOICES_CREATE => 'Create invoices',
             self::INVOICES_EXTRA_DISCOUNT => 'Apply extra discounts to invoices',
+
+            // Purchasing - Suppliers
+            self::SUPPLIERS_VIEW => 'View suppliers',
+            self::SUPPLIERS_CREATE => 'Create new suppliers',
+            self::SUPPLIERS_UPDATE => 'Edit supplier information',
+            self::SUPPLIERS_DESTROY => 'Delete suppliers',
         ];
 
         return $descriptions[$permission] ?? $permission;

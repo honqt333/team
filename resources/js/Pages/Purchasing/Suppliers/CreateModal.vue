@@ -1,5 +1,5 @@
 <template>
-    <DialogModal :show="show" @close="close">
+    <DialogModal :show="show" @close="handleClose">
         <template #title>
             {{ form.id ? $t('purchasing.suppliers.edit') : $t('purchasing.suppliers.add') }}
         </template>
@@ -12,13 +12,13 @@
                         {{ $t('purchasing.suppliers.type') }}
                     </label>
                     <div class="flex gap-4">
-                        <label class="relative flex items-center p-4 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all"
-                            :class="form.type === 'parts' ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 ring-1 ring-orange-500' : 'border-gray-200 dark:border-gray-700'"
+                        <label class="relative flex items-center p-4 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                            :class="form.type === 'parts' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-500' : 'border-gray-200 dark:border-gray-700'"
                         >
                             <input type="radio" v-model="form.type" value="parts" class="sr-only" />
                             <div class="flex items-center gap-3">
                                 <span class="flex items-center justify-center w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600"
-                                    :class="{'border-orange-500 bg-orange-500': form.type === 'parts'}"
+                                    :class="{'border-indigo-500 bg-indigo-500': form.type === 'parts'}"
                                 >
                                     <span v-if="form.type === 'parts'" class="w-2 h-2 rounded-full bg-white"></span>
                                 </span>
@@ -29,13 +29,13 @@
                             </div>
                         </label>
 
-                        <label class="relative flex items-center p-4 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all"
-                            :class="form.type === 'services' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-1 ring-blue-500' : 'border-gray-200 dark:border-gray-700'"
+                        <label class="relative flex items-center p-4 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                            :class="form.type === 'services' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 ring-1 ring-purple-500' : 'border-gray-200 dark:border-gray-700'"
                         >
                             <input type="radio" v-model="form.type" value="services" class="sr-only" />
                             <div class="flex items-center gap-3">
                                 <span class="flex items-center justify-center w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600"
-                                    :class="{'border-blue-500 bg-blue-500': form.type === 'services'}"
+                                    :class="{'border-purple-500 bg-purple-500': form.type === 'services'}"
                                 >
                                     <span v-if="form.type === 'services'" class="w-2 h-2 rounded-full bg-white"></span>
                                 </span>
@@ -50,92 +50,92 @@
 
                 <!-- Name -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.name') }} <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.name"
                         type="text"
-                        :class="['w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500', form.errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
+                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 shadow-sm transition-all', form.errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-500']"
                     />
-                    <p v-if="form.errors.name" class="mt-1 text-sm text-red-500">{{ form.errors.name }}</p>
+                    <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-500">{{ form.errors.name }}</p>
                 </div>
 
                 <!-- Code -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.code') }}
                     </label>
                     <input
                         v-model="form.code"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                         :placeholder="$t('purchasing.suppliers.code_placeholder')"
                     />
                 </div>
 
                 <!-- Contact Person -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.contact') }}
                     </label>
                     <input
                         v-model="form.contact_person"
                         type="text"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                 </div>
 
                 <!-- Phone -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.phone') }}
                     </label>
                     <input
                         v-model="form.phone"
                         type="tel"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                 </div>
 
                 <!-- Email -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.email') }}
                     </label>
                     <input
                         v-model="form.email"
                         type="email"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                 </div>
 
                 <!-- Tax Number -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.tax_number') }}
                     </label>
                     <input
                         v-model="form.tax_number"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                 </div>
 
                 <!-- CR Number -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.cr_number') }}
                     </label>
                     <input
                         v-model="form.cr_number"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                 </div>
 
@@ -166,11 +166,11 @@
                                 class="w-full h-[260px] rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden"
                             >
                                 <div v-if="!mapReady" class="h-full flex flex-col items-center justify-center text-center p-4">
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">Loading map...</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('common.loading_map') }}</p>
                                 </div>
                             </div>
                             <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-                                Click on map to select location
+                                {{ $t('purchasing.suppliers.map.click_hint') }}
                             </p>
                         </div>
 
@@ -184,7 +184,7 @@
                                 <textarea 
                                     v-model="form.address"
                                     rows="2"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 resize-none"
+                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
                                 ></textarea>
                             </div>
 
@@ -194,53 +194,53 @@
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.building_number') }}
                                     </label>
-                                    <input v-model="form.building_number" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <input v-model="form.building_number" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.postal_code') }}
                                     </label>
-                                    <input v-model="form.postal_code" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <input v-model="form.postal_code" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.district') }}
                                     </label>
-                                    <input v-model="form.district" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <input v-model="form.district" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                             </div>
-
+                            
                             <!-- City + Region + Country -->
                             <div class="grid grid-cols-3 gap-2">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.city') }}
                                     </label>
-                                    <input v-model="form.city" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <input v-model="form.city" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.region') }}
                                     </label>
-                                    <input v-model="form.region" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <input v-model="form.region" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.country') }}
                                     </label>
-                                    <input v-model="form.country" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <input v-model="form.country" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                             </div>
                             
                             <!-- Lat/Lng -->
                              <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Lat</label>
-                                    <input type="number" step="any" v-model="form.lat" @change="updateMarkerFromInputs" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('purchasing.suppliers.form.lat') }}</label>
+                                    <input type="number" step="any" dir="ltr" v-model="form.lat" @change="updateMarkerFromInputs" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Lng</label>
-                                    <input type="number" step="any" v-model="form.lng" @change="updateMarkerFromInputs" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500" />
+                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('purchasing.suppliers.form.lng') }}</label>
+                                    <input type="number" step="any" dir="ltr" v-model="form.lng" @change="updateMarkerFromInputs" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                             </div>
                         </div>
@@ -254,52 +254,52 @@
 
                 <!-- Bank Name -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.bank_name') }}
                     </label>
                     <input
                         v-model="form.bank_name"
                         type="text"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
                 </div>
 
                 <!-- IBAN -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.iban') }}
                     </label>
                     <input
                         v-model="form.iban"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                         placeholder="SA..."
                     />
                 </div>
 
                 <!-- Notes -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('common.notes') }}
                     </label>
                     <textarea
                         v-model="form.notes"
                         rows="3"
-                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
                     ></textarea>
                 </div>
                 
                 <!-- Active Status -->
                 <div class="md:col-span-2">
-                    <label class="flex items-center gap-3">
-                         <div class="relative inline-block w-11 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                             :class="form.is_active ? 'bg-orange-600' : 'bg-gray-200 dark:bg-gray-700'"
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
+                         <div class="relative inline-block w-11 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                             :class="form.is_active ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'"
                              @click="form.is_active = !form.is_active"
                         >
                             <span
                                 class="inline-block w-5 h-5 transform transition duration-200 ease-in-out bg-white rounded-full shadow ring-0"
-                                :class="form.is_active ? 'translate-x-5' : 'translate-x-0'"
+                                :class="form.is_active ? 'translate-x-5 rtl:-translate-x-5' : 'translate-x-0'"
                             ></span>
                         </div>
                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -320,7 +320,7 @@
             <button
                 @click="submit"
                 :disabled="form.processing"
-                class="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 transition-all disabled:opacity-50 disabled:shadow-none"
             >
                 {{ form.processing ? $t('common.saving') : $t('common.save') }}
             </button>
@@ -333,6 +333,7 @@ import { useForm } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
 import { ref, watch, nextTick, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useConfirm } from '@/Composables/useConfirm';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -350,7 +351,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
-const { locale } = useI18n();
+const { locale, t } = useI18n();
+const { confirm } = useConfirm();
+
+const isDirty = ref(false);
+const initialFormData = ref(null);
 
 const mapContainer = ref(null);
 const mapReady = ref(false);
@@ -432,9 +437,32 @@ watch(() => props.show, async (open) => {
         initMap();
         setTimeout(() => {
             if (map) map.invalidateSize();
+            // Snapshot initial form data
+            initialFormData.value = JSON.stringify(form.data());
+            isDirty.value = false;
         }, 300);
     } else {
         destroyMap();
+    }
+});
+
+// Track form changes
+watch(() => form.data(), (newData) => {
+    if (initialFormData.value) {
+        const currentData = JSON.stringify(newData);
+        isDirty.value = currentData !== initialFormData.value;
+    }
+}, { deep: true });
+
+import { onMounted } from 'vue';
+
+onMounted(async () => {
+    if (props.show) {
+        await nextTick();
+        initMap();
+        setTimeout(() => {
+            if (map) map.invalidateSize();
+        }, 300);
     }
 });
 
@@ -552,7 +580,7 @@ async function reverseGeocode(lat, lng) {
             form.address = addressParts.length > 0 ? addressParts.join('، ') : (data.display_name?.split(',').slice(0, 2).join('،') || '');
         }
     } catch (error) {
-        console.warn('Reverse geocoding failed:', error);
+        // Silently fail or use toast if critical
     } finally {
         geocodingLoading.value = false;
     }
@@ -562,7 +590,23 @@ const close = () => {
     emit('close');
     form.reset();
     form.clearErrors();
+    isDirty.value = false;
+    initialFormData.value = null;
 };
+
+async function handleClose() {
+    if (isDirty.value) {
+        const confirmed = await confirm({
+            title: t('common.unsaved_changes'),
+            message: t('common.unsaved_changes_message'),
+            confirmText: t('common.yes_close'),
+            cancelText: t('common.cancel'),
+            type: 'warning',
+        });
+        if (!confirmed) return;
+    }
+    close();
+}
 
 const submit = () => {
     if (form.id) {

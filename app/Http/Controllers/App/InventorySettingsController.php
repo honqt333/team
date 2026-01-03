@@ -41,8 +41,8 @@ class InventorySettingsController extends Controller
         $tenantId = auth()->user()->tenant_id;
 
         return Inertia::render('Inventory/Settings', [
-            'units' => InventoryUnit::where('tenant_id', $tenantId)->orderBy('name_ar')->get(),
-            'categories' => InventoryCategory::where('tenant_id', $tenantId)->orderBy('name_ar')->get(),
+            'units' => InventoryUnit::with('updatedBy')->where('tenant_id', $tenantId)->orderBy('name_ar')->get(),
+            'categories' => InventoryCategory::with('updatedBy')->where('tenant_id', $tenantId)->orderBy('name_ar')->get(),
         ]);
     }
 
@@ -63,6 +63,7 @@ class InventorySettingsController extends Controller
             'name_ar' => $validated['name_ar'],
             'name_en' => $validated['name_en'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
+            'updated_by' => auth()->id(),
         ]);
 
         return back()->with('success', __('messages.saved'));
@@ -78,6 +79,7 @@ class InventorySettingsController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        $validated['updated_by'] = auth()->id();
         $unit->update($validated);
 
         return back()->with('success', __('messages.saved'));
@@ -86,7 +88,14 @@ class InventorySettingsController extends Controller
     public function destroyUnit(InventoryUnit $unit)
     {
         $this->authorizeForTenant($unit);
-        $unit->delete();
+        try {
+            $unit->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return back()->with('error', __('common.cannot_delete_has_data'));
+            }
+            throw $e;
+        }
 
         return back()->with('success', __('messages.deleted'));
     }
@@ -108,6 +117,7 @@ class InventorySettingsController extends Controller
             'name_ar' => $validated['name_ar'],
             'name_en' => $validated['name_en'] ?? null,
             'is_active' => $validated['is_active'] ?? true,
+            'updated_by' => auth()->id(),
         ]);
 
         return back()->with('success', __('messages.saved'));
@@ -123,6 +133,7 @@ class InventorySettingsController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        $validated['updated_by'] = auth()->id();
         $category->update($validated);
 
         return back()->with('success', __('messages.saved'));
@@ -131,7 +142,14 @@ class InventorySettingsController extends Controller
     public function destroyCategory(InventoryCategory $category)
     {
         $this->authorizeForTenant($category);
-        $category->delete();
+        try {
+            $category->delete();
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return back()->with('error', __('common.cannot_delete_has_data'));
+            }
+            throw $e;
+        }
 
         return back()->with('success', __('messages.deleted'));
     }

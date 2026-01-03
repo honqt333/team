@@ -91,4 +91,60 @@ class InvoiceService
             return $invoice;
         });
     }
+
+    /**
+     * Get proforma data (for printing without creating invoice record)
+     */
+    public function getProformaData(WorkOrder $workOrder): array
+    {
+        $workOrder->load(['customer', 'items.service', 'center', 'vehicle']);
+        
+        $tenant = $workOrder->tenant;
+        $taxSettings = $tenant->taxSettings;
+        $template = \App\Models\InvoiceTemplate::getDefault($tenant->id, 'proforma');
+
+        return [
+            'work_order' => $workOrder,
+            'customer' => $workOrder->customer,
+            'vehicle' => $workOrder->vehicle,
+            'items' => $workOrder->items,
+            'center' => $workOrder->center,
+            'tenant' => $tenant,
+            'tax_settings' => $taxSettings,
+            'template' => $template,
+            'labels' => $template->getAllLabels(),
+            'is_proforma' => true,
+            'totals' => [
+                'subtotal' => $workOrder->total_excl_tax ?? 0,
+                'tax' => $workOrder->total_tax ?? 0,
+                'total' => $workOrder->total_incl_tax ?? 0,
+            ],
+        ];
+    }
+
+    /**
+     * Generate ZATCA Phase 1 QR code TLV
+     */
+    public function generateZatcaQr(Invoice $invoice): string
+    {
+        $tenant = $invoice->tenant;
+        
+        // TLV encoding for ZATCA
+        $tlv = '';
+        $tlv .= $this->tlvEncode(1, $tenant->legal_name ?? $tenant->name); // Seller Name
+        $tlv .= $this->tlvEncode(2, $tenant->taxSettings?->tax_number ?? ''); // VAT Number
+        $tlv .= $this->tlvEncode(3, $invoice->issue_date->toIso8601String()); // Timestamp
+        $tlv .= $this->tlvEncode(4, number_format($invoice->total_incl_tax, 2, '.', '')); // Total with VAT
+        $tlv .= $this->tlvEncode(5, number_format($invoice->total_tax, 2, '.', '')); // VAT Amount
+
+        return base64_encode($tlv);
+    }
+
+    /**
+     * TLV encoding helper
+     */
+    protected function tlvEncode(int $tag, string $value): string
+    {
+        return chr($tag) . chr(strlen($value)) . $value;
+    }
 }

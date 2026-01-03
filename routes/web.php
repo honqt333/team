@@ -78,6 +78,20 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     Route::post('/work-orders/{work_order}/cancel', [WorkOrderController::class, 'cancel'])->name('work-orders.cancel');
     Route::post('/work-orders/{work_order}/complete', [WorkOrderController::class, 'complete'])->name('work-orders.complete');
     
+    // Work Order Print Routes
+    Route::get('/work-orders/{workOrder}/print/condition', [WorkOrderController::class, 'printCondition'])->name('work-orders.print.condition');
+    Route::get('/work-orders/{workOrder}/print/services', [WorkOrderController::class, 'printServices'])->name('work-orders.print.services');
+    Route::get('/work-orders/{workOrder}/print/proforma', [WorkOrderController::class, 'printProforma'])->name('work-orders.print.proforma');
+    Route::get('/work-orders/{workOrder}/print/payments', [WorkOrderController::class, 'printPayments'])->name('work-orders.print.payments');
+    
+    // Work Order Payments
+    Route::post('/work-orders/{workOrder}/payments', [WorkOrderController::class, 'storePayment'])->name('work-orders.payments.store');
+    Route::put('/work-orders/{workOrder}/payments/{payment}', [WorkOrderController::class, 'updatePayment'])->name('work-orders.payments.update');
+    Route::delete('/work-orders/{workOrder}/payments/{payment}', [WorkOrderController::class, 'destroyPayment'])->name('work-orders.payments.destroy');
+    
+    // Work Order Condition Report (Fuel Level & Damage Marks)
+    Route::put('/work-orders/{workOrder}/condition', [WorkOrderController::class, 'updateCondition'])->name('app.work-orders.update-condition');
+    
     // Work Order Item Status
     Route::patch('/work-orders/{work_order}/items/{item}/status', [WorkOrderController::class, 'updateItemStatus'])->name('work-orders.items.status');
     
@@ -93,6 +107,9 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     // Work Order Item Notes
     Route::post('/work-orders/{work_order}/items/{item}/notes', [WorkOrderController::class, 'addNote'])->name('work-orders.items.notes.store');
     Route::delete('/work-orders/{work_order}/items/{item}/notes/{note}', [WorkOrderController::class, 'deleteNote'])->name('work-orders.items.notes.destroy');
+    
+    // Work Order Photos
+    Route::delete('/work-orders/{workOrder}/photos/{photo}', [WorkOrderController::class, 'deletePhoto'])->name('work-orders.photos.destroy');
     
     // Quotes
     Route::get('/quotes', [QuoteController::class, 'index'])->name('app.quotes.index');
@@ -227,10 +244,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     Route::prefix('purchasing')->name('app.purchasing.')->group(function () {
         // Suppliers
         Route::get('/suppliers', [\App\Http\Controllers\App\SuppliersController::class, 'index'])->name('suppliers.index');
-        Route::get('/suppliers/create', [\App\Http\Controllers\App\SuppliersController::class, 'create'])->name('suppliers.create');
+        Route::get('/suppliers/export', [\App\Http\Controllers\App\SuppliersController::class, 'export'])->name('suppliers.export');
+
         Route::post('/suppliers', [\App\Http\Controllers\App\SuppliersController::class, 'store'])->name('suppliers.store');
-        Route::get('/suppliers/{supplier}/edit', [\App\Http\Controllers\App\SuppliersController::class, 'edit'])->name('suppliers.edit');
+        Route::get('/suppliers/{supplier}', [\App\Http\Controllers\App\SuppliersController::class, 'show'])->name('suppliers.show');
+
         Route::put('/suppliers/{supplier}', [\App\Http\Controllers\App\SuppliersController::class, 'update'])->name('suppliers.update');
+        Route::delete('/suppliers/{supplier}', [\App\Http\Controllers\App\SuppliersController::class, 'destroy'])->name('suppliers.destroy');
         Route::patch('/suppliers/{supplier}/toggle', [\App\Http\Controllers\App\SuppliersController::class, 'toggleActive'])->name('suppliers.toggle');
         Route::get('/api/suppliers/search', [\App\Http\Controllers\App\SuppliersController::class, 'search'])->name('suppliers.search');
         
@@ -252,6 +272,94 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
         Route::post('/grn/{goodsReceivedNote}/post', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'post'])->name('grn.post');
         Route::post('/grn/{goodsReceivedNote}/cancel', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'cancel'])->name('grn.cancel');
     });
+
+    // ───────────────────────────────────────────────────────────────
+    // HR Module (Human Resources)
+    // ───────────────────────────────────────────────────────────────
+    Route::prefix('hr')->name('app.hr.')->group(function () {
+        // Dashboard
+        Route::get('/', [\App\Http\Controllers\App\HR\HRController::class, 'index'])->name('index');
+        
+        // Settings (employee types, job titles, allowances, deductions)
+        Route::get('/settings', [\App\Http\Controllers\App\HR\SettingsController::class, 'index'])->name('settings.index');
+        
+        // Employee Types
+        Route::post('/settings/employee-types', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeEmployeeType'])->name('settings.employee-types.store');
+        Route::put('/settings/employee-types/{employeeType}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateEmployeeType'])->name('settings.employee-types.update');
+        Route::delete('/settings/employee-types/{employeeType}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyEmployeeType'])->name('settings.employee-types.destroy');
+        
+        // Job Titles
+        Route::post('/settings/job-titles', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeJobTitle'])->name('settings.job-titles.store');
+        Route::put('/settings/job-titles/{jobTitle}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateJobTitle'])->name('settings.job-titles.update');
+        Route::delete('/settings/job-titles/{jobTitle}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyJobTitle'])->name('settings.job-titles.destroy');
+        
+        // Allowances
+        Route::post('/settings/allowances', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeAllowance'])->name('settings.allowances.store');
+        Route::put('/settings/allowances/{allowance}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateAllowance'])->name('settings.allowances.update');
+        Route::delete('/settings/allowances/{allowance}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyAllowance'])->name('settings.allowances.destroy');
+        
+        // Deductions
+        Route::post('/settings/deductions', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeDeduction'])->name('settings.deductions.store');
+        Route::put('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateDeduction'])->name('settings.deductions.update');
+        Route::delete('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyDeduction'])->name('settings.deductions.destroy');
+        
+        // Employees
+        Route::get('/employees', [\App\Http\Controllers\App\HR\EmployeeController::class, 'index'])->name('employees.index');
+        Route::post('/employees', [\App\Http\Controllers\App\HR\EmployeeController::class, 'store'])->name('employees.store');
+        Route::get('/employees/{employee}', [\App\Http\Controllers\App\HR\EmployeeController::class, 'show'])->name('employees.show');
+        Route::put('/employees/{employee}', [\App\Http\Controllers\App\HR\EmployeeController::class, 'update'])->name('employees.update');
+        Route::delete('/employees/{employee}', [\App\Http\Controllers\App\HR\EmployeeController::class, 'destroy'])->name('employees.destroy');
+        Route::put('/employees/{employee}/allowances', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateAllowances'])->name('employees.allowances.update');
+        Route::put('/employees/{employee}/deductions', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateDeductions'])->name('employees.deductions.update');
+        Route::post('/employees/{employee}/upload-photo', [\App\Http\Controllers\App\HR\EmployeeController::class, 'uploadPhoto'])->name('employees.upload-photo');
+        Route::put('/employees/{employee}/default-shift', [\App\Http\Controllers\App\HR\EmployeeShiftController::class, 'updateDefaultShift'])->name('employees.default-shift.update');
+        Route::put('/employees/{employee}/weekly-schedule', [\App\Http\Controllers\App\HR\EmployeeShiftController::class, 'updateWeeklySchedule'])->name('employees.weekly-schedule.update');
+        
+        // Attendance
+        Route::get('/attendance/print', [\App\Http\Controllers\App\HR\AttendanceController::class, 'print'])->name('attendance.print');
+        Route::get('/attendance', [\App\Http\Controllers\App\HR\AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [\App\Http\Controllers\App\HR\AttendanceController::class, 'store'])->name('attendance.store');
+        Route::put('/attendance/{attendance}', [\App\Http\Controllers\App\HR\AttendanceController::class, 'update'])->name('attendance.update');
+        Route::delete('/attendance/{attendance}', [\App\Http\Controllers\App\HR\AttendanceController::class, 'destroy'])->name('attendance.destroy');
+
+        // Leaves
+        Route::post('/leaves', [\App\Http\Controllers\App\HR\LeaveController::class, 'store'])->name('leaves.store');
+        Route::put('/leaves/{leave}', [\App\Http\Controllers\App\HR\LeaveController::class, 'update'])->name('leaves.update');
+        Route::delete('/leaves/{leave}', [\App\Http\Controllers\App\HR\LeaveController::class, 'destroy'])->name('leaves.destroy');
+        Route::put('/leaves/{leave}/status', [\App\Http\Controllers\App\HR\LeaveController::class, 'updateStatus'])->name('leaves.update-status');
+
+        // Biometric Devices
+        Route::post('/settings/biometric-devices', [\App\Http\Controllers\App\HR\BiometricDeviceController::class, 'store'])->name('settings.biometric-devices.store');
+        Route::put('/settings/biometric-devices/{biometricDevice}', [\App\Http\Controllers\App\HR\BiometricDeviceController::class, 'update'])->name('settings.biometric-devices.update');
+        Route::delete('/settings/biometric-devices/{biometricDevice}', [\App\Http\Controllers\App\HR\BiometricDeviceController::class, 'destroy'])->name('settings.biometric-devices.destroy');
+        Route::post('/settings/biometric-devices/{biometricDevice}/regenerate-token', [\App\Http\Controllers\App\HR\BiometricDeviceController::class, 'regenerateToken'])->name('settings.biometric-devices.regenerate-token');
+        Route::get('/settings/biometric-devices/{biometricDevice}/token', [\App\Http\Controllers\App\HR\BiometricDeviceController::class, 'showToken'])->name('settings.biometric-devices.show-token');
+
+        // Shifts
+        Route::post('/settings/shifts', [\App\Http\Controllers\App\HR\ShiftController::class, 'store'])->name('settings.shifts.store');
+        Route::put('/settings/shifts/{shift}', [\App\Http\Controllers\App\HR\ShiftController::class, 'update'])->name('settings.shifts.update');
+        Route::delete('/settings/shifts/{shift}', [\App\Http\Controllers\App\HR\ShiftController::class, 'destroy'])->name('settings.shifts.destroy');
+    });
+
+    // ───────────────────────────────────────────────────────────────
+    // Invoices & Payments
+    // ───────────────────────────────────────────────────────────────
+    Route::prefix('invoices')->name('app.invoices.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\App\InvoicesController::class, 'index'])->name('index');
+        Route::get('/{invoice}', [\App\Http\Controllers\App\InvoicesController::class, 'show'])->name('show');
+        Route::get('/{invoice}/print', [\App\Http\Controllers\App\InvoicesController::class, 'print'])->name('print');
+        
+        // Payments on Invoice
+        Route::post('/{invoice}/payments', [\App\Http\Controllers\App\PaymentsController::class, 'store'])->name('payments.store');
+        Route::post('/{invoice}/pay-full', [\App\Http\Controllers\App\PaymentsController::class, 'payFull'])->name('payments.pay-full');
+    });
+    
+    // Delete payment (outside invoices prefix)
+    Route::delete('/payments/{payment}', [\App\Http\Controllers\App\PaymentsController::class, 'destroy'])->name('app.payments.destroy');
+
+    // Generate invoice from work order
+    Route::post('/work-orders/{workOrder}/invoice', [\App\Http\Controllers\App\InvoicesController::class, 'createFromWorkOrder'])->name('app.work-orders.invoice');
+    Route::get('/work-orders/{workOrder}/proforma', [\App\Http\Controllers\App\InvoicesController::class, 'printProforma'])->name('app.work-orders.proforma');
 });
 
 // Test routes for tenancy middleware (testing environment only)

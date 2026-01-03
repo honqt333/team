@@ -77,6 +77,7 @@
                 <!-- Actions Bar -->
                 <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-2">
                     <button
+                        v-if="can('purchasing.suppliers.update')"
                         @click="showEditModal = true"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
@@ -87,15 +88,16 @@
                     </button>
 
                     <button
+                        v-if="can('purchasing.suppliers.destroy')"
                         @click="confirmDelete"
-                        :disabled="counts.orders > 0"
+                        :disabled="counts.orders > 0 || counts.invoices > 0 || counts.payments > 0"
                         :class="[
                             'inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors',
-                            counts.orders === 0
+                            (counts.orders === 0 && counts.invoices === 0 && counts.payments === 0)
                                 ? 'text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 hover:bg-red-50 dark:hover:bg-red-900/20'
                                 : 'text-gray-400 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 cursor-not-allowed'
                         ]"
-                        :title="counts.orders > 0 ? $t('common.cannot_delete') : ''"
+                        :title="(counts.orders > 0 || counts.invoices > 0 || counts.payments > 0) ? $t('common.cannot_delete_has_data') : ''"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -255,6 +257,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import CreateModal from './CreateModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
     supplier: Object,
@@ -264,6 +267,7 @@ const props = defineProps({
 
 const { t, locale } = useI18n();
 const { confirm } = useConfirm();
+const { can } = usePermission();
 
 const showEditModal = ref(false);
 const activeTab = ref('overview');

@@ -39,6 +39,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
                 'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
             ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
             'tenant' => $tenant ? [
                 'id' => $tenant->id,
                 'name' => $tenant->trade_name ?: $tenant->legal_name ?: $tenant->name,

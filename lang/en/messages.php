@@ -41,4 +41,6 @@ return [
     // Notes
     'note_added' => 'Note added successfully',
     'note_deleted' => 'Note deleted successfully',
+
+
 ];

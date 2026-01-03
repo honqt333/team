@@ -37,16 +37,16 @@
                         </div>
 
                         <!-- Type Filter -->
-                        <select
-                            v-model="typeFilter"
-                            class="px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                        >
-                            <option value="">{{ $t('customers.filter.all_types') }}</option>
-                            <option value="individual">{{ $t('customers.type.individual') }}</option>
-                            <option value="company">{{ $t('customers.type.company') }}</option>
-                            <option value="government">{{ $t('customers.type.government') }}</option>
-                            <option value="vip">{{ $t('customers.type.vip') }}</option>
-                        </select>
+                        <div class="w-full sm:w-48">
+                            <SearchableSelect
+                                v-model="typeFilter"
+                                :options="typeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :placeholder="$t('customers.filter.all_types')"
+                                :label="''"
+                            />
+                        </div>
 
                         <!-- Export/Import/Print Buttons -->
                         <div class="flex gap-2">
@@ -376,13 +376,60 @@
             <div class="print-section hidden">
                 <!-- Header -->
                 <div class="print-header">
-                    <h1 v-if="$page.props.auth.center">{{ $page.props.auth.center.name }}</h1>
-                    <h1 v-else>Carag</h1>
-                    <p class="text-sm" v-if="$page.props.auth.center?.address">{{ $page.props.auth.center.address }}</p>
-                    <p class="text-sm" v-if="$page.props.auth.center?.phone">{{ $page.props.auth.center.phone }}</p>
-                    <div class="mt-4 border-t pt-4 w-1/2 mx-auto border-gray-200">
-                        <h2 class="text-xl font-bold">{{ $t('customers.title') }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString('ar-SA') }}</p>
+                    <!-- Arabic Layout: Logo right, info beside it -->
+                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
+                        <!-- Logo -->
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img 
+                                :src="$page.props.tenant.logo_url" 
+                                :alt="$page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                        </div>
+                        <!-- Center Info -->
+                        <div class="flex-1 text-right">
+                            <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                البريد: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
+                                السجل التجاري: {{ $page.props.tenant?.cr_number }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- English Layout: Logo left with info beside it -->
+                    <div v-else class="flex items-start gap-4 mb-4">
+                        <!-- Logo -->
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img 
+                                :src="$page.props.tenant.logo_url" 
+                                :alt="$page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                        </div>
+                        <!-- Center Info -->
+                        <div class="flex-1">
+                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                Email: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
+                                CR: {{ $page.props.tenant?.cr_number }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Title centered (both languages) -->
+                    <div class="border-t pt-4 border-gray-300 text-center">
+                        <h2 class="text-lg font-bold">{{ $t('customers.title') }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
                     </div>
                 </div>
 
@@ -427,7 +474,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
@@ -435,6 +482,7 @@ import { useToast } from '@/Composables/useToast';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import CustomerImportModal from '@/Components/Customers/CustomerImportModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     customers: {
@@ -447,8 +495,18 @@ const props = defineProps({
     },
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const isRtl = computed(() => locale.value === 'ar');
 const { success, error, info } = useToast();
+
+const typeOptions = computed(() => [
+    { value: '', label: t('customers.filter.all_types') },
+    { value: 'individual', label: t('customers.type.individual') },
+    { value: 'company', label: t('customers.type.company') },
+    { value: 'government', label: t('customers.type.government') },
+    { value: 'vip', label: t('customers.type.vip') },
+]);
+
 const showModal = ref(false);
 const selectedCustomer = ref(null);
 const searchQuery = ref(props.filters.search || '');

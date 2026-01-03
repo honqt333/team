@@ -11,7 +11,6 @@
                 <!-- Modal Container -->
                 <div 
                     class="relative bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-auto max-h-[90vh] flex flex-col"
-                    @click.stop
                 >
                     <!-- Header -->
                     <div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">

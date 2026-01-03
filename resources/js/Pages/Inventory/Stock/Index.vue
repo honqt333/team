@@ -50,16 +50,33 @@
                             @input="debouncedSearch"
                         />
                     </div>
-                    <select
-                        v-model="localFilters.stock_status"
-                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    >
-                        <option value="">{{ $t('common.all') }}</option>
-                        <option value="in_stock">{{ $t('inventory.stock.in_stock') }}</option>
-                        <option value="low_stock">{{ $t('inventory.stock.low_stock') }}</option>
-                        <option value="out_of_stock">{{ $t('inventory.stock.out_of_stock') }}</option>
-                    </select>
+                    <div class="w-48">
+                        <SearchableSelect
+                            v-model="localFilters.category"
+                            :options="[{id: '', name: $t('common.all_categories')}, ...categories]"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('common.all_categories')"
+                            :label="''"
+                            @change="applyFilters"
+                        />
+                    </div>
+                    <div class="w-48">
+                        <SearchableSelect
+                            v-model="localFilters.stock_status"
+                            :options="[
+                                {value: '', label: $t('common.all')},
+                                {value: 'in_stock', label: $t('inventory.stock.in_stock')},
+                                {value: 'low_stock', label: $t('inventory.stock.low_stock')},
+                                {value: 'out_of_stock', label: $t('inventory.stock.out_of_stock')}
+                            ]"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('common.all')"
+                            :label="''"
+                            @change="applyFilters"
+                        />
+                    </div>
                 </div>
             </div>
 
@@ -142,6 +159,7 @@
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { debounce } from 'lodash-es';
 
 const props = defineProps({

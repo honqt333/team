@@ -55,50 +55,61 @@
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div
-                                v-for="unit in units"
-                                :key="unit.id"
-                                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <div>
-                                        <p class="font-medium text-gray-900 dark:text-white">{{ unit.name_ar }}</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ unit.name_en }}</p>
-                                    </div>
-                                    <span :class="[
-                                        'inline-flex px-2 py-0.5 rounded-full text-xs font-medium',
-                                        unit.is_active
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
-                                    ]">
-                                        {{ unit.is_active ? $t('common.active') : $t('common.inactive') }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button
-                                        @click="editUnit(unit)"
-                                        class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                        <!-- Units Table -->
+                        <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">#</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.name') }} (AR)</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.name') }} (EN)</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.active') }}</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.updated_by') }}</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr 
+                                        v-for="(unit, index) in units" 
+                                        :key="unit.id" 
+                                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                                     >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click="deleteUnit(unit)"
-                                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                                        <td class="px-6 py-4">{{ index + 1 }}</td>
+                                        <td 
+                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer hover:text-emerald-600 hover:underline"
+                                            @click="editUnit(unit)"
+                                        >
+                                            {{ unit.name_ar }}
+                                        </td>
+                                        <td class="px-6 py-4">{{ unit.name_en }}</td>
+                                        <td class="px-6 py-4">
+                                            <span :class="[
+                                                'inline-flex px-2 py-0.5 rounded-full text-xs font-medium',
+                                                unit.is_active
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                                            ]">
+                                                {{ unit.is_active ? $t('common.active') : $t('common.inactive') }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">{{ unit.updated_by?.name || '-' }}</td>
+                                        <td class="px-6 py-4">
+                                            <button
+                                                @click="deleteUnit(unit)"
+                                                class="font-medium text-red-600 dark:text-red-500 hover:underline"
+                                            >
+                                                {{ $t('common.delete') }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="!units.length">
+                                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                            {{ $t('common.no_data') }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-
-                        <p v-if="!units.length" class="text-center py-8 text-gray-400">
-                            {{ $t('common.no_data') }}
-                        </p>
                     </div>
 
                     <!-- Categories Tab -->
@@ -116,50 +127,61 @@
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div
-                                v-for="category in categories"
-                                :key="category.id"
-                                class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <div>
-                                        <p class="font-medium text-gray-900 dark:text-white">{{ category.name_ar }}</p>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ category.name_en }}</p>
-                                    </div>
-                                    <span :class="[
-                                        'inline-flex px-2 py-0.5 rounded-full text-xs font-medium',
-                                        category.is_active
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
-                                    ]">
-                                        {{ category.is_active ? $t('common.active') : $t('common.inactive') }}
-                                    </span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button
-                                        @click="editCategory(category)"
-                                        class="p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30"
+                        <!-- Categories Table -->
+                        <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+                            <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3">#</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.name') }} (AR)</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.name') }} (EN)</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.active') }}</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.updated_by') }}</th>
+                                        <th scope="col" class="px-6 py-3">{{ $t('common.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr 
+                                        v-for="(category, index) in categories" 
+                                        :key="category.id" 
+                                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                                     >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click="deleteCategory(category)"
-                                        class="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
+                                        <td class="px-6 py-4">{{ index + 1 }}</td>
+                                        <td 
+                                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white cursor-pointer hover:text-emerald-600 hover:underline"
+                                            @click="editCategory(category)"
+                                        >
+                                            {{ category.name_ar }}
+                                        </td>
+                                        <td class="px-6 py-4">{{ category.name_en }}</td>
+                                        <td class="px-6 py-4">
+                                            <span :class="[
+                                                'inline-flex px-2 py-0.5 rounded-full text-xs font-medium',
+                                                category.is_active
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-300'
+                                            ]">
+                                                {{ category.is_active ? $t('common.active') : $t('common.inactive') }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4">{{ category.updated_by?.name || '-' }}</td>
+                                        <td class="px-6 py-4">
+                                            <button
+                                                @click="deleteCategory(category)"
+                                                class="font-medium text-red-600 dark:text-red-500 hover:underline"
+                                            >
+                                                {{ $t('common.delete') }}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="!categories.length">
+                                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                                            {{ $t('common.no_data') }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-
-                        <p v-if="!categories.length" class="text-center py-8 text-gray-400">
-                            {{ $t('common.no_data') }}
-                        </p>
                     </div>
                 </div>
             </div>
@@ -254,7 +276,7 @@ import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 
 const { t } = useI18n();
-const { success } = useToast();
+const { success, error } = useToast();
 const { confirm } = useConfirm();
 
 const props = defineProps({
@@ -309,7 +331,14 @@ async function deleteUnit(unit) {
     });
     if (confirmed) {
         router.delete(route('app.inventory.settings.units.destroy', unit.id), {
-            onSuccess: () => success(t('common.deleted_success')),
+            preserveScroll: true,
+            onSuccess: (page) => {
+                if (page.props.flash?.error) {
+                    error(page.props.flash.error);
+                } else {
+                    success(t('common.deleted_success'));
+                }
+            },
         });
     }
 }
@@ -355,7 +384,14 @@ async function deleteCategory(category) {
     });
     if (confirmed) {
         router.delete(route('app.inventory.settings.categories.destroy', category.id), {
-            onSuccess: () => success(t('common.deleted_success')),
+            preserveScroll: true,
+            onSuccess: (page) => {
+                if (page.props.flash?.error) {
+                    error(page.props.flash.error);
+                } else {
+                    success(t('common.deleted_success'));
+                }
+            },
         });
     }
 }

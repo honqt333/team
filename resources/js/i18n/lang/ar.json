@@ -9,19 +9,28 @@
         "loading": "جار التحميل...",
         "na": "—",
         "choose": "اختر...",
+        "no_results": "لا توجد نتائج",
         "other": "أخرى",
+        "male": "ذكر",
+        "female": "أنثى",
         "call": "اتصال",
+        "email": "البريد الإلكتروني",
         "add": "إضافة",
         "remove": "إزالة",
         "total": "الإجمالي",
-        "active": "مفعّل",
-        "inactive": "معطّل",
+        "active": "فعال",
+        "inactive": "غير فعال",
+        "print": "طباعة",
         "actions": "الإجراءات",
+        "updated_by": "قام بالتحديث",
         "confirm_delete_title": "تأكيد الحذف",
         "confirm_delete_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
         "confirm": "تأكيد",
         "deleted_success": "تم الحذف بنجاح",
         "saved_success": "تم الحفظ بنجاح",
+        "saving": "جاري الحفظ...",
+        "loading_map": "جاري تحميل الخريطة...",
+        "currency_sar": "ر.س",
         "lang": {
             "ar": "عربي",
             "en": "English"
@@ -48,6 +57,7 @@
         "read_only": "قراءة فقط",
         "qty": "الكمية",
         "unit_price": "سعر الوحدة",
+        "no_contact": "لا توجد معلومات اتصال",
         "status": "الحالة",
         "created_at": "تاريخ الإنشاء",
         "created_by": "أنشئ بواسطة",
@@ -55,7 +65,28 @@
         "notes": "ملاحظات",
         "select": "اختر",
         "all": "الكل",
+        "all_categories": "جميع الفئات",
         "name": "الاسم",
+        "basic_info": "البيانات الأساسية",
+        "overview": "نظرة عامة",
+        "showing": "عرض",
+        "of": "من",
+        "cannot_delete_has_data": "لا يمكن الحذف: السجل مرتبط ببيانات أخرى",
+        "customer": "العميل",
+        "details": "التفاصيل",
+        "description": "الوصف",
+        "phone": "الهاتف",
+        "view": "عرض",
+        "manage": "إدارة",
+        "finance": "المالية",
+        "hr_department": "الموارد البشرية",
+        "management": "الإدارة",
+        "department": "القسم",
+        "type": "النوع",
+        "amount": "المبلغ",
+        "minutes": "دقيقة",
+        "days": "يوم",
+        "save_changes": "حفظ التغييرات",
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
@@ -67,6 +98,7 @@
         "customers": "العملاء",
         "vehicles": "المركبات",
         "work_orders": "كروت العمل",
+        "invoices": "الفواتير",
         "departments": "الأقسام",
         "services": "الخدمات",
         "user": "مستخدم",
@@ -264,9 +296,35 @@
         },
         "all_loaded": "تم تحميل جميع المركبات"
     },
+    "print": {
+        "options_title": "خيارات الطباعة",
+        "vehicle_report": "تقرير حالة المركبة",
+        "vehicle_report_desc": "تقرير شامل عن حالة المركبة عند الاستلام",
+        "work_order": "أمر العمل",
+        "work_order_desc": "قائمة الخدمات المطلوبة",
+        "proforma_invoice": "فاتورة أولية",
+        "proforma_invoice_desc": "فاتورة تفصيلية بدون رقم رسمي",
+        "payments_receipt": "سند المدفوعات",
+        "payments_receipt_desc": "جميع المدفوعات المسجلة على هذا الكرت"
+    },
     "work_orders": {
-        "title": "كروت العمل",
-        "add": "إنشاء كرت عمل",
+        "title": "أوامر العمل",
+        "total": "الإجمالي",
+        "balance": "المتبقي",
+        "cost_and_payment": "التكلفة والدفع",
+        "services_total": "الخدمات",
+        "parts_total": "قطع الغيار",
+        "price": "السعر",
+        "discount": "الخصم",
+        "amount": "المبلغ",
+        "paid": "المدفوعات",
+        "duration": "المدة",
+        "overdue_days": "متأخر {days} يوم",
+        "days_remaining": "متبقي {days} يوم",
+        "due_today": "اليوم موعد التسليم",
+        "completed_in_days": "اكتمل في {days} يوم",
+        "create_new": "إنشاء أمر عمل",
+        "add": "إنشاء أمر عمل",
         "edit": "تعديل كرت عمل",
         "details": "تفاصيل كرت العمل",
         "created_at": "تاريخ الإنشاء",
@@ -385,6 +443,7 @@
         "condition_report": {
             "select_color": "اختر لون العلامة",
             "click_to_mark": "انقر على الرسم لإضافة علامة ضرر",
+            "fuel_level": "مستوى الوقود",
             "front": "أمام",
             "rear": "خلف",
             "left": "يسار",
@@ -691,10 +750,10 @@
             "edit": "تعديل الماركة"
         },
         "models": {
-            "subtitle": "إدارة موديلات السيارات",
+            "subtitle": "إدارة الموديلات",
+            "all_makes": "كل الماركات",
             "add": "إضافة موديل",
-            "edit": "تعديل الموديل",
-            "all_makes": "جميع الماركات"
+            "edit": "تعديل الموديل"
         },
         "colors": {
             "subtitle": "إدارة ألوان السيارات",
@@ -951,13 +1010,13 @@
         },
         "settings": {
             "title": "إعدادات المخزون",
-            "subtitle": "إدارة وحدات القياس وفئات القطع",
+            "subtitle": "إدارة وحدات المخزون وفئات القطع",
             "units": {
-                "title": "وحدات القياس",
+                "title": "وحدات المخزون",
                 "unit": "وحدة"
             },
             "categories": {
-                "title": "فئات القطع",
+                "title": "فئات المخزون",
                 "category": "فئة"
             }
         },
@@ -976,7 +1035,9 @@
             "sku_placeholder": "مثال: OIL-5W30",
             "name": "الاسم",
             "name_ar": "الاسم بالعربي",
+            "name_ar_placeholder": "مثال: فلتر زيت تويوتا",
             "name_en": "الاسم بالإنجليزي",
+            "name_en_placeholder": "مثال: Toyota Oil Filter",
             "unit": "الوحدة",
             "category": "الفئة",
             "category_placeholder": "زيوت، فلاتر، فرامل...",
@@ -1113,6 +1174,7 @@
             "bank_info": "البيانات البنكية",
             "bank_name": "اسم البنك",
             "iban": "رقم الآيبان",
+            "orders": "الطلبات",
             "orders_count": "الطلبات",
             "created": "تم إضافة المورد بنجاح",
             "updated": "تم تحديث المورد بنجاح",
@@ -1120,7 +1182,7 @@
             "deactivated": "تم تعطيل المورد",
             "type": "نوع المورد",
             "type_parts": "مورد قطع غيار",
-            "type_parts_desc": "تويفير قطع الغيار ومواد المخزون",
+            "type_parts_desc": "توفير قطع الغيار ومواد المخزون",
             "type_services": "مقدم خدمات",
             "type_services_desc": "تقديم خدمات صيانة أو عمالة",
             "address_details": "تفاصيل العنوان",
@@ -1131,7 +1193,17 @@
             "city": "المدينة",
             "region": "المنطقة",
             "country": "الدولة",
-            "clear_address": "مسح العنوان"
+            "clear_address": "مسح العنوان",
+            "balance": "الرصيد",
+            "invoices": "الفواتير",
+            "payments": "المدفوعات",
+            "form": {
+                "lat": "خط العرض",
+                "lng": "خط الطول"
+            },
+            "map": {
+                "click_hint": "اضغط على الخريطة لتحديد الموقع"
+            }
         },
         "orders": {
             "title": "أوامر الشراء",
@@ -1176,6 +1248,289 @@
             "posted": "تم ترحيل سند الاستلام للمخزون",
             "cancelled": "تم إلغاء سند الاستلام",
             "post": "ترحيل للمخزون"
+        }
+    },
+    "invoices": {
+        "title": "الفواتير",
+        "invoice": "فاتورة",
+        "invoices": "الفواتير",
+        "invoice_number": "رقم الفاتورة",
+        "issue_date": "تاريخ الإصدار",
+        "supply_date": "تاريخ التوريد",
+        "create": "إنشاء فاتورة",
+        "created": "تم إنشاء الفاتورة بنجاح",
+        "print": "طباعة الفاتورة",
+        "proforma": "فاتورة أولية",
+        "tax_invoice": "فاتورة ضريبية",
+        "already_exists": "الفاتورة موجودة بالفعل لهذا الأمر",
+        "work_order_not_completed": "أمر العمل غير مكتمل",
+        "status": {
+            "draft": "مسودة",
+            "valid": "صالحة",
+            "reported": "مُبلغة",
+            "cancelled": "ملغاة",
+            "unpaid": "غير مدفوعة",
+            "partial": "مدفوعة جزئياً",
+            "paid": "مدفوعة"
+        },
+        "subtotal": "المجموع قبل الضريبة",
+        "tax": "ضريبة القيمة المضافة",
+        "tax_rate": "نسبة الضريبة",
+        "total": "الإجمالي",
+        "grand_total": "الإجمالي شامل الضريبة",
+        "total_paid": "المدفوع",
+        "balance": "المتبقي",
+        "all_statuses": "جميع الحالات",
+        "date_from": "من تاريخ",
+        "date_to": "إلى تاريخ"
+    },
+    "payments": {
+        "title": "المدفوعات",
+        "payment": "دفعة",
+        "payments": "المدفوعات",
+        "add_payment": "إضافة دفعة",
+        "edit_payment": "تعديل الدفعة",
+        "recorded": "تم تسجيل الدفعة بنجاح",
+        "deleted": "تم حذف الدفعة",
+        "saved_successfully": "تم حفظ الدفعة بنجاح",
+        "updated_successfully": "تم تحديث الدفعة بنجاح",
+        "deleted_successfully": "تم حذف الدفعة بنجاح",
+        "pay_full": "دفع الكامل",
+        "pay_partial": "دفع جزئي",
+        "no_payments": "لا توجد مدفوعات",
+        "form": {
+            "type": "نوع العملية",
+            "method": "طريقة الدفع",
+            "amount": "المبلغ",
+            "amount_placeholder": "أدخل المبلغ",
+            "date": "تاريخ الدفع",
+            "reference": "رقم المرجع",
+            "reference_placeholder": "رقم الإيصال أو رقم العملية",
+            "notes": "التفاصيل",
+            "notes_placeholder": "ملاحظات إضافية..."
+        },
+        "types": {
+            "payment": "دفع",
+            "refund": "استرجاع"
+        },
+        "amount_exceeds_paid": "المبلغ يتجاوز القيمة المدفوعة",
+        "methods": {
+            "cash": "نقداً",
+            "mada": "مدى",
+            "visa": "فيزا",
+            "mastercard": "ماستركارد",
+            "transfer": "تحويل بنكي",
+            "apple_pay": "Apple Pay",
+            "stc_pay": "STC Pay",
+            "tabby": "تابي",
+            "tamara": "تمارا",
+            "credit": "آجل",
+            "other": "أخرى"
+        },
+        "amount_exceeds_balance": "المبلغ يتجاوز المتبقي"
+    },
+    "hr": {
+        "title": "الموارد البشرية",
+        "subtitle": "إدارة الموظفين والرواتب والحضور",
+        "employees": {
+            "title": "الموظفين",
+            "subtitle": "إدارة ملفات الموظفين",
+            "total": "إجمالي الموظفين",
+            "add": "إضافة موظف",
+            "hire_date": "تاريخ التعيين",
+            "contract_end_date": "تاريخ انتهاء العقد",
+            "link_user": "ربط بمستخدم",
+            "no_user_link": "بدون ربط",
+            "link_user_hint": "ربط الموظف بحساب مستخدم للوصول للنظام",
+            "total_allowances": "إجمالي البدلات",
+            "total_deductions": "إجمالي الخصومات",
+            "net_salary": "صافي الراتب",
+            "no_allowances": "لا توجد بدلات",
+            "no_deductions": "لا توجد خصومات",
+            "deactivate": "تعطيل",
+            "activate": "تفعيل",
+            "no_job_title": "لا يوجد مسمى وظيفي",
+            "number": "الرقم الوظيفي",
+            "job_title": "المسمى الوظيفي",
+            "base_salary": "الراتب الأساسي",
+            "no_employees": "لا يوجد موظفين",
+            "gender": "الجنس",
+            "nationality": "الجنسية",
+            "branch": "الفرع",
+            "status": {
+                "active": "نشط",
+                "inactive": "غير نشط",
+                "terminated": "منهي عقده"
+            },
+            "tabs": {
+                "info": "المعلومات",
+                "financial": "المالية",
+                "schedule": "الدوام والإجازات",
+                "attendance": "الحضور",
+                "payroll": "الرواتب",
+                "work_orders": "كروت العمل",
+                "basic": "البيانات الأساسية",
+                "address": "العنوان",
+                "job": "البيانات الوظيفية",
+                "identity": "الهوية",
+                "insurance": "التأمين"
+            },
+            "sections": {
+                "basic_info": "البيانات الأساسية",
+                "job_info": "البيانات الوظيفية"
+            },
+            "gender": "الجنس",
+            "genders": {
+                "male": "ذكر",
+                "female": "أنثى"
+            },
+            "nationality": "الجنسية",
+            "marital_status": "الحالة الاجتماعية",
+            "marital_statuses": {
+                "single": "أعزب",
+                "married": "متزوج"
+            },
+            "birth_date": "تاريخ الميلاد",
+            "branch": "الفرع",
+            "working_hours": "أوقات العمل",
+            "shift_start": "بداية الدوام",
+            "shift_end": "نهاية الدوام",
+            "or_select_shift": "أو اختر وردية من القائمة",
+            "default_shift": "الوردية الافتراضية",
+            "default_shift_hint": "تُستخدم عند عدم وجود جدولة أسبوعية أو يومية",
+            "manual_times_title": "أو حدد أوقات ثابتة يدوياً:",
+            "weekly_schedule": "الجدولة الأسبوعية",
+            "save_schedule": "حفظ الجدول",
+            "saving_schedule": "جاري الحفظ...",
+            "shift": "الوردية",
+            "day": "اليوم",
+            "time": "الوقت",
+            "rest_day": "راحة / حسب الافتراضي",
+            "address": {
+                "city": "المدينة",
+                "district": "الحي",
+                "street": "الشارع",
+                "building_number": "رقم المبنى",
+                "postal_code": "الرمز البريدي"
+            },
+            "identity": {
+                "nationality": "الجنسية",
+                "national_id_expiry": "تاريخ انتهاء الهوية",
+                "passport_number": "رقم الجواز",
+                "passport_expiry": "تاريخ انتهاء الجواز",
+                "border_entry_number": "رقم الدخول من المنفذ",
+                "border_port": "المنفذ الحدودي",
+                "sponsor_name": "اسم الكفيل",
+                "profession_on_id": "المهنة في الهوية"
+            },
+            "insurance": {
+                "company": "شركة التأمين",
+                "card_number": "رقم بطاقة التأمين",
+                "policy_number": "رقم وثيقة التأمين",
+                "expiry": "تاريخ انتهاء التأمين",
+                "classification": "تصنيف التأمين",
+                "details": "تفاصيل التأمين"
+            }
+        },
+        "attendance": {
+            "title": "الحضور والانصراف",
+            "subtitle": "سجل حضور الموظفين",
+            "date": "التاريخ",
+            "check_in": "تسجيل دخول",
+            "check_out": "تسجيل خروج",
+            "status": "الحالة",
+            "present": "حاضر",
+            "absent": "غائب",
+            "late": "متأخر",
+            "leave": "إجازة",
+            "holiday": "عطلة",
+            "notes": "ملاحظات",
+            "mark_absent": "تسجيل غياب",
+            "update_status": "تحديث الحالة",
+            "print_report": "طباعة التقرير",
+            "daily_report": "تقرير الحضور اليومي"
+        },
+        "leaves": {
+            "title": "الإجازات والدوام",
+            "add": "إضافة إجازة",
+            "edit": "تعديل إجازة",
+            "type": "نوع الإجازة",
+            "reason": "سبب الإجازة",
+            "duration": "المدة",
+            "dates": "التواريخ",
+            "status": "الحالة",
+            "types": {
+                "annual": "سنوية",
+                "sick": "مرضية",
+                "unpaid": "بدون راتب",
+                "emergency": "طارئة",
+                "other": "أخرى"
+            },
+            "statuses": {
+                "pending": "معلقة",
+                "approved": "مقبولة",
+                "rejected": "مرفوضة"
+            }
+        },
+        "payroll": {
+            "title": "الرواتب",
+            "subtitle": "كشوف الرواتب الشهرية"
+        },
+        "settings": {
+            "title": "الإعدادات",
+            "subtitle": "إعدادات الموارد البشرية",
+            "employee_types": {
+                "title": "أنواع الموظفين",
+                "singular": "نوع موظف",
+                "add": "إضافة نوع"
+            },
+            "job_titles": {
+                "title": "المسميات الوظيفية",
+                "singular": "مسمى وظيفي",
+                "add": "إضافة مسمى"
+            },
+            "allowances": {
+                "title": "البدلات",
+                "singular": "بدل",
+                "add": "إضافة بدل"
+            },
+            "deductions": {
+                "title": "الخصومات",
+                "singular": "خصم",
+                "add": "إضافة خصم"
+            },
+            "types": {
+                "fixed": "ثابت",
+                "percentage": "نسبة مئوية"
+            },
+            "calculation_base": "أساس الاحتساب",
+            "calculation_bases": {
+                "base_salary": "الراتب الأساسي",
+                "monthly_contribution": "معدل المساهمة الشهري"
+            },
+            "biometric_devices": {
+                "title": "أجهزة البصمة",
+                "subtitle": "إدارة أجهزة الحضور والانصراف",
+                "device": "جهاز بصمة",
+                "device_id": "معرف الجهاز",
+                "device_type": "نوع الجهاز",
+                "no_devices": "لا توجد أجهزة مسجلة",
+                "show_token": "عرض مفتاح الـ API",
+                "token_copied": "تم نسخ مفتاح الـ API",
+                "last_sync": "آخر مزامنة"
+            },
+            "shifts": {
+                "title": "الورديات",
+                "subtitle": "إدارة ورديات العمل (صباحي، مسائي، ليلي)",
+                "shift": "وردية",
+                "no_shifts": "لا توجد ورديات مسجلة",
+                "start_time": "وقت البدء",
+                "end_time": "وقت الانتهاء",
+                "break": "الاستراحة",
+                "overnight": "وردية ليلية",
+                "color": "اللون",
+                "cannot_delete_in_use": "لا يمكن حذف الوردية لأنها مستخدمة من قبل موظفين"
+            }
         }
     }
 }

@@ -13,38 +13,26 @@
                 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
                     <!-- From Warehouse -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {{ $t('inventory.transfers.from') }} *
-                        </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.from_warehouse_id"
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            :options="fromWarehouseOptions"
+                            :label="$t('inventory.transfers.from')"
+                            :placeholder="$t('common.select')"
                             required
-                        >
-                            <option value="">-- {{ $t('common.select') }} --</option>
-                            <option v-for="wh in warehouses" :key="wh.id" :value="wh.id">
-                                {{ wh.name }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.from_warehouse_id" class="mt-1 text-sm text-red-600">{{ form.errors.from_warehouse_id }}</p>
+                            :error="form.errors.from_warehouse_id"
+                        />
                     </div>
 
                     <!-- To Warehouse -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {{ $t('inventory.transfers.to') }} *
-                        </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.to_warehouse_id"
-                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                            :options="toWarehouseOptions"
+                            :label="$t('inventory.transfers.to')"
+                            :placeholder="$t('common.select')"
                             required
-                        >
-                            <option value="">-- {{ $t('common.select') }} --</option>
-                            <option v-for="wh in availableToWarehouses" :key="wh.id" :value="wh.id">
-                                {{ wh.name }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.to_warehouse_id" class="mt-1 text-sm text-red-600">{{ form.errors.to_warehouse_id }}</p>
+                            :error="form.errors.to_warehouse_id"
+                        />
                     </div>
 
                     <!-- Notes -->
@@ -85,6 +73,7 @@
 import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     warehouses: Array,
@@ -97,8 +86,20 @@ const form = useForm({
     notes: props.transfer?.notes || '',
 });
 
-const availableToWarehouses = computed(() => {
-    return props.warehouses.filter(wh => wh.id !== form.from_warehouse_id);
+const fromWarehouseOptions = computed(() => {
+    return props.warehouses.map(wh => ({
+        value: wh.id,
+        label: wh.name
+    }));
+});
+
+const toWarehouseOptions = computed(() => {
+    return props.warehouses
+        .filter(wh => wh.id !== form.from_warehouse_id)
+        .map(wh => ({
+            value: wh.id,
+            label: wh.name
+        }));
 });
 
 const submit = () => {

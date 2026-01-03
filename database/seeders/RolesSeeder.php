@@ -76,6 +76,11 @@ class RolesSeeder extends Seeder
                     Permissions::INVOICES_VIEW,
                     Permissions::INVOICES_CREATE,
                     Permissions::INVOICES_EXTRA_DISCOUNT,
+                    // Purchasing - Suppliers
+                    Permissions::SUPPLIERS_VIEW,
+                    Permissions::SUPPLIERS_CREATE,
+                    Permissions::SUPPLIERS_UPDATE,
+                    Permissions::SUPPLIERS_DESTROY,
                 ],
             ],
             'manager' => [

@@ -20,7 +20,11 @@
                     {{ $t('vehicles.form.plate') }} <span class="text-red-500">*</span>
                 </label>
                 <!-- Saudi Plate Interactive Input -->
-                <SaudiPlateInput v-model="form.plate_number" />
+                <SaudiPlateInput 
+                    ref="plateInput"
+                    v-model="form.plate_number" 
+                    :error="form.errors.plate_number"
+                />
                 <p v-if="form.errors.plate_number" class="mt-2 text-sm text-red-600 dark:text-red-400 text-center">{{ form.errors.plate_number }}</p>
             </div>
 
@@ -34,34 +38,31 @@
                     <!-- Make -->
                     <div>
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.make') }} <span class="text-red-500">*</span></label>
-                        <SelectInput
+                        <SearchableSelect
                             v-model="form.make_id"
                             @change="onMakeChange"
-                            color="teal"
+                            :options="[...makes, {id: '__other__', name: $t('common.other')}]"
+                            option-label="name"
+                            option-value="id"
+                            :label="''"
+                            :placeholder="$t('common.choose')"
                             :error="form.errors.make_id"
-                        >
-                            <option value="">{{ $t('common.choose') }}</option>
-                            <option v-for="make in makes" :key="make.id" :value="make.id">
-                                {{ make.name }}
-                            </option>
-                            <option value="__other__">{{ $t('common.other') }}</option>
-                        </SelectInput>
+                        />
                     </div>
 
                     <!-- Model -->
                     <div>
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.model') }}</label>
-                        <SelectInput
+                        <SearchableSelect
                             v-if="form.make_id && form.make_id !== '__other__'"
                             v-model="form.model_id"
-                            color="teal"
-                        >
-                            <option value="">{{ $t('common.choose') }}</option>
-                            <option v-for="model in availableModels" :key="model.id" :value="model.id">
-                                {{ model.name }}
-                            </option>
-                            <option value="__other__">{{ $t('common.other') }}</option>
-                        </SelectInput>
+                            :options="[...availableModels, {id: '__other__', name: $t('common.other')}]"
+                            option-label="name"
+                            option-value="id"
+                            :label="''"
+                            :placeholder="$t('common.choose')"
+                            :error="form.errors.model_id"
+                        />
                         <input 
                             v-else
                             type="text"
@@ -113,16 +114,15 @@
                         </svg>
                     </button>
                 </div>
-                <SelectInput
+                <SearchableSelect
                     v-model="form.customer_id"
-                    color="teal"
+                    :options="localCustomers"
+                    :placeholder="$t('common.choose')"
+                    :option-label="c => `${c.name} (${c.phone})`"
+                    option-value="id"
+                    :label="''"
                     :error="form.errors.customer_id"
-                >
-                    <option value="">{{ $t('common.choose') }}</option>
-                    <option v-for="customer in localCustomers" :key="customer.id" :value="customer.id">
-                        {{ customer.name }} ({{ customer.phone }})
-                    </option>
-                </SelectInput>
+                />
             </div>
 
             <!-- Vehicle Details Section -->
@@ -133,29 +133,25 @@
                     <!-- Year -->
                     <div>
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.year') }}</label>
-                        <SelectInput
+                        <SearchableSelect
                             v-model="form.year"
-                            color="teal"
-                        >
-                            <option value="">{{ $t('common.choose') }}</option>
-                            <option v-for="year in yearOptions" :key="year" :value="year">
-                                {{ year }}
-                            </option>
-                        </SelectInput>
+                            :options="yearOptions"
+                            :placeholder="$t('common.choose')"
+                            :label="''"
+                        />
                     </div>
 
                     <!-- Color -->
                     <div>
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.color') }}</label>
-                        <SelectInput
+                        <SearchableSelect
                             v-model="form.color"
-                            color="teal"
-                        >
-                            <option value="">{{ $t('common.choose') }}</option>
-                            <option v-for="color in colors" :key="color.id" :value="color.name">
-                                {{ color.name }}
-                            </option>
-                        </SelectInput>
+                            :options="colors"
+                            option-label="name"
+                            option-value="name"
+                            :placeholder="$t('common.choose')"
+                            :label="''"
+                        />
                     </div>
 
                     <!-- Odometer -->
@@ -230,7 +226,7 @@ import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import BaseModal from '@/Components/BaseModal.vue';
-import SelectInput from '@/Components/SelectInput.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import SaudiPlateInput from '@/Components/Vehicles/SaudiPlateInput.vue';
 
@@ -443,7 +439,64 @@ onUnmounted(() => {
     window.removeEventListener('customer-reloaded', handleCustomerReloaded);
 });
 
+const plateInput = ref(null);
+
+function validate() {
+    form.clearErrors();
+    let isValid = true;
+
+    // 1. Plate Number Validation
+    // Use the component's internal validation if available, otherwise fallback to simple check
+    const isPlateValid = plateInput.value ? plateInput.value.validate() : !!form.plate_number;
+    if (!isPlateValid) {
+        form.setError('plate_number', ' '); // Trigger red border
+        isValid = false;
+    }
+
+    // 2. Make Validation
+    if (!form.make_id) {
+        form.setError('make_id', ' ');
+        isValid = false;
+    } else if (form.make_id === '__other__') {
+        // If Make is Other, Make Name is required
+        if (!form.make_other) {
+            form.setError('make_other', ' ');
+            isValid = false;
+        }
+        // And Model Name is also required (since standard model dropdown is disabled)
+        if (!form.model_other) {
+            form.setError('model_other', ' ');
+            isValid = false;
+        }
+    } else {
+        // Normal Make selected
+        // 3. Model Validation
+        if (!form.model_id) {
+            form.setError('model_id', ' ');
+            isValid = false;
+        } else if (form.model_id === '__other__') {
+            // If Model is Other, Model Name is required
+            if (!form.model_other) {
+                form.setError('model_other', ' ');
+                isValid = false;
+            }
+        }
+    }
+
+    // 4. Customer Validation
+    if (!form.customer_id) {
+        form.setError('customer_id', ' ');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
 function submitForm() {
+    if (!validate()) {
+        return;
+    }
+
     const url = props.vehicle 
         ? `/app/vehicles/${props.vehicle.id}` 
         : '/app/vehicles';

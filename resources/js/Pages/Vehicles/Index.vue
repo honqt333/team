@@ -328,13 +328,60 @@
             <div class="print-section hidden">
                 <!-- Header -->
                 <div class="print-header">
-                    <h1 v-if="$page.props.auth.center">{{ $page.props.auth.center.name }}</h1>
-                    <h1 v-else>Carag</h1>
-                    <p class="text-sm" v-if="$page.props.auth.center?.address">{{ $page.props.auth.center.address }}</p>
-                    <p class="text-sm" v-if="$page.props.auth.center?.phone">{{ $page.props.auth.center.phone }}</p>
-                    <div class="mt-4 border-t pt-4 w-1/2 mx-auto border-gray-200">
-                        <h2 class="text-xl font-bold">{{ $t('vehicles.title') }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString('ar-SA') }}</p>
+                    <!-- Arabic Layout: Logo right, info beside it -->
+                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
+                        <!-- Logo -->
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img 
+                                :src="$page.props.tenant.logo_url" 
+                                :alt="$page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                        </div>
+                        <!-- Center Info -->
+                        <div class="flex-1 text-right">
+                            <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                البريد: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
+                                السجل التجاري: {{ $page.props.tenant?.cr_number }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- English Layout: Logo left with info beside it -->
+                    <div v-else class="flex items-start gap-4 mb-4">
+                        <!-- Logo -->
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img 
+                                :src="$page.props.tenant.logo_url" 
+                                :alt="$page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                        </div>
+                        <!-- Center Info -->
+                        <div class="flex-1">
+                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                Email: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
+                                CR: {{ $page.props.tenant?.cr_number }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Title centered (both languages) -->
+                    <div class="border-t pt-4 border-gray-300 text-center">
+                        <h2 class="text-lg font-bold">{{ $t('vehicles.title') }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
                     </div>
                 </div>
 
@@ -375,7 +422,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, watch, onMounted, onUnmounted, computed } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import { useI18n } from "vue-i18n";
 import axios from "axios";
@@ -411,7 +458,8 @@ const props = defineProps({
     },
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const isRtl = computed(() => locale.value === 'ar');
 const { success } = useToast();
 const { toEnglish } = useNumberFormat();
 const showModal = ref(false);
