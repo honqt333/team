@@ -48,7 +48,23 @@
 
             <!-- Type & Amount (for allowance/deduction only) -->
             <div v-if="type === 'allowance' || type === 'deduction'" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
+                <!-- Is Flexible (custom amount per employee) - FIRST -->
+                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-700">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input
+                            v-model="form.is_flexible"
+                            type="checkbox"
+                            class="w-5 h-5 text-amber-600 bg-gray-100 border-gray-300 rounded focus:ring-amber-500"
+                        />
+                        <div>
+                            <p class="font-medium text-amber-900 dark:text-amber-200">{{ $t('hr.financial.flexible') }}</p>
+                            <p class="text-xs text-amber-700 dark:text-amber-300">{{ $t('hr.settings.flexible_hint') }}</p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Type & Amount - Hidden when flexible -->
+                <div v-if="!form.is_flexible" class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('common.type') }}
@@ -75,8 +91,8 @@
                     </div>
                 </div>
 
-                <!-- Calculation Base (only for percentage) -->
-                <div v-if="form.type === 'percentage'">
+                <!-- Calculation Base (only for percentage and not flexible) -->
+                <div v-if="form.type === 'percentage' && !form.is_flexible">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('hr.settings.calculation_base') }}
                     </label>
@@ -161,6 +177,7 @@ const form = useForm({
     type: 'fixed',
     amount: 0,
     calculation_base: 'base_salary',
+    is_flexible: true,
     is_active: true,
 });
 
@@ -171,6 +188,7 @@ function resetForm() {
     form.type = 'fixed';
     form.amount = 0;
     form.calculation_base = 'base_salary';
+    form.is_flexible = true;
     form.is_active = true;
 }
 
@@ -183,6 +201,7 @@ watch(() => props.show, (newVal) => {
             form.type = props.item.type || 'fixed';
             form.amount = props.item.amount || 0;
             form.calculation_base = props.item.calculation_base || 'base_salary';
+            form.is_flexible = props.item.is_flexible ?? false;
             form.is_active = props.item.is_active ?? true;
         } else {
             resetForm();

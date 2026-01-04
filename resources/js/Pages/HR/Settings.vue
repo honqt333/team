@@ -261,6 +261,100 @@
                             {{ $t('hr.settings.shifts.no_shifts') }}
                         </div>
                     </div>
+
+                    <!-- Attendance Settings Tab -->
+                    <div v-show="activeTab === 'attendance_settings'" class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $t('hr.settings.attendance_settings.title') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.settings.attendance_settings.subtitle') }}</p>
+                        </div>
+
+                        <form @submit.prevent="saveAttendanceSettings" class="space-y-6">
+                            <!-- Grace Period -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+                                    <label class="block text-sm font-medium text-amber-900 dark:text-amber-200 mb-2">⏰ {{ $t('hr.settings.attendance_settings.grace_period') }}</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" v-model="attendanceSettingsForm.grace_period_minutes" min="0" max="60"
+                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
+                                        <span class="text-amber-700 dark:text-amber-300">{{ $t('common.minutes') }}</span>
+                                    </div>
+                                    <p class="text-xs text-amber-600 dark:text-amber-400 mt-2">{{ $t('hr.settings.attendance_settings.grace_period_hint') }}</p>
+                                </div>
+
+                                <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
+                                    <label class="block text-sm font-medium text-red-900 dark:text-red-200 mb-2">💰 {{ $t('hr.settings.attendance_settings.late_deduction') }}</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" v-model="attendanceSettingsForm.late_deduction_per_minute" min="0" step="0.01"
+                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
+                                        <span class="text-red-700 dark:text-red-300">{{ $t('common.currency') }} / {{ $t('common.minute') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <label class="block text-sm font-medium text-red-900 dark:text-red-200">📅 {{ $t('hr.settings.attendance_settings.absence_deduction') }}</label>
+                                        <div class="flex gap-2">
+                                            <label class="flex items-center gap-1 cursor-pointer">
+                                                <input type="radio" v-model="attendanceSettingsForm.absence_deduction_type" value="fixed" class="text-red-600 focus:ring-red-500">
+                                                <span class="text-xs text-red-800 dark:text-red-300">{{ $t('common.fixed_amount') }}</span>
+                                            </label>
+                                            <label class="flex items-center gap-1 cursor-pointer">
+                                                <input type="radio" v-model="attendanceSettingsForm.absence_deduction_type" value="percentage" class="text-red-600 focus:ring-red-500">
+                                                <span class="text-xs text-red-800 dark:text-red-300">{{ $t('common.percentage') }}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" v-model="attendanceSettingsForm.absence_deduction_value" min="0" step="0.01"
+                                            class="w-32 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
+                                        <span class="text-red-700 dark:text-red-300">
+                                            {{ attendanceSettingsForm.absence_deduction_type === 'percentage' ? '%' : ($t('common.currency') + ' / ' + $t('common.day')) }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-red-600 dark:text-red-400 mt-2">
+                                        {{ attendanceSettingsForm.absence_deduction_type === 'percentage' ? $t('hr.settings.attendance_settings.absence_deduction_hint_percentage') : $t('hr.settings.attendance_settings.absence_deduction_hint_fixed') }}
+                                    </p>
+                                </div>
+
+                                <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
+                                    <label class="block text-sm font-medium text-emerald-900 dark:text-emerald-200 mb-2">⏱️ {{ $t('hr.settings.attendance_settings.overtime_rate') }}</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" v-model="attendanceSettingsForm.overtime_rate_per_hour" min="0" step="0.01"
+                                            class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
+                                        <span class="text-emerald-700 dark:text-emerald-300">{{ $t('common.currency') }} / {{ $t('common.hour') }}</span>
+                                    </div>
+                                    <label class="flex items-center gap-2 mt-3 cursor-pointer">
+                                        <input type="checkbox" v-model="attendanceSettingsForm.overtime_enabled" class="rounded text-emerald-600">
+                                        <span class="text-sm text-emerald-700 dark:text-emerald-300">{{ $t('hr.settings.attendance_settings.overtime_enabled') }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Working Days -->
+                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                                <label class="block text-sm font-medium text-blue-900 dark:text-blue-200 mb-3">🗓️ {{ $t('hr.settings.attendance_settings.working_days') }}</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <label v-for="(dayName, dayIndex) in weekDays" :key="dayIndex" 
+                                        class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-700 rounded-lg border cursor-pointer"
+                                        :class="attendanceSettingsForm.working_days.includes(dayIndex) ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/40' : 'border-gray-200 dark:border-gray-600'"
+                                    >
+                                        <input type="checkbox" :value="dayIndex" v-model="attendanceSettingsForm.working_days" class="rounded text-blue-600">
+                                        <span class="text-sm">{{ dayName }}</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <button type="submit" :disabled="savingAttendanceSettings"
+                                    class="px-6 py-2.5 bg-violet-600 text-white rounded-xl font-medium hover:bg-violet-700 disabled:opacity-50">
+                                    {{ savingAttendanceSettings ? $t('common.saving') : $t('common.save') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -503,6 +597,7 @@ const props = defineProps({
     biometricDevices: Array,
     centers: Array,
     shifts: Array,
+    attendanceSettings: Object,
 });
 
 const activeTab = ref('employee_types');
@@ -513,6 +608,7 @@ const tabs = computed(() => [
     { key: 'allowances', label: t('hr.settings.allowances.title'), icon: '💰' },
     { key: 'deductions', label: t('hr.settings.deductions.title'), icon: '📉' },
     { key: 'shifts', label: t('hr.settings.shifts.title'), icon: '⏰' },
+    { key: 'attendance_settings', label: t('hr.settings.attendance_settings.title'), icon: '📋' },
     { key: 'biometric_devices', label: t('hr.settings.biometric_devices.title'), icon: '📡' },
 ]);
 
@@ -696,6 +792,34 @@ async function deleteShift(shift) {
 
     router.delete(route('app.hr.settings.shifts.destroy', shift.id), {
         onSuccess: () => success(t('common.deleted_success')),
+    });
+}
+
+// Attendance Settings
+const weekDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const savingAttendanceSettings = ref(false);
+
+const attendanceSettingsForm = ref({
+    grace_period_minutes: props.attendanceSettings?.grace_period_minutes ?? 10,
+    late_deduction_per_minute: props.attendanceSettings?.late_deduction_per_minute ?? 0,
+    absence_deduction_value: props.attendanceSettings?.absence_deduction_value ?? (props.attendanceSettings?.absence_deduction_per_day ?? 100),
+    absence_deduction_type: props.attendanceSettings?.absence_deduction_type ?? 'percentage',
+    overtime_rate_per_hour: props.attendanceSettings?.overtime_rate_per_hour ?? 0,
+    overtime_enabled: props.attendanceSettings?.overtime_enabled ?? true,
+    working_days: props.attendanceSettings?.working_days ?? [0, 1, 2, 3, 4],
+});
+
+function saveAttendanceSettings() {
+    savingAttendanceSettings.value = true;
+    router.put(route('app.hr.settings.attendance.update'), attendanceSettingsForm.value, {
+        preserveScroll: true,
+        onSuccess: () => {
+            success(t('common.saved_success'));
+            savingAttendanceSettings.value = false;
+        },
+        onError: () => {
+            savingAttendanceSettings.value = false;
+        },
     });
 }
 </script>

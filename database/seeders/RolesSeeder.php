@@ -21,177 +21,51 @@ class RolesSeeder extends Seeder
         // Reset cached roles and permissions
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Assign Super Admin to User 1 if exists
-        $user = \App\Models\User::find(1);
-        if ($user) {
-            // Set context to user's tenant to create/assign role in that tenant scope
-            app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
-            $this->command->info("Assigning Super Admin to User 1 (Tenant: {$user->tenant_id})...");
-        }
-
-        // Define default roles with their permissions
-        $roles = [
-            'super_admin' => [
-                'ar' => 'مدير عام',
-                'en' => 'Super Admin',
-                'description' => 'Full system access - all permissions',
-                'permissions' => Permissions::all(), // All permissions
-            ],
-            'admin' => [
-                'ar' => 'مدير',
-                'en' => 'Admin',
-                'description' => 'Administrative access - most permissions except system settings',
-                'permissions' => [
-                    // CRM - Customers
-                    Permissions::CUSTOMERS_VIEW,
-                    Permissions::CUSTOMERS_CREATE,
-                    Permissions::CUSTOMERS_UPDATE,
-                    Permissions::CUSTOMERS_DELETE,
-                    // CRM - Vehicles
-                    Permissions::VEHICLES_VIEW,
-                    Permissions::VEHICLES_CREATE,
-                    Permissions::VEHICLES_UPDATE,
-                    Permissions::VEHICLES_DELETE,
-                    Permissions::VEHICLE_SETTINGS_VIEW,
-                    Permissions::VEHICLE_SETTINGS_MANAGE,
-                    // CRM - Work Orders
-                    Permissions::WORK_ORDERS_VIEW,
-                    Permissions::WORK_ORDERS_CREATE,
-                    Permissions::WORK_ORDERS_UPDATE,
-                    Permissions::WORK_ORDERS_DELETE,
-                    // Quotes
-                    Permissions::QUOTES_VIEW,
-                    Permissions::QUOTES_CREATE,
-                    Permissions::QUOTES_UPDATE,
-                    Permissions::QUOTES_DELETE,
-                    Permissions::QUOTES_APPROVE,
-                    // Services
-                    Permissions::SERVICES_VIEW,
-                    Permissions::SERVICES_CREATE,
-                    Permissions::SERVICES_UPDATE,
-                    Permissions::SERVICES_DELETE,
-                    Permissions::DEPARTMENTS_VIEW,
-                    Permissions::DEPARTMENTS_MANAGE,
-                    // Invoices
-                    Permissions::INVOICES_VIEW,
-                    Permissions::INVOICES_CREATE,
-                    Permissions::INVOICES_EXTRA_DISCOUNT,
-                    // Purchasing - Suppliers
-                    Permissions::SUPPLIERS_VIEW,
-                    Permissions::SUPPLIERS_CREATE,
-                    Permissions::SUPPLIERS_UPDATE,
-                    Permissions::SUPPLIERS_DESTROY,
-                ],
-            ],
-            'manager' => [
-                'ar' => 'مدير فرع',
-                'en' => 'Branch Manager',
-                'description' => 'Branch management - operational permissions without deletion',
-                'permissions' => [
-                    // CRM - Customers (no delete)
-                    Permissions::CUSTOMERS_VIEW,
-                    Permissions::CUSTOMERS_CREATE,
-                    Permissions::CUSTOMERS_UPDATE,
-                    // CRM - Vehicles (no delete)
-                    Permissions::VEHICLES_VIEW,
-                    Permissions::VEHICLES_CREATE,
-                    Permissions::VEHICLES_UPDATE,
-                    Permissions::VEHICLE_SETTINGS_VIEW,
-                    // CRM - Work Orders (no delete)
-                    Permissions::WORK_ORDERS_VIEW,
-                    Permissions::WORK_ORDERS_CREATE,
-                    Permissions::WORK_ORDERS_UPDATE,
-                    // Quotes (all)
-                    Permissions::QUOTES_VIEW,
-                    Permissions::QUOTES_CREATE,
-                    Permissions::QUOTES_UPDATE,
-                    Permissions::QUOTES_APPROVE,
-                    // Services (view only)
-                    Permissions::SERVICES_VIEW,
-                    Permissions::DEPARTMENTS_VIEW,
-                    // Invoices
-                    Permissions::INVOICES_VIEW,
-                    Permissions::INVOICES_CREATE,
-                ],
-            ],
-            'receptionist' => [
-                'ar' => 'موظف استقبال',
-                'en' => 'Receptionist',
-                'description' => 'Front desk operations - quotes and work order creation',
-                'permissions' => [
-                    // CRM - Customers (create/edit only)
-                    Permissions::CUSTOMERS_VIEW,
-                    Permissions::CUSTOMERS_CREATE,
-                    Permissions::CUSTOMERS_UPDATE,
-                    // CRM - Vehicles (create/edit only)
-                    Permissions::VEHICLES_VIEW,
-                    Permissions::VEHICLES_CREATE,
-                    Permissions::VEHICLES_UPDATE,
-                    // CRM - Work Orders (create only)
-                    Permissions::WORK_ORDERS_VIEW,
-                    Permissions::WORK_ORDERS_CREATE,
-                    // Quotes (create/edit)
-                    Permissions::QUOTES_VIEW,
-                    Permissions::QUOTES_CREATE,
-                    Permissions::QUOTES_UPDATE,
-                    // Services (view for pricing)
-                    Permissions::SERVICES_VIEW,
-                    Permissions::DEPARTMENTS_VIEW,
-                ],
-            ],
-            'technician' => [
-                'ar' => 'فني',
-                'en' => 'Technician',
-                'description' => 'Technical work only - view assigned work orders, no financial data',
-                'permissions' => [
-                    // Work Orders (view and update status only)
-                    Permissions::WORK_ORDERS_VIEW,
-                    Permissions::WORK_ORDERS_UPDATE,
-                    // Vehicles (view for inspection)
-                    Permissions::VEHICLES_VIEW,
-                    // Services (view for reference)
-                    Permissions::SERVICES_VIEW,
-                ],
-            ],
-            'accountant' => [
-                'ar' => 'محاسب',
-                'en' => 'Accountant',
-                'description' => 'Financial operations - invoices and customer financials',
-                'permissions' => [
-                    // Customers (view only)
-                    Permissions::CUSTOMERS_VIEW,
-                    // Vehicles (view only)
-                    Permissions::VEHICLES_VIEW,
-                    // Work Orders (view only)
-                    Permissions::WORK_ORDERS_VIEW,
-                    // Invoices (full access)
-                    Permissions::INVOICES_VIEW,
-                    Permissions::INVOICES_CREATE,
-                    Permissions::INVOICES_EXTRA_DISCOUNT,
-                ],
-            ],
-        ];
-
-        // Create roles
-        foreach ($roles as $roleName => $roleData) {
-            $role = Role::firstOrCreate(
-                ['name' => $roleName, 'guard_name' => 'web'],
-                ['name' => $roleName, 'guard_name' => 'web']
+        // Create all permissions (Global)
+        $allPermissions = Permissions::all();
+        foreach ($allPermissions as $permission) {
+            Permission::firstOrCreate(
+                ['name' => $permission, 'guard_name' => 'web'],
+                ['name' => $permission, 'guard_name' => 'web']
             );
+        }
+        $this->command->info("Created " . count($allPermissions) . " permissions.");
 
-            // Sync permissions
-            $role->syncPermissions($roleData['permissions']);
-
-            // Special Case: Assign Super Admin to User 1
-            if ($roleName === 'super_admin' && isset($user)) {
-                $user->assignRole($role);
-                $this->command->info("User 1 assigned to Super Admin Role.");
-            }
-
-            $this->command->info("Role '{$roleName}' created with " . count($roleData['permissions']) . ' permissions.');
+        // Get all tenants
+        $tenants = \App\Models\Tenant::all();
+        
+        if ($tenants->isEmpty()) {
+            $this->command->warn("No tenants found. Seeding roles for default tenant (ID 1) as fallback.");
+            // Create a dummy tenant object/ID or just force ID 1 if that's the convention
+             $tenants = collect([(object)['id' => 1]]); 
         }
 
-        $this->command->info('');
-        $this->command->info('Default roles seeded successfully!');
+        $tenantSetupService = new \App\Services\TenantSetupService();
+
+        foreach ($tenants as $tenant) {
+            $tenantSetupService->seedRolesForTenant($tenant->id);
+            $this->command->info("Seeded roles for Tenant ID: {$tenant->id}");
+        }
+
+        // Assign Super Admin to the FIRST user of EACH tenant
+        foreach ($tenants as $tenant) {
+            $firstUser = \App\Models\User::where('tenant_id', $tenant->id)->orderBy('id')->first();
+            
+            if ($firstUser) {
+                $superAdminRole = \App\Models\Role::where('name', 'super_admin')
+                    ->where('tenant_id', $tenant->id)
+                    ->first();
+                    
+                if ($superAdminRole) {
+                    // Set the team id for the assignment context
+                    app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+                    
+                    if (!$firstUser->hasRole('super_admin')) {
+                        $firstUser->assignRole($superAdminRole);
+                        $this->command->info("User {$firstUser->id} assigned to Super Admin Role (Tenant {$tenant->id}).");
+                    }
+                }
+            }
+        }
     }
 }

@@ -93,6 +93,75 @@ class Permissions
     public const WORKCARDS_LINES_DISCOUNT = 'workcards.lines.discount';
 
     // ========================================
+    // HR MODULE
+    // ========================================
+    
+    /** HR Dashboard */
+    public const HR_VIEW = 'hr.view';
+    
+    /** Employees */
+    public const HR_EMPLOYEES_VIEW = 'hr.employees.view';
+    public const HR_EMPLOYEES_CREATE = 'hr.employees.create';
+    public const HR_EMPLOYEES_UPDATE = 'hr.employees.update';
+    public const HR_EMPLOYEES_DELETE = 'hr.employees.delete';
+    
+    /** Attendance */
+    public const HR_ATTENDANCE_VIEW = 'hr.attendance.view';
+    public const HR_ATTENDANCE_MANAGE = 'hr.attendance.manage';
+    
+    /** Leaves */
+    public const HR_LEAVES_VIEW = 'hr.leaves.view';
+    public const HR_LEAVES_MANAGE = 'hr.leaves.manage';
+    public const HR_LEAVES_APPROVE = 'hr.leaves.approve';
+    
+    /** Settings */
+    public const HR_SETTINGS_MANAGE = 'hr.settings.manage';
+    
+    /** Payroll */
+    public const HR_PAYROLL_VIEW = 'hr.payroll.view';
+    public const HR_PAYROLL_CREATE = 'hr.payroll.create'; // Also implies manage/calculate
+    public const HR_PAYROLL_UPDATE = 'hr.payroll.update';
+    public const HR_PAYROLL_DELETE = 'hr.payroll.delete';
+    
+    /** Other Payments */
+    public const HR_PAYMENTS_VIEW = 'hr.payments.view';
+    public const HR_PAYMENTS_CREATE = 'hr.payments.create';
+    public const HR_PAYMENTS_UPDATE = 'hr.payments.update';
+    public const HR_PAYMENTS_DELETE = 'hr.payments.delete';
+    public const HR_PAYMENTS_APPROVE = 'hr.payments.approve';
+
+    // ========================================
+    // INVENTORY MODULE
+    // ========================================
+
+    public const INVENTORY_VIEW = 'inventory.view';
+    public const INVENTORY_SETTINGS_MANAGE = 'inventory.settings.manage';
+    // Future permissions placeholders
+    public const INVENTORY_STOCK_VIEW = 'inventory.stock.view';
+    public const INVENTORY_MOVES_VIEW = 'inventory.moves.view';
+    public const INVENTORY_MOVES_CREATE = 'inventory.moves.create';
+
+    // ========================================
+    // USER MANAGEMENT
+    // ========================================
+    
+    public const USERS_VIEW = 'users.view';
+    public const USERS_CREATE = 'users.create';
+    public const USERS_UPDATE = 'users.update';
+    public const USERS_DELETE = 'users.delete';
+
+    // ========================================
+    // TENANT SETTINGS
+    // ========================================
+
+    /** Company Profile */
+    public const COMPANY_MANAGE = 'settings.company.manage';
+
+    /** Centers (Branches) */
+    public const CENTERS_VIEW = 'settings.centers.view';
+    public const CENTERS_MANAGE = 'settings.centers.manage';
+
+    // ========================================
     // HELPER METHODS
     // ========================================
 
@@ -116,13 +185,18 @@ class Permissions
     public static function byModule(): array
     {
         return [
-            'CRM - Customers' => [
+            'settings_general' => [
+                self::COMPANY_MANAGE,
+                self::CENTERS_VIEW,
+                self::CENTERS_MANAGE,
+            ],
+            'crm_customers' => [
                 self::CUSTOMERS_VIEW,
                 self::CUSTOMERS_CREATE,
                 self::CUSTOMERS_UPDATE,
                 self::CUSTOMERS_DELETE,
             ],
-            'CRM - Vehicles' => [
+            'crm_vehicles' => [
                 self::VEHICLES_VIEW,
                 self::VEHICLES_CREATE,
                 self::VEHICLES_UPDATE,
@@ -130,20 +204,20 @@ class Permissions
                 self::VEHICLE_SETTINGS_VIEW,
                 self::VEHICLE_SETTINGS_MANAGE,
             ],
-            'CRM - Work Orders' => [
+            'crm_work_orders' => [
                 self::WORK_ORDERS_VIEW,
                 self::WORK_ORDERS_CREATE,
                 self::WORK_ORDERS_UPDATE,
                 self::WORK_ORDERS_DELETE,
             ],
-            'Quotes' => [
+            'quotes' => [
                 self::QUOTES_VIEW,
                 self::QUOTES_CREATE,
                 self::QUOTES_UPDATE,
                 self::QUOTES_DELETE,
                 self::QUOTES_APPROVE,
             ],
-            'Services' => [
+            'services' => [
                 self::SERVICES_VIEW,
                 self::SERVICES_CREATE,
                 self::SERVICES_UPDATE,
@@ -151,23 +225,68 @@ class Permissions
                 self::DEPARTMENTS_VIEW,
                 self::DEPARTMENTS_MANAGE,
             ],
-            'Invoices' => [
+            'invoices' => [
                 self::INVOICES_VIEW,
                 self::INVOICES_CREATE,
                 self::INVOICES_EXTRA_DISCOUNT,
             ],
-            'Purchasing - Suppliers' => [
+            'purchasing_suppliers' => [
                 self::SUPPLIERS_VIEW,
                 self::SUPPLIERS_CREATE,
                 self::SUPPLIERS_UPDATE,
                 self::SUPPLIERS_DESTROY,
             ],
-            'Work Cards (Legacy)' => [
+            'workcards' => [
                 self::WORKCARDS_VIEW,
                 self::WORKCARDS_CREATE,
                 self::WORKCARDS_UPDATE,
                 self::WORKCARDS_DELETE,
                 self::WORKCARDS_LINES_DISCOUNT,
+            ],
+            'hr_general' => [
+                self::HR_VIEW,
+                self::HR_SETTINGS_MANAGE,
+            ],
+            'hr_employees' => [
+                self::HR_EMPLOYEES_VIEW,
+                self::HR_EMPLOYEES_CREATE,
+                self::HR_EMPLOYEES_UPDATE,
+                self::HR_EMPLOYEES_DELETE,
+            ],
+            'hr_attendance' => [
+                self::HR_ATTENDANCE_VIEW,
+                self::HR_ATTENDANCE_MANAGE,
+            ],
+            'hr_leaves' => [
+                self::HR_LEAVES_VIEW,
+                self::HR_LEAVES_MANAGE,
+                self::HR_LEAVES_APPROVE,
+            ],
+            'hr_payroll' => [
+                self::HR_PAYROLL_VIEW,
+                self::HR_PAYROLL_CREATE,
+                self::HR_PAYROLL_UPDATE,
+                self::HR_PAYROLL_DELETE,
+            ],
+            'hr_payments' => [
+                self::HR_PAYMENTS_VIEW,
+                self::HR_PAYMENTS_CREATE,
+                self::HR_PAYMENTS_UPDATE,
+                self::HR_PAYMENTS_DELETE,
+                self::HR_PAYMENTS_APPROVE,
+            ],
+            'user_management' => [
+                self::USERS_VIEW,
+                self::USERS_CREATE,
+                self::USERS_UPDATE,
+                self::USERS_DELETE,
+            ],
+            'inventory' => [
+                self::INVENTORY_VIEW,
+                self::INVENTORY_SETTINGS_MANAGE,
+                self::INVENTORY_STOCK_VIEW,
+                self::INVENTORY_MOVES_VIEW,
+                self::INVENTORY_MOVES_CREATE,
             ],
         ];
     }
@@ -180,54 +299,6 @@ class Permissions
      */
     public static function describe(string $permission): string
     {
-        $descriptions = [
-            // CRM - Customers
-            self::CUSTOMERS_VIEW => 'View customer records',
-            self::CUSTOMERS_CREATE => 'Create new customers',
-            self::CUSTOMERS_UPDATE => 'Edit customer information',
-            self::CUSTOMERS_DELETE => 'Delete customers',
-            
-            // CRM - Vehicles
-            self::VEHICLES_VIEW => 'View vehicle records',
-            self::VEHICLES_CREATE => 'Register new vehicles',
-            self::VEHICLES_UPDATE => 'Edit vehicle information',
-            self::VEHICLES_DELETE => 'Delete vehicles',
-            self::VEHICLE_SETTINGS_VIEW => 'View vehicle makes/models/colors',
-            self::VEHICLE_SETTINGS_MANAGE => 'Manage vehicle makes/models/colors',
-            
-            // CRM - Work Orders
-            self::WORK_ORDERS_VIEW => 'View work orders',
-            self::WORK_ORDERS_CREATE => 'Create new work orders',
-            self::WORK_ORDERS_UPDATE => 'Edit work orders',
-            self::WORK_ORDERS_DELETE => 'Delete work orders',
-            
-            // Quotes
-            self::QUOTES_VIEW => 'View quotes',
-            self::QUOTES_CREATE => 'Create new quotes',
-            self::QUOTES_UPDATE => 'Edit quotes',
-            self::QUOTES_DELETE => 'Delete quotes',
-            self::QUOTES_APPROVE => 'Approve/reject quotes',
-            
-            // Services
-            self::SERVICES_VIEW => 'View service catalog',
-            self::SERVICES_CREATE => 'Add new services',
-            self::SERVICES_UPDATE => 'Edit services',
-            self::SERVICES_DELETE => 'Delete services',
-            self::DEPARTMENTS_VIEW => 'View departments',
-            self::DEPARTMENTS_MANAGE => 'Create/edit/delete departments',
-            
-            // Invoices
-            self::INVOICES_VIEW => 'View invoices',
-            self::INVOICES_CREATE => 'Create invoices',
-            self::INVOICES_EXTRA_DISCOUNT => 'Apply extra discounts to invoices',
-
-            // Purchasing - Suppliers
-            self::SUPPLIERS_VIEW => 'View suppliers',
-            self::SUPPLIERS_CREATE => 'Create new suppliers',
-            self::SUPPLIERS_UPDATE => 'Edit supplier information',
-            self::SUPPLIERS_DESTROY => 'Delete suppliers',
-        ];
-
-        return $descriptions[$permission] ?? $permission;
+        return __('permissions.' . str_replace('.', '_', $permission));
     }
 }

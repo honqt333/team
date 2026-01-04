@@ -14,6 +14,7 @@ class Supplier extends Model
 
     protected $fillable = [
         'tenant_id',
+        'center_id',
         'name',
         'type',
         'code',
@@ -51,6 +52,11 @@ class Supplier extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function center(): BelongsTo
+    {
+        return $this->belongsTo(Center::class);
+    }
+
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class);
@@ -63,6 +69,14 @@ class Supplier extends Model
     public function scopeForTenant($query, int $tenantId)
     {
         return $query->where('tenant_id', $tenantId);
+    }
+
+    public function scopeForCenter($query, ?int $centerId)
+    {
+        return $query->where(function ($q) use ($centerId) {
+            $q->where('center_id', $centerId)
+              ->orWhereNull('center_id');
+        });
     }
 
     public function scopeActive($query)

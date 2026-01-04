@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\HR\Attendance;
+use App\Models\HR\Employee;
 use App\Models\Quote;
 use App\Models\QuoteLine;
 use App\Models\Service;
@@ -14,6 +16,8 @@ use App\Models\VehicleModel;
 use App\Models\WorkOrder;
 use App\Policies\CustomerPolicy;
 use App\Policies\DepartmentPolicy;
+use App\Policies\HR\AttendancePolicy;
+use App\Policies\HR\EmployeePolicy;
 use App\Policies\QuoteLinePolicy;
 use App\Policies\QuotePolicy;
 use App\Policies\ServicePolicy;
@@ -54,5 +58,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(VehicleColor::class, VehicleColorPolicy::class);
         Gate::policy(Quote::class, QuotePolicy::class);
         Gate::policy(QuoteLine::class, QuoteLinePolicy::class);
+        
+        // HR Policies
+        Gate::policy(Employee::class, EmployeePolicy::class);
+        Gate::policy(Attendance::class, AttendancePolicy::class);
+
+        // Super Admin Bypass
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('super_admin') ? true : null;
+        });
     }
 }

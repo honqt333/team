@@ -19,12 +19,14 @@ class Deduction extends Model
         'type',
         'amount',
         'calculation_base',
+        'is_flexible',
         'is_active',
         'updated_by',
     ];
 
     protected $casts = [
         'amount' => 'float',
+        'is_flexible' => 'boolean',
         'is_active' => 'boolean',
     ];
 

@@ -1,7 +1,19 @@
 {
     "common": {
         "save": "حفظ",
+        "minute": "دقيقة",
+        "hour": "ساعة",
+        "day": "يوم",
+        "none": "لا يوجد",
+        "fixed_amount": "مبلغ ثابت",
+        "percentage": "نسبة مئوية",
+        "center": "المركز",
+        "employee": "موظف",
+        "no_records": "لا يوجد سجلات",
         "cancel": "إلغاء",
+        "from": "من",
+        "to": "إلى",
+        "error_occurred": "حدث خطأ ما",
         "create": "إنشاء",
         "update": "تحديث",
         "delete": "حذف",
@@ -39,15 +51,17 @@
         "no_data": "لا توجد بيانات",
         "import": "استيراد",
         "export": "تصدير",
-        "print": "طباعة",
         "edit": "تعديل",
         "error": "خطأ",
-        "system": "نظام",
         "cannot_modify_system_data": "لا يمكن تعديل بيانات النظام",
         "cannot_delete_system_data": "لا يمكن حذف بيانات النظام",
+        "cannot_edit_system_role": "لا يمكن تعديل صلاحيات المدير العام",
+        "cannot_delete_system_role": "لا يمكن حذف دور المدير العام",
         "selected": "تم الاختيار",
         "back": "رجوع",
         "currency": "ر.س",
+        "switch_center": "تبديل الفرع",
+        "home": "الرئيسية",
         "unsaved_changes": "تغييرات غير محفوظة",
         "unsaved_changes_message": "لم يتم حفظ التغييرات. هل أنت متأكد من إغلاق هذا النموذج؟",
         "yes_close": "نعم، إغلاق",
@@ -66,6 +80,7 @@
         "select": "اختر",
         "all": "الكل",
         "all_categories": "جميع الفئات",
+        "all_centers": "جميع الفروع",
         "name": "الاسم",
         "basic_info": "البيانات الأساسية",
         "overview": "نظرة عامة",
@@ -87,6 +102,7 @@
         "minutes": "دقيقة",
         "days": "يوم",
         "save_changes": "حفظ التغييرات",
+        "view_details": "عرض التفاصيل",
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
@@ -581,6 +597,40 @@
             "is_active": "مفعّل"
         }
     },
+    "users": {
+        "title": "إدارة المستخدمين",
+        "management": "إدارة المستخدمين والصلاحيات",
+        "description": "إدارة مستخدمين النظام وصلاحياتهم",
+        "create_user": "إضافة مستخدم جديد",
+        "edit_user": "تعديل بيانات المستخدم",
+        "create_new": "أضف مستخدم",
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "new_password": "كلمة المرور الجديدة (اختياري)",
+        "confirm_password": "تأكيد كلمة المرور",
+        "allowed_centers": "الفروع المتاحة",
+        "branches": "الفروع",
+        "employee": "الموظف المرتبط",
+        "no_employee": "-",
+        "roles": "الأدوار",
+        "direct_permissions": "الصلاحيات المباشرة",
+        "permissions_desc_extra": "امنح المستخدم صلاحيات إضافية محددة بجانب دوره.",
+        "label_ar": "الاسم بالعربية",
+        "label_en": "الاسم بالإنجليزية",
+        "system_name": "اسم النظام (Slug)",
+        "description": "الوصف",
+        "role": "الدور",
+        "select_role": "اختر الدور",
+        "select_employee": "اختر الموظف",
+        "is_active": "حساب نشط",
+        "is_active_hint": "للسماح للمستخدم بتسجيل الدخول للنظام",
+        "status": "الحالة",
+        "active": "نشط",
+        "inactive": "غير نشط",
+        "toggle_status": "تغيير الحالة",
+        "create_new": "إضافة مستخدم جديد"
+    },
     "settings": {
         "title": "الإعدادات",
         "subtitle": "إدارة إعدادات النظام والتهيئة",
@@ -589,6 +639,10 @@
                 "title": "ملف الشركة",
                 "description": "بيانات الشركة، الضرائب، فاتورة"
             },
+            "users": {
+                "title": "المستخدمين",
+                "description": "إدارة مستخدمين النظام وصلاحياتهم"
+            },
             "branches": {
                 "title": "الفروع",
                 "description": "إدارة فروع ومراكز الشركة"
@@ -596,6 +650,10 @@
             "system": {
                 "title": "إعدادات المركبات",
                 "description": "الماركات، الموديلات، الألوان"
+            },
+            "roles": {
+                "title": "إدارة الأدوار",
+                "description": "إنشاء وتعديل الأدوار والصلاحيات"
             },
             "departments": {
                 "title": "الأقسام",
@@ -1336,12 +1394,15 @@
             "title": "الموظفين",
             "subtitle": "إدارة ملفات الموظفين",
             "total": "إجمالي الموظفين",
+            "employee": "موظف",
             "add": "إضافة موظف",
             "hire_date": "تاريخ التعيين",
             "contract_end_date": "تاريخ انتهاء العقد",
             "link_user": "ربط بمستخدم",
             "no_user_link": "بدون ربط",
             "link_user_hint": "ربط الموظف بحساب مستخدم للوصول للنظام",
+            "name": "الاسم",
+            "department": "القسم",
             "total_allowances": "إجمالي البدلات",
             "total_deductions": "إجمالي الخصومات",
             "net_salary": "صافي الراتب",
@@ -1352,10 +1413,12 @@
             "no_job_title": "لا يوجد مسمى وظيفي",
             "number": "الرقم الوظيفي",
             "job_title": "المسمى الوظيفي",
+            "employee_type": "نوع الموظف",
             "base_salary": "الراتب الأساسي",
             "no_employees": "لا يوجد موظفين",
             "gender": "الجنس",
             "nationality": "الجنسية",
+            "national_id": "رقم الهوية",
             "branch": "الفرع",
             "status": {
                 "active": "نشط",
@@ -1363,21 +1426,18 @@
                 "terminated": "منهي عقده"
             },
             "tabs": {
-                "info": "المعلومات",
-                "financial": "المالية",
-                "schedule": "الدوام والإجازات",
+                "info": "البيانات الأساسية",
+                "financial": "البيانات المالية",
+                "schedule": "الجدولة",
                 "attendance": "الحضور",
-                "payroll": "الرواتب",
+                "payroll": "المسيرات",
                 "work_orders": "كروت العمل",
+                "permissions": "الصلاحيات",
                 "basic": "البيانات الأساسية",
                 "address": "العنوان",
                 "job": "البيانات الوظيفية",
                 "identity": "الهوية",
                 "insurance": "التأمين"
-            },
-            "sections": {
-                "basic_info": "البيانات الأساسية",
-                "job_info": "البيانات الوظيفية"
             },
             "gender": "الجنس",
             "genders": {
@@ -1423,6 +1483,8 @@
                 "sponsor_name": "اسم الكفيل",
                 "profession_on_id": "المهنة في الهوية"
             },
+            "no_user_account": "لا يوجد حساب مستخدم لهذا الموظف",
+            "create_user_account_msg": "يجب ربط الموظف بحساب مستخدم لتتمكن من إدارة صلاحياته.",
             "insurance": {
                 "company": "شركة التأمين",
                 "card_number": "رقم بطاقة التأمين",
@@ -1470,11 +1532,105 @@
                 "pending": "معلقة",
                 "approved": "مقبولة",
                 "rejected": "مرفوضة"
-            }
+            },
+            "approve": "قبول",
+            "reject": "رفض",
+            "confirm_approve": "هل أنت متأكد من قبول هذه الإجازة؟",
+            "confirm_reject": "هل أنت متأكد من رفض هذه الإجازة؟"
         },
         "payroll": {
-            "title": "الرواتب",
-            "subtitle": "كشوف الرواتب الشهرية"
+            "title": "المسيّرات",
+            "subtitle": "إدارة كشوف الرواتب الشهرية",
+            "generate": "إنشاء مسيّرة",
+            "details": "تفاصيل المسيّرة",
+            "monthly_salaries": "الرواتب الشهرية",
+            "period": "الفترة",
+            "period_start": "بداية الفترة",
+            "period_end": "نهاية الفترة",
+            "payment_date": "تاريخ الصرف",
+            "employees_count": "عدد الموظفين",
+            "total_salaries": "إجمالي الرواتب",
+            "total_deductions": "إجمالي الخصومات",
+            "total_net": "صافي الإجمالي",
+            "status": "الحالة",
+            "items": "تفاصيل الموظفين",
+            "base_salary": "الراتب الأساسي",
+            "allowances": "البدلات",
+            "deductions": "الخصومات",
+            "gosi": "التأمينات",
+            "net_salary": "الصافي",
+            "approve": "اعتماد",
+            "mark_paid": "تسجيل كمدفوع",
+            "print_report": "طباعة كشف الرواتب",
+            "print_title": "كشف مسيّرة الرواتب",
+            "no_payrolls": "لا توجد مسيّرات",
+            "already_exists": "توجد مسيّرة لهذه الفترة مسبقاً",
+            "generated_successfully": "تم إنشاء المسيّرة بنجاح",
+            "approved_successfully": "تمت الموافقة على المسيّرة",
+            "marked_paid": "تم تسجيل المسيّرة كمدفوعة",
+            "cannot_approve": "لا يمكن اعتماد هذه المسيّرة",
+            "must_approve_first": "يجب اعتماد المسيّرة قبل تسجيلها كمدفوعة",
+            "statuses": {
+                "draft": "مسودة",
+                "approved": "معتمدة",
+                "paid": "مدفوعة"
+            }
+        },
+        "financial": {
+            "tabs": {
+                "bank_info": "معلومات البنك",
+                "salaries": "الرواتب والبدلات",
+                "payment_history": "سجل العمليات"
+            },
+            "bank": {
+                "name": "اسم البنك",
+                "iban": "رقم الآيبان",
+                "account_number": "رقم الحساب",
+                "notes": "ملاحظات"
+            },
+            "payroll": {
+                "base_salary": "الراتب الأساسي",
+                "gosi_rate": "نسبة التأمينات",
+                "gosi_amount": "مبلغ التأمينات",
+                "next_payment": "الصرف القادم",
+                "next_payment_date": "تاريخ الصرف المتوقع",
+                "expected_amount": "المبلغ المتوقع",
+                "period": "فترة الصرف",
+                "net_salary": "صافي الراتب",
+                "created_by": "منشئ السجل",
+                "approved_by": "تم الاعتماد بواسطة",
+                "print_slip": "طباعة كشف الراتب",
+                "monthly_salaries": "الرواتب الشهرية"
+            },
+            "other_payments": {
+                "title": "المدفوعات الأخرى",
+                "add": "إضافة دفعة",
+                "payment_title": "العنوان",
+                "types": {
+                    "advance": "سلفة",
+                    "bonus": "مكافأة",
+                    "compensation": "تعويض",
+                    "penalty": "جزاء",
+                    "other": "أخرى"
+                }
+            },
+            "manage_allowances": "إدارة البدلات",
+            "manage_deductions": "إدارة الحسومات",
+            "allowance_type": "نوع البدل",
+            "deduction_type": "نوع الحسم",
+            "add_allowance": "إضافة بدل",
+            "add_deduction": "إضافة حسم",
+            "period_type": "نوع الفترة",
+            "start_date": "تاريخ البداية",
+            "end_date": "تاريخ النهاية",
+            "start_month": "شهر البداية",
+            "end_month": "شهر النهاية",
+            "flexible": "مرن",
+            "periods": {
+                "one_time": "مرة واحدة",
+                "fixed_period": "فترة محددة",
+                "indefinite": "مستمر"
+            }
         },
         "settings": {
             "title": "الإعدادات",
@@ -1487,7 +1643,8 @@
             "job_titles": {
                 "title": "المسميات الوظيفية",
                 "singular": "مسمى وظيفي",
-                "add": "إضافة مسمى"
+                "add": "إضافة مسمى",
+                "department": "القسم"
             },
             "allowances": {
                 "title": "البدلات",
@@ -1508,6 +1665,7 @@
                 "base_salary": "الراتب الأساسي",
                 "monthly_contribution": "معدل المساهمة الشهري"
             },
+            "flexible_hint": "السماح بتحديد مبلغ مخصص لكل موظف",
             "biometric_devices": {
                 "title": "أجهزة البصمة",
                 "subtitle": "إدارة أجهزة الحضور والانصراف",
@@ -1530,7 +1688,127 @@
                 "overnight": "وردية ليلية",
                 "color": "اللون",
                 "cannot_delete_in_use": "لا يمكن حذف الوردية لأنها مستخدمة من قبل موظفين"
+            },
+            "attendance_settings": {
+                "title": "إعدادات الحضور",
+                "subtitle": "تخصيص سياسات التأخير والغياب والعمل الإضافي لهذا المركز",
+                "grace_period": "فترة السماح",
+                "grace_period_hint": "التأخير ضمن هذه الفترة لا يُحتسب",
+                "late_deduction": "خصم التأخير",
+                "absence_deduction": "خصم الغياب",
+                "absence_deduction_hint_fixed": "يتم خصم مبلغ ثابت عن كل يوم غياب",
+                "absence_deduction_hint_percentage": "يتم الاحتساب كنسبة مئوية من الراتب اليومي (الأساسي + البدلات) / 30",
+                "overtime_rate": "معدل العمل الإضافي",
+                "overtime_enabled": "تفعيل حساب العمل الإضافي",
+                "working_days": "أيام العمل"
             }
         }
+    },
+    "errors": {
+        "403": {
+            "title": "غير مصرح لك بالوصول",
+            "description": "ليس لديك الصلاحية للوصول إلى هذه الصفحة. تواصل مع مسؤول النظام إذا كنت تعتقد أن هذا خطأ.",
+            "contact_admin": "تحتاج صلاحيات؟ تواصل مع مسؤول النظام"
+        },
+        "404": {
+            "title": "الصفحة غير موجودة",
+            "description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+        }
+    },
+    "roles": {
+        "title": "إدارة الأدوار",
+        "add": "إضافة دور",
+        "edit": "تعديل الدور",
+        "name": "اسم الدور",
+        "label_ar": "الاسم بالعربية",
+        "label_en": "الاسم بالإنجليزية",
+        "system_name": "الاسم البرمجي",
+        "description": "الوصف",
+        "page_description": "إدارة أدوار المستخدمين والصلاحيات",
+        "permissions": "الصلاحيات",
+        "users_count": "عدد المستخدمين",
+        "select_all": "تحديد الكل",
+        "deselect_all": "إلغاء تحديد الكل",
+        "delete_confirm_title": "حذف الدور",
+        "delete_confirm_message": "هل أنت متأكد من حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    "permissions": {
+        "crm_customers_view": "عرض سجلات العملاء",
+        "crm_customers_create": "إضافة عملاء جدد",
+        "crm_customers_update": "تعديل بيانات العملاء",
+        "crm_customers_delete": "حذف العملاء",
+        "crm_vehicles_view": "عرض سجلات المركبات",
+        "crm_vehicles_create": "تسجيل مركبات جديدة",
+        "crm_vehicles_update": "تعديل بيانات المركبات",
+        "crm_vehicles_delete": "حذف المركبات",
+        "crm_vehicles_settings_view": "عرض إعدادات المركبات (الماركات/الموديلات)",
+        "crm_vehicles_settings_manage": "إدارة إعدادات المركبات",
+        "crm_work_orders_view": "عرض كروت العمل",
+        "crm_work_orders_create": "إنشاء كروت عمل جديدة",
+        "crm_work_orders_update": "تعديل كروت العمل",
+        "crm_work_orders_delete": "حذف كروت العمل",
+        "workcards_view": "عرض كروت العمل (متقدم)",
+        "workcards_create": "إنشاء كروت عمل (متقدم)",
+        "workcards_update": "تعديل كروت العمل (متقدم)",
+        "workcards_delete": "حذف كروت العمل (متقدم)",
+        "workcards_lines_discount": "تعديل خصم البنود",
+        "quotes_view": "عرض التقييمات",
+        "quotes_create": "إنشاء تقييمات جديدة",
+        "quotes_update": "تعديل التقييمات",
+        "quotes_delete": "حذف التقييمات",
+        "quotes_approve": "اعتماد/رفض التقييمات",
+        "services_view": "عرض قائمة الخدمات",
+        "services_create": "إضافة خدمات جديدة",
+        "services_update": "تعديل الخدمات",
+        "services_delete": "حذف الخدمات",
+        "services_departments_view": "عرض الأقسام",
+        "services_departments_manage": "إدارة الأقسام (إضافة/تعديل/حذف)",
+        "invoices_view": "عرض الفواتير",
+        "invoices_create": "إنشاء فواتير",
+        "invoices_extra_discount": "تطبيق خصومات إضافية على الفاتورة",
+        "purchasing_suppliers_view": "عرض الموردين",
+        "purchasing_suppliers_create": "إضافة موردين جدد",
+        "purchasing_suppliers_update": "تعديل بيانات الموردين",
+        "purchasing_suppliers_destroy": "حذف الموردين",
+        "hr_view": "الدخول لنظام الموارد البشرية",
+        "hr_employees_view": "عرض سجلات الموظفين",
+        "hr_employees_create": "إضافة موظفين جدد",
+        "hr_employees_update": "تعديل بيانات الموظفين",
+        "hr_employees_delete": "حذف الموظفين",
+        "hr_attendance_view": "عرض سجلات الحضور",
+        "hr_attendance_manage": "إدارة الحضور (تسجيل دخول/خروج)",
+        "hr_leaves_view": "عرض طلبات الإجازة",
+        "hr_leaves_manage": "إدارة طلبات الإجازة",
+        "hr_leaves_approve": "اعتماد/رفض الإجازات",
+        "hr_settings_manage": "إدارة إعدادات الموارد البشرية",
+        "users_view": "عرض مستخدمين النظام",
+        "users_create": "إضافة مستخدمين جدد",
+        "users_update": "تعديل بيانات المستخدمين",
+        "users_delete": "حذف المستخدمين",
+        "inventory_view": "عرض المخزون",
+        "inventory_settings_manage": "إدارة الإعدادات",
+        "inventory_stock_view": "عرض الأرصدة",
+        "inventory_moves_view": "عرض الحركات",
+        "inventory_moves_create": "إنشاء حركات",
+        "settings_company_manage": "إدارة ملف الشركة",
+        "settings_centers_view": "عرض الفروع",
+        "settings_centers_manage": "إدارة الفروع"
+    },
+    "permissions_modules": {
+        "crm_customers": "إدارة العملاء",
+        "crm_vehicles": "إدارة المركبات",
+        "crm_work_orders": "إدارة كروت العمل",
+        "quotes": "التقييمات",
+        "services": "الخدمات",
+        "invoices": "الفواتير",
+        "purchasing_suppliers": "المشتريات والموردين",
+        "workcards": "كروت العمل (متقدم)",
+        "hr_general": "الموارد البشرية (عام)",
+        "hr_employees": "الموظفين",
+        "hr_attendance": "الحضور والانصراف",
+        "hr_leaves": "الإجازات",
+        "user_management": "إدارة المستخدمين",
+        "inventory": "المخزون",
+        "settings_general": "الإعدادات العامة"
     }
 }

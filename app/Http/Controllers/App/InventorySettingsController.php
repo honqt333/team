@@ -19,6 +19,8 @@ class InventorySettingsController extends Controller
      */
     public function hub(): Response
     {
+        $this->authorize(\App\Support\Permissions::INVENTORY_VIEW);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
@@ -38,6 +40,8 @@ class InventorySettingsController extends Controller
      */
     public function index(): Response
     {
+        $this->authorize(\App\Support\Permissions::INVENTORY_SETTINGS_MANAGE);
+
         $tenantId = auth()->user()->tenant_id;
 
         return Inertia::render('Inventory/Settings', [
@@ -52,6 +56,8 @@ class InventorySettingsController extends Controller
 
     public function storeUnit(Request $request)
     {
+        $this->authorize(\App\Support\Permissions::INVENTORY_SETTINGS_MANAGE);
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:100',
             'name_en' => 'required|string|max:100',
@@ -71,6 +77,7 @@ class InventorySettingsController extends Controller
 
     public function updateUnit(Request $request, InventoryUnit $unit)
     {
+        $this->authorize(\App\Support\Permissions::INVENTORY_SETTINGS_MANAGE);
         $this->authorizeForTenant($unit);
 
         $validated = $request->validate([

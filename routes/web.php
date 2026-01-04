@@ -28,6 +28,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/profile/switch-center', [ProfileController::class, 'switchCenter'])->name('profile.switch-center');
 });
 
 // App routes (authenticated + tenancy)
@@ -149,6 +150,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     
     // System Settings
     Route::get('/settings/system', [\App\Http\Controllers\App\SystemSettingsController::class, 'index'])->name('settings.system');
+
+    // Users Settings
+    Route::resource('settings/users', \App\Http\Controllers\App\UserController::class)->names('settings.users');
+    Route::patch('/settings/users/{user}/toggle-active', [\App\Http\Controllers\App\UserController::class, 'toggleActive'])->name('settings.users.toggle');
+    
+    // Roles Settings
+    Route::resource('settings/roles', \App\Http\Controllers\App\RoleController::class)->names('settings.roles');
     
     // Vehicle Makes
     Route::get('/settings/makes', [\App\Http\Controllers\App\VehicleMakeController::class, 'index'])->name('settings.makes.index');
@@ -303,7 +311,12 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
         Route::put('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateDeduction'])->name('settings.deductions.update');
         Route::delete('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyDeduction'])->name('settings.deductions.destroy');
         
+        // Employee Permissions
+        Route::get('/employees/{employee}/permissions', [\App\Http\Controllers\App\HR\EmployeePermissionsController::class, 'index'])->name('employees.permissions.index');
+        Route::put('/employees/{employee}/permissions', [\App\Http\Controllers\App\HR\EmployeePermissionsController::class, 'update'])->name('employees.permissions.update');
+
         // Employees
+        Route::get('/employees/print', [\App\Http\Controllers\App\HR\EmployeeController::class, 'print'])->name('employees.print');
         Route::get('/employees', [\App\Http\Controllers\App\HR\EmployeeController::class, 'index'])->name('employees.index');
         Route::post('/employees', [\App\Http\Controllers\App\HR\EmployeeController::class, 'store'])->name('employees.store');
         Route::get('/employees/{employee}', [\App\Http\Controllers\App\HR\EmployeeController::class, 'show'])->name('employees.show');
@@ -315,6 +328,35 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
         Route::put('/employees/{employee}/default-shift', [\App\Http\Controllers\App\HR\EmployeeShiftController::class, 'updateDefaultShift'])->name('employees.default-shift.update');
         Route::put('/employees/{employee}/weekly-schedule', [\App\Http\Controllers\App\HR\EmployeeShiftController::class, 'updateWeeklySchedule'])->name('employees.weekly-schedule.update');
         
+        // Employee Financial
+        Route::put('/employees/{employee}/bank-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateBankInfo'])->name('employees.bank-info.update');
+        Route::put('/employees/{employee}/financial-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateFinancialInfo'])->name('employees.financial-info.update');
+        
+        
+        // Payroll Runs
+        Route::get('/payroll', [\App\Http\Controllers\App\HR\PayrollController::class, 'index'])->name('payroll.index');
+        Route::post('/payroll/generate', [\App\Http\Controllers\App\HR\PayrollController::class, 'generate'])->name('payroll.generate');
+        
+        // Other Payments (MUST be before {payrollRun} wildcard routes!)
+        Route::get('/payroll/other-payments', [\App\Http\Controllers\App\HR\OtherPaymentsController::class, 'index'])->name('payroll.other-payments.index');
+        Route::post('/payroll/other-payments', [\App\Http\Controllers\App\HR\OtherPaymentsController::class, 'store'])->name('payroll.other-payments.store');
+        Route::put('/payroll/other-payments/{otherPayment}', [\App\Http\Controllers\App\HR\OtherPaymentsController::class, 'update'])->name('payroll.other-payments.update');
+        Route::delete('/payroll/other-payments/{otherPayment}', [\App\Http\Controllers\App\HR\OtherPaymentsController::class, 'destroy'])->name('payroll.other-payments.destroy');
+        Route::put('/payroll/other-payments/{otherPayment}/approve', [\App\Http\Controllers\App\HR\OtherPaymentsController::class, 'approve'])->name('payroll.other-payments.approve');
+        Route::put('/payroll/other-payments/{otherPayment}/pay', [\App\Http\Controllers\App\HR\OtherPaymentsController::class, 'markAsPaid'])->name('payroll.other-payments.pay');
+
+        // Payroll Run Details (wildcard routes)
+        Route::get('/payroll/{payrollRun}', [\App\Http\Controllers\App\HR\PayrollController::class, 'show'])->name('payroll.show');
+        Route::put('/payroll/{payrollRun}/approve', [\App\Http\Controllers\App\HR\PayrollController::class, 'approve'])->name('payroll.approve');
+        Route::put('/payroll/{payrollRun}/regenerate', [\App\Http\Controllers\App\HR\PayrollController::class, 'regenerate'])->name('payroll.regenerate');
+        Route::put('/payroll/{payrollRun}/mark-paid', [\App\Http\Controllers\App\HR\PayrollController::class, 'markPaid'])->name('payroll.mark-paid');
+        Route::delete('/payroll/{payrollRun}/items/{payrollItem}', [\App\Http\Controllers\App\HR\PayrollController::class, 'destroyItem'])->name('payroll.items.destroy');
+        Route::get('/payroll/{payrollRun}/print', [\App\Http\Controllers\App\HR\PayrollController::class, 'print'])->name('payroll.print');
+
+        // Employee Payroll
+        Route::get('/employees/{employee}/payroll', [\App\Http\Controllers\App\HR\PayrollController::class, 'employeePayroll'])->name('employees.payroll');
+        Route::get('/payroll-items/{payrollItem}/print', [\App\Http\Controllers\App\HR\PayrollController::class, 'printPaySlip'])->name('payroll.payslip');
+
         // Attendance
         Route::get('/attendance/print', [\App\Http\Controllers\App\HR\AttendanceController::class, 'print'])->name('attendance.print');
         Route::get('/attendance', [\App\Http\Controllers\App\HR\AttendanceController::class, 'index'])->name('attendance.index');
@@ -339,6 +381,9 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
         Route::post('/settings/shifts', [\App\Http\Controllers\App\HR\ShiftController::class, 'store'])->name('settings.shifts.store');
         Route::put('/settings/shifts/{shift}', [\App\Http\Controllers\App\HR\ShiftController::class, 'update'])->name('settings.shifts.update');
         Route::delete('/settings/shifts/{shift}', [\App\Http\Controllers\App\HR\ShiftController::class, 'destroy'])->name('settings.shifts.destroy');
+
+        // Attendance Settings
+        Route::put('/settings/attendance', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateAttendanceSettings'])->name('settings.attendance.update');
     });
 
     // ───────────────────────────────────────────────────────────────

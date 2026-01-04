@@ -32,6 +32,8 @@
                             </div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ employee.employee_number }} | {{ employee.job_title?.name_ar || $t('hr.employees.no_job_title') }}
+                                <span v-if="employee.center" class="mx-2 text-gray-300 dark:text-gray-600">|</span>
+                                <span v-if="employee.center" class="text-violet-600 dark:text-violet-400 font-medium">{{ employee.center?.name }}</span>
                             </p>
                         </div>
                     </div>
@@ -93,15 +95,29 @@
                         :employee="employee"
                         :all-allowances="allAllowances"
                         :all-deductions="allDeductions"
+                        :payroll-items="payrollItems || []"
+                        :other-payments="otherPayments || []"
                     />
 
-                    <!-- Schedule & Leaves Tab -->
+                    <!-- Schedule Tab -->
                     <EmployeeScheduleTab
                         v-show="activeTab === 'schedule'"
                         :employee="employee"
-                        :leaves="employee.leaves || []"
                         :shifts="shifts"
                         :weekly-schedule="weeklySchedule"
+                    />
+
+                    <!-- Leaves Tab -->
+                    <LeavesTab
+                        v-show="activeTab === 'leaves'"
+                        :employee="employee"
+                        :leaves="employee.leaves || []"
+                    />
+
+                    <!-- Permissions Tab -->
+                    <PermissionsTab
+                        v-show="activeTab === 'permissions'"
+                        :employee="employee"
                     />
 
                     <!-- Attendance Tab (Coming Soon) -->
@@ -142,6 +158,8 @@ import EmployeeInfoTab from '@/Components/HR/Tabs/EmployeeInfoTab.vue';
 
 import EmployeeFinancialTab from '@/Components/HR/Tabs/EmployeeFinancialTab.vue';
 import EmployeeScheduleTab from '@/Components/HR/Tabs/EmployeeScheduleTab.vue';
+import LeavesTab from '@/Components/HR/Tabs/LeavesTab.vue';
+import PermissionsTab from '@/Components/HR/Tabs/PermissionsTab.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();
@@ -159,6 +177,8 @@ const props = defineProps({
     centers: Array,
     shifts: Array,
     weeklySchedule: Object,
+    payrollItems: Array,
+    otherPayments: Array,
 });
 
 const activeTab = ref('info');
@@ -167,6 +187,8 @@ const tabs = computed(() => [
     { key: 'info', label: t('hr.employees.tabs.info'), icon: '📋' },
     { key: 'financial', label: t('hr.employees.tabs.financial'), icon: '💵' },
     { key: 'schedule', label: t('hr.employees.tabs.schedule'), icon: '⏰' },
+    { key: 'leaves', label: t('hr.leaves.title'), icon: '🏖️' },
+    { key: 'permissions', label: t('hr.employees.tabs.permissions'), icon: '🔐' },
     { key: 'attendance', label: t('hr.employees.tabs.attendance'), icon: '📅' },
     { key: 'payroll', label: t('hr.employees.tabs.payroll'), icon: '💰' },
     { key: 'work_orders', label: t('hr.employees.tabs.work_orders'), icon: '🔧' },

@@ -53,6 +53,11 @@ class Department extends Model
         return $this->hasMany(Service::class);
     }
 
+    public function employees(): HasMany
+    {
+        return $this->hasMany(\App\Models\HR\Employee::class);
+    }
+
     /**
      * Get only active services count
      */

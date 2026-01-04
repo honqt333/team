@@ -34,7 +34,16 @@
                 <!-- Name AR -->
                 <div>
                     <label :class="labelClass">{{ $t('common.name') }} (AR) <span class="text-red-500">*</span></label>
-                    <input v-model="form.name_ar" type="text" required :class="inputClass" />
+                    <input
+                        v-model="form.name_ar"
+                        type="text"
+                        required
+                        :class="[
+                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                            form.errors.name_ar ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                        ]"
+                    />
+                    <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">{{ form.errors.name_ar }}</p>
                 </div>
 
                 <!-- Name EN -->
@@ -44,9 +53,19 @@
                 </div>
 
                 <!-- Phone -->
+                <!-- Phone -->
                 <div>
                     <label :class="labelClass">{{ $t('common.phone') }}</label>
-                    <input v-model="form.phone" type="tel" dir="ltr" :class="inputClass" />
+                    <input
+                        v-model="form.phone"
+                        type="tel"
+                        dir="ltr"
+                        :class="[
+                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                            form.errors.phone ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                        ]"
+                    />
+                    <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">{{ form.errors.phone }}</p>
                 </div>
 
                 <!-- Email -->

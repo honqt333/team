@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Center;
 use App\Models\HR\Allowance;
+use App\Models\HR\AttendanceSettings;
 use App\Models\HR\BiometricDevice;
 use App\Models\HR\Deduction;
 use App\Models\HR\EmployeeType;
@@ -23,6 +24,7 @@ class SettingsController extends Controller
     public function index()
     {
         $tenantId = TenancyContext::tenantId();
+        $centerId = TenancyContext::centerId();
 
         return Inertia::render('HR/Settings', [
             'employeeTypes' => EmployeeType::where('tenant_id', $tenantId)
@@ -55,6 +57,7 @@ class SettingsController extends Controller
             'shifts' => Shift::where('tenant_id', $tenantId)
                 ->orderBy('name_ar')
                 ->get(),
+            'attendanceSettings' => AttendanceSettings::getForCenter($centerId),
         ]);
     }
 
@@ -155,11 +158,18 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'type' => 'required|in:fixed,percentage',
-            'amount' => 'required|numeric|min:0',
+            'is_flexible' => 'boolean',
+            'type' => 'required_if:is_flexible,false|in:fixed,percentage',
+            'amount' => 'required_if:is_flexible,false|numeric|min:0.01',
             'calculation_base' => 'nullable|in:base_salary,monthly_contribution',
             'is_active' => 'boolean',
         ]);
+
+        // Set defaults for flexible allowances
+        if ($request->boolean('is_flexible')) {
+            $validated['type'] = 'fixed';
+            $validated['amount'] = 0;
+        }
 
         Allowance::create([
             'tenant_id' => TenancyContext::tenantId(),
@@ -175,11 +185,18 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'type' => 'required|in:fixed,percentage',
-            'amount' => 'required|numeric|min:0',
+            'is_flexible' => 'boolean',
+            'type' => 'required_if:is_flexible,false|in:fixed,percentage',
+            'amount' => 'required_if:is_flexible,false|numeric|min:0.01',
             'calculation_base' => 'nullable|in:base_salary,monthly_contribution',
             'is_active' => 'boolean',
         ]);
+
+        // Set defaults for flexible allowances
+        if ($request->boolean('is_flexible')) {
+            $validated['type'] = 'fixed';
+            $validated['amount'] = 0;
+        }
 
         $allowance->update([
             'updated_by' => auth()->id(),
@@ -204,11 +221,18 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'type' => 'required|in:fixed,percentage',
-            'amount' => 'required|numeric|min:0',
+            'is_flexible' => 'boolean',
+            'type' => 'required_if:is_flexible,false|in:fixed,percentage',
+            'amount' => 'required_if:is_flexible,false|numeric|min:0.01',
             'calculation_base' => 'nullable|in:base_salary,monthly_contribution',
             'is_active' => 'boolean',
         ]);
+
+        // Set defaults for flexible deductions
+        if ($request->boolean('is_flexible')) {
+            $validated['type'] = 'fixed';
+            $validated['amount'] = 0;
+        }
 
         Deduction::create([
             'tenant_id' => TenancyContext::tenantId(),
@@ -224,11 +248,18 @@ class SettingsController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'type' => 'required|in:fixed,percentage',
-            'amount' => 'required|numeric|min:0',
+            'is_flexible' => 'boolean',
+            'type' => 'required_if:is_flexible,false|in:fixed,percentage',
+            'amount' => 'required_if:is_flexible,false|numeric|min:0.01',
             'calculation_base' => 'nullable|in:base_salary,monthly_contribution',
             'is_active' => 'boolean',
         ]);
+
+        // Set defaults for flexible deductions
+        if ($request->boolean('is_flexible')) {
+            $validated['type'] = 'fixed';
+            $validated['amount'] = 0;
+        }
 
         $deduction->update([
             'updated_by' => auth()->id(),
@@ -242,5 +273,30 @@ class SettingsController extends Controller
     {
         $deduction->delete();
         return back()->with('success', __('messages.deleted_successfully'));
+    }
+
+    // ========================
+    // Attendance Settings
+    // ========================
+
+    public function updateAttendanceSettings(Request $request)
+    {
+        $centerId = TenancyContext::centerId();
+        
+        $validated = $request->validate([
+            'grace_period_minutes' => 'required|integer|min:0|max:60',
+            'late_deduction_per_minute' => 'required|numeric|min:0',
+            'absence_deduction_value' => 'required|numeric|min:0',
+            'absence_deduction_type' => 'required|in:fixed,percentage',
+            'overtime_rate_per_hour' => 'required|numeric|min:0',
+            'overtime_enabled' => 'boolean',
+            'working_days' => 'array',
+            'working_days.*' => 'integer|min:0|max:6',
+        ]);
+
+        $settings = AttendanceSettings::getForCenter($centerId);
+        $settings->update($validated);
+
+        return back()->with('success', __('messages.saved_successfully'));
     }
 }

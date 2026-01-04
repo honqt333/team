@@ -51,6 +51,18 @@
                             </button>
                         </div>
                         
+                        <!-- Print Button -->
+                        <a
+                            :href="route('app.hr.employees.print')"
+                            target="_blank"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                            {{ $t('common.print') }}
+                        </a>
+
                         <button
                             @click="showAddModal = true"
                             class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
@@ -67,7 +79,7 @@
             <!-- Filters & Content -->
             <div class="space-y-6">
                 <!-- Tabs & Search -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col md:flex-row justify-between items-center border-b border-gray-200 dark:border-gray-700">
                         <!-- Tabs -->
                         <div class="w-full md:w-auto px-4">
@@ -103,14 +115,25 @@
                             </nav>
                         </div>
                         
-                        <!-- Search -->
-                        <div class="w-full md:w-auto p-3">
-                            <div class="relative">
+                        <!-- Search & Filter -->
+                        <div class="w-full md:w-auto p-3 flex gap-3 items-center">
+                            <div class="w-48" v-if="centers.length > 1">
+                                <SearchableSelect
+                                    v-model="selectedCenter"
+                                    :options="[{id: '', name: $t('common.all_centers')}, ...centers]"
+                                    option-label="name"
+                                    option-value="id"
+                                    :placeholder="$t('common.all_centers')"
+                                    @update:modelValue="search"
+                                />
+                            </div>
+
+                            <div class="relative w-full md:w-64">
                                 <input
                                     v-model="searchQuery"
                                     type="text"
                                     :placeholder="$t('common.search')"
-                                    class="w-full md:w-64 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
+                                    class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
                                     @keyup.enter="search"
                                 />
                                 <svg class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -159,6 +182,10 @@
                                     <span class="text-gray-500 dark:text-gray-400">{{ $t('common.department') }}</span>
                                     <span class="font-medium text-gray-900 dark:text-white">{{ employee.department?.name || '-' }}</span>
                                 </div>
+                                <div class="flex items-center justify-between text-sm" v-if="employee.center">
+                                    <span class="text-gray-500 dark:text-gray-400">{{ $t('hr.employees.branch') }}</span>
+                                    <span class="font-medium text-violet-600 dark:text-violet-400">{{ employee.center?.name }}</span>
+                                </div>
                                 <div class="flex items-center justify-between text-sm">
                                     <span class="text-gray-500 dark:text-gray-400">{{ $t('common.phone') }}</span>
                                     <span class="font-medium text-gray-900 dark:text-white" dir="ltr">{{ employee.phone || '-' }}</span>
@@ -184,6 +211,7 @@
                                     <th scope="col" class="px-6 py-3">{{ $t('hr.employees.number') }}</th>
                                     <th scope="col" class="px-6 py-3">{{ $t('common.name') }}</th>
                                     <th scope="col" class="px-6 py-3">{{ $t('hr.employees.job_title') }}</th>
+                                    <th scope="col" class="px-6 py-3">{{ $t('hr.employees.branch') }}</th>
                                     <th scope="col" class="px-6 py-3">{{ $t('common.department') }}</th>
                                     <th scope="col" class="px-6 py-3">{{ $t('hr.employees.base_salary') }}</th>
                                     <th scope="col" class="px-6 py-3">{{ $t('common.phone') }}</th>
@@ -220,6 +248,9 @@
                                         {{ employee.job_title?.name_ar || '-' }}
                                     </td>
                                     <td class="px-6 py-4">
+                                        {{ employee.center?.name || '-' }}
+                                    </td>
+                                    <td class="px-6 py-4">
                                         {{ employee.department?.name || '-' }}
                                     </td>
                                     <td class="px-6 py-4 font-mono">
@@ -238,7 +269,7 @@
                                     </td>
                                 </tr>
                                 <tr v-if="!employees.data?.length">
-                                    <td colspan="7" class="px-6 py-12 text-center">
+                                    <td colspan="8" class="px-6 py-12 text-center">
                                         <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                                             <span class="text-2xl">👥</span>
                                         </div>
@@ -269,6 +300,7 @@
                     </nav>
                 </div>
             </div>
+            <!-- ... unchanged ... -->
         </div>
 
         <!-- Add Employee Modal -->
@@ -289,6 +321,7 @@ import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import EmployeeFormModal from '@/Components/HR/EmployeeFormModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     employees: Object,
@@ -302,18 +335,24 @@ const props = defineProps({
 
 const showAddModal = ref(false);
 const searchQuery = ref(props.filters?.search || '');
+const selectedCenter = ref(props.filters?.center_id || '');
 const viewMode = ref('grid'); // Default view mode
 
 const currentStatus = computed(() => props.filters?.status || 'active');
 
 function changeStatus(status) {
-    router.get(route('app.hr.employees.index'), { status }, { preserveState: true });
+    router.get(route('app.hr.employees.index'), {
+        status,
+        search: searchQuery.value,
+        center_id: selectedCenter.value
+    }, { preserveState: true });
 }
 
 function search() {
     router.get(route('app.hr.employees.index'), { 
         status: currentStatus.value,
-        search: searchQuery.value 
+        search: searchQuery.value,
+        center_id: selectedCenter.value
     }, { preserveState: true });
 }
 </script>

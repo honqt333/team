@@ -318,18 +318,74 @@
                     <div class="mt-2">
                         <a
                             href="/app/hr"
+                            @click="hrExpanded = true"
                             :class="[
-                                'w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
+                                'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                                 isActive('/app/hr')
                                     ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
                                     : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                             ]"
                         >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                {{ $t('hr.title') }}
+                            </div>
+                            <svg 
+                                @click.prevent.stop="hrExpanded = !hrExpanded"
+                                :class="['w-4 h-4 transition-transform cursor-pointer hover:text-violet-600', hrExpanded ? 'rotate-180' : '']" 
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                             </svg>
-                            {{ $t('hr.title') }}
                         </a>
+                        
+                        <div v-show="hrExpanded" class="ps-4 mt-1 space-y-1">
+                            <a
+                                href="/app/hr/employees"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/hr/employees')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                {{ $t('hr.employees.title') }}
+                            </a>
+                            <a
+                                href="/app/hr/attendance"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/hr/attendance')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {{ $t('hr.attendance.title') }}
+                            </a>
+                            <a
+                                href="/app/hr/settings"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/hr/settings')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                {{ $t('hr.settings.title') }}
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Divider -->
@@ -370,6 +426,57 @@
                     <div class="hidden md:block"></div>
 
                     <div class="flex items-center gap-1">
+                        <!-- Center Switcher -->
+                        <div v-if="page.props.auth.available_centers?.length > 1" class="relative mx-1">
+                            <button 
+                                @click="centerMenuOpen = !centerMenuOpen"
+                                class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+                            >
+                                <span class="hidden sm:inline-block max-w-[150px] truncate">
+                                    {{ isRtl ? page.props.center.name_ar : page.props.center.name_en }}
+                                </span>
+                                <span class="sm:hidden font-mono">#{{ page.props.center.id }}</span>
+                                <svg class="w-4 h-4 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                </svg>
+                            </button>
+
+                            <!-- Dropdown -->
+                            <Transition name="dropdown">
+                                <div 
+                                    v-if="centerMenuOpen"
+                                    :class="[
+                                        'absolute top-full mt-2 w-60 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50 overflow-hidden',
+                                        isRtl ? 'left-0' : 'right-0'
+                                    ]"
+                                >
+                                    <div class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
+                                        {{ $t('common.switch_center') || 'Switch Center' }}
+                                    </div>
+                                    <button
+                                        v-for="c in page.props.auth.available_centers"
+                                        :key="c.id"
+                                        @click="switchCenter(c.id)"
+                                        :class="[
+                                            'w-full text-start px-4 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors block border-b last:border-0 border-gray-100 dark:border-gray-700/50',
+                                            c.id === page.props.center?.id ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-900/10' : 'text-gray-700 dark:text-gray-300'
+                                        ]"
+                                    >
+                                        <div class="flex items-center justify-between">
+                                            <span>{{ isRtl ? c.name_ar : c.name_en }}</span>
+                                            <span v-if="c.id === page.props.center?.id" class="text-indigo-600 dark:text-indigo-400">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </button>
+                                </div>
+                            </Transition>
+                        </div>
+                        <div v-else-if="page.props.center" class="hidden sm:block px-3 py-1.5 text-sm font-medium text-gray-500">
+                             {{ isRtl ? page.props.center.name_ar : page.props.center.name_en }}
+                        </div>
                         <!-- Language toggle -->
                         <button
                             @click="toggleLocale"
@@ -768,6 +875,86 @@
                     </div>
 
                     <!-- Divider -->
+                    <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
+
+                    <!-- HR Section (Mobile) -->
+                    <div>
+                         <a
+                            href="/app/hr"
+                            @click="hrExpanded = true; mobileMenuOpen = false"
+                            :class="[
+                                'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
+                                isActive('/app/hr')
+                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                    : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]"
+                        >
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                {{ $t('hr.title') }}
+                            </div>
+                            <svg 
+                                @click.prevent.stop="hrExpanded = !hrExpanded"
+                                :class="['w-4 h-4 transition-transform cursor-pointer hover:text-violet-600', hrExpanded ? 'rotate-180' : '']" 
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </a>
+                        
+                        <div v-show="hrExpanded" class="ps-4 mt-1 space-y-1">
+                            <a
+                                href="/app/hr/employees"
+                                @click="mobileMenuOpen = false"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/hr/employees')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                {{ $t('hr.employees.title') }}
+                            </a>
+                            <a
+                                href="/app/hr/attendance"
+                                @click="mobileMenuOpen = false"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/hr/attendance')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {{ $t('hr.attendance.title') }}
+                            </a>
+                            <a
+                                href="/app/hr/settings"
+                                @click="mobileMenuOpen = false"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/hr/settings')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]"
+                            >
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                {{ $t('hr.settings.title') }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
                     <a
                         href="/app/settings"
                         @click="mobileMenuOpen = false"
@@ -804,6 +991,7 @@ const page = usePage();
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
+const centerMenuOpen = ref(false);
 const isDark = ref(false);
 const currentLocale = ref('ar');
 
@@ -819,6 +1007,8 @@ const getStoredState = (key, defaultValue) => {
 const inventoryExpanded = ref(getStoredState('inventoryExpanded', true));
 const purchasingExpanded = ref(getStoredState('purchasingExpanded', false));
 
+const hrExpanded = ref(getStoredState('hrExpanded', false));
+
 // Watch and persist changes
 watch(inventoryExpanded, (val) => {
     if (typeof window !== 'undefined') {
@@ -829,6 +1019,12 @@ watch(inventoryExpanded, (val) => {
 watch(purchasingExpanded, (val) => {
     if (typeof window !== 'undefined') {
         localStorage.setItem('purchasingExpanded', val.toString());
+    }
+});
+
+watch(hrExpanded, (val) => {
+    if (typeof window !== 'undefined') {
+        localStorage.setItem('hrExpanded', val.toString());
     }
 });
 
@@ -848,8 +1044,9 @@ watch(isRtl, (rtl) => {
 
 // Close user menu when clicking outside
 function handleClickOutside(event) {
-    if (userMenuOpen.value && !event.target.closest('.relative')) {
+    if ((userMenuOpen.value || centerMenuOpen.value) && !event.target.closest('.relative')) {
         userMenuOpen.value = false;
+        centerMenuOpen.value = false;
     }
 }
 
@@ -888,6 +1085,18 @@ function isActive(path) {
 function logout() {
     userMenuOpen.value = false;
     router.post('/logout');
+}
+
+function switchCenter(centerId) {
+    if (page.props.center?.id === centerId) {
+        centerMenuOpen.value = false;
+        return;
+    }
+    router.post(route('profile.switch-center'), {
+        center_id: centerId
+    }, {
+        onSuccess: () => centerMenuOpen.value = false,
+    });
 }
 </script>
 

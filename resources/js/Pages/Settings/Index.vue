@@ -71,6 +71,30 @@
                     </svg>
                 </a>
 
+                <!-- Users & Roles -->
+                <a
+                    v-if="can('users.view')"
+                    href="/app/settings/users"
+                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-violet-400 dark:hover:border-violet-600 hover:bg-violet-50/50 dark:hover:bg-violet-900/20 transition-all"
+                >
+                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-violet-500/30">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                            {{ $t('users.management') }}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            {{ $t('users.description') }}
+                        </p>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-violet-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+
                 <!-- System Settings -->
                 <a
                     href="/app/settings/system"
@@ -100,4 +124,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { usePermission } from '@/Composables/usePermission';
+
+const { can } = usePermission();
 </script>

@@ -55,34 +55,31 @@ class Attendance extends Model
     /**
      * احتساب دقائق التأخير والانصراف المبكر والأوقات الإضافية
      * يدعم نظام الورديات إذا كان مفعلاً، وإلا يستخدم الأوقات الثابتة
-     * 
-     * @param int $gracePeriod فترة السماح بالدقائق (افتراضي: 10 دقائق)
      */
-    public function calculateTimes(int $gracePeriod = 10): void
+    public function calculateTimes(): void
     {
         $employee = $this->employee;
         
         if (!$employee) return;
 
+        // Get center settings for grace period
+        $settings = AttendanceSettings::getForCenter($this->center_id);
+        $gracePeriod = $settings->grace_period_minutes;
+
         $this->late_minutes = 0;
         $this->early_leave_minutes = 0;
         $this->overtime_minutes = 0;
 
-        // الحصول على أوقات الدوام من نظام الورديات أو الأوقات الثابتة
-        $shiftStartTime = null;
-        $shiftEndTime = null;
-
-        // 1. محاولة الحصول على الوردية من نظام الورديات
+        // الحصول على أوقات الدوام من نظام الورديات فقط
         $shift = $employee->getShiftForDate($this->date);
         
-        if ($shift) {
-            $shiftStartTime = $shift->start_time;
-            $shiftEndTime = $shift->end_time;
-        } else {
-            // 2. الرجوع للأوقات الثابتة في ملف الموظف
-            $shiftStartTime = $employee->shift_start;
-            $shiftEndTime = $employee->shift_end;
+        // لا وردية = لا يُحسب التأخير
+        if (!$shift) {
+            return;
         }
+        
+        $shiftStartTime = $shift->start_time;
+        $shiftEndTime = $shift->end_time;
 
         // حساب التأخير
         if ($this->check_in && $shiftStartTime) {
@@ -109,8 +106,8 @@ class Attendance extends Model
             if ($checkOut->lt($shiftEnd)) {
                 // انصراف مبكر
                 $this->early_leave_minutes = abs($shiftEnd->diffInMinutes($checkOut));
-            } elseif ($checkOut->gt($shiftEnd)) {
-                // وقت إضافي
+            } elseif ($checkOut->gt($shiftEnd) && $settings->overtime_enabled) {
+                // وقت إضافي (فقط إذا كان مفعلاً)
                 $this->overtime_minutes = abs($checkOut->diffInMinutes($shiftEnd));
             }
         }

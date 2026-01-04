@@ -21,13 +21,19 @@ class EmployeeController extends Controller
      */
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Employee::class);
+        
         $tenantId = TenancyContext::tenantId();
+        $centerId = TenancyContext::centerId();
         $status = $request->get('status', 'active');
+        $isSuperAdmin = auth()->user()->hasRole('super_admin');
 
         $employees = Employee::where('tenant_id', $tenantId)
+            ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
+            ->when($isSuperAdmin && $request->center_id, fn($q) => $q->where('center_id', $request->center_id))
             ->when($status === 'active', fn($q) => $q->active())
             ->when($status === 'inactive', fn($q) => $q->where('status', '!=', 'active'))
-            ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en', 'employeeType:id,name_ar,name_en'])
+            ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en', 'employeeType:id,name_ar,name_en', 'center:id,name'])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name_ar', 'like', "%{$search}%")
@@ -42,16 +48,26 @@ class EmployeeController extends Controller
 
         return Inertia::render('HR/Employees/Index', [
             'employees' => $employees,
-            'filters' => array_merge($request->only(['search']), ['status' => $status]),
+            'filters' => array_merge($request->only(['search', 'center_id']), ['status' => $status]),
             'counts' => [
-                'active' => Employee::where('tenant_id', $tenantId)->active()->count(),
-                'inactive' => Employee::where('tenant_id', $tenantId)->where('status', '!=', 'active')->count(),
+                'active' => Employee::where('tenant_id', $tenantId)
+                    ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
+                    ->when($isSuperAdmin && $request->center_id, fn($q) => $q->where('center_id', $request->center_id))
+                    ->active()
+                    ->count(),
+                'inactive' => Employee::where('tenant_id', $tenantId)
+                    ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
+                    ->when($isSuperAdmin && $request->center_id, fn($q) => $q->where('center_id', $request->center_id))
+                    ->where('status', '!=', 'active')
+                    ->count(),
             ],
             // For create modal
             'jobTitles' => JobTitle::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
             'employeeTypes' => EmployeeType::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
             'departments' => Department::where('tenant_id', $tenantId)->where('is_active', true)->get(['id', 'name_ar', 'name_en']),
-            'centers' => \App\Models\Center::where('tenant_id', $tenantId)->get(['id', 'name']),
+            'centers' => $isSuperAdmin 
+                ? \App\Models\Center::where('tenant_id', $tenantId)->get(['id', 'name'])
+                : \App\Models\Center::where('id', $centerId)->get(['id', 'name']),
             'nationalities' => \App\Models\Nationality::active()->orderBy('name_ar')->get(['id', 'name_ar', 'name_en']),
             'users' => User::where('tenant_id', $tenantId)
                 ->whereDoesntHave('employee')
@@ -61,28 +77,85 @@ class EmployeeController extends Controller
     }
 
     /**
+     * Print employees list.
+     */
+    public function print()
+    {
+        $this->authorize('viewAny', Employee::class);
+        
+        $tenantId = TenancyContext::tenantId();
+        $centerId = TenancyContext::centerId();
+        $isSuperAdmin = auth()->user()->hasRole('super_admin');
+
+        $employees = Employee::where('tenant_id', $tenantId)
+            ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
+            ->active()
+            ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en'])
+            ->orderBy('name_ar')
+            ->get();
+
+        // Group statistics
+        $byDepartment = $employees->groupBy(fn($e) => $e->department?->name_ar ?? 'بدون قسم')->map->count();
+        $byJobTitle = $employees->groupBy(fn($e) => $e->jobTitle?->name_ar ?? 'بدون مسمى')->map->count();
+
+        return Inertia::render('HR/Employees/Print', [
+            'employees' => $employees,
+            'tenant' => auth()->user()->tenant,
+            'center' => \App\Models\Center::find($centerId),
+            'stats' => [
+                'by_department' => $byDepartment,
+                'by_job_title' => $byJobTitle,
+            ]
+        ]);
+    }
+
+    /**
      * Store new employee.
      */
     public function store(Request $request)
     {
+        \Log::info('Employee store initiated', $request->all());
+        $this->authorize('create', Employee::class);
+        
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|max:20|unique:hr_employees,phone,NULL,id,tenant_id,' . TenancyContext::tenantId(),
             'gender' => 'required|in:male,female',
             'nationality_id' => 'required|exists:nationalities,id',
             'job_title_id' => 'required|exists:hr_job_titles,id',
             'center_id' => 'nullable|exists:centers,id',
-            'shift_start' => 'nullable|date_format:H:i',
-            'shift_end' => 'nullable|date_format:H:i',
             'default_shift_id' => 'nullable|exists:hr_shifts,id',
         ]);
 
-        $employee = Employee::create([
-            'tenant_id' => TenancyContext::tenantId(),
-            'center_id' => array_key_exists('center_id', $validated) ? $validated['center_id'] : TenancyContext::centerId(),
-            ...$validated,
-        ]);
+        // Security Check: Restrict "Management" department to Super Admin
+        if (isset($validated['department_id'])) {
+            $this->checkManagementRestriction($validated['department_id']);
+        }
+
+        // Check if user has permission to management if center_id is null
+        if (empty($validated['center_id']) && !auth()->user()->hasRole('super_admin')) {
+             $validated['center_id'] = TenancyContext::centerId();
+             \Log::info('Auto-assigned center_id', ['center_id' => $validated['center_id']]);
+        }
+
+        try {
+            $employee = Employee::create([
+                'tenant_id' => TenancyContext::tenantId(),
+                'center_id' => array_key_exists('center_id', $validated) ? $validated['center_id'] : TenancyContext::centerId(),
+                ...$validated,
+            ]);
+            \Log::info('Employee created', ['id' => $employee->id]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Database Error creating employee: ' . $e->getMessage());
+            if ($e->errorInfo[1] == 1062) { // Duplicate entry
+                return back()->with('error', __('messages.duplicate_entry_error') . ' - ' . __('hr.employees.employee_number_exists'));
+            }
+            return back()->with('error', __('messages.error_occurred'));
+        } catch (\Exception $e) {
+            \Log::error('Error creating employee: ' . $e->getMessage());
+            return back()->with('error', __('messages.error_occurred'));
+        }
 
         return back()->with('success', __('messages.created_successfully'));
     }
@@ -92,6 +165,8 @@ class EmployeeController extends Controller
      */
     public function show(Employee $employee)
     {
+        $this->authorize('view', $employee);
+        
         $tenantId = TenancyContext::tenantId();
 
         $employee->load([
@@ -132,6 +207,17 @@ class EmployeeController extends Controller
                 ->get(['id', 'name', 'email']),
             'shifts' => \App\Models\HR\Shift::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en', 'start_time', 'end_time', 'color']),
             'weeklySchedule' => $weeklySchedule,
+            // Financial Data
+            'payrollItems' => $employee->payrollItems()
+                ->with(['payrollRun', 'createdBy:id,name'])
+                ->orderByDesc('created_at')
+                ->take(12)
+                ->get(),
+            'otherPayments' => $employee->otherPayments()
+                ->with(['createdBy:id,name', 'approvedBy:id,name'])
+                ->orderByDesc('created_at')
+                ->take(20)
+                ->get(),
         ]);
     }
 
@@ -140,11 +226,13 @@ class EmployeeController extends Controller
      */
     public function update(Request $request, Employee $employee)
     {
+        $this->authorize('update', $employee);
+        
         $validated = $request->validate([
             // Basic Info
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|max:20|unique:hr_employees,phone,' . $employee->id . ',id,tenant_id,' . TenancyContext::tenantId(),
             'email' => 'nullable|email|max:255',
             'gender' => 'nullable|in:male,female',
             'marital_status' => 'nullable|in:single,married',
@@ -163,8 +251,6 @@ class EmployeeController extends Controller
             'user_id' => 'nullable|exists:users,id',
             'hire_date' => 'nullable|date',
             'contract_end_date' => 'nullable|date',
-            'shift_start' => 'nullable|date_format:H:i',
-            'shift_end' => 'nullable|date_format:H:i',
             'default_shift_id' => 'nullable|exists:hr_shifts,id',
             'status' => 'required|in:active,inactive,terminated',
             'notes' => 'nullable|string',
@@ -196,6 +282,11 @@ class EmployeeController extends Controller
 
         $employee->update($validated);
 
+        // Security Check: Restrict "Management" department to Super Admin if changed
+        if (isset($validated['department_id']) && $validated['department_id'] != $employee->getOriginal('department_id')) {
+            $this->checkManagementRestriction($validated['department_id']);
+        }
+
         return back()->with('success', __('messages.updated_successfully'));
     }
 
@@ -208,12 +299,21 @@ class EmployeeController extends Controller
             'allowances' => 'array',
             'allowances.*.id' => 'required|exists:hr_allowances,id',
             'allowances.*.custom_amount' => 'nullable|numeric|min:0',
+            'allowances.*.period_type' => 'required|in:one_time,fixed_period,indefinite',
+            'allowances.*.start_date' => 'nullable|date',
+            'allowances.*.end_date' => 'nullable|date|after_or_equal:allowances.*.start_date',
         ]);
 
         // Sync allowances
         $syncData = [];
         foreach ($validated['allowances'] ?? [] as $allowance) {
-            $syncData[$allowance['id']] = ['custom_amount' => $allowance['custom_amount'] ?? null];
+            $syncData[$allowance['id']] = [
+                'custom_amount' => $allowance['custom_amount'] ?? null,
+                'period_type' => $allowance['period_type'] ?? 'indefinite',
+                'start_date' => $allowance['start_date'] ?? null,
+                'end_date' => $allowance['end_date'] ?? null,
+                'is_active' => true,
+            ];
         }
         $employee->allowances()->sync($syncData);
 
@@ -229,12 +329,21 @@ class EmployeeController extends Controller
             'deductions' => 'array',
             'deductions.*.id' => 'required|exists:hr_deductions,id',
             'deductions.*.custom_amount' => 'nullable|numeric|min:0',
+            'deductions.*.period_type' => 'required|in:one_time,fixed_period,indefinite',
+            'deductions.*.start_date' => 'nullable|date',
+            'deductions.*.end_date' => 'nullable|date|after_or_equal:deductions.*.start_date',
         ]);
 
         // Sync deductions
         $syncData = [];
         foreach ($validated['deductions'] ?? [] as $deduction) {
-            $syncData[$deduction['id']] = ['custom_amount' => $deduction['custom_amount'] ?? null];
+            $syncData[$deduction['id']] = [
+                'custom_amount' => $deduction['custom_amount'] ?? null,
+                'period_type' => $deduction['period_type'] ?? 'indefinite',
+                'start_date' => $deduction['start_date'] ?? null,
+                'end_date' => $deduction['end_date'] ?? null,
+                'is_active' => true,
+            ];
         }
         $employee->deductions()->sync($syncData);
 
@@ -264,12 +373,71 @@ class EmployeeController extends Controller
     }
 
     /**
+     * Update employee bank info.
+     */
+    public function updateBankInfo(Request $request, Employee $employee)
+    {
+        $this->authorize('update', $employee);
+        
+        $validated = $request->validate([
+            'bank_name' => 'nullable|string|max:100',
+            'bank_iban' => 'nullable|string|max:34',
+            'bank_account_number' => 'nullable|string|max:50',
+            'bank_notes' => 'nullable|string',
+        ]);
+
+        $employee->update($validated);
+
+        return back()->with('success', __('messages.updated_successfully'));
+    }
+
+    /**
+     * Update employee financial info (salary, GOSI rate).
+     */
+    public function updateFinancialInfo(Request $request, Employee $employee)
+    {
+        $this->authorize('update', $employee);
+        
+        $validated = $request->validate([
+            'base_salary' => 'required|numeric|min:0',
+            'gosi_rate' => 'nullable|numeric|min:0|max:100',
+        ]);
+
+        $employee->update($validated);
+
+        return back()->with('success', __('messages.updated_successfully'));
+    }
+
+    /**
      * Delete employee.
      */
     public function destroy(Employee $employee)
     {
+        $this->authorize('delete', $employee);
+        
         $employee->delete();
         return redirect()->route('app.hr.employees.index')
             ->with('success', __('messages.deleted_successfully'));
+    }
+
+    /**
+     * Check if the selected department is "Management" and restrict it to Super Admin.
+     */
+    private function checkManagementRestriction($departmentId)
+    {
+        if (auth()->user()->hasRole('super_admin')) {
+            return;
+        }
+
+        $department = Department::find($departmentId);
+        if (!$department) return;
+
+        // Check if department is "Management" / "الإدارة"
+        $isManagement = str_contains($department->name_en, 'Management') || 
+                        str_contains($department->name_ar, 'الإدارة');
+
+        if ($isManagement) {
+            abort(403, 'إضافة موظفين لقسم الإدارة متاح فقط للمدير العام (Super Admin).');
+        }
     }
 }

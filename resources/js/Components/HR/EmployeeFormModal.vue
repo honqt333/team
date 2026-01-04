@@ -95,65 +95,31 @@
                 </div>
 
                 <!-- Branch -->
-                <div class="md:col-span-2">
+                <div class="md:col-span-2" v-if="filteredCenterOptions.length > 1">
                      <SearchableSelect
                         v-model="form.center_id"
                         :label="$t('hr.employees.branch')"
-                        :options="[{id: null, name: '🏠 ' + $t('common.management')}, ...centers.map(c => ({...c, name: '📍 ' + c.name}))]"
+                        :options="filteredCenterOptions"
                         option-label="name"
                         option-value="id"
                         :error="form.errors.center_id"
                         required
                     />
                 </div>
+                <!-- Hidden input for single branch -->
+                <input v-else type="hidden" :value="form.center_id" />
 
-                <!-- Working Hours -->
-                <div class="md:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">{{ $t('hr.employees.working_hours') }}</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                {{ $t('hr.employees.shift_start') }}
-                            </label>
-                            <input
-                                v-model="form.shift_start"
-                                type="time"
-                                :class="[
-                                    'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                                    form.errors.shift_start ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
-                                ]"
-                            />
-                            <p v-if="form.errors.shift_start" class="mt-1 text-xs text-red-500">{{ form.errors.shift_start }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                {{ $t('hr.employees.shift_end') }}
-                            </label>
-                            <input
-                                v-model="form.shift_end"
-                                type="time"
-                                :class="[
-                                    'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                                    form.errors.shift_end ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
-                                ]"
-                            />
-                            <p v-if="form.errors.shift_end" class="mt-1 text-xs text-red-500">{{ form.errors.shift_end }}</p>
-                        </div>
-                    </div>
-
-                    <!-- أو اختيار وردية -->
-                    <div v-if="shifts?.length" class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <SearchableSelect
-                            v-model="form.default_shift_id"
-                            :label="$t('hr.settings.shifts.shift') + ' (اختياري)'"
-                            :options="shifts"
-                            :option-label="locale === 'ar' ? 'name_ar' : 'name_en'"
-                            option-value="id"
-                            :error="form.errors.default_shift_id"
-                            :placeholder="$t('hr.employees.or_select_shift')"
-                        />
-                        <p class="mt-1 text-xs text-gray-500">عند اختيار وردية، سيتم استخدامها بدلاً من الأوقات اليدوية</p>
-                    </div>
+                <!-- الوردية -->
+                <div v-if="shifts?.length" class="md:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
+                    <SearchableSelect
+                        v-model="form.default_shift_id"
+                        :label="$t('hr.settings.shifts.shift')"
+                        :options="shifts"
+                        :option-label="locale === 'ar' ? 'name_ar' : 'name_en'"
+                        option-value="id"
+                        :error="form.errors.default_shift_id"
+                        :placeholder="$t('common.choose')"
+                    />
                 </div>
             </div>
         </form>
@@ -180,14 +146,16 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { computed, watch } from 'vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t, locale } = useI18n();
 const { success } = useToast();
+const page = usePage();
 
 const props = defineProps({
     show: Boolean,
@@ -207,10 +175,33 @@ const form = useForm({
     nationality_id: null,
     job_title_id: null,
     center_id: null, // null = Management
-    shift_start: null,
-    shift_end: null,
     default_shift_id: null,
     hasErrors: false,
+});
+
+// Computed options
+const filteredCenterOptions = computed(() => {
+    const options = props.centers.map(c => ({...c, name: '📍 ' + c.name}));
+    
+    // Only add Management option if super admin
+    // Note: checking permission via shared props since we don't have direct checkRole here
+    // Assuming super_admin capability is shared or we can check via page props
+    const isSuperAdmin = page.props.auth.user.roles?.some(r => r.name === 'super_admin');
+    
+    if (isSuperAdmin) {
+        options.unshift({id: null, name: '🏠 ' + t('common.management')});
+    }
+    
+    return options;
+});
+
+// Auto-select if only one option
+watch(() => props.show, (newVal) => {
+    if (newVal) {
+        if (filteredCenterOptions.value.length === 1) {
+            form.center_id = filteredCenterOptions.value[0].id;
+        }
+    }
 });
 
 function submit() {

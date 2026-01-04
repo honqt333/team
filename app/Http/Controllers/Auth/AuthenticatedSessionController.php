@@ -33,6 +33,19 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = $request->user();
+
+        // 1. Check if current_center_id is set
+        // 2. Check if the user is actually attached to this center
+        if (!$user->current_center_id || !$user->centers()->where('centers.id', $user->current_center_id)->exists()) {
+            // Find the first valid center
+            $firstCenter = $user->centers()->first();
+            
+            if ($firstCenter) {
+                $user->update(['current_center_id' => $firstCenter->id]);
+            }
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

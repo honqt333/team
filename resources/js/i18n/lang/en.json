@@ -1,7 +1,19 @@
 {
     "common": {
         "save": "Save",
+        "minute": "Minute",
+        "hour": "Hour",
+        "day": "Day",
+        "none": "None",
+        "fixed_amount": "Fixed Amount",
+        "percentage": "Percentage",
+        "center": "Center",
+        "employee": "Employee",
+        "no_records": "No records found",
         "cancel": "Cancel",
+        "from": "From",
+        "to": "To",
+        "error_occurred": "An error occurred",
         "create": "Create",
         "update": "Update",
         "delete": "Delete",
@@ -41,12 +53,14 @@
         "print": "Print",
         "edit": "Edit",
         "error": "Error",
-        "system": "System",
         "cannot_modify_system_data": "Cannot modify system data",
         "cannot_delete_system_data": "Cannot delete system data",
+        "cannot_edit_system_role": "Cannot edit Super Admin role",
+        "cannot_delete_system_role": "Cannot delete Super Admin role",
         "selected": "Selected",
         "back": "Back",
         "currency": "SAR",
+        "home": "Home",
         "unsaved_changes": "Unsaved Changes",
         "unsaved_changes_message": "Changes have not been saved. Are you sure you want to close this form?",
         "yes_close": "Yes, Close",
@@ -65,6 +79,7 @@
         "select": "Select",
         "all": "All",
         "all_categories": "All Categories",
+        "all_centers": "All Centers",
         "name": "Name",
         "basic_info": "Basic Information",
         "overview": "Overview",
@@ -85,7 +100,8 @@
         "amount": "Amount",
         "minutes": "min",
         "days": "days",
-        "save_changes": "Save Changes"
+        "save_changes": "Save Changes",
+        "view_details": "View Details"
     },
     "nav": {
         "brand": "Carag",
@@ -569,6 +585,30 @@
             "is_active": "Active"
         }
     },
+    "users": {
+        "title": "Users Management",
+        "create_user": "Add New User",
+        "edit_user": "Edit User",
+        "create_new": "Add User",
+        "name": "Name",
+        "email": "Email",
+        "password": "Password",
+        "new_password": "New Password (Optional)",
+        "confirm_password": "Confirm Password",
+        "allowed_centers": "Allowed Branches",
+        "branches": "Branches",
+        "employee": "Linked Employee",
+        "no_employee": "-",
+        "role": "Role",
+        "select_role": "Select Role",
+        "select_employee": "Select Employee",
+        "is_active": "Active Account",
+        "is_active_hint": "Allow user to login to the system",
+        "status": "Status",
+        "active": "Active",
+        "inactive": "Inactive",
+        "toggle_status": "Toggle Status"
+    },
     "settings": {
         "title": "Settings",
         "subtitle": "Manage system settings and configuration",
@@ -576,6 +616,10 @@
             "company": {
                 "title": "Company Profile",
                 "description": "Company data, taxes, invoicing"
+            },
+            "users": {
+                "title": "Users",
+                "description": "Manage system users and permissions"
             },
             "branches": {
                 "title": "Branches",
@@ -1280,6 +1324,7 @@
             "title": "Employees",
             "subtitle": "Employee list",
             "total": "employee(s)",
+            "employee": "Employee",
             "add": "Add Employee",
             "no_employees": "No employees found",
             "number": "Employee #",
@@ -1418,7 +1463,64 @@
         },
         "payroll": {
             "title": "Payroll",
-            "subtitle": "Monthly payroll sheets"
+            "subtitle": "Monthly payroll sheets",
+            "monthly_salaries": "Monthly Salaries"
+        },
+        "financial": {
+            "tabs": {
+                "bank_info": "Bank Information",
+                "salaries": "Salaries & Allowances",
+                "payment_history": "Payment History"
+            },
+            "bank": {
+                "name": "Bank Name",
+                "iban": "IBAN Number",
+                "account_number": "Account Number",
+                "notes": "Notes"
+            },
+            "payroll": {
+                "base_salary": "Base Salary",
+                "gosi_rate": "GOSI Rate",
+                "gosi_amount": "GOSI Amount",
+                "next_payment": "Next Payment",
+                "next_payment_date": "Expected Payment Date",
+                "expected_amount": "Expected Amount",
+                "period": "Payment Period",
+                "net_salary": "Net Salary",
+                "created_by": "Created By",
+                "approved_by": "Approved By",
+                "print_slip": "Print Pay Slip",
+                "monthly_salaries": "Monthly Salaries"
+            },
+            "other_payments": {
+                "title": "Other Payments",
+                "add": "Add Payment",
+                "payment_title": "Title",
+                "types": {
+                    "advance": "Advance",
+                    "bonus": "Bonus",
+                    "compensation": "Compensation",
+                    "penalty": "Penalty",
+                    "other": "Other"
+                }
+            },
+            "manage_allowances": "Manage Allowances",
+            "manage_deductions": "Manage Deductions",
+            "allowance_type": "Allowance Type",
+            "deduction_type": "Deduction Type",
+            "add_allowance": "Add Allowance",
+            "add_deduction": "Add Deduction",
+            "period_type": "Period Type",
+            "start_date": "Start Date",
+            "end_date": "End Date",
+            "start_month": "Start Month",
+            "end_month": "End Month",
+            "flexible": "Flexible",
+            "periods": {
+                "one_time": "One Time",
+                "fixed_period": "Fixed Period",
+                "indefinite": "Indefinite"
+            }
         },
         "settings": {
             "title": "Settings",
@@ -1448,6 +1550,7 @@
                 "base_salary": "Base Salary",
                 "monthly_contribution": "Monthly Contribution Rate"
             },
+            "flexible_hint": "Allow custom amount for each employee",
             "biometric_devices": {
                 "title": "Biometric Devices",
                 "subtitle": "Manage attendance tracking devices",
@@ -1470,7 +1573,123 @@
                 "overnight": "Overnight Shift",
                 "color": "Color",
                 "cannot_delete_in_use": "Cannot delete shift: it is assigned to employees"
+            },
+            "attendance_settings": {
+                "title": "Attendance Settings",
+                "subtitle": "Customize lateness, absence, and overtime policies",
+                "grace_period": "Grace Period",
+                "grace_period_hint": "Lateness within this period is ignored",
+                "late_deduction": "Late Deduction",
+                "absence_deduction": "Absence Deduction",
+                "absence_deduction_hint_fixed": "Deducted as a fixed amount per day of absence",
+                "absence_deduction_hint_percentage": "Calculated as a percentage of daily salary (Base + Allowances) / 30",
+                "overtime_rate": "Overtime Rate",
+                "overtime_enabled": "Enable Overtime Calculation",
+                "working_days": "Working Days"
             }
         }
+    },
+    "errors": {
+        "403": {
+            "title": "Access Denied",
+            "description": "You don't have permission to access this page. Contact your system administrator if you believe this is an error.",
+            "contact_admin": "Need access? Contact your system administrator"
+        },
+        "404": {
+            "title": "Page Not Found",
+            "description": "The page you're looking for doesn't exist or has been moved."
+        }
+    },
+    "roles": {
+        "title": "Roles Management",
+        "add": "Add Role",
+        "edit": "Edit Role",
+        "name": "Role Name",
+        "label_ar": "Name (Arabic)",
+        "label_en": "Name (English)",
+        "system_name": "System Name",
+        "description": "Description",
+        "page_description": "Manage user roles and system permissions",
+        "permissions": "Permissions",
+        "users_count": "Users Count",
+        "select_all": "Select All",
+        "deselect_all": "Deselect All",
+        "delete_confirm_title": "Delete Role",
+        "delete_confirm_message": "Are you sure you want to delete this role? This action cannot be undone."
+    },
+    "permissions": {
+        "crm_customers_view": "View customer records",
+        "crm_customers_create": "Create new customers",
+        "crm_customers_update": "Edit customer information",
+        "crm_customers_delete": "Delete customers",
+        "crm_vehicles_view": "View vehicle records",
+        "crm_vehicles_create": "Register new vehicles",
+        "crm_vehicles_update": "Edit vehicle information",
+        "crm_vehicles_delete": "Delete vehicles",
+        "crm_vehicles_settings_view": "View vehicle makes/models/colors",
+        "crm_vehicles_settings_manage": "Manage vehicle makes/models/colors",
+        "crm_work_orders_view": "View work orders",
+        "crm_work_orders_create": "Create new work orders",
+        "crm_work_orders_update": "Edit work orders",
+        "crm_work_orders_delete": "Delete work orders",
+        "workcards_view": "View Work Cards (Advanced)",
+        "workcards_create": "Create Work Cards (Advanced)",
+        "workcards_update": "Edit Work Cards (Advanced)",
+        "workcards_delete": "Delete Work Cards (Advanced)",
+        "workcards_lines_discount": "Work Card Line Discounts",
+        "quotes_view": "View quotes",
+        "quotes_create": "Create new quotes",
+        "quotes_update": "Edit quotes",
+        "quotes_delete": "Delete quotes",
+        "quotes_approve": "Approve/reject quotes",
+        "services_view": "View service catalog",
+        "services_create": "Add new services",
+        "services_update": "Edit services",
+        "services_delete": "Delete services",
+        "services_departments_view": "View departments",
+        "services_departments_manage": "Manage departments",
+        "invoices_view": "View invoices",
+        "invoices_create": "Create invoices",
+        "invoices_extra_discount": "Apply extra discounts to invoices",
+        "purchasing_suppliers_view": "View suppliers",
+        "purchasing_suppliers_create": "Create new suppliers",
+        "purchasing_suppliers_update": "Edit supplier information",
+        "purchasing_suppliers_destroy": "Delete suppliers",
+        "hr_view": "Access HR module",
+        "hr_employees_view": "View employees",
+        "hr_employees_create": "Create new employees",
+        "hr_employees_update": "Edit employee information",
+        "hr_employees_delete": "Delete employees",
+        "hr_attendance_view": "View attendance records",
+        "hr_attendance_manage": "Manage attendance (check-in/out)",
+        "hr_leaves_view": "View leave requests",
+        "hr_leaves_manage": "Manage leave requests",
+        "hr_leaves_approve": "Approve/reject leave requests",
+        "hr_settings_manage": "Manage HR settings",
+        "users_view": "View system users",
+        "users_create": "Create new users",
+        "users_update": "Edit user details",
+        "users_delete": "Delete users",
+        "inventory_view": "View Inventory",
+        "inventory_settings_manage": "Manage Settings",
+        "inventory_stock_view": "View Stock Balances",
+        "inventory_moves_view": "View Moves",
+        "inventory_moves_create": "Create Moves"
+    },
+    "permissions_modules": {
+        "crm_customers": "CRM - Customers",
+        "crm_vehicles": "CRM - Vehicles",
+        "crm_work_orders": "CRM - Work Orders",
+        "quotes": "Quotes",
+        "services": "Services",
+        "invoices": "Invoices",
+        "purchasing_suppliers": "Purchasing - Suppliers",
+        "workcards": "Work Cards (Advanced)",
+        "hr_general": "HR - General",
+        "hr_employees": "HR - Employees",
+        "hr_attendance": "HR - Attendance",
+        "hr_leaves": "HR - Leaves",
+        "user_management": "User Management",
+        "inventory": "Inventory"
     }
 }

@@ -60,4 +60,24 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+    /**
+     * Switch the current center context.
+     */
+    public function switchCenter(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'center_id' => ['required', 'integer'],
+        ]);
+
+        $user = $request->user();
+
+        // Verify user belongs to this center
+        if (!$user->centers()->where('centers.id', $validated['center_id'])->exists()) {
+             abort(403, 'Unauthorized access to center');
+        }
+
+        $user->update(['current_center_id' => $validated['center_id']]);
+
+        return back()->with('success', __('messages.updated_successfully'));
+    }
 }

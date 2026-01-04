@@ -27,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_active',
         'tenant_id',
         'current_center_id',
     ];
@@ -51,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -74,6 +76,30 @@ class User extends Authenticatable
     public function employee(): HasOne
     {
         return $this->hasOne(Employee::class);
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (User $user) {
+            // Check if this is the first user for the tenant
+            $count = User::where('tenant_id', $user->tenant_id)->count();
+            
+            if ($count === 1) {
+                // First user gets Super Admin role
+                $superAdminRole = \App\Models\Role::where('name', 'super_admin')
+                    ->where('tenant_id', $user->tenant_id)
+                    ->first();
+                    
+                if ($superAdminRole) {
+                    // Set permission team context
+                    app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+                    $user->assignRole($superAdminRole);
+                }
+            }
+        });
     }
 }
 

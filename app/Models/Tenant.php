@@ -53,4 +53,17 @@ class Tenant extends Model
     {
         return $this->hasOne(TenantZatcaSetting::class);
     }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Tenant $tenant) {
+            // Seed default roles for the new tenant
+            (new \App\Services\TenantSetupService())->seedRolesForTenant($tenant->id);
+            
+            // Create default settings if needed (future)
+        });
+    }
 }

@@ -4,7 +4,10 @@ namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\HR\Attendance;
+use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
+use App\Models\HR\Leave;
+use App\Support\TenancyContext;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,17 +16,44 @@ class AttendanceController extends Controller
 {
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Attendance::class);
+        
+        $tenantId = TenancyContext::tenantId();
+        $centerId = TenancyContext::centerId();
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
         
-        // Get all active employees
-        $employees = Employee::active()
+        // Get center attendance settings
+        $settings = AttendanceSettings::getForCenter($centerId);
+        
+        // Get all active employees for this tenant and center
+        $employees = Employee::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->active()
             ->with(['attendance' => function ($query) use ($date) {
                 $query->whereDate('date', $date->format('Y-m-d'));
             }])
             ->get()
-            ->map(function ($employee) use ($date) {
+            ->map(function ($employee) use ($date, $tenantId) {
                 // Attach attendance if exists, otherwise null
                 $attendance = $employee->attendance->first();
+                
+                // Check if employee is on approved leave
+                $isOnLeave = Leave::where('employee_id', $employee->id)
+                    ->where('status', 'approved')
+                    ->where('start_date', '<=', $date->toDateString())
+                    ->where('end_date', '>=', $date->toDateString())
+                    ->exists();
+                
+                // Get shift for this date
+                $shift = $employee->getShiftForDate($date);
+                
+                // Determine status
+                $status = null;
+                if ($attendance) {
+                    $status = $attendance->status;
+                } elseif ($isOnLeave) {
+                    $status = 'leave';
+                }
                 
                 return [
                     'id' => $employee->id,
@@ -31,8 +61,10 @@ class AttendanceController extends Controller
                     'name_en' => $employee->name_en,
                     'employee_number' => $employee->employee_number,
                     'photo_url' => $employee->photo_path ? asset('storage/' . $employee->photo_path) : null,
-                    'shift_start' => $employee->shift_start,
-                    'shift_end' => $employee->shift_end,
+                    'shift_start' => $shift?->start_time,
+                    'shift_end' => $shift?->end_time,
+                    'shift_name' => $shift?->name_ar,
+                    'is_on_leave' => $isOnLeave,
                     'attendance' => $attendance ? [
                         'id' => $attendance->id,
                         'status' => $attendance->status,
@@ -43,12 +75,14 @@ class AttendanceController extends Controller
                         'overtime_minutes' => $attendance->overtime_minutes ?? 0,
                         'notes' => $attendance->notes,
                     ] : null,
+                    'display_status' => $status,
                 ];
             });
 
         // Calculate stats
         $totalLateMinutes = $employees->sum(fn($e) => $e['attendance']['late_minutes'] ?? 0);
         $lateCount = $employees->filter(fn($e) => ($e['attendance']['late_minutes'] ?? 0) > 0)->count();
+        $onLeaveCount = $employees->filter(fn($e) => $e['is_on_leave'])->count();
 
         return Inertia::render('HR/Attendance/Index', [
             'employees' => $employees,
@@ -58,19 +92,29 @@ class AttendanceController extends Controller
             'stats' => [
                 'total' => $employees->count(),
                 'present' => $employees->filter(fn($e) => $e['attendance'] && $e['attendance']['status'] === 'present')->count(),
-                'absent' => $employees->filter(fn($e) => !$e['attendance'] || $e['attendance']['status'] === 'absent')->count(),
-                'leave' => $employees->filter(fn($e) => $e['attendance'] && $e['attendance']['status'] === 'leave')->count(),
+                'absent' => $employees->filter(fn($e) => !$e['attendance'] && !$e['is_on_leave'])->count(),
+                'leave' => $onLeaveCount,
                 'late_count' => $lateCount,
                 'total_late_minutes' => $totalLateMinutes,
+            ],
+            'settings' => [
+                'grace_period_minutes' => $settings->grace_period_minutes,
+                'overtime_enabled' => $settings->overtime_enabled,
             ]
         ]);
     }
 
     public function print(Request $request)
     {
+        $this->authorize('viewAny', Attendance::class);
+        
+        $tenantId = TenancyContext::tenantId();
+        $centerId = TenancyContext::centerId();
         $date = $request->input('date') ? Carbon::parse($request->input('date')) : Carbon::today();
         
-        $employees = Employee::active()
+        $employees = Employee::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->active()
             ->with(['attendance' => function ($query) use ($date) {
                 $query->whereDate('date', $date->format('Y-m-d'));
             }, 'jobTitle', 'department'])
@@ -104,6 +148,8 @@ class AttendanceController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Attendance::class);
+        
         $validated = $request->validate([
             'employee_id' => 'required|exists:hr_employees,id',
             'date' => 'required|date',
@@ -133,10 +179,7 @@ class AttendanceController extends Controller
 
     public function update(Request $request, Attendance $attendance)
     {
-        // Ensure same tenant
-        if ($attendance->tenant_id !== auth()->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('update', $attendance);
 
         $validated = $request->validate([
             'status' => 'required|in:present,absent,late,leave,holiday',
@@ -156,9 +199,7 @@ class AttendanceController extends Controller
 
     public function destroy(Attendance $attendance)
     {
-        if ($attendance->tenant_id !== auth()->user()->tenant_id) {
-            abort(403);
-        }
+        $this->authorize('delete', $attendance);
 
         $attendance->delete();
 

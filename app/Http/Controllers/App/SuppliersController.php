@@ -17,8 +17,14 @@ class SuppliersController extends Controller
         $this->authorize('viewAny', Supplier::class);
 
         $tenantId = auth()->user()->tenant_id;
+        $isSuperAdmin = auth()->user()->hasRole('super_admin');
+        // Filter by user's current center unless super admin wants to see all (and didnt filter)
+        // But usually, 'Not isolated' complaint suggests strict isolation.
+        // I will use current_center_id logic similar to Employee.
+        $centerId = $isSuperAdmin ? $request->center_id : auth()->user()->current_center_id;
 
         $query = Supplier::forTenant($tenantId)
+            ->when(!$isSuperAdmin || $centerId, fn($q) => $q->forCenter($centerId))
             ->search($request->input('search'))
             ->when($request->input('status') === 'active', fn($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
@@ -67,6 +73,7 @@ class SuppliersController extends Controller
 
         $validated = $request->validated();
         $validated['tenant_id'] = auth()->user()->tenant_id;
+        $validated['center_id'] = auth()->user()->current_center_id;
 
         Supplier::create($validated);
 
@@ -118,8 +125,10 @@ class SuppliersController extends Controller
         $this->authorize('viewAny', Supplier::class);
 
         $tenantId = auth()->user()->tenant_id;
+        $centerId = auth()->user()->current_center_id;
 
         $suppliers = Supplier::forTenant($tenantId)
+            ->forCenter($centerId)
             ->active()
             ->search($request->input('q'))
             ->select('id', 'name', 'code', 'phone')
@@ -142,8 +151,10 @@ class SuppliersController extends Controller
         }
 
         $tenantId = auth()->user()->tenant_id;
+        $centerId = auth()->user()->current_center_id;
 
         $suppliers = Supplier::forTenant($tenantId)
+            ->forCenter($centerId)
             ->search($request->input('search'))
             ->when($request->input('status') === 'active', fn($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))

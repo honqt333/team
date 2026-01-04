@@ -10,6 +10,10 @@ class InventoryPermissionsSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
+            // Base
+            'inventory.view',
+            'inventory.settings.manage',
+
             // Parts
             'inventory.parts.view',
             'inventory.parts.create',
@@ -38,6 +42,10 @@ class InventoryPermissionsSeeder extends Seeder
             'inventory.issue.view',
             'inventory.issue.create',
             'inventory.issue.reverse',
+
+            // Moves
+            'inventory.moves.view',
+            'inventory.moves.create',
             
             // Transfers (Sprint 4)
             'inventory.transfers.view',

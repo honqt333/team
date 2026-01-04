@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use App\Models\HR\Allowance;
 use App\Models\HR\Deduction;
 use App\Models\HR\Employee;
@@ -21,11 +22,13 @@ class HRController extends Controller
     {
         $tenantId = TenancyContext::tenantId();
 
+        $centerId = TenancyContext::centerId();
+
         // Stats for dashboard cards
         $stats = [
             'employees' => [
-                'total' => Employee::where('tenant_id', $tenantId)->count(),
-                'active' => Employee::where('tenant_id', $tenantId)->active()->count(),
+                'total' => Employee::where('tenant_id', $tenantId)->where('center_id', $centerId)->count(),
+                'active' => Employee::where('tenant_id', $tenantId)->where('center_id', $centerId)->active()->count(),
             ],
             'attendance' => [
                 'present_today' => 0, // Will be calculated when attendance is implemented
@@ -33,6 +36,7 @@ class HRController extends Controller
             'payroll' => [
                 'current_period' => now()->format('Y-m'),
                 'status' => Payroll::where('tenant_id', $tenantId)
+                    ->where('center_id', $centerId)
                     ->where('period', now()->format('Y-m'))
                     ->first()?->status ?? 'none',
             ],
@@ -44,8 +48,31 @@ class HRController extends Controller
             ],
         ];
 
+        $recentEmployees = Employee::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->with(['jobTitle', 'department', 'nationality'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $departmentsStats = Department::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->active()
+            ->withCount(['employees' => function($q) use ($centerId) {
+                $q->where('center_id', $centerId); // Ensure employee is also in this center
+            }])
+            ->get()
+            ->map(function($dept) {
+                return [
+                    'name' => $dept->name, // Accessor handles locale
+                    'count' => $dept->employees_count,
+                ];
+            });
+
         return Inertia::render('HR/Index', [
             'stats' => $stats,
+            'recentEmployees' => $recentEmployees,
+            'departmentsStats' => $departmentsStats,
         ]);
     }
 }

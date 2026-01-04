@@ -47,9 +47,10 @@ class EnsureCenterContext
         }
 
         // Validate user is assigned to this center via pivot
+        // Super Admin bypass: Allow access to any center in the tenant
         $isAssigned = $user->centers()->where('center_id', $currentCenterId)->exists();
-
-        if (!$isAssigned) {
+        
+        if (!$isAssigned && !$user->hasRole('super_admin')) {
             abort(403, 'User is not assigned to this center');
         }
 

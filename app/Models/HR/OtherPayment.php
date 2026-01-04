@@ -2,42 +2,62 @@
 
 namespace App\Models\HR;
 
-use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OtherPayment extends Model
 {
+    use HasFactory, SoftDeletes;
+
     protected $table = 'hr_other_payments';
 
     protected $fillable = [
         'tenant_id',
         'employee_id',
         'type',
-        'amount',
-        'date',
-        'reason',
-        'status',
-        'approved_by',
-        'approved_at',
+        'title',
         'notes',
+        'amount',
+        'payment_date',
+        'status',
+        'created_by',
+        'approved_by',
     ];
 
     protected $casts = [
-        'amount' => 'float',
-        'date' => 'date:Y-m-d',
-        'approved_at' => 'datetime',
+        'amount' => 'decimal:2',
+        'payment_date' => 'date',
     ];
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
+    // ─────────────────────────────────────────────────────────────
+    // Constants
+    // ─────────────────────────────────────────────────────────────
+
+    public const TYPE_ADVANCE = 'advance';
+    public const TYPE_BONUS = 'bonus';
+    public const TYPE_COMPENSATION = 'compensation';
+    public const TYPE_PENALTY = 'penalty';
+    public const TYPE_OTHER = 'other';
+
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_PAID = 'paid';
+
+    // ─────────────────────────────────────────────────────────────
+    // Relationships
+    // ─────────────────────────────────────────────────────────────
 
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function approvedBy(): BelongsTo
@@ -45,29 +65,41 @@ class OtherPayment extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    // ─────────────────────────────────────────────────────────────
     // Scopes
-    public function scopeAdvances($query)
-    {
-        return $query->where('type', 'advance');
-    }
-
-    public function scopeBonuses($query)
-    {
-        return $query->where('type', 'bonus');
-    }
-
-    public function scopeDeductions($query)
-    {
-        return $query->where('type', 'deduction');
-    }
+    // ─────────────────────────────────────────────────────────────
 
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', self::STATUS_PENDING);
     }
 
     public function scopeApproved($query)
     {
-        return $query->where('status', 'approved');
+        return $query->where('status', self::STATUS_APPROVED);
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('status', self::STATUS_PAID);
+    }
+
+    public function scopeOfType($query, string $type)
+    {
+        return $query->where('type', $type);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────
+
+    public function isPositive(): bool
+    {
+        return in_array($this->type, [self::TYPE_BONUS, self::TYPE_COMPENSATION]);
+    }
+
+    public function isNegative(): bool
+    {
+        return in_array($this->type, [self::TYPE_ADVANCE, self::TYPE_PENALTY]);
     }
 }
