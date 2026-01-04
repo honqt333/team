@@ -1,17 +1,29 @@
 <script setup>
-import GuestLayout from '@/Layouts/GuestLayout.vue';
+import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import { ref, computed } from 'vue';
+
+const { locale } = useI18n();
+const isRTL = computed(() => locale.value === 'ar');
 
 const form = useForm({
-    name: '',
+    company_name: '',
+    first_name: '',
+    last_name: '',
     email: '',
+    phone: '',
     password: '',
     password_confirmation: '',
+    promo_code: '',
+    terms: false,
 });
+
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
+const showTermsModal = ref(false);
+const showPrivacyModal = ref(false);
 
 const submit = () => {
     form.post(route('register'), {
@@ -21,93 +33,263 @@ const submit = () => {
 </script>
 
 <template>
-    <GuestLayout>
-        <Head title="Register" />
+    <AuthLayout>
+        <Head :title="isRTL ? 'إنشاء حساب' : 'Create Account'" />
 
-        <form @submit.prevent="submit">
+        <!-- Title -->
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-6 font-cairo">
+            {{ isRTL ? 'إنشاء حساب' : 'Create Account' }}
+        </h2>
+
+        <form @submit.prevent="submit" class="space-y-4">
+            <!-- Company Name -->
             <div>
-                <InputLabel for="name" value="Name" />
-
-                <TextInput
-                    id="name"
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ isRTL ? 'الاسم التجاري' : 'Business Name' }} <span class="text-red-500">*</span>
+                </label>
+                <input
                     type="text"
-                    class="mt-1 block w-full"
-                    v-model="form.name"
+                    v-model="form.company_name"
                     required
                     autofocus
-                    autocomplete="name"
+                    :placeholder="isRTL ? 'اسم الشركة أو المركز' : 'Company or Center Name'"
+                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    :class="form.errors.company_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
                 />
-
-                <InputError class="mt-2" :message="form.errors.name" />
+                <InputError class="mt-1" :message="form.errors.company_name" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="email" value="Email" />
+            <!-- First & Last Name -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ isRTL ? 'الاسم الأول' : 'First Name' }} <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        v-model="form.first_name"
+                        required
+                        :placeholder="isRTL ? 'الاسم الأول' : 'First Name'"
+                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        :class="form.errors.first_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                    />
+                    <InputError class="mt-1" :message="form.errors.first_name" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ isRTL ? 'اسم الأخير' : 'Last Name' }} <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        v-model="form.last_name"
+                        required
+                        :placeholder="isRTL ? 'اسم الأخير' : 'Last Name'"
+                        class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        :class="form.errors.last_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                    />
+                    <InputError class="mt-1" :message="form.errors.last_name" />
+                </div>
+            </div>
 
-                <TextInput
-                    id="email"
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ isRTL ? 'بريد العمل' : 'Work Email' }} <span class="text-red-500">*</span>
+                </label>
+                <input
                     type="email"
-                    class="mt-1 block w-full"
                     v-model="form.email"
                     required
-                    autocomplete="username"
+                    autocomplete="email"
+                    placeholder="example@company.com"
+                    class="w-full px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                    :class="form.errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
                 />
-
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-1" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+            <!-- Phone -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ isRTL ? 'هاتف العمل' : 'Work Phone' }} <span class="text-red-500">*</span>
+                </label>
+                <div class="flex gap-2">
+                    <div class="flex items-center gap-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        <span class="text-lg">🇸🇦</span>
+                        <span class="text-sm">+966</span>
+                    </div>
+                    <input
+                        type="tel"
+                        v-model="form.phone"
+                        required
+                        placeholder="5xxxxxxxx"
+                        class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        :class="form.errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                    />
+                </div>
+                <InputError class="mt-1" :message="form.errors.phone" />
+            </div>
 
-                <TextInput
-                    id="password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password"
+            <!-- Password -->
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ isRTL ? 'كلمة المرور' : 'Password' }} <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input
+                            :type="showPassword ? 'text' : 'password'"
+                            v-model="form.password"
+                            required
+                            autocomplete="new-password"
+                            placeholder="••••••"
+                            class="w-full px-4 py-2.5 pe-10 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                            :class="form.errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
+                        />
+                        <button type="button" @click="showPassword = !showPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600">
+                            <svg v-if="!showPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        </button>
+                    </div>
+                    <InputError class="mt-1" :message="form.errors.password" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ isRTL ? 'تأكيد كلمة المرور' : 'Confirm Password' }} <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input
+                            :type="showConfirmPassword ? 'text' : 'password'"
+                            v-model="form.password_confirmation"
+                            required
+                            autocomplete="new-password"
+                            placeholder="••••••"
+                            class="w-full px-4 py-2.5 pe-10 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        />
+                        <button type="button" @click="showConfirmPassword = !showConfirmPassword" class="absolute inset-y-0 end-0 flex items-center pe-3 text-gray-400 hover:text-gray-600">
+                            <svg v-if="!showConfirmPassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                        </button>
+                    </div>
+                    <InputError class="mt-1" :message="form.errors.password_confirmation" />
+                </div>
+            </div>
+
+            <!-- Promo Code -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ isRTL ? 'الرمز الترويجي' : 'Promo Code' }}
+                </label>
+                <input
+                    type="text"
+                    v-model="form.promo_code"
+                    :placeholder="isRTL ? 'أدخل الرمز إن وجد' : 'Enter code if you have one'"
+                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                />
+                <InputError class="mt-1" :message="form.errors.promo_code" />
+            </div>
+
+            <!-- Terms Checkbox -->
+            <div class="flex items-start gap-2">
+                <input
+                    type="checkbox"
+                    id="terms"
+                    v-model="form.terms"
                     required
-                    autocomplete="new-password"
+                    class="mt-1 w-4 h-4 text-violet-600 border-gray-300 rounded focus:ring-violet-500"
                 />
-
-                <InputError class="mt-2" :message="form.errors.password" />
+                <label for="terms" class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ isRTL ? 'قرأت وأوافق على' : 'I have read and agree to the' }}
+                    <button type="button" @click="showTermsModal = true" class="text-violet-600 hover:underline">{{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}</button>
+                    {{ isRTL ? 'و' : 'and' }}
+                    <button type="button" @click="showPrivacyModal = true" class="text-violet-600 hover:underline">{{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}</button>
+                </label>
             </div>
+            <InputError class="mt-1" :message="form.errors.terms" />
 
-            <div class="mt-4">
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
+            <!-- Submit Button -->
+            <button
+                type="submit"
+                :disabled="form.processing"
+                class="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <span v-if="form.processing" class="flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {{ isRTL ? 'جاري الإرسال...' : 'Submitting...' }}
+                </span>
+                <span v-else>{{ isRTL ? 'إرسال' : 'Submit' }}</span>
+            </button>
 
-                <TextInput
-                    id="password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    v-model="form.password_confirmation"
-                    required
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
-            </div>
-
-            <div class="mt-4 flex items-center justify-end">
+            <!-- Links -->
+            <div class="flex items-center justify-between text-sm pt-2">
                 <Link
                     :href="route('login')"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    class="font-medium text-violet-600 hover:text-violet-500 dark:text-violet-400"
                 >
-                    Already registered?
+                    {{ isRTL ? 'تسجيل الدخول' : 'Sign In' }}
                 </Link>
-
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
-                    :disabled="form.processing"
+                <Link
+                    :href="route('password.request')"
+                    class="font-medium text-gray-600 hover:text-gray-500 dark:text-gray-400"
                 >
-                    Register
-                </PrimaryButton>
+                    {{ isRTL ? 'هل نسيت كلمة المرور؟' : 'Forgot Password?' }}
+                </Link>
             </div>
         </form>
-    </GuestLayout>
+
+        <!-- Terms Modal -->
+        <Teleport to="body">
+            <div v-if="showTermsModal" class="fixed inset-0 z-50 overflow-y-auto">
+                <div class="flex min-h-screen items-center justify-center p-4">
+                    <div class="fixed inset-0 bg-black/50" @click="showTermsModal = false"></div>
+                    <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+                        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-white">{{ isRTL ? 'سياسة الاستخدام' : 'Terms of Service' }}</h3>
+                            <button @click="showTermsModal = false" class="text-white/80 hover:text-white">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                            <h4 class="font-bold mb-2">{{ isRTL ? 'نظرة عامة' : 'Overview' }}</h4>
+                            <p class="mb-4">{{ isRTL ? 'مرحباً بك في خدمة برو. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.' : 'Welcome to Khidma Pro. By using this service, you agree to be bound by these terms and conditions.' }}</p>
+                            <p class="mb-4">{{ isRTL ? 'يرجى قراءة هذه الشروط بعناية قبل استخدام النظام. إذا كنت لا توافق على جميع الشروط، فلا يجوز لك استخدام الخدمة.' : 'Please read these terms carefully before using the system. If you do not agree to all terms, you may not use the service.' }}</p>
+                            <p class="text-gray-500 dark:text-gray-400 italic">{{ isRTL ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)' : '(This content will be updated from the system admin panel)' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+
+        <!-- Privacy Modal -->
+        <Teleport to="body">
+            <div v-if="showPrivacyModal" class="fixed inset-0 z-50 overflow-y-auto">
+                <div class="flex min-h-screen items-center justify-center p-4">
+                    <div class="fixed inset-0 bg-black/50" @click="showPrivacyModal = false"></div>
+                    <div class="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+                        <div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-white">{{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}</h3>
+                            <button @click="showPrivacyModal = false" class="text-white/80 hover:text-white">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                            <h4 class="font-bold mb-2">{{ isRTL ? 'سياسة الخصوصية' : 'Privacy Policy' }}</h4>
+                            <p class="mb-4">{{ isRTL ? 'نحن نحترم خصوصيتك ونلتزم بحماية بياناتك الشخصية. توضح هذه السياسة كيفية جمع واستخدام وحماية معلوماتك.' : 'We respect your privacy and are committed to protecting your personal data. This policy explains how we collect, use, and protect your information.' }}</p>
+                            <p class="mb-4">{{ isRTL ? 'نستخدم بياناتك لتقديم الخدمة وتحسينها. لن نشارك معلوماتك مع أطراف ثالثة دون موافقتك.' : 'We use your data to provide and improve the service. We will not share your information with third parties without your consent.' }}</p>
+                            <p class="text-gray-500 dark:text-gray-400 italic">{{ isRTL ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)' : '(This content will be updated from the system admin panel)' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+    </AuthLayout>
 </template>
+
+<style scoped>
+.font-cairo {
+    font-family: 'Cairo', system-ui, sans-serif;
+}
+</style>

@@ -2,7 +2,7 @@
     <AppLayout :title="$t('inventory.transfers.title')">
         <div class="p-6">
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-4 mb-6">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ $t('inventory.transfers.title') }}

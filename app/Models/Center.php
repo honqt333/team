@@ -22,6 +22,7 @@ class Center extends Model
         'name_en',
         'slug',
         'is_active',
+        'is_main',
         // Profile
         'manager_name',
         'center_type',
@@ -39,6 +40,7 @@ class Center extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_main' => 'boolean',
     ];
 
     public function tenant(): BelongsTo

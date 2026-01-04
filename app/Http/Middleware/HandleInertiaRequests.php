@@ -53,7 +53,7 @@ class HandleInertiaRequests extends Middleware
                 'phone' => $tenant->phone,
                 'email' => $tenant->email,
                 'cr_number' => $tenant->cr_number,
-                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : null,
+                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/logo.png'),
             ] : null,
             'center' => $user?->currentCenter ? [
                 'id' => $user->currentCenter->id,

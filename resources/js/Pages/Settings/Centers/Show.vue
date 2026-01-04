@@ -53,10 +53,18 @@
                         </div>
                     </div>
                     
-                    <!-- Center ID -->
-                    <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-mono">
-                        #{{ props.center?.id }}
-                    </span>
+                    <!-- Center Status -->
+                    <div class="flex items-center gap-2">
+                        <!-- Main Center Badge -->
+                        <span v-if="props.center?.is_main" class="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-sm font-medium">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                            {{ $t('center_settings.main_center') }}
+                        </span>
+                        <!-- Center ID -->
+                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-mono">
+                            #{{ props.center?.id }}
+                        </span>
+                    </div>
                 </div>
             </div>
 
@@ -101,8 +109,29 @@
                                 <input v-model="form.profile.manager_name" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.profile.center_type') }}</label>
-                                <input v-model="form.profile.center_type" type="text" :placeholder="$t('center_settings.profile.center_type_placeholder')" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {{ $t('center_settings.profile.center_type') }}
+                                    <span v-if="props.center?.is_main && !props.center?.canModifyMain" class="text-xs text-gray-400 font-normal">({{ $t('common.read_only') }})</span>
+                                </label>
+                                <div class="relative">
+                                    <input 
+                                        v-model="form.profile.center_type" 
+                                        type="text" 
+                                        :disabled="props.center?.is_main && !props.center?.canModifyMain"
+                                        :placeholder="$t('center_settings.profile.center_type_placeholder')" 
+                                        :class="[
+                                            'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                                            props.center?.is_main && !props.center?.canModifyMain 
+                                                ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
+                                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                                        ]" 
+                                    />
+                                    <div v-if="props.center?.is_main && !props.center?.canModifyMain" class="absolute inset-y-0 rtl:right-auto rtl:left-0 ltr:right-0 flex items-center px-3 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.profile.license_number') }}</label>

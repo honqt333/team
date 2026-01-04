@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant.active' => \App\Http\Middleware\EnsureTenantActive::class,
             'center.context' => \App\Http\Middleware\EnsureCenterContext::class,
+            'system.admin' => \App\Http\Middleware\EnsureSystemAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

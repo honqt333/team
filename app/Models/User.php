@@ -28,6 +28,7 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'is_system_admin',
         'tenant_id',
         'current_center_id',
     ];
@@ -53,6 +54,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_system_admin' => 'boolean',
         ];
     }
 

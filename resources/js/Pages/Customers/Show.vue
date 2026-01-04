@@ -108,13 +108,13 @@
 
                 <!-- Tabs Navigation -->
                 <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex gap-1 bg-gray-100 dark:bg-gray-900 rounded-xl p-1">
+                    <div class="flex gap-1 bg-gray-100 dark:bg-gray-900 rounded-xl p-1 overflow-x-auto no-scrollbar">
                         <button
                             v-for="tab in tabs"
                             :key="tab.key"
                             @click="activeTab = tab.key"
                             :class="[
-                                'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all flex-1 justify-center',
+                                'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap',
                                 activeTab === tab.key
                                     ? 'bg-white dark:bg-gray-800 shadow-sm ' + tab.activeColor
                                     : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'

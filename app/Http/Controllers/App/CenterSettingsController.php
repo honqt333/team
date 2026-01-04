@@ -35,6 +35,9 @@ class CenterSettingsController extends Controller
                 'name_ar' => $center->name_ar,
                 'name_en' => $center->name_en,
                 'is_active' => $center->is_active,
+                'is_main' => $center->is_main ?? false,
+                // Can only modify/delete main center if there are other centers
+                'canModifyMain' => $center->tenant->centers()->count() > 1,
             ],
             'profile' => [
                 'name_ar' => $center->name_ar,

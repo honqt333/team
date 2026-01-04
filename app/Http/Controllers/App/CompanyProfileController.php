@@ -35,7 +35,7 @@ class CompanyProfileController extends Controller
                 'vat_number' => $tenant->vat_number,
                 'cr_number' => $tenant->cr_number,
                 'iban' => $tenant->iban,
-                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : null,
+                'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/logo.png'),
                 'country' => 'SA', // Locked
                 'currency' => 'SAR', // Locked
             ],

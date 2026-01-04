@@ -11,6 +11,8 @@
         "employee": "Employee",
         "no_records": "No records found",
         "cancel": "Cancel",
+        "monthly": "Monthly",
+        "system": "System",
         "from": "From",
         "to": "To",
         "error_occurred": "An error occurred",
@@ -416,6 +418,7 @@
         },
         "show": {
             "no_services": "No services",
+            "no_parts": "No parts",
             "tabs": {
                 "services": "Services",
                 "parts": "Spare Parts",
@@ -716,6 +719,7 @@
     },
     "quotes": {
         "title": "Quotes",
+        "create": "Create Quote",
         "add": "Add Quote",
         "edit": "Edit Quote",
         "search": "Search quotes...",
@@ -947,6 +951,7 @@
     },
     "center_settings": {
         "title": "Center Settings",
+        "main_center": "Main Center",
         "tabs": {
             "profile": "Information",
             "contact": "Contact & Address",
@@ -1294,6 +1299,7 @@
             "date": "Payment Date",
             "reference": "Reference",
             "reference_placeholder": "Receipt or transaction number",
+            "details": "Payment Details",
             "notes": "Details",
             "notes_placeholder": "Additional notes..."
         },

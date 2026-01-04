@@ -418,4 +418,43 @@ if (app()->environment('testing')) {
     })->middleware(['auth', 'tenant.active', 'center.context']);
 }
 
+// System Admin Panel routes
+Route::prefix('system')->middleware(['auth', 'system.admin'])->group(function () {
+    // Dashboard
+    Route::get('/', [\App\Http\Controllers\System\SystemDashboardController::class, 'index'])->name('system.dashboard');
+    
+    // Tenants Management
+    Route::get('/tenants', [\App\Http\Controllers\System\TenantsController::class, 'index'])->name('system.tenants.index');
+    Route::get('/tenants/{tenant}', [\App\Http\Controllers\System\TenantsController::class, 'show'])->name('system.tenants.show');
+    Route::post('/tenants/{tenant}/suspend', [\App\Http\Controllers\System\TenantsController::class, 'suspend'])->name('system.tenants.suspend');
+    Route::post('/tenants/{tenant}/activate', [\App\Http\Controllers\System\TenantsController::class, 'activate'])->name('system.tenants.activate');
+    Route::post('/tenants/{tenant}/extend-trial', [\App\Http\Controllers\System\TenantsController::class, 'extendTrial'])->name('system.tenants.extend-trial');
+    Route::delete('/tenants/{tenant}', [\App\Http\Controllers\System\TenantsController::class, 'destroy'])->name('system.tenants.destroy');
+    
+    // Plans Management
+    Route::get('/plans', [\App\Http\Controllers\System\PlansController::class, 'index'])->name('system.plans.index');
+    Route::get('/plans/create', [\App\Http\Controllers\System\PlansController::class, 'create'])->name('system.plans.create');
+    Route::post('/plans', [\App\Http\Controllers\System\PlansController::class, 'store'])->name('system.plans.store');
+    Route::get('/plans/{plan}/edit', [\App\Http\Controllers\System\PlansController::class, 'edit'])->name('system.plans.edit');
+    Route::put('/plans/{plan}', [\App\Http\Controllers\System\PlansController::class, 'update'])->name('system.plans.update');
+    Route::delete('/plans/{plan}', [\App\Http\Controllers\System\PlansController::class, 'destroy'])->name('system.plans.destroy');
+    
+    // Promo Codes Management
+    Route::get('/promo-codes', [\App\Http\Controllers\System\PromoCodesController::class, 'index'])->name('system.promo-codes.index');
+    Route::get('/promo-codes/create', [\App\Http\Controllers\System\PromoCodesController::class, 'create'])->name('system.promo-codes.create');
+    Route::post('/promo-codes', [\App\Http\Controllers\System\PromoCodesController::class, 'store'])->name('system.promo-codes.store');
+    Route::get('/promo-codes/{promoCode}/edit', [\App\Http\Controllers\System\PromoCodesController::class, 'edit'])->name('system.promo-codes.edit');
+    Route::put('/promo-codes/{promoCode}', [\App\Http\Controllers\System\PromoCodesController::class, 'update'])->name('system.promo-codes.update');
+    Route::delete('/promo-codes/{promoCode}', [\App\Http\Controllers\System\PromoCodesController::class, 'destroy'])->name('system.promo-codes.destroy');
+    
+    // Subscriptions Management
+    Route::get('/subscriptions', [\App\Http\Controllers\System\SubscriptionsController::class, 'index'])->name('system.subscriptions.index');
+    Route::get('/subscriptions/create', [\App\Http\Controllers\System\SubscriptionsController::class, 'create'])->name('system.subscriptions.create');
+    Route::post('/subscriptions', [\App\Http\Controllers\System\SubscriptionsController::class, 'store'])->name('system.subscriptions.store');
+    Route::get('/subscriptions/{subscription}', [\App\Http\Controllers\System\SubscriptionsController::class, 'show'])->name('system.subscriptions.show');
+    Route::post('/subscriptions/{subscription}/cancel', [\App\Http\Controllers\System\SubscriptionsController::class, 'cancel'])->name('system.subscriptions.cancel');
+    Route::post('/subscriptions/{subscription}/activate', [\App\Http\Controllers\System\SubscriptionsController::class, 'activate'])->name('system.subscriptions.activate');
+    Route::post('/subscriptions/{subscription}/extend', [\App\Http\Controllers\System\SubscriptionsController::class, 'extend'])->name('system.subscriptions.extend');
+});
+
 require __DIR__.'/auth.php';

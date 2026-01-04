@@ -15,6 +15,10 @@ class Tenant extends Model
     protected $fillable = [
         'name',
         'slug',
+        'status',
+        'trial_ends_at',
+        'suspended_at',
+        'suspension_reason',
         // Company Profile
         'legal_name',
         'legal_name_en',
@@ -28,6 +32,14 @@ class Tenant extends Model
         'logo_path',
         'invoice_number_format',
     ];
+    
+    protected function casts(): array
+    {
+        return [
+            'trial_ends_at' => 'datetime',
+            'suspended_at' => 'datetime',
+        ];
+    }
 
     public function centers(): HasMany
     {
@@ -52,6 +64,11 @@ class Tenant extends Model
     public function zatcaSettings(): HasOne
     {
         return $this->hasOne(TenantZatcaSetting::class);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(\App\Models\Billing\Subscription::class);
     }
 
     /**
