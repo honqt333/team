@@ -80,6 +80,8 @@ class SubscriptionsController extends Controller
             'plan_id' => 'required|exists:plans,id',
             'billing_cycle' => 'required|in:monthly,yearly',
             'promo_code' => 'nullable|string|exists:promo_codes,code',
+            'use_installments' => 'boolean',
+            'installment_count' => 'nullable|integer|in:2,3,4,6,12',
         ]);
         
         $plan = Plan::findOrFail($validated['plan_id']);
@@ -107,6 +109,16 @@ class SubscriptionsController extends Controller
             'auto_renew' => true,
             'promo_code' => $validated['promo_code'] ?? null,
         ]);
+        
+        // Create installments if requested (yearly only)
+        if (!empty($validated['use_installments']) && $validated['billing_cycle'] === 'yearly') {
+            $installmentService = app(\App\Services\Billing\InstallmentService::class);
+            $installmentService->createInstallments(
+                $subscription,
+                $validated['installment_count'] ?? 4,
+                0 // discount
+            );
+        }
         
         // Update tenant status
         $subscription->tenant->update([

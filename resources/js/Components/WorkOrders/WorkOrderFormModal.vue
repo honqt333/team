@@ -422,7 +422,8 @@ const allTabs = [
 ];
 const tabs = computed(() => {
     if (props.workOrder) {
-        return allTabs.filter(tab => tab.key !== 'departments');
+        // When editing: hide departments, condition_report, and photos tabs
+        return allTabs.filter(tab => !['departments', 'condition_report', 'photos'].includes(tab.key));
     }
     return allTabs;
 });

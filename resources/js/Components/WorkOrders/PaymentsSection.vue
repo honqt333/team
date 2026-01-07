@@ -138,21 +138,16 @@
             @saved="onPaymentSaved"
         />
 
-        <!-- Delete Confirmation -->
-        <ConfirmModal
-            :show="showDeleteConfirm"
-            :title="$t('common.confirm_delete_title')"
-            :message="$t('common.confirm_delete_message')"
-            @confirm="deletePayment"
-            @cancel="showDeleteConfirm = false"
-        />
+        <!-- Delete Confirmation removed - using useConfirm instead -->
     </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { router } from '@inertiajs/vue3';
 import PaymentFormModal from './PaymentFormModal.vue';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const props = defineProps({
     workOrderId: { type: Number, required: true },
@@ -166,6 +161,7 @@ const props = defineProps({
 const emit = defineEmits(['refresh']);
 
 const { t, locale } = useI18n();
+const { confirm } = useConfirm();
 
 const isRtl = computed(() => locale.value === 'ar');
 const searchQuery = ref('');
@@ -234,6 +230,24 @@ const closePaymentModal = () => {
 
 const onPaymentSaved = () => {
     emit('refresh');
+};
+
+const deletePayment = async (payment) => {
+    const confirmed = await confirm({
+        title: t('common.confirm_delete_title'),
+        message: t('common.confirm_delete_message'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+    
+    if (confirmed) {
+        router.delete(route('app.payments.destroy', payment.id), {
+            onSuccess: () => {
+                emit('refresh');
+            }
+        });
+    }
 };
 
 </script>

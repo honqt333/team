@@ -103,7 +103,9 @@
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ $t('vehicles.form.customer') }} <span class="text-red-500">*</span>
                     </span>
+                    <!-- Only show add button if no default customer -->
                     <button
+                        v-if="!defaultCustomerId"
                         type="button"
                         @click="showCustomerModal = true"
                         class="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 flex items-center justify-center transition-colors"
@@ -114,7 +116,19 @@
                         </svg>
                     </button>
                 </div>
+                <!-- Show read-only customer info when defaultCustomerId is set -->
+                <div v-if="defaultCustomerId && selectedCustomer" class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                        <span class="text-white font-bold">{{ selectedCustomer.name?.charAt(0)?.toUpperCase() }}</span>
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ selectedCustomer.name }}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400" dir="ltr">{{ selectedCustomer.phone }}</p>
+                    </div>
+                </div>
+                <!-- Show dropdown if no default customer -->
                 <SearchableSelect
+                    v-else
                     v-model="form.customer_id"
                     :options="localCustomers"
                     :placeholder="$t('common.choose')"
@@ -258,12 +272,22 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    defaultCustomerId: {
+        type: [Number, String],
+        default: null,
+    },
 });
 
 const emit = defineEmits(['close', 'saved', 'customer-created']);
 
 const showCustomerModal = ref(false);
 const localCustomers = computed(() => props.customers || []);
+const selectedCustomer = computed(() => {
+    if (props.defaultCustomerId) {
+        return localCustomers.value.find(c => c.id === props.defaultCustomerId) || null;
+    }
+    return null;
+});
 const pendingCustomerPhone = ref(null); // Store phone instead of ID
 const isDirty = ref(false);
 const initialFormData = ref(null);
@@ -321,9 +345,16 @@ watch(() => props.vehicle, (newVehicle) => {
 
 // Reset form when modal opens for create
 watch(() => props.show, (open) => {
+    console.log('[VehicleFormModal] Watch fired - show:', open, 'defaultCustomerId:', props.defaultCustomerId);
     if (open) {
         if (!props.vehicle) {
             form.reset();
+            // Auto-fill customer if defaultCustomerId is provided
+            if (props.defaultCustomerId) {
+                console.log('[VehicleFormModal] Setting customer_id to:', props.defaultCustomerId);
+                form.customer_id = props.defaultCustomerId;
+                console.log('[VehicleFormModal] form.customer_id after set:', form.customer_id);
+            }
         }
         // Snapshot initial form data after short delay to capture initial state
         setTimeout(() => {
@@ -331,7 +362,7 @@ watch(() => props.show, (open) => {
             isDirty.value = false;
         }, 100);
     }
-});
+}, { immediate: true });
 
 // Track form changes
 watch(() => form.data(), () => {
@@ -484,16 +515,22 @@ function validate() {
     }
 
     // 4. Customer Validation
+    console.log('[VehicleFormModal] Validating customer_id:', form.customer_id);
     if (!form.customer_id) {
+        console.log('[VehicleFormModal] Customer validation FAILED');
         form.setError('customer_id', ' ');
         isValid = false;
     }
 
+    console.log('[VehicleFormModal] Validation result:', isValid);
     return isValid;
 }
 
 function submitForm() {
+    console.log('[VehicleFormModal] submitForm called');
+    console.log('[VehicleFormModal] Form data:', form.data());
     if (!validate()) {
+        console.log('[VehicleFormModal] Validation failed, not submitting');
         return;
     }
 
@@ -503,18 +540,15 @@ function submitForm() {
     
     const method = props.vehicle ? 'put' : 'post';
 
-    // Prepare data - convert empty strings to null for optional fields
-    const data = {
-        ...form.data(),
-        make_id: form.make_id === '__other__' ? null : (form.make_id || null),
-        model_id: form.model_id === '__other__' ? null : (form.model_id || null),
-        year: form.year || null,
-        odometer: form.odometer || null,
-    };
-
-    form[method](url, {
+    // Transform data before sending - convert empty strings to null for optional fields
+    form.transform(data => ({
+        ...data,
+        make_id: data.make_id === '__other__' ? null : (data.make_id || null),
+        model_id: data.model_id === '__other__' ? null : (data.model_id || null),
+        year: data.year || null,
+        odometer: data.odometer || null,
+    }))[method](url, {
         preserveScroll: true,
-        data,
         onSuccess: (page) => {
             // Get the saved vehicle from page props
             const savedVehicle = page.props.vehicle || props.vehicle || {

@@ -54,6 +54,10 @@ const props = defineProps({
         type: String,
         default: '',
     },
+    size: {
+        type: String,
+        default: 'md',
+    },
 });
 
 const emit = defineEmits(['close']);

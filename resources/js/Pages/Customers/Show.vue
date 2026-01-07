@@ -67,6 +67,7 @@
                 <!-- Actions Bar -->
                 <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-2">
                     <button
+                        v-if="can('crm.customers.update')"
                         @click="showEditModal = true"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
@@ -76,9 +77,9 @@
                         {{ $t('common.edit') }}
                     </button>
 
-                    <!-- Merge Button (only for customers with data) -->
+                    <!-- Merge Button (only for customers with data and update permission) -->
                     <button
-                        v-if="canMerge"
+                        v-if="canMerge && can('crm.customers.update')"
                         @click="showMergeModal = true"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-amber-700 dark:text-amber-400 bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-700 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-colors"
                     >
@@ -89,6 +90,7 @@
                     </button>
 
                     <button
+                        v-if="can('crm.customers.delete')"
                         @click="confirmDelete"
                         :disabled="!canDelete"
                         :class="[
@@ -168,6 +170,7 @@
                             </div>
                             <!-- Add Button -->
                             <button
+                                v-if="can('crm.vehicles.create')"
                                 @click="openVehicleModal"
                                 class="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg shadow-teal-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all"
                             >
@@ -274,7 +277,11 @@
                                 </svg>
                             </div>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('customers.no_vehicles') }}</p>
-                            <button @click="openVehicleModal" class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg">
+                            <button
+                                v-if="can('crm.vehicles.create')"
+                                @click="openVehicleModal"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg"
+                            >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
@@ -484,14 +491,74 @@
 
                     <!-- ========== PAYMENTS TAB ========== -->
                     <div v-if="activeTab === 'payments'" class="space-y-4">
-                        <div class="text-center py-12">
+                        <!-- Search Box -->
+                        <div class="flex items-center gap-3">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    v-model="paymentSearch"
+                                    :placeholder="$t('common.search') + '...'"
+                                    class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Payments Table -->
+                        <div v-if="filteredPayments && filteredPayments.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800">
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">#</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.reference') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.method') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.type') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.date') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.notes') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.amount') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('common.updated_by') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="(payment, index) in filteredPayments" :key="payment.id" class="hover:bg-gray-100 dark:hover:bg-gray-800">
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ index + 1 }}</td>
+                                        <td class="px-4 py-3">
+                                            <Link :href="route('work-orders.show', payment.work_order_id)" class="text-indigo-600 dark:text-indigo-400 hover:underline font-mono">
+                                                {{ payment.work_order?.code || '-' }}
+                                            </Link>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getPaymentMethodClass(payment.payment_method)">
+                                                {{ $t(`payments.methods.${payment.payment_method}`) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="px-2 py-1 rounded-full text-xs font-medium" :class="payment.type === 'refund' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'">
+                                                {{ $t(`payments.types.${payment.type || 'payment'}`) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-600 dark:text-gray-300" dir="ltr">{{ formatDate(payment.payment_date) }}</td>
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">{{ payment.notes || '-' }}</td>
+                                        <td class="px-4 py-3 font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatPrice(payment.amount) }}</td>
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">{{ payment.received_by?.name || '-' }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-else class="text-center py-12">
                             <div class="w-16 h-16 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
                                 <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
                             </div>
                             <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ $t('customers.payments') }}</p>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.coming_soon') }}</p>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('payments.no_payments') }}</p>
                         </div>
                     </div>
                 </div>
@@ -499,8 +566,8 @@
         </div>
 
         <!-- Modals -->
-        <CustomerFormModal v-if="showEditModal" :show="showEditModal" :customer="customer" @close="showEditModal = false" @saved="handleCustomerSaved" />
-        <VehicleFormModal v-if="showVehicleModal" :show="showVehicleModal" :vehicle="selectedVehicle" :customers="[customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" @close="showVehicleModal = false" @saved="handleVehicleSaved" />
+        <CustomerFormModal :show="showEditModal" :customer="customer" @close="showEditModal = false" @saved="handleCustomerSaved" />
+        <VehicleFormModal v-if="showVehicleModal" :show="showVehicleModal" :vehicle="selectedVehicle" :customers="[customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" :defaultCustomerId="customer.id" @close="showVehicleModal = false" @saved="handleVehicleSaved" />
         <WorkOrderFormModal v-if="showWorkOrderModal" :show="showWorkOrderModal" :customers="[customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" :departments="departments" @close="showWorkOrderModal = false" @saved="handleWorkOrderSaved" />
         <QuoteFormModal v-if="showQuoteModal" :show="showQuoteModal" :customers="[customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" :departments="departments" :services="services" @close="showQuoteModal = false" @saved="handleQuoteSaved" />
         <CustomerMergeModal v-if="showMergeModal" :show="showMergeModal" :customer="customer" :counts="counts" @close="showMergeModal = false" />
@@ -519,6 +586,7 @@ import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { usePermission } from '@/Composables/usePermission';
 import CustomerMergeModal from '@/Components/Customers/CustomerMergeModal.vue';
 
 const props = defineProps({
@@ -528,6 +596,7 @@ const props = defineProps({
     vehicles: Array,
     workOrders: Array,
     quotes: Array,
+    payments: { type: Array, default: () => [] },
     makes: { type: Array, default: () => [] },
     colors: { type: Array, default: () => [] },
     modelsByMake: { type: Object, default: () => ({}) },
@@ -537,6 +606,7 @@ const props = defineProps({
 
 const { t, locale } = useI18n();
 const { confirm } = useConfirm();
+const { can } = usePermission();
 
 // Modal states
 const showEditModal = ref(false);
@@ -557,6 +627,7 @@ const quoteViewMode = ref(localStorage.getItem('customer_quote_view_mode') || 'g
 const vehicleSearch = ref('');
 const workOrderSearch = ref('');
 const quoteSearch = ref('');
+const paymentSearch = ref('');
 
 // Persistence watchers
 watch(vehicleViewMode, (val) => localStorage.setItem('customer_vehicle_view_mode', val));
@@ -599,6 +670,18 @@ const filteredQuotes = computed(() => {
     if (!quoteSearch.value) return props.quotes;
     const q = quoteSearch.value.toLowerCase();
     return props.quotes.filter(qu => qu.code?.toLowerCase().includes(q) || qu.vehicle?.plate_number?.toLowerCase().includes(q));
+});
+
+const filteredPayments = computed(() => {
+    if (!props.payments) return [];
+    if (!paymentSearch.value) return props.payments;
+    const q = paymentSearch.value.toLowerCase();
+    return props.payments.filter(p => 
+        p.work_order?.code?.toLowerCase().includes(q) ||
+        p.notes?.toLowerCase().includes(q) ||
+        p.payment_method?.toLowerCase().includes(q) ||
+        p.received_by?.name?.toLowerCase().includes(q)
+    );
 });
 
 // Helpers
@@ -670,6 +753,28 @@ function getColorHex(colorName) {
 function getQuoteStatusClass(status) {
     const classes = { draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300', pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', converted: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' };
     return classes[status] || classes.draft;
+}
+
+function getPaymentMethodClass(method) {
+    const classes = {
+        cash: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+        mada: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+        visa: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+        mastercard: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+        transfer: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+        apple_pay: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+        stc_pay: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+        credit: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
+        other: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    };
+    return classes[method] || classes.other;
+}
+
+function formatPrice(amount) {
+    return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(amount || 0) + ' ' + t('common.currency');
 }
 
 // Modal handlers

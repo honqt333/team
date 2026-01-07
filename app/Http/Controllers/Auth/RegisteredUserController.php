@@ -24,7 +24,11 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'phone_verification_enabled' => PhoneVerificationController::isEnabled(),
+            'phone_verified' => session('phone_verified', false),
+            'verified_phone' => session('verified_phone_number', ''),
+        ]);
     }
 
     /**
@@ -45,6 +49,19 @@ class RegisteredUserController extends Controller
             'promo_code' => 'nullable|string|max:50',
             'terms' => 'required|accepted',
         ]);
+
+        // Check if phone already exists for any tenant
+        $formattedPhone = $this->formatPhoneNumber($request->phone);
+        if (\App\Models\Tenant::where('phone', $formattedPhone)->exists()) {
+            return back()->withErrors(['phone' => __('auth.phone_already_registered')]);
+        }
+
+        // Check phone verification if Authentica is enabled
+        if (\App\Http\Controllers\Auth\PhoneVerificationController::isEnabled()) {
+            if (!session('phone_verified') || session('verified_phone_number') !== $this->formatPhoneNumber($request->phone)) {
+                return back()->withErrors(['phone' => __('auth.verify_phone_first')]);
+            }
+        }
 
         $user = DB::transaction(function () use ($request) {
             $ownerName = $request->first_name . ' ' . $request->last_name;
@@ -108,6 +125,37 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        // Clear phone verification session
+        session()->forget(['phone_verified', 'verified_phone_number', 'phone_verification_number']);
+
         return redirect(route('dashboard', absolute: false));
+    }
+
+    /**
+     * Format phone number to international format.
+     */
+    protected function formatPhoneNumber(string $phone): string
+    {
+        // Remove any spaces or dashes
+        $phone = preg_replace('/[\s\-]/', '', $phone);
+
+        // If starts with 0, remove it and add +966
+        if (str_starts_with($phone, '0')) {
+            $phone = '+966' . substr($phone, 1);
+        }
+        // If starts with 5 (Saudi mobile), add +966
+        elseif (str_starts_with($phone, '5')) {
+            $phone = '+966' . $phone;
+        }
+        // If starts with 966, add +
+        elseif (str_starts_with($phone, '966')) {
+            $phone = '+' . $phone;
+        }
+        // If doesn't start with +, add it
+        elseif (!str_starts_with($phone, '+')) {
+            $phone = '+' . $phone;
+        }
+
+        return $phone;
     }
 }

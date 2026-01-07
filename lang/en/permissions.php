@@ -22,12 +22,18 @@ return [
     'crm_customers_create' => 'Create Customer',
     'crm_customers_update' => 'Update Customer',
     'crm_customers_delete' => 'Delete Customer',
+    'crm_customers_print' => 'Print Customers',
+    'crm_customers_export' => 'Export Customers',
+    'crm_customers_import' => 'Import Customers',
 
     // CRM - Vehicles
     'crm_vehicles_view' => 'View Vehicles',
     'crm_vehicles_create' => 'Create Vehicle',
     'crm_vehicles_update' => 'Update Vehicle',
     'crm_vehicles_delete' => 'Delete Vehicle',
+    'crm_vehicles_print' => 'Print Vehicles',
+    'crm_vehicles_export' => 'Export Vehicles',
+    'crm_vehicles_import' => 'Import Vehicles',
     'crm_vehicles_settings_view' => 'View Vehicle Settings',
     'crm_vehicles_settings_manage' => 'Manage Vehicle Settings',
 

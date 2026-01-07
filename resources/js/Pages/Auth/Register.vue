@@ -1,12 +1,13 @@
 <script setup>
 import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const { locale } = useI18n();
 const isRTL = computed(() => locale.value === 'ar');
+const page = usePage();
 
 const form = useForm({
     company_name: '',
@@ -20,10 +21,92 @@ const form = useForm({
     terms: false,
 });
 
+const otpForm = useForm({
+    phone: '',
+    otp: '',
+});
+
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const showTermsModal = ref(false);
 const showPrivacyModal = ref(false);
+
+// Phone verification state
+const phoneVerificationEnabled = computed(() => page.props.phone_verification_enabled ?? false);
+const codeSent = ref(false);
+const verifiedPhone = ref(page.props.verified_phone ?? '');
+
+// Phone is verified only if: session says verified AND current phone matches verified phone
+const phoneVerified = computed(() => {
+    if (!page.props.phone_verified) return false;
+    if (!form.phone) return false;
+    return formatPhone(form.phone) === verifiedPhone.value;
+});
+
+// Watch for phone changes to reset code sent state
+watch(() => form.phone, (newPhone) => {
+    if (verifiedPhone.value && formatPhone(newPhone) !== verifiedPhone.value) {
+        codeSent.value = false;
+    }
+});
+
+const formatPhone = (phone) => {
+    phone = phone.replace(/[\s\-]/g, '');
+    if (phone.startsWith('0')) {
+        return '+966' + phone.substring(1);
+    } else if (phone.startsWith('5')) {
+        return '+966' + phone;
+    } else if (phone.startsWith('966')) {
+        return '+' + phone;
+    } else if (!phone.startsWith('+')) {
+        return '+' + phone;
+    }
+    return phone;
+};
+
+// Cooldown timer
+const cooldownRemaining = ref(0);
+let cooldownInterval = null;
+
+const startCooldown = (seconds) => {
+    cooldownRemaining.value = seconds;
+    if (cooldownInterval) clearInterval(cooldownInterval);
+    cooldownInterval = setInterval(() => {
+        cooldownRemaining.value--;
+        if (cooldownRemaining.value <= 0) {
+            clearInterval(cooldownInterval);
+            cooldownInterval = null;
+        }
+    }, 1000);
+};
+
+const sendOtp = () => {
+    otpForm.phone = form.phone;
+    otpForm.post(route('phone.send-otp'), {
+        preserveScroll: true,
+        onSuccess: (page) => {
+            codeSent.value = true;
+            // Start 60-second cooldown
+            startCooldown(60);
+        },
+    });
+};
+
+const verifyOtp = () => {
+    otpForm.phone = form.phone;
+    otpForm.post(route('phone.verify-otp'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            // Update verifiedPhone - phoneVerified is computed based on this
+            verifiedPhone.value = formatPhone(form.phone);
+            // Force page.props update to reflect verified state
+            page.props.phone_verified = true;
+            page.props.verified_phone = verifiedPhone.value;
+            cooldownRemaining.value = 0;
+            if (cooldownInterval) clearInterval(cooldownInterval);
+        },
+    });
+};
 
 const submit = () => {
     form.post(route('register'), {
@@ -108,10 +191,11 @@ const submit = () => {
                 <InputError class="mt-1" :message="form.errors.email" />
             </div>
 
-            <!-- Phone -->
+            <!-- Phone with OTP Verification -->
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                     {{ isRTL ? 'هاتف العمل' : 'Work Phone' }} <span class="text-red-500">*</span>
+                    <span v-if="phoneVerified" class="text-green-500 text-xs ms-2">✓ {{ isRTL ? 'تم التحقق' : 'Verified' }}</span>
                 </label>
                 <div class="flex gap-2">
                     <div class="flex items-center gap-1 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
@@ -122,12 +206,62 @@ const submit = () => {
                         type="tel"
                         v-model="form.phone"
                         required
+                        :disabled="phoneVerified"
                         placeholder="5xxxxxxxx"
-                        class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400"
+                        class="flex-1 px-4 py-2.5 border rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 disabled:opacity-50"
                         :class="form.errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'"
                     />
+                    <!-- Send OTP Button - Only show if verification enabled and not verified -->
+                    <button
+                        v-if="phoneVerificationEnabled && !phoneVerified && !codeSent"
+                        type="button"
+                        @click="sendOtp"
+                        :disabled="otpForm.processing || !form.phone"
+                        class="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-xl text-sm font-medium disabled:opacity-50"
+                    >
+                        {{ isRTL ? 'تحقق' : 'Verify' }}
+                    </button>
                 </div>
-                <InputError class="mt-1" :message="form.errors.phone" />
+                <InputError class="mt-1" :message="form.errors.phone || otpForm.errors.phone" />
+                
+                <!-- OTP Input (show after code sent) -->
+                <div v-if="codeSent && !phoneVerified" class="mt-3 p-4 bg-violet-50 dark:bg-violet-900/20 rounded-xl border border-violet-200 dark:border-violet-800">
+                    <p class="text-sm text-violet-700 dark:text-violet-300 mb-3">
+                        {{ isRTL ? 'تم إرسال رمز التحقق إلى هاتفك' : 'Verification code sent to your phone' }}
+                    </p>
+                    <div class="flex gap-2">
+                        <input
+                            type="text"
+                            v-model="otpForm.otp"
+                            maxlength="6"
+                            :placeholder="isRTL ? 'أدخل الرمز المكون من 6 أرقام' : 'Enter 6-digit code'"
+                            class="flex-1 px-4 py-2.5 border border-violet-300 dark:border-violet-600 rounded-xl focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center tracking-widest font-mono"
+                        />
+                        <button
+                            type="button"
+                            @click="verifyOtp"
+                            :disabled="otpForm.processing || otpForm.otp.length !== 6"
+                            class="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium disabled:opacity-50"
+                        >
+                            {{ isRTL ? 'تأكيد' : 'Confirm' }}
+                        </button>
+                    </div>
+                    <button
+                        type="button"
+                        @click="sendOtp"
+                        :disabled="otpForm.processing || cooldownRemaining > 0"
+                        class="mt-2 text-sm disabled:opacity-50"
+                        :class="cooldownRemaining > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-violet-600 hover:underline'"
+                    >
+                        <span v-if="cooldownRemaining > 0">
+                            {{ isRTL ? `إعادة الإرسال بعد ${cooldownRemaining} ثانية` : `Resend in ${cooldownRemaining}s` }}
+                        </span>
+                        <span v-else>
+                            {{ isRTL ? 'إعادة إرسال الرمز' : 'Resend code' }}
+                        </span>
+                    </button>
+                    <InputError class="mt-1" :message="otpForm.errors.otp" />
+                </div>
             </div>
 
             <!-- Password -->
@@ -210,7 +344,7 @@ const submit = () => {
             <!-- Submit Button -->
             <button
                 type="submit"
-                :disabled="form.processing"
+                :disabled="form.processing || (phoneVerificationEnabled && !phoneVerified)"
                 class="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <span v-if="form.processing" class="flex items-center justify-center gap-2">
@@ -220,6 +354,7 @@ const submit = () => {
                     </svg>
                     {{ isRTL ? 'جاري الإرسال...' : 'Submitting...' }}
                 </span>
+                <span v-else-if="phoneVerificationEnabled && !phoneVerified">{{ isRTL ? 'يرجى التحقق من رقم الهاتف أولاً' : 'Please verify phone first' }}</span>
                 <span v-else>{{ isRTL ? 'إرسال' : 'Submit' }}</span>
             </button>
 

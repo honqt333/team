@@ -16,13 +16,15 @@ class PromoCodesController extends Controller
      */
     public function index(): Response
     {
-        $promoCodes = PromoCode::with('plan')
+        $promoCodes = PromoCode::with(['plan', 'usages.tenant'])
+            ->withCount('usages')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn ($code) => [
                 ...$code->toArray(),
                 'is_valid' => $code->isValid(),
                 'discount_description' => $code->discount_description,
+                'total_discount_given' => $code->usages->sum('discount_amount'),
             ]);
         
         return Inertia::render('System/PromoCodes/Index', [

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\HR\Employee;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, HasRoles;
@@ -27,10 +27,15 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
         'is_active',
         'is_system_admin',
         'tenant_id',
         'current_center_id',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+        'two_factor_type',
     ];
 
     /**
@@ -41,6 +46,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -55,6 +62,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'is_system_admin' => 'boolean',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
@@ -102,6 +110,14 @@ class User extends Authenticatable
                 }
             }
         });
+    }
+
+    /**
+     * Send the email verification notification using custom template.
+     */
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new \App\Notifications\VerifyEmailNotification);
     }
 }
 

@@ -72,6 +72,80 @@
                 </div>
             </div>
             
+            <!-- Provider Balances -->
+            <div v-if="integrations?.length" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">أرصدة مزودي الخدمة</h2>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">SMS & WhatsApp</p>
+                        </div>
+                    </div>
+                    <button 
+                        @click="refreshAllBalances" 
+                        :disabled="isRefreshing"
+                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 flex items-center gap-2 transition-colors"
+                    >
+                        <svg :class="{'animate-spin': isRefreshing}" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        تحديث الأرصدة
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div 
+                        v-for="integration in integrations" 
+                        :key="integration.id"
+                        class="relative overflow-hidden rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                        :class="getProviderCardClass(integration.provider)"
+                    >
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-2xl">{{ getProviderIcon(integration.type) }}</span>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-white text-sm">{{ integration.name_ar }}</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ integration.type === 'sms' ? 'رسائل SMS' : 'واتساب' }}</p>
+                                </div>
+                            </div>
+                            <button 
+                                @click="fetchProviderBalance(integration)"
+                                :disabled="providerLoading[integration.id]"
+                                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+                            >
+                                <svg :class="{'animate-spin': providerLoading[integration.id]}" class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">الرصيد المتبقي</p>
+                                <p class="text-2xl font-bold" :class="getBalanceTextClass(providerBalances[integration.id])">
+                                    {{ providerBalances[integration.id]?.balance ?? '—' }}
+                                </p>
+                            </div>
+                            <a 
+                                :href="`/system/integrations/${integration.id}`"
+                                class="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                            >
+                                الإعدادات ←
+                            </a>
+                        </div>
+                        
+                        <p v-if="providerErrors[integration.id]" class="mt-2 text-xs text-red-500">
+                            {{ providerErrors[integration.id] }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
             <!-- Content Grid -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Recent Registrations -->
@@ -144,14 +218,22 @@
 </template>
 
 <script setup>
+import { ref, reactive, onMounted } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 
-defineProps({
+const props = defineProps({
     stats: Object,
     recentRegistrations: Array,
     trialEndingSoon: Array,
+    integrations: Array,
 });
+
+// Balance state
+const providerBalances = reactive({});
+const providerLoading = reactive({});
+const providerErrors = reactive({});
+const isRefreshing = ref(false);
 
 const formatDate = (date) => {
     if (!date) return '-';
@@ -175,4 +257,62 @@ const getStatusLabel = (status) => {
     };
     return labels[status] || status;
 };
+
+const getProviderIcon = (type) => {
+    return type === 'sms' ? '📱' : '💬';
+};
+
+const getProviderCardClass = (provider) => {
+    const classes = {
+        authentica: 'bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20',
+        unifonic: 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
+        twilio: 'bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20',
+        whatsapp_cloud: 'bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20',
+    };
+    return classes[provider] || 'bg-gray-50 dark:bg-gray-900/20';
+};
+
+const getBalanceTextClass = (balanceData) => {
+    if (!balanceData?.balance) return 'text-gray-400';
+    const balance = parseFloat(balanceData.balance);
+    if (balance <= 10) return 'text-red-600 dark:text-red-400';
+    if (balance <= 50) return 'text-amber-600 dark:text-amber-400';
+    return 'text-emerald-600 dark:text-emerald-400';
+};
+
+const fetchProviderBalance = async (integration) => {
+    providerLoading[integration.id] = true;
+    providerErrors[integration.id] = null;
+    
+    try {
+        const response = await fetch(`/system/integrations/${integration.id}/balance`);
+        const data = await response.json();
+        
+        if (data.success) {
+            providerBalances[integration.id] = data;
+        } else {
+            providerErrors[integration.id] = data.message || 'فشل في جلب الرصيد';
+        }
+    } catch (error) {
+        providerErrors[integration.id] = 'خطأ في الاتصال';
+    } finally {
+        providerLoading[integration.id] = false;
+    }
+};
+
+const refreshAllBalances = async () => {
+    isRefreshing.value = true;
+    
+    const promises = props.integrations?.map(integration => fetchProviderBalance(integration)) || [];
+    await Promise.all(promises);
+    
+    isRefreshing.value = false;
+};
+
+// Auto-fetch balances on mount
+onMounted(() => {
+    if (props.integrations?.length) {
+        refreshAllBalances();
+    }
+});
 </script>

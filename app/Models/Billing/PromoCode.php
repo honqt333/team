@@ -43,6 +43,11 @@ class PromoCode extends Model
         return $this->belongsTo(Plan::class);
     }
 
+    public function usages(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(PromoCodeUsage::class);
+    }
+
     /**
      * Check if promo code is valid
      */

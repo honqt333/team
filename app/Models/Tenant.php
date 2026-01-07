@@ -31,6 +31,9 @@ class Tenant extends Model
         'email',
         'logo_path',
         'invoice_number_format',
+        'two_factor_enabled',
+        'two_factor_enforcement',
+        'sms_2fa_enabled',
     ];
     
     protected function casts(): array
@@ -38,6 +41,8 @@ class Tenant extends Model
         return [
             'trial_ends_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'two_factor_enabled' => 'boolean',
+            'sms_2fa_enabled' => 'boolean',
         ];
     }
 

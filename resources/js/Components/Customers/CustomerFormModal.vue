@@ -410,7 +410,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -438,6 +438,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 const { t, locale } = useI18n(); // Access t function and current locale
+const page = usePage();
 
 const mapContainer = ref(null);
 const mapReady = ref(false);
@@ -446,8 +447,13 @@ const geocodingLoading = ref(false);
 let map = null;
 let marker = null;
 
-const defaultLat = 24.7136;
-const defaultLng = 46.6753;
+// Default location: use tenant/center location or fallback to Riyadh
+const defaultLat = computed(() => {
+    return page.props.auth?.center?.lat || page.props.tenant?.lat || 24.7136;
+});
+const defaultLng = computed(() => {
+    return page.props.auth?.center?.lng || page.props.tenant?.lng || 46.6753;
+});
 
 const { confirm } = useConfirm();
 const isDirty = ref(false);
@@ -503,15 +509,29 @@ watch(() => props.show, async (open) => {
             form.reset();
         }
         await nextTick();
-        initMap();
         
-        // Fix map size after modal animation
-        setTimeout(() => {
-            if (map) map.invalidateSize();
-            // Snapshot initial form data after map init
-            initialFormData.value = JSON.stringify(form.data());
-            isDirty.value = false;
-        }, 300);
+        // Ensure previous map is destroyed before creating new one
+        destroyMap();
+        
+        // Wait for modal transition and DOM to be ready, then initialize map with retries
+        const tryInitMap = (attempts = 0) => {
+            if (mapContainer.value) {
+                initMap();
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                    initialFormData.value = JSON.stringify(form.data());
+                    isDirty.value = false;
+                }, 100);
+            } else if (attempts < 10) {
+                // Retry after 100ms, up to 10 times (1 second total)
+                setTimeout(() => tryInitMap(attempts + 1), 100);
+            } else {
+                console.warn('[CustomerFormModal] Map container not found after retries');
+            }
+        };
+        
+        // Start trying after modal animation (300ms)
+        setTimeout(() => tryInitMap(), 300);
     } else {
         destroyMap();
     }
@@ -543,8 +563,8 @@ watch(() => form.phone, (newPhone, oldPhone) => {
 function initMap() {
     if (!mapContainer.value || map) return;
     
-    const startLat = form.lat || defaultLat;
-    const startLng = form.lng || defaultLng;
+    const startLat = form.lat || defaultLat.value;
+    const startLng = form.lng || defaultLng.value;
 
     map = L.map(mapContainer.value).setView([startLat, startLng], 13);
 

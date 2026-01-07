@@ -33,12 +33,15 @@ class HandleInertiaRequests extends Middleware
         $user = $request->user();
         $tenant = $user?->tenant;
 
+        // Check if user is a regular tenant User
+        $isTenantUser = $user instanceof \App\Models\User;
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $user ? $user->load('roles:id,name,label_ar,label_en') : null,
-                'permissions' => $user ? $user->getAllPermissions()->pluck('name') : [],
-                'available_centers' => $user ? $user->centers()->get(['centers.id', 'centers.name_ar', 'centers.name_en']) : [],
+                'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,
+                'permissions' => $user ? ($isTenantUser ? $user->getAllPermissions()->pluck('name') : ($user->permissions ?? [])) : [],
+                'available_centers' => ($user && $isTenantUser) ? $user->centers()->get(['centers.id', 'centers.name_ar', 'centers.name_en']) : [],
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -64,6 +67,11 @@ class HandleInertiaRequests extends Middleware
                 'phone' => $user->currentCenter->phone,
                 'email' => $user->currentCenter->email,
             ] : null,
+            // Impersonation state
+            'impersonating' => $request->session()->has('impersonating_from'),
+            'impersonating_tenant_name' => $request->session()->has('impersonating_tenant') 
+                ? \App\Models\Tenant::find($request->session()->get('impersonating_tenant'))?->trade_name 
+                : null,
         ];
     }
 }

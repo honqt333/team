@@ -19,18 +19,19 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    phone: user.phone || '',
 });
 </script>
 
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Profile Information
+            <h2 class="text-lg font-medium text-gray-900 dark:text-white">
+                معلومات الملف الشخصي
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
-                Update your account's profile information and email address.
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                تحديث معلومات حسابك وعنوان بريدك الإلكتروني.
             </p>
         </header>
 
@@ -39,7 +40,7 @@ const form = useForm({
             class="mt-6 space-y-6"
         >
             <div>
-                <InputLabel for="name" value="Name" />
+                <InputLabel for="name" value="الاسم" />
 
                 <TextInput
                     id="name"
@@ -55,7 +56,7 @@ const form = useForm({
             </div>
 
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" value="البريد الإلكتروني" />
 
                 <TextInput
                     id="email"
@@ -69,16 +70,33 @@ const form = useForm({
                 <InputError class="mt-2" :message="form.errors.email" />
             </div>
 
+            <div>
+                <InputLabel for="phone" value="رقم الهاتف" />
+
+                <TextInput
+                    id="phone"
+                    type="tel"
+                    class="mt-1 block w-full"
+                    v-model="form.phone"
+                    dir="ltr"
+                    placeholder="05xxxxxxxx"
+                    autocomplete="tel"
+                />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">مطلوب لاستخدام المصادقة الثنائية عبر SMS</p>
+
+                <InputError class="mt-2" :message="form.errors.phone" />
+            </div>
+
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800">
-                    Your email address is unverified.
+                <p class="mt-2 text-sm text-gray-800 dark:text-gray-200">
+                    بريدك الإلكتروني غير مفعّل.
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
                         class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
-                        Click here to re-send the verification email.
+                        اضغط هنا لإعادة إرسال رابط التفعيل.
                     </Link>
                 </p>
 
@@ -86,12 +104,12 @@ const form = useForm({
                     v-show="status === 'verification-link-sent'"
                     class="mt-2 text-sm font-medium text-green-600"
                 >
-                    A new verification link has been sent to your email address.
+                    تم إرسال رابط تفعيل جديد إلى بريدك الإلكتروني.
                 </div>
             </div>
 
             <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+                <PrimaryButton :disabled="form.processing">حفظ</PrimaryButton>
 
                 <Transition
                     enter-active-class="transition ease-in-out"
@@ -103,10 +121,11 @@ const form = useForm({
                         v-if="form.recentlySuccessful"
                         class="text-sm text-gray-600"
                     >
-                        Saved.
+                        تم الحفظ.
                     </p>
                 </Transition>
             </div>
         </form>
     </section>
 </template>
+

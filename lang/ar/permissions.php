@@ -22,12 +22,18 @@ return [
     'crm_customers_create' => 'إضافة عميل',
     'crm_customers_update' => 'تعديل بيانات عميل',
     'crm_customers_delete' => 'حذف عميل',
+    'crm_customers_print' => 'طباعة العملاء',
+    'crm_customers_export' => 'تصدير العملاء',
+    'crm_customers_import' => 'استيراد العملاء',
 
     // CRM - Vehicles
     'crm_vehicles_view' => 'عرض المركبات',
     'crm_vehicles_create' => 'إضافة مركبة',
     'crm_vehicles_update' => 'تعديل بيانات مركبة',
     'crm_vehicles_delete' => 'حذف مركبة',
+    'crm_vehicles_print' => 'طباعة المركبات',
+    'crm_vehicles_export' => 'تصدير المركبات',
+    'crm_vehicles_import' => 'استيراد المركبات',
     'crm_vehicles_settings_view' => 'عرض إعدادات المركبات (الماركات/الموديلات)',
     'crm_vehicles_settings_manage' => 'إدارة إعدادات المركبات',
 

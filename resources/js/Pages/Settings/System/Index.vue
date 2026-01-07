@@ -36,8 +36,9 @@
             <!-- Tabs Navigation - Separate Card -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center gap-1 flex-wrap">
-                    <a
-                        href="/app/settings/makes"
+
+                    <button
+                        @click="activeSection = 'makes'"
                         :class="[
                             'flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all',
                             activeSection === 'makes'
@@ -49,9 +50,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                         {{ $t('system_settings.sections.makes') }}
-                    </a>
-                    <a
-                        href="/app/settings/models"
+                    </button>
+                    <button
+                        @click="activeSection = 'models'"
                         :class="[
                             'flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all',
                             activeSection === 'models'
@@ -63,9 +64,9 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
                         </svg>
                         {{ $t('system_settings.sections.models') }}
-                    </a>
-                    <a
-                        href="/app/settings/colors"
+                    </button>
+                    <button
+                        @click="activeSection = 'colors'"
                         :class="[
                             'flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all',
                             activeSection === 'colors'
@@ -77,7 +78,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
                         </svg>
                         {{ $t('system_settings.sections.colors') }}
-                    </a>
+                    </button>
                     <span class="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -88,7 +89,9 @@
                 </div>
             </div>
 
-            <!-- Content Section -->
+
+            <!-- Makes/Models/Colors Section -->
+            <!-- Makes/Models/Colors Section -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <!-- Toolbar -->
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -487,7 +490,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import MakeFormModal from './Modals/MakeFormModal.vue';
 import ModelFormModal from './Modals/ModelFormModal.vue';
@@ -506,6 +509,8 @@ const props = defineProps({
     makes: [Object, Array],
     models: Object,
     colors: Object,
+    settings: Object,
+    global_sms_enabled: Boolean,
     activeSection: {
         type: String,
         default: 'makes'
@@ -521,6 +526,11 @@ const selectedMake = ref(props.filters?.make_id ? Number(props.filters.make_id) 
 watch(() => props.filters?.make_id, (newVal) => {
     selectedMake.value = newVal ? Number(newVal) : '';
 });
+
+// Settings Form
+
+
+const globalSmsEnabled = computed(() => props.global_sms_enabled);
 
 // Modal state
 const showMakeModal = ref(false);
@@ -547,6 +557,8 @@ const makeOptions = computed(() => {
 
 const currentSectionTitle = computed(() => {
     const section = props.activeSection || 'makes';
+    // Mapping for general
+    if (section === 'general') return 'الإعدادات العامة';
     return t(`system_settings.${section}.subtitle`) || t(`system_settings.sections.${section}`);
 });
 
@@ -557,6 +569,8 @@ const currentPagination = computed(() => {
 });
 
 // Handlers
+
+
 function handleSearch() {
     const params = { 
         search: search.value || undefined 

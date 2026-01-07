@@ -34,6 +34,7 @@ class LoginRequest extends FormRequest
 
     /**
      * Attempt to authenticate the request's credentials.
+     * Checks admin_users first, then users table.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -41,15 +42,38 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password') + ['is_active' => true], $this->boolean('remember'))) {
-            RateLimiter::hit($this->throttleKey());
+        $email = $this->input('email');
+        $password = $this->input('password');
+        $remember = $this->boolean('remember');
 
-            throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
-            ]);
+        // First, check admin_users table
+        $adminUser = \App\Models\AdminUser::where('email', $email)
+            ->where('is_active', true)
+            ->first();
+
+        if ($adminUser && \Illuminate\Support\Facades\Hash::check($password, $adminUser->password)) {
+            // Admin user found - login with admin guard
+            Auth::guard('admin')->login($adminUser, $remember);
+            $adminUser->updateLoginInfo();
+            RateLimiter::clear($this->throttleKey());
+            
+            // Store flag for redirect
+            session(['is_admin_login' => true]);
+            return;
         }
 
-        RateLimiter::clear($this->throttleKey());
+        // Second, check users table
+        if (Auth::attempt($this->only('email', 'password') + ['is_active' => true], $remember)) {
+            RateLimiter::clear($this->throttleKey());
+            session(['is_admin_login' => false]);
+            return;
+        }
+
+        RateLimiter::hit($this->throttleKey());
+
+        throw ValidationException::withMessages([
+            'email' => trans('auth.failed'),
+        ]);
     }
 
     /**

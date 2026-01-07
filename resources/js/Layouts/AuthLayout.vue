@@ -1,9 +1,16 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useLocaleSync } from '@/Composables/useLocaleSync';
 
 const { locale } = useI18n();
+const { init: initLocaleSync } = useLocaleSync();
 const isRTL = computed(() => locale.value === 'ar');
+
+// Sync locale to backend on mount
+onMounted(() => {
+    initLocaleSync();
+});
 </script>
 
 <template>

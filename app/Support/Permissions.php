@@ -23,12 +23,18 @@ class Permissions
     public const CUSTOMERS_CREATE = 'crm.customers.create';
     public const CUSTOMERS_UPDATE = 'crm.customers.update';
     public const CUSTOMERS_DELETE = 'crm.customers.delete';
+    public const CUSTOMERS_PRINT = 'crm.customers.print';
+    public const CUSTOMERS_EXPORT = 'crm.customers.export';
+    public const CUSTOMERS_IMPORT = 'crm.customers.import';
     
     /** Vehicles */
     public const VEHICLES_VIEW = 'crm.vehicles.view';
     public const VEHICLES_CREATE = 'crm.vehicles.create';
     public const VEHICLES_UPDATE = 'crm.vehicles.update';
     public const VEHICLES_DELETE = 'crm.vehicles.delete';
+    public const VEHICLES_PRINT = 'crm.vehicles.print';
+    public const VEHICLES_EXPORT = 'crm.vehicles.export';
+    public const VEHICLES_IMPORT = 'crm.vehicles.import';
     
     /** Vehicle Settings (Makes, Models, Colors) */
     public const VEHICLE_SETTINGS_VIEW = 'crm.vehicles.settings.view';
@@ -39,6 +45,9 @@ class Permissions
     public const WORK_ORDERS_CREATE = 'crm.work_orders.create';
     public const WORK_ORDERS_UPDATE = 'crm.work_orders.update';
     public const WORK_ORDERS_DELETE = 'crm.work_orders.delete';
+    public const WORK_ORDERS_PRINT = 'crm.work_orders.print';
+    public const WORK_ORDERS_EXPORT = 'crm.work_orders.export';
+    public const WORK_ORDERS_IMPORT = 'crm.work_orders.import';
 
     // ========================================
     // PURCHASING MODULE
@@ -195,12 +204,18 @@ class Permissions
                 self::CUSTOMERS_CREATE,
                 self::CUSTOMERS_UPDATE,
                 self::CUSTOMERS_DELETE,
+                self::CUSTOMERS_PRINT,
+                self::CUSTOMERS_EXPORT,
+                self::CUSTOMERS_IMPORT,
             ],
             'crm_vehicles' => [
                 self::VEHICLES_VIEW,
                 self::VEHICLES_CREATE,
                 self::VEHICLES_UPDATE,
                 self::VEHICLES_DELETE,
+                self::VEHICLES_PRINT,
+                self::VEHICLES_EXPORT,
+                self::VEHICLES_IMPORT,
                 self::VEHICLE_SETTINGS_VIEW,
                 self::VEHICLE_SETTINGS_MANAGE,
             ],

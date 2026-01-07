@@ -614,11 +614,12 @@
                     </div>
 
                     <!-- Technicians Tab -->
-                    <div v-show="activeTab === 'technicians'" class="text-center py-12">
-                        <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                            <span class="text-2xl">👷</span>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400">{{ $t('common.coming_soon') }}</p>
+                    <!-- Technicians Tab -->
+                    <div v-show="activeTab === 'technicians'">
+                        <TechniciansSection 
+                            :work-order="workOrder"
+                            :items-by-department="itemsByDepartment"
+                        />
                     </div>
 
                     <!-- Payments Tab -->
@@ -805,6 +806,7 @@ import WorkOrderItemModal from '@/Components/WorkOrders/WorkOrderItemModal.vue';
 import AddPartModal from '@/Components/Inventory/AddPartModal.vue';
 import PrintOptionsModal from '@/Components/WorkOrders/PrintOptionsModal.vue';
 import PaymentsSection from '@/Components/WorkOrders/PaymentsSection.vue';
+import TechniciansSection from '@/Components/WorkOrders/TechniciansSection.vue';
 import PaymentsListModal from '@/Components/WorkOrders/PaymentsListModal.vue'; // Updated
 
 const props = defineProps({
@@ -930,7 +932,10 @@ function refreshWorkOrder() {
 
 // Debounce helper
 let saveConditionReportTimer = null;
+let isSavingCondition = false;
+
 function saveConditionReportDebounced() {
+    if (isSavingCondition) return; // Skip if we're already saving
     if (saveConditionReportTimer) clearTimeout(saveConditionReportTimer);
     saveConditionReportTimer = setTimeout(() => {
         saveConditionReport();
@@ -941,21 +946,36 @@ function saveConditionReportDebounced() {
 function saveConditionReport() {
     if (isReadOnly.value) return;
     
+    isSavingCondition = true;
     router.put(route('app.work-orders.update-condition', props.workOrder.id), {
         fuel_level: props.workOrder.fuel_level,
         damage_marks: props.workOrder.damage_marks,
     }, {
         preserveScroll: true,
         preserveState: true,
+        onFinish: () => {
+            // Reset flag after a delay to avoid re-triggering from prop update
+            setTimeout(() => {
+                isSavingCondition = false;
+            }, 500);
+        },
         onError: () => {
-            // Silent fail - could add toast here
+            isSavingCondition = false;
         }
     });
 }
 
-// Watch fuel level and damage marks changes
-watch(() => props.workOrder.fuel_level, saveConditionReportDebounced);
-watch(() => props.workOrder.damage_marks, saveConditionReportDebounced, { deep: true });
+// Watch fuel level and damage marks changes - skip initial values
+watch(() => props.workOrder.fuel_level, (newVal, oldVal) => {
+    if (oldVal !== undefined && !isSavingCondition) {
+        saveConditionReportDebounced();
+    }
+});
+watch(() => props.workOrder.damage_marks, (newVal, oldVal) => {
+    if (oldVal !== undefined && !isSavingCondition) {
+        saveConditionReportDebounced();
+    }
+}, { deep: true });
 
 // State for payment modal from header
 const showPaymentModalFromHeader = ref(false);

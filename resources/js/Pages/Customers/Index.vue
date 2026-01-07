@@ -52,6 +52,7 @@
                         <div class="flex gap-2">
                             <!-- Export -->
                             <button
+                                v-if="can('crm.customers.export')"
                                 @click="exportCustomers"
                                 :disabled="exporting"
                                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
@@ -63,6 +64,7 @@
                             </button>
                             <!-- Import -->
                             <button
+                                v-if="can('crm.customers.import')"
                                 @click="showImportModal = true"
                                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                                 :title="$t('common.import')"
@@ -73,6 +75,7 @@
                             </button>
                             <!-- Print -->
                             <button
+                                v-if="can('crm.customers.print')"
                                 @click="printCustomers"
                                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                                 :title="$t('common.print')"
@@ -115,6 +118,7 @@
 
                         <!-- Add Button -->
                         <button
+                            v-if="can('crm.customers.create')"
                             @click="openCreateModal"
                             class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
                         >
@@ -449,7 +453,7 @@
                         <tr v-for="(customer, index) in allCustomers" :key="customer.id">
                             <td>{{ index + 1 }}</td>
                             <td>{{ customer.name }}</td>
-                            <td>{{ customer.manager_name || '-' }}</td>
+                            <td>{{ customer.contact_name || '-' }}</td>
                             <td>
                                 <span class="print-badge">
                                     {{ customer.type ? $t(`customers.type.${customer.type}`) : '-' }}
@@ -479,6 +483,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
+import { usePermission } from '@/Composables/usePermission';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import CustomerImportModal from '@/Components/Customers/CustomerImportModal.vue';
@@ -498,6 +503,7 @@ const props = defineProps({
 const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { success, error, info } = useToast();
+const { can } = usePermission();
 
 const typeOptions = computed(() => [
     { value: '', label: t('customers.filter.all_types') },

@@ -38,7 +38,6 @@ class PlansController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:plans',

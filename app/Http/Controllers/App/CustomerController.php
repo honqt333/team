@@ -112,8 +112,16 @@ class CustomerController
 
         // Get all related data
         $vehicles = $customer->vehicles()->with(['make', 'model'])->get();
-        $workOrders = $customer->workOrders()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
+        $workOrders = $customer->workOrders()->with(['vehicle.make', 'vehicle.model', 'payments.receivedBy'])->latest()->get();
         $quotes = $customer->quotes()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
+
+        // Get all payments from customer's work orders
+        $payments = \App\Models\Payment::whereHas('workOrder', function($q) use ($customer) {
+            $q->where('customer_id', $customer->id);
+        })
+        ->with(['receivedBy', 'workOrder'])
+        ->latest('payment_date')
+        ->get();
 
         // Count related data
         $counts = [
@@ -121,7 +129,7 @@ class CustomerController
             'quotes' => $quotes->count(),
             'workOrders' => $workOrders->count(),
             'invoices' => 0, // Placeholder for future
-            'payments' => 0, // Placeholder for future
+            'payments' => $payments->count(),
         ];
 
         // Check if can be deleted
@@ -141,6 +149,7 @@ class CustomerController
             'vehicles' => $vehicles,
             'workOrders' => $workOrders,
             'quotes' => $quotes,
+            'payments' => $payments,
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
@@ -171,7 +180,7 @@ class CustomerController
             return redirect()->back()->with('error', __('messages.customer_has_related_data'));
         }
 
-        $customer->delete();
+        $customer->forceDelete();
 
         return redirect()->route('customers.index')->with('success', __('messages.customer_deleted'));
     }

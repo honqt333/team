@@ -19,10 +19,14 @@ class EnsureSystemAdmin
         if (!$user) {
             return redirect()->route('login');
         }
+
+        // 1. If user is AdminUser instance -> Allow
+        if ($user instanceof \App\Models\AdminUser) {
+            return $next($request);
+        }
         
-        // Check if user is a system admin
-        // System admins are stored without tenant_id OR have special is_system_admin flag
-        if (!$user->is_system_admin) {
+        // 2. If user is User instance -> Check is_system_admin flag
+        if ($user instanceof \App\Models\User && !$user->is_system_admin) {
             abort(403, 'غير مصرح لك بالوصول للوحة النظام');
         }
         

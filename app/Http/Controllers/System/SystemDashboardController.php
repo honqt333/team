@@ -5,6 +5,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Integration\Integration;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -40,11 +41,18 @@ class SystemDashboardController extends Controller
             ->orderBy('trial_ends_at')
             ->take(10)
             ->get(['id', 'name', 'trade_name', 'trial_ends_at']);
+        
+        // Get active SMS/WhatsApp integrations for balance display
+        $integrations = Integration::whereIn('type', ['sms', 'whatsapp'])
+            ->where('is_active', true)
+            ->get(['id', 'name', 'name_ar', 'provider', 'type']);
             
         return Inertia::render('System/Dashboard', [
             'stats' => $stats,
             'recentRegistrations' => $recentRegistrations,
             'trialEndingSoon' => $trialEndingSoon,
+            'integrations' => $integrations,
         ]);
     }
 }
+

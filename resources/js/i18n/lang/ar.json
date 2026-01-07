@@ -36,6 +36,8 @@
         "inactive": "غير فعال",
         "print": "طباعة",
         "actions": "الإجراءات",
+        "btn_create_work_order": "إنشاء أمر عمل",
+        "btn_create_quote": "إنشاء تقييم",
         "updated_by": "قام بالتحديث",
         "confirm_delete_title": "تأكيد الحذف",
         "confirm_delete_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -105,6 +107,7 @@
         "days": "يوم",
         "save_changes": "حفظ التغييرات",
         "view_details": "عرض التفاصيل",
+        "km": "كم",
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
@@ -195,13 +198,13 @@
             "individual": "فرد",
             "company": "شركة",
             "government": "حكومي",
-            "vip": "مميز"
+            "vip": "VIP"
         },
         "classification": {
             "potential": "محتمل",
             "new": "جديد",
             "regular": "منتظم",
-            "vip": "مميز",
+            "vip": "VIP",
             "inactive": "غير نشط"
         },
         "quick": {
@@ -341,7 +344,7 @@
         "days_remaining": "متبقي {days} يوم",
         "due_today": "اليوم موعد التسليم",
         "completed_in_days": "اكتمل في {days} يوم",
-        "create_new": "إنشاء أمر عمل",
+        "create": "إنشاء أمر عمل",
         "add": "إنشاء أمر عمل",
         "edit": "تعديل كرت عمل",
         "details": "تفاصيل كرت العمل",
@@ -379,7 +382,11 @@
             "open": "المفتوحة",
             "draft": "معلقة",
             "overdue": "متأخرة",
-            "pending_payment": "مستحقة الدفع"
+            "pending_payment": "مستحقة الدفع",
+            "date_from": "من تاريخ",
+            "date_to": "إلى تاريخ",
+            "all_types": "كل الأنواع",
+            "customer_type": "نوع العميل"
         },
         "create": {
             "title": "إنشاء كرت عمل"
@@ -387,7 +394,9 @@
         "tabs": {
             "main_info": "معلومات كرت الصيانة",
             "condition_report": "تقرير حالة المركبة",
-            "photos": "صور المركبة"
+            "photos": "صور المركبة",
+            "technicians": "الفنيين",
+            "payments": "المدفوعات"
         },
         "form": {
             "customer": "العميل",
@@ -413,13 +422,20 @@
             "entry_date": "تاريخ الدخول",
             "expected_end_date": "تاريخ الانتهاء المتوقع"
         },
+        "assigned_services": "الخدمات المسندة",
+        "no_technicians_assigned": "لا يوجد فنيين مسندين لخدمات في كرت العمل هذا",
         "columns": {
             "code": "رقم الكرت",
             "customer": "العميل",
             "vehicle": "المركبة",
             "status": "الحالة",
-            "total": "الإجمالي",
-            "created_at": "التاريخ"
+            "total": "الفاتورة",
+            "created_at": "التاريخ",
+            "expected_end": "الانتهاء المتوقع",
+            "contact_name": "المسؤول",
+            "services": "الخدمات",
+            "paid": "المدفوع",
+            "balance": "الباقي"
         },
         "status": {
             "draft": "مسودة",

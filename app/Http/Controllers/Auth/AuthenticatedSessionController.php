@@ -33,19 +33,31 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // Check if this is an admin login
+        if (session('is_admin_login')) {
+            session()->forget('is_admin_login');
+            return redirect('/system');
+        }
+
+        // Regular user login
         $user = $request->user();
 
-        // 1. Check if current_center_id is set
-        // 2. Check if the user is actually attached to this center
-        if (!$user->current_center_id || !$user->centers()->where('centers.id', $user->current_center_id)->exists()) {
-            // Find the first valid center
+        // Setup center context if needed
+        if ($user && (!$user->current_center_id || !$user->centers()->where('centers.id', $user->current_center_id)->exists())) {
             $firstCenter = $user->centers()->first();
-            
             if ($firstCenter) {
                 $user->update(['current_center_id' => $firstCenter->id]);
             }
         }
 
+        // Check if user has 2FA enabled - redirect to challenge
+        if ($user && $user->two_factor_confirmed_at !== null) {
+            $request->session()->put('2fa:user_id', $user->id);
+            Auth::guard('web')->logout();
+            return redirect()->route('app.2fa.challenge');
+        }
+
+        // Tenant user → Tenant Panel
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
@@ -54,7 +66,9 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        // Logout from both guards
         Auth::guard('web')->logout();
+        Auth::guard('admin')->logout();
 
         $request->session()->invalidate();
 

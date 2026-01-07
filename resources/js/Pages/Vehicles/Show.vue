@@ -103,6 +103,7 @@
                 <!-- Actions Bar -->
                 <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-2">
                     <button
+                        v-if="can('crm.vehicles.update')"
                         @click="showEditModal = true"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
@@ -113,28 +114,31 @@
                     </button>
 
                     <button
+                        v-if="can('crm.work_orders.create')"
                         @click="openWorkOrderModal"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 transition-colors"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                         </svg>
-                        {{ $t('work_orders.add') }}
+                        {{ $t('common.btn_create_work_order') }}
                     </button>
 
                     <button
+                        v-if="can('quotes.create')"
                         @click="openQuoteModal"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-amber-600 border border-transparent rounded-lg hover:bg-amber-700 transition-colors"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                         </svg>
-                        {{ $t('quotes.add') }}
+                        {{ $t('common.btn_create_quote') }}
                     </button>
 
                     <div class="flex-1"></div>
 
                     <button
+                        v-if="can('crm.vehicles.delete')"
                         @click="confirmDelete"
                         :disabled="!canDelete"
                         :class="[
@@ -223,11 +227,15 @@
                                 </svg>
                             </div>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('customers.no_work_orders') }}</p>
-                            <button @click="openWorkOrderModal" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium shadow-lg hover:bg-indigo-700 transition-colors">
+                            <button
+                                v-if="can('crm.work_orders.create')"
+                                @click="openWorkOrderModal"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl font-medium shadow-lg hover:bg-indigo-700 transition-colors"
+                            >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                {{ $t('work_orders.create') }}
+                                {{ $t('common.btn_create_work_order') }}
                             </button>
                         </div>
                     </div>
@@ -278,11 +286,15 @@
                                 </svg>
                             </div>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('customers.no_quotes') }}</p>
-                            <button @click="openQuoteModal" class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl font-medium shadow-lg hover:bg-amber-700 transition-colors">
+                            <button
+                                v-if="can('quotes.create')"
+                                @click="openQuoteModal"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-xl font-medium shadow-lg hover:bg-amber-700 transition-colors"
+                            >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                {{ $t('quotes.create') }}
+                                {{ $t('common.btn_create_quote') }}
                             </button>
                         </div>
                     </div>
@@ -357,6 +369,7 @@ import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
+import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
     vehicle: Object,
@@ -374,6 +387,7 @@ const props = defineProps({
 
 const { t, locale } = useI18n();
 const { confirm } = useConfirm();
+const { can } = usePermission();
 
 // Compute customers list compatible with modals (must include current customer)
 const customersList = computed(() => {

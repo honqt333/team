@@ -148,8 +148,20 @@ class WorkOrderController
             ->when(request("search"), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where("id", "like", "%{$search}%")
+                      ->orWhere("code", "like", "%{$search}%")
                       ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
                       ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                });
+            })
+            ->when(request("date_from"), function ($query, $dateFrom) {
+                $query->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when(request("date_to"), function ($query, $dateTo) {
+                $query->whereDate('created_at', '<=', $dateTo);
+            })
+            ->when(request("customer_type"), function ($query, $customerType) {
+                $query->whereHas('customer', function ($q) use ($customerType) {
+                    $q->where('type', $customerType);
                 });
             })
             ->orderByDesc("created_at")
@@ -181,11 +193,26 @@ class WorkOrderController
             "modelsByMake" => $modelsByMake,
             "departments" => $departments,
             "services" => $services,
-            "filters" => request()->only(["search", "status", "sub_filter"]),
+            "filters" => request()->only(["search", "status", "sub_filter", "date_from", "date_to", "customer_type"]),
             "statusFilter" => $status,
             "subFilter" => $subFilter,
             "filterCounts" => $filterCounts,
         ]);
+    }
+
+    /**
+     * Export work orders to XLSX.
+     */
+    public function export()
+    {
+        $this->authorize('viewAny', WorkOrder::class);
+
+        $filename = 'work_orders_' . date('Y-m-d_His') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\WorkOrdersExport(),
+            $filename
+        );
     }
     
     public function store(WorkOrderStoreRequest $request, CreateWorkOrderAction $createWorkOrder): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
@@ -236,12 +263,17 @@ class WorkOrderController
         $departments = \App\Models\Department::active()->ordered()->get();
         $services = \App\Models\Service::active()->ordered()->get();
         
-        // Get technicians (users strictly belonging to the work order's center)
-        $technicians = \App\Models\User::whereHas('centers', function ($q) use ($workOrder) {
-                $q->where('centers.id', $workOrder->center_id);
-            })
-            ->select('users.id', 'users.name')
-            ->get();
+        // Get technicians (employees with linked users belonging to the work order's center)
+        $technicians = \App\Models\HR\Employee::where('center_id', $workOrder->center_id)
+            ->whereNotNull('user_id')
+            ->active()
+            ->get()
+            ->map(function ($employee) {
+                return [
+                    'id' => $employee->user_id, // Use user_id as the compatible ID for assignment
+                    'name' => $employee->display_name,
+                ];
+            });
         
         $modelsByMake = \App\Models\VehicleModel::query()
             ->select('id', 'make_id', 'name_ar', 'name_en')

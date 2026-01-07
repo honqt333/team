@@ -20,19 +20,38 @@ Route::get('/', function () {
     ]);
 });
 
+// Phone Verification (Registration)
+Route::post('/phone/send-otp', [\App\Http\Controllers\Auth\PhoneVerificationController::class, 'sendOtp'])->name('phone.send-otp');
+Route::post('/phone/verify-otp', [\App\Http\Controllers\Auth\PhoneVerificationController::class, 'verifyOtp'])->name('phone.verify-otp');
+
+// Locale Management
+Route::post('/locale', [\App\Http\Controllers\LocaleController::class, 'setLocale'])->name('locale.set');
+Route::get('/locale', [\App\Http\Controllers\LocaleController::class, 'getLocale'])->name('locale.get');
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// 2FA Challenge (during login)
+Route::get('/app/2fa/challenge', [\App\Http\Controllers\App\TwoFactorAuthenticatedSessionController::class, 'challenge'])->name('app.2fa.challenge');
+Route::post('/app/2fa/verify', [\App\Http\Controllers\App\TwoFactorAuthenticatedSessionController::class, 'verify'])->name('app.2fa.verify');
+Route::post('/app/2fa/challenge/resend', [\App\Http\Controllers\App\TwoFactorAuthenticatedSessionController::class, 'resend'])->name('app.2fa.challenge.resend');
+
+Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureTenantActive::class])->prefix('app')->group(function () {
+    // Profile
+    Route::get('/profile', [\App\Http\Controllers\App\ProfileController::class, 'index'])->name('app.profile');
+    Route::patch('/profile', [\App\Http\Controllers\App\ProfileController::class, 'update'])->name('app.profile.update');
     Route::post('/profile/switch-center', [ProfileController::class, 'switchCenter'])->name('profile.switch-center');
+
+    // Two-Factor Authentication (Tenant App)
+    Route::post('/security/2fa/send-code', [\App\Http\Controllers\App\TwoFactorController::class, 'sendCode'])->name('app.2fa.send-code');
+    Route::post('/security/2fa/enable', [\App\Http\Controllers\App\TwoFactorController::class, 'enable'])->name('app.security.2fa.enable');
+    Route::post('/security/2fa/disable', [\App\Http\Controllers\App\TwoFactorController::class, 'disable'])->name('app.security.2fa.disable');
+    Route::post('/security/2fa/regenerate', [\App\Http\Controllers\App\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('app.security.2fa.regenerate');
 });
 
 // App routes (authenticated + tenancy)
-Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->group(function () {
+Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \App\Http\Middleware\EnsureTwoFactorEnabled::class])->group(function () {
     // Customer export/import routes (must be before resource routes)
     Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
     Route::get('/customers/print', [CustomerController::class, 'print'])->name('customers.print');
@@ -50,6 +69,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     Route::apiResource('vehicles', VehicleController::class);
     
     // Work Orders - Hub and Index
+    Route::get('/work-orders/export', [WorkOrderController::class, 'export'])->name('work-orders.export');
     Route::get('/work-orders', [WorkOrderController::class, 'hub'])->name('work-orders.hub');
     Route::get('/work-orders/list', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
@@ -127,6 +147,11 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     Route::post('/quotes/{quote}/departments', [QuoteController::class, 'addDepartment'])->name('app.quotes.departments.store');
     Route::delete('/quotes/{quote}/departments/{department}', [QuoteController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
     
+
+
+    // Tenants
+    Route::resource('tenants', \App\Http\Controllers\App\TenantsController::class);
+    
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     
@@ -150,6 +175,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context'])->g
     
     // System Settings
     Route::get('/settings/system', [\App\Http\Controllers\App\SystemSettingsController::class, 'index'])->name('settings.system');
+    Route::put('/settings/system', [\App\Http\Controllers\App\SystemSettingsController::class, 'update'])->name('settings.system.update');
 
     // Users Settings
     Route::resource('settings/users', \App\Http\Controllers\App\UserController::class)->names('settings.users');
@@ -419,7 +445,7 @@ if (app()->environment('testing')) {
 }
 
 // System Admin Panel routes
-Route::prefix('system')->middleware(['auth', 'system.admin'])->group(function () {
+Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(function () {
     // Dashboard
     Route::get('/', [\App\Http\Controllers\System\SystemDashboardController::class, 'index'])->name('system.dashboard');
     
@@ -429,7 +455,13 @@ Route::prefix('system')->middleware(['auth', 'system.admin'])->group(function ()
     Route::post('/tenants/{tenant}/suspend', [\App\Http\Controllers\System\TenantsController::class, 'suspend'])->name('system.tenants.suspend');
     Route::post('/tenants/{tenant}/activate', [\App\Http\Controllers\System\TenantsController::class, 'activate'])->name('system.tenants.activate');
     Route::post('/tenants/{tenant}/extend-trial', [\App\Http\Controllers\System\TenantsController::class, 'extendTrial'])->name('system.tenants.extend-trial');
+
+    // Communication Templates
+    Route::resource('communication/templates', \App\Http\Controllers\System\CommunicationTemplatesController::class)
+        ->only(['index', 'edit', 'update'])
+        ->names('system.communication.templates');
     Route::delete('/tenants/{tenant}', [\App\Http\Controllers\System\TenantsController::class, 'destroy'])->name('system.tenants.destroy');
+    Route::put('/tenants/{tenant}/security', [\App\Http\Controllers\System\TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update');
     
     // Plans Management
     Route::get('/plans', [\App\Http\Controllers\System\PlansController::class, 'index'])->name('system.plans.index');
@@ -455,6 +487,108 @@ Route::prefix('system')->middleware(['auth', 'system.admin'])->group(function ()
     Route::post('/subscriptions/{subscription}/cancel', [\App\Http\Controllers\System\SubscriptionsController::class, 'cancel'])->name('system.subscriptions.cancel');
     Route::post('/subscriptions/{subscription}/activate', [\App\Http\Controllers\System\SubscriptionsController::class, 'activate'])->name('system.subscriptions.activate');
     Route::post('/subscriptions/{subscription}/extend', [\App\Http\Controllers\System\SubscriptionsController::class, 'extend'])->name('system.subscriptions.extend');
+    
+    // Payment
+    Route::get('/payment/checkout/{subscription}', [\App\Http\Controllers\System\PaymentController::class, 'checkout'])->name('system.payment.checkout');
+    Route::get('/payment/callback/{payment}', [\App\Http\Controllers\System\PaymentController::class, 'callback'])->name('system.payment.callback');
+    Route::get('/payment/success/{payment}', [\App\Http\Controllers\System\PaymentController::class, 'success'])->name('system.payment.success');
+    Route::get('/payment/failed/{payment}', [\App\Http\Controllers\System\PaymentController::class, 'failed'])->name('system.payment.failed');
+    Route::post('/payment/retry/{payment}', [\App\Http\Controllers\System\PaymentController::class, 'retry'])->name('system.payment.retry');
+    
+    // Payment Settings
+    Route::get('/settings/payment', [\App\Http\Controllers\System\PaymentSettingsController::class, 'index'])->name('system.settings.payment');
+    Route::put('/settings/payment', [\App\Http\Controllers\System\PaymentSettingsController::class, 'update'])->name('system.settings.payment.update');
+    
+    // General Settings
+    Route::get('/settings/general', [\App\Http\Controllers\System\GeneralSettingsController::class, 'index'])->name('system.settings.general');
+    Route::put('/settings/general', [\App\Http\Controllers\System\GeneralSettingsController::class, 'update'])->name('system.settings.general.update');
+    
+    // Subscription Invoices
+    Route::get('/invoices', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index');
+    Route::get('/invoices/{invoice}', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'show'])->name('system.invoices.show');
+    Route::get('/invoices/{invoice}/download', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'download'])->name('system.invoices.download');
+    Route::post('/invoices/{invoice}/send', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'send'])->name('system.invoices.send');
+    Route::post('/invoices/{invoice}/mark-paid', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'markPaid'])->name('system.invoices.mark-paid');
+    Route::post('/invoices/{invoice}/cancel', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'cancel'])->name('system.invoices.cancel');
+    Route::post('/invoices/{invoice}/regenerate-pdf', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'regeneratePdf'])->name('system.invoices.regenerate-pdf');
+    
+    // Installments
+    Route::get('/installments', [\App\Http\Controllers\System\InstallmentsController::class, 'index'])->name('system.installments.index');
+    Route::get('/installments/invoice/{invoice}', [\App\Http\Controllers\System\InstallmentsController::class, 'show'])->name('system.installments.show');
+    Route::post('/installments/{installment}/mark-paid', [\App\Http\Controllers\System\InstallmentsController::class, 'markPaid'])->name('system.installments.mark-paid');
+    Route::post('/installments/update-overdue', [\App\Http\Controllers\System\InstallmentsController::class, 'updateOverdue'])->name('system.installments.update-overdue');
+    
+    // SMS Credits
+    Route::get('/sms/packages', [\App\Http\Controllers\System\SmsCreditsController::class, 'packages'])->name('system.sms.packages');
+    Route::post('/sms/packages', [\App\Http\Controllers\System\SmsCreditsController::class, 'storePackage'])->name('system.sms.packages.store');
+    Route::put('/sms/packages/{package}', [\App\Http\Controllers\System\SmsCreditsController::class, 'updatePackage'])->name('system.sms.packages.update');
+    Route::delete('/sms/packages/{package}', [\App\Http\Controllers\System\SmsCreditsController::class, 'destroyPackage'])->name('system.sms.packages.destroy');
+    Route::get('/sms/balances', [\App\Http\Controllers\System\SmsCreditsController::class, 'balances'])->name('system.sms.balances');
+    Route::post('/sms/add-credits', [\App\Http\Controllers\System\SmsCreditsController::class, 'addCredits'])->name('system.sms.add-credits');
+    Route::get('/sms/purchases', [\App\Http\Controllers\System\SmsCreditsController::class, 'purchases'])->name('system.sms.purchases');
+    Route::get('/sms/usage', [\App\Http\Controllers\System\SmsCreditsController::class, 'usage'])->name('system.sms.usage');
+    
+    // WhatsApp Credits
+    Route::get('/whatsapp/packages', [\App\Http\Controllers\System\WhatsappCreditsController::class, 'packages'])->name('system.whatsapp.packages');
+    Route::post('/whatsapp/packages', [\App\Http\Controllers\System\WhatsappCreditsController::class, 'storePackage'])->name('system.whatsapp.packages.store');
+    Route::put('/whatsapp/packages/{package}', [\App\Http\Controllers\System\WhatsappCreditsController::class, 'updatePackage'])->name('system.whatsapp.packages.update');
+    Route::delete('/whatsapp/packages/{package}', [\App\Http\Controllers\System\WhatsappCreditsController::class, 'destroyPackage'])->name('system.whatsapp.packages.destroy');
+    Route::get('/whatsapp/balances', [\App\Http\Controllers\System\WhatsappCreditsController::class, 'balances'])->name('system.whatsapp.balances');
+    Route::post('/whatsapp/add-credits', [\App\Http\Controllers\System\WhatsappCreditsController::class, 'addCredits'])->name('system.whatsapp.add-credits');
+    Route::get('/whatsapp/usage', [\App\Http\Controllers\System\WhatsappCreditsController::class, 'usage'])->name('system.whatsapp.usage');
+    
+    // Integrations
+    Route::get('/integrations', [\App\Http\Controllers\System\IntegrationsController::class, 'index'])->name('system.integrations.index');
+    Route::post('/integrations', [\App\Http\Controllers\System\IntegrationsController::class, 'store'])->name('system.integrations.store');
+    Route::get('/integrations/{integration}', [\App\Http\Controllers\System\IntegrationsController::class, 'show'])->name('system.integrations.show');
+    Route::put('/integrations/{integration}', [\App\Http\Controllers\System\IntegrationsController::class, 'update'])->name('system.integrations.update');
+    Route::post('/integrations/{integration}/test', [\App\Http\Controllers\System\IntegrationsController::class, 'test'])->name('system.integrations.test');
+    Route::get('/integrations/{integration}/balance', [\App\Http\Controllers\System\IntegrationsController::class, 'getBalance'])->name('system.integrations.balance');
+    Route::delete('/integrations/{integration}', [\App\Http\Controllers\System\IntegrationsController::class, 'destroy'])->name('system.integrations.destroy');
+    
+    // Profile
+    Route::get('/profile', [\App\Http\Controllers\System\ProfileController::class, 'index'])->name('system.profile.index');
+    Route::put('/profile', [\App\Http\Controllers\System\ProfileController::class, 'update'])->name('system.profile.update');
+    Route::put('/profile/password', [\App\Http\Controllers\System\ProfileController::class, 'updatePassword'])->name('system.profile.password');
+
+    // Admin Users
+    Route::get('/admin-users', [\App\Http\Controllers\System\AdminUsersController::class, 'index'])->name('system.admin-users.index');
+    Route::get('/admin-users/create', [\App\Http\Controllers\System\AdminUsersController::class, 'create'])->name('system.admin-users.create');
+    Route::post('/admin-users', [\App\Http\Controllers\System\AdminUsersController::class, 'store'])->name('system.admin-users.store');
+    Route::get('/admin-users/{adminUser}/edit', [\App\Http\Controllers\System\AdminUsersController::class, 'edit'])->name('system.admin-users.edit');
+    Route::put('/admin-users/{adminUser}', [\App\Http\Controllers\System\AdminUsersController::class, 'update'])->name('system.admin-users.update');
+    Route::delete('/admin-users/{adminUser}', [\App\Http\Controllers\System\AdminUsersController::class, 'destroy'])->name('system.admin-users.destroy');
+    Route::get('/activity-log', [\App\Http\Controllers\System\AdminUsersController::class, 'activityLog'])->name('system.activity-log');
+    
+    // Announcements
+    Route::get('/announcements', [\App\Http\Controllers\System\AnnouncementsController::class, 'index'])->name('system.announcements.index');
+    Route::get('/announcements/create', [\App\Http\Controllers\System\AnnouncementsController::class, 'create'])->name('system.announcements.create');
+    Route::post('/announcements', [\App\Http\Controllers\System\AnnouncementsController::class, 'store'])->name('system.announcements.store');
+    Route::get('/announcements/{announcement}', [\App\Http\Controllers\System\AnnouncementsController::class, 'show'])->name('system.announcements.show');
+    Route::post('/announcements/{announcement}/publish', [\App\Http\Controllers\System\AnnouncementsController::class, 'publish'])->name('system.announcements.publish');
+    Route::post('/announcements/{announcement}/unpublish', [\App\Http\Controllers\System\AnnouncementsController::class, 'unpublish'])->name('system.announcements.unpublish');
+    Route::delete('/announcements/{announcement}', [\App\Http\Controllers\System\AnnouncementsController::class, 'destroy'])->name('system.announcements.destroy');
+    
+    // Two-Factor Authentication
+    Route::get('/security/2fa', [\App\Http\Controllers\System\TwoFactorController::class, 'setup'])->name('system.2fa.setup');
+    Route::post('/security/2fa/send-code', [\App\Http\Controllers\System\TwoFactorController::class, 'sendCode'])->name('system.2fa.send-code');
+    Route::post('/security/2fa/enable', [\App\Http\Controllers\System\TwoFactorController::class, 'enable'])->name('system.2fa.enable');
+    Route::post('/security/2fa/disable', [\App\Http\Controllers\System\TwoFactorController::class, 'disable'])->name('system.2fa.disable');
+    Route::post('/security/2fa/regenerate', [\App\Http\Controllers\System\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('system.2fa.regenerate');
+    
+    // Impersonation (Login as Tenant)
+    Route::post('/tenants/{tenant}/impersonate', [\App\Http\Controllers\System\ImpersonationController::class, 'start'])->name('system.impersonate.start');
 });
+
+// 2FA Challenge (during login, before auth)
+Route::middleware('web')->group(function () {
+    Route::get('/2fa/challenge', [\App\Http\Controllers\System\TwoFactorController::class, 'challenge'])->name('2fa.challenge');
+    Route::post('/2fa/verify', [\App\Http\Controllers\System\TwoFactorController::class, 'verify'])->name('2fa.verify');
+});
+
+// Stop Impersonation (accessible from anywhere when impersonating)
+Route::post('/impersonate/stop', [\App\Http\Controllers\System\ImpersonationController::class, 'stop'])
+    ->name('impersonate.stop')
+    ->middleware(['web', 'auth']);
 
 require __DIR__.'/auth.php';

@@ -41,6 +41,7 @@
                         <div class="flex gap-2">
                             <!-- Export -->
                             <button
+                                v-if="can('crm.vehicles.export')"
                                 @click="exportVehicles"
                                 :disabled="exporting"
                                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
@@ -52,6 +53,7 @@
                             </button>
                             <!-- Print -->
                             <button
+                                v-if="can('crm.vehicles.print')"
                                 @click="printVehicles"
                                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                                 :title="$t('common.print')"
@@ -94,6 +96,7 @@
 
                         <!-- Add Button -->
                         <button
+                            v-if="can('crm.vehicles.create')"
                             @click="openCreateModal"
                             class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base w-full sm:w-auto bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
                         >
@@ -126,6 +129,7 @@
                 <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ $t('vehicles.empty') }}</p>
                 <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('vehicles.empty_hint') }}</p>
                 <button
+                    v-if="can('crm.vehicles.create')"
                     @click="openCreateModal"
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl transition-all"
                 >
@@ -430,6 +434,7 @@ import { useToast } from "@/Composables/useToast";
 import { useNumberFormat } from "@/Composables/useNumberFormat";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import VehicleFormModal from "@/Components/Vehicles/VehicleFormModal.vue";
+import { usePermission } from "@/Composables/usePermission";
 
 const props = defineProps({
     vehicles: {
@@ -462,6 +467,7 @@ const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { success } = useToast();
 const { toEnglish } = useNumberFormat();
+const { can } = usePermission();
 const showModal = ref(false);
 const selectedVehicle = ref(null);
 const searchQuery = ref(props.filters.search || "");

@@ -16,12 +16,17 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $locale = $request->header('X-Locale');
+        // Priority: Header > Session > Cookie > Config default
+        $locale = $request->header('X-Locale') 
+            ?? session('locale') 
+            ?? $request->cookie('locale')
+            ?? config('app.locale', 'ar');
 
-        if ($locale && in_array($locale, ['ar', 'en'])) {
+        if (in_array($locale, ['ar', 'en'])) {
             App::setLocale($locale);
         }
 
         return $next($request);
     }
 }
+
