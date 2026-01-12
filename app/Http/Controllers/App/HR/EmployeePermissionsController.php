@@ -28,8 +28,10 @@ class EmployeePermissionsController extends Controller
             ]);
         }
 
-        // Get all roles for current tenant
-        $roles = Role::where('tenant_id', TenancyContext::tenantId())->get(['id', 'name']);
+        // Get all roles for current tenant WITH their permissions
+        $roles = Role::where('tenant_id', TenancyContext::tenantId())
+            ->with('permissions:id,name')
+            ->get(['id', 'name', 'label_ar', 'label_en']);
         
         // Get all permissions grouped by module
         $groupedPermissions = Permissions::byModule();

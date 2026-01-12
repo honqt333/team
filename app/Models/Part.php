@@ -15,6 +15,7 @@ class Part extends Model
     protected $fillable = [
         'tenant_id',
         'sku',
+        'barcode',
         'name_ar',
         'name_en',
         'unit_id',
@@ -23,6 +24,7 @@ class Part extends Model
         'min_qty',
         'reorder_qty',
         'default_sale_price',
+        'min_sale_price',
         'is_active',
     ];
 
@@ -30,6 +32,7 @@ class Part extends Model
         'min_qty' => 'decimal:3',
         'reorder_qty' => 'decimal:3',
         'default_sale_price' => 'decimal:2',
+        'min_sale_price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 
@@ -84,6 +87,7 @@ class Part extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('sku', 'like', "%{$search}%")
+              ->orWhere('barcode', 'like', "%{$search}%")
               ->orWhere('name_ar', 'like', "%{$search}%")
               ->orWhere('name_en', 'like', "%{$search}%");
         });

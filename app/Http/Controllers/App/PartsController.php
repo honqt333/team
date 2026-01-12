@@ -22,7 +22,7 @@ class PartsController extends Controller
             ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
             ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
             ->when($request->input('category'), fn($q, $catId) => $q->where('category_id', $catId))
-            ->with(['unit', 'category'])
+            ->with(['unit', 'category', 'inventoryBalances.warehouse.center'])
             ->withSum('inventoryBalances', 'qty_on_hand')
             ->orderBy('name_ar');
 
@@ -66,14 +66,22 @@ class PartsController extends Controller
                 'max:50',
                 Rule::unique('parts')->where('tenant_id', $tenantId),
             ],
+            'barcode' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('parts')->where('tenant_id', $tenantId),
+            ],
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'unit_id' => 'required|exists:inventory_units,id',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'min_qty' => 'nullable|numeric|min:0',
             'reorder_qty' => 'nullable|numeric|min:0',
             'default_sale_price' => 'nullable|numeric|min:0',
+            'min_sale_price' => 'nullable|numeric|min:0',
+            'is_active' => 'boolean',
         ]);
 
         $validated['tenant_id'] = $tenantId;
@@ -110,14 +118,22 @@ class PartsController extends Controller
                 'max:50',
                 Rule::unique('parts')->where('tenant_id', $tenantId)->ignore($part->id),
             ],
+            'barcode' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('parts')->where('tenant_id', $tenantId)->ignore($part->id),
+            ],
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'unit_id' => 'required|exists:inventory_units,id',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'min_qty' => 'nullable|numeric|min:0',
             'reorder_qty' => 'nullable|numeric|min:0',
             'default_sale_price' => 'nullable|numeric|min:0',
+            'min_sale_price' => 'nullable|numeric|min:0',
+            'is_active' => 'boolean',
         ]);
 
         $part->update($validated);
@@ -135,6 +151,31 @@ class PartsController extends Controller
         return back()->with('success', $part->is_active 
             ? __('inventory.parts.activated') 
             : __('inventory.parts.deactivated'));
+    }
+
+    public function show(Part $part)
+    {
+        $this->authorize('view', $part);
+
+        $part->load(['unit', 'category']);
+        $tenantId = auth()->user()->tenant_id;
+
+        $balances = $part->inventoryBalances()
+            ->with(['warehouse.center'])
+            ->get();
+
+        $moves = $part->inventoryMoves()
+            ->with(['warehouse.center', 'reference'])
+            ->orderBy('posted_at', 'desc')
+            ->paginate(20);
+            
+        return Inertia::render('Inventory/Parts/Show', [
+            'part' => $part,
+            'balances' => $balances,
+            'moves' => $moves,
+            'units' => \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+            'categories' => \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+        ]);
     }
 
     /**

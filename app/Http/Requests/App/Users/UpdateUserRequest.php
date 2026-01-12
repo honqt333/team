@@ -53,7 +53,7 @@ class UpdateUserRequest extends FormRequest
             'centers' => ['required', 'array', 'min:1'],
             'centers.*' => ['exists:centers,id'],
             'role_id' => ['nullable', 'exists:roles,id'],
-            'employee_id' => ['nullable', 'exists:hr_employees,id'],
+            // Note: employee_id linking is removed - it's automatic via EmployeeObserver
         ];
     }
 }

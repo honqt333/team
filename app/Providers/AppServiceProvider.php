@@ -63,6 +63,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Employee::class, EmployeePolicy::class);
         Gate::policy(Attendance::class, AttendancePolicy::class);
 
+        // Observers
+        Employee::observe(\App\Observers\EmployeeObserver::class);
+
         // Super Admin Bypass
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super_admin') ? true : null;

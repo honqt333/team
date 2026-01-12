@@ -17,6 +17,7 @@ class JobTitle extends Model
         'tenant_id',
         'name_ar',
         'name_en',
+        'default_role_name',
         'department_id',
         'is_active',
         'updated_by',

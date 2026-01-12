@@ -31,9 +31,21 @@ export function usePermission() {
         return permissions.every(p => userPermissions.includes(p));
     }
 
+    /**
+     * Check if user has a specific role
+     * @param {string} role 
+     * @returns {boolean}
+     */
+    function hasRole(role) {
+        const roles = usePage().props.auth.user?.roles || [];
+        return roles.some(r => r.name === role || r === role);
+    }
+
     return {
         can,
         canAny,
-        canAll
+        canAll,
+        hasRole
     };
 }
+

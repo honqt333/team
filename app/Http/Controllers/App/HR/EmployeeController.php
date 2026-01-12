@@ -121,6 +121,7 @@ class EmployeeController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'phone' => 'required|string|max:20|unique:hr_employees,phone,NULL,id,tenant_id,' . TenancyContext::tenantId(),
+            'email' => 'required|email|max:255|unique:hr_employees,email,NULL,id,tenant_id,' . TenancyContext::tenantId(),
             'gender' => 'required|in:male,female',
             'nationality_id' => 'required|exists:nationalities,id',
             'job_title_id' => 'required|exists:hr_job_titles,id',
@@ -140,11 +141,16 @@ class EmployeeController extends Controller
         }
 
         try {
-            $employee = Employee::create([
+            $employee = new Employee();
+            $employee->fill([
                 'tenant_id' => TenancyContext::tenantId(),
                 'center_id' => array_key_exists('center_id', $validated) ? $validated['center_id'] : TenancyContext::centerId(),
+                'status' => 'active',
                 ...$validated,
             ]);
+            
+            $employee->save();
+
             \Log::info('Employee created', ['id' => $employee->id]);
         } catch (\Illuminate\Database\QueryException $e) {
             \Log::error('Database Error creating employee: ' . $e->getMessage());
@@ -207,6 +213,11 @@ class EmployeeController extends Controller
                 ->get(['id', 'name', 'email']),
             'shifts' => \App\Models\HR\Shift::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en', 'start_time', 'end_time', 'color']),
             'weeklySchedule' => $weeklySchedule,
+            // Roles for assignment
+            'availableRoles' => \App\Models\Role::where('tenant_id', $tenantId)
+                ->whereNotIn('name', ['super_admin']) // Exclude super_admin from assignment
+                ->get(['id', 'name', 'label_ar', 'label_en']),
+            'userRoles' => $employee->user ? $employee->user->roles->pluck('name') : [],
             // Financial Data
             'payrollItems' => $employee->payrollItems()
                 ->with(['payrollRun', 'createdBy:id,name'])
@@ -233,7 +244,7 @@ class EmployeeController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20|unique:hr_employees,phone,' . $employee->id . ',id,tenant_id,' . TenancyContext::tenantId(),
-            'email' => 'nullable|email|max:255',
+            'email' => 'required|email|max:255|unique:hr_employees,email,' . $employee->id . ',id,tenant_id,' . TenancyContext::tenantId(),
             'gender' => 'nullable|in:male,female',
             'marital_status' => 'nullable|in:single,married',
             'birth_date' => 'nullable|date',
@@ -280,7 +291,8 @@ class EmployeeController extends Controller
             'termination_reason' => 'nullable|string',
         ]);
 
-        $employee->update($validated);
+        $employee->fill($validated);
+        $employee->save();
 
         // Security Check: Restrict "Management" department to Super Admin if changed
         if (isset($validated['department_id']) && $validated['department_id'] != $employee->getOriginal('department_id')) {
@@ -439,5 +451,48 @@ class EmployeeController extends Controller
         if ($isManagement) {
             abort(403, 'إضافة موظفين لقسم الإدارة متاح فقط للمدير العام (Super Admin).');
         }
+    }
+
+    /**
+     * Update employee's user roles.
+     */
+    public function updateRoles(Request $request, Employee $employee)
+    {
+        $this->authorize('update', $employee);
+        
+        // Ensure employee has a linked user
+        if (!$employee->user) {
+            return back()->with('error', __('hr.employees.no_user_linked'));
+        }
+
+        $validated = $request->validate([
+            'roles' => 'required|array',
+            'roles.*' => 'string|exists:roles,name',
+        ]);
+
+        // Get tenant ID for permission context
+        $tenantId = $employee->tenant_id;
+        
+        // Set team context for role operations
+        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenantId);
+        
+        // Get allowed roles for this tenant (exclude super_admin)
+        $allowedRoles = \App\Models\Role::where('tenant_id', $tenantId)
+            ->whereNotIn('name', ['super_admin'])
+            ->pluck('name')
+            ->toArray();
+        
+        // Filter to only allowed roles and always include 'employee' role
+        $rolesToSync = array_intersect($validated['roles'], $allowedRoles);
+        if (!in_array('employee', $rolesToSync)) {
+            $rolesToSync[] = 'employee'; // Employee role is always required
+        }
+        
+        // Sync roles
+        $employee->user->syncRoles($rolesToSync);
+        
+        \Log::info("Updated roles for employee {$employee->id}", ['roles' => $rolesToSync]);
+        
+        return back()->with('success', __('hr.employees.roles_updated'));
     }
 }

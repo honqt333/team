@@ -86,6 +86,40 @@ const filteredGroupedPermissions = computed(() => {
     return result;
 });
 
+// Computed: permissions inherited from selected roles
+const rolePermissions = computed(() => {
+    const perms = new Set();
+    form.roles.forEach(roleName => {
+        const role = availableRoles.value.find(r => r.name === roleName);
+        if (role && role.permissions) {
+            role.permissions.forEach(p => perms.add(p.name));
+        }
+    });
+    return Array.from(perms);
+});
+
+// Check if a permission is inherited from a role (read-only)
+const isPermissionFromRole = (permission) => {
+    return rolePermissions.value.includes(permission);
+};
+
+// Check if permission is active (either direct or from role)
+const isPermissionActive = (permission) => {
+    return form.permissions.includes(permission) || rolePermissions.value.includes(permission);
+};
+
+// Computed: total unique active permissions (direct + from roles)
+const totalActivePermissions = computed(() => {
+    const allPerms = new Set([...form.permissions, ...rolePermissions.value]);
+    return allPerms.size;
+});
+
+// Count active permissions in a module
+const getModuleActiveCount = (moduleName) => {
+    const perms = groupedPermissions.value[moduleName] || [];
+    return perms.filter(p => isPermissionActive(p)).length;
+};
+
 // "Select All" Logic per Module
 const isModuleFullySelected = (moduleName) => {
     const perms = groupedPermissions.value[moduleName] || [];
@@ -198,6 +232,9 @@ onMounted(() => {
                         <span class="block text-base font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-violet-700 dark:group-hover:text-violet-300 transition-colors">
                             {{ role.label_ar || role.name }}
                         </span>
+                        <span v-if="role.permissions && role.permissions.length > 0" class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ role.permissions.length }} {{ t('permissions.count', 'صلاحية') }}
+                        </span>
                     </div>
                     <div v-if="form.roles.includes(role.name)" class="absolute top-4 end-4 text-violet-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,11 +260,18 @@ onMounted(() => {
                             </svg>
                         </div>
                         <div>
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                                {{ t('users.direct_permissions') }}
-                            </h3>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ t('users.permissions_all', 'الصلاحيات') }}
+                                </h3>
+                                <span class="px-2 py-0.5 text-xs font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">
+                                    {{ totalActivePermissions }} {{ t('permissions.active', 'مفعّلة') }}
+                                </span>
+                            </div>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ t('users.permissions_desc_extra', 'Grant specific permissions in addition to roles') }}
+                                <span class="text-violet-600 dark:text-violet-400 font-medium">{{ rolePermissions.length }}</span> {{ t('permissions.from_roles', 'من الأدوار') }}
+                                •
+                                <span class="text-indigo-600 dark:text-indigo-400 font-medium">{{ form.permissions.length }}</span> {{ t('users.direct_permissions', 'مباشرة') }}
                             </p>
                         </div>
                     </div>
@@ -269,10 +313,15 @@ onMounted(() => {
                                 </svg>
                             </button>
                             <span class="text-base font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wide">
-                                {{ moduleName }}
+                                {{ t('permissions_modules.' + moduleName, moduleName) }}
                             </span>
-                            <span class="px-2 py-0.5 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">
-                                {{ perms.length }}
+                            <span 
+                                class="px-2 py-0.5 text-xs font-medium rounded-full"
+                                :class="getModuleActiveCount(moduleName) > 0 
+                                    ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' 
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+                            >
+                                {{ getModuleActiveCount(moduleName) }}/{{ perms.length }}
                             </span>
                         </div>
                         
@@ -294,20 +343,39 @@ onMounted(() => {
                             <div 
                                 v-for="permission in perms" 
                                 :key="permission"
-                                class="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-700 transition-colors"
+                                class="flex items-center justify-between p-3 rounded-xl border transition-colors"
+                                :class="[
+                                    isPermissionFromRole(permission) 
+                                        ? 'bg-violet-50 dark:bg-violet-900/20 border-violet-200 dark:border-violet-800' 
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-700'
+                                ]"
                             >
                                 <div class="flex flex-col pe-3">
-                                    <span class="text-sm font-medium text-gray-900 dark:text-gray-200">
-                                        {{ permissionDescriptions[permission] || permission }}
-                                    </span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-sm font-medium text-gray-900 dark:text-gray-200">
+                                            {{ permissionDescriptions[permission] || permission }}
+                                        </span>
+                                        <span 
+                                            v-if="isPermissionFromRole(permission)" 
+                                            class="px-1.5 py-0.5 text-[10px] font-medium bg-violet-100 dark:bg-violet-800 text-violet-700 dark:text-violet-300 rounded"
+                                        >
+                                            {{ t('permissions.from_role', 'من الدور') }}
+                                        </span>
+                                    </div>
                                     <span class="text-[10px] text-gray-400 font-mono mt-0.5 truncate max-w-[200px]" :title="permission">
                                         {{ permission }}
                                     </span>
                                 </div>
                                 <Toggle 
+                                    v-if="!isPermissionFromRole(permission)"
                                     v-model:checked="form.permissions" 
                                     :value="permission"
                                 />
+                                <div v-else class="flex items-center gap-1 text-violet-600 dark:text-violet-400">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
                             </div>
                         </div>
                     </div>

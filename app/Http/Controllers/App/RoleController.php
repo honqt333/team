@@ -56,7 +56,17 @@ class RoleController extends Controller
         ]);
 
         if (!empty($validated['permissions'])) {
-            $role->syncPermissions($validated['permissions']);
+            // Temporarily unset team ID to find global permissions
+            $registrar = app(\Spatie\Permission\PermissionRegistrar::class);
+            $currentTeamId = $registrar->getPermissionsTeamId();
+            $registrar->setPermissionsTeamId(null);
+            
+            try {
+                $role->syncPermissions($validated['permissions']);
+            } finally {
+                // Restore team ID
+                $registrar->setPermissionsTeamId($currentTeamId);
+            }
         }
 
         return back()->with('success', __('messages.saved_success'));
@@ -104,7 +114,17 @@ class RoleController extends Controller
         ]);
 
         if (isset($validated['permissions'])) {
-            $role->syncPermissions($validated['permissions']);
+            // Temporarily unset team ID to find global permissions
+            $registrar = app(\Spatie\Permission\PermissionRegistrar::class);
+            $currentTeamId = $registrar->getPermissionsTeamId();
+            $registrar->setPermissionsTeamId(null);
+            
+            try {
+                $role->syncPermissions($validated['permissions']);
+            } finally {
+                // Restore team ID
+                $registrar->setPermissionsTeamId($currentTeamId);
+            }
         }
 
         return back()->with('success', __('messages.saved_success'));

@@ -140,6 +140,28 @@ class Permissions
     public const HR_PAYMENTS_APPROVE = 'hr.payments.approve';
 
     // ========================================
+    // EMPLOYEE PORTAL (Self-Service)
+    // ========================================
+    
+    /** Employee can view their own profile/data */
+    public const EMPLOYEE_PROFILE_VIEW = 'employee.profile.view';
+    
+    /** Employee can view their own attendance records */
+    public const EMPLOYEE_ATTENDANCE_VIEW = 'employee.attendance.view';
+    
+    /** Employee can view their own leaves */
+    public const EMPLOYEE_LEAVES_VIEW = 'employee.leaves.view';
+    
+    /** Employee can request leaves */
+    public const EMPLOYEE_LEAVES_REQUEST = 'employee.leaves.request';
+    
+    /** Employee can view their own payslips */
+    public const EMPLOYEE_PAYSLIPS_VIEW = 'employee.payslips.view';
+    
+    /** Employee can submit general requests */
+    public const EMPLOYEE_REQUESTS_CREATE = 'employee.requests.create';
+
+    // ========================================
     // INVENTORY MODULE
     // ========================================
 
@@ -302,6 +324,14 @@ class Permissions
                 self::INVENTORY_STOCK_VIEW,
                 self::INVENTORY_MOVES_VIEW,
                 self::INVENTORY_MOVES_CREATE,
+            ],
+            'employee_portal' => [
+                self::EMPLOYEE_PROFILE_VIEW,
+                self::EMPLOYEE_ATTENDANCE_VIEW,
+                self::EMPLOYEE_LEAVES_VIEW,
+                self::EMPLOYEE_LEAVES_REQUEST,
+                self::EMPLOYEE_PAYSLIPS_VIEW,
+                self::EMPLOYEE_REQUESTS_CREATE,
             ],
         ];
     }

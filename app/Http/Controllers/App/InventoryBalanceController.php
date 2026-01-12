@@ -16,20 +16,48 @@ class InventoryBalanceController extends Controller
         $this->authorize('viewAny', InventoryBalance::class);
 
         $user = auth()->user();
+        $tenantId = $user->tenant_id;
         $centerId = $user->current_center_id;
 
-        // Get warehouse for current center
-        $warehouse = Warehouse::forCenter($centerId)->default()->first();
+        // Get all warehouses for tenant centers
+        $warehouses = Warehouse::whereHas('center', function($q) use ($tenantId) {
+                $q->where('tenant_id', $tenantId);
+            })
+            ->with('center:id,name_ar,name_en')
+            ->get()
+            ->map(function ($w) {
+                return [
+                    'id' => $w->id,
+                    'name' => $w->name . ' - ' . ($w->center?->name ?? 'Main'),
+                ];
+            });
 
+        // Determine which warehouse to show
+        $selectedWarehouseId = $request->input('warehouse_id');
+        
+        if ($selectedWarehouseId) {
+            $warehouse = Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))->find($selectedWarehouseId);
+        }
+        
+        // Fallback to current center's default if not selected or not found
+        if (!isset($warehouse) || !$warehouse) {
+             $warehouse = Warehouse::forCenter($centerId)->default()->first() 
+                ?? Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))->first();
+        }
+
+        // If still no warehouse (e.g. new tenant), create one
         if (!$warehouse) {
             $warehouse = Warehouse::getOrCreateDefault($centerId);
+             // Re-fetch to get cleaner object if needed
+             $warehouse = Warehouse::find($warehouse->id);
         }
 
         $query = InventoryBalance::forWarehouse($warehouse->id)
-            ->with(['part' => fn($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'min_qty')->with(['category'])])
+            ->with(['part' => fn($q) => $q->select('id', 'sku', 'barcode', 'name_ar', 'name_en', 'unit_id', 'category_id', 'min_qty', 'description', 'default_sale_price', 'min_sale_price')->with(['category', 'unit'])])
             ->when($request->input('search'), function ($q, $search) {
                 $q->whereHas('part', fn($pq) => 
                     $pq->where('sku', 'like', "%{$search}%")
+                       ->orWhere('barcode', 'like', "%{$search}%")
                        ->orWhere('name_ar', 'like', "%{$search}%")
                        ->orWhere('name_en', 'like', "%{$search}%")
                 );
@@ -45,7 +73,7 @@ class InventoryBalanceController extends Controller
         $balances = $query->paginate(25)->withQueryString();
 
         // Get categories for filter
-        $categories = \App\Models\InventoryCategory::where('tenant_id', $user->tenant_id)
+        $categories = \App\Models\InventoryCategory::where('tenant_id', $tenantId)
             ->where('is_active', true)
             ->select('id', 'name_ar', 'name_en')
             ->get()
@@ -67,8 +95,9 @@ class InventoryBalanceController extends Controller
         return Inertia::render('Inventory/Stock/Index', [
             'balances' => $balances,
             'warehouse' => $warehouse,
+            'warehouses' => $warehouses, // Pass list
             'categories' => $categories,
-            'filters' => $request->only(['search', 'category', 'stock_status']),
+            'filters' => $request->only(['search', 'category', 'stock_status', 'warehouse_id']),
             'stats' => $stats,
         ]);
     }

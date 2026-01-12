@@ -210,6 +210,19 @@ class TenantSetupService
                     Permissions::HR_PAYMENTS_APPROVE,
                 ],
             ],
+            'employee' => [
+                'label_ar' => 'موظف',
+                'label_en' => 'Employee',
+                'description' => 'موظف - الوصول للبوابة الذاتية فقط (معلوماته الشخصية، حضوره، إجازاته، رواتبه)',
+                'permissions' => [
+                    Permissions::EMPLOYEE_PROFILE_VIEW,
+                    Permissions::EMPLOYEE_ATTENDANCE_VIEW,
+                    Permissions::EMPLOYEE_LEAVES_VIEW,
+                    Permissions::EMPLOYEE_LEAVES_REQUEST,
+                    Permissions::EMPLOYEE_PAYSLIPS_VIEW,
+                    Permissions::EMPLOYEE_REQUESTS_CREATE,
+                ],
+            ],
         ];
     }
 }

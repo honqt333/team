@@ -24,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant.active' => \App\Http\Middleware\EnsureTenantActive::class,
             'center.context' => \App\Http\Middleware\EnsureCenterContext::class,
             'system.admin' => \App\Http\Middleware\EnsureSystemAdmin::class,
+            // Spatie Permission middleware
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

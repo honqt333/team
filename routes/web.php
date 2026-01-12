@@ -28,6 +28,12 @@ Route::post('/phone/verify-otp', [\App\Http\Controllers\Auth\PhoneVerificationCo
 Route::post('/locale', [\App\Http\Controllers\LocaleController::class, 'setLocale'])->name('locale.set');
 Route::get('/locale', [\App\Http\Controllers\LocaleController::class, 'getLocale'])->name('locale.get');
 
+// Invitation Routes
+Route::middleware('guest')->group(function () {
+    Route::get('invitations/accept/{user}', [\App\Http\Controllers\Auth\SetPasswordController::class, 'show'])->name('invitations.accept');
+    Route::post('invitations/accept/{user}', [\App\Http\Controllers\Auth\SetPasswordController::class, 'store']);
+});
+
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -48,6 +54,17 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureTenantActive::
     Route::post('/security/2fa/enable', [\App\Http\Controllers\App\TwoFactorController::class, 'enable'])->name('app.security.2fa.enable');
     Route::post('/security/2fa/disable', [\App\Http\Controllers\App\TwoFactorController::class, 'disable'])->name('app.security.2fa.disable');
     Route::post('/security/2fa/regenerate', [\App\Http\Controllers\App\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('app.security.2fa.regenerate');
+
+    // Employee Portal (Self-Service) - requires 'employee' role
+    Route::prefix('my')->middleware('role:employee')->group(function () {
+        Route::get('/', [\App\Http\Controllers\App\EmployeePortalController::class, 'dashboard'])->name('employee.dashboard');
+        Route::get('/profile', [\App\Http\Controllers\App\EmployeePortalController::class, 'profile'])->name('employee.profile');
+        Route::get('/attendance', [\App\Http\Controllers\App\EmployeePortalController::class, 'attendance'])->name('employee.attendance');
+        Route::get('/leaves', [\App\Http\Controllers\App\EmployeePortalController::class, 'leaves'])->name('employee.leaves');
+        Route::post('/leaves', [\App\Http\Controllers\App\EmployeePortalController::class, 'requestLeave'])->name('employee.leaves.request');
+        Route::get('/payslips', [\App\Http\Controllers\App\EmployeePortalController::class, 'payslips'])->name('employee.payslips');
+        Route::get('/payslips/{payslip}', [\App\Http\Controllers\App\EmployeePortalController::class, 'showPayslip'])->name('employee.payslips.show');
+    });
 });
 
 // App routes (authenticated + tenancy)
@@ -249,6 +266,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::put('/parts/{part}', [\App\Http\Controllers\App\PartsController::class, 'update'])->name('parts.update');
         Route::patch('/parts/{part}/toggle', [\App\Http\Controllers\App\PartsController::class, 'toggleActive'])->name('parts.toggle');
         Route::get('/api/parts/search', [\App\Http\Controllers\App\PartsController::class, 'search'])->name('parts.search');
+        Route::get('/parts/{part}', [\App\Http\Controllers\App\PartsController::class, 'show'])->name('parts.show');
         
         // Stock Balances
         Route::get('/stock', [\App\Http\Controllers\App\InventoryBalanceController::class, 'index'])->name('stock.index');
@@ -357,6 +375,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         // Employee Financial
         Route::put('/employees/{employee}/bank-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateBankInfo'])->name('employees.bank-info.update');
         Route::put('/employees/{employee}/financial-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateFinancialInfo'])->name('employees.financial-info.update');
+        Route::put('/employees/{employee}/roles', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateRoles'])->name('employees.roles.update');
         
         
         // Payroll Runs

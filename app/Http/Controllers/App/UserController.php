@@ -42,25 +42,12 @@ class UserController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        // Fetch unlinked employees
-        $unlinkedEmployees = \App\Models\HR\Employee::where('tenant_id', $tenantId)
-            ->whereNull('user_id')
-            ->get(['id', 'name_ar', 'name_en', 'employee_number']);
-
-        // Fetch employees linked to the current list of users (so they appear in edit modal)
-        $userIds = $users->pluck('id');
-        $linkedEmployees = \App\Models\HR\Employee::where('tenant_id', $tenantId)
-            ->whereIn('user_id', $userIds)
-            ->get(['id', 'name_ar', 'name_en', 'employee_number']);
-        
-        $allEmployees = $unlinkedEmployees->merge($linkedEmployees)->sortBy('name_ar')->values();
-
         return Inertia::render('Settings/Users/Index', [
             'users' => $users,
             'filters' => $request->only(['search']),
             'centers' => Center::where('tenant_id', $tenantId)->get(['id', 'name']),
             'roles' => Role::where('tenant_id', $tenantId)->get(['id', 'name', 'label_ar', 'label_en']),
-            'employees' => $allEmployees, // Pass all relevant employees
+            // Note: employees list removed - linking is automatic via EmployeeObserver
         ]);
     }
 
@@ -144,19 +131,8 @@ class UserController extends Controller
              // $user->syncRoles([]);
         }
 
-        // Link Employee
-        if (array_key_exists('employee_id', $validated)) {
-             // First, unlink any employee currently linked to this user
-            \App\Models\HR\Employee::where('user_id', $user->id)
-                ->update(['user_id' => null]);
-
-            // Then link the new one if provided
-            if (!empty($validated['employee_id'])) {
-                \App\Models\HR\Employee::where('id', $validated['employee_id'])
-                     ->where('tenant_id', $tenantId)
-                     ->update(['user_id' => $user->id]);
-            }
-        }
+        // Note: Employee linking is automatic via EmployeeObserver
+        // Manual linking from User side is not allowed
 
         return back()->with('success', __('messages.updated_successfully'));
     }

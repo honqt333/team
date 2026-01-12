@@ -70,8 +70,16 @@
 
                 <!-- Email -->
                 <div>
-                    <label :class="labelClass">{{ $t('common.email') }}</label>
-                    <input v-model="form.email" type="email" dir="ltr" :class="inputClass" />
+                    <label :class="labelClass">
+                        {{ $t('common.email') }} <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        v-model="form.email" 
+                        type="email" 
+                        dir="ltr" 
+                        :class="inputClass" 
+                        required
+                    />
                 </div>
 
                 <!-- Gender -->
@@ -174,14 +182,32 @@
                     <input v-model="form.contract_end_date" type="date" :class="inputClass" />
                 </div>
                 <div>
+                    <!-- Existing User Link (Super Admin only or if already linked) -->
                     <SearchableSelect
+                        v-if="form.user_id"
                         v-model="form.user_id"
                         :label="$t('hr.employees.link_user')"
                         :options="users"
                         option-label="name"
                         option-value="id"
                         :placeholder="$t('hr.employees.no_user_link')"
+                        disabled
+                        :hint="$t('hr.employees.user_already_linked')"
                     />
+                    
+                    <!-- Grant Access Toggle (If no user linked) -->
+                    <div v-else class="bg-violet-50 dark:bg-violet-900/20 p-4 rounded-xl border border-violet-100 dark:border-violet-800">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $t('hr.employees.grant_system_access') }}</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" v-model="form.grant_system_access" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-300 dark:peer-focus:ring-violet-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            {{ form.grant_system_access ? $t('hr.employees.system_access_info') : $t('hr.employees.grant_system_access_hint') }}
+                        </p>
+                    </div>
                 </div>
                 <div>
                      <SearchableSelect
@@ -341,6 +367,7 @@ const form = useForm({
     hire_date: props.employee.hire_date || '',
     contract_end_date: props.employee.contract_end_date || '',
     user_id: props.employee.user_id || null,
+    grant_system_access: false,
     status: props.employee.status || 'active',
     notes: props.employee.notes || '',
     // Identity

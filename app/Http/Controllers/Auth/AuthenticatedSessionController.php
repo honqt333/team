@@ -57,7 +57,21 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('app.2fa.challenge');
         }
 
-        // Tenant user → Tenant Panel
+        // Set team context for role checking (required by Spatie Permission)
+        if ($user->tenant_id) {
+            app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+        }
+
+        // Role-based redirect
+        // If user ONLY has 'employee' role, redirect to employee portal
+        $roles = $user->getRoleNames()->toArray();
+        $isOnlyEmployee = count($roles) === 1 && in_array('employee', $roles);
+        
+        if ($isOnlyEmployee) {
+            return redirect()->intended(route('employee.dashboard', absolute: false));
+        }
+
+        // Tenant user with other roles → Tenant Panel
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

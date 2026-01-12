@@ -17,7 +17,6 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <button
-                            v-if="can('inventory.receipts.create')"
                             @click="showReceiptModal = true"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
                         >
@@ -27,7 +26,6 @@
                             <span class="hidden sm:inline">{{ $t('inventory.moves.receipt') }}</span>
                         </button>
                         <button
-                            v-if="can('inventory.adjustments.create')"
                             @click="showAdjustmentModal = true"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
                         >
@@ -182,6 +180,20 @@
             </div>
         </div>
     </AppLayout>
+
+    <!-- Modals -->
+    <ReceiptModal
+        :show="showReceiptModal"
+        :warehouse-id="warehouse?.id"
+        @close="showReceiptModal = false"
+        @saved="() => {}"
+    />
+    <AdjustmentModal
+        :show="showAdjustmentModal"
+        :warehouse-id="warehouse?.id"
+        @close="showAdjustmentModal = false"
+        @saved="() => {}"
+    />
 </template>
 
 <script setup>
@@ -191,6 +203,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import ReceiptModal from '@/Components/Inventory/ReceiptModal.vue';
+import AdjustmentModal from '@/Components/Inventory/AdjustmentModal.vue';
 
 const { t } = useI18n();
 const page = usePage();

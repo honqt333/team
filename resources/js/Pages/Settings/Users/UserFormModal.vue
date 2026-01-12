@@ -21,10 +21,7 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    employees: { // Add employees prop
-        type: Array,
-        default: () => [],
-    },
+    // Note: employees prop removed - linking is automatic via EmployeeObserver
 });
 
 const emit = defineEmits(['close']);
@@ -36,7 +33,6 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     role_id: null,
-    employee_id: null, // Add employee_id
     centers: [],
 });
 
@@ -49,33 +45,7 @@ const roleOptions = computed(() => {
     }));
 });
 
-// Employee Options
-const employeeOptions = computed(() => {
-    let options = props.employees.map(emp => ({
-        value: emp.id,
-        label: `${emp.employee_number} - ${locale.value === 'ar' ? emp.name_ar : emp.name_en}`
-    }));
-
-     // If editing and user has an employee, ensure they are in the list (even if not in "unlinked" list passed from backend)
-    // Actually, backend passes "unlinked" employees. The currently linked employee is NOT "unlinked".
-    // So we need to handle this.
-    // The backend ONLY passes unlinked employees.
-    // But `props.user.employee` exists if user is linked.
-    // So we should append `props.user.employee` to the options if it exists.
-    
-    if (props.user && props.user.employee) {
-        // Check if already in list (unlikely based on backend logic, but safe to check)
-        const exists = options.find(o => o.value === props.user.employee.id);
-        if (!exists) {
-            options.unshift({
-                value: props.user.employee.id,
-                label: `${props.user.employee.employee_number || 'EMP'} - ${locale.value === 'ar' ? props.user.employee.name_ar : props.user.employee.name_en}`
-            });
-        }
-    }
-    
-    return options;
-});
+// Note: employeeOptions removed - linking is automatic via EmployeeObserver
 
 watch(() => props.show, (newVal) => {
     if (newVal) {
@@ -88,14 +58,12 @@ watch(() => props.show, (newVal) => {
             form.centers = props.user.centers ? props.user.centers.map(c => c.id) : [];
             // Extract role ID
             form.role_id = props.user.roles && props.user.roles.length > 0 ? props.user.roles[0].id : null;
-            // Extract employee ID
-            form.employee_id = props.user.employee ? props.user.employee.id : null;
+            // Note: employee_id removed - linking is automatic
             form.is_active = !!props.user.is_active; // Set is_active
         } else {
             form.reset();
             form.centers = [];
             form.role_id = null;
-            form.employee_id = null;
             form.is_active = true; // Default to active
         }
     }
@@ -195,21 +163,7 @@ const submit = () => {
                     <InputError class="mt-2" :message="form.errors.role_id" />
                 </div>
 
-                <!-- Employee Selection -->
-                <div>
-                    <InputLabel :value="t('users.employee', 'Linked Employee')">
-                         <span class="text-gray-400 text-xs font-normal">({{ t('common.optional', 'Optional') }})</span>
-                    </InputLabel>
-                    <SearchableSelect
-                        v-model="form.employee_id"
-                        :options="employeeOptions"
-                        option-label="label"
-                        option-value="value"
-                        :placeholder="t('users.select_employee', 'Select Employee')"
-                        class="mt-1 block w-full"
-                    />
-                    <InputError class="mt-2" :message="form.errors.employee_id" />
-                </div>
+                <!-- Note: Employee selection removed - linking is automatic via EmployeeObserver -->
 
                 <!-- Active Status -->
                 <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">

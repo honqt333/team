@@ -9,12 +9,12 @@ class InventoryMovePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('inventory.ledger.view');
+        return $user->can('inventory.moves.view');
     }
 
     public function view(User $user, InventoryMove $move): bool
     {
-        return $user->can('inventory.ledger.view');
+        return $user->can('inventory.moves.view');
     }
 
     public function create(User $user, string $type = 'receipt'): bool

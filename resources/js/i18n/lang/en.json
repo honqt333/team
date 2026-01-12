@@ -124,7 +124,8 @@
         "profile": "Edit Profile",
         "logout": "Logout",
         "settings": "Settings",
-        "quotes": "Quotes"
+        "quotes": "Quotes",
+        "employee_portal": "My Portal"
     },
     "theme": {
         "toggle": "Toggle Theme",
@@ -617,6 +618,9 @@
         "password": "Password",
         "new_password": "New Password (Optional)",
         "confirm_password": "Confirm Password",
+        "set_password": "Set Password",
+        "set_password_hint": "Hello {name}, please set a password for your account to access the system.",
+        "set_password_action": "Save & Login",
         "allowed_centers": "Allowed Branches",
         "branches": "Branches",
         "employee": "Linked Employee",
@@ -1346,6 +1350,17 @@
         "title": "Human Resources",
         "subtitle": "Manage employees, payroll & attendance",
         "employees": {
+            "user_already_linked": "This employee is already linked to a user",
+            "grant_system_access": "Grant System Access?",
+            "grant_system_access_hint": "Invitation will be sent to employee to set password",
+            "system_access_info": "User account will be auto-created and activation link sent via email.",
+            "auto_account_title": "Automatic Account",
+            "auto_account_hint": "A user account will be created automatically and an invitation email will be sent to set the password.",
+            "roles_updated": "Roles updated successfully",
+            "no_user_linked": "Employee is not linked to a user account",
+            "manage_roles": "Manage Roles",
+            "assigned_roles": "Assigned Roles",
+            "available_roles": "Available Roles",
             "title": "Employees",
             "subtitle": "Employee list",
             "total": "employee(s)",
@@ -1716,5 +1731,26 @@
         "hr_leaves": "HR - Leaves",
         "user_management": "User Management",
         "inventory": "Inventory"
+    },
+    "employee_portal": {
+        "dashboard": "Employee Portal",
+        "welcome": "Welcome",
+        "my_profile": "My Profile",
+        "my_attendance": "My Attendance",
+        "my_leaves": "My Leaves",
+        "my_payslips": "My Payslips",
+        "present_days": "Present Days",
+        "late_days": "Late Days",
+        "leave_balance": "Leave Balance",
+        "total_hours": "Total Hours",
+        "quick_actions": "Quick Actions",
+        "recent_payslips": "Recent Payslips",
+        "personal_info": "Personal Information",
+        "job_info": "Job Information",
+        "profile": "Profile",
+        "attendance": "Attendance",
+        "leaves": "Leaves",
+        "payslips": "Payslips",
+        "back_to_dashboard": "Back to Dashboard"
     }
 }

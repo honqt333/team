@@ -94,6 +94,23 @@
                     />
                 </div>
 
+                <!-- Email (Mandatory) -->
+                <div class="md:col-span-2 animate-fadeIn">
+                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {{ $t('common.email') }} <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        v-model="form.email"
+                        type="email"
+                        :class="[
+                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                            form.errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                        ]"
+                        required
+                    />
+                    <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
+                </div>
+
                 <!-- Branch -->
                 <div class="md:col-span-2" v-if="filteredCenterOptions.length > 1">
                      <SearchableSelect
@@ -109,7 +126,7 @@
                 <!-- Hidden input for single branch -->
                 <input v-else type="hidden" :value="form.center_id" />
 
-                <!-- الوردية -->
+                <!-- Default Shift -->
                 <div v-if="shifts?.length" class="md:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
                     <SearchableSelect
                         v-model="form.default_shift_id"
@@ -120,6 +137,21 @@
                         :error="form.errors.default_shift_id"
                         :placeholder="$t('common.choose')"
                     />
+                </div>
+
+
+
+                <!-- Auto System Access Info -->
+                <div class="md:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
+                    <div class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+                        <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div>
+                            <h3 class="font-medium text-blue-900 dark:text-blue-100">{{ $t('hr.employees.auto_account_title') }}</h3>
+                            <p class="text-xs text-blue-700 dark:text-blue-300 mt-1">{{ $t('hr.employees.auto_account_hint') }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
@@ -171,10 +203,11 @@ const form = useForm({
     name_ar: '',
     name_en: '',
     phone: '',
+    email: '',
     gender: null,
     nationality_id: null,
     job_title_id: null,
-    center_id: null, // null = Management
+    center_id: null,
     default_shift_id: null,
     hasErrors: false,
 });

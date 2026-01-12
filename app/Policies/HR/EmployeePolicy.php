@@ -17,6 +17,15 @@ class EmployeePolicy
     }
 
     /**
+     * Determine whether the user can view their own employee record (Employee Portal).
+     */
+    public function viewOwn(User $user): bool
+    {
+        // User must have employee role and be linked to an employee record
+        return $user->hasPermissionTo(Permissions::EMPLOYEE_PROFILE_VIEW) && $user->employee !== null;
+    }
+
+    /**
      * Determine whether the user can view the employee.
      */
     public function view(User $user, Employee $employee): bool

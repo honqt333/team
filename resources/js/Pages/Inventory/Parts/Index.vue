@@ -15,6 +15,29 @@
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.subtitle') }}</p>
                         </div>
                     </div>
+                <div class="flex items-center gap-3">
+                    <!-- View Toggle -->
+                    <div class="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg flex items-center">
+                        <button 
+                            @click="toggleView('list')"
+                            :class="['p-1.5 rounded-md transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
+                            title="List View"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                        <button 
+                            @click="toggleView('grid')"
+                            :class="['p-1.5 rounded-md transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
+                            title="Grid View"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                        </button>
+                    </div>
+
                     <button
                         v-if="can('inventory.parts.create')"
                         @click="createPart"
@@ -25,6 +48,7 @@
                         </svg>
                         <span class="hidden sm:inline">{{ $t('inventory.parts.add') }}</span>
                     </button>
+                </div>
                 </div>
             </div>
 
@@ -71,7 +95,7 @@
 
             <!-- Parts Table -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="overflow-x-auto">
+                <div v-if="viewMode === 'list'" class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
@@ -88,10 +112,14 @@
                             <tr v-for="part in parts.data" :key="part.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                 <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ part.sku }}</td>
                                 <td class="px-4 py-3">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ part.name_ar }}</div>
+                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
+                                        <button @click="editPart(part)" class="hover:text-blue-600 hover:underline text-start">
+                                            {{ part.name_ar }}
+                                        </button>
+                                    </div>
                                     <div v-if="part.name_en" class="text-xs text-gray-500 dark:text-gray-400">{{ part.name_en }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ part.unit?.name_ar || '-' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ (locale === 'ar' ? part.unit?.name_ar : (part.unit?.name_en || part.unit?.name_ar)) || '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{ part.category?.name_ar || '-' }}</td>
                                 <td class="px-4 py-3">
                                     <span :class="[
@@ -153,6 +181,133 @@
                     </table>
                 </div>
 
+                <!-- Grid View -->
+                <div v-else-if="viewMode === 'grid'" class="p-6">
+                    <div v-if="parts.data.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div 
+                            v-for="part in parts.data" 
+                            :key="part.id" 
+                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:shadow-md transition-all group relative flex flex-col overflow-hidden"
+                        >
+                            <!-- Top Row: SKU & Unit -->
+                            <div class="px-4 pt-4 flex justify-between items-start text-xs text-gray-500 dark:text-gray-400">
+                                <span class="font-mono font-medium text-blue-600 dark:text-blue-400">{{ part.sku }}</span>
+                                <span v-if="part.unit">{{ $t('inventory.parts.unit') }}: {{ locale === 'ar' ? part.unit.name_ar : (part.unit.name_en || part.unit.name_ar) }}</span>
+                            </div>
+
+                            <!-- Middle: Barcode & Name & Cart Icon -->
+                            <div class="px-4 py-3 flex items-center justify-between gap-3">
+                                <div class="flex-1 flex flex-col items-center text-center">
+                                    <!-- Fake Barcode Visual -->
+                                    <div class="h-8 w-32 flex items-end justify-center gap-[1px] opacity-70 mb-1">
+                                        <div v-for="i in 20" :key="i" :class="['bg-gray-800 dark:bg-gray-300', i % 2 === 0 ? 'w-[1px]' : 'w-[2px]', i % 3 === 0 ? 'h-full' : 'h-3/4']"></div>
+                                    </div>
+                                    <h3 class="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 px-1">
+                                        {{ part.name_ar }} 
+                                        <span v-if="part.name_en" class="block text-[10px] font-normal text-gray-400">{{ part.name_en }}</span>
+                                    </h3>
+                                </div>
+                                
+                                <!-- Cart Icon -->
+                                <button 
+                                    class="text-gray-300 hover:text-blue-600 dark:text-gray-600 dark:hover:text-blue-400 transition-colors"
+                                    :title="$t('inventory.parts.add_to_wo')"
+                                >
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Bottom: Collapsible-like Sections -->
+                            <div class="mt-auto border-t border-gray-50 dark:border-gray-700/50">
+                                <!-- Make/Model Indicator (Placeholder) -->
+                                <button class="w-full flex items-center justify-between px-4 py-2.5 text-xs text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-b border-gray-50 dark:border-gray-700/50">
+                                    <span>{{ $t('inventory.parts.category') }}</span>
+                                    <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </button>
+                                
+                                <!-- Warehouses/Stock Toggle -->
+                                <button 
+                                    @click="toggleExpanded(part.id)"
+                                    class="w-full flex items-center justify-between px-4 py-2.5 text-xs text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                                    :class="{'bg-gray-50 dark:bg-gray-700/50': expandedPartId === part.id}"
+                                >
+                                    <span class="flex items-center gap-1">
+                                        {{ $t('inventory.stock.title') }}
+                                        <span 
+                                            class="px-1.5 py-0.5 rounded text-[10px] font-medium"
+                                            :class="part.inventory_balances_sum_qty_on_hand > 0 ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' : 'bg-gray-100 text-gray-500'"
+                                        >
+                                            ({{ part.inventory_balances_sum_qty_on_hand ?? 0 }})
+                                        </span>
+                                    </span>
+                                    <svg 
+                                        class="w-3 h-3 text-gray-400 transition-transform duration-200" 
+                                        :class="{'rotate-180': expandedPartId === part.id}"
+                                        fill="none" 
+                                        stroke="currentColor" 
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Collapsible Table -->
+                                <div v-show="expandedPartId === part.id" class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 overflow-x-auto">
+                                    <table class="w-full text-[10px] whitespace-nowrap">
+                                        <thead>
+                                            <tr class="text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                                                <th class="pb-2 font-medium text-start px-1">#</th>
+                                                <th class="pb-2 font-medium text-start px-1">{{ $t('inventory.warehouses.single') }}</th>
+                                                <th class="pb-2 font-medium text-center px-1">{{ $t('inventory.parts.cost_price') }}</th>
+                                                <th class="pb-2 font-medium text-center px-1">{{ $t('inventory.parts.sale_price') }}</th>
+                                                <th class="pb-2 font-medium text-center px-1">{{ $t('inventory.parts.min_sale_price') }}</th>
+                                                <th class="pb-2 font-medium text-center px-1">{{ $t('inventory.stock.current_stock') }}</th>
+                                                <th class="pb-2 font-medium text-center px-1">{{ $t('common.active') }}</th>
+                                                <th class="pb-2 font-medium text-start px-1">{{ $t('inventory.locations.location') }}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                            <tr v-for="(balance, index) in part.inventory_balances" :key="balance.id">
+                                                <td class="py-2 text-gray-500 px-1">{{ index + 1 }}</td>
+                                                <td class="py-2 font-medium text-gray-700 dark:text-gray-300 px-1">
+                                                    {{ balance.warehouse?.center?.name || balance.warehouse?.name || '-' }}
+                                                </td>
+                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ balance.wac_cost || 0 }}</td>
+                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ part.default_sale_price || 0 }}</td>
+                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ part.min_sale_price || 0 }}</td>
+                                                <td class="py-2 text-center font-medium text-gray-900 dark:text-white px-1">
+                                                    {{ balance.qty_on_hand }} {{ locale === 'ar' ? part.unit?.name_ar : (part.unit?.name_en || part.unit?.name_ar) }}
+                                                </td>
+                                                <td class="py-2 text-center px-1">
+                                                    <svg class="w-3 h-3 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                </td>
+                                                <td class="py-2 text-gray-500 px-1">-</td>
+                                            </tr>
+                                            <tr v-if="!part.inventory_balances?.length">
+                                                <td colspan="8" class="py-3 text-center text-gray-400 italic">
+                                                    {{ $t('inventory.parts.no_stock') }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Edit/Action Overlay (Visible on Hover or Menu) -->
+                            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button @click="editPart(part)" class="p-1.5 bg-white dark:bg-gray-700 rounded-full shadow-sm text-gray-400 hover:text-blue-600 border border-gray-100 dark:border-gray-600">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="text-center py-12 text-gray-500 dark:text-gray-400">
+                        {{ $t('inventory.parts.empty') }}
+                    </div>
+                </div>
+
                 <!-- Pagination -->
                 <div v-if="parts.links?.length > 3" class="px-4 py-3 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex items-center justify-between">
@@ -194,6 +349,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
 import CreateModal from './CreateModal.vue';
@@ -213,13 +369,14 @@ const props = defineProps({
 });
 
 const page = usePage();
+const { t, locale } = useI18n();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
 
 const computedCategories = computed(() => {
-    const allOption = { id: '', name: page.props.auth.user.locale === 'ar' ? 'جميع التصنيفات' : 'All Categories' };
+    const allOption = { id: '', name: locale.value === 'ar' ? 'جميع التصنيفات' : 'All Categories' };
     const cats = props.categories.map(cat => ({
         ...cat,
-        name: page.props.auth.user.locale === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)
+        name: locale.value === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)
     }));
     return [allOption, ...cats];
 });
@@ -229,6 +386,14 @@ const localFilters = ref({
     category: props.filters?.category || '',
     status: props.filters?.status || '',
 });
+
+// View Mode Logic
+const viewMode = ref(localStorage.getItem('inventory_parts_view_mode') || 'list');
+
+const toggleView = (mode) => {
+    viewMode.value = mode;
+    localStorage.setItem('inventory_parts_view_mode', mode);
+};
 
 const showCreateModal = ref(false);
 const editingPart = ref(null);
@@ -262,5 +427,15 @@ const toggleActive = (part) => {
     router.patch(route('app.inventory.parts.toggle', part.id), {}, {
         preserveScroll: true,
     });
+};
+
+const expandedPartId = ref(null);
+
+const toggleExpanded = (partId) => {
+    if (expandedPartId.value === partId) {
+        expandedPartId.value = null;
+    } else {
+        expandedPartId.value = partId;
+    }
 };
 </script>
