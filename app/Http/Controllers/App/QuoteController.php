@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Department;
 use App\Models\Quote;
 use App\Models\QuoteLine;
+use App\Models\QuotePart;
 use App\Models\Service;
 use App\Models\Vehicle;
 use App\Models\VehicleColor;
@@ -72,6 +73,9 @@ class QuoteController extends Controller
     {
         $this->authorize("viewAny", Quote::class);
 
+        // Default to pending if not specified
+        $status = $request->input('status', 'pending');
+
         // Calculate counts for filter tabs
         $filterCounts = [
             'all' => Quote::count(),
@@ -91,11 +95,11 @@ class QuoteController extends Controller
                       ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
                 });
             })
-            ->when($request->status && $request->status !== 'all', function ($query) use ($request) {
-                if ($request->status === 'pending') {
+            ->when($status && $status !== 'all', function ($query) use ($status) {
+                if ($status === 'pending') {
                     $query->whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT]);
                 } else {
-                    $query->where('status', $request->status);
+                    $query->where('status', $status);
                 }
             })
             ->when($request->date_range && $request->date_range !== 'all', function ($query, $range) {
@@ -147,7 +151,7 @@ class QuoteController extends Controller
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
-            'filters' => $request->only(['search', 'status', 'date_range']),
+            'filters' => array_merge($request->only(['search', 'date_range']), ['status' => $status]),
             'filterCounts' => $filterCounts,
         ]);
     }
@@ -269,26 +273,40 @@ class QuoteController extends Controller
             'notes' => $request->notes,
         ]);
 
-        // Delete existing lines and recreate
-        $quote->lines()->delete();
+        // Sync departments if provided
+        if ($request->has('departments')) {
+            $quote->departments()->sync($request->departments);
+        }
 
-        foreach ($request->lines as $lineData) {
-            $service = null;
-            if (!empty($lineData['service_id'])) {
-                $service = Service::find($lineData['service_id']);
+        // Only update lines if provided in request to prevent accidental deletion
+        // when editing header info via modal which sends empty lines
+        if ($request->filled('lines') && count($request->lines) > 0) {
+            // Delete existing lines and recreate
+            $quote->lines()->delete();
+
+            foreach ($request->lines as $lineData) {
+                $service = null;
+                if (!empty($lineData['service_id'])) {
+                    $service = Service::find($lineData['service_id']);
+                }
+
+                QuoteLine::create([
+                    'quote_id' => $quote->id,
+                    'service_id' => $lineData['service_id'] ?? null,
+                    'description' => $lineData['description'],
+                    'qty' => $lineData['qty'],
+                    'unit_price' => $lineData['unit_price'],
+                    'base_price_snapshot' => $service?->base_price ?? $lineData['unit_price'],
+                    'min_price_snapshot' => $service?->min_price ?? 0,
+                    'discount_type' => $lineData['discount_type'] ?? 'none',
+                    'discount_value' => $lineData['discount_value'] ?? null,
+                ]);
             }
 
-            QuoteLine::create([
-                'quote_id' => $quote->id,
-                'service_id' => $lineData['service_id'] ?? null,
-                'description' => $lineData['description'],
-                'qty' => $lineData['qty'],
-                'unit_price' => $lineData['unit_price'],
-                'base_price_snapshot' => $service?->base_price ?? $lineData['unit_price'],
-                'min_price_snapshot' => $service?->min_price ?? 0,
-                'discount_type' => $lineData['discount_type'] ?? 'none',
-                'discount_value' => $lineData['discount_value'] ?? null,
-            ]);
+            // Recalculate totals only if lines were updated
+            $quote->refresh();
+            $quote->recalculateTotals();
+            $quote->save();
         }
 
         // Recalculate totals
@@ -328,6 +346,8 @@ class QuoteController extends Controller
             'vehicle.customer',
             'vehicle.model',
             'lines.service.department',
+            'parts.part',
+            'parts.quoteLine',
             'departments',
             'createdByUser',
         ]);
@@ -346,12 +366,31 @@ class QuoteController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        // Data for QuoteFormModal (edit)
+        $customers = Customer::with('vehicles')->orderBy('name')->get();
+        $makes = VehicleMake::where('is_active', true)->orderBy('name_ar')->get();
+        $colors = VehicleColor::where('is_active', true)->orderBy('name_ar')->get();
+        $modelsByMake = \App\Models\VehicleModel::where('is_active', true)
+            ->orderBy('name_ar')
+            ->get()
+            ->groupBy('make_id');
+
+        // Data for QuotePartModal
+        $inventoryUnits = \App\Models\InventoryUnit::where('is_active', true)
+            ->orderBy('name_ar')
+            ->get();
+
         return Inertia::render('Quotes/Show', [
             'quote' => $quote,
             'linesByDepartment' => $linesByDepartment,
             'departments' => $departments,
             'services' => $services,
             'quoteDepartments' => $quote->departments,
+            'customers' => $customers,
+            'makes' => $makes,
+            'colors' => $colors,
+            'modelsByMake' => $modelsByMake,
+            'inventoryUnits' => $inventoryUnits,
         ]);
     }
 
@@ -372,11 +411,18 @@ class QuoteController extends Controller
             'unit_price' => ['required', 'numeric', 'min:0'],
             'discount_type' => ['nullable', 'in:none,percentage,fixed'],
             'discount_value' => ['nullable', 'numeric', 'min:0'],
+            // Pending parts validation
+            'pending_parts' => ['nullable', 'array'],
+            'pending_parts.*.source' => ['required_with:pending_parts', 'in:warehouse,external,customer'],
+            'pending_parts.*.name' => ['required_with:pending_parts', 'string', 'max:255'],
+            'pending_parts.*.qty' => ['required_with:pending_parts', 'numeric', 'min:0.01'],
+            'pending_parts.*.unit_price' => ['required_with:pending_parts', 'numeric', 'min:0'],
+            'pending_parts.*.discount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         $service = Service::find($validated['service_id']);
 
-        QuoteLine::create([
+        $line = QuoteLine::create([
             'quote_id' => $quote->id,
             'service_id' => $validated['service_id'],
             'description' => $validated['description'] ?? $service->name,
@@ -387,6 +433,27 @@ class QuoteController extends Controller
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
         ]);
+
+        // Save pending parts linked to the new service line
+        if (!empty($request->pending_parts)) {
+            foreach ($request->pending_parts as $partData) {
+                QuotePart::create([
+                    'quote_id' => $quote->id,
+                    'quote_line_id' => $line->id,
+                    'part_id' => $partData['part_id'] ?? null,
+                    'source' => $partData['source'],
+                    'name' => $partData['name'],
+                    'part_number' => $partData['part_number'] ?? null,
+                    'unit_id' => $partData['unit_id'] ?? null,
+                    'description' => $partData['description'] ?? null,
+                    'qty' => $partData['qty'],
+                    'unit_price' => $partData['unit_price'],
+                    'discount' => $partData['discount'] ?? 0,
+                    'include_in_package' => $partData['include_in_package'] ?? true,
+                    'hide_on_print' => $partData['hide_on_print'] ?? false,
+                ]);
+            }
+        }
 
         $quote->refresh();
         $quote->recalculateTotals();
@@ -493,4 +560,106 @@ class QuoteController extends Controller
 
         return redirect()->back();
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Quote Parts Management
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Add a part to the quote.
+     */
+    public function addPart(Request $request, Quote $quote): RedirectResponse
+    {
+        $this->authorize('update', $quote);
+
+        if (!$quote->canBeEdited()) {
+            abort(403, 'Cannot add parts to a converted or approved quote.');
+        }
+
+        $validated = $request->validate([
+            'source' => ['required', 'in:warehouse,external,customer'],
+            'name' => ['required', 'string', 'max:255'],
+            'part_id' => ['nullable', 'exists:parts,id'],
+            'quote_line_id' => ['nullable', 'exists:quote_lines,id'],
+            'part_number' => ['nullable', 'string', 'max:255'],
+            'unit_id' => ['nullable', 'exists:inventory_units,id'],
+            'description' => ['nullable', 'string'],
+            'qty' => ['required', 'numeric', 'min:0.01'],
+            'unit_price' => ['required', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
+            'include_in_package' => ['boolean'],
+            'hide_on_print' => ['boolean'],
+        ]);
+
+        $quote->parts()->create($validated);
+
+        $quote->recalculateTotals();
+        $quote->save();
+
+        return redirect()->back();
+    }
+
+    /**
+     * Update a part in the quote.
+     */
+    public function updatePart(Request $request, Quote $quote, QuotePart $quotePart): RedirectResponse
+    {
+        $this->authorize('update', $quote);
+
+        if (!$quote->canBeEdited()) {
+            abort(403, 'Cannot update parts of a converted or approved quote.');
+        }
+
+        // Ensure part belongs to this quote
+        if ($quotePart->quote_id !== $quote->id) {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'source' => ['sometimes', 'in:warehouse,external,customer'],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'part_id' => ['nullable', 'exists:parts,id'],
+            'quote_line_id' => ['nullable', 'exists:quote_lines,id'],
+            'part_number' => ['nullable', 'string', 'max:255'],
+            'unit_id' => ['nullable', 'exists:inventory_units,id'],
+            'description' => ['nullable', 'string'],
+            'qty' => ['sometimes', 'numeric', 'min:0.01'],
+            'unit_price' => ['sometimes', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
+            'include_in_package' => ['boolean'],
+            'hide_on_print' => ['boolean'],
+        ]);
+
+        $quotePart->update($validated);
+
+        $quote->recalculateTotals();
+        $quote->save();
+
+        return redirect()->back();
+    }
+
+    /**
+     * Delete a part from the quote.
+     */
+    public function deletePart(Quote $quote, QuotePart $quotePart): RedirectResponse
+    {
+        $this->authorize('update', $quote);
+
+        if (!$quote->canBeEdited()) {
+            abort(403, 'Cannot delete parts from a converted or approved quote.');
+        }
+
+        // Ensure part belongs to this quote
+        if ($quotePart->quote_id !== $quote->id) {
+            abort(404);
+        }
+
+        $quotePart->delete();
+
+        $quote->recalculateTotals();
+        $quote->save();
+
+        return redirect()->back();
+    }
 }
+

@@ -191,7 +191,6 @@ class PartsController extends Controller
             ->active()
             ->search($request->input('q'))
             ->with(['unit'])
-            ->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'default_sale_price')
             ->withSum('inventoryBalances', 'qty_on_hand')
             ->limit(20)
             ->get();

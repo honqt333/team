@@ -37,4 +37,5 @@ return [
     'from' => 'من',
     'to' => 'إلى',
     'error_occurred' => 'حدث خطأ ما',
+    'error_alert_title' => 'يوجد أخطاء في البيانات المدخلة',
 ];

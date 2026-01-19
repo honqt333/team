@@ -24,6 +24,12 @@ return [
         'approved_successfully' => 'تم اعتماد المسير بنجاح',
         'must_approve_first' => 'يجب اعتماد المسير أولاً',
         'marked_paid' => 'تم تحديد المسير كمدفوع',
+        'statuses' => [
+            'pending' => 'معلق',
+            'draft' => 'مسودة',
+            'approved' => 'معتمد',
+            'paid' => 'مدفوع',
+        ],
     ],
     'settings' => [
         'title' => 'إعدادات الموارد البشرية',

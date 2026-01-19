@@ -41,6 +41,8 @@
         "updated_by": "قام بالتحديث",
         "confirm_delete_title": "تأكيد الحذف",
         "confirm_delete_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
+        "delete_confirm": "تأكيد الحذف",
+        "delete_confirm_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
         "confirm": "تأكيد",
         "deleted_success": "تم الحذف بنجاح",
         "saved_success": "تم الحفظ بنجاح",
@@ -56,6 +58,9 @@
         "import": "استيراد",
         "export": "تصدير",
         "edit": "تعديل",
+        "next": "التالي",
+        "optional": "اختياري",
+        "pending": "معلق",
         "error": "خطأ",
         "cannot_modify_system_data": "لا يمكن تعديل بيانات النظام",
         "cannot_delete_system_data": "لا يمكن حذف بيانات النظام",
@@ -113,7 +118,9 @@
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
-        }
+        },
+        "discount": "الخصم",
+        "quantity": "الكمية"
     },
     "nav": {
         "brand": "Carag",
@@ -318,7 +325,9 @@
                 "other": "أخرى"
             }
         },
-        "all_loaded": "تم تحميل جميع المركبات"
+        "all_loaded": "تم تحميل جميع المركبات",
+        "delete_confirm_title": "حذف المركبة",
+        "delete_confirm_message": "هل أنت متأكد من رغبتك في حذف هذه المركبة؟ لا يمكن التراجع عن هذا الإجراء."
     },
     "print": {
         "options_title": "خيارات الطباعة",
@@ -536,6 +545,8 @@
                 "customer": "من العميل"
             },
             "no_parts": "لا توجد قطع غيار",
+            "include_in_package": "ضمن السعر في الباقة",
+            "hide_on_print": "إخفاء عند الطباعة",
             "assign_technician": "تعيين فني",
             "no_technicians": "لا يوجد فنيون معينون",
             "assigned_at": "تاريخ التعيين",
@@ -708,6 +719,7 @@
             "description": "الوصف",
             "price": "السعر",
             "min_sale_price": "أقل سعر بيع",
+            "min_price_warning": "السعر أقل من الحد الأدنى المسموح",
             "stock_balance": "رصيد المستودع الحالي",
             "empty": "لا توجد فروع",
             "empty_hint": "أضف فرعك الأول للبدء",
@@ -901,6 +913,17 @@
         "total_count": "تقييم",
         "showing": "عرض",
         "of": "من",
+        "parts": {
+            "source": "مصدر القطعة",
+            "source_description": "حدد مصدر قطع الغيار المرتبطة بهذه الخدمة.",
+            "warehouse": "من المستودع",
+            "warehouse_hint": "خصم من المخزون",
+            "external": "شراء خارجي",
+            "external_hint": "يتطلب أمر شراء",
+            "customer": "من العميل",
+            "customer_hint": "توفير بواسطة العميل",
+            "implementation_placeholder": "سيتم تنفيذ آلية إضافة القطع هنا."
+        },
         "status": {
             "draft": "مسودة",
             "sent": "مرسل",
@@ -947,8 +970,14 @@
             "confirm_reject": "هل تريد رفض هذا التقييم؟",
             "confirm_delete": "هل تريد حذف هذا التقييم نهائياً؟",
             "confirm_remove_department": "هل تريد إزالة هذا القسم من التقييم؟",
+            "confirm_remove_department_title": "إزالة القسم",
+            "confirm_delete_title": "حذف التقييم",
+            "confirm_delete_service": "هل تريد حذف هذه الخدمة من التقييم؟",
+            "confirm_delete_service_title": "حذف الخدمة",
             "cannot_edit": "لا يمكن تعديل هذا التقييم",
-            "cannot_delete": "لا يمكن حذف هذا التقييم"
+            "cannot_delete": "لا يمكن حذف هذا التقييم",
+            "confirm_delete_part": "هل تريد حذف هذه القطعة من التقييم؟",
+            "confirm_delete_part_title": "حذف القطعة"
         },
         "converted_to": "تم التحويل إلى كرت عمل",
         "tabs": {
@@ -958,7 +987,14 @@
             "main_info": "المعلومات الرئيسية",
             "customer_complaint": "شكوى العميل",
             "initial_assessment": "التقييم المبدئي",
-            "departments": "الأقسام والخدمات"
+            "departments": "الأقسام والخدمات",
+            "services": "الخدمات",
+            "parts": "قطع الغيار"
+        },
+        "part_source": {
+            "warehouse": "من المستودع",
+            "external": "شراء خارجي",
+            "customer": "موفر من العميل"
         },
         "filters": {
             "code_placeholder": "رقم التقييم...",
@@ -1005,14 +1041,19 @@
             "add_service": "إضافة خدمة",
             "services_count": "خدمات",
             "no_services": "لا توجد خدمات في هذا القسم",
+            "no_parts": "لا توجد قطع غيار",
+            "add_part": "إضافة قطعة",
             "no_departments": "لا توجد أقسام، قم بإضافة قسم للبدء",
             "all_departments_added": "تم إضافة جميع الأقسام",
             "print": "طباعة",
             "share": "مشاركة",
             "copy_link": "نسخ الرابط",
+            "confirm_remove_department": "هل أنت متأكد من إزالة هذا القسم؟",
             "tabs": {
                 "services": "الخدمات",
-                "spare_parts": "قطع الغيار"
+                "spare_parts": "قطع الغيار",
+                "service_info": "بيانات الخدمة",
+                "linked_parts": "قطع الغيار المرتبطة"
             }
         },
         "service_modal": {
@@ -1026,6 +1067,22 @@
             "fixed": "مبلغ ثابت",
             "discount_value": "قيمة الخصم",
             "total_cost": "تكلفة الخدمة"
+        },
+        "parts_display": {
+            "view_grid": "عرض شبكي",
+            "view_table": "عرض جدولي",
+            "part_number": "رقم القطعة",
+            "barcode": "باركود",
+            "supplier": "الجهة الموردة",
+            "service": "الخدمة",
+            "price": "السعر",
+            "discount": "الخصم",
+            "qty": "الكمية",
+            "amount": "المبلغ",
+            "vat": "VAT",
+            "total": "المجموع",
+            "without_service": "بدون خدمة",
+            "external_purchase": "شراء خارجي"
         },
         "all_loaded": "تم تحميل جميع التقييمات"
     },
@@ -1125,6 +1182,12 @@
             "barcode": "الباركود",
             "print_barcode": "طباعة الباركود",
             "category": "التصنيف",
+            "search": "بحث عن قطع غيار...",
+            "search_label": "بحث عن قطعة",
+            "part_number": "رقم القطعة",
+            "unit_price": "سعر الوحدة",
+            "contains": "تحتوي على",
+            "current_stock": "المخزون الحالي",
             "category_placeholder": "زيوت، فلاتر، فرامل...",
             "unit": "وحدة التخزين",
             "description": "الوصف",
@@ -1157,6 +1220,7 @@
             "external": "خارجي",
             "all_categories": "جميع الفئات",
             "empty": "لا توجد قطع",
+            "no_stock": "لا يوجد مخزون",
             "search_placeholder": "ابحث بالرمز أو الاسم...",
             "statuses": {
                 "pending": "معلق",
@@ -1165,6 +1229,9 @@
             }
         },
         "units": {
+            "single": "وحدة",
+            "stock_unit": "وحدة المخزون",
+            "warehouse_unit": "وحدة المستودع",
             "piece": "قطعة",
             "liter": "لتر",
             "kg": "كيلوغرام",
@@ -1178,6 +1245,7 @@
             "search_placeholder": "ابحث بالرمز أو الاسم...",
             "qty": "المخزون الحالي",
             "current_stock": "الكمية الحالية",
+            "current": "المخزون الحالي",
             "wac": "سعر الكلفة",
             "min_qty": "الحد الأدنى",
             "value": "إجمالي القيمة",
@@ -1189,6 +1257,7 @@
             "previous_stock": "المخزون السابق",
             "empty": "لا توجد أرصدة",
             "insufficient": "الكمية المطلوبة أكبر من المتوفر",
+            "insufficient_warning": "تنبيه: الكمية المطلوبة أكبر من المتوفر في المخزون",
             "available": "المتوفر",
             "total_qty": "إجمالي المخزون",
             "avg_cost": "متوسط التكلفة",
@@ -1221,6 +1290,24 @@
                 "transfer_in": "تحويل وارد",
                 "transfer_out": "تحويل صادر",
                 "reversal": "عكس حركة"
+            },
+            "columns": {
+                "row_number": "#",
+                "part": "القطعة",
+                "action": "الإجراء",
+                "details": "التفاصيل",
+                "stock_before": "المخزون السابق",
+                "qty": "الكمية",
+                "stock_after": "المخزون اللاحق",
+                "cost_price": "سعر الكلفة",
+                "wac": "سعر الكلفة المرجح",
+                "price": "السعر",
+                "cost_amount": "مبلغ التكلفة",
+                "discount": "الخصم",
+                "subtotal": "المجموع الفرعي",
+                "vat": "ضريبة القيمة المضافة VAT",
+                "total_amount": "المبلغ الإجمالي",
+                "updated_at": "تاريخ التحديث"
             }
         },
         "transfers": {
@@ -1333,6 +1420,14 @@
             "send": "إرسال للمورد",
             "cancel": "إلغاء",
             "receive": "استلام البضاعة",
+            "add": "إضافة أمر شراء",
+            "edit": "تعديل أمر شراء",
+            "price_includes_tax": "الأسعار شاملة الضريبة",
+            "items": "الأصناف",
+            "no_items": "لا توجد أصناف",
+            "balance": "المتبقي",
+            "supplier_reference": "مرجع المورد",
+            "select_supplier": "اختر المورد...",
             "statuses": {
                 "draft": "مسودة",
                 "sent": "مرسل",
@@ -1340,6 +1435,11 @@
                 "received": "مستلم بالكامل",
                 "cancelled": "ملغي"
             }
+        },
+        "items": {
+            "add": "إضافة صنف",
+            "edit": "تعديل صنف",
+            "select_part": "اختر قطعة الغيار"
         },
         "grn": {
             "title": "سندات الاستلام",

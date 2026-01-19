@@ -101,6 +101,12 @@ class Quote extends Model
         return $this->hasMany(QuoteLine::class);
     }
 
+    public function parts(): HasMany
+    {
+        return $this->hasMany(QuotePart::class);
+    }
+
+
     public function createdByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -198,7 +204,7 @@ class Quote extends Model
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Recalculate totals from lines.
+     * Recalculate totals from lines and parts.
      */
     public function recalculateTotals(): void
     {
@@ -206,8 +212,19 @@ class Quote extends Model
             // Ensure line totals are calculated
         });
 
-        $this->subtotal = $this->lines->sum('line_total') + $this->lines->sum('discount_amount');
-        $this->total_discount = $this->lines->sum('discount_amount');
-        $this->total = $this->lines->sum('line_total');
+        // Services totals
+        $linesSubtotal = $this->lines->sum('line_total_excl_tax') ?: $this->lines->sum('line_total');
+        $linesDiscount = $this->lines->sum('discount_amount');
+        $linesTax = $this->lines->sum('tax_amount');
+
+        // Parts totals (exclude parts where include_in_package = false)
+        $partsSubtotal = $this->parts->where('include_in_package', true)->sum('total');
+
+        $this->subtotal = $linesSubtotal + $partsSubtotal;
+        $this->total_discount = $linesDiscount;
+        $this->total_tax = $linesTax;
+        $this->total_excl_tax = $this->subtotal;
+        $this->total_incl_tax = $this->subtotal + $this->total_tax;
+        $this->total = $this->total_incl_tax;
     }
 }

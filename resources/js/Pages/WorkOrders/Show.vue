@@ -531,7 +531,7 @@
                     <!-- Spare Parts Tab -->
                     <div v-show="activeTab === 'parts'" class="space-y-4">
                         <!-- Add Part Button -->
-                        <div class="flex justify-end">
+                        <div v-if="!isReadOnly" class="flex justify-end">
                             <button
                                 @click="showAddPartModal = true"
                                 class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
@@ -543,74 +543,16 @@
                             </button>
                         </div>
 
-                        <!-- Parts List -->
-                        <div v-if="allWorkOrderParts.length > 0" class="space-y-2">
-                            <div
-                                v-for="part in allWorkOrderParts"
-                                :key="part.id"
-                                class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 flex items-center justify-between hover:shadow-md transition-shadow"
-                            >
-                                <div class="flex items-center gap-4">
-                                    <!-- Part Icon -->
-                                    <div class="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                                        <span class="text-amber-600 dark:text-amber-400">🔩</span>
-                                    </div>
-                                    
-                                    <div>
-                                        <p class="font-medium text-gray-900 dark:text-white">
-                                            {{ part.part?.name_ar || part.part?.name_en || part.name }}
-                                        </p>
-                                        <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                            <span v-if="part.part?.sku" class="font-mono">{{ part.part.sku }}</span>
-                                            <span>{{ part.qty }} × {{ formatPrice(part.unit_price) }}</span>
-                                            <span 
-                                                v-if="part.status" 
-                                                :class="{
-                                                    'text-green-600': part.status === 'issued',
-                                                    'text-red-600': part.status === 'reversed',
-                                                    'text-gray-500': part.status === 'pending'
-                                                }"
-                                            >
-                                                {{ $t('inventory.parts.statuses.' + part.status) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-center gap-3">
-                                    <span class="font-semibold text-gray-900 dark:text-white">
-                                        {{ formatPrice(part.qty * part.unit_price) }}
-                                    </span>
-                                    <button 
-                                        v-if="!isReadOnly && part.status !== 'reversed'"
-                                        @click="deleteWorkOrderPart(part)"
-                                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                    >
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Empty State -->
-                        <div v-else class="text-center py-12">
-                            <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                                <span class="text-2xl">🔩</span>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.show.no_parts') }}</p>
-                            <button
-                                v-if="!isReadOnly"
-                                @click="showAddPartModal = true"
-                                class="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                {{ $t('inventory.parts.add_to_wo') }}
-                            </button>
-                        </div>
+                        <!-- Parts Display Component -->
+                        <PartsDisplay 
+                            :parts="normalizedPartsForDisplay"
+                            :read-only="isReadOnly"
+                            storage-key="work_orders_parts_view_mode"
+                            :empty-message="$t('work_orders.show.no_parts')"
+                            :add-button-text="$t('inventory.parts.add_to_wo')"
+                            @delete="deleteWorkOrderPart"
+                            @add="showAddPartModal = true"
+                        />
                     </div>
 
                     <!-- Technicians Tab -->
@@ -808,6 +750,7 @@ import PrintOptionsModal from '@/Components/WorkOrders/PrintOptionsModal.vue';
 import PaymentsSection from '@/Components/WorkOrders/PaymentsSection.vue';
 import TechniciansSection from '@/Components/WorkOrders/TechniciansSection.vue';
 import PaymentsListModal from '@/Components/WorkOrders/PaymentsListModal.vue'; // Updated
+import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 
 const props = defineProps({
     workOrder: Object,
@@ -891,6 +834,18 @@ const allWorkOrderParts = computed(() => {
         });
     });
     return parts;
+});
+
+// Normalized parts for PartsDisplay component
+const normalizedPartsForDisplay = computed(() => {
+    return allWorkOrderParts.value.map(part => ({
+        ...part,
+        name: part.part?.name_ar || part.part?.name_en || part.name || '',
+        part_number: part.part?.sku || '',
+        source: part.source || 'warehouse',
+        total: (part.qty * part.unit_price) - (part.discount || 0),
+        discount: part.discount || 0,
+    }));
 });
 
 // Payment computed properties

@@ -24,6 +24,12 @@ return [
         'approved_successfully' => 'Payroll approved successfully',
         'must_approve_first' => 'Must approve payroll first',
         'marked_paid' => 'Payroll marked as paid',
+        'statuses' => [
+            'pending' => 'Pending',
+            'draft' => 'Draft',
+            'approved' => 'Approved',
+            'paid' => 'Paid',
+        ],
     ],
     'settings' => [
         'title' => 'HR Settings',

@@ -50,6 +50,8 @@ class PurchaseOrdersController extends Controller
                 PurchaseOrder::STATUS_RECEIVED,
                 PurchaseOrder::STATUS_CANCELLED,
             ],
+            'defaultWarehouse' => Warehouse::forCenter($centerId)->default()->first(),
+            'warehouses' => Warehouse::forCenter($centerId)->active()->get(['id', 'name']),
         ]);
     }
 
@@ -65,6 +67,7 @@ class PurchaseOrdersController extends Controller
         return Inertia::render('Purchasing/Orders/Form', [
             'order' => null,
             'suppliers' => $suppliers,
+            'warehouses' => Warehouse::forCenter($user->current_center_id)->active()->get(['id', 'name']),
             'defaultWarehouse' => $warehouse,
         ]);
     }
@@ -91,6 +94,26 @@ class PurchaseOrdersController extends Controller
 
         $validated['tenant_id'] = $user->tenant_id;
         $validated['center_id'] = $user->current_center_id;
+
+        // Append payment info to notes if present
+        if ($request->has('payments') && count($request->input('payments')) > 0) {
+            $paymentInfo = "\n\n--- Start Payment Details ---\n";
+            $paymentInfo .= "Payment Type: " . ucfirst($request->input('payment_type', 'unknown')) . "\n";
+            foreach ($request->input('payments') as $payment) {
+                $paymentInfo .= sprintf(
+                    "- Method: %s, Amount: %s, Date: %s, Notes: %s\n",
+                    $payment['payment_method'] ?? 'N/A',
+                    $payment['amount'] ?? 0,
+                    $payment['payment_date'] ?? 'N/A',
+                    $payment['notes'] ?? ''
+                );
+            }
+            $paymentInfo .= "--- End Payment Details ---";
+            
+            $validated['notes'] = ($validated['notes'] ?? '') . $paymentInfo;
+        } else if ($request->input('payment_type') === 'deferred') {
+             $validated['notes'] = ($validated['notes'] ?? '') . "\n\n[Marked as Deferred/Credit]";
+        }
 
         $order = $this->purchasingService->createPurchaseOrder($validated);
 

@@ -164,6 +164,11 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::post('/quotes/{quote}/departments', [QuoteController::class, 'addDepartment'])->name('app.quotes.departments.store');
     Route::delete('/quotes/{quote}/departments/{department}', [QuoteController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
     
+    // Quote Parts
+    Route::post('/quotes/{quote}/parts', [QuoteController::class, 'addPart'])->name('app.quotes.parts.store');
+    Route::put('/quotes/{quote}/parts/{quotePart}', [QuoteController::class, 'updatePart'])->name('app.quotes.parts.update');
+    Route::delete('/quotes/{quote}/parts/{quotePart}', [QuoteController::class, 'deletePart'])->name('app.quotes.parts.destroy');
+    
 
 
     // Tenants

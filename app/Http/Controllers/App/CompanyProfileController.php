@@ -198,6 +198,11 @@ class CompanyProfileController extends Controller
                         'rounding_mode' => $data['rounding_mode'] ?? 'half_up',
                     ]
                 );
+
+                // Update VAT number on tenant profile if provided
+                if (isset($data['vat_number'])) {
+                    $tenant->update(['vat_number' => $data['vat_number']]);
+                }
                 break;
 
             case 'zatca':
@@ -232,7 +237,6 @@ class CompanyProfileController extends Controller
                     'legal_name_en' => 'required|string|max:255',
                     'trade_name' => 'required|string|max:255',
                     'owner_name' => 'required|string|max:255',
-                    'vat_number' => 'nullable|string|max:20',
                     'cr_number' => 'nullable|string|max:20',
                     'iban' => 'nullable|string|max:34',
                 ];
@@ -244,14 +248,12 @@ class CompanyProfileController extends Controller
                     'vat_rate' => 'required_if:vat_enabled,true|numeric|min:0|max:100',
                     'pricing_mode' => 'required_if:vat_enabled,true|in:inclusive,exclusive',
                     'rounding_mode' => 'nullable|in:half_up,half_down',
+                    'vat_number' => 'nullable|string|max:20',
                 ];
                 
-                // If VAT is enabled, VAT number must exist on tenant
+                // If VAT is enabled, VAT number is required and must be numeric up to 15 digits
                 if ($data['vat_enabled'] ?? false) {
-                    $existingVatNumber = $tenant->vat_number ?? ($data['vat_number'] ?? null);
-                    if (empty($existingVatNumber)) {
-                        return ['vat_number' => __('company_profile.vat.vat_number_required')];
-                    }
+                     $rules['vat_number'] = ['required', 'string', 'max:15', 'regex:/^[0-9]+$/'];
                 }
                 break;
 

@@ -37,4 +37,5 @@ return [
     'from' => 'From',
     'to' => 'To',
     'error_occurred' => 'An error occurred',
+    'error_alert_title' => 'There were errors with your submission',
 ];

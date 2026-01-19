@@ -38,7 +38,7 @@ class EmployeePermissionsController extends Controller
         
         return response()->json([
             'has_user' => true,
-            'current_roles' => $employee->user->roles->pluck('name'),
+            'current_roles' => $employee->user->roles->pluck('id'), // Return IDs
             'current_permissions' => $employee->user->permissions->pluck('name'),
             'available_roles' => $roles,
             'grouped_permissions' => $groupedPermissions,
@@ -48,7 +48,7 @@ class EmployeePermissionsController extends Controller
 
     public function update(Request $request, Employee $employee)
     {
-        $this->authorize('update', $employee); // Or a more specific permission like 'assign_roles'
+        $this->authorize('update', $employee); 
 
         if (!$employee->user) {
             return back()->with('error', __('messages.user_not_found'));
@@ -56,12 +56,12 @@ class EmployeePermissionsController extends Controller
 
         $validated = $request->validate([
             'roles' => ['array'],
-            'roles.*' => ['string', 'exists:roles,name'],
+            'roles.*' => ['integer', 'exists:roles,id'], // Validate IDs
             'permissions' => ['array'],
-            'permissions.*' => ['string'], // We validate existence manually or rely on spatie
+            'permissions.*' => ['string'],
         ]);
 
-        // Sync Roles
+        // Sync Roles by ID
         $employee->user->syncRoles($validated['roles'] ?? []);
 
         // Sync Direct Permissions

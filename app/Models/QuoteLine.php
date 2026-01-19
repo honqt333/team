@@ -61,7 +61,24 @@ class QuoteLine extends Model
 
             $line->discount_amount = $computed['discount_amount'];
             $line->final_unit_price = $computed['final_unit_price'];
-            $line->line_total = $computed['line_total'];
+            $line->line_total_excl_tax = $computed['line_total'];
+
+            // Calculate tax based on quote's tax_enabled_snapshot
+            $quote = $line->quote;
+            if ($quote && $quote->tax_enabled_snapshot) {
+                $taxRate = $quote->tax_rate_snapshot ?? 15; // Default 15%
+                $line->is_taxable = true;
+                $line->tax_rate_snapshot = $taxRate;
+                $line->tax_amount = round($computed['line_total'] * ($taxRate / 100), 2);
+                $line->line_total_incl_tax = $computed['line_total'] + $line->tax_amount;
+                $line->line_total = $line->line_total_incl_tax;
+            } else {
+                $line->is_taxable = false;
+                $line->tax_rate_snapshot = 0;
+                $line->tax_amount = 0;
+                $line->line_total_incl_tax = $computed['line_total'];
+                $line->line_total = $computed['line_total'];
+            }
         });
     }
 
