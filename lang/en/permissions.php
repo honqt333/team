@@ -63,11 +63,18 @@ return [
     'invoices_create' => 'Create Invoice',
     'invoices_extra_discount' => 'Apply Extra Discount',
 
-    // Purchasing
+    // Purchasing - Suppliers
     'purchasing_suppliers_view' => 'View Suppliers',
     'purchasing_suppliers_create' => 'Create Supplier',
     'purchasing_suppliers_update' => 'Update Supplier',
     'purchasing_suppliers_destroy' => 'Delete Supplier',
+
+    // Purchasing - Purchase Orders
+    'purchasing_pos_view' => 'View Purchase Orders',
+    'purchasing_pos_create' => 'Create Purchase Order',
+    'purchasing_pos_update' => 'Update Purchase Order',
+    'purchasing_pos_send' => 'Send Purchase Order to Supplier',
+    'purchasing_pos_cancel' => 'Cancel Purchase Order',
 
     // HR
     'hr_view' => 'Access HR Module',
@@ -87,4 +94,12 @@ return [
     'users_create' => 'Create User',
     'users_update' => 'Update User',
     'users_delete' => 'Delete User',
+
+    // Employee Portal (Self-Service)
+    'employee_profile_view' => 'View own profile',
+    'employee_attendance_view' => 'View own attendance',
+    'employee_leaves_view' => 'View own leaves',
+    'employee_leaves_request' => 'Request leave',
+    'employee_payslips_view' => 'View own payslips',
+    'employee_requests_create' => 'Create requests',
 ];

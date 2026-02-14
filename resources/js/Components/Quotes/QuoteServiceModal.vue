@@ -72,17 +72,43 @@
 
             <!-- Price (Qty is hidden/fixed to 1) -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('quotes.service_modal.price') }}
-                </label>
+                <div class="flex items-center justify-between mb-1">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ $t('quotes.service_modal.price') }}
+                    </label>
+                    <!-- Lock indicator when price override not allowed -->
+                    <span v-if="isPriceLocked"
+                        class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        {{ $t('pricing.price_locked') }}
+                    </span>
+                </div>
                 <div class="relative">
-                    <input type="number" v-model="form.unit_price" step="0.01" min="0" dir="ltr"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-end"
-                        required />
+                    <input type="number" v-model="form.unit_price" step="0.01" :min="selectedServiceMinPrice" dir="ltr"
+                        :disabled="isPriceLocked" :class="[
+                            'w-full px-4 py-3 border rounded-xl font-mono text-end focus:ring-2 focus:border-blue-500',
+                            isPriceLocked
+                                ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
+                                : isPriceBelowMinimum
+                                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
+                                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-blue-500'
+                        ]" required />
                     <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
                         <span class="text-gray-500">{{ $t('common.currency') }}</span>
                     </div>
                 </div>
+                <!-- Min price warning -->
+                <p v-if="isPriceBelowMinimum"
+                    class="mt-1 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    {{ $t('quotes.min_price_warning', { min: formatCurrency(selectedServiceMinPrice) }) }}
+                </p>
             </div>
 
             <!-- Discount Section -->
@@ -124,20 +150,62 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('quotes.service_modal.discount_value') }}
                     </label>
-                    <input type="number" v-model="form.discount_value" step="0.01" min="0" dir="ltr"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-end" />
+                    <input type="number" v-model="form.discount_value" step="0.01" min="0" dir="ltr" :class="[
+                        'w-full px-4 py-3 border rounded-xl font-mono text-end focus:ring-2',
+                        isPriceBelowMinimum
+                            ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-red-500 focus:border-red-500'
+                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 focus:ring-blue-500 focus:border-blue-500'
+                    ]" />
+
+                    <!-- Max allowed discount hint -->
+                    <p v-if="selectedServiceMinPrice > 0" :class="[
+                        'mt-1 text-sm flex items-center gap-1',
+                        isPriceBelowMinimum ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
+                    ]">
+                        <svg v-if="isPriceBelowMinimum" class="w-4 h-4" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span v-if="form.discount_type === 'fixed'">
+                            {{ $t('quotes.max_discount_fixed', { max: formatCurrency(maxAllowedFixedDiscount) }) }}
+                        </span>
+                        <span v-else-if="form.discount_type === 'percentage'">
+                            {{ $t('quotes.max_discount_percentage', { max: maxAllowedPercentageDiscount.toFixed(1) }) }}
+                        </span>
+                    </p>
                 </div>
             </div>
 
             <!-- Calculated Total -->
-            <div
-                class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ $t('quotes.service_modal.total_cost') }}
-                </span>
-                <span class="text-xl font-bold text-blue-600 dark:text-blue-400 font-mono">
-                    {{ formatPrice(calculatedTotal) }}
-                </span>
+            <div :class="[
+                'p-4 rounded-xl border',
+                isPriceBelowMinimum
+                    ? 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-900/20 border-red-300 dark:border-red-700'
+                    : 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800'
+            ]">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {{ $t('quotes.service_modal.total_cost') }}
+                    </span>
+                    <span :class="[
+                        'text-xl font-bold font-mono',
+                        isPriceBelowMinimum ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'
+                    ]">
+                        {{ formatPrice(calculatedTotal) }}
+                    </span>
+                </div>
+                <!-- Min price warning - more visible here -->
+                <div v-if="isPriceBelowMinimum"
+                    class="mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span class="font-medium">
+                        {{ $t('quotes.min_price_warning', { min: formatCurrency(selectedServiceMinPrice) }) }}
+                    </span>
+                </div>
             </div>
         </form>
 
@@ -148,7 +216,7 @@
                 <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {{ $t('quotes.show.tabs.linked_parts') }}
                 </h4>
-                <button type="button" @click="openPartModal"
+                <button type="button" @click="openPartModal()"
                     class="px-3 py-1.5 text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -157,73 +225,20 @@
                 </button>
             </div>
 
-            <!-- Parts List -->
-            <div v-if="allParts.length > 0" class="space-y-2">
-                <div v-for="(part, index) in allParts" :key="part.id || `pending-${index}`"
-                    class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium text-gray-900 dark:text-white">{{ part.name }}</span>
-                            <span :class="getSourceBadgeClass(part.source)" class="text-xs px-2 py-0.5 rounded-full">
-                                {{ $t('quotes.part_source.' + part.source) }}
-                            </span>
-                            <span v-if="!part.id"
-                                class="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
-                                {{ $t('common.pending') }}
-                            </span>
-                        </div>
-                        <div class="text-sm text-gray-500 flex items-center gap-3 mt-1" dir="ltr">
-                            <span>{{ part.qty }} × {{ formatCurrency(part.unit_price) }}</span>
-                            <span v-if="part.discount > 0" class="text-red-500">-{{ formatCurrency(part.discount)
-                                }}</span>
-                            <span class="font-bold text-green-600">= {{ formatCurrency(part.total ||
-                                calculatePartTotal(part))
-                                }}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <!-- Edit button (only for pending parts) -->
-                        <button v-if="!part.id" type="button" @click="editPendingPart(index)"
-                            class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
-                        <!-- Delete button -->
-                        <button type="button" @click="removePart(part, index)"
-                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+            <!-- Parts Display Component -->
+            <PartsDisplay :parts="allParts" :read-only="false" :show-vat="quote.is_taxed" :show-service="false"
+                :compact-grid="true" :pending-check="part => !part.id" storage-key="quote_service_modal_parts_view"
+                :empty-message="$t('work_orders.item.no_parts')" :add-button-text="$t('work_orders.item.add_part')"
+                @edit="handlePartEdit" @delete="handlePartDelete" @add="openPartModal()" />
 
-                <!-- Parts Total -->
-                <div
-                    class="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                    <span class="text-sm font-medium text-green-700 dark:text-green-300">{{
-                        $t('work_orders.item.parts_cost')
-                    }}</span>
-                    <span class="font-bold text-green-600 dark:text-green-400 font-mono" dir="ltr">{{
-                        formatCurrency(partsTotalCost) }} {{ $t('common.currency') }}</span>
-                </div>
-            </div>
-
-            <!-- Empty State -->
-            <div v-else class="text-center py-8 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
-                <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-                <p class="text-gray-400 text-sm mb-3">{{ $t('work_orders.item.no_parts') }}</p>
-                <button type="button" @click="openPartModal"
-                    class="px-4 py-2 text-sm bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
-                    {{ $t('work_orders.item.add_part') }}
-                </button>
+            <!-- Parts Total -->
+            <div v-if="allParts.length > 0"
+                class="flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                <span class="text-sm font-medium text-green-700 dark:text-green-300">{{
+                    $t('work_orders.item.parts_cost')
+                }}</span>
+                <span class="font-bold text-green-600 dark:text-green-400 font-mono" dir="ltr">{{
+                    formatCurrency(partsTotalCost) }} {{ $t('common.currency') }}</span>
             </div>
         </div>
 
@@ -237,7 +252,8 @@
                 class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 {{ $t('common.cancel') }}
             </button>
-            <button v-if="activeTab === 'service'" type="button" @click="submitForm" :disabled="form.processing"
+            <button v-if="activeTab === 'service'" type="button" @click="submitForm"
+                :disabled="form.processing || isPriceBelowMinimum"
                 class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 transition-all">
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
             </button>
@@ -257,6 +273,7 @@ import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
+import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import { router } from '@inertiajs/vue3';
 import { useConfirm } from '@/Composables/useConfirm';
 
@@ -305,6 +322,72 @@ const calculatedTotal = computed(() => {
     }
 
     return Math.max(0, (price - discount) * qty);
+});
+
+// Get the currently selected service
+const selectedService = computed(() => {
+    // In edit mode, use the line's service directly
+    if (props.line?.service) {
+        return props.line.service;
+    }
+    // In add mode, find from services list
+    if (!form.service_id) return null;
+    const serviceId = parseInt(form.service_id);
+    return props.services?.find(s => s.id === serviceId) || null;
+});
+
+// Check if price is locked (allow_price_override = false)
+const isPriceLocked = computed(() => {
+    if (!selectedService.value) return false;
+    return selectedService.value.allow_price_override === false;
+});
+
+// Get min price for selected service
+const selectedServiceMinPrice = computed(() => {
+    if (!selectedService.value) return 0;
+    return parseFloat(selectedService.value.min_price) || 0;
+});
+
+// Calculate the effective price (base_price for locked, unit_price for unlocked)
+const effectivePrice = computed(() => {
+    if (isPriceLocked.value && selectedService.value) {
+        return parseFloat(selectedService.value.base_price) || 0;
+    }
+    return parseFloat(form.unit_price) || 0;
+});
+
+// Max allowed fixed discount (price - min_price)
+const maxAllowedFixedDiscount = computed(() => {
+    const minPrice = selectedServiceMinPrice.value;
+    if (minPrice <= 0) return effectivePrice.value; // No limit
+    return Math.max(0, effectivePrice.value - minPrice);
+});
+
+// Max allowed percentage discount ((price - min_price) / price * 100)
+const maxAllowedPercentageDiscount = computed(() => {
+    const minPrice = selectedServiceMinPrice.value;
+    const price = effectivePrice.value;
+    if (minPrice <= 0 || price <= 0) return 100; // No limit
+    return Math.max(0, ((price - minPrice) / price) * 100);
+});
+
+// Check if FINAL price (after discount) is below minimum
+const isPriceBelowMinimum = computed(() => {
+    if (!selectedService.value) return false;
+    const minPrice = selectedServiceMinPrice.value;
+    if (minPrice <= 0) return false;
+
+    // Calculate the final total using effective price
+    const price = effectivePrice.value;
+    let discount = 0;
+    if (form.discount_type === 'fixed') {
+        discount = parseFloat(form.discount_value) || 0;
+    } else if (form.discount_type === 'percentage') {
+        discount = (price * (parseFloat(form.discount_value) || 0)) / 100;
+    }
+    const finalPrice = Math.max(0, price - discount);
+
+    return finalPrice < minPrice;
 });
 
 // Linked parts for this service line (saved)
@@ -431,6 +514,35 @@ function getSourceBadgeClass(source) {
         customer: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
     };
     return classes[source] || 'bg-gray-100 text-gray-700';
+}
+
+// Handler for PartsDisplay edit event
+function handlePartEdit(part) {
+    // Find the index of this part in allParts
+    const index = allParts.value.findIndex(p => {
+        if (part.id) return p.id === part.id;
+        // For pending parts, compare by reference or unique properties
+        return p === part || (p.name === part.name && p.unit_price === part.unit_price && !p.id);
+    });
+
+    if (part.id) {
+        // Saved part - open for editing
+        openPartModal(part);
+    } else if (index >= linkedParts.value.length) {
+        // Pending part - use editPendingPart with the allParts index
+        editPendingPart(index);
+    }
+}
+
+// Handler for PartsDisplay delete event
+async function handlePartDelete(part) {
+    // Find the index of this part in allParts
+    const index = allParts.value.findIndex(p => {
+        if (part.id) return p.id === part.id;
+        return p === part || (p.name === part.name && p.unit_price === part.unit_price && !p.id);
+    });
+
+    await removePart(part, index);
 }
 
 // Watch for service selection to auto-fill price

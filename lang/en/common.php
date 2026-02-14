@@ -38,4 +38,5 @@ return [
     'to' => 'To',
     'error_occurred' => 'An error occurred',
     'error_alert_title' => 'There were errors with your submission',
+    'vat_settings_updated' => 'VAT settings updated successfully. Please login again.',
 ];

@@ -356,6 +356,19 @@
                                 </svg>
                                 {{ $t('hr.attendance.title') }}
                             </a>
+                            <a v-if="can('hr.payroll.view')" href="/app/hr/payroll" :class="[
+                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                                isActive('/app/hr/payroll')
+                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                {{ $t('nav.payroll') }}
+                            </a>
                             <a href="/app/hr/settings" :class="[
                                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                                 isActive('/app/hr/settings')
@@ -895,6 +908,20 @@
                                 </svg>
                                 {{ $t('hr.attendance.title') }}
                             </a>
+                            <a v-if="can('hr.payroll.view')" href="/app/hr/payroll" @click="mobileMenuOpen = false"
+                                :class="[
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                                    isActive('/app/hr/payroll')
+                                        ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                ]">
+                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                {{ $t('nav.payroll') }}
+                            </a>
                             <a href="/app/hr/settings" @click="mobileMenuOpen = false" :class="[
                                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                                 isActive('/app/hr/settings')
@@ -985,7 +1012,7 @@ const getStoredState = (key, defaultValue) => {
     return defaultValue;
 };
 
-const inventoryExpanded = ref(getStoredState('inventoryExpanded', true));
+const inventoryExpanded = ref(getStoredState('inventoryExpanded', false));
 const purchasingExpanded = ref(getStoredState('purchasingExpanded', false));
 
 const hrExpanded = ref(getStoredState('hrExpanded', false));

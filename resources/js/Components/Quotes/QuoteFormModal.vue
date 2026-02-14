@@ -203,6 +203,32 @@
                     </div>
                 </div>
 
+                <!-- Odometer -->
+                <div v-if="selectedVehicle"
+                    class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ $t('work_orders.form.odometer') }}
+                        </label>
+                        <button type="button" @click="showMileageModal = true"
+                            class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ $t('vehicles.mileage.history') }}
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input v-model.number="form.odometer" type="number"
+                            :placeholder="$t('work_orders.form.odometer_placeholder')"
+                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                        <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Tab 2: Customer Complaint -->
                 <div v-show="activeTab === 'customer_complaint'" class="space-y-4">
                     <div
@@ -265,6 +291,10 @@
     <VehicleFormModal v-if="showVehicleModal" :show="showVehicleModal" :customers="customers" :makes="makes"
         :colors="colors" :modelsByMake="modelsByMake" @close="showVehicleModal = false" @saved="onVehicleSaved"
         @customer-created="handleCustomerCreated" />
+
+    <!-- Vehicle Mileage Modal -->
+    <VehicleMileageModal v-if="showMileageModal" :show="showMileageModal" :vehicle="selectedVehicle"
+        @close="showMileageModal = false" />
 </template>
 
 <script setup>
@@ -274,6 +304,7 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
+import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -331,6 +362,7 @@ const selectedVehicle = ref(null);
 
 // Vehicle Modal
 const showVehicleModal = ref(false);
+const showMileageModal = ref(false);
 
 // Form
 const form = useForm({
@@ -339,6 +371,7 @@ const form = useForm({
     department_id: props.quote?.department_id || '',
     customer_complaint: props.quote?.customer_complaint || '',
     initial_assessment: props.quote?.initial_assessment || '',
+    odometer: props.quote?.odometer || '',
     departments: props.quote?.departments?.map(d => d.id) || [],
     notes: props.quote?.notes || '',
     lines: [],
@@ -352,6 +385,7 @@ watch(() => props.show, (newVal) => {
         form.vehicle_id = props.quote.vehicle_id || '';
         form.customer_complaint = props.quote.customer_complaint || '';
         form.initial_assessment = props.quote.initial_assessment || '';
+        form.odometer = props.quote.odometer || '';
         form.departments = props.quote.departments?.map(d => d.id) || [];
         form.notes = props.quote.notes || '';
         form.lines = [];
@@ -507,6 +541,7 @@ function resetForm() {
     form.vehicle_id = '';
     form.customer_complaint = '';
     form.initial_assessment = '';
+    form.odometer = '';
     form.departments = [];
     form.notes = '';
     form.lines = [];

@@ -25,7 +25,12 @@ class Vehicle extends Model
         'color',
         'vin',
         'odometer',
+        'allow_lower_mileage',
         'notes',
+    ];
+
+    protected $casts = [
+        'allow_lower_mileage' => 'boolean',
     ];
 
     protected $appends = ['display_make', 'display_model', 'display_name'];
@@ -107,5 +112,15 @@ class Vehicle extends Model
     public function quotes(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Quote::class);
+    }
+
+    public function mileageLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(VehicleMileageLog::class);
+    }
+
+    public function latestMileageLog(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(VehicleMileageLog::class)->latestOfMany('recorded_at');
     }
 }

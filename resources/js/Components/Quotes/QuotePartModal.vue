@@ -397,7 +397,7 @@ const form = useForm({
     qty: 1,
     unit_price: 0,
     discount: 0,
-    include_in_package: true,
+    include_in_package: false,
     hide_on_print: false,
 });
 
@@ -578,7 +578,7 @@ watch(() => props.show, (isOpen) => {
             form.source = 'external';
             form.quote_line_id = props.quoteLineId || null;
             form.qty = 1;
-            form.include_in_package = true;
+            form.include_in_package = false;
             form.hide_on_print = false;
         }
     }

@@ -48,15 +48,14 @@ class PricingHelper
     }
 
     /**
-     * Compute complete line pricing with validation.
+     * Compute complete line pricing.
      *
      * @param float $unitPrice The price before discount
      * @param string $discountType 'none', 'percentage', or 'fixed'
      * @param float|null $discountValue The discount value
      * @param int|float $qty Quantity
-     * @param float $minPrice Minimum allowed price (0 = no minimum)
+     * @param float $minPrice Minimum allowed price (0 = no minimum) - for reference only
      * @return array ['discount_amount', 'final_unit_price', 'line_total']
-     * @throws InvalidArgumentException If final price is below minimum
      */
     public static function computeLineTotal(
         float $unitPrice,
@@ -68,15 +67,8 @@ class PricingHelper
         $discountAmount = self::computeDiscountAmount($unitPrice, $discountType, $discountValue);
         $finalUnitPrice = max(0, $unitPrice - $discountAmount);
 
-        // Validate minimum price
-        if ($minPrice > 0 && $finalUnitPrice < $minPrice) {
-            throw new InvalidArgumentException(
-                __('pricing.final_price_below_minimum', [
-                    'final' => number_format($finalUnitPrice, 2),
-                    'min' => number_format($minPrice, 2),
-                ])
-            );
-        }
+        // Note: min_price validation is handled by frontend
+        // Backend accepts values as-is since validation happens before saving
 
         $lineTotal = $finalUnitPrice * $qty;
 

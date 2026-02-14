@@ -38,6 +38,7 @@
 
                         <!-- Add Button -->
                         <button
+                            v-if="can('departments.create')"
                             @click="openCreateModal"
                             class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-orange-500/30 hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all"
                         >
@@ -129,6 +130,7 @@
                                 <td class="px-5 py-4">
                                     <div class="flex items-center gap-2">
                                         <button
+                                            v-if="can('departments.edit')"
                                             @click="openEditModal(dept)"
                                             class="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                                         >
@@ -137,6 +139,7 @@
                                             </svg>
                                         </button>
                                         <button
+                                            v-if="can('departments.delete')"
                                             @click="handleDelete(dept)"
                                             class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                         >
@@ -180,11 +183,13 @@ import DepartmentFormModal from '@/Components/DepartmentFormModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';
+import { usePermission } from '@/Composables/usePermission';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
 const { success } = useToast();
 const { getName } = useLocalized();
+const { can } = usePermission();
 
 const props = defineProps({
     departments: {

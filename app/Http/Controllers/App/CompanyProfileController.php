@@ -55,14 +55,18 @@ class CompanyProfileController extends Controller
             ] : null,
             'vat' => $tenant->taxSettings ? [
                 'vat_enabled' => $tenant->taxSettings->vat_enabled,
-                'vat_rate' => $tenant->taxSettings->vat_rate,
-                'pricing_mode' => $tenant->taxSettings->pricing_mode,
-                'rounding_mode' => $tenant->taxSettings->rounding_mode,
+                'services_vat_rate' => $tenant->taxSettings->services_vat_rate ?? 15,
+                'parts_vat_rate' => $tenant->taxSettings->parts_vat_rate ?? 15,
+                'services_inclusive' => $tenant->taxSettings->services_inclusive ?? false,
+                'parts_inclusive' => $tenant->taxSettings->parts_inclusive ?? false,
+                'show_amount_before_vat' => $tenant->taxSettings->show_amount_before_vat ?? true,
             ] : [
                 'vat_enabled' => false,
-                'vat_rate' => 15,
-                'pricing_mode' => 'exclusive',
-                'rounding_mode' => 'half_up',
+                'services_vat_rate' => 15,
+                'parts_vat_rate' => 15,
+                'services_inclusive' => false,
+                'parts_inclusive' => false,
+                'show_amount_before_vat' => true,
             ],
             'zatca' => [
                 'qr_enabled' => $tenant->zatcaSettings?->qr_enabled ?? false,
@@ -193,9 +197,11 @@ class CompanyProfileController extends Controller
                     ['tenant_id' => $tenant->id],
                     [
                         'vat_enabled' => $data['vat_enabled'] ?? false,
-                        'vat_rate' => $data['vat_rate'] ?? 15,
-                        'pricing_mode' => $data['pricing_mode'] ?? 'exclusive',
-                        'rounding_mode' => $data['rounding_mode'] ?? 'half_up',
+                        'services_vat_rate' => $data['services_vat_rate'] ?? 15,
+                        'parts_vat_rate' => $data['parts_vat_rate'] ?? 15,
+                        'services_inclusive' => $data['services_inclusive'] ?? false,
+                        'parts_inclusive' => $data['parts_inclusive'] ?? false,
+                        'show_amount_before_vat' => $data['show_amount_before_vat'] ?? true,
                     ]
                 );
 
@@ -217,6 +223,15 @@ class CompanyProfileController extends Controller
                     'invoice_number_format' => $data['invoice_number_format'] ?? 'INV-{CENTER}-{YYYY}-{SEQ}',
                 ]);
                 break;
+        }
+
+        // For VAT section, logout the user and redirect to login
+        if ($section === 'vat') {
+            auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            
+            return redirect()->route('login')->with('success', __('common.vat_settings_updated'));
         }
 
         return back()->with('success', __('common.saved_success'));
@@ -245,9 +260,11 @@ class CompanyProfileController extends Controller
             case 'vat':
                 $rules = [
                     'vat_enabled' => 'required|boolean',
-                    'vat_rate' => 'required_if:vat_enabled,true|numeric|min:0|max:100',
-                    'pricing_mode' => 'required_if:vat_enabled,true|in:inclusive,exclusive',
-                    'rounding_mode' => 'nullable|in:half_up,half_down',
+                    'services_vat_rate' => 'required_if:vat_enabled,true|numeric|min:0|max:100',
+                    'parts_vat_rate' => 'required_if:vat_enabled,true|numeric|min:0|max:100',
+                    'services_inclusive' => 'boolean',
+                    'parts_inclusive' => 'boolean',
+                    'show_amount_before_vat' => 'boolean',
                     'vat_number' => 'nullable|string|max:20',
                 ];
                 

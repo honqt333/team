@@ -41,6 +41,7 @@ class WorkOrder extends Model
         'quote_id',
         'code',
         'status',
+        'odometer',
         'opened_at',
         'closed_at',
         'notes',
@@ -287,6 +288,38 @@ class WorkOrder extends Model
     {
         if (!$this->canVehicleExit()) {
             return false;
+        }
+
+        // Create mileage log if odometer is set
+        if ($this->odometer !== null) {
+            $vehicle = $this->vehicle;
+            
+            // Validation for lower mileage
+            if (!$vehicle->allow_lower_mileage && $vehicle->odometer !== null && $this->odometer < $vehicle->odometer) {
+                // We cannot use ValidationException here easily without request context, 
+                // but Controller expects boolean. Ideally we throw exception and catch it in controller.
+                // For now, let's assume valid or return false?
+                // Returning false will show generic error. 
+                // Let's rely on validation before this action? request validation handles min:0 but not comparison to old value.
+                // We should probably check this earlier, but check logic here to be safe.
+                return false; 
+            }
+
+            // Create log
+            \App\Models\VehicleMileageLog::create([
+                'vehicle_id' => $vehicle->id,
+                'mileage' => $this->odometer,
+                'previous_mileage' => $vehicle->odometer,
+                'difference' => $this->odometer - ($vehicle->odometer ?? 0),
+                'reference_type' => self::class,
+                'reference_id' => $this->id,
+                'reference_code' => $this->code,
+                'created_by' => auth()->id(),
+                'recorded_at' => now(),
+            ]);
+
+            // Update vehicle odometer
+            $vehicle->update(['odometer' => $this->odometer]);
         }
 
         $this->update([

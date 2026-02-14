@@ -54,7 +54,7 @@ class WorkOrderUpdateRequest extends FormRequest
             // New fields
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
-            'mileage' => ['nullable', 'integer', 'min:0'],
+            'odometer' => ['nullable', 'integer', 'min:0'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:20'],
             'entry_date' => ['nullable', 'date'],

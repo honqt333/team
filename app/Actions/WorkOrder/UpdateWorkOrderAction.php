@@ -21,7 +21,7 @@ class UpdateWorkOrderAction
                 // New Fields
                 'customer_complaint' => $data['customer_complaint'] ?? $workOrder->customer_complaint,
                 'initial_assessment' => $data['initial_assessment'] ?? $workOrder->initial_assessment,
-                'mileage' => $data['mileage'] ?? $workOrder->mileage,
+                'odometer' => $data['odometer'] ?? $workOrder->odometer,
                 'contact_name' => $data['contact_name'] ?? $workOrder->contact_name,
                 'contact_phone' => $data['contact_phone'] ?? $workOrder->contact_phone,
                 'entry_date' => $data['entry_date'] ?? $workOrder->entry_date,

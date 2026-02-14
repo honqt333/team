@@ -2,22 +2,30 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div class="flex items-center gap-4">
-                        <Link :href="route('app.hr.index')" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        <Link :href="route('app.hr.index')"
+                            class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 rtl:rotate-180" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 19l-7-7 7-7" />
                             </svg>
                         </Link>
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-500 to-slate-600 flex items-center justify-center shadow-lg">
+                        <div
+                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-500 to-slate-600 flex items-center justify-center shadow-lg">
                             <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('hr.settings.title') }}</h1>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('hr.settings.title') }}
+                            </h1>
                             <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.settings.subtitle') }}</p>
                         </div>
                     </div>
@@ -25,20 +33,16 @@
             </div>
 
             <!-- Tabs -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="flex -mb-px overflow-x-auto">
-                        <button
-                            v-for="tab in tabs"
-                            :key="tab.key"
-                            @click="activeTab = tab.key"
-                            :class="[
-                                'px-6 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                                activeTab === tab.key
-                                    ? 'border-violet-500 text-violet-600 dark:text-violet-400'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
-                            ]"
-                        >
+                        <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
+                            'px-6 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
+                            activeTab === tab.key
+                                ? 'border-violet-500 text-violet-600 dark:text-violet-400'
+                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                        ]">
                             {{ tab.icon }} {{ tab.label }}
                         </button>
                     </nav>
@@ -48,108 +52,101 @@
                     <!-- Employee Types Tab -->
                     <div v-show="activeTab === 'employee_types'" class="space-y-4">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('hr.settings.employee_types.title') }}</h3>
-                            <button
-                                @click="openModal('employee_type')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors"
-                            >
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
+                                $t('hr.settings.employee_types.title') }}</h3>
+                            <button @click="openModal('employee_type')"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
                                 </svg>
                                 {{ $t('common.add') }}
                             </button>
                         </div>
 
-                        <SettingsTable
-                            :items="employeeTypes"
+                        <SettingsTable :items="employeeTypes"
                             :columns="['name_ar', 'name_en', 'is_active', 'updated_by']"
                             @edit="(item) => openModal('employee_type', item)"
-                            @delete="(item) => deleteItem('employee_type', item)"
-                        />
+                            @delete="(item) => deleteItem('employee_type', item)" />
                     </div>
 
                     <!-- Job Titles Tab -->
                     <div v-show="activeTab === 'job_titles'" class="space-y-4">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('hr.settings.job_titles.title') }}</h3>
-                            <button
-                                @click="openModal('job_title')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors"
-                            >
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
+                                $t('hr.settings.job_titles.title') }}</h3>
+                            <button @click="openModal('job_title')"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
                                 </svg>
                                 {{ $t('common.add') }}
                             </button>
                         </div>
 
-                        <SettingsTable
-                            :items="jobTitles"
+                        <SettingsTable :items="jobTitles"
                             :columns="['name_ar', 'name_en', 'department', 'is_active', 'updated_by']"
                             @edit="(item) => openModal('job_title', item)"
-                            @delete="(item) => deleteItem('job_title', item)"
-                        />
+                            @delete="(item) => deleteItem('job_title', item)" />
                     </div>
 
                     <!-- Allowances Tab -->
                     <div v-show="activeTab === 'allowances'" class="space-y-4">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('hr.settings.allowances.title') }}</h3>
-                            <button
-                                @click="openModal('allowance')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
-                            >
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
+                                $t('hr.settings.allowances.title') }}</h3>
+                            <button @click="openModal('allowance')"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
                                 </svg>
                                 {{ $t('common.add') }}
                             </button>
                         </div>
 
-                        <SettingsTable
-                            :items="allowances"
+                        <SettingsTable :items="allowances"
                             :columns="['name_ar', 'name_en', 'type', 'amount', 'is_active']"
                             @edit="(item) => openModal('allowance', item)"
-                            @delete="(item) => deleteItem('allowance', item)"
-                        />
+                            @delete="(item) => deleteItem('allowance', item)" />
                     </div>
 
                     <!-- Deductions Tab -->
                     <div v-show="activeTab === 'deductions'" class="space-y-4">
                         <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('hr.settings.deductions.title') }}</h3>
-                            <button
-                                @click="openModal('deduction')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-                            >
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
+                                $t('hr.settings.deductions.title') }}</h3>
+                            <button @click="openModal('deduction')"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
                                 </svg>
                                 {{ $t('common.add') }}
                             </button>
                         </div>
 
-                        <SettingsTable
-                            :items="deductions"
+                        <SettingsTable :items="deductions"
                             :columns="['name_ar', 'name_en', 'type', 'amount', 'is_active']"
                             @edit="(item) => openModal('deduction', item)"
-                            @delete="(item) => deleteItem('deduction', item)"
-                        />
+                            @delete="(item) => deleteItem('deduction', item)" />
                     </div>
 
                     <!-- Biometric Devices Tab -->
                     <div v-show="activeTab === 'biometric_devices'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('hr.settings.biometric_devices.title') }}</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.settings.biometric_devices.subtitle') }}</p>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
+                                    $t('hr.settings.biometric_devices.title') }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{
+                                    $t('hr.settings.biometric_devices.subtitle') }}</p>
                             </div>
-                            <button
-                                @click="openDeviceModal()"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                            >
+                            <button @click="openDeviceModal()"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
                                 </svg>
                                 {{ $t('common.add') }}
                             </button>
@@ -157,37 +154,44 @@
 
                         <!-- Devices List -->
                         <div v-if="biometricDevices.length" class="space-y-3">
-                            <div v-for="device in biometricDevices" :key="device.id" 
-                                class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600"
-                            >
+                            <div v-for="device in biometricDevices" :key="device.id"
+                                class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                                        <div
+                                            class="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                                             <span class="text-xl">📡</span>
                                         </div>
                                         <div>
                                             <h4 class="font-medium text-gray-900 dark:text-white">{{ device.name }}</h4>
                                             <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ device.center?.name }} • {{ device.device_type || $t('common.unknown') }}
+                                                {{ device.center?.name }} • {{ device.device_type ||
+                                                    $t('common.unknown') }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <span :class="[
                                             'px-2 py-0.5 rounded-full text-xs font-medium',
-                                            device.is_active 
+                                            device.is_active
                                                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                                                 : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400'
                                         ]">
                                             {{ device.is_active ? $t('common.active') : $t('common.inactive') }}
                                         </span>
-                                        <button @click="showDeviceToken(device)" class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg" :title="$t('hr.settings.biometric_devices.show_token')">
+                                        <button @click="showDeviceToken(device)"
+                                            class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg"
+                                            :title="$t('hr.settings.biometric_devices.show_token')">
                                             🔑
                                         </button>
-                                        <button @click="openDeviceModal(device)" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded-lg" :title="$t('common.edit')">
+                                        <button @click="openDeviceModal(device)"
+                                            class="p-1.5 text-gray-600 hover:bg-gray-200 rounded-lg"
+                                            :title="$t('common.edit')">
                                             ✏️
                                         </button>
-                                        <button @click="deleteDevice(device)" class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg" :title="$t('common.delete')">
+                                        <button @click="deleteDevice(device)"
+                                            class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg"
+                                            :title="$t('common.delete')">
                                             🗑️
                                         </button>
                                     </div>
@@ -207,15 +211,16 @@
                     <div v-show="activeTab === 'shifts'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <div>
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('hr.settings.shifts.title') }}</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.settings.shifts.subtitle') }}</p>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
+                                    $t('hr.settings.shifts.title') }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.settings.shifts.subtitle')
+                                }}</p>
                             </div>
-                            <button
-                                @click="openShiftModal()"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
-                            >
+                            <button @click="openShiftModal()"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
                                 </svg>
                                 {{ $t('common.add') }}
                             </button>
@@ -223,36 +228,41 @@
 
                         <!-- Shifts List -->
                         <div v-if="shifts.length" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                            <div v-for="shift in shifts" :key="shift.id" 
+                            <div v-for="shift in shifts" :key="shift.id"
                                 class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border-2 transition-all"
-                                :style="{ borderColor: shift.color }"
-                            >
+                                :style="{ borderColor: shift.color }">
                                 <div class="flex items-center justify-between mb-3">
                                     <div class="flex items-center gap-2">
-                                        <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: shift.color }"></div>
+                                        <div class="w-3 h-3 rounded-full" :style="{ backgroundColor: shift.color }">
+                                        </div>
                                         <h4 class="font-medium text-gray-900 dark:text-white">{{ shift.name_ar }}</h4>
                                     </div>
                                     <span :class="[
                                         'px-2 py-0.5 rounded-full text-xs font-medium',
-                                        shift.is_active 
+                                        shift.is_active
                                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                                             : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400'
                                     ]">
                                         {{ shift.is_active ? $t('common.active') : $t('common.inactive') }}
                                     </span>
                                 </div>
-                                <div class="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-mono text-center">
+                                <div
+                                    class="text-2xl font-bold text-gray-900 dark:text-white mb-2 font-mono text-center">
                                     {{ shift.start_time?.slice(0, 5) }} - {{ shift.end_time?.slice(0, 5) }}
                                 </div>
                                 <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                                     <span v-if="shift.is_overnight" class="flex items-center gap-1">
                                         🌙 {{ $t('hr.settings.shifts.overnight') }}
                                     </span>
-                                    <span>📅 {{ $t('hr.settings.shifts.break') }}: {{ shift.break_minutes }} {{ $t('common.minutes') }}</span>
+                                    <span>📅 {{ $t('hr.settings.shifts.break') }}: {{ shift.break_minutes }} {{
+                                        $t('common.minutes') }}</span>
                                 </div>
-                                <div class="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                                    <button @click="openShiftModal(shift)" class="p-1.5 text-gray-600 hover:bg-gray-200 rounded-lg">✏️</button>
-                                    <button @click="deleteShift(shift)" class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg">🗑️</button>
+                                <div
+                                    class="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                    <button @click="openShiftModal(shift)"
+                                        class="p-1.5 text-gray-600 hover:bg-gray-200 rounded-lg">✏️</button>
+                                    <button @click="deleteShift(shift)"
+                                        class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg">🗑️</button>
                                 </div>
                             </div>
                         </div>
@@ -265,83 +275,115 @@
                     <!-- Attendance Settings Tab -->
                     <div v-show="activeTab === 'attendance_settings'" class="space-y-6">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{ $t('hr.settings.attendance_settings.title') }}</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.settings.attendance_settings.subtitle') }}</p>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">{{
+                                $t('hr.settings.attendance_settings.title') }}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{
+                                $t('hr.settings.attendance_settings.subtitle') }}</p>
                         </div>
 
                         <form @submit.prevent="saveAttendanceSettings" class="space-y-6">
                             <!-- Grace Period -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
-                                    <label class="block text-sm font-medium text-amber-900 dark:text-amber-200 mb-2">⏰ {{ $t('hr.settings.attendance_settings.grace_period') }}</label>
+                                <div
+                                    class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+                                    <label class="block text-sm font-medium text-amber-900 dark:text-amber-200 mb-2">⏰
+                                        {{ $t('hr.settings.attendance_settings.grace_period') }}</label>
                                     <div class="flex items-center gap-2">
-                                        <input type="number" v-model="attendanceSettingsForm.grace_period_minutes" min="0" max="60"
+                                        <input type="number" v-model="attendanceSettingsForm.grace_period_minutes"
+                                            min="0" max="60"
                                             class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
-                                        <span class="text-amber-700 dark:text-amber-300">{{ $t('common.minutes') }}</span>
+                                        <span class="text-amber-700 dark:text-amber-300">{{ $t('common.minutes')
+                                        }}</span>
                                     </div>
-                                    <p class="text-xs text-amber-600 dark:text-amber-400 mt-2">{{ $t('hr.settings.attendance_settings.grace_period_hint') }}</p>
+                                    <p class="text-xs text-amber-600 dark:text-amber-400 mt-2">{{
+                                        $t('hr.settings.attendance_settings.grace_period_hint') }}</p>
                                 </div>
 
-                                <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
-                                    <label class="block text-sm font-medium text-red-900 dark:text-red-200 mb-2">💰 {{ $t('hr.settings.attendance_settings.late_deduction') }}</label>
+                                <div
+                                    class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
+                                    <label class="block text-sm font-medium text-red-900 dark:text-red-200 mb-2">💰 {{
+                                        $t('hr.settings.attendance_settings.late_deduction') }}</label>
                                     <div class="flex items-center gap-2">
-                                        <input type="number" v-model="attendanceSettingsForm.late_deduction_per_minute" min="0" step="0.01"
+                                        <input type="number" v-model="attendanceSettingsForm.late_deduction_per_minute"
+                                            min="0" step="0.01"
                                             class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
-                                        <span class="text-red-700 dark:text-red-300">{{ $t('common.currency') }} / {{ $t('common.minute') }}</span>
+                                        <span class="text-red-700 dark:text-red-300">{{ $t('common.currency') }} / {{
+                                            $t('common.minute') }}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
+                                <div
+                                    class="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 border border-red-200 dark:border-red-800">
                                     <div class="flex justify-between items-center mb-2">
-                                        <label class="block text-sm font-medium text-red-900 dark:text-red-200">📅 {{ $t('hr.settings.attendance_settings.absence_deduction') }}</label>
+                                        <label class="block text-sm font-medium text-red-900 dark:text-red-200">📅 {{
+                                            $t('hr.settings.attendance_settings.absence_deduction') }}</label>
                                         <div class="flex gap-2">
                                             <label class="flex items-center gap-1 cursor-pointer">
-                                                <input type="radio" v-model="attendanceSettingsForm.absence_deduction_type" value="fixed" class="text-red-600 focus:ring-red-500">
-                                                <span class="text-xs text-red-800 dark:text-red-300">{{ $t('common.fixed_amount') }}</span>
+                                                <input type="radio"
+                                                    v-model="attendanceSettingsForm.absence_deduction_type"
+                                                    value="fixed" class="text-red-600 focus:ring-red-500">
+                                                <span class="text-xs text-red-800 dark:text-red-300">{{
+                                                    $t('common.fixed_amount') }}</span>
                                             </label>
                                             <label class="flex items-center gap-1 cursor-pointer">
-                                                <input type="radio" v-model="attendanceSettingsForm.absence_deduction_type" value="percentage" class="text-red-600 focus:ring-red-500">
-                                                <span class="text-xs text-red-800 dark:text-red-300">{{ $t('common.percentage') }}</span>
+                                                <input type="radio"
+                                                    v-model="attendanceSettingsForm.absence_deduction_type"
+                                                    value="percentage" class="text-red-600 focus:ring-red-500">
+                                                <span class="text-xs text-red-800 dark:text-red-300">{{
+                                                    $t('common.percentage') }}</span>
                                             </label>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <input type="number" v-model="attendanceSettingsForm.absence_deduction_value" min="0" step="0.01"
+                                        <input type="number" v-model="attendanceSettingsForm.absence_deduction_value"
+                                            min="0" step="0.01"
                                             class="w-32 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
                                         <span class="text-red-700 dark:text-red-300">
-                                            {{ attendanceSettingsForm.absence_deduction_type === 'percentage' ? '%' : ($t('common.currency') + ' / ' + $t('common.day')) }}
+                                            {{ attendanceSettingsForm.absence_deduction_type === 'percentage' ? '%' :
+                                                ($t('common.currency') + ' / ' + $t('common.day')) }}
                                         </span>
                                     </div>
                                     <p class="text-xs text-red-600 dark:text-red-400 mt-2">
-                                        {{ attendanceSettingsForm.absence_deduction_type === 'percentage' ? $t('hr.settings.attendance_settings.absence_deduction_hint_percentage') : $t('hr.settings.attendance_settings.absence_deduction_hint_fixed') }}
+                                        {{ attendanceSettingsForm.absence_deduction_type === 'percentage' ?
+                                            $t('hr.settings.attendance_settings.absence_deduction_hint_percentage') :
+                                            $t('hr.settings.attendance_settings.absence_deduction_hint_fixed') }}
                                     </p>
                                 </div>
 
-                                <div class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
-                                    <label class="block text-sm font-medium text-emerald-900 dark:text-emerald-200 mb-2">⏱️ {{ $t('hr.settings.attendance_settings.overtime_rate') }}</label>
+                                <div
+                                    class="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
+                                    <label
+                                        class="block text-sm font-medium text-emerald-900 dark:text-emerald-200 mb-2">⏱️
+                                        {{ $t('hr.settings.attendance_settings.overtime_rate') }}</label>
                                     <div class="flex items-center gap-2">
-                                        <input type="number" v-model="attendanceSettingsForm.overtime_rate_per_hour" min="0" step="0.01"
+                                        <input type="number" v-model="attendanceSettingsForm.overtime_rate_per_hour"
+                                            min="0" step="0.01"
                                             class="w-24 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-center font-bold text-lg" />
-                                        <span class="text-emerald-700 dark:text-emerald-300">{{ $t('common.currency') }} / {{ $t('common.hour') }}</span>
+                                        <span class="text-emerald-700 dark:text-emerald-300">{{ $t('common.currency') }}
+                                            / {{ $t('common.hour') }}</span>
                                     </div>
                                     <label class="flex items-center gap-2 mt-3 cursor-pointer">
-                                        <input type="checkbox" v-model="attendanceSettingsForm.overtime_enabled" class="rounded text-emerald-600">
-                                        <span class="text-sm text-emerald-700 dark:text-emerald-300">{{ $t('hr.settings.attendance_settings.overtime_enabled') }}</span>
+                                        <input type="checkbox" v-model="attendanceSettingsForm.overtime_enabled"
+                                            class="rounded text-emerald-600">
+                                        <span class="text-sm text-emerald-700 dark:text-emerald-300">{{
+                                            $t('hr.settings.attendance_settings.overtime_enabled') }}</span>
                                     </label>
                                 </div>
                             </div>
 
                             <!-- Working Days -->
-                            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
-                                <label class="block text-sm font-medium text-blue-900 dark:text-blue-200 mb-3">🗓️ {{ $t('hr.settings.attendance_settings.working_days') }}</label>
+                            <div
+                                class="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                                <label class="block text-sm font-medium text-blue-900 dark:text-blue-200 mb-3">🗓️ {{
+                                    $t('hr.settings.attendance_settings.working_days') }}</label>
                                 <div class="flex flex-wrap gap-2">
-                                    <label v-for="(dayName, dayIndex) in weekDays" :key="dayIndex" 
+                                    <label v-for="(dayName, dayIndex) in weekDays" :key="dayIndex"
                                         class="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-700 rounded-lg border cursor-pointer"
-                                        :class="attendanceSettingsForm.working_days.includes(dayIndex) ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/40' : 'border-gray-200 dark:border-gray-600'"
-                                    >
-                                        <input type="checkbox" :value="dayIndex" v-model="attendanceSettingsForm.working_days" class="rounded text-blue-600">
+                                        :class="attendanceSettingsForm.working_days.includes(dayIndex) ? 'border-blue-500 bg-blue-100 dark:bg-blue-900/40' : 'border-gray-200 dark:border-gray-600'">
+                                        <input type="checkbox" :value="dayIndex"
+                                            v-model="attendanceSettingsForm.working_days" class="rounded text-blue-600">
                                         <span class="text-sm">{{ dayName }}</span>
                                     </label>
                                 </div>
@@ -355,48 +397,103 @@
                             </div>
                         </form>
                     </div>
+
+                    <!-- Regulations Tab -->
+                    <div v-show="activeTab === 'regulations'" class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
+                                    $t('hr.settings.regulations.title') }}</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">{{
+                                    $t('hr.settings.regulations.subtitle') }}</p>
+                            </div>
+                            <button @click="openRegulationModal()"
+                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+                                </svg>
+                                {{ $t('hr.settings.regulations.add') }}
+                            </button>
+                        </div>
+
+                        <div v-if="regulations.length" class="space-y-6">
+                            <div v-for="(group, category) in groupedRegulations" :key="category" class="space-y-3">
+                                <h4
+                                    class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                                    {{ $t(`hr.settings.regulations.categories.${category}`) }}
+                                </h4>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div v-for="reg in group" :key="reg.id"
+                                        class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-4 border border-gray-200 dark:border-gray-600 hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+                                        <div class="flex justify-between items-start gap-4">
+                                            <div class="flex-1 min-w-0">
+                                                <h5 class="font-bold text-gray-900 dark:text-white truncate"
+                                                    :title="reg.title_ar">
+                                                    {{ reg.title_ar }}
+                                                </h5>
+                                                <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+                                                    {{ reg.content_ar }}
+                                                </p>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <button @click="openRegulationModal(reg)"
+                                                    class="p-1.5 text-gray-500 hover:text-violet-600 hover:bg-violet-100 dark:hover:bg-violet-900/30 rounded-lg transition-colors">
+                                                    ✏️
+                                                </button>
+                                                <button @click="deleteRegulation(reg)"
+                                                    class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                                    🗑️
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else
+                            class="text-center py-12 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                            <span class="text-4xl mb-4 block">📜</span>
+                            {{ $t('hr.settings.regulations.no_regulations') }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Modals -->
-        <HRSettingModal
-            :show="showModal"
-            :type="modalType"
-            :item="editingItem"
-            :departments="departments"
-            @close="closeModal"
-            @saved="closeModal"
-        />
+        <HRSettingModal :show="showModal" :type="modalType" :item="editingItem" :departments="departments"
+            @close="closeModal" @saved="closeModal" />
+
+        <!-- Regulation Modal -->
+        <RegulationModal :show="showRegulationModal" :item="editingRegulation" @close="closeRegulationModal"
+            @saved="closeRegulationModal" />
 
         <!-- Biometric Device Modal -->
         <BaseModal :show="showDeviceModal" @close="closeDeviceModal" size="md">
             <template #title>
-                {{ editingDevice ? $t('common.edit') : $t('common.add') }} {{ $t('hr.settings.biometric_devices.device') }}
+                {{ editingDevice ? $t('common.edit') : $t('common.add') }} {{ $t('hr.settings.biometric_devices.device')
+                }}
             </template>
-            
+
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('common.name') }} *
                     </label>
-                    <input
-                        v-model="deviceForm.name"
-                        type="text"
+                    <input v-model="deviceForm.name" type="text"
                         class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                        required
-                    />
+                        required />
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('common.center') }} *
                     </label>
-                    <select
-                        v-model="deviceForm.center_id"
+                    <select v-model="deviceForm.center_id"
                         class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                        required
-                    >
+                        required>
                         <option v-for="center in centers" :key="center.id" :value="center.id">
                             {{ center.name }}
                         </option>
@@ -408,52 +505,40 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('hr.settings.biometric_devices.device_id') }}
                         </label>
-                        <input
-                            v-model="deviceForm.device_id"
-                            type="text"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                        />
+                        <input v-model="deviceForm.device_id" type="text"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('hr.settings.biometric_devices.device_type') }}
                         </label>
-                        <input
-                            v-model="deviceForm.device_type"
-                            type="text"
-                            placeholder="ZKTeco, Hikvision..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                        />
+                        <input v-model="deviceForm.device_type" type="text" placeholder="ZKTeco, Hikvision..."
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500" />
                     </div>
                 </div>
 
                 <div v-if="editingDevice" class="flex items-center gap-2">
-                    <input type="checkbox" v-model="deviceForm.is_active" id="device_active" class="rounded text-violet-600">
-                    <label for="device_active" class="text-sm text-gray-700 dark:text-gray-300">{{ $t('common.active') }}</label>
+                    <input type="checkbox" v-model="deviceForm.is_active" id="device_active"
+                        class="rounded text-violet-600">
+                    <label for="device_active" class="text-sm text-gray-700 dark:text-gray-300">{{ $t('common.active')
+                    }}</label>
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('common.notes') }}
                     </label>
-                    <textarea
-                        v-model="deviceForm.notes"
-                        rows="2"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                    ></textarea>
+                    <textarea v-model="deviceForm.notes" rows="2"
+                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"></textarea>
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <button 
-                        @click="closeDeviceModal"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                    >
+                    <button @click="closeDeviceModal"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
                         {{ $t('common.cancel') }}
                     </button>
-                    <button 
-                        @click="saveDevice"
-                        class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700"
-                    >
+                    <button @click="saveDevice"
+                        class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700">
                         {{ $t('common.save') }}
                     </button>
                 </div>
@@ -465,31 +550,23 @@
             <template #title>
                 {{ editingShift ? $t('common.edit') : $t('common.add') }} {{ $t('hr.settings.shifts.shift') }}
             </template>
-            
+
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('common.name') }} (العربية) *
                         </label>
-                        <input
-                            v-model="shiftForm.name_ar"
-                            type="text"
-                            placeholder="صباحي، مسائي..."
+                        <input v-model="shiftForm.name_ar" type="text" placeholder="صباحي، مسائي..."
                             class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                            required
-                        />
+                            required />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('common.name') }} (English)
                         </label>
-                        <input
-                            v-model="shiftForm.name_en"
-                            type="text"
-                            placeholder="Morning, Evening..."
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                        />
+                        <input v-model="shiftForm.name_en" type="text" placeholder="Morning, Evening..."
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500" />
                     </div>
                 </div>
 
@@ -498,23 +575,17 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('hr.settings.shifts.start_time') }} *
                         </label>
-                        <input
-                            v-model="shiftForm.start_time"
-                            type="time"
+                        <input v-model="shiftForm.start_time" type="time"
                             class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                            required
-                        />
+                            required />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('hr.settings.shifts.end_time') }} *
                         </label>
-                        <input
-                            v-model="shiftForm.end_time"
-                            type="time"
+                        <input v-model="shiftForm.end_time" type="time"
                             class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                            required
-                        />
+                            required />
                     </div>
                 </div>
 
@@ -523,30 +594,23 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('hr.settings.shifts.break') }}
                         </label>
-                        <input
-                            v-model.number="shiftForm.break_minutes"
-                            type="number"
-                            min="0"
-                            max="180"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                        />
+                        <input v-model.number="shiftForm.break_minutes" type="number" min="0" max="180"
+                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('hr.settings.shifts.color') }}
                         </label>
-                        <input
-                            v-model="shiftForm.color"
-                            type="color"
-                            class="w-full h-10 rounded-xl border border-gray-300 dark:border-gray-600 cursor-pointer"
-                        />
+                        <input v-model="shiftForm.color" type="color"
+                            class="w-full h-10 rounded-xl border border-gray-300 dark:border-gray-600 cursor-pointer" />
                     </div>
                 </div>
 
                 <div class="flex items-center gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" v-model="shiftForm.is_overnight" class="rounded text-violet-600">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">🌙 {{ $t('hr.settings.shifts.overnight') }}</span>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">🌙 {{ $t('hr.settings.shifts.overnight')
+                        }}</span>
                     </label>
                     <label v-if="editingShift" class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" v-model="shiftForm.is_active" class="rounded text-violet-600">
@@ -555,16 +619,12 @@
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    <button 
-                        @click="closeShiftModal"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
-                    >
+                    <button @click="closeShiftModal"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600">
                         {{ $t('common.cancel') }}
                     </button>
-                    <button 
-                        @click="saveShift"
-                        class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700"
-                    >
+                    <button @click="saveShift"
+                        class="px-4 py-2 text-sm font-medium text-white bg-violet-600 rounded-lg hover:bg-violet-700">
                         {{ $t('common.save') }}
                     </button>
                 </div>
@@ -580,6 +640,7 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SettingsTable from '@/Components/HR/SettingsTable.vue';
 import HRSettingModal from '@/Components/HR/HRSettingModal.vue';
+import RegulationModal from '@/Components/HR/RegulationModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
@@ -598,6 +659,7 @@ const props = defineProps({
     centers: Array,
     shifts: Array,
     attendanceSettings: Object,
+    regulations: Array,
 });
 
 const activeTab = ref('employee_types');
@@ -607,10 +669,19 @@ const tabs = computed(() => [
     { key: 'job_titles', label: t('hr.settings.job_titles.title'), icon: '💼' },
     { key: 'allowances', label: t('hr.settings.allowances.title'), icon: '💰' },
     { key: 'deductions', label: t('hr.settings.deductions.title'), icon: '📉' },
+    { key: 'regulations', label: t('hr.settings.regulations.title'), icon: '📜' },
     { key: 'shifts', label: t('hr.settings.shifts.title'), icon: '⏰' },
     { key: 'attendance_settings', label: t('hr.settings.attendance_settings.title'), icon: '📋' },
     { key: 'biometric_devices', label: t('hr.settings.biometric_devices.title'), icon: '📡' },
 ]);
+
+const groupedRegulations = computed(() => {
+    return props.regulations.reduce((acc, reg) => {
+        if (!acc[reg.category]) acc[reg.category] = [];
+        acc[reg.category].push(reg);
+        return acc;
+    }, {});
+});
 
 // Modal state
 const showModal = ref(false);
@@ -798,6 +869,29 @@ async function deleteShift(shift) {
 // Attendance Settings
 const weekDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 const savingAttendanceSettings = ref(false);
+
+// HR Regulations
+const showRegulationModal = ref(false);
+const editingRegulation = ref(null);
+
+function openRegulationModal(regulation = null) {
+    editingRegulation.value = regulation;
+    showRegulationModal.value = true;
+}
+
+function closeRegulationModal() {
+    showRegulationModal.value = false;
+    editingRegulation.value = null;
+}
+
+async function deleteRegulation(regulation) {
+    const confirmed = await confirm(t('common.confirm_delete'), t('common.delete_confirm_message'));
+    if (!confirmed) return;
+
+    router.delete(route('app.hr.settings.regulations.destroy', regulation.id), {
+        onSuccess: () => success(t('common.deleted_success')),
+    });
+}
 
 const attendanceSettingsForm = ref({
     grace_period_minutes: props.attendanceSettings?.grace_period_minutes ?? 10,

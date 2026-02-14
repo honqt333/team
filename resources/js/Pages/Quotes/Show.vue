@@ -370,7 +370,8 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <h4 class="font-medium text-gray-900 dark:text-white">
+                                            <h4 @click="editLine(line)"
+                                                class="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                                                 {{ line.description || getName(line.service) }}
                                             </h4>
                                             <!-- Parts Summary Tag -->
@@ -383,15 +384,25 @@
 
                                     <!-- Price & Actions -->
                                     <div class="flex items-center gap-6">
-                                        <div class="text-end">
-                                            <p class="font-bold text-gray-900 dark:text-white font-mono">
-                                                {{ formatCurrency(line.line_total) }}
-                                            </p>
-                                            <p v-if="line.discount_amount > 0"
-                                                class="text-xs text-red-500 line-through">
-                                                {{ formatCurrency(line.unit_price * line.qty) }}
-                                            </p>
+                                        <!-- Prices Group (like WorkOrder) -->
+                                        <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg">
+                                            <!-- Labor/Service -->
+                                            <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium" :title="$t('work_orders.item.service_cost')">
+                                                <span class="text-indigo-500">🔧</span>
+                                                <span class="font-mono">{{ formatCurrency(line.line_total) }}</span>
+                                            </div>
+                                            <!-- Parts (if any) -->
+                                            <div v-if="line.parts_total > 0" class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium border-s border-gray-200 dark:border-gray-600 ps-3" :title="$t('work_orders.item.parts_cost')">
+                                                <span class="text-amber-500">🔩</span>
+                                                <span class="font-mono">{{ formatCurrency(line.parts_total) }}</span>
+                                            </div>
                                         </div>
+
+                                        <!-- Discount indicator -->
+                                        <p v-if="line.discount_amount > 0"
+                                            class="text-xs text-red-500 line-through font-mono">
+                                            {{ formatCurrency(line.unit_price * line.qty) }}
+                                        </p>
 
                                         <!-- Actions -->
                                         <div
@@ -444,14 +455,8 @@
 
             <!-- Parts Tab Content -->
             <div v-show="activeTab === 'parts'" id="parts-section" class="space-y-4">
-                <PartsDisplay 
-                    :parts="quote.parts || []"
-                    :show-vat="hasTax"
-                    storage-key="quotes_parts_view_mode"
-                    @edit="openPartModal"
-                    @delete="deletePart"
-                    @add="openPartModal()"
-                />
+                <PartsDisplay :parts="quote.parts || []" :show-vat="hasTax" storage-key="quotes_parts_view_mode"
+                    @edit="openPartModal" @delete="deletePart" @add="openPartModal()" />
             </div>
 
         </div>
@@ -462,7 +467,7 @@
             @close="closeServiceModal" @saved="onServiceSaved" />
 
         <QuoteDepartmentModal :show="showDepartmentModal" :quote="quote" :available-departments="departments"
-            @close="closeDepartmentModal" @saved="onDepartmentSaved" />
+            :lines-by-department="linesByDepartment" @close="closeDepartmentModal" @saved="onDepartmentSaved" />
 
         <QuoteFormModal :show="showEditModal" :quote="quote" :customers="customers" :departments="departments"
             :makes="makes" :colors="colors" :modelsByMake="modelsByMake" @close="closeEditModal"
@@ -484,6 +489,7 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
+import { usePermission } from '@/Composables/usePermission';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import QuoteServiceModal from '@/Components/Quotes/QuoteServiceModal.vue';
 import QuoteDepartmentModal from '@/Components/Quotes/QuoteDepartmentModal.vue';
@@ -508,6 +514,7 @@ const props = defineProps({
 const { t } = useI18n();
 const { getName } = useLocalized();
 const { formatCurrency } = useNumberFormat();
+const { can } = usePermission();
 const { confirm } = useConfirm();
 
 // State

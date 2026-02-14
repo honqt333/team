@@ -36,6 +36,7 @@ class Quote extends Model
         'vehicle_id',
         'code',
         'status',
+        'odometer',
         'notes',
         'customer_complaint',
         'initial_assessment',

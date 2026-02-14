@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureTenantActive::
     // Profile
     Route::get('/profile', [\App\Http\Controllers\App\ProfileController::class, 'index'])->name('app.profile');
     Route::patch('/profile', [\App\Http\Controllers\App\ProfileController::class, 'update'])->name('app.profile.update');
+    Route::post('/profile/photo', [\App\Http\Controllers\App\ProfileController::class, 'updatePhoto'])->name('app.profile.photo.update');
     Route::post('/profile/switch-center', [ProfileController::class, 'switchCenter'])->name('profile.switch-center');
 
     // Two-Factor Authentication (Tenant App)
@@ -84,6 +85,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::get('/vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
     Route::get('/vehicles/print', [VehicleController::class, 'print'])->name('vehicles.print');
     Route::apiResource('vehicles', VehicleController::class);
+    Route::get('/vehicles/{vehicle}/mileage-logs', [\App\Http\Controllers\App\VehicleMileageController::class, 'index'])->name('vehicles.mileage-logs.index');
     
     // Work Orders - Hub and Index
     Route::get('/work-orders/export', [WorkOrderController::class, 'export'])->name('work-orders.export');
@@ -226,6 +228,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::put('/settings/colors/{color}', [\App\Http\Controllers\App\VehicleColorController::class, 'update'])->name('settings.colors.update');
     Route::delete('/settings/colors/{color}', [\App\Http\Controllers\App\VehicleColorController::class, 'destroy'])->name('settings.colors.destroy');
     Route::patch('/settings/colors/{color}/toggle-active', [\App\Http\Controllers\App\VehicleColorController::class, 'toggleActive'])->name('settings.colors.toggle');
+
+    // Vehicle Condition Items
+    Route::get('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'index'])->name('settings.condition-items.index');
+    Route::post('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'store'])->name('settings.condition-items.store');
+    Route::put('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'update'])->name('settings.condition-items.update');
+    Route::delete('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'destroy'])->name('settings.condition-items.destroy');
+    Route::patch('/settings/condition-items/{conditionItem}/toggle-active', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'toggleActive'])->name('settings.condition-items.toggle');
     
     // Departments
     Route::apiResource('departments', \App\Http\Controllers\App\DepartmentController::class);
@@ -359,7 +368,12 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::post('/settings/deductions', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeDeduction'])->name('settings.deductions.store');
         Route::put('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateDeduction'])->name('settings.deductions.update');
         Route::delete('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyDeduction'])->name('settings.deductions.destroy');
-        
+ 
+        // Regulations
+        Route::post('/settings/regulations', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeRegulation'])->name('settings.regulations.store');
+        Route::put('/settings/regulations/{regulation}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateRegulation'])->name('settings.regulations.update');
+        Route::delete('/settings/regulations/{regulation}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyRegulation'])->name('settings.regulations.destroy');
+ 
         // Employee Permissions
         Route::get('/employees/{employee}/permissions', [\App\Http\Controllers\App\HR\EmployeePermissionsController::class, 'index'])->name('employees.permissions.index');
         Route::put('/employees/{employee}/permissions', [\App\Http\Controllers\App\HR\EmployeePermissionsController::class, 'update'])->name('employees.permissions.update');
@@ -381,7 +395,15 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::put('/employees/{employee}/bank-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateBankInfo'])->name('employees.bank-info.update');
         Route::put('/employees/{employee}/financial-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateFinancialInfo'])->name('employees.financial-info.update');
         Route::put('/employees/{employee}/roles', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateRoles'])->name('employees.roles.update');
-        
+
+        // Documents
+        Route::post('/employees/{employee}/documents', [\App\Http\Controllers\App\HR\EmployeeDocumentsController::class, 'store'])->name('employees.documents.store');
+        Route::delete('/documents/{document}', [\App\Http\Controllers\App\HR\EmployeeDocumentsController::class, 'destroy'])->name('documents.destroy');
+
+        // Contracts
+        Route::post('/employees/{employee}/contracts', [\App\Http\Controllers\App\HR\EmployeeContractsController::class, 'store'])->name('employees.contracts.store');
+        Route::put('/contracts/{contract}', [\App\Http\Controllers\App\HR\EmployeeContractsController::class, 'update'])->name('contracts.update');
+        Route::delete('/contracts/{contract}', [\App\Http\Controllers\App\HR\EmployeeContractsController::class, 'destroy'])->name('contracts.destroy');
         
         // Payroll Runs
         Route::get('/payroll', [\App\Http\Controllers\App\HR\PayrollController::class, 'index'])->name('payroll.index');

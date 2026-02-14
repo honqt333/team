@@ -17,9 +17,12 @@ class BranchesController extends Controller
     {
         $tenant = auth()->user()->tenant;
         $branches = $tenant->centers()
-            ->select('id', 'name', 'center_type', 'manager_name', 'phone', 'email', 'slug', 'is_active', 'created_at')
+            ->select('id', 'name', 'center_type', 'manager_name', 'phone', 'email', 'slug', 'is_active', 'created_at', 'logo_light_path', 'logo_dark_path')
             ->orderBy('id')
             ->get();
+
+        // Append virtual attributes for logo URLs
+        $branches->each->setAppends(['logo_light_url', 'logo_dark_url']);
 
         return Inertia::render('Settings/Branches/Index', [
             'branches' => $branches,

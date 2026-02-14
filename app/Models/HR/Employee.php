@@ -209,6 +209,16 @@ class Employee extends Model
         return $this->hasMany(EmployeeShift::class);
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(EmployeeDocument::class);
+    }
+
+    public function contracts(): HasMany
+    {
+        return $this->hasMany(EmployeeContract::class);
+    }
+
     /**
      * الحصول على وردية الموظف ليوم محدد
      * يبحث أولاً عن وردية مجدولة لهذا اليوم

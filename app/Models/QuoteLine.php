@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Support\PricingHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuoteLine extends Model
 {
@@ -95,4 +96,26 @@ class QuoteLine extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function parts(): HasMany
+    {
+        return $this->hasMany(QuotePart::class, 'quote_line_id');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Accessors
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Calculate total price of linked parts (only non-included ones for display)
+     */
+    public function getPartsTotalAttribute(): float
+    {
+        return $this->parts()
+            ->where('include_in_package', false)
+            ->sum('total') ?: 0;
+    }
+
+    protected $appends = ['parts_total'];
 }
+

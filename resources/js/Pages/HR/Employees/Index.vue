@@ -64,7 +64,9 @@
                             {{ $t('common.print') }}
                         </a>
 
-                        <button @click="showAddModal = true"
+                        <button 
+                            v-if="can('hr.employees.create')"
+                            @click="showAddModal = true"
                             class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -304,6 +306,9 @@ import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import EmployeeFormModal from '@/Components/HR/EmployeeFormModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { usePermission } from '@/Composables/usePermission';
+
+const { can } = usePermission();
 
 const props = defineProps({
     employees: Object,

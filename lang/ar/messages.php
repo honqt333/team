@@ -42,5 +42,8 @@ return [
     'note_added' => 'تمت إضافة الملاحظة بنجاح',
     'note_deleted' => 'تم حذف الملاحظة بنجاح',
 
+    // Service Deletion
+    'service_has_quote_lines' => 'لا يمكن حذف الخدمة - يوجد :count تقييم يستخدم هذه الخدمة',
+    'service_has_work_order_items' => 'لا يمكن حذف الخدمة - يوجد :count كرت عمل يستخدم هذه الخدمة',
 
 ];

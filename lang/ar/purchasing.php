@@ -38,13 +38,31 @@ return [
         'supplier_reference' => 'رقم مرجع المورد',
         'price_includes_tax' => 'السعر شامل الضريبة',
         'items' => 'المنتجات',
+        'items_count' => 'عدد المنتجات',
         'no_items' => 'لم يتم إضافة منتجات',
         'balance' => 'المتبقي',
+        'warehouse' => 'المستودع',
+        'financial_summary' => 'الملخص المالي',
+        'qty_ordered' => 'الكمية المطلوبة',
+        'qty_received' => 'الكمية المستلمة',
+        'unit_cost' => 'سعر الوحدة',
+        'line_total' => 'الإجمالي',
+        'part_name' => 'الصنف',
+        'sent_at' => 'تاريخ الإرسال',
+        'terms' => 'الشروط والأحكام',
         'payment_details' => 'تفاصيل الدفع',
         'payment_types' => [
             'cash' => 'نقدي (دفع فوري)',
             'deferred' => 'آجل (ذمم)',
         ],
+        'actions' => [
+            'send' => 'إرسال للمورد',
+            'receive' => 'استلام البضاعة',
+        ],
+        'confirm_send_title' => 'تأكيد إرسال أمر الشراء',
+        'confirm_send' => 'هل أنت متأكد من إرسال أمر الشراء إلى المورد؟',
+        'confirm_cancel_title' => 'تأكيد إلغاء أمر الشراء',
+        'confirm_cancel' => 'هل أنت متأكد من إلغاء أمر الشراء هذا؟',
         'errors' => [
             'full_payment_required' => 'يجب سداد كامل المبلغ للأوامر النقدية',
         ],
@@ -58,5 +76,8 @@ return [
     ],
     'items' => [
         'add' => 'إضافة منتج',
+    ],
+    'grn' => [
+        'title' => 'سندات استلام البضاعة',
     ],
 ];

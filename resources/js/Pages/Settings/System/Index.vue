@@ -76,6 +76,18 @@
                         </svg>
                         {{ $t('system_settings.sections.colors') }}
                     </button>
+                    <button @click="navigateToSection('condition-items')" :class="[
+                        'flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium transition-all',
+                        activeSection === 'condition-items'
+                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/30'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        {{ $t('system_settings.sections.condition_items') }}
+                    </button>
                     <span
                         class="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -444,6 +456,101 @@
                     </table>
                 </div>
 
+                <!-- Condition Items Table -->
+                <div v-if="activeSection === 'condition-items'" class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
+                            <tr>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ $t('system_settings.columns.name_ar') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ $t('system_settings.columns.name_en') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ $t('system_settings.columns.is_active') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ $t('system_settings.columns.updated_by') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    {{ $t('common.actions') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr v-for="item in conditionItemsData" :key="item.id"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ item.name_ar }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ item.name_en || '—' }}
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <button v-if="item.source !== 'system'"
+                                        @click="toggleActive('condition-items', item)" :class="[
+                                            'px-3 py-1 text-xs font-medium rounded-full transition-colors',
+                                            item.is_active
+                                                ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
+                                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                                        ]">
+                                        {{ item.is_active ? $t('common.active') : $t('common.inactive') }}
+                                    </button>
+                                    <span v-else :class="[
+                                        'px-3 py-1 text-xs font-medium rounded-full',
+                                        item.is_active
+                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
+                                            : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                                    ]">
+                                        {{ item.is_active ? $t('common.active') : $t('common.inactive') }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                    <span v-if="item.source === 'system'"
+                                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                                        {{ $t('common.system') }}
+                                    </span>
+                                    <div v-else class="flex flex-col">
+                                        <span>{{ item.updated_by ? item.updated_by.name : '—' }}</span>
+                                        <span v-if="item.updated_at" class="text-xs text-gray-400">{{ new
+                                            Date(item.updated_at).toLocaleDateString('ar-SA') }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <div v-if="item.source !== 'system'" class="flex items-center justify-center gap-2">
+                                        <button @click="openEditModal('condition_item', item)"
+                                            class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button @click="handleDelete('condition-items', item)"
+                                            class="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <span v-else class="text-xs text-gray-400 dark:text-gray-500">—</span>
+                                </td>
+                            </tr>
+                            <tr v-if="!conditionItemsData?.length">
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    {{ $t('common.no_data') }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <!-- Pagination -->
                 <div v-if="currentPagination?.links" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex justify-center gap-1">
@@ -467,6 +574,9 @@
             @saved="handleSaved" />
 
         <ColorFormModal v-if="showColorModal" :color="editingColor" @close="closeColorModal" @saved="handleSaved" />
+
+        <ConditionItemFormModal v-if="showConditionItemModal" :condition-item="editingConditionItem"
+            @close="closeConditionItemModal" @saved="handleSaved" />
     </AppLayout>
 </template>
 
@@ -478,6 +588,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import MakeFormModal from './Modals/MakeFormModal.vue';
 import ModelFormModal from './Modals/ModelFormModal.vue';
 import ColorFormModal from './Modals/ColorFormModal.vue';
+import ConditionItemFormModal from './Modals/ConditionItemFormModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -492,6 +603,7 @@ const props = defineProps({
     makes: [Object, Array],
     models: Object,
     colors: Object,
+    condition_items: Object,
     settings: Object,
     global_sms_enabled: Boolean,
     activeSection: {
@@ -522,11 +634,14 @@ const showColorModal = ref(false);
 const editingMake = ref(null);
 const editingModel = ref(null);
 const editingColor = ref(null);
+const showConditionItemModal = ref(false);
+const editingConditionItem = ref(null);
 
 // Computed data
 const makesData = computed(() => props.makes?.data || props.makes || []);
 const modelsData = computed(() => props.models?.data || []);
 const colorsData = computed(() => props.colors?.data || []);
+const conditionItemsData = computed(() => props.condition_items?.data || []);
 const makesForFilter = computed(() => props.makes?.data || props.makes || []);
 
 const makeOptions = computed(() => {
@@ -542,12 +657,14 @@ const currentSectionTitle = computed(() => {
     const section = props.activeSection || 'makes';
     // Mapping for general
     if (section === 'general') return 'الإعدادات العامة';
+    if (section === 'condition-items') return t('system_settings.sections.condition_items');
     return t(`system_settings.${section}.subtitle`) || t(`system_settings.sections.${section}`);
 });
 
 const currentPagination = computed(() => {
     if (props.activeSection === 'models') return props.models;
     if (props.activeSection === 'colors') return props.colors;
+    if (props.activeSection === 'condition-items') return props.condition_items;
     return props.makes;
 });
 
@@ -582,6 +699,9 @@ function openAddModal() {
     } else if (props.activeSection === 'colors') {
         editingColor.value = null;
         showColorModal.value = true;
+    } else if (props.activeSection === 'condition-items') {
+        editingConditionItem.value = null;
+        showConditionItemModal.value = true;
     }
 }
 
@@ -595,6 +715,9 @@ function openEditModal(type, item) {
     } else if (type === 'color') {
         editingColor.value = item;
         showColorModal.value = true;
+    } else if (type === 'condition_item') {
+        editingConditionItem.value = item;
+        showConditionItemModal.value = true;
     }
 }
 
@@ -613,10 +736,16 @@ function closeColorModal() {
     editingColor.value = null;
 }
 
+function closeConditionItemModal() {
+    showConditionItemModal.value = false;
+    editingConditionItem.value = null;
+}
+
 function handleSaved() {
     closeMakeModal();
     closeModelModal();
     closeColorModal();
+    closeConditionItemModal();
     success(t('common.saved_success'));
     router.reload();
 }

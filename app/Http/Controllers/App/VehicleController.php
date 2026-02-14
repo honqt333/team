@@ -165,6 +165,7 @@ class VehicleController
         $counts = [
             'workOrders' => $workOrders->count(),
             'quotes' => $quotes->count(),
+            'mileageLogs' => $vehicle->mileageLogs()->count(),
             'invoices' => 0, // Placeholder
             'payments' => 0, // Placeholder
         ];

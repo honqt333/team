@@ -264,7 +264,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -286,7 +286,11 @@ const localFilters = ref({
     warehouse_id: props.filters?.warehouse_id || props.warehouse?.id || '',
 });
 
-const viewMode = ref('list');
+const viewMode = ref(localStorage.getItem('inventory_stock_view_mode') || 'list');
+
+watch(viewMode, (mode) => {
+    localStorage.setItem('inventory_stock_view_mode', mode);
+});
 
 const applyFilters = () => {
     router.get(route('app.inventory.stock.index'), {

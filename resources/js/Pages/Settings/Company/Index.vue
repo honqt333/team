@@ -434,20 +434,9 @@
 
                     <!-- VAT Settings Tab -->
                     <div v-if="activeTab === 'vat'" class="space-y-6">
-                        <div
-                            class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                            <p class="text-sm text-blue-700 dark:text-blue-300">{{ $t('company_profile.vat.notice') }}
-                            </p>
-                        </div>
-
-                        <div
-                            class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700">
-                            <div>
-                                <h4 class="font-medium text-gray-900 dark:text-white">{{
-                                    $t('company_profile.vat.vat_enabled') }}</h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{
-                                    $t('company_profile.vat.vat_enabled_hint') }}</p>
-                            </div>
+                        <!-- VAT Toggle (Top Right) -->
+                        <div class="flex items-center justify-end gap-3">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">VAT</span>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" v-model="form.vat.vat_enabled" class="sr-only peer">
                                 <div
@@ -457,38 +446,207 @@
                         </div>
 
                         <div v-if="form.vat.vat_enabled" class="space-y-6">
+                            <!-- ZATCA Tax Number -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                    $t('company_profile.profile.vat_number') }}</label>
+                                    $t('company_profile.vat.zatca_number') }}</label>
                                 <input v-model="form.vat.vat_number" type="text" maxlength="15"
                                     @input="form.vat.vat_number = form.vat.vat_number.replace(/[^0-9]/g, '')"
-                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                    class="w-full px-4 py-2.5 rounded-lg border border-emerald-500 dark:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
                             </div>
 
+                            <!-- Two Columns: Services & Parts -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                        $t('company_profile.vat.vat_rate') }}</label>
-                                    <div class="relative">
-                                        <input v-model.number="form.vat.vat_rate" type="number" min="0" max="100"
-                                            step="0.01"
-                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-                                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                <!-- Services Column -->
+                                <div class="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
+                                                $t('company_profile.vat.services_vat_rate') }}</label>
+                                        <div class="relative">
+                                            <input v-model.number="form.vat.services_vat_rate" type="number" min="0"
+                                                max="100" step="0.01"
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                            <span
+                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">{{
+                                            $t('company_profile.vat.services_inclusive') }}</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" v-model="form.vat.services_inclusive"
+                                                class="sr-only peer">
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600">
+                                            </div>
+                                        </label>
                                     </div>
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                        $t('company_profile.vat.pricing_mode') }}</label>
-                                    <select v-model="form.vat.pricing_mode"
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
-                                        <option value="exclusive">{{ $t('company_profile.vat.exclusive') }}</option>
-                                        <option value="inclusive">{{ $t('company_profile.vat.inclusive') }}</option>
-                                    </select>
+
+                                <!-- Parts Column -->
+                                <div class="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                                    <div>
+                                        <label
+                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
+                                                $t('company_profile.vat.parts_vat_rate') }}</label>
+                                        <div class="relative">
+                                            <input v-model.number="form.vat.parts_vat_rate" type="number" min="0"
+                                                max="100" step="0.01"
+                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                            <span
+                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400">{{
+                                            $t('company_profile.vat.parts_inclusive') }}</span>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" v-model="form.vat.parts_inclusive"
+                                                class="sr-only peer">
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600">
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Show Amount Before VAT -->
+                            <div
+                                class="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <div class="flex items-center gap-2">
+                                    <Tooltip :text="$t('company_profile.vat.click_for_details')" position="top">
+                                        <button type="button" @click="showVatExplanationModal = true"
+                                            class="flex items-center gap-2 text-blue-500 hover:text-blue-600 transition-colors">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </Tooltip>
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">{{
+                                        $t('company_profile.vat.show_amount_before_vat') }}</span>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.vat.show_amount_before_vat"
+                                        class="sr-only peer">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- VAT Explanation Modal -->
+                            <Teleport to="body">
+                                <div v-if="showVatExplanationModal"
+                                    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+                                    @click.self="showVatExplanationModal = false">
+                                    <div
+                                        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden">
+                                        <!-- Modal Header -->
+                                        <div
+                                            class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-700 to-gray-800 text-white">
+                                            <h3 class="text-lg font-semibold">{{
+                                                $t('company_profile.vat.show_amount_before_vat') }}</h3>
+                                            <button @click="showVatExplanationModal = false"
+                                                class="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Modal Content -->
+                                        <div class="p-6 space-y-4">
+                                            <!-- Toggle in Modal -->
+                                            <div class="flex items-center justify-center gap-3">
+                                                <span class="text-sm text-gray-600 dark:text-gray-400">{{
+                                                    $t('company_profile.vat.show_amount_before_vat') }}</span>
+                                                <label class="relative inline-flex items-center cursor-pointer">
+                                                    <input type="checkbox" v-model="vatExplanationToggle"
+                                                        class="sr-only peer">
+                                                    <div
+                                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600">
+                                                    </div>
+                                                </label>
+                                            </div>
+
+                                            <!-- Example Table -->
+                                            <div
+                                                class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                                                <table class="w-full text-sm">
+                                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                                        <tr>
+                                                            <th
+                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
+                                                                {{ $t('company_profile.vat.table_amount') }}
+                                                            </th>
+                                                            <th
+                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
+                                                                {{ $t('company_profile.vat.table_vat') }}
+                                                                <div class="text-xs font-normal text-gray-500">VAT</div>
+                                                                <div class="text-xs font-normal text-gray-400">({{
+                                                                    $t('company_profile.vat.inclusive') }})</div>
+                                                            </th>
+                                                            <th
+                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
+                                                                {{ $t('company_profile.vat.table_total') }}
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="bg-white dark:bg-gray-800">
+                                                            <td class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium"
+                                                                :class="{ 'bg-blue-50 dark:bg-blue-900/20': vatExplanationToggle }">
+                                                                {{ vatExplanationToggle ? '86.96' : '100' }}
+                                                            </td>
+                                                            <td
+                                                                class="px-4 py-4 text-center text-gray-600 dark:text-gray-400">
+                                                                13.04
+                                                            </td>
+                                                            <td
+                                                                class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium">
+                                                                100
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                            <!-- Explanation Text -->
+                                            <p class="text-sm text-gray-500 dark:text-gray-400 text-center">
+                                                {{ vatExplanationToggle
+                                                    ? $t('company_profile.vat.explanation_enabled')
+                                                    : $t('company_profile.vat.explanation_disabled')
+                                                }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Teleport>
+
+                            <!-- Warning Notes -->
+                            <div class="space-y-3">
+                                <div
+                                    class="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                                    <p class="text-sm text-amber-700 dark:text-amber-300">
+                                        <strong>{{ $t('company_profile.vat.note_label') }}</strong>
+                                        {{ $t('company_profile.vat.vat_change_warning') }}
+                                    </p>
+                                </div>
+                                <div
+                                    class="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                    <p class="text-sm text-red-700 dark:text-red-300">
+                                        <strong>{{ $t('company_profile.vat.warning_label') }}</strong>
+                                        {{ $t('company_profile.vat.logout_warning') }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
-
-
 
                         <div class="flex justify-end pt-4">
                             <button @click="saveSection('vat')" :disabled="saving"
@@ -732,6 +890,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -762,6 +921,10 @@ const activeTab = ref('profile');
 const saving = ref(false);
 const uploadingLogo = ref(false);
 const logoPreview = ref(null);
+
+// VAT Explanation Modal
+const showVatExplanationModal = ref(false);
+const vatExplanationToggle = ref(true);
 
 // Map state
 const mapContainer = ref(null);
@@ -813,10 +976,12 @@ const form = ref({
     },
     vat: {
         vat_enabled: props.vat?.vat_enabled ?? false,
-        vat_rate: props.vat?.vat_rate ?? 15,
-        pricing_mode: props.vat?.pricing_mode ?? 'exclusive',
-        rounding_mode: props.vat?.rounding_mode ?? 'half_up',
         vat_number: props.profile?.vat_number ?? '',
+        services_vat_rate: props.vat?.services_vat_rate ?? 15,
+        parts_vat_rate: props.vat?.parts_vat_rate ?? 15,
+        services_inclusive: props.vat?.services_inclusive ?? false,
+        parts_inclusive: props.vat?.parts_inclusive ?? false,
+        show_amount_before_vat: props.vat?.show_amount_before_vat ?? true,
     },
     zatca: {
         qr_enabled: props.zatca?.qr_enabled ?? false,

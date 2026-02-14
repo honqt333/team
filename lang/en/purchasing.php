@@ -38,13 +38,31 @@ return [
         'supplier_reference' => 'Supplier Reference',
         'price_includes_tax' => 'Price includes tax',
         'items' => 'Items',
+        'items_count' => 'Items Count',
         'no_items' => 'No items added',
         'balance' => 'Balance',
+        'warehouse' => 'Warehouse',
+        'financial_summary' => 'Financial Summary',
+        'qty_ordered' => 'Qty Ordered',
+        'qty_received' => 'Qty Received',
+        'unit_cost' => 'Unit Cost',
+        'line_total' => 'Line Total',
+        'part_name' => 'Part',
+        'sent_at' => 'Sent At',
+        'terms' => 'Terms & Conditions',
         'payment_details' => 'Payment Details',
         'payment_types' => [
             'cash' => 'Cash (Pay Now)',
             'deferred' => 'Deferred (Credit)',
         ],
+        'actions' => [
+            'send' => 'Send to Supplier',
+            'receive' => 'Receive Goods',
+        ],
+        'confirm_send_title' => 'Confirm Send Order',
+        'confirm_send' => 'Are you sure you want to send this purchase order to the supplier?',
+        'confirm_cancel_title' => 'Confirm Cancel Order',
+        'confirm_cancel' => 'Are you sure you want to cancel this purchase order?',
         'errors' => [
             'full_payment_required' => 'Full payment is required for Cash orders.',
         ],
@@ -58,5 +76,8 @@ return [
     ],
     'items' => [
         'add' => 'Add Item',
+    ],
+    'grn' => [
+        'title' => 'Goods Received Notes',
     ],
 ];

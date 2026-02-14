@@ -14,6 +14,7 @@ use App\Models\HR\JobTitle;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
 use App\Models\HR\Shift;
+use App\Models\HR\HRRegulation;
 use Inertia\Inertia;
 
 class SettingsController extends Controller
@@ -56,6 +57,11 @@ class SettingsController extends Controller
                 ->get(['id', 'name']),
             'shifts' => Shift::where('tenant_id', $tenantId)
                 ->orderBy('name_ar')
+                ->get(),
+            'regulations' => HRRegulation::where('tenant_id', $tenantId)
+                ->with(['updatedBy:id,name'])
+                ->orderBy('category')
+                ->orderBy('title_ar')
                 ->get(),
             'attendanceSettings' => AttendanceSettings::getForCenter($centerId),
         ]);
@@ -298,5 +304,54 @@ class SettingsController extends Controller
         $settings->update($validated);
 
         return back()->with('success', __('messages.saved_successfully'));
+    }
+
+    // ========================
+    // HR Regulations CRUD
+    // ========================
+
+    public function storeRegulation(Request $request)
+    {
+        $validated = $request->validate([
+            'category' => 'required|string|max:255',
+            'title_ar' => 'required|string|max:255',
+            'title_en' => 'nullable|string|max:255',
+            'content_ar' => 'required|string',
+            'content_en' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        HRRegulation::create([
+            'tenant_id' => TenancyContext::tenantId(),
+            'updated_by' => auth()->id(),
+            ...$validated,
+        ]);
+
+        return back()->with('success', __('messages.created_successfully'));
+    }
+
+    public function updateRegulation(Request $request, HRRegulation $regulation)
+    {
+        $validated = $request->validate([
+            'category' => 'required|string|max:255',
+            'title_ar' => 'required|string|max:255',
+            'title_en' => 'nullable|string|max:255',
+            'content_ar' => 'required|string',
+            'content_en' => 'nullable|string',
+            'is_active' => 'boolean',
+        ]);
+
+        $regulation->update([
+            'updated_by' => auth()->id(),
+            ...$validated,
+        ]);
+
+        return back()->with('success', __('messages.updated_successfully'));
+    }
+
+    public function destroyRegulation(HRRegulation $regulation)
+    {
+        $regulation->delete();
+        return back()->with('success', __('messages.deleted_successfully'));
     }
 }

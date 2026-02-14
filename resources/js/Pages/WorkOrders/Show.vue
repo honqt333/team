@@ -556,7 +556,6 @@
                     </div>
 
                     <!-- Technicians Tab -->
-                    <!-- Technicians Tab -->
                     <div v-show="activeTab === 'technicians'">
                         <TechniciansSection 
                             :work-order="workOrder"
@@ -749,8 +748,11 @@ import AddPartModal from '@/Components/Inventory/AddPartModal.vue';
 import PrintOptionsModal from '@/Components/WorkOrders/PrintOptionsModal.vue';
 import PaymentsSection from '@/Components/WorkOrders/PaymentsSection.vue';
 import TechniciansSection from '@/Components/WorkOrders/TechniciansSection.vue';
-import PaymentsListModal from '@/Components/WorkOrders/PaymentsListModal.vue'; // Updated
+import PaymentsListModal from '@/Components/WorkOrders/PaymentsListModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
+import { usePermission } from '@/Composables/usePermission';
+
+const { can } = usePermission();
 
 const props = defineProps({
     workOrder: Object,

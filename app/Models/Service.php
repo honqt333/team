@@ -15,6 +15,7 @@ class Service extends Model
     // Service types
     public const TYPE_INTERNAL = 'internal';
     public const TYPE_EXTERNAL = 'external';
+    public const TYPE_PACKAGE = 'package';
 
     protected $fillable = [
         'tenant_id',
@@ -37,6 +38,7 @@ class Service extends Model
         'requires_approval',
         'is_active',
         'sort_order',
+        'updated_by',
     ];
 
     protected $casts = [
@@ -84,6 +86,14 @@ class Service extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Get the user who last updated this service
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
     /**
@@ -152,5 +162,12 @@ class Service extends Model
             return "{$hours}س";
         }
         return "{$minutes}د";
+    }
+
+    public function items()
+    {
+        return $this->belongsToMany(Service::class, 'service_items', 'parent_service_id', 'child_service_id')
+            ->withPivot('quantity')
+            ->withTimestamps();
     }
 }

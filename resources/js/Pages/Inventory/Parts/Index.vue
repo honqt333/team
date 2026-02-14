@@ -355,6 +355,8 @@ import { debounce } from 'lodash-es';
 import CreateModal from './CreateModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
+import { usePermission } from '@/Composables/usePermission';
+
 const props = defineProps({
     parts: Object,
     categories: {
@@ -370,7 +372,7 @@ const props = defineProps({
 
 const page = usePage();
 const { t, locale } = useI18n();
-const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
+const { can } = usePermission();
 
 const computedCategories = computed(() => {
     const allOption = { id: '', name: locale.value === 'ar' ? 'جميع التصنيفات' : 'All Categories' };

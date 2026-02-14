@@ -22,6 +22,7 @@ class QuoteRequest extends FormRequest
         return [
             'customer_id' => ['required', 'exists:customers,id'],
             'vehicle_id' => ['required', 'exists:vehicles,id'],
+            'odometer' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:2000'],
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],

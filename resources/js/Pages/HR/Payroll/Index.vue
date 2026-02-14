@@ -47,6 +47,7 @@
             <div v-if="activeTab === 'payroll'">
                  <div class="flex justify-end mb-4">
                      <button
+                        v-if="can('hr.payroll.create')"
                         @click="showGenerateModal = true"
                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
                     >
@@ -171,10 +172,12 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';
+import { usePermission } from '@/Composables/usePermission';
 import OtherPaymentsTab from './Tabs/OtherPaymentsTab.vue';
 import axios from 'axios';
 
 const { success } = useToast();
+const { can } = usePermission();
 const page = usePage();
 
 const props = defineProps({

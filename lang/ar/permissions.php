@@ -63,11 +63,18 @@ return [
     'invoices_create' => 'إنشاء فاتورة',
     'invoices_extra_discount' => 'إضافة خصم إضافي',
 
-    // Purchasing
+    // Purchasing - Suppliers
     'purchasing_suppliers_view' => 'عرض الموردين',
     'purchasing_suppliers_create' => 'إضافة مورد',
     'purchasing_suppliers_update' => 'تعديل بيانات مورد',
     'purchasing_suppliers_destroy' => 'حذف مورد',
+
+    // Purchasing - Purchase Orders
+    'purchasing_pos_view' => 'عرض أوامر الشراء',
+    'purchasing_pos_create' => 'إنشاء أمر شراء',
+    'purchasing_pos_update' => 'تعديل أمر شراء',
+    'purchasing_pos_send' => 'إرسال أمر الشراء للمورد',
+    'purchasing_pos_cancel' => 'إلغاء أمر الشراء',
 
     // HR
     'hr_view' => 'الدخول لقسم الموارد البشرية',
@@ -87,4 +94,12 @@ return [
     'users_create' => 'إضافة مستخدم',
     'users_update' => 'تعديل مستخدم',
     'users_delete' => 'حذف مستخدم',
+
+    // Employee Portal (Self-Service)
+    'employee_profile_view' => 'عرض الملف الشخصي',
+    'employee_attendance_view' => 'عرض سجل الحضور',
+    'employee_leaves_view' => 'عرض الإجازات',
+    'employee_leaves_request' => 'طلب إجازة',
+    'employee_payslips_view' => 'عرض كشوف الراتب',
+    'employee_requests_create' => 'إنشاء طلبات',
 ];

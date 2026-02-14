@@ -14,6 +14,11 @@ class TenantTaxSetting extends Model
         'tenant_id',
         'vat_enabled',
         'vat_rate',
+        'services_vat_rate',
+        'parts_vat_rate',
+        'services_inclusive',
+        'parts_inclusive',
+        'show_amount_before_vat',
         'pricing_mode',
         'rounding_mode',
         'currency_code',
@@ -23,6 +28,11 @@ class TenantTaxSetting extends Model
     protected $casts = [
         'vat_enabled' => 'boolean',
         'vat_rate' => 'decimal:2',
+        'services_vat_rate' => 'decimal:2',
+        'parts_vat_rate' => 'decimal:2',
+        'services_inclusive' => 'boolean',
+        'parts_inclusive' => 'boolean',
+        'show_amount_before_vat' => 'boolean',
     ];
 
     public function tenant(): BelongsTo

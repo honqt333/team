@@ -17,6 +17,11 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, SoftDeletes, HasRoles;
+    
+    protected $appends = [
+        'photo_url',
+        'can_update_photo',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -28,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'phone',
+        'photo_path',
         'is_active',
         'is_system_admin',
         'tenant_id',
@@ -81,6 +87,39 @@ class User extends Authenticatable implements MustVerifyEmail
     public function currentCenter(): BelongsTo
     {
         return $this->belongsTo(Center::class, 'current_center_id');
+    }
+
+    /**
+     * Get the URL to the user's profile photo.
+     */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        // 1. Check if user is an employee and has an HR photo
+        $hrPhoto = $this->employee?->photo_path;
+        if ($hrPhoto) {
+            return asset('storage/' . $hrPhoto);
+        }
+
+        // 2. Check for uploaded profile photo
+        if ($this->photo_path) {
+            return asset('storage/' . $this->photo_path);
+        }
+
+        // 3. Fallback: UI Avatars or null
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+    }
+
+    /**
+     * Determine if the user can update their profile photo.
+     */
+    public function getCanUpdatePhotoAttribute(): bool
+    {
+        // Employees with HR photos cannot update their own
+        if ($this->employee()->exists() && $this->employee->photo_path) {
+            return false;
+        }
+
+        return true;
     }
 
     public function employee(): HasOne

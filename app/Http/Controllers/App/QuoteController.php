@@ -14,6 +14,7 @@ use App\Models\Vehicle;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Support\TenancyContext;
+use App\Support\PricingHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -218,6 +219,7 @@ class QuoteController extends Controller
             'notes' => $request->notes,
             'customer_complaint' => $request->customer_complaint,
             'initial_assessment' => $request->initial_assessment,
+            'odometer' => $request->odometer,
             'created_by' => auth()->id(),
         ]);
 
@@ -422,13 +424,40 @@ class QuoteController extends Controller
 
         $service = Service::find($validated['service_id']);
 
+        // Validate price constraints based on service settings
+        $unitPrice = (float) $validated['unit_price'];
+        $discountType = $validated['discount_type'] ?? 'none';
+        $discountValue = (float) ($validated['discount_value'] ?? 0);
+        
+        // If price override not allowed, force base_price (but allow discount with min_price check)
+        if (!$service->allow_price_override) {
+            $unitPrice = (float) $service->base_price;
+        }
+        
+        // Always check min_price constraint on FINAL price (after discount)
+        $minPrice = (float) ($service->min_price ?? 0);
+        if ($minPrice > 0) {
+            // Calculate final price using same logic as frontend
+            $discountAmount = PricingHelper::computeDiscountAmount($unitPrice, $discountType, $discountValue);
+            $finalPrice = max(0, $unitPrice - $discountAmount);
+            
+            if ($finalPrice < $minPrice) {
+                return redirect()->back()->withErrors([
+                    'unit_price' => __('pricing.final_price_below_minimum', [
+                        'final' => number_format($finalPrice, 2),
+                        'min' => number_format($minPrice, 2),
+                    ])
+                ]);
+            }
+        }
+
         $line = QuoteLine::create([
             'quote_id' => $quote->id,
             'service_id' => $validated['service_id'],
             'description' => $validated['description'] ?? $service->name,
             'qty' => $validated['qty'],
-            'unit_price' => $validated['unit_price'],
-            'base_price_snapshot' => $service->base_price ?? $validated['unit_price'],
+            'unit_price' => $unitPrice,
+            'base_price_snapshot' => $service->base_price ?? $unitPrice,
             'min_price_snapshot' => $service->min_price ?? 0,
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
@@ -483,12 +512,42 @@ class QuoteController extends Controller
             'discount_value' => ['nullable', 'numeric', 'min:0'],
         ]);
 
+        // Get the service for price validation
+        $service = $line->service;
+        $unitPrice = (float) $validated['unit_price'];
+        $discountType = $validated['discount_type'] ?? 'none';
+        $discountValue = (float) ($validated['discount_value'] ?? 0);
+        
+        if ($service) {
+            // If price override not allowed, force base_price (but allow discount with min_price check)
+            if (!$service->allow_price_override) {
+                $unitPrice = (float) $service->base_price;
+            }
+            
+            // Always check min_price constraint on FINAL price (after discount)
+            $minPrice = (float) ($service->min_price ?? 0);
+            if ($minPrice > 0) {
+                // Calculate final price using same logic as frontend
+                $discountAmount = PricingHelper::computeDiscountAmount($unitPrice, $discountType, $discountValue);
+                $finalPrice = max(0, $unitPrice - $discountAmount);
+                
+                if ($finalPrice < $minPrice) {
+                    return redirect()->back()->withErrors([
+                        'unit_price' => __('pricing.final_price_below_minimum', [
+                            'final' => number_format($finalPrice, 2),
+                            'min' => number_format($minPrice, 2),
+                        ])
+                    ]);
+                }
+            }
+        }
+
         $line->update([
             'description' => $validated['description'] ?? $line->description,
             'qty' => $validated['qty'],
-            'unit_price' => $validated['unit_price'],
-            'discount_type' => $validated['discount_type'] ?? 'none',
-            'discount_value' => $validated['discount_value'] ?? 0,
+            'unit_price' => $unitPrice,
+            'discount_type' => $discountType,
+            'discount_value' => $discountValue,
         ]);
 
         $quote->refresh();

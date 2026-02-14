@@ -20,12 +20,30 @@
                 </div>
 
                 <label v-for="dept in departments" :key="dept.id"
-                    class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 cursor-pointer transition-all"
-                    :class="{ 'bg-blue-50 dark:bg-blue-900/10 border-blue-500 ring-1 ring-blue-500': form.departments.includes(dept.id) }">
-                    <span class="font-medium text-gray-900 dark:text-white">{{ getName(dept) }}</span>
+                    class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 transition-all"
+                    :class="[
+                        hasServices(dept.id)
+                            ? 'bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-60'
+                            : 'hover:border-blue-500 dark:hover:border-blue-400 cursor-pointer',
+                        { 'bg-blue-50 dark:bg-blue-900/10 border-blue-500 ring-1 ring-blue-500': form.departments.includes(dept.id) && !hasServices(dept.id) }
+                    ]">
+                    <div class="flex items-center gap-2">
+                        <span class="font-medium text-gray-900 dark:text-white">{{ getName(dept) }}</span>
+                        <!-- Lock icon for departments with services -->
+                        <span v-if="hasServices(dept.id)" 
+                            class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                            :title="$t('quotes.department_has_services')">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                            {{ getServicesCount(dept.id) }}
+                        </span>
+                    </div>
                     <div class="relative flex items-center">
                         <input type="checkbox" :value="dept.id" v-model="form.departments"
-                            class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out" />
+                            :disabled="hasServices(dept.id)"
+                            class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed" />
                     </div>
                 </label>
             </div>
@@ -53,15 +71,8 @@ import BaseModal from '@/Components/BaseModal.vue';
 const props = defineProps({
     show: Boolean,
     quote: Object,
-    availableDepartments: Array, // Departments NOT YET in the quote? Or just all? 
-    // Wait, passed from parent is 'availableDepartments' which implies logic is done there?
-    // Parent logic: "departments: Array" (all). "quoteDepartments: Array" (selected).
-    // So here passing 'availableDepartments' should be the FULL LIST, but filtered if I want to only show new ones?
-    // Actually, passing "all departments" and checking which are selected is better for maintaining state if I want to unselect eventually.
-    // BUT the task is just to ADD.
-    // Let's assume parent passes "availableDepartments" as ALL departments, and we simply check checks against quote.departments.
-    // OR parent computes only "unselected" departments.
-    // Let's stick to simple: Parent passes ALL departments, we check which are already in.
+    availableDepartments: Array,
+    linesByDepartment: [Object, Array], // Lines grouped by department_id
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -77,12 +88,24 @@ const form = useForm({
     departments: [],
 });
 
-// Departments to show (excluding already added ones?)
-// User likely wants to toggle them.
-// So let's show all and pre-check existing ones.
+// Departments to show
 const departments = computed(() => {
     return props.availableDepartments || [];
 });
+
+// Check if a department has services in the quote
+function hasServices(deptId) {
+    if (!props.linesByDepartment) return false;
+    const lines = props.linesByDepartment[deptId];
+    return Array.isArray(lines) && lines.length > 0;
+}
+
+// Get services count for a department
+function getServicesCount(deptId) {
+    if (!props.linesByDepartment) return 0;
+    const lines = props.linesByDepartment[deptId];
+    return Array.isArray(lines) ? lines.length : 0;
+}
 
 function submitForm() {
     form.put(route('app.quotes.update', props.quote.id), {
@@ -99,13 +122,10 @@ watch(() => props.show, (isOpen) => {
         form.customer_id = props.quote.customer_id;
         form.vehicle_id = props.quote.vehicle_id;
         form.departments = props.quote.departments ? props.quote.departments.map(d => d.id) : [];
-        // And other required fields...
-        // Wait, if I only send departments, will other 'required' fields fail validation if I don't send them?
-        // Yes, validation rules detailed "required".
-        // SO I must populate them.
         form.notes = props.quote.notes;
         form.customer_complaint = props.quote.customer_complaint;
         form.initial_assessment = props.quote.initial_assessment;
     }
 });
 </script>
+

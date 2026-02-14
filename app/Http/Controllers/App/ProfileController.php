@@ -62,4 +62,32 @@ class ProfileController extends Controller
 
         return back()->with('success', 'تم تحديث الملف الشخصي بنجاح');
     }
+
+    /**
+     * Update the user's profile photo.
+     */
+    public function updatePhoto(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        if (!$user->can_update_photo) {
+            return back()->with('error', 'لا يمكن تعديل الصورة الشخصية للموظفين الذين لديهم صورة في ملف الموارد البشرية');
+        }
+
+        $request->validate([
+            'photo' => ['required', 'image', 'max:2048'],
+        ]);
+
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($user->photo_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->photo_path);
+            }
+
+            $path = $request->file('photo')->store('profile-photos', 'public');
+            $user->update(['photo_path' => $path]);
+        }
+
+        return back()->with('success', 'تم تحديث الصورة الشخصية بنجاح');
+    }
 }

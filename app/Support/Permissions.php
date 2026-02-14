@@ -58,6 +58,13 @@ class Permissions
     public const SUPPLIERS_CREATE = 'purchasing.suppliers.create';
     public const SUPPLIERS_UPDATE = 'purchasing.suppliers.update';
     public const SUPPLIERS_DESTROY = 'purchasing.suppliers.destroy';
+
+    /** Purchase Orders */
+    public const POS_VIEW = 'purchasing.pos.view';
+    public const POS_CREATE = 'purchasing.pos.create';
+    public const POS_UPDATE = 'purchasing.pos.update';
+    public const POS_SEND = 'purchasing.pos.send';
+    public const POS_CANCEL = 'purchasing.pos.cancel';
     
     // ========================================
     // QUOTES MODULE
@@ -272,6 +279,13 @@ class Permissions
                 self::SUPPLIERS_CREATE,
                 self::SUPPLIERS_UPDATE,
                 self::SUPPLIERS_DESTROY,
+            ],
+            'purchasing_pos' => [
+                self::POS_VIEW,
+                self::POS_CREATE,
+                self::POS_UPDATE,
+                self::POS_SEND,
+                self::POS_CANCEL,
             ],
             'workcards' => [
                 self::WORKCARDS_VIEW,

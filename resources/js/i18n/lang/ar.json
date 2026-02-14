@@ -39,6 +39,7 @@
         "btn_create_work_order": "إنشاء أمر عمل",
         "btn_create_quote": "إنشاء تقييم",
         "updated_by": "قام بالتحديث",
+        "confirm_delete": "تأكيد الحذف",
         "confirm_delete_title": "تأكيد الحذف",
         "confirm_delete_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
         "delete_confirm": "تأكيد الحذف",
@@ -46,6 +47,7 @@
         "confirm": "تأكيد",
         "deleted_success": "تم الحذف بنجاح",
         "saved_success": "تم الحفظ بنجاح",
+        "vat_settings_updated": "تم تحديث إعدادات الضريبة بنجاح. يرجى تسجيل الدخول مرة أخرى.",
         "saving": "جاري الحفظ...",
         "loading_map": "جاري تحميل الخريطة...",
         "currency_sar": "ر.س",
@@ -91,6 +93,8 @@
         "all_categories": "جميع الفئات",
         "all_centers": "جميع الفروع",
         "name": "الاسم",
+        "title": "العنوان",
+        "content": "المحتوى",
         "basic_info": "البيانات الأساسية",
         "overview": "نظرة عامة",
         "showing": "عرض",
@@ -115,6 +119,7 @@
         "save_changes": "حفظ التغييرات",
         "view_details": "عرض التفاصيل",
         "km": "كم",
+        "unit": "الوحدة",
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
@@ -139,7 +144,8 @@
         "logout": "تسجيل الخروج",
         "settings": "الإعدادات",
         "quotes": "التقييمات",
-        "employee_portal": "بوابتي"
+        "employee_portal": "بوابتي",
+        "payroll": "مسيرات الرواتب"
     },
     "theme": {
         "toggle": "تبديل المظهر",
@@ -327,7 +333,13 @@
         },
         "all_loaded": "تم تحميل جميع المركبات",
         "delete_confirm_title": "حذف المركبة",
-        "delete_confirm_message": "هل أنت متأكد من رغبتك في حذف هذه المركبة؟ لا يمكن التراجع عن هذا الإجراء."
+        "delete_confirm_message": "هل أنت متأكد من رغبتك في حذف هذه المركبة؟ لا يمكن التراجع عن هذا الإجراء.",
+        "mileage": {
+            "history": "سجل الكيلومترات",
+            "no_history": "لا يوجد سجل للكيلومترات",
+            "value": "قراءة العداد",
+            "difference": "الفرق"
+        }
     },
     "print": {
         "options_title": "خيارات الطباعة",
@@ -429,8 +441,9 @@
             "contact_name_placeholder": "اسم الشخص المسؤول...",
             "contact_phone": "رقم الاتصال",
             "contact_phone_placeholder": "+966...",
-            "entry_date": "تاريخ الدخول",
-            "expected_end_date": "تاريخ الانتهاء المتوقع"
+            "expected_end_date": "تاريخ الانتهاء المتوقع",
+            "odometer": "عداد الكيلومترات",
+            "odometer_placeholder": "كم"
         },
         "assigned_services": "الخدمات المسندة",
         "no_technicians_assigned": "لا يوجد فنيين مسندين لخدمات في كرت العمل هذا",
@@ -611,6 +624,18 @@
             "months": "شهر",
             "years": "سنة"
         },
+        "columns": {
+            "number": "#",
+            "name": "الاسم",
+            "base_price": "سعر الخدمة",
+            "min_price": "أقل سعر للبيع",
+            "duration": "مدة الخدمة",
+            "warranty": "ضمان الخدمة",
+            "allow_price_override": "السماح بتغيير السعر",
+            "updated_by": "قام بالتحديث",
+            "actions": "الإجراء"
+        },
+        "not_set": "غير محدد",
         "form": {
             "department": "القسم",
             "no_department": "بدون قسم",
@@ -785,12 +810,28 @@
             "notice": "تُطبّق هذه الإعدادات على جميع الفروع، وتؤثر على المستندات الجديدة فقط (المستندات السابقة محفوظة Snapshots).",
             "vat_enabled": "تفعيل ضريبة القيمة المضافة",
             "vat_enabled_hint": "عند التفعيل، سيتم احتساب الضريبة على جميع الفواتير",
+            "zatca_number": "الرقم الضريبي (ZATCA)",
+            "services_vat_rate": "ضريبة القيمة المضافة على الخدمات %",
+            "parts_vat_rate": "ضريبة القيمة المضافة على قطع الغيار %",
+            "services_inclusive": "هل سعر الخدمة شامل قيمة الضريبة المضافة؟",
+            "parts_inclusive": "هل سعر قطع الغيار شامل قيمة الضريبة المضافة؟",
+            "show_amount_before_vat": "عرض المبلغ قبل الضريبة باستثناء ضريبة القيمة المضافة",
             "vat_rate": "نسبة الضريبة",
             "pricing_mode": "طريقة التسعير",
             "inclusive": "شامل الضريبة",
             "exclusive": "غير شامل الضريبة",
             "vat_number_required": "يجب إدخال الرقم الضريبي لتفعيل الضريبة",
-            "go_to_profile": "انتقل لملف الشركة"
+            "go_to_profile": "انتقل لملف الشركة",
+            "note_label": "ملاحظة!",
+            "warning_label": "تنبيه!",
+            "vat_change_warning": "التغيير في قيمة الضريبة المضافة سيؤثر على كروت الصيانة والتقييمات وفواتير قطع الغيار المستجدة فقط ولن تؤثر على كروت الصيانة والتقييمات وفواتير قطع الغيار المنشأة مسبقاً!",
+            "logout_warning": "الرجاء ملاحظة أنه عندما يتم ضغط زر الحفظ فإن النظام سيقوم بتسجيل خروج تلقائي وذلك لاحتواء الصفحة على بيانات متعلقة بالضريبة.",
+            "table_amount": "المبلغ",
+            "table_vat": "ضريبة القيمة المضافة",
+            "table_total": "المجموع",
+            "explanation_enabled": "عند التفعيل: يتم عرض المبلغ مستخرجاً منه الضريبة (المبلغ الأساسي قبل إضافة الضريبة)",
+            "explanation_disabled": "عند الإلغاء: يتم عرض المبلغ الكامل كما هو",
+            "click_for_details": "اضغط للمزيد من التفاصيل"
         },
         "zatca": {
             "phase1_title": "المرحلة الأولى (QR Code)",
@@ -834,6 +875,7 @@
             "models": "الموديلات",
             "colors": "الألوان",
             "service_types": "أنواع الخدمات",
+            "condition_items": "نموذج حالة المركبة",
             "payment_methods": "طرق الدفع"
         },
         "makes": {
@@ -871,6 +913,12 @@
             "hex_code": "كود اللون",
             "logo": "شعار الماركة",
             "is_active": "فعّال"
+        },
+        "condition_items": {
+            "title": "نموذج حالة المركبة",
+            "subtitle": "إدارة عناصر فحص حالة المركبة (الخدوش، الصدمات، مستوى الوقود...)",
+            "add": "إضافة عنصر",
+            "edit": "تعديل عنصر"
         }
     },
     "pricing": {
@@ -885,6 +933,8 @@
             "percentage": "نسبة مئوية",
             "fixed": "مبلغ ثابت"
         },
+        "fixed_amount": "مبلغ ثابت",
+        "percentage": "نسبة مئوية",
         "allow_price_override": "السماح بتغيير السعر",
         "allow_price_override_hint": "عند التفعيل، يمكن للاستقبال تعديل السعر أو الخصم عند إضافة الخدمة لكرت الصيانة",
         "price_locked": "السعر مقفل",
@@ -894,6 +944,11 @@
         "line_total": "إجمالي السطر",
         "subtotal": "المجموع الفرعي",
         "total_discount": "إجمالي الخصومات",
+        "quick_edit": "تعديل سريع للأسعار",
+        "errors": {
+            "min_price_exceeds_base": "يجب أن يكون أدنى سعر للبيع أقل من أو يساوي السعر الأساسي ({price} {currency})",
+            "percentage_invalid": "النسبة المئوية يجب أن تكون بين 0 و 100"
+        },
         "total_due": "المبلغ المستحق",
         "final_price_below_minimum": "السعر النهائي ({final}) أقل من الحد الأدنى ({min})",
         "coming_soon": {
@@ -901,6 +956,16 @@
             "line_discount_ui": "تعديل خصم البند - قريباً"
         },
         "all_loaded": "تم تحميل جميع كروت العمل"
+    },
+    "packages": {
+        "title": "باقات الخدمات",
+        "add": "إنشاء باقة",
+        "items": "محتويات الباقة",
+        "add_item": "إضافة خدمة",
+        "select_service": "اختر خدمة",
+        "quantity": "الكمية",
+        "calculate_total": "حساب السعر الإجمالي",
+        "empty": "لم تتم إضافة أي خدمات لهذه الباقة بعد."
     },
     "quotes": {
         "title": "التقييمات",
@@ -1056,6 +1121,11 @@
                 "linked_parts": "قطع الغيار المرتبطة"
             }
         },
+        "department_has_services": "يحتوي على خدمات",
+        "price_locked_hint": "السعر مقفل حسب إعدادات الخدمة",
+        "min_price_warning": "السعر النهائي أقل من الحد الأدنى ({min})",
+        "max_discount_fixed": "الحد الأقصى للخصم: {max}",
+        "max_discount_percentage": "الحد الأقصى للخصم: {max}%",
         "service_modal": {
             "service": "الخدمة",
             "description": "وصف الخدمة",
@@ -1420,7 +1490,6 @@
             "send": "إرسال للمورد",
             "cancel": "إلغاء",
             "receive": "استلام البضاعة",
-            "add": "إضافة أمر شراء",
             "edit": "تعديل أمر شراء",
             "price_includes_tax": "الأسعار شاملة الضريبة",
             "items": "الأصناف",
@@ -1428,13 +1497,36 @@
             "balance": "المتبقي",
             "supplier_reference": "مرجع المورد",
             "select_supplier": "اختر المورد...",
+            "payment_details": "تفاصيل الدفع",
+            "payment_types": {
+                "cash": "نقدي",
+                "deferred": "آجل"
+            },
             "statuses": {
                 "draft": "مسودة",
                 "sent": "مرسل",
                 "partial": "استلام جزئي",
                 "received": "مستلم بالكامل",
                 "cancelled": "ملغي"
-            }
+            },
+            "warehouse": "المستودع",
+            "financial_summary": "الملخص المالي",
+            "qty_ordered": "الكمية المطلوبة",
+            "qty_received": "الكمية المستلمة",
+            "unit_cost": "سعر الوحدة",
+            "line_total": "إجمالي السطر",
+            "items_count": "عدد الأصناف",
+            "part_name": "الصنف",
+            "sent_at": "تاريخ الإرسال",
+            "terms": "الشروط والأحكام",
+            "actions": {
+                "send": "إرسال للمورد",
+                "receive": "استلام البضاعة"
+            },
+            "confirm_send_title": "تأكيد الإرسال",
+            "confirm_send": "هل أنت متأكد من إرسال أمر الشراء للمورد؟",
+            "confirm_cancel_title": "تأكيد الإلغاء",
+            "confirm_cancel": "هل أنت متأكد من إلغاء أمر الشراء؟"
         },
         "items": {
             "add": "إضافة صنف",
@@ -1594,6 +1686,8 @@
                 "payroll": "المسيرات",
                 "work_orders": "كروت العمل",
                 "permissions": "الصلاحيات",
+                "documents": "الوثائق",
+                "contracts": "العقود",
                 "basic": "البيانات الأساسية",
                 "address": "العنوان",
                 "job": "البيانات الوظيفية",
@@ -1745,6 +1839,7 @@
             "cannot_approve": "لا يمكن اعتماد هذه المسيّرة",
             "must_approve_first": "يجب اعتماد المسيّرة قبل تسجيلها كمدفوعة",
             "statuses": {
+                "pending": "قيد الانتظار",
                 "draft": "مسودة",
                 "approved": "معتمدة",
                 "paid": "مدفوعة"
@@ -1875,6 +1970,53 @@
                 "overtime_rate": "معدل العمل الإضافي",
                 "overtime_enabled": "تفعيل حساب العمل الإضافي",
                 "working_days": "أيام العمل"
+            },
+            "regulations": {
+                "title": "لوائح العمل",
+                "subtitle": "إدارة لوائح الشركة وسياسات الانضباط",
+                "add": "إضافة لائحة",
+                "no_regulations": "لا توجد لوائح معرفة",
+                "category": "الفئة",
+                "categories": {
+                    "work_hours": "ساعات العمل",
+                    "discipline": "الانضباط والجزاءات",
+                    "benefits": "المزايا والبدلات",
+                    "safety": "السلامة والصحة",
+                    "other": "أخرى"
+                }
+            }
+        },
+        "documents": {
+            "title": "الوثائق المؤرشفة",
+            "add": "إضافة وثيقة",
+            "no_documents": "لا توجد وثائق مؤرشفة",
+            "type": "نوع الوثيقة",
+            "title_label": "عنوان الوثيقة",
+            "expiry": "تاريخ الانتهاء",
+            "file": "الملف",
+            "types": {
+                "id": "هوية / إقامة",
+                "passport": "جواز سفر",
+                "license": "رخصة قيادة",
+                "certificate": "شهادة علمية",
+                "contract": "عقد عمل",
+                "other": "أخرى"
+            }
+        },
+        "contracts": {
+            "title": "عقود العمل",
+            "add": "إنشاء عقد جديد",
+            "no_contracts": "لا توجد عقود مسجلة",
+            "draft_contract": "صياغة عقد",
+            "number": "رقم العقد",
+            "start_date": "تاريخ البداية",
+            "end_date": "تاريخ النهاية",
+            "content": "محتوى العقد",
+            "status": {
+                "draft": "مسودة",
+                "active": "نشط",
+                "expired": "منتهي",
+                "cancelled": "ملغي"
             }
         }
     },
@@ -1944,6 +2086,11 @@
         "purchasing_suppliers_create": "إضافة موردين جدد",
         "purchasing_suppliers_update": "تعديل بيانات الموردين",
         "purchasing_suppliers_destroy": "حذف الموردين",
+        "purchasing_pos_view": "عرض أوامر الشراء",
+        "purchasing_pos_create": "إنشاء أوامر شراء",
+        "purchasing_pos_update": "تعديل أوامر الشراء",
+        "purchasing_pos_send": "إرسال أوامر الشراء للموردين",
+        "purchasing_pos_cancel": "إلغاء أوامر الشراء",
         "hr_view": "الدخول لنظام الموارد البشرية",
         "hr_employees_view": "عرض سجلات الموظفين",
         "hr_employees_create": "إضافة موظفين جدد",
@@ -1966,7 +2113,13 @@
         "inventory_moves_create": "إنشاء حركات",
         "settings_company_manage": "إدارة ملف الشركة",
         "settings_centers_view": "عرض الفروع",
-        "settings_centers_manage": "إدارة الفروع"
+        "settings_centers_manage": "إدارة الفروع",
+        "employee_profile_view": "عرض الملف الشخصي",
+        "employee_attendance_view": "عرض سجل الحضور",
+        "employee_leaves_view": "عرض الإجازات",
+        "employee_leaves_request": "طلب إجازة",
+        "employee_payslips_view": "عرض كشوف الراتب",
+        "employee_requests_create": "إنشاء طلبات"
     },
     "permissions_modules": {
         "crm_customers": "إدارة العملاء",
@@ -1975,7 +2128,8 @@
         "quotes": "التقييمات",
         "services": "الخدمات",
         "invoices": "الفواتير",
-        "purchasing_suppliers": "المشتريات والموردين",
+        "purchasing_suppliers": "الموردين",
+        "purchasing_pos": "أوامر الشراء",
         "workcards": "كروت العمل (متقدم)",
         "hr_general": "الموارد البشرية (عام)",
         "hr_employees": "الموظفين",
@@ -1983,7 +2137,8 @@
         "hr_leaves": "الإجازات",
         "user_management": "إدارة المستخدمين",
         "inventory": "المخزون",
-        "settings_general": "الإعدادات العامة"
+        "settings_general": "الإعدادات العامة",
+        "employee_portal": "بوابة الموظف"
     },
     "employee_portal": {
         "title": "بوابة الموظف",
@@ -2006,5 +2161,24 @@
         "leaves": "الإجازات",
         "payslips": "كشوف الرواتب",
         "back_to_dashboard": "العودة للوحة التحكم"
+    },
+    "profile": {
+        "tabs": {
+            "info": "الملف الشخصي",
+            "security": "الأمان",
+            "password": "كلمة المرور"
+        },
+        "info": {
+            "title": "معلومات الملف الشخصي",
+            "name": "الاسم",
+            "email": "البريد الإلكتروني",
+            "phone": "رقم الهاتف",
+            "phone_hint": "رقم الهاتف المسجل عند إنشاء الحساب (للإطلاع فقط)",
+            "save_changes": "حفظ التغييرات"
+        },
+        "photo": {
+            "hr_locked": "تتم إدارة الصورة عبر ملف الموارد البشرية",
+            "success": "تم تحديث الصورة الشخصية بنجاح"
+        }
     }
 }

@@ -27,7 +27,7 @@ class CreateWorkOrderAction
                 // New Fields
                 'customer_complaint' => $data['customer_complaint'] ?? null,
                 'initial_assessment' => $data['initial_assessment'] ?? null,
-                'mileage' => $data['mileage'] ?? null,
+                'odometer' => $data['odometer'] ?? null,
                 'contact_name' => $data['contact_name'] ?? null,
                 'contact_phone' => $data['contact_phone'] ?? null,
                 'entry_date' => $data['entry_date'] ?? now()->toDateString(),

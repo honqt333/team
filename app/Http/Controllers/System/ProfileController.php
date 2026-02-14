@@ -28,6 +28,10 @@ class ProfileController extends Controller
     {
         $admin = Auth::guard('admin')->user();
         
+        if (!$admin) {
+            abort(401, 'Unauthorized');
+        }
+        
         // Generate secret if not already set
         $secret = $admin->two_factor_secret;
         $isEnabled = $admin->two_factor_confirmed_at !== null;
