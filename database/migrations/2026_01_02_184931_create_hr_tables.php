@@ -159,21 +159,6 @@ return new class extends Migration
         });
 
 
-        // المدفوعات الأخرى (سلف، مكافآت، خصومات استثنائية)
-        Schema::create('hr_other_payments', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('tenant_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('employee_id')->constrained('hr_employees')->cascadeOnDelete();
-            $table->enum('type', ['advance', 'bonus', 'deduction', 'reimbursement'])->default('advance');
-            $table->decimal('amount', 10, 2);
-            $table->date('date');
-            $table->text('reason')->nullable();
-            $table->enum('status', ['pending', 'approved', 'paid', 'rejected'])->default('pending');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('approved_at')->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
     }
 
     /**
@@ -181,7 +166,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('hr_other_payments');
         Schema::dropIfExists('hr_payrolls');
         Schema::dropIfExists('hr_attendance');
         Schema::dropIfExists('hr_employee_deductions');
