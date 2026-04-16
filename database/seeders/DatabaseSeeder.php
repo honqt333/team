@@ -18,7 +18,10 @@ class DatabaseSeeder extends Seeder
         // 1. Create Roles and Permissions first
         $this->call(RolesSeeder::class);
 
-        // 2. Create Test Data (Tenants, Centers, Admin User)
+        // 2. Create Initial System Admin (Production)
+        $this->call(InitialSystemSeeder::class);
+
+        // 3. Create Test Data (Optional, but useful for now)
         $this->call(TestDataSeeder::class);
 
         // 3. Keep Nationalities
