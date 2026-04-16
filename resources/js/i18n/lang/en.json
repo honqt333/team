@@ -20,6 +20,7 @@
         "update": "Update",
         "delete": "Delete",
         "search": "Search",
+        "share": "Share",
         "loading": "Loading...",
         "na": "—",
         "choose": "Choose...",
@@ -47,6 +48,7 @@
         "deleted_success": "Deleted successfully",
         "saved_success": "Saved successfully",
         "saving": "Saving...",
+        "vat_included": "VAT Included",
         "loading_map": "Loading map...",
         "currency_sar": "SAR",
         "lang": {
@@ -334,6 +336,9 @@
                 "sa": "Saudi Arabia",
                 "other": "Other"
             }
+        },
+        "filter": {
+            "all_makes": "All Makes"
         },
         "all_loaded": "All vehicles loaded",
         "delete_confirm_title": "Delete Vehicle",
@@ -997,7 +1002,15 @@
             "without_service": "Without Service",
             "external_purchase": "External Purchase"
         },
-        "all_loaded": "All quotes loaded"
+        "all_loaded": "All quotes loaded",
+        "tax_summary": {
+            "title": "Tax Calculation",
+            "subtotal": "Subtotal (excl. VAT)",
+            "vat": "VAT",
+            "total_with_vat": "Total (incl. VAT)",
+            "inclusive": "Tax Inclusive",
+            "exclusive": "Tax Exclusive"
+        }
     },
     "company_profile": {
         "title": "Company Profile",
@@ -1101,11 +1114,21 @@
         "admin_user": {
             "title": "Admin User",
             "info": "Admin user information",
+            "admin_label": "System Admin",
             "name": "Name",
             "email": "Email",
+            "change_email": "Change Email",
+            "change_password": "Change Password",
             "password": "Password",
-            "password_confirm": "Confirm Password",
-            "password_hint": "Leave blank to keep current password"
+            "current_password": "Current Password",
+            "new_password": "New Password",
+            "confirm_password": "Confirm Password",
+            "password_hint": "Leave blank if you don't want to change it",
+            "email_invalid": "The email address is invalid",
+            "email_taken": "The email address is already taken",
+            "current_password_wrong": "The current password is incorrect",
+            "password_min": "The password must be at least 8 characters",
+            "password_confirm_mismatch": "The password confirmation does not match"
         }
     },
     "center_settings": {
@@ -1124,7 +1147,8 @@
             "center_type": "Center Type",
             "center_type_placeholder": "Main center, Riyadh branch...",
             "license_number": "License Number",
-            "vat_number": "VAT Number"
+            "vat_number": "VAT Number",
+            "vat_help": "The tax number is fetched from the main company profile and cannot be edited here"
         },
         "contact": {
             "phone": "Phone Number",
@@ -2048,5 +2072,23 @@
             "hr_locked": "Profile photo is managed by HR records",
             "success": "Profile photo updated successfully"
         }
+    },
+    "notifications": {
+        "title": "Notifications",
+        "empty": "No notifications",
+        "empty_description": "Notifications will appear here when new events occur",
+        "mark_all_read": "Mark all as read",
+        "view_all": "View all notifications",
+        "unread_count": "{count} unread notifications",
+        "just_now": "Just now",
+        "minutes_ago": "{count} minutes ago",
+        "hours_ago": "{count} hours ago",
+        "days_ago": "{count} days ago",
+        "work_order_created": "New Work Order",
+        "work_order_status_changed": "Work Order Status Updated",
+        "invoice_created": "New Invoice",
+        "quote_created": "New Quote",
+        "quote_approved": "Quote Approved",
+        "quote_rejected": "Quote Rejected"
     }
 }

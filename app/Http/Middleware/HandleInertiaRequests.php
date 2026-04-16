@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\InternalNotification;
+use App\Models\SystemAnnouncement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
@@ -42,6 +44,10 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,
                 'permissions' => $user ? ($isTenantUser ? $user->getAllPermissions()->pluck('name') : ($user->permissions ?? [])) : [],
                 'available_centers' => ($user && $isTenantUser) ? $user->centers()->get(['centers.id', 'centers.name_ar', 'centers.name_en']) : [],
+                'unread_notifications_count' => ($user && $isTenantUser)
+                    ? InternalNotification::where('user_id', $user->id)->where('tenant_id', $user->tenant_id)->whereNull('read_at')->count()
+                    + ($tenant ? SystemAnnouncement::forTenant($tenant->id)->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $tenant->id))->count() : 0)
+                    : 0,
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
@@ -72,6 +78,15 @@ class HandleInertiaRequests extends Middleware
             'impersonating_tenant_name' => $request->session()->has('impersonating_tenant') 
                 ? \App\Models\Tenant::find($request->session()->get('impersonating_tenant'))?->trade_name 
                 : null,
+            // System announcements for tenant users
+            'system_announcements' => ($user && $isTenantUser && $tenant)
+                ? SystemAnnouncement::forTenant($tenant->id)
+                    ->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $tenant->id))
+                    ->select('id', 'title', 'content', 'type', 'published_at')
+                    ->latest('published_at')
+                    ->limit(5)
+                    ->get()
+                : [],
         ];
     }
 }

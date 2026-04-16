@@ -13,6 +13,7 @@ use App\Models\Service;
 use App\Models\Vehicle;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
+use App\Services\NotificationService;
 use App\Support\TenancyContext;
 use App\Support\PricingHelper;
 use Illuminate\Http\JsonResponse;
@@ -229,29 +230,41 @@ class QuoteController extends Controller
         }
 
         // Create lines
-        foreach ($request->lines as $lineData) {
-            $service = null;
-            if (!empty($lineData['service_id'])) {
-                $service = Service::find($lineData['service_id']);
-            }
+        if (!empty($request->lines)) {
+            foreach ($request->lines as $lineData) {
+                $service = null;
+                if (!empty($lineData['service_id'])) {
+                    $service = Service::find($lineData['service_id']);
+                }
 
-            QuoteLine::create([
-                'quote_id' => $quote->id,
-                'service_id' => $lineData['service_id'] ?? null,
-                'description' => $lineData['description'],
-                'qty' => $lineData['qty'],
-                'unit_price' => $lineData['unit_price'],
-                'base_price_snapshot' => $service?->base_price ?? $lineData['unit_price'],
-                'min_price_snapshot' => $service?->min_price ?? 0,
-                'discount_type' => $lineData['discount_type'] ?? 'none',
-                'discount_value' => $lineData['discount_value'] ?? null,
-            ]);
+                QuoteLine::create([
+                    'quote_id' => $quote->id,
+                    'service_id' => $lineData['service_id'] ?? null,
+                    'description' => $lineData['description'],
+                    'qty' => $lineData['qty'],
+                    'unit_price' => $lineData['unit_price'],
+                    'base_price_snapshot' => $service?->base_price ?? $lineData['unit_price'],
+                    'min_price_snapshot' => $service?->min_price ?? 0,
+                    'discount_type' => $lineData['discount_type'] ?? 'none',
+                    'discount_value' => $lineData['discount_value'] ?? null,
+                ]);
+            }
         }
 
         // Recalculate totals
         $quote->refresh();
         $quote->recalculateTotals();
         $quote->save();
+
+        // Notify owner about new quote
+        NotificationService::notifyOwner(
+            tenantId: $tenantId,
+            type: 'quote.created',
+            title: 'عرض سعر جديد #' . $quote->code,
+            body: 'تم إنشاء عرض سعر جديد',
+            actionUrl: '/app/quotes/' . $quote->id,
+            actorId: auth()->id(),
+        );
 
         return redirect()->route("app.quotes.show", $quote);
     }

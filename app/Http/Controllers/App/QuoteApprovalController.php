@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quote;
+use App\Services\NotificationService;
 use App\Services\QuoteConversionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -51,6 +52,20 @@ class QuoteApprovalController extends Controller
             abort(500, 'Failed to convert quote to work order.');
         }
 
+        // Notify quote creator about approval
+        if ($quote->created_by && $quote->created_by !== auth()->id()) {
+            NotificationService::notify(
+                tenantId: $quote->tenant_id,
+                userId: $quote->created_by,
+                type: 'quote.approved',
+                title: 'تمت الموافقة على عرض السعر #' . $quote->code,
+                body: 'تمت الموافقة على عرض السعر وتحويله إلى أمر عمل',
+                actionUrl: '/app/quotes/' . $quote->id,
+                actorId: auth()->id(),
+                icon: 'check',
+            );
+        }
+
         return redirect()->back();
     }
 
@@ -74,6 +89,20 @@ class QuoteApprovalController extends Controller
             'status' => Quote::STATUS_REJECTED,
             'rejected_at' => now(),
         ]);
+
+        // Notify quote creator about rejection
+        if ($quote->created_by && $quote->created_by !== auth()->id()) {
+            NotificationService::notify(
+                tenantId: $quote->tenant_id,
+                userId: $quote->created_by,
+                type: 'quote.rejected',
+                title: 'تم رفض عرض السعر #' . $quote->code,
+                body: 'تم رفض عرض السعر',
+                actionUrl: '/app/quotes/' . $quote->id,
+                actorId: auth()->id(),
+                icon: 'x',
+            );
+        }
 
         return redirect()->back();
     }

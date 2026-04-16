@@ -20,6 +20,7 @@
         "update": "تحديث",
         "delete": "حذف",
         "search": "بحث",
+        "share": "مشاركة",
         "loading": "جار التحميل...",
         "na": "—",
         "choose": "اختر...",
@@ -48,6 +49,7 @@
         "deleted_success": "تم الحذف بنجاح",
         "saved_success": "تم الحفظ بنجاح",
         "vat_settings_updated": "تم تحديث إعدادات الضريبة بنجاح. يرجى تسجيل الدخول مرة أخرى.",
+        "vat_included": "شامل الضريبة",
         "saving": "جاري الحفظ...",
         "loading_map": "جاري تحميل الخريطة...",
         "currency_sar": "ر.س",
@@ -330,6 +332,9 @@
                 "sa": "السعودية",
                 "other": "أخرى"
             }
+        },
+        "filter": {
+            "all_makes": "جميع الماركات"
         },
         "all_loaded": "تم تحميل جميع المركبات",
         "delete_confirm_title": "حذف المركبة",
@@ -1154,7 +1159,15 @@
             "without_service": "بدون خدمة",
             "external_purchase": "شراء خارجي"
         },
-        "all_loaded": "تم تحميل جميع التقييمات"
+        "all_loaded": "تم تحميل جميع التقييمات",
+        "tax_summary": {
+            "title": "حساب الضريبة",
+            "subtotal": "المجموع قبل الضريبة",
+            "vat": "ضريبة القيمة المضافة",
+            "total_with_vat": "الإجمالي شامل الضريبة",
+            "inclusive": "شامل الضريبة",
+            "exclusive": "غير شامل الضريبة"
+        }
     },
     "center_settings": {
         "title": "إعدادات المركز",
@@ -1172,7 +1185,8 @@
             "center_type": "نوع المركز",
             "center_type_placeholder": "مركز رئيسي، فرع الرياض...",
             "license_number": "رقم الرخصة",
-            "vat_number": "الرقم الضريبي"
+            "vat_number": "الرقم الضريبي",
+            "vat_help": "يتم جلب الرقم الضريبي من ملف الشركة الرئيسي ولا يمكن تعديله هنا"
         },
         "contact": {
             "phone": "رقم الهاتف",
@@ -2180,5 +2194,23 @@
             "hr_locked": "تتم إدارة الصورة عبر ملف الموارد البشرية",
             "success": "تم تحديث الصورة الشخصية بنجاح"
         }
+    },
+    "notifications": {
+        "title": "الإشعارات",
+        "empty": "لا توجد إشعارات",
+        "empty_description": "ستظهر الإشعارات هنا عند حدوث أحداث جديدة",
+        "mark_all_read": "تعليم الكل كمقروء",
+        "view_all": "عرض جميع الإشعارات",
+        "unread_count": "{count} إشعار غير مقروء",
+        "just_now": "الآن",
+        "minutes_ago": "قبل {count} دقيقة",
+        "hours_ago": "قبل {count} ساعة",
+        "days_ago": "قبل {count} يوم",
+        "work_order_created": "أمر عمل جديد",
+        "work_order_status_changed": "تحديث حالة أمر عمل",
+        "invoice_created": "فاتورة جديدة",
+        "quote_created": "عرض سعر جديد",
+        "quote_approved": "تمت الموافقة على عرض السعر",
+        "quote_rejected": "تم رفض عرض السعر"
     }
 }

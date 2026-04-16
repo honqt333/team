@@ -248,22 +248,22 @@
                         </div>
 
                         <!-- List View -->
-                        <div v-else-if="vehicleViewMode === 'list' && filteredVehicles.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div v-else-if="vehicleViewMode === 'list' && filteredVehicles.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('vehicles.form.plate') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('vehicles.form.make') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('vehicles.form.model') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('vehicles.form.year') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('vehicles.form.plate') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('vehicles.form.make') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('vehicles.form.model') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('vehicles.form.year') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="vehicle in filteredVehicles" :key="vehicle.id" @click="router.visit(route('vehicles.show', vehicle.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-bold text-gray-800 dark:text-gray-200"><span dir="ltr">{{ vehicle.plate_number }}</span></td>
-                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ getMakeName(vehicle) }}</td>
-                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ getModelName(vehicle) }}</td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ vehicle.year }}</td>
+                                        <td class="px-4 py-3 font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap"><span dir="ltr" class="inline-block">{{ vehicle.plate_number }}</span></td>
+                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ getMakeName(vehicle) }}</td>
+                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ getModelName(vehicle) }}</td>
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ vehicle.year }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -348,29 +348,29 @@
                         </div>
 
                         <!-- List View -->
-                        <div v-else-if="workOrderViewMode === 'list' && filteredWorkOrders.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div v-else-if="workOrderViewMode === 'list' && filteredWorkOrders.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('work_orders.columns.code') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('work_orders.columns.vehicle') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('work_orders.columns.status') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('work_orders.columns.created_at') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.code') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.vehicle') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.status') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.created_at') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="order in filteredWorkOrders" :key="order.id" @click="router.visit(route('work-orders.show', order.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ order.code }}</td>
-                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ order.code }}</td>
+                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                                             <div class="flex flex-col">
-                                                <span dir="ltr" class="text-sm font-bold w-fit text-start">{{ order.vehicle?.plate_number }}</span>
+                                                <span dir="ltr" class="text-sm font-bold w-fit text-start inline-block">{{ order.vehicle?.plate_number }}</span>
                                                 <span class="text-xs text-gray-500">{{ getVehicleName(order.vehicle) }}</span>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ formatDate(order.created_at) }}</td>
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(order.created_at) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -437,28 +437,28 @@
                         </div>
                         
                         <!-- List View -->
-                        <div v-else-if="quoteViewMode === 'list' && filteredQuotes.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div v-else-if="quoteViewMode === 'list' && filteredQuotes.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('quotes.columns.code') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('quotes.columns.vehicle') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('quotes.columns.status') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('quotes.columns.created_at') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('quotes.columns.code') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('quotes.columns.vehicle') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('quotes.columns.status') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('quotes.columns.created_at') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="quote in filteredQuotes" :key="quote.id" @click="router.visit(route('app.quotes.show', quote.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ quote.code }}</td>
-                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ quote.code }}</td>
+                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                                             <div class="flex flex-col">
-                                                <span dir="ltr" class="text-sm font-bold w-fit text-start">{{ quote.vehicle?.plate_number }}</span>
+                                                <span dir="ltr" class="text-sm font-bold w-fit text-start inline-block">{{ quote.vehicle?.plate_number }}</span>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ formatDate(quote.created_at) }}</td>
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(quote.created_at) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -509,42 +509,46 @@
                         </div>
 
                         <!-- Payments Table -->
-                        <div v-if="filteredPayments && filteredPayments.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div v-if="filteredPayments && filteredPayments.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">#</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.reference') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.method') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.type') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.date') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.notes') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('payments.form.amount') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{{ $t('common.updated_by') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">#</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('payments.form.reference') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('payments.form.method') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('payments.form.type') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('payments.form.date') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('payments.form.notes') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('payments.form.amount') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.updated_by') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="(payment, index) in filteredPayments" :key="payment.id" class="hover:bg-gray-100 dark:hover:bg-gray-800">
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ index + 1 }}</td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ index + 1 }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <Link :href="route('work-orders.show', payment.work_order_id)" class="text-indigo-600 dark:text-indigo-400 hover:underline font-mono">
                                                 {{ payment.work_order?.code || '-' }}
                                             </Link>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getPaymentMethodClass(payment.payment_method)">
                                                 {{ $t(`payments.methods.${payment.payment_method}`) }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <span class="px-2 py-1 rounded-full text-xs font-medium" :class="payment.type === 'refund' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'">
                                                 {{ $t(`payments.types.${payment.type || 'payment'}`) }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3 text-gray-600 dark:text-gray-300" dir="ltr">{{ formatDate(payment.payment_date) }}</td>
+                                        <td class="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                            <span dir="ltr" class="inline-block">{{ formatDate(payment.payment_date) }}</span>
+                                        </td>
                                         <td class="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">{{ payment.notes || '-' }}</td>
-                                        <td class="px-4 py-3 font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatPrice(payment.amount) }}</td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">{{ payment.received_by?.name || '-' }}</td>
+                                        <td class="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
+                                            <span dir="ltr" class="inline-block">{{ formatPrice(payment.amount) }}</span>
+                                        </td>
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm whitespace-nowrap">{{ payment.received_by?.name || '-' }}</td>
                                     </tr>
                                 </tbody>
                             </table>

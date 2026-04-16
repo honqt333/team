@@ -23,7 +23,7 @@ trait HasTaxSnapshot
 
                 if ($settings) {
                     $model->tax_enabled_snapshot = $settings->vat_enabled;
-                    $model->pricing_mode_snapshot = $settings->pricing_mode;
+                    $model->pricing_mode_snapshot = $settings->services_inclusive ? 'inclusive' : 'exclusive';
                     $model->tax_rate_snapshot = $settings->vat_rate;
                     $model->currency_code = $settings->currency_code;
                 } else {

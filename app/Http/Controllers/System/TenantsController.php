@@ -155,18 +155,30 @@ class TenantsController extends Controller
             return back()->with('error', 'اسم المستأجر غير متطابق');
         }
         
-        // Delete all related data (CASCADE should handle most, but be explicit)
-        // Users
-        $tenant->users()->forceDelete();
-        
-        // Centers and their related data
-        foreach ($tenant->centers as $center) {
-            // Delete center-related data here if needed
-            $center->forceDelete();
-        }
-        
-        // Finally delete the tenant
-        $tenant->forceDelete();
+        \DB::transaction(function () use ($tenant) {
+            $centerIds = $tenant->centers()->pluck('id');
+            
+            // 1. Delete customers first (restrictOnDelete on center_id and tenant_id)
+            \App\Models\Customer::withoutGlobalScopes()
+                ->whereIn('center_id', $centerIds)
+                ->forceDelete();
+            
+            // 2. Nullify user center references before deleting centers
+            \App\Models\User::where('tenant_id', $tenant->id)
+                ->update(['current_center_id' => null]);
+            
+            // 3. Delete centers (cascade handles: addresses, working_hours, departments, 
+            //    services, quotes, invoices, work_orders, sequences, etc.)
+            foreach ($tenant->centers as $center) {
+                $center->forceDelete();
+            }
+            
+            // 4. Delete users (restrictOnDelete on tenant_id)
+            $tenant->users()->forceDelete();
+            
+            // 5. Finally delete the tenant
+            $tenant->forceDelete();
+        });
         
         return redirect()->route('system.tenants.index')->with('success', 'تم حذف المستأجر وجميع بياناته نهائياً');
     }

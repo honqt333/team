@@ -37,6 +37,18 @@
                             />
                         </div>
 
+                        <!-- Make Filter -->
+                        <div class="w-full sm:w-48">
+                            <SearchableSelect
+                                v-model="filterMakeId"
+                                :options="makeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :placeholder="$t('vehicles.filter.all_makes')"
+                                :label="''"
+                            />
+                        </div>
+
                         <!-- Export/Print Buttons -->
                         <div class="flex gap-2">
                             <!-- Export -->
@@ -434,6 +446,7 @@ import { useToast } from "@/Composables/useToast";
 import { useNumberFormat } from "@/Composables/useNumberFormat";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import VehicleFormModal from "@/Components/Vehicles/VehicleFormModal.vue";
+import SearchableSelect from "@/Components/SearchableSelect.vue";
 import { usePermission } from "@/Composables/usePermission";
 
 const props = defineProps({
@@ -468,9 +481,19 @@ const isRtl = computed(() => locale.value === 'ar');
 const { success } = useToast();
 const { toEnglish } = useNumberFormat();
 const { can } = usePermission();
+
+const makeOptions = computed(() => [
+    { value: '', label: t('vehicles.filter.all_makes') },
+    ...props.makes.map(make => ({
+        value: make.id,
+        label: isRtl.value ? (make.name_ar || make.name_en) : (make.name_en || make.name_ar),
+    })),
+]);
+
 const showModal = ref(false);
 const selectedVehicle = ref(null);
 const searchQuery = ref(props.filters.search || "");
+const filterMakeId = ref(props.filters.make_id || "");
 const viewMode = ref(localStorage.getItem("vehiclesViewMode") || "grid");
 const exporting = ref(false);
 
@@ -500,6 +523,7 @@ const loadMore = async () => {
         const params = new URLSearchParams();
         params.set('page', page);
         if (searchQuery.value) params.set('search', searchQuery.value);
+        if (filterMakeId.value) params.set('make_id', filterMakeId.value);
         // Add other filters if any
         
         const apiUrl = '/app/api/vehicles-index?' + params.toString();
@@ -584,12 +608,22 @@ const debounce = (fn, delay) => {
 };
 
 watch(searchQuery, debounce((value) => {
-    router.get(route("vehicles.index"), { search: value }, {
+    const params = { search: value || undefined, make_id: filterMakeId.value || undefined };
+    router.get(route("vehicles.index"), params, {
         preserveState: true,
         preserveScroll: true,
         replace: true,
     });
 }, 300));
+
+watch(filterMakeId, (value) => {
+    const params = { search: searchQuery.value || undefined, make_id: value || undefined };
+    router.get(route("vehicles.index"), params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+});
 
 watch(viewMode, (newMode) => {
     localStorage.setItem("vehiclesViewMode", newMode);

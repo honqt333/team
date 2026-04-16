@@ -66,6 +66,7 @@ class VehicleController
                       ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
+            ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -89,6 +90,7 @@ class VehicleController
                       ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
+            ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -121,6 +123,7 @@ class VehicleController
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
+            'filters' => $request->only(['search', 'make_id']),
         ]);
     }
 

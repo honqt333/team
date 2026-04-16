@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\WorkOrder;
 use App\Services\InvoiceService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -88,6 +89,16 @@ class InvoicesController extends Controller
         try {
             $invoice = $this->invoiceService->createFromWorkOrder($workOrder, auth()->user());
             $this->invoiceService->issueInvoice($invoice);
+
+            // Notify owner about new invoice
+            NotificationService::notifyOwner(
+                tenantId: auth()->user()->tenant_id,
+                type: 'invoice.created',
+                title: 'فاتورة جديدة #' . $invoice->invoice_number,
+                body: 'تم إنشاء فاتورة من أمر العمل #' . ($workOrder->code ?? $workOrder->id),
+                actionUrl: '/app/invoices/' . $invoice->id,
+                actorId: auth()->id(),
+            );
 
             return redirect()->route('app.invoices.show', $invoice->id)
                 ->with('success', __('invoices.created'));

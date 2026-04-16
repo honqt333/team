@@ -168,38 +168,75 @@
                 <div class="p-6">
                     <!-- ========== WORK ORDERS TAB ========== -->
                     <div v-if="activeTab === 'workOrders'" class="space-y-4">
-                        <!-- Toolbar (Search only, Add checks moved to Action Bar) -->
-                        <div v-if="filteredWorkOrders.length > 0" class="flex items-center gap-3">
-                            <div class="relative flex-1 max-w-md">
-                                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
+                        <!-- Toolbar (Search and View Toggle) -->
+                        <div v-if="filteredWorkOrders.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="relative max-w-md">
+                                    <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" v-model="workOrderSearch" :placeholder="$t('work_orders.search')"
+                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
                                 </div>
-                                <input type="text" v-model="workOrderSearch" :placeholder="$t('work_orders.search')"
-                                    class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
+                                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-900 p-1">
+                                    <button 
+                                        @click="workOrderViewMode = 'grid'" 
+                                        :class="['px-2 py-1 rounded transition-colors', workOrderViewMode === 'grid' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
+                                    >
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+                                    </button>
+                                    <button 
+                                        @click="workOrderViewMode = 'list'" 
+                                        :class="['px-2 py-1 rounded transition-colors', workOrderViewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
+                                    >
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Grid/List View Logic (Keeping it Simple: List View preferred for details) -->
-                        <div v-if="filteredWorkOrders.length > 0"
-                            class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <!-- Grid View -->
+                        <div v-if="workOrderViewMode === 'grid' && filteredWorkOrders.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <Link
+                                v-for="order in filteredWorkOrders"
+                                :key="order.id"
+                                :href="route('work-orders.show', order.id)"
+                                class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md transition-all"
+                            >
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 group-hover:text-indigo-700 dark:group-hover:text-indigo-300">{{ order.code }}</span>
+                                    <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-lg font-bold text-gray-900 dark:text-white mb-3">
+                                    <span>{{ formatCurrency(order.total) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <span class="text-xs text-gray-400">{{ formatDate(order.created_at) }}</span>
+                                </div>
+                            </Link>
+                        </div>
+
+                        <!-- List View -->
+                        <div v-else-if="workOrderViewMode === 'list' && filteredWorkOrders.length > 0"
+                            class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('work_orders.columns.code') }}</th>
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('work_orders.columns.status') }}</th>
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('work_orders.columns.total') }}</th>
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('work_orders.columns.created_at') }}</th>
                                     </tr>
                                 </thead>
@@ -207,16 +244,16 @@
                                     <tr v-for="order in filteredWorkOrders" :key="order.id"
                                         @click="router.visit(route('work-orders.show', order.id))"
                                         class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ order.code }}
+                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ order.code }}
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <span :class="getStatusClass(order.status)"
                                                 class="px-2 py-0.5 text-xs font-medium rounded-full">{{
                                                     $t(`work_orders.status.${order.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{
+                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
                                             formatCurrency(order.total) }}</td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{
                                             formatDate(order.created_at) }}</td>
                                     </tr>
                                 </tbody>
@@ -248,37 +285,74 @@
                     <!-- ========== QUOTES TAB ========== -->
                     <div v-if="activeTab === 'quotes'" class="space-y-4">
                         <!-- Toolbar -->
-                        <div v-if="filteredQuotes.length > 0" class="flex items-center gap-3">
-                            <div class="relative flex-1 max-w-md">
-                                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
+                        <div v-if="filteredQuotes.length > 0" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="relative max-w-md">
+                                    <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" v-model="quoteSearch" :placeholder="$t('quotes.search')"
+                                        class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500" />
                                 </div>
-                                <input type="text" v-model="quoteSearch" :placeholder="$t('quotes.search')"
-                                    class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500" />
+                                <div class="flex rounded-lg bg-gray-100 dark:bg-gray-900 p-1">
+                                    <button 
+                                        @click="quoteViewMode = 'grid'" 
+                                        :class="['px-2 py-1 rounded transition-colors', quoteViewMode === 'grid' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
+                                    >
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+                                    </button>
+                                    <button 
+                                        @click="quoteViewMode = 'list'" 
+                                        :class="['px-2 py-1 rounded transition-colors', quoteViewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
+                                    >
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
+                        <!-- Grid View -->
+                        <div v-if="quoteViewMode === 'grid' && filteredQuotes.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <Link
+                                v-for="quote in filteredQuotes"
+                                :key="quote.id"
+                                :href="route('app.quotes.show', quote.id)"
+                                class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-md transition-all"
+                            >
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="font-mono font-bold text-amber-600 dark:text-amber-400 group-hover:text-amber-700 dark:group-hover:text-amber-300">{{ quote.code }}</span>
+                                    <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-lg font-bold text-gray-900 dark:text-white mb-3">
+                                    <span>{{ formatCurrency(quote.total) }}</span>
+                                </div>
+                                <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <span class="text-xs text-gray-400">{{ formatDate(quote.created_at) }}</span>
+                                </div>
+                            </Link>
+                        </div>
+
                         <!-- List View -->
-                        <div v-if="filteredQuotes.length > 0"
-                            class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div v-else-if="quoteViewMode === 'list' && filteredQuotes.length > 0"
+                            class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('quotes.columns.code') }}</th>
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('quotes.columns.status') }}</th>
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('quotes.columns.total') }}</th>
                                         <th
-                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                                            class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('quotes.columns.created_at') }}</th>
                                     </tr>
                                 </thead>
@@ -286,16 +360,16 @@
                                     <tr v-for="quote in filteredQuotes" :key="quote.id"
                                         @click="router.visit(route('app.quotes.show', quote.id))"
                                         class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white">{{ quote.code }}
+                                        <td class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">{{ quote.code }}
                                         </td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <span :class="getQuoteStatusClass(quote.status)"
                                                 class="px-2 py-0.5 text-xs font-medium rounded-full">{{
                                                     $t(`quotes.status.${quote.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{
+                                        <td class="px-4 py-3 text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
                                             formatCurrency(quote.total) }}</td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{
                                             formatDate(quote.created_at) }}</td>
                                     </tr>
                                 </tbody>
@@ -409,8 +483,14 @@ const showQuoteModal = ref(false);
 
 // Tab & view states
 const activeTab = ref('workOrders');
+const workOrderViewMode = ref(localStorage.getItem('vehicle_work_order_view_mode') || 'grid');
+const quoteViewMode = ref(localStorage.getItem('vehicle_quote_view_mode') || 'grid');
 const workOrderSearch = ref('');
 const quoteSearch = ref('');
+
+// Persistence watchers
+watch(workOrderViewMode, (val) => localStorage.setItem('vehicle_work_order_view_mode', val));
+watch(quoteViewMode, (val) => localStorage.setItem('vehicle_quote_view_mode', val));
 
 // Icons
 const ClipboardIcon = () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2' })]);

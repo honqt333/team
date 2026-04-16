@@ -257,6 +257,16 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::get('/api/makes', [\App\Http\Controllers\App\VehicleMakeController::class, 'apiList']);
     
     // ───────────────────────────────────────────────────────────────
+    // Internal Notifications
+    // ───────────────────────────────────────────────────────────────
+    Route::get('/notifications', [\App\Http\Controllers\App\NotificationController::class, 'index'])->name('app.notifications.index');
+    Route::get('/api/notifications', [\App\Http\Controllers\App\NotificationController::class, 'apiIndex'])->name('app.notifications.api');
+    Route::get('/api/notifications/unread-count', [\App\Http\Controllers\App\NotificationController::class, 'unreadCount'])->name('app.notifications.unread-count');
+    Route::post('/notifications/{notification}/read', [\App\Http\Controllers\App\NotificationController::class, 'markAsRead'])->name('app.notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\App\NotificationController::class, 'markAllAsRead'])->name('app.notifications.read-all');
+    Route::post('/announcements/{announcement}/dismiss', [\App\Http\Controllers\App\NotificationController::class, 'dismissAnnouncement'])->name('app.announcements.dismiss');
+
+    // ───────────────────────────────────────────────────────────────
     // Inventory Module
     // ───────────────────────────────────────────────────────────────
     Route::prefix('inventory')->name('app.inventory.')->group(function () {

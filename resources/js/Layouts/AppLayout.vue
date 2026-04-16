@@ -424,6 +424,8 @@
 
             <!-- Main Content -->
             <div class="flex-1 min-w-0 flex flex-col">
+                <SystemAnnouncementBanner v-if="$page.props.system_announcements?.length > 0" />
+
                 <!-- Top bar -->
                 <header
                     class="h-14 flex items-center justify-between px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
@@ -507,6 +509,9 @@
                                     d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                             </svg>
                         </button>
+
+                        <!-- Notification Bell -->
+                        <NotificationBell />
 
                         <!-- User Dropdown -->
                         <div class="relative">
@@ -986,6 +991,8 @@ import { toggleTheme } from '@/theme.js';
 import { setLocale, getCurrentLocale } from '@/i18n/index.js';
 import Toast from '@/Components/Toast.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import SystemAnnouncementBanner from '@/Components/SystemAnnouncementBanner.vue';
+import NotificationBell from '@/Components/NotificationBell.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const { locale } = useI18n();

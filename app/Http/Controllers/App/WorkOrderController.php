@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Service;
 use App\Models\VehicleMake;
 use App\Models\WorkOrder;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -229,6 +230,17 @@ class WorkOrderController
             $workOrder->load('items');
             return response()->json($workOrder, 201);
         }
+
+        // Send notification to owner
+        $workOrder->load('customer');
+        NotificationService::notifyOwner(
+            tenantId: $request->user()->tenant_id,
+            type: 'work_order.created',
+            title: 'أمر عمل جديد #' . ($workOrder->code ?? $workOrder->id),
+            body: 'تم إنشاء أمر عمل جديد' . ($workOrder->customer ? ' للعميل ' . $workOrder->customer->name : ''),
+            actionUrl: '/app/work-orders/' . $workOrder->id,
+            actorId: $request->user()->id,
+        );
 
         // Redirect to the newly created work order's show page
         return redirect()->route('work-orders.show', $workOrder)->with('success', __('messages.work_order_created'));

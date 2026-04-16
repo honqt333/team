@@ -667,6 +667,9 @@
                 </nav>
             </aside>
         </Transition>
+
+        <ConfirmModal />
+        <Toast />
     </div>
 </template>
 
@@ -674,6 +677,8 @@
 import { ref, computed } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
+import Toast from '@/Components/Toast.vue';
 
 const page = usePage();
 const { locale } = useI18n();

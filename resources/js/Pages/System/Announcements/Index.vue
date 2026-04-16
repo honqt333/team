@@ -71,6 +71,9 @@
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import { useConfirm } from '@/Composables/useConfirm';
+
+const { confirm } = useConfirm();
 
 const props = defineProps({
     announcements: Object,
@@ -95,8 +98,16 @@ const getTypeClass = (type) => ({
 
 const getTargetLabel = (target) => ({ all: 'الكل', active: 'النشطين', trial: 'التجريبي', expired: 'المنتهية', specific: 'محدد' }[target] || target);
 
-const deleteAnnouncement = (item) => {
-    if (confirm(`هل تريد حذف "${item.title}"؟`)) {
+const deleteAnnouncement = async (item) => {
+    const confirmed = await confirm({
+        title: 'تأكيد الحذف',
+        message: `هل أنت متأكد من حذف الإعلان "${item.title}"؟ لا يمكن التراجع عن هذا الإجراء وسيتم حذف جميع سجلات الإرسال المرتبطة بهذا الإعلان.`,
+        confirmText: 'نعم، حذف الإعلان',
+        cancelText: 'إلغاء',
+        type: 'danger'
+    });
+
+    if (confirmed) {
         router.delete(`/system/announcements/${item.id}`);
     }
 };
