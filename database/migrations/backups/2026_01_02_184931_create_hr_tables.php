@@ -158,6 +158,29 @@ return new class extends Migration
             $table->unique(['tenant_id', 'center_id', 'period']);
         });
 
+        // تفاصيل رواتب الموظفين
+        Schema::create('hr_payroll_items', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('payroll_id')->constrained('hr_payrolls')->cascadeOnDelete();
+            $table->foreignId('employee_id')->constrained('hr_employees')->cascadeOnDelete();
+            
+            $table->decimal('base_salary', 10, 2)->default(0);
+            $table->decimal('total_allowances', 10, 2)->default(0);
+            $table->decimal('total_deductions', 10, 2)->default(0);
+            $table->decimal('overtime_amount', 10, 2)->default(0);
+            $table->decimal('commission_amount', 10, 2)->default(0);
+            $table->decimal('net_salary', 10, 2)->default(0);
+            
+            $table->integer('working_days')->default(0);
+            $table->integer('absent_days')->default(0);
+            $table->decimal('absent_deduction', 10, 2)->default(0);
+            
+            $table->enum('status', ['pending', 'paid'])->default('pending');
+            $table->timestamp('paid_at')->nullable();
+            $table->string('payment_method')->nullable();
+            $table->text('notes')->nullable();
+            $table->timestamps();
+        });
 
         // المدفوعات الأخرى (سلف، مكافآت، خصومات استثنائية)
         Schema::create('hr_other_payments', function (Blueprint $table) {
@@ -182,6 +205,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('hr_other_payments');
+        Schema::dropIfExists('hr_payroll_items');
         Schema::dropIfExists('hr_payrolls');
         Schema::dropIfExists('hr_attendance');
         Schema::dropIfExists('hr_employee_deductions');
