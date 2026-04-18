@@ -354,6 +354,7 @@
                     <slot />
                 </main>
             </div>
+        </div>
 
         <!-- Mobile Drawer Backdrop -->
         <Transition name="fade">
