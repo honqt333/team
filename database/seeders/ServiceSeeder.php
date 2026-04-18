@@ -60,11 +60,12 @@ class ServiceSeeder extends Seeder
                     [
                         'tenant_id' => $center->tenant_id,
                         'center_id' => $center->id,
-                        'name' => $serviceData['name'],
+                        'name_ar' => $serviceData['name'],
                     ],
                     [
-                        'category' => $serviceData['category'],
-                        'default_price' => $serviceData['default_price'],
+                        'name_en' => $serviceData['name'], // Fallback or could use translation mapping
+                        'base_price' => $serviceData['default_price'],
+                        'type' => Service::TYPE_INTERNAL,
                         'is_active' => true,
                         'sort_order' => $order++,
                     ]
