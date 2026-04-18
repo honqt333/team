@@ -12,7 +12,7 @@ import { ArabicNumeralsPlugin } from './Plugins/arabicNumerals';
 import VueTelInput from 'vue-tel-input';
 import 'vue-tel-input/vue-tel-input.css';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = i18n.global.t('common.app_name') || import.meta.env.VITE_APP_NAME || 'Laravel';
 
 // Apply initial theme on startup
 applyTheme(getInitialTheme());

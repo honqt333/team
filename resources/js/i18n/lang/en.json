@@ -1,5 +1,6 @@
 {
     "common": {
+        "app_name": "Khidmh Pro",
         "save": "Save",
         "minute": "Minute",
         "hour": "Hour",

@@ -373,12 +373,13 @@ function handleImageError() {
                             </div>
                         </div>
                     </div>
+                <Head :title="$t('common.app_name')" />
                 </main>
 
                 <footer
                     class="py-16 text-center text-sm text-black dark:text-white/70"
                 >
-                    Laravel v{{ laravelVersion }} (PHP v{{ phpVersion }})
+                    {{ $t('common.app_name') }}
                 </footer>
             </div>
         </div>
