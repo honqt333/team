@@ -1,342 +1,242 @@
 <template>
     <BaseModal :show="show" @close="$emit('close')" size="lg">
+        <!-- Modern Header -->
         <template #title>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-4">
                 <div
-                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-green-500/20">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center shadow-lg shadow-gray-900/20 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                 </div>
                 <div>
-                    <h3 class="font-bold text-gray-900 dark:text-white">
+                    <h3 class="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">
                         {{ part ? $t('inventory.parts.edit') : $t('quotes.show.add_part') }}
                     </h3>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ quote.code }}</p>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <span class="inline-flex w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 capitalize">{{ $t(`quotes.parts.${form.source}`) }}</p>
+                    </div>
                 </div>
             </div>
         </template>
 
-        <form @submit.prevent="submitForm" class="space-y-5">
-            <!-- Source Selector -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                    {{ $t('quotes.parts.source') }}
-                </label>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button type="button" @click="form.source = 'warehouse'" :class="[
-                        'relative p-4 rounded-xl border-2 text-start transition-all duration-200',
-                        form.source === 'warehouse'
-                            ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 shadow-lg shadow-green-500/10'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-green-300 dark:hover:border-green-600 hover:shadow-md'
-                    ]">
-                        <div class="flex items-center gap-2 font-bold text-gray-800 dark:text-gray-200 mb-1">
-                            <span class="text-xl">🏭</span>
-                            <span>{{ $t('quotes.parts.warehouse') }}</span>
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('quotes.parts.warehouse_hint') }}
-                        </div>
-                        <div v-if="form.source === 'warehouse'"
-                            class="absolute top-2 end-2 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                    </button>
-
-                    <button type="button" @click="form.source = 'external'" :class="[
-                        'relative p-4 rounded-xl border-2 text-start transition-all duration-200',
-                        form.source === 'external'
-                            ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 shadow-lg shadow-blue-500/10'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-md'
-                    ]">
-                        <div class="flex items-center gap-2 font-bold text-gray-800 dark:text-gray-200 mb-1">
-                            <span class="text-xl">🛒</span>
-                            <span>{{ $t('quotes.parts.external') }}</span>
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('quotes.parts.external_hint') }}
-                        </div>
-                        <div v-if="form.source === 'external'"
-                            class="absolute top-2 end-2 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                    </button>
-
-                    <button type="button" @click="form.source = 'customer'" :class="[
-                        'relative p-4 rounded-xl border-2 text-start transition-all duration-200',
-                        form.source === 'customer'
-                            ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/30 dark:to-amber-900/30 shadow-lg shadow-orange-500/10'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 hover:shadow-md'
-                    ]">
-                        <div class="flex items-center gap-2 font-bold text-gray-800 dark:text-gray-200 mb-1">
-                            <span class="text-xl">👤</span>
-                            <span>{{ $t('quotes.parts.customer') }}</span>
-                        </div>
-                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $t('quotes.parts.customer_hint') }}
-                        </div>
-                        <div v-if="form.source === 'customer'"
-                            class="absolute top-2 end-2 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
-                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                        </div>
-                    </button>
-                </div>
+        <form @submit.prevent="submitForm" class="space-y-6">
+            <!-- Part Source (Keep it compact but functional) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button type="button" @click="form.source = 'warehouse'" :class="[
+                    'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
+                    form.source === 'warehouse' ? 'border-emerald-500 bg-emerald-50/30 text-emerald-700 dark:text-emerald-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                ]">
+                    🏭 {{ $t('quotes.parts.warehouse') }}
+                </button>
+                <button type="button" @click="form.source = 'external'" :class="[
+                    'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
+                    form.source === 'external' ? 'border-blue-500 bg-blue-50/30 text-blue-700 dark:text-blue-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                ]">
+                    🛒 {{ $t('quotes.parts.external') }}
+                </button>
+                <button type="button" @click="form.source = 'customer'" :class="[
+                    'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
+                    form.source === 'customer' ? 'border-amber-500 bg-amber-50/30 text-amber-700 dark:text-amber-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                ]">
+                    👤 {{ $t('quotes.parts.customer') }}
+                </button>
             </div>
 
-            <!-- Linked Service (only shown when opening from Parts tab) -->
-            <div v-if="showServiceSelect"
-                class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('quotes.service_modal.service') }}
-                    <span class="text-xs font-normal text-gray-400 ms-1">({{ $t('common.optional') || 'اختياري'
-                        }})</span>
-                </label>
-                <SearchableSelect v-model="form.quote_line_id" :options="serviceOptions" option-label="label"
-                    option-value="value" :placeholder="$t('common.none') || 'بدون خدمة'" />
-            </div>
-
-            <!-- Part Search (for warehouse source) -->
-            <div v-if="form.source === 'warehouse'"
-                class="bg-green-50/50 dark:bg-green-900/10 rounded-xl p-4 border border-green-200 dark:border-green-800">
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('inventory.parts.search_label') }}
-                </label>
-                <div class="relative">
-                    <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <input type="text" v-model="partSearch" @input="debouncedSearch"
-                        :placeholder="$t('inventory.parts.search')"
-                        class="w-full ps-12 pe-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" />
-                    <!-- Search Results Dropdown -->
-                    <div v-if="searchResults.length > 0"
-                        class="absolute z-20 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-auto">
-                        <button v-for="result in searchResults" :key="result.id" type="button"
-                            @click="selectPart(result)"
-                            class="w-full px-4 py-3 text-start hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0">
-                            <div class="flex items-center justify-between">
-                                <div class="font-medium text-gray-900 dark:text-white">{{ getName(result) }}</div>
-                                <span :class="[
-                                    'text-xs px-2 py-0.5 rounded-full font-medium',
-                                    (result.inventory_balances_sum_qty_on_hand || 0) > 0
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                ]">
-                                    {{ $t('inventory.stock.available') }}: {{ result.inventory_balances_sum_qty_on_hand
-                                        || 0 }}
-                                </span>
-                            </div>
-                            <div class="text-sm text-gray-500 flex items-center gap-2" dir="ltr">
-                                <span>{{ result.sku }}</span>
-                                <span class="text-green-600 font-mono">{{ formatCurrency(result.default_sale_price) }}
-                                    {{
-                                        $t('common.currency') }}</span>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-                <div v-if="selectedPart" class="mt-3 space-y-2">
-                    <div
-                        class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-300 dark:border-green-700 flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-lg bg-green-500 flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
-                                </svg>
-                            </div>
-                            <div>
-                                <span class="font-medium text-green-800 dark:text-green-200">{{ getName(selectedPart)
-                                    }}</span>
-                                <span class="text-xs text-green-600 dark:text-green-400 ms-2">
-                                    ({{ $t('inventory.stock.available') }}: {{ availableStock }})
-                                </span>
-                            </div>
-                        </div>
-                        <button type="button" @click="clearPartSelection"
-                            class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                    <!-- Stock Warning -->
-                    <div v-if="stockWarning"
-                        class="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <span class="text-sm text-red-700 dark:text-red-300">
-                            {{ $t('inventory.stock.insufficient_warning') }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Manual Fields (for external/customer sources) -->
-            <div v-if="form.source !== 'warehouse'" class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        {{ $t('inventory.parts.part_number') }}
+            <!-- Content Container (Linear Vertical Stack) -->
+            <div class="bg-gray-50 dark:bg-gray-900/40 rounded-3xl p-6 space-y-5 border border-gray-100 dark:border-gray-800">
+                
+                <!-- Warehouse Search -->
+                <div v-if="form.source === 'warehouse' && !selectedPart" class="relative" ref="searchWrapper">
+                    <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ms-1">
+                        {{ $t('inventory.parts.search_label') }}
                     </label>
-                    <input type="text" v-model="form.part_number" dir="ltr"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono transition-all" />
+                    <div class="relative">
+                        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" v-model="partSearch" @input="debouncedSearch"
+                            :placeholder="$t('inventory.parts.search')"
+                            class="w-full ps-12 pe-4 py-3.5 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm" />
+                        
+                        <!-- Search Results -->
+                        <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100">
+                            <div v-if="searchResults.length > 0"
+                                class="absolute z-30 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl max-h-64 overflow-auto backdrop-blur-xl">
+                                <button v-for="result in searchResults" :key="result.id" type="button"
+                                    @click="selectPart(result)"
+                                    class="w-full px-5 py-3 text-start hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0 group/item">
+                                    <div class="flex items-center justify-between">
+                                        <div class="font-bold text-gray-900 dark:text-white group-hover/item:text-emerald-600 transition-colors">{{ getName(result) }}</div>
+                                        <span class="text-[10px] font-mono text-gray-500">{{ result.sku }}</span>
+                                    </div>
+                                    <div class="text-[10px] text-emerald-600 font-bold mt-0.5">{{ formatCurrency(result.default_sale_price) }}</div>
+                                </button>
+                            </div>
+                        </transition>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        {{ $t('inventory.parts.unit') }} <span class="text-red-500">*</span>
-                    </label>
-                    <SearchableSelect v-model="form.unit_id" :options="unitOptions" option-label="label"
-                        option-value="value" :placeholder="$t('common.choose') || 'اختر'" />
+
+                <!-- Selected Part Banner (Small) -->
+                <div v-if="selectedPart" class="flex items-center justify-between p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs">📦</div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ getName(selectedPart) }}</p>
+                            <p class="text-[10px] text-emerald-600 font-bold uppercase">{{ $t('inventory.stock.available') }}: {{ availableStock }}</p>
+                        </div>
+                    </div>
+                    <button type="button" @click="clearPartSelection" class="p-1.5 hover:bg-emerald-500/20 rounded-lg text-emerald-600 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
                 </div>
-            </div>
 
-            <!-- Part Name -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('inventory.parts.name') }} <span class="text-red-500">*</span>
-                </label>
-                <input type="text" v-model="form.name" required :readonly="form.source === 'warehouse' && selectedPart"
-                    :class="[
-                        'w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all',
-                        form.source === 'warehouse' && selectedPart
-                            ? 'bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 cursor-not-allowed'
-                            : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700'
-                    ]" />
-            </div>
-
-            <!-- Description -->
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    {{ $t('inventory.parts.description') }}
-                </label>
-                <textarea v-model="form.description" rows="2"
-                    class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none transition-all"></textarea>
-            </div>
-
-            <!-- Pricing Row -->
-            <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                <div class="grid grid-cols-4 gap-4">
+                <!-- Row 1: Part Number & Unit -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
+                            {{ $t('inventory.parts.part_number') }} / {{ $t('inventory.parts.barcode') }}
+                        </label>
+                        <input type="text" v-model="form.part_number" dir="ltr"
+                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-mono transition-all text-sm" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
+                            {{ $t('inventory.parts.unit') }}
+                        </label>
+                        <SearchableSelect v-model="form.unit_id" :options="unitOptions" option-label="label"
+                            option-value="value" :placeholder="$t('common.choose')" />
+                    </div>
+                </div>
+
+                <!-- Row 2: Name -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
+                        {{ $t('inventory.parts.name') }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" v-model="form.name" required
+                        class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-bold" />
+                </div>
+
+                <!-- Row 3: Description -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
+                        {{ $t('inventory.parts.description') }}
+                    </label>
+                    <textarea v-model="form.description" rows="2"
+                        class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 resize-none transition-all text-sm"
+                        :placeholder="$t('inventory.parts.description_placeholder')"></textarea>
+                </div>
+
+                <!-- Row 4: Pricing Grid [Price | Discount | Qty] -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
                             {{ $t('inventory.parts.unit_price') }} <span class="text-red-500">*</span>
                         </label>
-                        <div class="relative">
-                            <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr" required
-                                @input="form.unit_price = normalizeArabicNumerals($event.target.value)"
-                                :readonly="form.source === 'customer' || (showToggles && form.include_in_package)"
-                                :class="[
-                                    'w-full px-3 py-2.5 border rounded-lg font-mono text-end transition-all',
-                                    (form.source === 'customer' || (showToggles && form.include_in_package))
-                                        ? 'bg-gray-200 dark:bg-gray-900 text-gray-500 border-gray-300 dark:border-gray-600 cursor-not-allowed'
-                                        : priceWarning
-                                            ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-400 dark:border-red-600 focus:ring-2 focus:ring-red-500'
-                                            : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-green-500'
-                                ]" />
-                            <div v-if="priceWarning" class="text-xs text-red-500 mt-1">
-                                {{ $t('inventory.parts.min_price_warning') }}: {{ formatCurrency(minSalePrice) }}
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                            {{ $t('quotes.form.discount') }}
-                        </label>
-                        <input type="text" inputmode="decimal" v-model="form.discount" dir="ltr"
-                            @input="form.discount = normalizeArabicNumerals($event.target.value)"
-                            :readonly="showToggles && form.include_in_package" :class="[
-                                'w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg font-mono text-end focus:ring-2 focus:ring-green-500 transition-all',
-                                (showToggles && form.include_in_package)
-                                    ? 'bg-gray-200 dark:bg-gray-900 text-gray-500 cursor-not-allowed'
-                                    : 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white'
+                        <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
+                            @input="form.unit_price = normalizeArabicNumerals($event.target.value)"
+                            :readonly="form.source === 'customer' || (form.include_in_package && form.quote_line_id)"
+                            :class="[
+                                'w-full px-4 py-3 border-2 rounded-2xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
+                                (form.include_in_package && form.quote_line_id) || form.source === 'customer'
+                                    ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-70'
+                                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500'
                             ]" />
                     </div>
                     <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                            {{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span>
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
+                            {{ $t('quotes.show.discount') }}
                         </label>
-                        <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr" required
-                            @input="form.qty = normalizeArabicNumerals($event.target.value)"
-                            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-mono text-end focus:ring-2 focus:ring-green-500 transition-all" />
+                        <input type="text" inputmode="decimal" v-model="form.discount" dir="ltr"
+                            @input="form.discount = normalizeArabicNumerals($event.target.value)"
+                            :readonly="form.include_in_package && form.quote_line_id"
+                            :class="[
+                                'w-full px-4 py-3 border-2 rounded-2xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
+                                (form.include_in_package && form.quote_line_id)
+                                    ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-red-500/50 cursor-not-allowed opacity-70'
+                                    : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-red-500 focus:ring-red-500/10 focus:border-red-500'
+                            ]" />
                     </div>
                     <div>
-                        <label
-                            class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
+                            {{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr"
+                            @input="form.qty = normalizeArabicNumerals($event.target.value)"
+                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold" />
+                    </div>
+                </div>
+
+                <!-- Row 5: VAT & Total (Styled like Image) -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ms-1">
+                            VAT ({{ quote.tax_rate_snapshot }}%)
+                        </label>
+                        <div class="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl text-center font-mono text-blue-700 dark:text-blue-300 font-bold text-sm">
+                            {{ formatCurrency(vatAmount) }}
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[10px] font-black text-gray-600 dark:text-gray-400 uppercase tracking-widest ms-1">
                             {{ $t('quotes.show.amount') }}
                         </label>
-                        <div class="px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-900 font-mono text-end text-gray-900 dark:text-white font-bold"
-                            dir="ltr">
-                            {{ formatCurrency(calculatedTotal) }}
+                        <div class="px-4 py-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-center font-mono text-gray-900 dark:text-white font-extrabold text-sm">
+                            {{ formatCurrency(grandTotalValue) }}
                         </div>
                     </div>
                 </div>
+
+                <!-- Row 6: Linked Service (Bottom as in Image) -->
+                <div v-if="showServiceSelect">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
+                        {{ $t('quotes.service_modal.service') }}
+                    </label>
+                    <SearchableSelect v-model="form.quote_line_id" :options="serviceOptions" option-label="label"
+                        option-value="value" :placeholder="$t('common.none')" />
+                </div>
+
             </div>
 
-            <!-- Toggles (only when from service form) -->
-            <div v-if="showToggles"
-                class="flex items-center gap-6 px-4 py-3 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200 dark:border-amber-800">
-                <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" v-model="form.include_in_package"
-                        class="w-5 h-5 text-green-600 bg-white dark:bg-gray-800 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
-                    <span
-                        class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                        {{ $t('work_orders.item.include_in_package') }}
-                    </span>
-                </label>
-                <label class="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" v-model="form.hide_on_print"
-                        class="w-5 h-5 text-green-600 bg-white dark:bg-gray-800 border-gray-300 rounded focus:ring-green-500 cursor-pointer" />
-                    <span
-                        class="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                        {{ $t('work_orders.item.hide_on_print') }}
-                    </span>
-                </label>
-            </div>
-
-            <!-- Calculated Total -->
-            <div
-                class="flex items-center justify-between p-5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg shadow-green-500/20">
-                <span class="text-sm font-medium text-white/90">
-                    {{ $t('quotes.show.total') }}
-                </span>
-                <span class="text-2xl font-bold text-white font-mono" dir="ltr">
-                    {{ formatCurrency(calculatedTotal) }} {{ $t('common.currency') }}
-                </span>
-            </div>
+            <!-- Toggles Section (Only shown if a service is selected) -->
+            <transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0">
+                <div v-if="form.quote_line_id" class="flex gap-4 px-2">
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" v-model="form.include_in_package" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700 dark:bg-gray-800">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">{{ $t('work_orders.item.include_in_package') }}</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer group">
+                        <input type="checkbox" v-model="form.hide_on_print" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700 dark:bg-gray-800">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">{{ $t('work_orders.item.hide_on_print') }}</span>
+                    </label>
+                </div>
+            </transition>
         </form>
 
+        <!-- Footer -->
         <template #footer>
-            <button type="button" @click="$emit('close')"
-                class="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors font-medium">
-                {{ $t('common.cancel') }}
-            </button>
-            <button type="button" @click="submitForm"
-                :disabled="form.processing || !form.name || !form.qty || (form.unit_price === '' || form.unit_price === null || form.unit_price === undefined) || (form.source !== 'warehouse' && !form.unit_id)"
-                class="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl hover:from-green-600 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium shadow-lg shadow-green-500/20 hover:shadow-xl hover:shadow-green-500/30">
-                {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
+            <div class="flex items-center justify-between w-full">
+                <button type="button" @click="$emit('close')"
+                    class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest">
+                    {{ $t('common.cancel') }}
+                </button>
+                <button type="button" @click="submitForm"
+                    :disabled="form.processing || !form.name || !form.qty || (form.unit_price === '' || form.unit_price === null) || (form.source !== 'warehouse' && !form.unit_id)"
+                    class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50">
+                    {{ form.processing ? $t('common.loading') : $t('common.save') }}
+                </button>
+            </div>
         </template>
     </BaseModal>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -366,13 +266,13 @@ function normalizeArabicNumerals(value) {
 const props = defineProps({
     show: Boolean,
     quote: Object,
-    part: Object, // Editing existing part
-    quoteLineId: Number, // When adding from service form
-    quoteLines: Array, // All quote lines for service dropdown
+    part: Object,
+    quoteLineId: Number,
+    quoteLines: Array,
     units: { type: Array, default: () => [] },
-    showServiceSelect: { type: Boolean, default: true }, // Show service dropdown
-    showToggles: { type: Boolean, default: false }, // Show include_in_package & hide_on_print
-    pendingMode: { type: Boolean, default: false }, // When true, emit data instead of saving
+    showServiceSelect: { type: Boolean, default: true },
+    showToggles: { type: Boolean, default: false },
+    pendingMode: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -384,12 +284,15 @@ const { formatCurrency } = useNumberFormat();
 const partSearch = ref('');
 const searchResults = ref([]);
 const selectedPart = ref(null);
+const searchWrapper = ref(null);
 
 // Form
 const form = useForm({
-    source: 'external',
+    id: null,
+    quote_id: props.quote?.id,
     quote_line_id: null,
     part_id: null,
+    source: 'warehouse',
     name: '',
     part_number: '',
     unit_id: null,
@@ -397,11 +300,34 @@ const form = useForm({
     qty: 1,
     unit_price: 0,
     discount: 0,
-    include_in_package: false,
+    include_in_package: true,
     hide_on_print: false,
 });
 
-// Computed
+// Store original price to restore it if user untoggles "Include in package"
+const stashedPrice = ref(0);
+const stashedDiscount = ref(0);
+
+watch(() => form.include_in_package, (val) => {
+    if (val && form.quote_line_id) {
+        // Only stash if current price is not already 0 to avoid losing data
+        if (Number(form.unit_price) > 0) stashedPrice.value = form.unit_price;
+        if (Number(form.discount) > 0) stashedDiscount.value = form.discount;
+        
+        form.unit_price = 0;
+        form.discount = 0;
+    } else if (!val && form.quote_line_id) {
+        // Restore values when untoggling
+        if (Number(form.unit_price) === 0 && stashedPrice.value > 0) {
+            form.unit_price = stashedPrice.value;
+        }
+        if (Number(form.discount) === 0 && stashedDiscount.value > 0) {
+            form.discount = stashedDiscount.value;
+        }
+    }
+});
+
+// Computed Calculations
 const calculatedTotal = computed(() => {
     const price = parseFloat(form.unit_price) || 0;
     const qty = parseFloat(form.qty) || 0;
@@ -409,7 +335,28 @@ const calculatedTotal = computed(() => {
     return Math.max(0, (price * qty) - discount);
 });
 
-// Options for SearchableSelect components
+const vatAmount = computed(() => {
+    if (!props.quote.tax_enabled_snapshot) return 0;
+    const isInclusive = props.quote.pricing_mode_snapshot === 'inclusive';
+    const rate = props.quote.tax_rate_snapshot || 15;
+    const netAmount = calculatedTotal.value;
+    
+    if (isInclusive) {
+        return netAmount - (netAmount / (1 + (rate / 100)));
+    } else {
+        return netAmount * (rate / 100);
+    }
+});
+
+const grandTotalValue = computed(() => {
+    const netAmount = calculatedTotal.value;
+    if (!props.quote.tax_enabled_snapshot || props.quote.pricing_mode_snapshot === 'inclusive') {
+        return netAmount;
+    }
+    return netAmount + vatAmount.value;
+});
+
+// Options
 const serviceOptions = computed(() => {
     return (props.quoteLines || []).map(line => ({
         value: line.id,
@@ -424,36 +371,20 @@ const unitOptions = computed(() => {
     }));
 });
 
-// Stock tracking for warehouse parts
 const availableStock = computed(() => {
     if (!selectedPart.value) return 0;
     return selectedPart.value.inventory_balances_sum_qty_on_hand || 0;
 });
 
-const stockWarning = computed(() => {
-    if (form.source !== 'warehouse' || !selectedPart.value) return false;
-    return (parseFloat(form.qty) || 0) > availableStock.value;
-});
+// Click outside handler
+const handleClickOutside = (event) => {
+    if (searchWrapper.value && !searchWrapper.value.contains(event.target)) {
+        searchResults.value = [];
+    }
+};
 
-// Price validation for warehouse parts
-const minSalePrice = computed(() => {
-    if (!selectedPart.value) return 0;
-    return parseFloat(selectedPart.value.min_sale_price) || 0;
-});
-
-// Check if net unit price (after discount) is below minimum
-const netUnitPrice = computed(() => {
-    const price = parseFloat(form.unit_price) || 0;
-    const qty = parseFloat(form.qty) || 1;
-    const discount = parseFloat(form.discount) || 0;
-    // Calculate per-unit net price (total - discount) / qty
-    return (price * qty - discount) / qty;
-});
-
-const priceWarning = computed(() => {
-    if (form.source !== 'warehouse' || !selectedPart.value || minSalePrice.value === 0) return false;
-    return netUnitPrice.value < minSalePrice.value;
-});
+onMounted(() => window.addEventListener('mousedown', handleClickOutside));
+onUnmounted(() => window.removeEventListener('mousedown', handleClickOutside));
 
 // Methods
 const debouncedSearch = debounce(async () => {
@@ -492,54 +423,25 @@ function clearPartSelection() {
 }
 
 function submitForm() {
-    // Calculate total
-    const total = calculateTotal();
-
+    const total = calculatedTotal.value;
     if (props.pendingMode) {
-        // Return part data instead of saving (for new service creation)
-        const partData = {
-            ...form.data(),
-            total: total
-        };
-        emit('saved', partData);
+        emit('saved', { ...form.data(), total });
         return;
     }
-
-    if (props.part) {
-        // Update existing part
-        form.put(route('app.quotes.parts.update', { quote: props.quote.id, quotePart: props.part.id }), {
-            onSuccess: () => {
-                emit('saved');
-            },
-        });
-    } else {
-        // Add new part
-        form.post(route('app.quotes.parts.store', { quote: props.quote.id }), {
-            onSuccess: () => {
-                emit('saved');
-            },
-        });
-    }
+    const url = props.part 
+        ? route('app.quotes.parts.update', { quote: props.quote.id, quotePart: props.part.id })
+        : route('app.quotes.parts.store', { quote: props.quote.id });
+    
+    const method = props.part ? 'put' : 'post';
+    form[method](url, { onSuccess: () => emit('saved') });
 }
 
-function calculateTotal() {
-    const price = parseFloat(form.unit_price) || 0;
-    const qty = parseFloat(form.qty) || 0;
-    const discount = parseFloat(form.discount) || 0;
-    return Math.max(0, (price * qty) - discount);
-}
-
-// Watch source changes
+// Watchers
 watch(() => form.source, (newSource) => {
-    if (newSource === 'customer') {
-        form.unit_price = 0;
-    }
-    if (newSource !== 'warehouse') {
-        clearPartSelection();
-    }
+    if (newSource === 'customer') form.unit_price = 0;
+    if (newSource !== 'warehouse') clearPartSelection();
 });
 
-// Watch include_in_package toggle (only when showToggles is enabled)
 watch(() => form.include_in_package, (isIncluded) => {
     if (props.showToggles && isIncluded) {
         form.unit_price = 0;
@@ -547,39 +449,20 @@ watch(() => form.include_in_package, (isIncluded) => {
     }
 });
 
-// Reset form when modal opens
 watch(() => props.show, (isOpen) => {
     if (isOpen) {
-        partSearch.value = '';
-        searchResults.value = [];
-        selectedPart.value = null;
-
         if (props.part) {
-            // Editing
-            form.source = props.part.source;
-            form.quote_line_id = props.part.quote_line_id;
-            form.part_id = props.part.part_id;
-            form.name = props.part.name;
-            form.part_number = props.part.part_number || '';
-            form.unit_id = props.part.unit_id;
-            form.description = props.part.description || '';
-            form.qty = props.part.qty;
-            form.unit_price = props.part.unit_price;
-            form.discount = props.part.discount;
-            form.include_in_package = props.part.include_in_package;
-            form.hide_on_print = props.part.hide_on_print;
-
-            if (props.part.part) {
-                selectedPart.value = props.part.part;
-            }
+            Object.assign(form, {
+                ...props.part,
+                part_number: props.part.part_number || '',
+                description: props.part.description || '',
+            });
+            if (props.part.part) selectedPart.value = props.part.part;
         } else {
-            // Adding new
             form.reset();
             form.source = 'external';
             form.quote_line_id = props.quoteLineId || null;
             form.qty = 1;
-            form.include_in_package = false;
-            form.hide_on_print = false;
         }
     }
 });

@@ -31,6 +31,11 @@ class QuotePart extends Model
         'unit_price',
         'discount',
         'total',
+        'is_taxable',
+        'tax_rate_snapshot',
+        'tax_amount',
+        'total_excl_tax',
+        'total_incl_tax',
         'include_in_package',
         'hide_on_print',
     ];
@@ -40,6 +45,11 @@ class QuotePart extends Model
         'unit_price' => 'decimal:2',
         'discount' => 'decimal:2',
         'total' => 'decimal:2',
+        'tax_rate_snapshot' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'total_excl_tax' => 'decimal:2',
+        'total_incl_tax' => 'decimal:2',
+        'is_taxable' => 'boolean',
         'include_in_package' => 'boolean',
         'hide_on_print' => 'boolean',
     ];
@@ -51,9 +61,38 @@ class QuotePart extends Model
     protected static function booted(): void
     {
         static::saving(function (QuotePart $part) {
-            // Auto-calculate total: (qty * unit_price) - discount
+            // Auto-calculate base total: (qty * unit_price) - discount
             $subtotal = bcmul($part->qty, $part->unit_price, 2);
-            $part->total = bcsub($subtotal, $part->discount, 2);
+            $netAmount = bcsub($subtotal, $part->discount, 2);
+            $part->total = $netAmount; // Base amount used for overall subtotal
+
+            // Calculate tax based on quote's tax settings
+            $quote = $part->quote;
+            if ($quote && $quote->tax_enabled_snapshot) {
+                $taxRate = $part->tax_rate_snapshot ?: $quote->tax_rate_snapshot ?: 15;
+                $part->is_taxable = true;
+                $part->tax_rate_snapshot = $taxRate;
+
+                if ($quote->pricing_mode_snapshot === 'inclusive') {
+                    $taxFactor = (float)bcadd('1', bcdiv($taxRate, '100', 4), 4);
+                    $part->total_incl_tax = (float)$netAmount;
+                    
+                    // Use round for base price to ensure Base + Tax = Total
+                    $baseExclTax = round($part->total_incl_tax / $taxFactor, 2);
+                    $part->total_excl_tax = $baseExclTax;
+                    $part->tax_amount = round($part->total_incl_tax - $baseExclTax, 2);
+                } else {
+                    $part->tax_amount = bcmul($netAmount, bcdiv($taxRate, '100', 4), 2);
+                    $part->total_incl_tax = bcadd($netAmount, $part->tax_amount, 2);
+                    $part->total_excl_tax = $netAmount;
+                }
+            } else {
+                $part->is_taxable = false;
+                $part->tax_rate_snapshot = 0;
+                $part->tax_amount = 0;
+                $part->total_excl_tax = (float)$netAmount;
+                $part->total_incl_tax = (float)$netAmount;
+            }
         });
     }
 

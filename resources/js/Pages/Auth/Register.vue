@@ -388,8 +388,7 @@ const submit = () => {
                             </button>
                         </div>
                         <div class="p-6 overflow-y-auto max-h-[60vh] text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                            <h4 class="font-bold mb-2">{{ isRTL ? 'نظرة عامة' : 'Overview' }}</h4>
-                            <p class="mb-4">{{ isRTL ? 'مرحباً بك في خدمة برو. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.' : 'Welcome to Khidma Pro. By using this service, you agree to be bound by these terms and conditions.' }}</p>
+                            <p class="mb-4">{{ isRTL ? 'مرحباً بك في خدمة برو. باستخدامك لهذه الخدمة، فإنك توافق على الالتزام بهذه الشروط والأحكام.' : 'Welcome to Khidmh Pro. By using this service, you agree to be bound by these terms and conditions.' }}</p>
                             <p class="mb-4">{{ isRTL ? 'يرجى قراءة هذه الشروط بعناية قبل استخدام النظام. إذا كنت لا توافق على جميع الشروط، فلا يجوز لك استخدام الخدمة.' : 'Please read these terms carefully before using the system. If you do not agree to all terms, you may not use the service.' }}</p>
                             <p class="text-gray-500 dark:text-gray-400 italic">{{ isRTL ? '(سيتم تحديث هذا المحتوى من لوحة تحكم النظام)' : '(This content will be updated from the system admin panel)' }}</p>
                         </div>

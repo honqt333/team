@@ -114,7 +114,7 @@ const initMoyasar = () => {
         methods: ['creditcard', 'applepay'],
         apple_pay: {
             country: 'SA',
-            label: 'Khidma Pro',
+            label: 'Khidmh Pro',
             validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
         },
         on_completed: function(payment) {

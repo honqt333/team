@@ -16,7 +16,7 @@
                         </svg>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">Khidma Pro</p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ $t('common.app_name') }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-400">لوحة النظام</p>
                     </div>
                 </div>
@@ -354,7 +354,6 @@
                     <slot />
                 </main>
             </div>
-        </div>
 
         <!-- Mobile Drawer Backdrop -->
         <Transition name="fade">
@@ -382,7 +381,7 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-sm font-bold text-gray-900 dark:text-white truncate">Khidma Pro</p>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ $t('common.app_name') }}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400">لوحة النظام</p>
                         </div>
                     </div>

@@ -29,7 +29,7 @@ class TwoFactorService
     /**
      * Generate QR code as SVG for authenticator app.
      */
-    public function generateQrCode(string $email, string $secret, string $appName = 'Khidma Pro'): string
+    public function generateQrCode(string $email, string $secret, string $appName = 'Khidmh Pro'): string
     {
         $otpAuthUrl = $this->google2fa->getQRCodeUrl(
             $appName,

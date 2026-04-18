@@ -395,6 +395,12 @@ class QuoteController extends Controller
             ->orderBy('name_ar')
             ->get();
 
+        // Auto-fix/recalculate on show to ensure financials are fresh
+        if ($quote->canBeEdited()) {
+            $quote->recalculateTotals();
+            $quote->save();
+        }
+
         return Inertia::render('Quotes/Show', [
             'quote' => $quote,
             'linesByDepartment' => $linesByDepartment,

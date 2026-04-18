@@ -5,10 +5,10 @@
         </div>
         <div class="flex flex-col items-center">
             <span class="font-bold text-3xl text-gray-900 dark:text-white font-cairo">
-                {{ $i18n.locale === 'ar' ? 'خدمة برو' : 'Khidma Pro' }}
+                {{ $t('common.app_name') }}
             </span>
              <span class="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-medium mt-1">
-                {{ $i18n.locale === 'ar' ? 'حلول الخدمات المتكاملة' : 'Integrated Service Solutions' }}
+                {{ $t('common.app_slogan') }}
             </span>
         </div>
     </Link>

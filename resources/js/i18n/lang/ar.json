@@ -1,6 +1,7 @@
 {
     "common": {
         "app_name": "خدمة برو",
+        "app_slogan": "نظام ادارة مراكز خدمات السيارات",
         "save": "حفظ",
         "minute": "دقيقة",
         "hour": "ساعة",
@@ -1125,7 +1126,18 @@
                 "spare_parts": "قطع الغيار",
                 "service_info": "بيانات الخدمة",
                 "linked_parts": "قطع الغيار المرتبطة"
-            }
+            },
+            "pricing_analysis": "تحليل التسعير",
+            "final_quoted_amount": "القيمة النهائية المذكورة في العرض"
+        },
+        "parts": {
+            "source": "مصدر القطعة",
+            "warehouse": "المستودع",
+            "warehouse_hint": "من مخزون المركز",
+            "external": "شراء خارجي",
+            "external_hint": "تأمين من مورد خارجي",
+            "customer": "من العميل",
+            "customer_hint": "أحضرها العميل معه"
         },
         "department_has_services": "يحتوي على خدمات",
         "price_locked_hint": "السعر مقفل حسب إعدادات الخدمة",
@@ -1158,7 +1170,8 @@
             "vat": "VAT",
             "total": "المجموع",
             "without_service": "بدون خدمة",
-            "external_purchase": "شراء خارجي"
+            "external_purchase": "شراء خارجي",
+            "empty_hint": "ابدأ بإضافة قطع الغيار للتقييم"
         },
         "all_loaded": "تم تحميل جميع التقييمات",
         "tax_summary": {

@@ -227,9 +227,14 @@ class CompanyProfileController extends Controller
 
         // For VAT section, logout the user and redirect to login
         if ($section === 'vat') {
+            $intendedUrl = route('settings.company', ['tab' => 'vat']);
+            
             auth()->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
+            
+            // Set intended URL in the NEW session after invalidation
+            session()->put('url.intended', $intendedUrl);
             
             return redirect()->route('login')->with('success', __('common.vat_settings_updated'));
         }

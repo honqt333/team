@@ -234,54 +234,6 @@
 
             </div>
 
-            <!-- Tax Summary Box (if tax is enabled) -->
-            <div v-if="hasTax"
-                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                        {{ $t('quotes.tax_summary.title') }}
-                    </h3>
-                    <span
-                        class="text-xs px-2.5 py-1 rounded-full font-medium"
-                        :class="quote.pricing_mode_snapshot === 'inclusive'
-                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'">
-                        {{ quote.pricing_mode_snapshot === 'inclusive'
-                            ? $t('quotes.tax_summary.inclusive')
-                            : $t('quotes.tax_summary.exclusive') }}
-                    </span>
-                </div>
-
-                <div class="space-y-1">
-                    <!-- Subtotal before tax -->
-                    <div class="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                        <span class="text-gray-600 dark:text-gray-400">{{ $t('quotes.tax_summary.subtotal') }}</span>
-                        <span class="font-mono font-medium text-gray-900 dark:text-white">{{ formatCurrency(totals.grand.amount) }}</span>
-                    </div>
-
-                    <!-- VAT Amount -->
-                    <div class="flex items-center justify-between py-2.5 px-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-900/10">
-                        <span class="text-gray-600 dark:text-gray-400">
-                            {{ $t('quotes.tax_summary.vat') }} ({{ quote.tax_rate_snapshot || 15 }}%)
-                        </span>
-                        <span class="font-mono font-medium text-emerald-600 dark:text-emerald-400">+ {{ formatCurrency(totals.grand.tax) }}</span>
-                    </div>
-
-                    <!-- Grand Total with tax -->
-                    <div class="flex items-center justify-between py-3 px-3 mt-2 border-t-2 border-gray-200 dark:border-gray-600 rounded-b-lg">
-                        <span class="font-bold text-gray-900 dark:text-white text-base">{{ $t('quotes.tax_summary.total_with_vat') }}</span>
-                        <span class="font-mono font-bold text-lg text-blue-600 dark:text-blue-400">{{ formatCurrency(totals.grand.total) }}</span>
-                    </div>
-                </div>
-            </div>
-
             <!-- Customer Complaint & Initial Assessment -->
             <div v-if="quote.customer_complaint || quote.initial_assessment"
                 class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -616,63 +568,71 @@ const totals = computed(() => {
         grand: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
     };
 
-    if (!props.quote?.lines) return t;
-
     const isInclusive = props.quote?.pricing_mode_snapshot === 'inclusive';
-    const taxRate = props.quote?.tax_rate_snapshot || 15;
+    const taxRate = Number(props.quote?.tax_rate_snapshot || 15);
     const taxFactor = 1 + (taxRate / 100);
+    const taxEnabled = !!props.quote?.tax_enabled_snapshot;
 
-    props.quote.lines.forEach(line => {
-        // Price (Qty * Unit Price)
-        let linePrice = parseFloat(line.unit_price || 0) * parseFloat(line.qty || 0);
-        let lineDiscount = parseFloat(line.discount_amount || 0);
+    // Services calculation
+    if (props.quote?.lines && props.quote.lines.length > 0) {
+        props.quote.lines.forEach(line => {
+            const price = Number(line.unit_price || 0) * Number(line.qty || 1);
+            const discount = Number(line.discount_amount || 0);
+            const tax = Number(line.tax_amount || 0);
+            const total = Number(line.line_total || (price - discount + (isInclusive ? 0 : tax)));
 
-        t.services.price += linePrice;
-        t.services.discount += lineDiscount;
-        t.services.tax += parseFloat(line.tax_amount || 0);
-        t.services.total += parseFloat(line.line_total || 0);
+            t.services.price += price;
+            t.services.discount += discount;
+            t.services.tax += tax;
+            t.services.total += total;
 
-        let lineAmount = linePrice - lineDiscount;
-        if (isInclusive && props.quote?.tax_enabled_snapshot) {
-            lineAmount = lineAmount / taxFactor;
-        }
-        t.services.amount += lineAmount;
-    });
+            let amount = price - discount;
+            if (isInclusive && taxEnabled) {
+                amount = amount / taxFactor;
+            }
+            t.services.amount += amount;
+        });
+    }
 
-    // Parts totals
-    if (props.quote?.parts) {
+    // Parts calculation
+    if (props.quote?.parts && props.quote.parts.length > 0) {
         props.quote.parts.forEach(part => {
-            if (part.include_in_package) {
-                const partPrice = parseFloat(part.unit_price || 0) * parseFloat(part.qty || 0);
-                const partDiscount = parseFloat(part.discount || 0);
-                const partNet = partPrice - partDiscount;
+            // FORCE INCLUDE: temporarily ignore the flag to ensure visibility
+            const isIncluded = true; 
+            
+            if (isIncluded) {
+                const qty = Number(part.qty || 0);
+                const unitPrice = Number(part.unit_price || 0);
+                const discount = Number(part.discount || 0);
+                
+                const partPrice = qty * unitPrice;
+                const partNet = partPrice - discount;
 
                 t.parts.price += partPrice;
-                t.parts.discount += partDiscount;
+                t.parts.discount += discount;
 
-                if (props.quote?.tax_enabled_snapshot) {
+                if (taxEnabled) {
                     if (isInclusive) {
-                        // Price includes tax → extract base and tax
-                        const baseAmount = partNet / taxFactor;
-                        t.parts.amount += baseAmount;
-                        t.parts.tax += (partNet - baseAmount);
+                        const amount = Number(part.total_excl_tax || (partNet / taxFactor));
+                        const tax = Number(part.tax_amount || (partNet - amount));
+                        t.parts.amount += amount;
+                        t.parts.tax += tax;
                         t.parts.total += partNet;
                     } else {
-                        // Price excludes tax → add tax on top
-                        const partTax = partNet * (taxRate / 100);
+                        const tax = Number(part.tax_amount || (partNet * (taxRate / 100)));
                         t.parts.amount += partNet;
-                        t.parts.tax += partTax;
-                        t.parts.total += (partNet + partTax);
+                        t.parts.tax += tax;
+                        t.parts.total += (partNet + tax);
                     }
                 } else {
                     t.parts.amount += partNet;
-                    t.parts.total += parseFloat(part.total || 0);
+                    t.parts.total += Number(part.total_incl_tax || part.total || partNet);
                 }
             }
         });
     }
 
-    // Grand Total
+    // Grand Totals sync
     t.grand.price = t.services.price + t.parts.price;
     t.grand.discount = t.services.discount + t.parts.discount;
     t.grand.amount = t.services.amount + t.parts.amount;

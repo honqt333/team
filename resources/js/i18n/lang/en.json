@@ -1,6 +1,7 @@
 {
     "common": {
         "app_name": "Khidmh Pro",
+        "app_slogan": "Integrated Service Solutions",
         "save": "Save",
         "minute": "Minute",
         "hour": "Hour",
@@ -910,10 +911,14 @@
             "services": "Services",
             "parts": "Spare Parts"
         },
-        "part_source": {
+        "parts": {
+            "source": "Part Source",
             "warehouse": "From Warehouse",
+            "warehouse_hint": "From center stock",
             "external": "External Purchase",
-            "customer": "From Customer"
+            "external_hint": "Secured from external supplier",
+            "customer": "From Customer",
+            "customer_hint": "Brought by customer"
         },
         "filters": {
             "code_placeholder": "Quote number...",
@@ -1001,7 +1006,8 @@
             "vat": "VAT",
             "total": "Total",
             "without_service": "Without Service",
-            "external_purchase": "External Purchase"
+            "external_purchase": "External Purchase",
+            "empty_hint": "Start adding spare parts to the quote"
         },
         "all_loaded": "All quotes loaded",
         "tax_summary": {

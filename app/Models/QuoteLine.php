@@ -121,7 +121,6 @@ class QuoteLine extends Model
     public function getPartsTotalAttribute(): float
     {
         return $this->parts()
-            ->where('include_in_package', false)
             ->sum('total') ?: 0;
     }
 

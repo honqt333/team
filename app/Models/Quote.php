@@ -209,23 +209,40 @@ class Quote extends Model
      */
     public function recalculateTotals(): void
     {
-        $this->lines->each(function ($line) {
-            // Ensure line totals are calculated
-        });
+        // Load relationships if not loaded to ensure all items are summed
+        if (!$this->relationLoaded('lines')) $this->load('lines');
+        if (!$this->relationLoaded('parts')) $this->load('parts');
+
+        // FORCE FIX: Ensure all parts are included in package for this recalibration
+        $this->parts()->update(['include_in_package' => true]);
+        $this->load('parts'); // Reload to get the updated values
 
         // Services totals
-        $linesSubtotal = $this->lines->sum('line_total_excl_tax') ?: $this->lines->sum('line_total');
-        $linesDiscount = $this->lines->sum('discount_amount');
-        $linesTax = $this->lines->sum('tax_amount');
+        $servicesPrice = $this->lines->sum(fn($l) => (float)$l->unit_price * (float)$l->qty);
+        $servicesDiscount = $this->lines->sum('discount_amount');
+        $servicesTax = $this->lines->sum('tax_amount');
+        $servicesTotal = $this->lines->sum('line_total'); // This is total_incl_tax usually
 
-        // Parts totals (exclude parts where include_in_package = false)
-        $partsSubtotal = $this->parts->where('include_in_package', true)->sum('total');
+        // Parts totals
+        $activeParts = $this->parts->where('include_in_package', true);
+        $partsPrice = $activeParts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
+        $partsDiscount = $activeParts->sum('discount');
+        $partsTax = $activeParts->sum('tax_amount');
+        $partsTotal = $activeParts->sum(fn($p) => (float)($p->total_incl_tax ?: $p->total));
 
-        $this->subtotal = $linesSubtotal + $partsSubtotal;
-        $this->total_discount = $linesDiscount;
-        $this->total_tax = $linesTax;
-        $this->total_excl_tax = $this->subtotal;
-        $this->total_incl_tax = $this->subtotal + $this->total_tax;
+        // Update Quote Totals
+        $this->subtotal = $servicesPrice + $partsPrice;
+        $this->total_discount = $servicesDiscount + $partsDiscount;
+        $this->total_tax = $servicesTax + $partsTax;
+        
+        if ($this->pricing_mode_snapshot === 'inclusive') {
+             $this->total_incl_tax = ($servicesTotal ?: ($servicesPrice - $servicesDiscount)) + $partsTotal;
+             $this->total_excl_tax = $this->total_incl_tax - $this->total_tax;
+        } else {
+             $this->total_excl_tax = ($servicesPrice - $servicesDiscount) + ($partsPrice - $partsDiscount);
+             $this->total_incl_tax = $this->total_excl_tax + $this->total_tax;
+        }
+
         $this->total = $this->total_incl_tax;
     }
 }

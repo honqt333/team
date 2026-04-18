@@ -94,13 +94,13 @@ class EmailService
 
         if ($isHtml) {
             Mail::mailer('dynamic_smtp')->html($body, function ($message) use ($config, $to, $subject) {
-                $message->from($config['from_address'], $config['from_name'] ?? 'Khidma Pro');
+                $message->from($config['from_address'], $config['from_name'] ?? 'Khidmh Pro');
                 $message->to($to);
                 $message->subject($subject);
             });
         } else {
             Mail::mailer('dynamic_smtp')->raw($body, function ($message) use ($config, $to, $subject) {
-                $message->from($config['from_address'], $config['from_name'] ?? 'Khidma Pro');
+                $message->from($config['from_address'], $config['from_name'] ?? 'Khidmh Pro');
                 $message->to($to);
                 $message->subject($subject);
             });

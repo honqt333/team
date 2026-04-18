@@ -228,7 +228,7 @@ class IntegrationsController extends Controller
             ->post("https://api.twilio.com/2010-04-01/Accounts/{$config['account_sid']}/Messages.json", [
                 'To' => $phone,
                 'From' => $config['from_number'],
-                'Body' => 'رسالة اختبار من Khidma Pro',
+                'Body' => 'رسالة اختبار من خدمة برو / Khidmh Pro',
             ]);
 
         if (!$response->successful()) {
@@ -245,7 +245,7 @@ class IntegrationsController extends Controller
                 'messaging_product' => 'whatsapp',
                 'to' => $phone,
                 'type' => 'text',
-                'text' => ['body' => 'رسالة اختبار من Khidma Pro ✅'],
+                'text' => ['body' => 'رسالة اختبار من خدمة برو / Khidmh Pro ✅'],
             ]);
 
         if (!$response->successful()) {
@@ -269,8 +269,8 @@ class IntegrationsController extends Controller
             ],
         ]);
 
-        \Mail::mailer('test_smtp')->raw('رسالة اختبار من Khidma Pro', function ($message) use ($config, $email) {
-            $message->from($config['from_address'], $config['from_name'] ?? 'Khidma Pro');
+        \Mail::mailer('test_smtp')->raw('رسالة اختبار من خدمة برو / Khidmh Pro', function ($message) use ($config, $email) {
+            $message->from($config['from_address'], $config['from_name'] ?? 'Khidmh Pro');
             $message->to($email);
             $message->subject('اختبار البريد الإلكتروني');
         });

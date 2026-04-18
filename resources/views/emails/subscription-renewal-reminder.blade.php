@@ -31,7 +31,9 @@
         @endcomponent
     @endif
 
-    شكراً لاختياركم **Khidma Pro**
+    <div class="company-name">Khidmh Pro</div>
 
-    {{ config('app.name') }}
+    <p>شكراً لاختياركم {{ config('app.name') }}</p>
+
+    Khidmh Pro
 @endcomponent

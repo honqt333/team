@@ -997,6 +997,15 @@ const form = ref({
     },
 });
 
+// Watch for VAT inclusive sync
+watch(() => form.value.vat.services_inclusive, (newVal) => {
+    form.value.vat.parts_inclusive = newVal;
+});
+
+watch(() => form.value.vat.parts_inclusive, (newVal) => {
+    form.value.vat.services_inclusive = newVal;
+});
+
 const formatExample = computed(() => {
     let example = form.value.numbering.invoice_number_format;
     const now = new Date();
@@ -1279,8 +1288,15 @@ watch(activeTab, async (newTab) => {
     }
 });
 
-// Init map on mount if contact tab is active
+// Init map on mount if contact tab is active, also handle tab query param
 onMounted(() => {
+    // Handle tab query param
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab && tabs.value.find(t => t.id === tab)) {
+        activeTab.value = tab;
+    }
+
     if (activeTab.value === 'contact') {
         nextTick(() => {
             initMap();
