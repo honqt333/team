@@ -21,10 +21,15 @@ class DatabaseSeeder extends Seeder
         // 2. Create Initial System Admin (Production)
         $this->call(InitialSystemSeeder::class);
 
-        // 3. Create Test Data (Optional, but useful for now)
+        // 3. Create Technical Data (Cars, Colors, Services)
+        $this->call(VehicleMakesSeeder::class);
+        $this->call(VehicleColorsSeeder::class);
+        $this->call(ServiceSeeder::class);
+
+        // 4. Create Test Data (Optional, but useful for now)
         $this->call(TestDataSeeder::class);
 
-        // 3. Keep Nationalities
+        // 5. Keep Nationalities
         $this->call(NationalitiesSeeder::class);
     }
 }
