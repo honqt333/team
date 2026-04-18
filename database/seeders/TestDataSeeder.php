@@ -35,7 +35,7 @@ class TestDataSeeder extends Seeder
 
         // Create center
         $center = Center::firstOrCreate(
-            ['slug' => 'main', 'tenant_id' => $tenant->id],
+            ['slug' => 'test-main', 'tenant_id' => $tenant->id],
             [
                 'tenant_id' => $tenant->id,
                 'name' => 'Main Branch',
