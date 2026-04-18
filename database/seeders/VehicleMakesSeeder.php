@@ -29,12 +29,22 @@ class VehicleMakesSeeder extends Seeder
         ];
 
         foreach ($makes as $makeName => $models) {
-            $make = VehicleMake::firstOrCreate(['name' => $makeName]);
+            $make = VehicleMake::firstOrCreate([
+                'name_en' => $makeName,
+                'source' => 'system'
+            ], [
+                'name_ar' => $makeName, // Fallback to same name for AR
+                'is_active' => true
+            ]);
             
             foreach ($models as $modelName) {
                 VehicleModel::firstOrCreate([
                     'make_id' => $make->id,
-                    'name' => $modelName,
+                    'name_en' => $modelName,
+                    'source' => 'system'
+                ], [
+                    'name_ar' => $modelName, // Fallback to same name for AR
+                    'is_active' => true
                 ]);
             }
         }
