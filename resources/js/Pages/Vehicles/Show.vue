@@ -543,14 +543,14 @@ function getVehicleName(vehicle) {
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US');
+    return new Date(dateStr).toLocaleDateString('en-US');
 }
 
 // Currency formatter
 // This should probably be a global helper used everywhere
 function formatCurrency(value) {
     if (!value) return '';
-    return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'SAR',
         minimumFractionDigits: 0
