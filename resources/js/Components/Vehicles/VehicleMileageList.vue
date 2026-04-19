@@ -13,59 +13,75 @@
             {{ $t('vehicles.mileage.no_history') }}
         </div>
 
-        <!-- History List -->
-        <div v-else class="relative overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700">
+        <div v-else class="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm">
             <table class="w-full text-sm text-start">
-                <thead class="text-xs text-gray-500 uppercase bg-gray-50 dark:bg-gray-800 dark:text-gray-400">
+                <thead class="text-xs text-gray-500 uppercase bg-gray-50/50 dark:bg-gray-800/50 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                     <tr>
-                        <th class="px-6 py-3 font-medium">{{ $t('common.date') }}</th>
-                        <th class="px-6 py-3 font-medium text-center">{{ $t('vehicles.mileage.value') }}</th>
-                        <th class="px-6 py-3 font-medium text-center">{{ $t('vehicles.mileage.difference') }}</th>
-                        <th class="px-6 py-3 font-medium">{{ $t('common.source') }}</th>
-                        <th class="px-6 py-3 font-medium">{{ $t('common.user') }}</th>
+                        <th class="px-6 py-4 font-semibold text-start">{{ $t('common.date') }}</th>
+                        <th class="px-6 py-4 font-semibold text-center">{{ $t('vehicles.mileage.value') }}</th>
+                        <th class="px-6 py-4 font-semibold text-center">{{ $t('vehicles.mileage.difference') }}</th>
+                        <th class="px-6 py-4 font-semibold text-start">{{ $t('common.source') }}</th>
+                        <th class="px-6 py-4 font-semibold text-start">{{ $t('common.user') }}</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     <tr v-for="log in logs" :key="log.id"
-                        class="bg-white dark:bg-gray-900 border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">
-                            {{ formatDate(log.recorded_at) }}
+                        class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+                        <!-- Date -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex flex-col">
+                                <span class="text-gray-900 dark:text-white font-medium">{{ formatDate(log.recorded_at) }}</span>
+                                <span class="text-[10px] text-gray-400 mt-0.5">{{ formatTime(log.recorded_at) }}</span>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 text-center font-mono font-bold text-gray-900 dark:text-white">
-                            {{ formatNumber(log.mileage) }}
-                        </td>
+                        <!-- Value -->
                         <td class="px-6 py-4 text-center">
-                            <span v-if="log.difference > 0"
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                dir="ltr">
-                                +{{ formatNumber(log.difference) }}
+                            <span class="font-mono font-bold text-gray-900 dark:text-white text-base">
+                                {{ formatNumber(log.mileage) }}
                             </span>
-                            <span v-else-if="log.difference < 0"
-                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                                dir="ltr">
-                                {{ formatNumber(log.difference) }}
-                            </span>
-                            <span v-else class="text-gray-400">-</span>
                         </td>
+                        <!-- Difference -->
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex justify-center">
+                                <span v-if="log.difference > 0"
+                                    class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50"
+                                    dir="ltr">
+                                    +{{ formatNumber(log.difference) }}
+                                </span>
+                                <span v-else-if="log.difference < 0"
+                                    class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 border border-red-100 dark:border-red-800/50"
+                                    dir="ltr">
+                                    {{ formatNumber(log.difference) }}
+                                </span>
+                                <span v-else class="text-gray-300">—</span>
+                            </div>
+                        </td>
+                        <!-- Source -->
                         <td class="px-6 py-4">
-                            <div v-if="log.reference_code" class="flex flex-col">
-                                <span
-                                    class="font-medium text-indigo-600 dark:text-indigo-400 break-words max-w-[150px]">
+                            <div v-if="log.reference_code" class="flex flex-col gap-0.5">
+                                <span class="font-bold text-indigo-600 dark:text-indigo-400 text-xs">
                                     {{ log.reference_code }}
                                 </span>
-                                <span class="text-xs text-gray-400">
+                                <span class="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-md self-start">
                                     {{ formatRefType(log.reference_type) }}
                                 </span>
                             </div>
                             <div v-else class="flex flex-col">
-                                <span v-if="log.previous_mileage === 0" class="text-amber-600 dark:text-amber-400 font-medium whitespace-nowrap">
+                                <span v-if="log.previous_mileage === 0" class="inline-flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                     {{ $t('vehicles.mileage.initial_log') }}
                                 </span>
-                                <span v-else class="text-gray-400 text-xs">{{ $t('common.manual_update') }}</span>
+                                <span v-else class="text-gray-400 text-xs italic">{{ $t('common.manual_update') }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs">
-                            {{ log.creator?.name || '-' }}
+                        <!-- User -->
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-bold text-gray-500">
+                                    {{ log.creator?.name?.charAt(0).toUpperCase() }}
+                                </div>
+                                <span class="text-gray-600 dark:text-gray-400 text-xs">{{ log.creator?.name || '-' }}</span>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
@@ -98,6 +114,12 @@ const formatDate = (dateString) => {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
+    });
+};
+
+const formatTime = (dateString) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleTimeString(undefined, {
         hour: '2-digit',
         minute: '2-digit'
     });
