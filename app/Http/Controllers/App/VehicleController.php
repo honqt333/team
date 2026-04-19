@@ -147,6 +147,17 @@ class VehicleController
 
         $vehicle = Vehicle::create($data);
         
+        // Record initial mileage log if provided
+        if ($request->odometer > 0) {
+            $vehicle->mileageLogs()->create([
+                'mileage' => $request->odometer,
+                'previous_mileage' => 0,
+                'difference' => $request->odometer,
+                'recorded_at' => now(),
+                'created_by' => $user->id,
+            ]);
+        }
+
         // Load customer relationship for frontend
         $vehicle->load('customer');
 
@@ -217,7 +228,20 @@ class VehicleController
             $data['model_id'] = null;
         }
 
+        $oldOdometer = (int)$vehicle->odometer;
         $vehicle->update($data);
+
+        // Record mileage log if odometer changed manually
+        $newOdometer = (int)$request->odometer;
+        if ($newOdometer !== $oldOdometer && $newOdometer > 0) {
+            $vehicle->mileageLogs()->create([
+                'mileage' => $newOdometer,
+                'previous_mileage' => $oldOdometer,
+                'difference' => $newOdometer - $oldOdometer,
+                'recorded_at' => now(),
+                'created_by' => auth()->id(),
+            ]);
+        }
 
         return back()->with('success', 'Vehicle updated successfully.');
     }
