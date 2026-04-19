@@ -97,11 +97,11 @@
                                 </div>
                                 <div class="flex-1">
                                     <p class="font-medium text-gray-900 dark:text-white" dir="ltr">{{
-                                        vehicle.plate_number }}
+                                        toEnglish(vehicle.plate_number) }}
                                     </p>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ vehicle.customer?.name }} -
                                         {{
-                                            vehicle.customer?.phone }}</p>
+                                            toEnglish(vehicle.customer?.phone) }}</p>
                                     <!-- Open Quote Warning -->
                                     <div v-if="vehicle.has_open_quote" class="mt-1 flex items-center gap-2">
                                         <span class="text-xs text-red-600 dark:text-red-400 font-medium">
@@ -137,7 +137,7 @@
                             </div>
                             <div>
                                 <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('common.selected') }}</h4>
-                                <p class="text-sm text-amber-600 dark:text-amber-400">{{ selectedVehicle.plate_number }}
+                                <p class="text-sm text-amber-600 dark:text-amber-400" dir="ltr">{{ toEnglish(selectedVehicle.plate_number) }}
                                 </p>
                             </div>
                             <button type="button" @click="clearSelection"
@@ -149,7 +149,7 @@
                                 </svg>
                             </button>
                         </div>
-
+ 
                         <!-- Info Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                             <!-- Customer Name -->
@@ -166,7 +166,7 @@
                                 <p class="font-semibold text-gray-900 dark:text-white truncate">{{
                                     selectedVehicle.customer?.name }}</p>
                             </div>
-
+ 
                             <!-- Phone -->
                             <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
                                 <div class="flex items-center gap-2 mb-1">
@@ -180,9 +180,9 @@
                                     }}</label>
                                 </div>
                                 <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    selectedVehicle.customer?.phone }}</p>
+                                    toEnglish(selectedVehicle.customer?.phone) }}</p>
                             </div>
-
+ 
                             <!-- Plate Number -->
                             <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
                                 <div class="flex items-center gap-2 mb-1">
@@ -196,7 +196,7 @@
                                     }}</label>
                                 </div>
                                 <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    selectedVehicle.plate_number
+                                    toEnglish(selectedVehicle.plate_number)
                                 }}</p>
                             </div>
                         </div>
@@ -302,6 +302,7 @@ import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
@@ -321,6 +322,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName } = useLocalized();
+const { toEnglish } = useNumberFormat();
 
 // Tab Icons as inline SVG components
 const IconInfo = {
