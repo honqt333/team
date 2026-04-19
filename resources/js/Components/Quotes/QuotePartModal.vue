@@ -300,7 +300,7 @@ const form = useForm({
     qty: 1,
     unit_price: 0,
     discount: 0,
-    include_in_package: true,
+    include_in_package: false,
     hide_on_print: false,
 });
 
@@ -308,15 +308,15 @@ const form = useForm({
 const stashedPrice = ref(0);
 const stashedDiscount = ref(0);
 
-watch(() => form.include_in_package, (val) => {
-    if (val && form.quote_line_id) {
-        // Only stash if current price is not already 0 to avoid losing data
+watch(() => form.include_in_package, (newVal, oldVal) => {
+    // Only apply zeroing logic if it was explicitly toggled ON by user
+    if (newVal && !oldVal && form.quote_line_id) {
         if (Number(form.unit_price) > 0) stashedPrice.value = form.unit_price;
         if (Number(form.discount) > 0) stashedDiscount.value = form.discount;
         
         form.unit_price = 0;
         form.discount = 0;
-    } else if (!val && form.quote_line_id) {
+    } else if (!newVal && oldVal && form.quote_line_id) {
         // Restore values when untoggling
         if (Number(form.unit_price) === 0 && stashedPrice.value > 0) {
             form.unit_price = stashedPrice.value;

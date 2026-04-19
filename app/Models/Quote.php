@@ -213,10 +213,6 @@ class Quote extends Model
         if (!$this->relationLoaded('lines')) $this->load('lines');
         if (!$this->relationLoaded('parts')) $this->load('parts');
 
-        // FORCE FIX: Ensure all parts are included in package for this recalibration
-        $this->parts()->update(['include_in_package' => true]);
-        $this->load('parts'); // Reload to get the updated values
-
         // Services totals
         $servicesPrice = $this->lines->sum(fn($l) => (float)$l->unit_price * (float)$l->qty);
         $servicesDiscount = $this->lines->sum('discount_amount');

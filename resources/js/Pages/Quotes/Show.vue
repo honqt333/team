@@ -597,8 +597,7 @@ const totals = computed(() => {
     // Parts calculation
     if (props.quote?.parts && props.quote.parts.length > 0) {
         props.quote.parts.forEach(part => {
-            // FORCE INCLUDE: temporarily ignore the flag to ensure visibility
-            const isIncluded = true; 
+            const isIncluded = !!(part.include_in_package || part.include_in_package === 1);
             
             if (isIncluded) {
                 const qty = Number(part.qty || 0);
