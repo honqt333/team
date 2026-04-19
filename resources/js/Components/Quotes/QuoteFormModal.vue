@@ -445,6 +445,7 @@ function selectVehicle(vehicle) {
     selectedVehicle.value = vehicleWithCustomer;
     form.customer_id = vehicleWithCustomer.customer_id;
     form.vehicle_id = vehicleWithCustomer.id;
+    form.odometer = vehicleWithCustomer.odometer || '';
     searchQuery.value = vehicleWithCustomer.plate_number;
     showResults.value = false;
 
@@ -580,6 +581,7 @@ watch(() => props.vehicle, (val) => {
         selectedVehicle.value = val;
         form.vehicle_id = val.id;
         form.customer_id = val.customer_id;
+        form.odometer = val.odometer || '';
     }
 }, { immediate: true });
 
