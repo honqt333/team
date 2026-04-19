@@ -201,30 +201,30 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Odometer -->
-                <div v-if="selectedVehicle"
-                    class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ $t('work_orders.form.odometer') }}
-                        </label>
-                        <button type="button" @click="showMileageModal = true"
-                            class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {{ $t('vehicles.mileage.history') }}
-                        </button>
-                    </div>
-                    <div class="relative">
-                        <input v-model.number="form.odometer" type="number"
-                            :placeholder="$t('work_orders.form.odometer_placeholder')"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
-                        <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
-                            <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
+                    <!-- Odometer (Now inside main_info) -->
+                    <div v-if="selectedVehicle"
+                        class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {{ $t('work_orders.form.odometer') }}
+                            </label>
+                            <button type="button" @click="showMileageModal = true"
+                                class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ $t('vehicles.mileage.history') }}
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <input v-model.number="form.odometer" type="number"
+                                :placeholder="$t('work_orders.form.odometer_placeholder')"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                            <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
+                            </div>
                         </div>
                     </div>
                 </div>
