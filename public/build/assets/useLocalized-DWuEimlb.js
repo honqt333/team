@@ -1,1 +1,0 @@
-import{x as i}from"./app-XHXQKcbt.js";function f(){const{locale:u}=i();function e(n,r="name"){if(!n)return"";const t=`${r}_ar`,o=`${r}_en`;return u.value==="ar"?n[t]||n[o]||"":n[o]||n[t]||""}function a(n){return e(n,"name")}function c(n){return e(n,"description")}return{getLocalized:e,getName:a,getDescription:c}}export{f as u};

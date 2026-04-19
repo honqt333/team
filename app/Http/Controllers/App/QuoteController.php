@@ -13,6 +13,7 @@ use App\Models\Service;
 use App\Models\Vehicle;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
+use App\Models\VehicleMileageLog;
 use App\Services\NotificationService;
 use App\Support\TenancyContext;
 use App\Support\PricingHelper;
@@ -32,7 +33,8 @@ class QuoteController extends Controller
         $this->authorize("viewAny", Quote::class);
 
         $quotes = Quote::with(["customer", "vehicle.make",
-            "vehicle.customer", "vehicle.model", "lines"])
+            "vehicle.customer", "vehicle.model", "convertedWorkOrder:id,code"])
+            ->withCount(['lines', 'parts'])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where("id", "like", "%{$search}%")
@@ -88,7 +90,8 @@ class QuoteController extends Controller
         ];
 
         $quotes = Quote::with(["customer", "vehicle.make",
-            "vehicle.customer", "vehicle.model", "lines"])
+            "vehicle.customer", "vehicle.model", "convertedWorkOrder:id,code"])
+            ->withCount(['lines', 'parts'])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where("id", "like", "%{$search}%")
@@ -207,6 +210,17 @@ class QuoteController extends Controller
     {
         $this->authorize('create', Quote::class);
 
+        // Check for existing open quotes for this vehicle
+        $openQuote = Quote::where('vehicle_id', $request->vehicle_id)
+            ->whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT])
+            ->first();
+
+        if ($openQuote) {
+            return redirect()->back()->withErrors([
+                'vehicle_id' => __('quotes.has_open_quote_error', ['code' => $openQuote->code])
+            ]);
+        }
+
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
 
@@ -256,6 +270,27 @@ class QuoteController extends Controller
         $quote->recalculateTotals();
         $quote->save();
 
+        // Sync Odometer to Vehicle History
+        if ($request->has('odometer') && $request->odometer !== null) {
+            $vehicle = $quote->vehicle;
+            
+            // Log mileage
+            VehicleMileageLog::create([
+                'vehicle_id' => $vehicle->id,
+                'mileage' => $request->odometer,
+                'previous_mileage' => $vehicle->odometer,
+                'difference' => $request->odometer - ($vehicle->odometer ?? 0),
+                'reference_type' => Quote::class,
+                'reference_id' => $quote->id,
+                'reference_code' => $quote->code,
+                'created_by' => auth()->id(),
+                'recorded_at' => now(),
+            ]);
+
+            // Update vehicle odometer
+            $vehicle->update(['odometer' => $request->odometer]);
+        }
+
         // Notify owner about new quote
         NotificationService::notifyOwner(
             tenantId: $tenantId,
@@ -285,8 +320,49 @@ class QuoteController extends Controller
             'vehicle_id' => $request->vehicle_id,
             'customer_complaint' => $request->customer_complaint,
             'initial_assessment' => $request->initial_assessment,
+            'odometer' => $request->odometer,
             'notes' => $request->notes,
         ]);
+
+        // Sync Odometer to Vehicle History if changed
+        if ($request->has('odometer') && $request->odometer !== null) {
+            $vehicle = $quote->vehicle;
+            
+            // Check if we already have a log for this quote
+            $existingLog = VehicleMileageLog::where('reference_type', Quote::class)
+                ->where('reference_id', $quote->id)
+                ->first();
+
+            if ($existingLog) {
+                // Update existing log if mileage changed
+                if ($existingLog->mileage != $request->odometer) {
+                    $existingLog->update([
+                        'mileage' => $request->odometer,
+                        'difference' => $request->odometer - ($existingLog->previous_mileage ?? 0),
+                        'recorded_at' => now(),
+                    ]);
+                    
+                    // Update vehicle record
+                    $vehicle->update(['odometer' => $request->odometer]);
+                }
+            } else {
+                // Create new log if none exists and mileage is provided
+                VehicleMileageLog::create([
+                    'vehicle_id' => $vehicle->id,
+                    'mileage' => $request->odometer,
+                    'previous_mileage' => $vehicle->odometer,
+                    'difference' => $request->odometer - ($vehicle->odometer ?? 0),
+                    'reference_type' => Quote::class,
+                    'reference_id' => $quote->id,
+                    'reference_code' => $quote->code,
+                    'created_by' => auth()->id(),
+                    'recorded_at' => now(),
+                ]);
+                
+                // Update vehicle record
+                $vehicle->update(['odometer' => $request->odometer]);
+            }
+        }
 
         // Sync departments if provided
         if ($request->has('departments')) {
@@ -365,6 +441,7 @@ class QuoteController extends Controller
             'parts.quoteLine',
             'departments',
             'createdByUser',
+            'convertedWorkOrder:id,code',
         ]);
 
         // Group lines by department
@@ -603,6 +680,12 @@ class QuoteController extends Controller
      */
     public function addDepartment(Request $request, Quote $quote): RedirectResponse
     {
+        $this->authorize('update', $quote);
+
+        if (!$quote->canBeEdited()) {
+            abort(403, 'Cannot modify departments of a converted quote.');
+        }
+
         $validated = $request->validate([
             'department_id' => ['required', 'exists:departments,id'],
         ]);

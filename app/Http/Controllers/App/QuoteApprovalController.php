@@ -40,7 +40,7 @@ class QuoteApprovalController extends Controller
 
         // Then convert to work order
         try {
-            $this->conversionService->convert($quote, auth()->user());
+            $workOrder = $this->conversionService->convert($quote, auth()->user());
         } catch (\Exception $e) {
             // Revert approval if conversion fails
             $quote->update([
@@ -66,7 +66,7 @@ class QuoteApprovalController extends Controller
             );
         }
 
-        return redirect()->back();
+        return redirect()->route('work-orders.show', $workOrder->id);
     }
 
     /**

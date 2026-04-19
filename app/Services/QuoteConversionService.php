@@ -43,6 +43,8 @@ class QuoteConversionService
                 'status' => WorkOrder::STATUS_OPEN,
                 'notes' => $quote->notes,
                 'opened_at' => now(),
+                'entry_date' => now()->toDateString(),
+                'expected_end_date' => now()->toDateString(),
             ]);
 
             // Copy quote lines to work order items

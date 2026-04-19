@@ -172,9 +172,10 @@
                     <div>
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.odometer') }}</label>
                         <input 
-                            type="number" 
+                            type="text" 
+                            inputmode="numeric"
                             v-model="form.odometer"
-                            min="0"
+                            @input="form.odometer = normalizeArabicNumerals($event.target.value).replace(/[^0-9]/g, '')"
                             :placeholder="$t('vehicles.form.odometer_placeholder')"
                             class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                         />
@@ -188,6 +189,7 @@
                         type="text" 
                         v-model="form.vin"
                         dir="ltr"
+                        @input="form.vin = normalizeArabicNumerals($event.target.value)"
                         :placeholder="$t('vehicles.form.vin_placeholder')"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
                     />
@@ -243,6 +245,15 @@ import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import SaudiPlateInput from '@/Components/Vehicles/SaudiPlateInput.vue';
+
+// Convert Arabic numerals to English
+function normalizeArabicNumerals(value) {
+    const arabicToEnglish = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+    };
+    return String(value).split('').map(char => arabicToEnglish[char] || char).join('');
+}
 
 const { t } = useI18n();
 const { confirm } = useConfirm();

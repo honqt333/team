@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     modelValue: [String, Number, null],
@@ -44,6 +45,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'change']);
 const { t } = useI18n();
+const { toEnglish } = useNumberFormat();
 
 const isOpen = ref(false);
 const searchQuery = ref('');
@@ -59,9 +61,9 @@ const getOptionLabel = (option) => {
         if (typeof props.optionLabel === 'function') {
             return props.optionLabel(option);
         }
-        return option[props.optionLabel];
+        return toEnglish(option[props.optionLabel]);
     }
-    return String(option);
+    return toEnglish(String(option));
 };
 
 // Get the value for an option
@@ -106,7 +108,7 @@ const inputValue = computed({
         return selectedOption.value ? getOptionLabel(selectedOption.value) : '';
     },
     set(val) {
-        searchQuery.value = val;
+        searchQuery.value = toEnglish(val);
         if (!isOpen.value) isOpen.value = true;
     }
 });

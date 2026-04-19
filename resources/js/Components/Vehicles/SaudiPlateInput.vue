@@ -50,7 +50,7 @@
                     <!-- Numbers -->
                     <div class="flex-1 flex flex-col justify-center items-center px-1">
                         <div class="flex flex-row gap-0.5" dir="ltr">
-                            <span v-for="(char, i) in displayNumbersAr.split(' ')" :key="i" class="text-sm font-bold text-gray-800">{{ char }}</span>
+                            <span v-for="(char, i) in displayNumbersEn.split(' ')" :key="i" class="text-sm font-bold text-gray-800">{{ char }}</span>
                         </div>
                         <div class="flex flex-row gap-0.5" dir="ltr">
                             <span v-for="(char, i) in displayNumbersEn.split(' ')" :key="i" class="text-[9px] text-gray-500">{{ char }}</span>
@@ -147,6 +147,7 @@
 <script setup>
 import { ref, computed, watch, nextTick } from 'vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     modelValue: {
@@ -160,6 +161,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue']);
+const { toEnglish } = useNumberFormat();
 
 // Saudi plate valid letters
 const plateLetters = [
@@ -182,9 +184,9 @@ const freeTextPlate = ref('');
 let isInternalUpdate = false;
 let initialized = false;
 
-// Arabic number conversion
-function toArabicNum(num) {
-    return String(num).split('').map(d => arabicNums[parseInt(d)] || d).join('');
+// Digit conversion helper (always English now)
+function toEnglishNum(num) {
+    return toEnglish(String(num));
 }
 
 function getLetterAr(en) {
@@ -209,7 +211,7 @@ const displayLettersEn = computed(() => {
 
 const displayNumbersAr = computed(() => {
     if (!plateNumbers.value) return '- - - -';
-    return plateNumbers.value.split('').map(n => toArabicNum(n)).join(' ');
+    return plateNumbers.value.split('').map(n => toEnglishNum(n)).join(' ');
 });
 
 const displayNumbersEn = computed(() => {

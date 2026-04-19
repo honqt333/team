@@ -132,7 +132,8 @@
         "quantity": "الكمية",
         "source": "المصدر",
         "user": "المستخدم",
-        "manual_update": "تحديث يدوي"
+        "manual_update": "تحديث يدوي",
+        "alert": "تنبيه"
     },
     "nav": {
         "brand": "Carag",
@@ -346,10 +347,13 @@
         "delete_confirm_message": "هل أنت متأكد من رغبتك في حذف هذه المركبة؟ لا يمكن التراجع عن هذا الإجراء.",
         "mileage": {
             "history": "سجل الكيلومترات",
-            "no_history": "لا يوجد سجل للكيلومترات",
+            "no_history": "لا يوجد سجل قراءات لهذه المركبة",
+            "last_recorded": "آخر قراءة مسجلة",
+            "lower_warning": "القراءة المدخلة أقل من آخر قراءة مسجلة ({last} كم). يرجى التفعيل للمتابعة.",
             "value": "قراءة العداد",
             "difference": "الفرق",
-            "initial_log": "إضافة مركبة"
+            "initial_log": "إضافة مركبة",
+            "confirm_delete_log": "هل أنت متأكد من حذف قراءة العداد ({mileage} كم)؟"
         }
     },
     "print": {
@@ -452,6 +456,7 @@
             "contact_name_placeholder": "اسم الشخص المسؤول...",
             "contact_phone": "رقم الاتصال",
             "contact_phone_placeholder": "+966...",
+            "entry_date": "تاريخ الدخول",
             "expected_end_date": "تاريخ الانتهاء المتوقع",
             "odometer": "عداد الكيلومترات",
             "odometer_placeholder": "كم"
@@ -979,6 +984,9 @@
         "empty": "لم تتم إضافة أي خدمات لهذه الباقة بعد."
     },
     "quotes": {
+        "has_open_quote_error": "هذه المركبة لديها تقييم مفتوح بالفعل (#{code}). لا يمكن إنشاء تقييم جديد.",
+        "has_open_quote_alert": "هذه المركبة لديها تقييم مفتوح بالفعل رقم {code}. هل تريد الانتقال إليه بدلاً من إنشاء واحد جديد؟",
+        "go_to_existing": "الانتقال للتقييم الحالي",
         "title": "التقييمات",
         "create": "إنشاء تقييم",
         "add": "إضافة تقييم",
@@ -987,6 +995,8 @@
         "empty": "لا توجد تقييمات",
         "empty_hint": "ابدأ بإضافة أول تقييم باستخدام زر الإضافة.",
         "total_count": "تقييم",
+        "share_title": "عرض سعر من كراج - {code}",
+        "share_message": "مرحباً، إليك عرض السعر الخاص بمركبتك {vehicle} رقم التقييم: {code}",
         "showing": "عرض",
         "of": "من",
         "parts": {
@@ -999,6 +1009,10 @@
             "customer": "من العميل",
             "customer_hint": "توفير بواسطة العميل",
             "implementation_placeholder": "سيتم تنفيذ آلية إضافة القطع هنا."
+        },
+        "card": {
+            "services": "الخدمات",
+            "parts": "قطع الغيار"
         },
         "status": {
             "draft": "مسودة",
@@ -1034,16 +1048,25 @@
         "actions": {
             "view": "عرض",
             "edit": "تعديل",
-            "approve": "اعتماد",
+            "approve": "اعتماد وتحويل",
             "reject": "رفض",
+            "share": "مشاركة",
+            "whatsapp": "واتساب",
+            "copy_link": "نسخ الرابط",
+            "email": "بريد إلكتروني",
+            "print": "طباعة",
             "delete": "حذف"
         },
         "messages": {
-            "approved_success": "تم اعتماد التقييم وتحويله لكرت عمل",
-            "rejected_success": "تم رفض التقييم",
+            "confirm_approve_title": "اعتماد التقييم وتحويله",
+            "confirm_approve": "هل أنت متأكد من اعتماد هذا التقييم؟ سيتم تحويله تلقائياً إلى كرت عمل.",
+            "confirm_reject_title": "رفض التقييم",
+            "confirm_reject": "هل أنت متأكد من رفض هذا التقييم؟ لا يمكن التراجع عن هذا الإجراء.",
+            "approved_success": "تم اعتماد التقييم وتحويله إلى كرت عمل بنجاح.",
+            "rejected_success": "تم رفض التقييم.",
+            "view_work_order": "عرض كرت العمل",
+            "link_copied": "تم نسخ الرابط بنجاح",
             "deleted_success": "تم حذف التقييم",
-            "confirm_approve": "هل تريد اعتماد هذا التقييم وتحويله لكرت عمل؟",
-            "confirm_reject": "هل تريد رفض هذا التقييم؟",
             "confirm_delete": "هل تريد حذف هذا التقييم نهائياً؟",
             "confirm_remove_department": "هل تريد إزالة هذا القسم من التقييم؟",
             "confirm_remove_department_title": "إزالة القسم",
@@ -1097,10 +1120,11 @@
             "initial_assessment": "التقييم المبدئي",
             "initial_assessment_placeholder": "اكتب التقييم المبدئي للمركبة...",
             "select_departments": "اختر الأقسام المطلوبة",
-            "no_results": "لا توجد نتائج",
-            "has_open_quote": "هذه المركبة لديها تقييم مفتوح",
-            "view_open_quote": "عرض التقييم"
+            "no_results": "لا توجد نتائج"
         },
+        "allow_lower_odometer": "السماح بقراءة عداد أقل",
+        "has_open_quote": "توجد مطالبة مفتوحة بالفعل لهذه المركبة",
+        "view_open_quote": "عرض التقييم",
         "show": {
             "services": "الخدمات",
             "price": "السعر",

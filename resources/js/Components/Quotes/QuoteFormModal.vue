@@ -105,7 +105,7 @@
                                     <!-- Open Quote Warning -->
                                     <div v-if="vehicle.has_open_quote" class="mt-1 flex items-center gap-2">
                                         <span class="text-xs text-red-600 dark:text-red-400 font-medium">
-                                            {{ $t('quotes.form_tabs.has_open_quote') }} ({{ vehicle.open_quote?.code }})
+                                            {{ $t('quotes.has_open_quote') }} ({{ toEnglish(vehicle.open_quote?.code) }})
                                         </span>
                                     </div>
                                 </div>
@@ -120,84 +120,95 @@
 
                     <!-- Selected Vehicle/Customer Info -->
                     <div v-if="selectedVehicle"
-                        class="relative bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-red-500/10 dark:from-amber-900/30 dark:via-orange-900/20 dark:to-red-900/20 rounded-2xl p-5 border border-amber-300/50 dark:border-amber-700/50 overflow-hidden">
-                        <!-- Decorative Background -->
-                        <div
-                            class="absolute top-0 end-0 w-32 h-32 bg-gradient-to-br from-amber-400/20 to-orange-400/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2">
-                        </div>
-
-                        <!-- Header -->
-                        <div class="flex items-center gap-3 mb-4">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('common.selected') }}</h4>
-                                <p class="text-sm text-amber-600 dark:text-amber-400" dir="ltr">{{ toEnglish(selectedVehicle.plate_number) }}
-                                </p>
+                        class="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group">
+                        
+                        <!-- Header / Plate Section -->
+                        <div class="bg-gray-50 dark:bg-gray-900/50 p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <!-- Stylized Plate Badge -->
+                                <div class="bg-white dark:bg-gray-800 border-2 border-gray-700 dark:border-gray-500 rounded-md px-3 py-1 flex flex-col items-center justify-center min-w-[100px] shadow-sm">
+                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight" dir="ltr">{{ toEnglish(selectedVehicle.plate_number) }}</span>
+                                    <div class="w-full h-px bg-gray-200 dark:bg-gray-600 my-0.5"></div>
+                                    <span class="text-[8px] font-bold text-gray-400 tracking-widest uppercase">KSA</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{{ $t('common.selected') }}</span>
+                                    <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                                        {{ getVehicleDisplay(selectedVehicle) }}
+                                    </h4>
+                                </div>
                             </div>
                             <button type="button" @click="clearSelection"
-                                class="ms-auto p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
-                                <svg class="w-5 h-5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
+                                class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
- 
+
                         <!-- Info Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <!-- Customer Name -->
-                            <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{
-                                        $t('quotes.form_tabs.customer_name') }}</label>
+                        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Column 1: Technical Details -->
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3 group/item">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                        <component :is="IconVIN" class="w-4 h-4" />
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('vehicles.form.vin') }}</span>
+                                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono">{{ selectedVehicle.vin || '—' }}</span>
+                                    </div>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white truncate">{{
-                                    selectedVehicle.customer?.name }}</p>
+
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2 group/item">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                            <component :is="IconYear" class="w-4 h-4" />
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('vehicles.form.year') }}</span>
+                                            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ toEnglish(selectedVehicle.year) || '—' }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 group/item">
+                                        <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                                            <component :is="IconColor" class="w-4 h-4" />
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('vehicles.form.color') }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span v-if="selectedVehicle.color" class="w-2.5 h-2.5 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm" :style="{ backgroundColor: getColorHex(selectedVehicle.color) }"></span>
+                                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ selectedVehicle.color || '—' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
- 
-                            <!-- Phone -->
-                            <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{
-                                        $t('quotes.form_tabs.phone')
-                                    }}</label>
+
+                            <!-- Column 2: Customer Details -->
+                            <div class="space-y-3 pt-4 sm:pt-0 sm:ps-4 sm:border-s border-gray-100 dark:border-gray-700">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white dark:ring-gray-800">
+                                        {{ selectedVehicle.customer?.name?.[0]?.toUpperCase() || 'C' }}
+                                    </div>
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('quotes.form_tabs.customer_name') }}</span>
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ selectedVehicle.customer?.name }}</span>
+                                    </div>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    toEnglish(selectedVehicle.customer?.phone) }}</p>
-                            </div>
- 
-                            <!-- Plate Number -->
-                            <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                    </svg>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{
-                                        $t('vehicles.plate_number')
-                                    }}</label>
+
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                        </svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('quotes.form_tabs.phone') }}</span>
+                                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono" dir="ltr">{{ toEnglish(selectedVehicle.customer?.phone) }}</span>
+                                    </div>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    toEnglish(selectedVehicle.plate_number)
-                                }}</p>
                             </div>
                         </div>
                     </div>
@@ -209,22 +220,57 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ $t('work_orders.form.odometer') }}
                             </label>
-                            <button type="button" @click="showMileageModal = true"
-                                class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {{ $t('vehicles.mileage.history') }}
-                            </button>
+                            <div class="flex items-center gap-3">
+                                <!-- Allow Lower Toggle -->
+                                <label v-if="selectedVehicle && lastVehicleOdometer > 0" class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative">
+                                        <input type="checkbox" v-model="form.allow_lower_odometer" class="sr-only peer" />
+                                        <div class="w-8 h-4 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-amber-500 transition-all after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"></div>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-gray-500 group-hover:text-amber-600 transition-colors uppercase tracking-wider">
+                                        {{ $t('quotes.allow_lower_odometer') }}
+                                    </span>
+                                </label>
+
+                                <button type="button" @click="showMileageModal = true"
+                                    class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ $t('vehicles.mileage.history') }}
+                                </button>
+                            </div>
                         </div>
+
                         <div class="relative">
-                            <input v-model.number="form.odometer" type="number"
+                            <input v-model="form.odometer" type="text" inputmode="numeric"
+                                @input="form.odometer = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
                                 :placeholder="$t('work_orders.form.odometer_placeholder')"
                                 class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
                             <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
                             </div>
+                        </div>
+
+                        <!-- Odometer Conflict Warning -->
+                        <div v-if="showOdometerWarning"
+                            class="mt-2 flex items-start gap-2 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg border border-red-100 dark:border-red-800/50">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>{{ $t('vehicles.mileage.lower_warning', { last: toEnglish(lastVehicleOdometer) }) }}</span>
+                        </div>
+
+                        <!-- Hint for last known -->
+                        <div v-else-if="selectedVehicle && lastVehicleOdometer > 0"
+                            class="mt-1.5 px-1 flex items-center gap-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ $t('vehicles.mileage.last_recorded') }}: {{ toEnglish(lastVehicleOdometer) }} km
                         </div>
                     </div>
                 </div>
@@ -267,7 +313,7 @@
                                 class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
                                 <input type="checkbox" v-model="form.departments" :value="dept.id"
                                     class="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
-                                <span class="text-gray-900 dark:text-white">{{ index + 1 }}. {{ getName(dept) }}</span>
+                                <span class="text-gray-900 dark:text-white">{{ toEnglish(index + 1) }}. {{ toEnglish(getName(dept)) }}</span>
                             </label>
                         </div>
                     </div>
@@ -280,7 +326,7 @@
                 class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 {{ $t('common.cancel') }}
             </button>
-            <button type="button" @click="submitForm" :disabled="form.processing || !selectedVehicle"
+            <button type="button" @click="submitForm" :disabled="form.processing || !selectedVehicle || (showOdometerWarning && !form.allow_lower_odometer)"
                 class="px-6 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg hover:from-amber-600 hover:to-orange-600 disabled:opacity-50 transition-all">
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
             </button>
@@ -298,7 +344,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, h } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -324,19 +370,28 @@ const { t } = useI18n();
 const { getName } = useLocalized();
 const { toEnglish } = useNumberFormat();
 
-// Tab Icons as inline SVG components
-const IconInfo = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
-};
-const IconComplaint = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>`
-};
-const IconAssessment = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>`
-};
-const IconDepartments = {
-    template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>`
-};
+// Tab Icons as functional components to avoid runtime compilation error
+const IconInfo = (props, { attrs }) => h('svg', { ...attrs, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' })
+]);
+const IconComplaint = (props, { attrs }) => h('svg', { ...attrs, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' })
+]);
+const IconAssessment = (props, { attrs }) => h('svg', { ...attrs, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' })
+]);
+const IconDepartments = (props, { attrs }) => h('svg', { ...attrs, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10' })
+]);
+const IconVIN = (props, { attrs }) => h('svg', { ...attrs, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
+]);
+const IconColor = (props, { attrs }) => h('svg', { ...attrs, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.828 2.828a2 2 0 010 2.828l-8.486 8.486' })
+]);
+const IconYear = (props, { attrs }) => h('svg', { ...attrs, fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+    h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' })
+]);
 
 // Tabs - hide departments tab when editing (managed in Show.vue)
 const allTabs = [
@@ -361,6 +416,7 @@ const searchResults = ref([]);
 const searching = ref(false);
 const showResults = ref(false);
 const selectedVehicle = ref(null);
+const lastVehicleOdometer = ref(0);
 
 // Vehicle Modal
 const showVehicleModal = ref(false);
@@ -374,6 +430,7 @@ const form = useForm({
     customer_complaint: props.quote?.customer_complaint || '',
     initial_assessment: props.quote?.initial_assessment || '',
     odometer: props.quote?.odometer || '',
+    allow_lower_odometer: false,
     departments: props.quote?.departments?.map(d => d.id) || [],
     notes: props.quote?.notes || '',
     lines: [],
@@ -388,13 +445,15 @@ watch(() => props.show, (newVal) => {
         form.customer_complaint = props.quote.customer_complaint || '';
         form.initial_assessment = props.quote.initial_assessment || '';
         form.odometer = props.quote.odometer || '';
+        form.allow_lower_odometer = false;
         form.departments = props.quote.departments?.map(d => d.id) || [];
         form.notes = props.quote.notes || '';
         form.lines = [];
 
-        // Set selected vehicle for display
+        // Set selected vehicle and reference odometer
         if (props.quote.vehicle) {
             selectedVehicle.value = props.quote.vehicle;
+            lastVehicleOdometer.value = props.quote.vehicle.odometer || 0;
             searchQuery.value = props.quote.vehicle.plate_number || '';
         }
     }
@@ -405,6 +464,7 @@ let debounceTimer = null;
 function debouncedSearch() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
+        searchQuery.value = toEnglish(searchQuery.value);
         performSearch();
     }, 300);
 }
@@ -448,6 +508,7 @@ function selectVehicle(vehicle) {
     form.customer_id = vehicleWithCustomer.customer_id;
     form.vehicle_id = vehicleWithCustomer.id;
     form.odometer = vehicleWithCustomer.odometer || '';
+    lastVehicleOdometer.value = vehicleWithCustomer.odometer || 0;
     searchQuery.value = vehicleWithCustomer.plate_number;
     showResults.value = false;
 
@@ -456,6 +517,7 @@ function selectVehicle(vehicle) {
 
 function clearSelection() {
     selectedVehicle.value = null;
+    lastVehicleOdometer.value = 0;
     form.customer_id = '';
     form.vehicle_id = '';
     searchQuery.value = '';
@@ -569,10 +631,12 @@ watch(() => props.quote, (newQuote) => {
         form.vehicle_id = newQuote.vehicle_id;
         form.customer_complaint = newQuote.customer_complaint || '';
         form.initial_assessment = newQuote.initial_assessment || '';
-        form.notes = props.quote.notes || '';
-        if (props.quote.vehicle) {
-            selectedVehicle.value = props.quote.vehicle;
-            searchQuery.value = props.quote.vehicle.plate_number || '';
+        form.odometer = newQuote.odometer || '';
+        form.notes = newQuote.notes || '';
+        if (newQuote.vehicle) {
+            selectedVehicle.value = newQuote.vehicle;
+            lastVehicleOdometer.value = newQuote.vehicle.odometer || 0;
+            searchQuery.value = newQuote.vehicle.plate_number || '';
         }
     }
 }, { immediate: true });
@@ -584,8 +648,14 @@ watch(() => props.vehicle, (val) => {
         form.vehicle_id = val.id;
         form.customer_id = val.customer_id;
         form.odometer = val.odometer || '';
+        lastVehicleOdometer.value = val.odometer || 0;
     }
 }, { immediate: true });
+
+const showOdometerWarning = computed(() => {
+    if (!selectedVehicle.value || !form.odometer || lastVehicleOdometer.value <= 0) return false;
+    return Number(form.odometer) < lastVehicleOdometer.value;
+});
 
 // Initial Load for Edit Mode or Pre-selection
 onMounted(() => {
@@ -595,4 +665,39 @@ onMounted(() => {
         selectedVehicle.value = props.vehicle;
     }
 });
+
+function getVehicleDisplay(vehicle) {
+    if (!vehicle) return '';
+    const make = getName(vehicle.make) || vehicle.make_other || '';
+    const model = getName(vehicle.model) || vehicle.model_other || '';
+    return [make, model].filter(Boolean).join(' ');
+}
+
+function getColorHex(colorName) {
+    if (!colorName) return '#9ca3af';
+    
+    const trimmedColor = colorName.trim();
+    
+    // 1. Try to find in props.colors from database (Most Accurate)
+    if (props.colors && props.colors.length > 0) {
+        const found = props.colors.find(c => 
+            c.name_ar === trimmedColor || 
+            (c.name_en && c.name_en.toLowerCase() === trimmedColor.toLowerCase()) ||
+            c.name === trimmedColor
+        );
+        if (found && found.hex_code) {
+            // Ensure hex code starts with #
+            return found.hex_code.startsWith('#') ? found.hex_code : `#${found.hex_code}`;
+        }
+    }
+
+    // 2. Fallback to hardcoded map
+    const colorMap = {
+        'أبيض': '#ffffff', 'أسود': '#111827', 'فضي': '#9ca3af', 'رمادي': '#4b5563', 'أحمر': '#dc2626',
+        'أزرق': '#2563eb', 'أخضر': '#16a34a', 'ذهبي': '#ca8a04', 'بني': '#78350f', 'برتقالي': '#ea580c',
+        'white': '#ffffff', 'black': '#111827', 'silver': '#9ca3af', 'gray': '#4b5563', 'red': '#dc2626',
+        'blue': '#2563eb', 'green': '#16a34a', 'gold': '#ca8a04', 'brown': '#78350f', 'orange': '#ea580c',
+    };
+    return colorMap[trimmedColor.toLowerCase()] || colorMap[trimmedColor] || '#9ca3af';
+}
 </script>

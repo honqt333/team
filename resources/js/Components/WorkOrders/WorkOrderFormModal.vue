@@ -97,11 +97,11 @@
                                 </div>
                                 <div class="flex-1">
                                     <p class="font-medium text-gray-900 dark:text-white" dir="ltr">{{
-                                        vehicle.plate_number }}
+                                        toEnglish(vehicle.plate_number) }}
                                     </p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ vehicle.customer?.name }} -
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ toEnglish(vehicle.customer?.name) }} -
                                         {{
-                                            vehicle.customer?.phone }}</p>
+                                            toEnglish(vehicle.customer?.phone) }}</p>
                                     <!-- Open Work Order Warning -->
                                     <div v-if="vehicle.has_open_work_order" class="mt-1 flex items-center gap-2">
                                         <span class="text-xs text-red-600 dark:text-red-400 font-medium">
@@ -142,8 +142,9 @@
                             </div>
                             <div>
                                 <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('common.selected') }}</h4>
-                                <p class="text-sm text-indigo-600 dark:text-indigo-400">{{ selectedVehicle.plate_number
-                                    }}</p>
+                                <p class="text-sm text-indigo-600 dark:text-indigo-400" dir="ltr">
+                                    {{ toEnglish(selectedVehicle.plate_number) }}
+                                </p>
                             </div>
                             <button type="button" @click="clearSelection"
                                 class="ms-auto p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
@@ -169,7 +170,7 @@
                                         $t('quotes.form_tabs.customer_name') }}</label>
                                 </div>
                                 <p class="font-semibold text-gray-900 dark:text-white truncate">{{
-                                    selectedVehicle.customer?.name }}</p>
+                                    toEnglish(selectedVehicle.customer?.name) }}</p>
                             </div>
 
                             <!-- Phone -->
@@ -185,7 +186,7 @@
                                         }}</label>
                                 </div>
                                 <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    selectedVehicle.customer?.phone }}</p>
+                                    toEnglish(selectedVehicle.customer?.phone) }}</p>
                             </div>
 
                             <!-- Plate Number -->
@@ -201,7 +202,7 @@
                                         }}</label>
                                 </div>
                                 <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    selectedVehicle.plate_number
+                                    toEnglish(selectedVehicle.plate_number)
                                     }}</p>
                             </div>
                         </div>
@@ -215,22 +216,56 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     {{ $t('work_orders.form.odometer') }}
                                 </label>
-                                <button v-if="selectedVehicle" type="button" @click="showMileageModal = true"
-                                    class="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ $t('vehicles.mileage.history') }}
-                                </button>
+                                <div class="flex items-center gap-3">
+                                    <!-- Allow Lower Toggle -->
+                                    <label v-if="selectedVehicle && lastVehicleOdometer > 0" class="flex items-center gap-2 cursor-pointer group">
+                                        <div class="relative">
+                                            <input type="checkbox" v-model="form.allow_lower_odometer" class="sr-only peer" />
+                                            <div class="w-8 h-4 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-indigo-500 transition-all after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"></div>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-gray-500 group-hover:text-indigo-600 transition-colors uppercase tracking-wider">
+                                            {{ $t('quotes.allow_lower_odometer') }}
+                                        </span>
+                                    </label>
+
+                                    <button v-if="selectedVehicle" type="button" @click="showMileageModal = true"
+                                        class="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {{ $t('vehicles.mileage.history') }}
+                                    </button>
+                                </div>
                             </div>
                             <div class="relative">
-                                <input v-model.number="form.odometer" type="number"
+                                <input v-model="form.odometer" type="text" inputmode="numeric"
+                                    @input="form.odometer = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
                                     :placeholder="$t('work_orders.form.odometer_placeholder')"
                                     class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
                                 <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
                                     <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
                                 </div>
+                            </div>
+
+                            <!-- Odometer Conflict Warning -->
+                            <div v-if="showOdometerWarning"
+                                class="mt-2 flex items-start gap-2 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg border border-red-100 dark:border-red-800/50">
+                                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <span>{{ $t('vehicles.mileage.lower_warning', { last: toEnglish(lastVehicleOdometer) }) }}</span>
+                            </div>
+
+                            <!-- Hint for last known -->
+                            <div v-else-if="selectedVehicle && lastVehicleOdometer > 0"
+                                class="mt-1.5 px-1 flex items-center gap-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {{ $t('vehicles.mileage.last_recorded') }}: {{ toEnglish(lastVehicleOdometer) }} km
                             </div>
                         </div>
 
@@ -323,7 +358,7 @@
                                 class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
                                 <input type="checkbox" v-model="form.departments" :value="dept.id"
                                     class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <span class="text-gray-900 dark:text-white">{{ index + 1 }}. {{ getName(dept) }}</span>
+                                <span class="text-gray-900 dark:text-white">{{ toEnglish(index + 1) }}. {{ toEnglish(getName(dept)) }}</span>
                             </label>
                         </div>
                     </div>
@@ -336,7 +371,7 @@
                 class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 {{ $t('common.cancel') }}
             </button>
-            <button type="button" @click="submitForm" :disabled="form.processing || !selectedVehicle"
+            <button type="button" @click="submitForm" :disabled="form.processing || !selectedVehicle || (showOdometerWarning && !form.allow_lower_odometer)"
                 class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all">
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
             </button>
@@ -358,6 +393,7 @@ import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
@@ -378,6 +414,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName } = useLocalized();
+const { toEnglish } = useNumberFormat();
 
 // Tab Icons as inline SVG components
 const IconInfo = {
@@ -428,6 +465,7 @@ const selectedVehicle = ref(null);
 // Vehicle Modal
 const showVehicleModal = ref(false);
 const showMileageModal = ref(false);
+const lastVehicleOdometer = ref(0);
 
 // Form
 const form = useForm({
@@ -436,6 +474,7 @@ const form = useForm({
     customer_complaint: props.workOrder?.customer_complaint || '',
     initial_assessment: props.workOrder?.initial_assessment || '',
     odometer: props.workOrder?.odometer || '',
+    allow_lower_odometer: false,
     contact_name: props.workOrder?.contact_name || '',
     contact_phone: props.workOrder?.contact_phone || '',
     entry_date: props.workOrder?.entry_date || new Date().toISOString().split('T')[0],
@@ -455,6 +494,7 @@ watch(() => props.show, (newVal) => {
         form.customer_complaint = props.workOrder.customer_complaint || '';
         form.initial_assessment = props.workOrder.initial_assessment || '';
         form.odometer = props.workOrder.odometer || '';
+        form.allow_lower_odometer = false;
         form.contact_name = props.workOrder.contact_name || '';
         form.contact_phone = props.workOrder.contact_phone || '';
         form.entry_date = formatDateForInput(props.workOrder.entry_date);
@@ -472,6 +512,7 @@ watch(() => props.show, (newVal) => {
 
         if (props.workOrder.vehicle) {
             selectedVehicle.value = props.workOrder.vehicle;
+            lastVehicleOdometer.value = props.workOrder.vehicle.odometer || 0;
             searchQuery.value = props.workOrder.vehicle.plate_number || '';
             // Ensure customer is set if not already matched
             if (!form.customer_id && props.workOrder.vehicle.customer_id) {
@@ -487,6 +528,8 @@ watch(() => props.vehicle, (val) => {
         selectedVehicle.value = val;
         form.vehicle_id = val.id;
         form.customer_id = val.customer_id;
+        form.odometer = val.odometer || '';
+        lastVehicleOdometer.value = val.odometer || 0;
     }
 }, { immediate: true });
 
@@ -523,6 +566,7 @@ let debounceTimer = null;
 function debouncedSearch() {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
+        searchQuery.value = toEnglish(searchQuery.value);
         performSearch();
     }, 300);
 }
@@ -551,6 +595,8 @@ function selectVehicle(vehicle) {
     selectedVehicle.value = vehicle;
     form.customer_id = vehicle.customer_id || (vehicle.customer ? vehicle.customer.id : '');
     form.vehicle_id = vehicle.id;
+    form.odometer = vehicle.odometer || '';
+    lastVehicleOdometer.value = vehicle.odometer || 0;
 
     // Auto-fill contact info from customer if available
     if (vehicle.customer) {
@@ -564,6 +610,7 @@ function selectVehicle(vehicle) {
 
 function clearSelection() {
     selectedVehicle.value = null;
+    lastVehicleOdometer.value = 0;
     form.customer_id = '';
     form.vehicle_id = '';
     form.contact_name = '';
@@ -587,6 +634,11 @@ function submitForm() {
     const url = isEdit
         ? `/app/work-orders/${props.workOrder.id}`
         : '/app/work-orders';
+
+    // Set odometer on vehicle object for warning check
+    if (selectedVehicle.value) {
+        selectedVehicle.value.odometer = form.odometer;
+    }
 
     const options = {
         onSuccess: () => {
@@ -630,6 +682,7 @@ function resetForm() {
     searchResults.value = [];
     showResults.value = false;
     activeTab.value = 'main_info';
+    lastVehicleOdometer.value = 0;
 }
 
 // Watch for show prop changes - reset when opening fresh
@@ -637,5 +690,10 @@ watch(() => props.show, (isOpen) => {
     if (isOpen && !props.workOrder) {
         resetForm();
     }
+});
+
+const showOdometerWarning = computed(() => {
+    if (!selectedVehicle.value || !form.odometer || lastVehicleOdometer.value <= 0) return false;
+    return Number(form.odometer) < lastVehicleOdometer.value;
 });
 </script>

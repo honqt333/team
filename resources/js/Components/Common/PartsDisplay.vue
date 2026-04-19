@@ -10,7 +10,7 @@
                 </div>
                 <div>
                     <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">{{ $t('quotes.show.tabs.spare_parts') }}</h3>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{{ parts.length }} {{ $t('quotes.show.tabs.spare_parts') }}</p>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{{ toEnglish(parts.length) }} {{ $t('quotes.show.tabs.spare_parts') }}</p>
                 </div>
             </div>
 
@@ -79,7 +79,7 @@
                         </div>
                         <div class="p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
                             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('work_orders.item.qty') }}</p>
-                            <p class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">{{ part.qty }} <span class="text-[10px]">{{ getUnitName(part) }}</span></p>
+                            <p class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">{{ toEnglish(part.qty) }} <span class="text-[10px]">{{ getUnitName(part) }}</span></p>
                         </div>
                         <div class="p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
                             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('quotes.tax_summary.vat') }}</p>
@@ -148,7 +148,7 @@
                     </thead>
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
                         <tr v-for="(part, index) in parts" :key="part.id" class="group hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
-                            <td class="px-6 py-4 text-xs font-bold text-gray-400">{{ index + 1 }}</td>
+                            <td class="px-6 py-4 text-xs font-bold text-gray-400">{{ toEnglish(index + 1) }}</td>
                             <td class="px-6 py-4">
                                 <div class="space-y-0.5">
                                     <p class="font-bold text-gray-900 dark:text-white">{{ part.name }}</p>
@@ -166,7 +166,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-end font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{{ formatCurrency(part.unit_price) }}</td>
-                            <td class="px-6 py-4 text-center font-mono text-xs font-black text-emerald-600 dark:text-emerald-400">{{ part.qty }}</td>
+                            <td class="px-6 py-4 text-center font-mono text-xs font-black text-emerald-600 dark:text-emerald-400">{{ toEnglish(part.qty) }}</td>
                             <td class="px-6 py-4 text-end font-mono text-xs font-bold text-gray-900 dark:text-white">
                                 {{ formatCurrency((part.unit_price * part.qty) - (part.discount || 0)) }}
                             </td>
@@ -223,7 +223,7 @@ const props = defineProps({
 
 const emit = defineEmits(['edit', 'delete', 'add']);
 const { getName } = useLocalized();
-const { formatCurrency } = useNumberFormat();
+const { formatCurrency, toEnglish } = useNumberFormat();
 
 // View mode state
 const viewMode = ref('grid');

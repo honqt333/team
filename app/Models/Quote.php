@@ -219,12 +219,12 @@ class Quote extends Model
         $servicesTax = $this->lines->sum('tax_amount');
         $servicesTotal = $this->lines->sum('line_total'); // This is total_incl_tax usually
 
-        // Parts totals
-        $activeParts = $this->parts->where('include_in_package', true);
-        $partsPrice = $activeParts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
-        $partsDiscount = $activeParts->sum('discount');
-        $partsTax = $activeParts->sum('tax_amount');
-        $partsTotal = $activeParts->sum(fn($p) => (float)($p->total_incl_tax ?: $p->total));
+        // Parts totals - process all parts
+        $allParts = $this->parts;
+        $partsPrice = $allParts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
+        $partsDiscount = $allParts->sum('discount');
+        $partsTax = $allParts->sum('tax_amount');
+        $partsTotal = $allParts->sum(fn($p) => (float)($p->total_incl_tax ?: $p->total));
 
         // Update Quote Totals
         $this->subtotal = $servicesPrice + $partsPrice;

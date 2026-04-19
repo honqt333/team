@@ -86,6 +86,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::get('/vehicles/print', [VehicleController::class, 'print'])->name('vehicles.print');
     Route::apiResource('vehicles', VehicleController::class);
     Route::get('/vehicles/{vehicle}/mileage-logs', [\App\Http\Controllers\App\VehicleMileageController::class, 'index'])->name('vehicles.mileage-logs.index');
+    Route::delete('/vehicles/{vehicle}/mileage-logs/{log}', [\App\Http\Controllers\App\VehicleMileageController::class, 'destroy'])->name('vehicles.mileage-logs.destroy');
     
     // Work Orders - Hub and Index
     Route::get('/work-orders/export', [WorkOrderController::class, 'export'])->name('work-orders.export');

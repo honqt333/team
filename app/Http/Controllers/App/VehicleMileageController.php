@@ -19,7 +19,8 @@ class VehicleMileageController extends Controller
         $logs = $vehicle->mileageLogs()
             ->with(['creator:id,name', 'reference'])
             ->orderByDesc('recorded_at')
-            ->paginate(10);
+            ->orderByDesc('id')
+            ->paginate(20);
 
         // Transform collection to add readable reference info if needed
         $logs->through(function ($log) {
@@ -40,5 +41,22 @@ class VehicleMileageController extends Controller
         }
 
         return back()->with('mileageLogs', $logs);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Vehicle $vehicle, $logId)
+    {
+        $this->authorize('update', $vehicle);
+
+        $log = $vehicle->mileageLogs()->findOrFail($logId);
+
+        $log->delete();
+
+        return response()->json([
+            'message' => 'Mileage log deleted successfully',
+            'odometer' => $vehicle->odometer
+        ]);
     }
 }

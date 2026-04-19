@@ -60,7 +60,7 @@
                         <td class="px-6 py-4">
                             <div v-if="log.reference_code" class="flex flex-col gap-0.5">
                                 <span class="font-bold text-indigo-600 dark:text-indigo-400 text-xs">
-                                    {{ log.reference_code }}
+                                    {{ toEnglish(log.reference_code) }}
                                 </span>
                                 <span class="text-[10px] text-gray-500 bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded-md self-start">
                                     {{ formatRefType(log.reference_type) }}
@@ -83,6 +83,17 @@
                                 <span class="text-gray-600 dark:text-gray-400 text-xs">{{ log.creator?.name || '-' }}</span>
                             </div>
                         </td>
+                        <!-- Actions -->
+                        <td class="px-6 py-4 text-end">
+                            <button @click="deleteLog(log)" 
+                                class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20"
+                                :title="$t('common.delete')">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </td>
                     </tr>
                 </tbody>
             </table>
@@ -95,6 +106,7 @@ import { ref, watch, onMounted } from 'vue';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useConfirm } from '@/Composables/useConfirm';
 
 const props = defineProps({
     vehicleId: {
@@ -104,7 +116,8 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
-const { formatNumber } = useNumberFormat();
+const { formatNumber, toEnglish } = useNumberFormat();
+const { confirm } = useConfirm();
 const logs = ref([]);
 const loading = ref(false);
 
@@ -143,6 +156,25 @@ const fetchLogs = async () => {
         console.error('Failed to fetch mileage logs', error);
     } finally {
         loading.value = false;
+    }
+};
+
+const deleteLog = async (log) => {
+    const isConfirmed = await confirm({
+        title: t('common.confirm_delete'),
+        message: t('vehicles.mileage.confirm_delete_log', { mileage: formatNumber(log.mileage) }),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        variant: 'danger'
+    });
+
+    if (isConfirmed) {
+        try {
+            await axios.delete(route('vehicles.mileage-logs.destroy', { vehicle: props.vehicleId, log: log.id }));
+            await fetchLogs();
+        } catch (error) {
+            console.error('Failed to delete mileage log', error);
+        }
     }
 };
 

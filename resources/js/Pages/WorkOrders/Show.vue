@@ -1,234 +1,277 @@
 <template>
     <AppLayout>
-        <div class="space-y-4">
-            <!-- Back Button -->
-            <Link
-                :href="backUrl"
-                class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-            >
-                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                {{ $t('common.back') }}
-            </Link>
+        <div class="space-y-6">
+            <!-- Header Actions Bar -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <!-- Action Buttons (Left) -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Back Button -->
+                    <Link :href="backUrl"
+                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 transition-all shadow-sm">
+                        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </Link>
 
-            <!-- Main Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <!-- Header Section - Redesigned -->
-                <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                    <div class="flex flex-col lg:flex-row gap-6">
-                        <!-- Right Side: Vehicle & Customer Info -->
-                        <div class="flex-1 flex flex-col lg:flex-row gap-4">
-                            <!-- Vehicle Logo (Large) -->
-                            <div class="w-20 h-20 rounded-2xl bg-gray-50 dark:bg-gray-700 shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0">
-                                <img
-                                    v-if="workOrder.vehicle?.make?.logo_path"
-                                    :src="`/storage/${workOrder.vehicle.make.logo_path}`"
-                                    :alt="getName(workOrder.vehicle.make)"
-                                    class="w-16 h-16 object-contain"
-                                />
-                                <svg v-else class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                    <!-- Print Button -->
+                    <button @click="showPrintModal = true"
+                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-all shadow-sm"
+                        :title="$t('common.print')">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                    </button>
+
+                    <!-- Payments Button -->
+                    <button v-if="!isReadOnly" @click="showPaymentsListModal = true"
+                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-all shadow-sm"
+                        :title="$t('payments.title')">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Edit Button -->
+                    <button v-if="!isReadOnly" @click="showEditModal = true"
+                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-all shadow-sm"
+                        :title="$t('common.edit')">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+
+                    <!-- Status Change Buttons -->
+                    <template v-if="workOrder.status === 'open'">
+                        <button @click="changeStatus('in_progress')"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-xl hover:bg-amber-600 shadow-sm transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <span>{{ $t('work_orders.actions.start_work') }}</span>
+                        </button>
+                    </template>
+                    <template v-if="workOrder.status === 'in_progress'">
+                        <button @click="changeStatus('done')"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 shadow-sm transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>{{ $t('work_orders.actions.complete') }}</span>
+                        </button>
+                    </template>
+                    <template v-if="workOrder.status !== 'done' && workOrder.status !== 'cancelled'">
+                        <button @click="changeStatus('cancelled')"
+                            class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm"
+                            :title="$t('work_orders.actions.cancel')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Work Order Info (Right) -->
+                <div class="flex items-center gap-3">
+                    <div class="flex flex-col items-end">
+                        <div class="flex items-center gap-3">
+                            <span :class="statusBadgeClass">{{ $t(`work_orders.status.${workOrder.status}`) }}</span>
+                            <div class="flex items-center gap-2">
+                                <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{{ workOrder.code }}</h1>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 shadow-inner">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                 </svg>
                             </div>
-                            
-                            <!-- Vehicle & Customer Details -->
-                            <div class="flex-1 space-y-2">
-                                <!-- WO Code & Status -->
-                                <div class="flex items-center gap-3 flex-wrap">
-                                    <h1 class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 font-mono" dir="ltr">{{ workOrder.code }}</h1>
-                                    <span :class="statusBadgeClass">{{ $t(`work_orders.status.${workOrder.status}`) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Section: Financial Summary & Customer Info -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 1. Right Card: Vehicle & Customer Info -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full">
+                    <!-- Gray Header: Plate + Model + Color -->
+                    <Link :href="route('vehicles.show', workOrder.vehicle?.id || 1)"
+                        class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/60 border-b border-gray-100 dark:border-gray-700 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors group">
+                        <!-- Spacer -->
+                        <div class="w-8"></div>
+                        <!-- Center: Plate + Model -->
+                        <div class="text-center">
+                            <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" dir="ltr">
+                                {{ workOrder.vehicle?.plate_number }}
+                            </h3>
+                            <p class="text-xs font-semibold text-blue-500 dark:text-blue-400 mt-0.5">
+                                {{ getName(workOrder.vehicle?.make) }} {{ getName(workOrder.vehicle?.model) }} {{ workOrder.vehicle?.year }}
+                            </p>
+                        </div>
+                        <!-- Right: Color -->
+                        <div class="w-8 flex items-center justify-end">
+                            <div v-if="workOrder.vehicle?.color" class="relative group/color">
+                                <div
+                                    class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-300 dark:ring-gray-600"
+                                    :style="{ backgroundColor: getColorHex(workOrder.vehicle.color) }">
                                 </div>
-                                
-                                <!-- Plate Number & Vehicle -->
-                                <div class="flex items-center gap-3 flex-wrap">
-                                    <span class="text-xl font-bold text-gray-900 dark:text-white" dir="ltr">{{ workOrder.vehicle?.plate_number }}</span>
-                                    <span class="text-gray-400">|</span>
-                                    <span class="text-gray-600 dark:text-gray-300">
-                                        {{ getName(workOrder.vehicle?.make) }} {{ getName(workOrder.vehicle?.model) }} {{ workOrder.vehicle?.year }}
-                                    </span>
-                                </div>
-                                
-                                <!-- Customer Info (Clickable Card) -->
-                                <Link 
-                                    v-if="workOrder.customer" 
-                                    :href="route('customers.show', workOrder.customer.id)"
-                                    class="block p-3 -mx-3 rounded-lg bg-gray-50/50 dark:bg-gray-800/30 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border border-transparent hover:border-indigo-200 dark:hover:border-indigo-700 transition-all cursor-pointer group"
-                                >
-                                    <div class="space-y-1 text-sm">
-                                        <!-- Customer Name -->
-                                        <div class="flex items-center gap-2 text-gray-700 dark:text-gray-200">
-                                            <svg class="w-4 h-4 text-indigo-500 group-hover:text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                            </svg>
-                                            <span class="font-semibold group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ workOrder.customer?.name }}</span>
-                                            <svg class="w-4 h-4 text-gray-400 group-hover:text-indigo-500 ms-auto opacity-0 group-hover:opacity-100 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-                                            </svg>
-                                        </div>
-                                        <!-- Contact Person (if exists) + Phone -->
-                                        <div class="flex items-center gap-4 text-gray-500 dark:text-gray-400">
-                                            <span v-if="workOrder.contact_name" class="flex items-center gap-1.5">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                </svg>
-                                                {{ workOrder.contact_name }}
-                                            </span>
-                                            <span class="flex items-center gap-1.5" dir="ltr">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                                                </svg>
-                                                {{ workOrder.contact_phone || workOrder.customer?.phone }}
-                                            </span>
-                                        </div>
+                                <!-- Custom Tooltip -->
+                                <div class="absolute bottom-full right-0 mb-2 hidden group-hover/color:block z-50 pointer-events-none">
+                                    <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                                        {{ workOrder.vehicle.color }}
                                     </div>
-                                </Link>
+                                    <div class="absolute top-full right-2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+
+                    <!-- Middle: Logo (centered) + Customer Info -->
+                    <div class="flex items-center px-5 py-4 gap-4 flex-1">
+                        <!-- Logo -->
+                        <div class="flex-shrink-0 w-16 h-16 flex items-center justify-center">
+                            <img v-if="workOrder.vehicle?.make?.logo_path"
+                                :src="`/storage/${workOrder.vehicle.make.logo_path}`"
+                                :alt="getName(workOrder.vehicle?.make)"
+                                class="w-full h-full object-contain" />
+                            <div v-else class="w-14 h-14 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l3 1h6z"/>
+                                </svg>
                             </div>
                         </div>
 
-                        <!-- Left Side: Cost & Payment Summary Table -->
-                        <div class="w-full lg:w-[500px] bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 py-2.5 text-center bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-                                {{ $t('work_orders.cost_and_payment') }}
-                            </h3>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-sm min-w-[380px]">
-                                    <thead>
-                                        <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
-                                            <th class="py-2.5 px-3 text-start font-medium"></th>
-                                            <th class="py-2.5 px-2 text-center font-medium">{{ $t('work_orders.price') }}</th>
-                                            <th class="py-2.5 px-2 text-center font-medium text-red-500">{{ $t('work_orders.discount') }}</th>
-                                            <th class="py-2.5 px-2 text-center font-medium">{{ $t('work_orders.amount') }}</th>
-                                            <th class="py-2.5 px-2 text-center font-medium">{{ $t('work_orders.total') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-gray-900 dark:text-white">
-                                        <!-- Services Row -->
-                                        <tr class="border-b border-gray-100 dark:border-gray-700/50">
-                                            <td class="py-2.5 px-3 text-gray-500 dark:text-gray-400">{{ $t('work_orders.services_total') }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs" dir="ltr">{{ formatNumber(servicesTotal) }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs text-red-500" dir="ltr">0.00</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs" dir="ltr">{{ formatNumber(servicesTotal) }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs font-medium" dir="ltr">{{ formatNumber(servicesTotal) }}</td>
-                                        </tr>
-                                        <!-- Parts Row (only if parts exist) -->
-                                        <tr v-if="partsTotal > 0" class="border-b border-gray-200 dark:border-gray-700">
-                                            <td class="py-2.5 px-3 text-gray-500 dark:text-gray-400">{{ $t('work_orders.parts_total') }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs" dir="ltr">{{ formatNumber(partsTotal) }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs text-red-500" dir="ltr">0.00</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs" dir="ltr">{{ formatNumber(partsTotal) }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs font-medium" dir="ltr">{{ formatNumber(partsTotal) }}</td>
-                                        </tr>
-                                        <!-- Total Row -->
-                                        <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-100/50 dark:bg-gray-800/50">
-                                            <td class="py-2.5 px-3 font-semibold text-gray-700 dark:text-gray-300">{{ $t('work_orders.total') }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs font-bold" dir="ltr">{{ formatNumber(workOrderTotal) }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs text-red-500 font-bold" dir="ltr">0.00</td>
-                                            <td class="py-2.5 px-2 text-center font-mono text-xs font-bold" dir="ltr">{{ formatNumber(workOrderTotal) }}</td>
-                                            <td class="py-2.5 px-2 text-center font-mono font-bold text-indigo-600 dark:text-indigo-400" dir="ltr">{{ formatNumber(workOrderTotal) }}</td>
-                                        </tr>
-                                        <!-- Payments Row -->
-                                        <tr class="border-b border-gray-200 dark:border-gray-700">
-                                            <td class="py-2.5 px-3 font-semibold text-green-600 dark:text-green-400">{{ $t('work_orders.paid') }}</td>
-                                            <td colspan="3"></td>
-                                            <td class="py-2.5 px-2 text-center font-mono font-bold text-green-600 dark:text-green-400" dir="ltr">{{ formatNumber(workOrderTotalPaid) }}</td>
-                                        </tr>
-                                        <!-- Balance Row -->
-                                        <tr>
-                                            <td class="py-2.5 px-3 font-semibold" :class="workOrderBalance > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'">{{ $t('work_orders.balance') }}</td>
-                                            <td colspan="3"></td>
-                                            <td 
-                                                class="py-2.5 px-2 text-center font-mono font-bold text-base" 
-                                                dir="ltr"
-                                                :class="workOrderBalance > 0 ? 'text-orange-600 dark:text-orange-400' : 'text-green-600 dark:text-green-400'"
-                                            >
-                                                {{ formatNumber(workOrderBalance) }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <!-- Customer info (right side) -->
+                        <div class="flex-1 flex flex-col gap-2.5 items-end">
+                            <!-- Customer Name -->
+                            <Link :href="route('customers.show', workOrder.customer?.id || 1)"
+                                class="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                <span>{{ workOrder.customer?.name }}</span>
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                            </Link>
+
+                            <!-- Contact Name (if exists) -->
+                            <div v-if="workOrder.contact_name" class="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                                <span>{{ workOrder.contact_name }}</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+
+                            <!-- WhatsApp Only -->
+                            <a :href="`https://wa.me/${(workOrder.contact_phone || workOrder.customer?.phone)?.replace(/\+/g, '').replace(/\s/g, '')}`"
+                                target="_blank"
+                                class="flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors">
+                                <span class="text-sm font-mono font-semibold" dir="ltr">{{ workOrder.contact_phone || workOrder.customer?.phone }}</span>
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Bottom: VIN + Odometer -->
+                    <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                        <!-- VIN -->
+                        <div class="relative group/vin">
+                            <span class="text-xs font-mono text-gray-500 dark:text-gray-400 cursor-default">
+                                {{ workOrder.vehicle?.vin || '—' }}
+                            </span>
+                            <div v-if="workOrder.vehicle?.vin" class="absolute bottom-full left-0 mb-2 hidden group-hover/vin:block z-50 pointer-events-none">
+                                <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                                    {{ $t('vehicles.form.vin') }}: {{ workOrder.vehicle.vin }}
+                                </div>
+                                <div class="absolute top-full left-2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1"></div>
+                            </div>
+                        </div>
+                        <!-- Odometer -->
+                        <div class="relative group/odo flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span class="text-sm font-bold text-teal-600 dark:text-teal-400 font-mono cursor-default">
+                                {{ workOrder.mileage ? Number(workOrder.mileage).toLocaleString() + ' كم' : '—' }}
+                            </span>
+                            <div class="absolute bottom-full right-0 mb-2 hidden group-hover/odo:block z-50 pointer-events-none">
+                                <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                                    {{ $t('work_orders.form.mileage') }}
+                                </div>
+                                <div class="absolute top-full right-2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Actions Bar -->
-                <div class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-2">
-                    <!-- Edit Button -->
-                    <button
-                        v-if="!isReadOnly"
-                        @click="showEditModal = true"
-                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                        {{ $t('common.edit') }}
-                    </button>
+                <!-- 2. Left Card: Financial Summary (Match mockup) -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col h-full">
+                    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                        <div class="w-2 h-5 bg-amber-500 rounded-full"></div>
+                        {{ $t('work_orders.cost_and_payment') || 'التكلفة و الدفع' }}
+                    </h3>
 
-                    <!-- Payments Button -->
-                    <button
-                        v-if="!isReadOnly"
-                        @click="showPaymentsListModal = true"
-                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 rounded-lg shadow-md transition-colors"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-                        </svg>
-                        {{ $t('payments.title') }}
-                    </button>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50">
+                                    <th class="pb-2 text-start font-bold uppercase tracking-wider">{{ $t('common.type') }}</th>
+                                    <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('work_orders.price') }}</th>
+                                    <th class="pb-2 text-end font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') }}</th>
+                                    <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
+                                    <th v-if="hasTax" class="pb-2 text-end font-bold uppercase tracking-wider italic">VAT (15%)</th>
+                                    <th class="pb-2 text-end font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
+                                <!-- Services Row -->
+                                <tr class="group">
+                                    <td class="py-1.5 font-bold text-gray-900 dark:text-white">{{ $t('work_orders.services_total') }}</td>
+                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.services.price) }}</td>
+                                    <td class="py-1.5 text-end font-mono text-red-500 italic">{{ totals.services.discount > 0 ? '-' + formatCurrency(totals.services.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.services.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.services.tax) }}</td>
+                                    <td class="py-1.5 text-end font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.services.total) }}</td>
+                                </tr>
 
-                    <!-- Print Button -->
-                    <button
-                        @click="showPrintModal = true"
-                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                        </svg>
-                        {{ $t('common.print') }}
-                    </button>
+                                <!-- Parts Row -->
+                                <tr class="group" v-if="totals.parts.total > 0">
+                                    <td class="py-1.5 font-bold text-gray-900 dark:text-white">{{ $t('work_orders.parts_total') }}</td>
+                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.parts.price) }}</td>
+                                    <td class="py-1.5 text-end font-mono text-red-500 italic">{{ totals.parts.discount > 0 ? '-' + formatCurrency(totals.parts.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.parts.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.parts.tax) }}</td>
+                                    <td class="py-1.5 text-end font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.parts.total) }}</td>
+                                </tr>
 
-                    <div class="flex-1"></div>
+                                <!-- Financial Totals -->
+                                <tr class="bg-gray-50/50 dark:bg-gray-900/30 font-black border-t-2 border-gray-100 dark:border-gray-700">
+                                    <td class="py-1.5 text-gray-900 dark:text-white ps-2 uppercase">{{ $t('work_orders.total') }}</td>
+                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.grand.price) }}</td>
+                                    <td class="py-1.5 text-end font-mono text-red-600 italic">{{ totals.grand.discount > 0 ? '-' + formatCurrency(totals.grand.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.grand.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.grand.tax) }}</td>
+                                    <td class="py-1.5 text-end font-black text-indigo-600 dark:text-indigo-400 font-mono text-lg">{{ formatCurrency(totals.grand.total) }}</td>
+                                </tr>
+                                
+                                <!-- Paid Row -->
+                                <tr class="bg-gray-50/50 dark:bg-gray-900/30">
+                                    <td class="py-1.5 font-black text-green-600 dark:text-green-500 ps-2" :colspan="hasTax ? 5 : 4">{{ $t('work_orders.paid') }}</td>
+                                    <td class="py-1.5 text-end font-black text-green-600 dark:text-green-500 font-mono text-base">{{ formatCurrency(workOrderTotalPaid) }}</td>
+                                </tr>
 
-                    <!-- Status Change Buttons -->
-                    <template v-if="workOrder.status === 'open'">
-                        <button
-                            @click="changeStatus('in_progress')"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg hover:from-amber-600 hover:to-orange-600 shadow-sm transition-all"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                            </svg>
-                            {{ $t('work_orders.actions.start_work') }}
-                        </button>
-                    </template>
-                    <template v-if="workOrder.status === 'in_progress'">
-                        <button
-                            @click="changeStatus('done')"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg hover:from-green-600 hover:to-emerald-600 shadow-sm transition-all"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            {{ $t('work_orders.actions.complete') }}
-                        </button>
-                    </template>
-                    <template v-if="workOrder.status !== 'done' && workOrder.status !== 'cancelled'">
-                        <button
-                            @click="changeStatus('cancelled')"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                            {{ $t('work_orders.actions.cancel') }}
-                        </button>
-                    </template>
+                                <!-- Balance Row -->
+                                <tr class="bg-gray-50/50 dark:bg-gray-900/30 border-b-0">
+                                    <td class="py-1.5 font-black ps-2" :class="workOrderBalance > 0 ? 'text-orange-600 dark:text-orange-500' : 'text-gray-500'" :colspan="hasTax ? 5 : 4">{{ $t('work_orders.balance') }}</td>
+                                    <td class="py-1.5 text-end font-black font-mono text-base" :class="workOrderBalance > 0 ? 'text-orange-600 dark:text-orange-500' : 'text-gray-500'">{{ formatCurrency(workOrderBalance) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+            </div>
 
+            <!-- Main Content Container with Info Cards -->
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <!-- Info Cards -->
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -774,6 +817,22 @@ const { formatNumber, formatCurrency } = useNumberFormat();
 const { success } = useToast();
 const { confirm } = useConfirm();
 
+function getColorHex(colorName) {
+    if (!colorName) return '#9ca3af';
+    const trimmedColor = colorName.trim();
+    if (props.colors && props.colors.length > 0) {
+        const found = props.colors.find(c =>
+            c.name_ar === trimmedColor ||
+            c.name_en === trimmedColor ||
+            c.hex === trimmedColor
+        );
+        if (found && found.hex) {
+            return found.hex;
+        }
+    }
+    return '#9ca3af';
+}
+
 const showEditModal = ref(false);
 const activeTab = ref('services');
 const showDeptMenu = ref(false);
@@ -851,25 +910,98 @@ const normalizedPartsForDisplay = computed(() => {
 });
 
 // Payment computed properties
-const servicesTotal = computed(() => {
-    return props.workOrder.items?.reduce((sum, item) => {
-        return sum + (parseFloat(item.line_total || (item.qty * item.unit_price)) || 0);
-    }, 0) || 0;
+const hasTax = computed(() => {
+    return !!props.workOrder?.tax_enabled_snapshot;
 });
 
-const partsTotal = computed(() => {
-    let total = 0;
-    props.workOrder.items?.forEach(item => {
-        item.parts?.forEach(part => {
-            total += parseFloat(part.qty * part.unit_price) || 0;
+const totals = computed(() => {
+    const t = {
+        services: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
+        parts: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
+        grand: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
+    };
+
+    const isInclusive = props.workOrder?.pricing_mode_snapshot === 'inclusive';
+    const taxRate = Number(props.workOrder?.tax_rate_snapshot || 15);
+    const taxFactor = 1 + (taxRate / 100);
+    const taxEnabled = !!props.workOrder?.tax_enabled_snapshot;
+
+    // Services calculation
+    if (props.workOrder?.items && props.workOrder.items.length > 0) {
+        props.workOrder.items.forEach(line => {
+            const price = Number(line.unit_price || 0) * Number(line.qty || 1);
+            const discount = Number(line.discount_amount || 0);
+            
+            let amount = price - discount;
+            let calculatedTax = Number(line.tax_amount || 0);
+            let total = Number(line.line_total || price);
+
+            // Compute frontend tax correctly if missing or for inclusive view separation
+            if (taxEnabled) {
+                if (isInclusive) {
+                    amount = (price - discount) / taxFactor;
+                    calculatedTax = (price - discount) - amount;
+                } else if (calculatedTax === 0) {
+                    calculatedTax = amount * (taxRate / 100);
+                    total = amount + calculatedTax;
+                }
+            }
+
+            // Always trust line_total if provided directly, otherwise compute
+            if (!line.line_total) {
+                total = isInclusive ? (price - discount) : (amount + calculatedTax);
+            }
+
+            t.services.price += price;
+            t.services.discount += discount;
+            t.services.tax += calculatedTax;
+            t.services.total += total;
+            t.services.amount += amount;
+
+            if (line.parts && line.parts.length > 0) {
+                line.parts.forEach(part => {
+                    const partQty = Number(part.qty || 0);
+                    const partUnitPrice = Number(part.unit_price || 0);
+                    const partDiscount = Number(part.discount || 0);
+                    
+                    const partPrice = partQty * partUnitPrice;
+                    const partNet = partPrice - partDiscount;
+
+                    t.parts.price += partPrice;
+                    t.parts.discount += partDiscount;
+
+                    let partAmount = partNet;
+                    let partTax = 0;
+
+                    if (taxEnabled) {
+                        if (isInclusive) {
+                            partAmount = partNet / taxFactor;
+                            partTax = partNet - partAmount;
+                        } else {
+                            partTax = partNet * (taxRate / 100);
+                        }
+                    }
+
+                    t.parts.amount += partAmount;
+                    t.parts.tax += partTax;
+                    t.parts.total += partTax + partAmount;
+                });
+            }
         });
-    });
-    return total;
+    }
+
+    t.grand.price = t.services.price + t.parts.price;
+    t.grand.discount = t.services.discount + t.parts.discount;
+    t.grand.amount = t.services.amount + t.parts.amount;
+    t.grand.tax = t.services.tax + t.parts.tax;
+    t.grand.total = t.services.total + t.parts.total;
+
+    return t;
 });
 
-const workOrderTotal = computed(() => {
-    return servicesTotal.value + partsTotal.value;
-});
+const servicesTotal = computed(() => totals.value.services.total);
+const partsTotal = computed(() => totals.value.parts.total);
+const workOrderTotal = computed(() => totals.value.grand.total);
 
 const workOrderTotalPaid = computed(() => {
     return props.workOrder.payments?.reduce((sum, p) => {

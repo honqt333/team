@@ -62,6 +62,15 @@
                                         <span class="text-xs uppercase tracking-widest text-gray-400">VIN:</span>
                                         {{ vehicle.vin }}
                                     </span>
+                                    
+                                    <!-- Odometer Badge -->
+                                    <div v-if="vehicle.odometer" class="flex items-center gap-1.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 px-3 py-1 rounded-xl border border-teal-100 dark:border-teal-800/50">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                        </svg>
+                                        <span class="font-black">{{ vehicle.odometer.toLocaleString() }}</span>
+                                        <span class="text-[10px] uppercase font-bold opacity-70">KM</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -564,14 +573,29 @@ function getStatusClass(status) {
 
 function getColorHex(colorName) {
     if (!colorName) return '#9ca3af';
-    // Simplified map (should match what is used in other components)
+    
+    const trimmedColor = colorName.trim();
+    
+    // 1. Try to find in props.colors from database (Most Accurate)
+    if (props.colors && props.colors.length > 0) {
+        const found = props.colors.find(c => 
+            c.name_ar === trimmedColor || 
+            (c.name_en && c.name_en.toLowerCase() === trimmedColor.toLowerCase()) ||
+            c.name === trimmedColor
+        );
+        if (found && found.hex_code) {
+            return found.hex_code.startsWith('#') ? found.hex_code : `#${found.hex_code}`;
+        }
+    }
+
+    // 2. Fallback to hardcoded map (should match what is used in other components)
     const colorMap = {
-        'أبيض': '#ffffff', 'أسود': '#1f2937', 'فضي': '#9ca3af', 'رمادي': '#6b7280', 'أحمر': '#ef4444',
-        'أزرق': '#3b82f6', 'أخضر': '#22c55e', 'ذهبي': '#eab308', 'بني': '#92400e', 'برتقالي': '#f97316',
-        'white': '#ffffff', 'black': '#1f2937', 'silver': '#9ca3af', 'gray': '#6b7280', 'red': '#ef4444',
-        'blue': '#3b82f6', 'green': '#22c55e', 'gold': '#eab308', 'brown': '#92400e', 'orange': '#f97316',
+        'أبيض': '#ffffff', 'أسود': '#111827', 'فضي': '#9ca3af', 'رمادي': '#4b5563', 'أحمر': '#dc2626',
+        'أزرق': '#2563eb', 'أخضر': '#16a34a', 'ذهبي': '#ca8a04', 'بني': '#78350f', 'برتقالي': '#ea580c',
+        'white': '#ffffff', 'black': '#111827', 'silver': '#9ca3af', 'gray': '#4b5563', 'red': '#dc2626',
+        'blue': '#2563eb', 'green': '#16a34a', 'gold': '#ca8a04', 'brown': '#78350f', 'orange': '#ea580c',
     };
-    return colorMap[colorName.toLowerCase()] || colorMap[colorName] || '#9ca3af';
+    return colorMap[trimmedColor.toLowerCase()] || colorMap[trimmedColor] || '#9ca3af';
 }
 
 function getQuoteStatusClass(status) {
@@ -581,7 +605,26 @@ function getQuoteStatusClass(status) {
 
 // Modal handlers
 function openWorkOrderModal() { showWorkOrderModal.value = true; }
-function openQuoteModal() { showQuoteModal.value = true; }
+async function openQuoteModal() {
+    const openQuote = props.quotes?.find(q => ['draft', 'sent'].includes(q.status));
+    
+    if (openQuote) {
+        const confirmed = await confirm({
+            title: t('common.alert'),
+            message: t('quotes.has_open_quote_alert', { code: openQuote.code }),
+            confirmText: t('quotes.go_to_existing'),
+            cancelText: t('common.cancel'),
+            type: 'warning'
+        });
+        
+        if (confirmed) {
+            router.visit(route('app.quotes.show', openQuote.id));
+        }
+        return;
+    }
+    
+    showQuoteModal.value = true; 
+}
 async function confirmDelete() {
     if (!props.canDelete) return;
     const confirmed = await confirm({ title: t("vehicles.delete_confirm_title") || t("common.delete_confirm"), message: t("vehicles.delete_confirm_message") || t("common.delete_confirm_message"), confirmText: t("common.delete"), cancelText: t("common.cancel"), type: "danger" });

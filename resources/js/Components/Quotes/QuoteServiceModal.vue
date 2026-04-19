@@ -9,7 +9,7 @@
                             d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                 </div>
-                {{ line ? getName(line.service) : $t('quotes.show.add_service') }}
+                {{ line ? toEnglish(getName(line.service)) : $t('quotes.show.add_service') }}
             </div>
         </template>
 
@@ -34,7 +34,7 @@
                     {{ $t('quotes.show.tabs.linked_parts') }}
                     <span v-if="allParts.length > 0"
                         class="ms-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
-                        {{ allParts.length }}
+                        {{ toEnglish(allParts.length) }}
                     </span>
                 </button>
             </nav>
@@ -52,11 +52,11 @@
                     required>
                     <option value="">{{ $t('common.choose') }}</option>
                     <option v-for="service in services" :key="service.id" :value="service.id">
-                        {{ getName(service) }}
+                        {{ toEnglish(getName(service)) }}
                     </option>
                 </select>
                 <div v-else class="px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-xl text-gray-900 dark:text-white">
-                    {{ getName(line.service) }}
+                    {{ toEnglish(getName(line.service)) }}
                 </div>
             </div>
 
@@ -87,7 +87,8 @@
                     </span>
                 </div>
                 <div class="relative">
-                    <input type="number" v-model="form.unit_price" step="0.01" :min="selectedServiceMinPrice" dir="ltr"
+                    <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
+                        @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                         :disabled="isPriceLocked" :class="[
                             'w-full px-4 py-3 border rounded-xl font-mono text-end focus:ring-2 focus:border-blue-500',
                             isPriceLocked
@@ -150,7 +151,9 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('quotes.service_modal.discount_value') }}
                     </label>
-                    <input type="number" v-model="form.discount_value" step="0.01" min="0" dir="ltr" :class="[
+                    <input type="text" inputmode="decimal" v-model="form.discount_value" dir="ltr"
+                        @input="form.discount_value = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
+                        :class="[
                         'w-full px-4 py-3 border rounded-xl font-mono text-end focus:ring-2',
                         isPriceBelowMinimum
                             ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-red-500 focus:border-red-500'
@@ -252,14 +255,10 @@
                 class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                 {{ $t('common.cancel') }}
             </button>
-            <button v-if="activeTab === 'service'" type="button" @click="submitForm"
+            <button type="button" @click="submitForm"
                 :disabled="form.processing || isPriceBelowMinimum"
                 class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 transition-all">
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
-            </button>
-            <button v-else type="button" disabled
-                class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed rounded-lg">
-                {{ $t('common.next') }}
             </button>
         </template>
     </BaseModal>
@@ -289,12 +288,13 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName } = useLocalized();
-const { formatCurrency } = useNumberFormat();
+const { formatCurrency, toEnglish } = useNumberFormat();
 
 const { confirm } = useConfirm();
 
 const activeTab = ref('service');
 const showLinkedPartModal = ref(false);
+const isPopulating = ref(false);
 const editingLinkedPart = ref(null);
 const pendingParts = ref([]); // Parts added during new service creation
 const editingPendingPartIndex = ref(null); // Track which pending part is being edited
@@ -547,6 +547,7 @@ async function handlePartDelete(part) {
 
 // Watch for service selection to auto-fill price
 watch(() => form.service_id, (serviceId) => {
+    if (isPopulating.value) return; // Skip if we are just loading data
     if (serviceId && !props.line) {
         const service = props.services.find(s => s.id === serviceId);
         if (service) {
@@ -557,21 +558,34 @@ watch(() => form.service_id, (serviceId) => {
 });
 
 // Reset form when modal opens
-watch(() => props.show, (isOpen) => {
+// Enhanced Watcher for robust data population
+watch([() => props.show, () => props.line], ([isOpen, line]) => {
     if (isOpen) {
+        isPopulating.value = true;
         activeTab.value = 'service';
         pendingParts.value = []; // Reset pending parts
-        if (props.line) {
-            form.service_id = props.line.service_id;
-            form.description = props.line.description;
-            form.qty = 1;
-            form.unit_price = props.line.unit_price;
-            form.discount_type = props.line.discount_type || 'none';
-            form.discount_value = props.line.discount_value || 0;
+        
+        if (line) {
+            form.service_id = line.service_id;
+            form.description = line.description || '';
+            form.qty = line.qty || 1;
+            form.unit_price = line.unit_price || 0;
+            form.discount_type = line.discount_type || 'none';
+            form.discount_value = line.discount_value || 0;
         } else {
-            form.reset();
+            form.service_id = '';
+            form.description = '';
             form.qty = 1;
+            form.unit_price = 0;
+            form.discount_type = 'none';
+            form.discount_value = 0;
+            form.reset();
         }
+
+        // Use timeout to ensure reactivity settles before re-enabling watchers
+        setTimeout(() => {
+            isPopulating.value = false;
+        }, 100);
     }
-});
+}, { immediate: true });
 </script>

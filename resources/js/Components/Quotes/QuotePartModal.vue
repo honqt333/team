@@ -24,7 +24,7 @@
 
         <form @submit.prevent="submitForm" class="space-y-6">
             <!-- Part Source (Keep it compact but functional) -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div v-if="!part" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button type="button" @click="form.source = 'warehouse'" :class="[
                     'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
                     form.source === 'warehouse' ? 'border-emerald-500 bg-emerald-50/30 text-emerald-700 dark:text-emerald-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -71,8 +71,8 @@
                                     @click="selectPart(result)"
                                     class="w-full px-5 py-3 text-start hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0 group/item">
                                     <div class="flex items-center justify-between">
-                                        <div class="font-bold text-gray-900 dark:text-white group-hover/item:text-emerald-600 transition-colors">{{ getName(result) }}</div>
-                                        <span class="text-[10px] font-mono text-gray-500">{{ result.sku }}</span>
+                                        <div class="font-bold text-gray-900 dark:text-white group-hover/item:text-emerald-600 transition-colors">{{ toEnglish(getName(result)) }}</div>
+                                        <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(result.sku) }}</span>
                                     </div>
                                     <div class="text-[10px] text-emerald-600 font-bold mt-0.5">{{ formatCurrency(result.default_sale_price) }}</div>
                                 </button>
@@ -86,8 +86,8 @@
                     <div class="flex items-center gap-3">
                         <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs">📦</div>
                         <div>
-                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ getName(selectedPart) }}</p>
-                            <p class="text-[10px] text-emerald-600 font-bold uppercase">{{ $t('inventory.stock.available') }}: {{ availableStock }}</p>
+                            <p class="text-sm font-bold text-gray-900 dark:text-white">{{ toEnglish(getName(selectedPart)) }}</p>
+                            <p class="text-[10px] text-emerald-600 font-bold uppercase">{{ $t('inventory.stock.available') }}: {{ toEnglish(availableStock) }}</p>
                         </div>
                     </div>
                     <button type="button" @click="clearPartSelection" class="p-1.5 hover:bg-emerald-500/20 rounded-lg text-emerald-600 transition-colors">
@@ -139,11 +139,11 @@
                             {{ $t('inventory.parts.unit_price') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
-                            @input="form.unit_price = normalizeArabicNumerals($event.target.value)"
-                            :readonly="form.source === 'customer' || (form.include_in_package && form.quote_line_id)"
+                            @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
+                            :readonly="form.source === 'customer' || form.include_in_package"
                             :class="[
                                 'w-full px-4 py-3 border-2 rounded-2xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                (form.include_in_package && form.quote_line_id) || form.source === 'customer'
+                                form.include_in_package || form.source === 'customer'
                                     ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-70'
                                     : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500'
                             ]" />
@@ -153,11 +153,11 @@
                             {{ $t('quotes.show.discount') }}
                         </label>
                         <input type="text" inputmode="decimal" v-model="form.discount" dir="ltr"
-                            @input="form.discount = normalizeArabicNumerals($event.target.value)"
-                            :readonly="form.include_in_package && form.quote_line_id"
+                            @input="form.discount = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
+                            :readonly="form.include_in_package"
                             :class="[
                                 'w-full px-4 py-3 border-2 rounded-2xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                (form.include_in_package && form.quote_line_id)
+                                form.include_in_package
                                     ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-red-500/50 cursor-not-allowed opacity-70'
                                     : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-red-500 focus:ring-red-500/10 focus:border-red-500'
                             ]" />
@@ -167,7 +167,7 @@
                             {{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr"
-                            @input="form.qty = normalizeArabicNumerals($event.target.value)"
+                            @input="form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                             class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold" />
                     </div>
                 </div>
@@ -176,7 +176,7 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-2">
                         <label class="block text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest ms-1">
-                            VAT ({{ quote.tax_rate_snapshot }}%)
+                            VAT ({{ toEnglish(quote.tax_rate_snapshot) }}%)
                         </label>
                         <div class="px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-2xl text-center font-mono text-blue-700 dark:text-blue-300 font-bold text-sm">
                             {{ formatCurrency(vatAmount) }}
@@ -203,9 +203,9 @@
 
             </div>
 
-            <!-- Toggles Section (Only shown if a service is selected) -->
+            <!-- Toggles Section (Shown if line is selected OR showToggles prop is true) -->
             <transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0">
-                <div v-if="form.quote_line_id" class="flex gap-4 px-2">
+                <div v-if="form.quote_line_id || showToggles" class="flex gap-4 px-2">
                     <label class="flex items-center gap-2 cursor-pointer group">
                         <input type="checkbox" v-model="form.include_in_package" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700 dark:bg-gray-800">
                         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">{{ $t('work_orders.item.include_in_package') }}</span>
@@ -254,14 +254,7 @@ function debounce(fn, delay) {
     };
 }
 
-// Convert Arabic numerals to English
-function normalizeArabicNumerals(value) {
-    const arabicToEnglish = {
-        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
-    };
-    return String(value).split('').map(char => arabicToEnglish[char] || char).join('');
-}
+const { formatCurrency, toEnglish } = useNumberFormat();
 
 const props = defineProps({
     show: Boolean,
@@ -278,13 +271,13 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName } = useLocalized();
-const { formatCurrency } = useNumberFormat();
 
 // State
 const partSearch = ref('');
 const searchResults = ref([]);
 const selectedPart = ref(null);
 const searchWrapper = ref(null);
+const isPopulating = ref(false);
 
 // Form
 const form = useForm({
@@ -310,13 +303,14 @@ const stashedDiscount = ref(0);
 
 watch(() => form.include_in_package, (newVal, oldVal) => {
     // Only apply zeroing logic if it was explicitly toggled ON by user
-    if (newVal && !oldVal && form.quote_line_id) {
+    // Now also checking props.showToggles for pending services
+    if (newVal && !oldVal && (form.quote_line_id || props.showToggles)) {
         if (Number(form.unit_price) > 0) stashedPrice.value = form.unit_price;
         if (Number(form.discount) > 0) stashedDiscount.value = form.discount;
         
         form.unit_price = 0;
         form.discount = 0;
-    } else if (!newVal && oldVal && form.quote_line_id) {
+    } else if (!newVal && oldVal && (form.quote_line_id || props.showToggles)) {
         // Restore values when untoggling
         if (Number(form.unit_price) === 0 && stashedPrice.value > 0) {
             form.unit_price = stashedPrice.value;
@@ -360,14 +354,14 @@ const grandTotalValue = computed(() => {
 const serviceOptions = computed(() => {
     return (props.quoteLines || []).map(line => ({
         value: line.id,
-        label: line.description || getName(line.service)
+        label: toEnglish(line.description || getName(line.service))
     }));
 });
 
 const unitOptions = computed(() => {
     return (props.units || []).map(unit => ({
         value: unit.id,
-        label: getName(unit)
+        label: toEnglish(getName(unit))
     }));
 });
 
@@ -405,8 +399,8 @@ const debouncedSearch = debounce(async () => {
 function selectPart(part) {
     selectedPart.value = part;
     form.part_id = part.id;
-    form.name = getName(part);
-    form.part_number = part.sku || part.barcode || '';
+    form.name = toEnglish(getName(part));
+    form.part_number = toEnglish(part.sku || part.barcode || '');
     form.unit_price = parseFloat(part.default_sale_price) || 0;
     form.unit_id = part.unit_id;
     partSearch.value = '';
@@ -438,32 +432,62 @@ function submitForm() {
 
 // Watchers
 watch(() => form.source, (newSource) => {
+    if (isPopulating.value) return; // Skip if we are just loading data
     if (newSource === 'customer') form.unit_price = 0;
     if (newSource !== 'warehouse') clearPartSelection();
 });
 
 watch(() => form.include_in_package, (isIncluded) => {
+    if (isPopulating.value) return; // Skip if we are just loading data
     if (props.showToggles && isIncluded) {
         form.unit_price = 0;
         form.discount = 0;
     }
 });
 
-watch(() => props.show, (isOpen) => {
+// Enhanced Watcher for robust data population
+watch([() => props.show, () => props.part], ([isOpen, part]) => {
     if (isOpen) {
-        if (props.part) {
-            Object.assign(form, {
-                ...props.part,
-                part_number: props.part.part_number || '',
-                description: props.part.description || '',
-            });
-            if (props.part.part) selectedPart.value = props.part.part;
+        isPopulating.value = true;
+        if (part) {
+            // Populate form explicitly for better reactivity
+            form.source = part.source || 'warehouse';
+            form.quote_line_id = part.quote_line_id;
+            form.part_id = part.part_id;
+            form.name = part.name || '';
+            form.part_number = part.part_number || '';
+            form.unit_id = part.unit_id;
+            form.description = part.description || '';
+            form.qty = part.qty || 1;
+            form.unit_price = part.unit_price || 0;
+            form.discount = part.discount || 0;
+            form.include_in_package = !!part.include_in_package;
+            form.hide_on_print = !!part.hide_on_print;
+
+            if (part.part) {
+                selectedPart.value = part.part;
+            } else {
+                selectedPart.value = null;
+            }
         } else {
+            // Reset for new part
             form.reset();
-            form.source = 'external';
+            form.id = null;
+            form.source = 'warehouse';
             form.quote_line_id = props.quoteLineId || null;
             form.qty = 1;
+            form.unit_price = 0;
+            form.discount = 0;
+            form.name = '';
+            form.part_id = null;
+            selectedPart.value = null;
+            partSearch.value = '';
         }
+        
+        // Use timeout to ensure reactivity settles before re-enabling watchers
+        setTimeout(() => {
+            isPopulating.value = false;
+        }, 100);
     }
-});
+}, { immediate: true });
 </script>

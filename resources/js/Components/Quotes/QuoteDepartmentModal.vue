@@ -85,6 +85,7 @@ const form = useForm({
     notes: props.quote?.notes,
     customer_complaint: props.quote?.customer_complaint,
     initial_assessment: props.quote?.initial_assessment,
+    odometer: props.quote?.odometer,
     departments: [],
 });
 
@@ -125,6 +126,7 @@ watch(() => props.show, (isOpen) => {
         form.notes = props.quote.notes;
         form.customer_complaint = props.quote.customer_complaint;
         form.initial_assessment = props.quote.initial_assessment;
+        form.odometer = props.quote.odometer;
     }
 });
 </script>
