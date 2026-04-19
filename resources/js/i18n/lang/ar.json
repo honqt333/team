@@ -129,7 +129,10 @@
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
         },
         "discount": "الخصم",
-        "quantity": "الكمية"
+        "quantity": "الكمية",
+        "source": "المصدر",
+        "user": "المستخدم",
+        "manual_update": "تحديث يدوي"
     },
     "nav": {
         "brand": "Carag",
@@ -345,7 +348,8 @@
             "history": "سجل الكيلومترات",
             "no_history": "لا يوجد سجل للكيلومترات",
             "value": "قراءة العداد",
-            "difference": "الفرق"
+            "difference": "الفرق",
+            "initial_log": "إضافة مركبة"
         }
     },
     "print": {

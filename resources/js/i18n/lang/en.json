@@ -121,7 +121,10 @@
         "km": "km",
         "unit": "Unit",
         "discount": "Discount",
-        "quantity": "Quantity"
+        "quantity": "Quantity",
+        "source": "Source",
+        "user": "User",
+        "manual_update": "Manual Update"
     },
     "nav": {
         "brand": "Carag",
@@ -349,7 +352,8 @@
             "history": "Mileage History",
             "no_history": "No mileage history recorded",
             "value": "Odometer",
-            "difference": "Difference"
+            "difference": "Difference",
+            "initial_log": "Vehicle Creation"
         }
     },
     "print": {

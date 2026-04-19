@@ -57,7 +57,12 @@
                                     {{ formatRefType(log.reference_type) }}
                                 </span>
                             </div>
-                            <span v-else class="text-gray-400 text-xs">{{ $t('common.manual_update') }}</span>
+                            <div v-else class="flex flex-col">
+                                <span v-if="log.previous_mileage === 0" class="text-amber-600 dark:text-amber-400 font-medium whitespace-nowrap">
+                                    {{ $t('vehicles.mileage.initial_log') }}
+                                </span>
+                                <span v-else class="text-gray-400 text-xs">{{ $t('common.manual_update') }}</span>
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400 text-xs">
                             {{ log.creator?.name || '-' }}
@@ -72,6 +77,7 @@
 <script setup>
 import { ref, watch, onMounted } from 'vue';
 import axios from 'axios';
+import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
@@ -81,13 +87,14 @@ const props = defineProps({
     },
 });
 
+const { t } = useI18n();
 const { formatNumber } = useNumberFormat();
 const logs = ref([]);
 const loading = ref(false);
 
 const formatDate = (dateString) => {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -98,8 +105,8 @@ const formatDate = (dateString) => {
 
 const formatRefType = (type) => {
     if (!type) return '';
-    if (type.includes('WorkOrder')) return 'Work Order';
-    if (type.includes('Quote')) return 'Quote';
+    if (type.includes('WorkOrder')) return t('work_orders.title');
+    if (type.includes('Quote')) return t('nav.quotes');
     return type.split('\\').pop();
 };
 
