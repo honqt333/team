@@ -209,7 +209,7 @@ function shareViaWhatsApp() {
 function triggerNativeShare() {
     if (navigator.share) {
         navigator.share({
-            title: t('quotes.share_title', { code: props.quote.code }),
+            title: t('quotes.share_title', { code: props.quote.code, center: centerDisplayName.value }),
             text: t('quotes.share.system_share_text', { center: centerDisplayName.value }),
             url: currentUrl.value
         }).catch(err => {
