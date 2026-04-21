@@ -40,7 +40,7 @@ class CustomerUpdateRequest extends FormRequest
                     ->where(fn ($q) => $q->where('tenant_id', $tenantId)->where('center_id', $centerId)),
             ],
             'whatsapp' => ['nullable', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'email' => ['nullable', 'string', 'email:rfc,dns', 'max:255'],
             'notes' => ['nullable', 'string'],
             'tax_number' => ['nullable', 'string', 'max:50'],
             'address_line' => ['nullable', 'string', 'max:500'],

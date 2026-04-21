@@ -125,7 +125,9 @@
         "source": "Source",
         "user": "User",
         "manual_update": "Manual Update",
-        "alert": "Alert"
+        "alert": "Alert",
+        "link_copied": "Link copied successfully",
+        "copied": "Copied"
     },
     "nav": {
         "brand": "Carag",
@@ -890,6 +892,50 @@
             "total": "Total",
             "status": "Status",
             "created_at": "Created At"
+        },
+        "public": {
+            "quote_offer": "Inspection & Maintenance Quote",
+            "vehicle_info": "Vehicle Information",
+            "services": "Services",
+            "parts": "Parts",
+            "notes": "Notes & Details",
+            "qty": "Qty",
+            "status_text": {
+                "draft": "Awaiting Approval",
+                "sent": "Awaiting Approval",
+                "approved": "Approved",
+                "rejected": "Rejected",
+                "converted": "Work Started"
+            },
+            "status_subtext": {
+                "draft": "Please review the quote below and take the appropriate action.",
+                "sent": "Please review the quote below and take the appropriate action.",
+                "approved": "You have approved this quote.",
+                "rejected": "You have rejected this quote.",
+                "converted": "This quote has been converted to a work order and works have started."
+            },
+            "action_prompt": "Do you approve this quote?",
+            "approve": "Approve Quote",
+            "reject": "Reject Quote",
+            "reject_title": "Reject Quote",
+            "reject_subtitle": "Please tell us the reason for rejection to help us improve our services.",
+            "rejection_reason": "Rejection Reason",
+            "rejection_reason_placeholder": "Write your reason here (optional)...",
+            "confirm_reject": "Confirm Rejection",
+            "contact_us": "Contact Us",
+            "call": "Call",
+            "powered_by": "Powered by Khidmh Pro"
+        },
+        "share": {
+            "title": "Share Quote",
+            "whatsapp": "WhatsApp",
+            "direct_message": "Send direct message to customer",
+            "copy_link": "Copy Link",
+            "more_options": "More Options",
+            "system_menu": "Use system menu for sharing",
+            "whatsapp_message": "Hello, here is your quote {code} from {center}. You can view it here: {url}",
+            "system_share_text": "Quote from {center}",
+            "share_title": "Share Quote {code}"
         },
         "actions": {
             "view": "View",

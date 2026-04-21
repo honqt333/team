@@ -296,11 +296,11 @@
                         <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                             {{ $t('quotes.form.grand_total') }}
                         </span>
-                        <div class="flex items-baseline gap-1">
+                        <div class="flex items-baseline gap-1 whitespace-nowrap">
                             <span class="text-base font-black bg-gradient-to-br from-amber-600 to-orange-600 bg-clip-text text-transparent">
                                 {{ formatCurrencyValue(quote.total) }}
                             </span>
-                            <span class="text-[9px] font-black text-amber-600">{{ $t('common.currency') }}</span>
+                            <span class="text-[9px] font-black text-amber-600 uppercase">{{ $t('common.currency') }}</span>
                         </div>
                     </div>
 

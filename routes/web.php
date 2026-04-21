@@ -7,9 +7,19 @@ use App\Http\Controllers\App\VehicleController;
 use App\Http\Controllers\App\WorkOrderController;
 use App\Http\Controllers\App\SettingsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\PublicQuoteController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Public Routes (No Authentication Required)
+// ─────────────────────────────────────────────────────────────────────────────
+Route::prefix('view')->name('public.')->group(function () {
+    Route::get('/quote/{uuid}', [PublicQuoteController::class, 'show'])->name('quotes.show');
+    Route::post('/quote/{uuid}/approve', [PublicQuoteController::class, 'approve'])->name('quotes.approve');
+    Route::post('/quote/{uuid}/reject', [PublicQuoteController::class, 'reject'])->name('quotes.reject');
+});
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

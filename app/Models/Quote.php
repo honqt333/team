@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class Quote extends Model
 {
@@ -60,6 +61,8 @@ class Quote extends Model
         'total_incl_tax',
         'total_taxable_amount',
         'tax_breakdown',
+        'uuid',
+        'rejection_reason',
     ];
 
     protected $casts = [
@@ -126,6 +129,19 @@ class Quote extends Model
     public function departments(): BelongsToMany
     {
         return $this->belongsToMany(Department::class, 'quote_departments');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Boot - Auto UUID
+    // ─────────────────────────────────────────────────────────────
+
+    protected static function booted(): void
+    {
+        static::creating(function (Quote $quote) {
+            if (empty($quote->uuid)) {
+                $quote->uuid = (string) Str::uuid();
+            }
+        });
     }
 
     // ─────────────────────────────────────────────────────────────

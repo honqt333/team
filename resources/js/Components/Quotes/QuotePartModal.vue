@@ -25,21 +25,30 @@
         <form @submit.prevent="submitForm" class="space-y-6">
             <!-- Part Source (Keep it compact but functional) -->
             <div v-if="!part" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button type="button" @click="form.source = 'warehouse'" :class="[
+                <button type="button" 
+                    :disabled="quote.status === 'converted'"
+                    @click="form.source = 'warehouse'" :class="[
                     'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
-                    form.source === 'warehouse' ? 'border-emerald-500 bg-emerald-50/30 text-emerald-700 dark:text-emerald-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    form.source === 'warehouse' ? 'border-emerald-500 bg-emerald-50/30 text-emerald-700 dark:text-emerald-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
+                    quote.status === 'converted' ? 'opacity-50 cursor-not-allowed' : ''
                 ]">
                     🏭 {{ $t('quotes.parts.warehouse') }}
                 </button>
-                <button type="button" @click="form.source = 'external'" :class="[
+                <button type="button" 
+                    :disabled="quote.status === 'converted'"
+                    @click="form.source = 'external'" :class="[
                     'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
-                    form.source === 'external' ? 'border-blue-500 bg-blue-50/30 text-blue-700 dark:text-blue-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    form.source === 'external' ? 'border-blue-500 bg-blue-50/30 text-blue-700 dark:text-blue-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
+                    quote.status === 'converted' ? 'opacity-50 cursor-not-allowed' : ''
                 ]">
                     🛒 {{ $t('quotes.parts.external') }}
                 </button>
-                <button type="button" @click="form.source = 'customer'" :class="[
+                <button type="button" 
+                    :disabled="quote.status === 'converted'"
+                    @click="form.source = 'customer'" :class="[
                     'flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all font-bold text-xs',
-                    form.source === 'customer' ? 'border-amber-500 bg-amber-50/30 text-amber-700 dark:text-amber-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    form.source === 'customer' ? 'border-amber-500 bg-amber-50/30 text-amber-700 dark:text-amber-400' : 'border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
+                    quote.status === 'converted' ? 'opacity-50 cursor-not-allowed' : ''
                 ]">
                     👤 {{ $t('quotes.parts.customer') }}
                 </button>
@@ -102,13 +111,15 @@
                             {{ $t('inventory.parts.part_number') }} / {{ $t('inventory.parts.barcode') }}
                         </label>
                         <input type="text" v-model="form.part_number" dir="ltr"
-                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-mono transition-all text-sm" />
+                            :disabled="quote.status === 'converted'"
+                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-mono transition-all text-sm disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500" />
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 ms-1">
                             {{ $t('inventory.parts.unit') }}
                         </label>
                         <SearchableSelect v-model="form.unit_id" :options="unitOptions" option-label="label"
+                            :disabled="quote.status === 'converted'"
                             option-value="value" :placeholder="$t('common.choose')" />
                     </div>
                 </div>
@@ -119,7 +130,8 @@
                         {{ $t('inventory.parts.name') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="text" v-model="form.name" required
-                        class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-bold" />
+                        :disabled="quote.status === 'converted'"
+                        class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-bold disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500" />
                 </div>
 
                 <!-- Row 3: Description -->
@@ -128,7 +140,8 @@
                         {{ $t('inventory.parts.description') }}
                     </label>
                     <textarea v-model="form.description" rows="2"
-                        class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 resize-none transition-all text-sm"
+                        :disabled="quote.status === 'converted'"
+                        class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 resize-none transition-all text-sm disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500"
                         :placeholder="$t('inventory.parts.description_placeholder')"></textarea>
                 </div>
 
@@ -140,10 +153,10 @@
                         </label>
                         <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
                             @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                            :readonly="form.source === 'customer' || form.include_in_package"
+                            :readonly="form.source === 'customer' || form.include_in_package || quote.status === 'converted'"
                             :class="[
                                 'w-full px-4 py-3 border-2 rounded-2xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                form.include_in_package || form.source === 'customer'
+                                form.include_in_package || form.source === 'customer' || quote.status === 'converted'
                                     ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-70'
                                     : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-900 dark:text-white focus:ring-emerald-500/10 focus:border-emerald-500'
                             ]" />
@@ -154,10 +167,10 @@
                         </label>
                         <input type="text" inputmode="decimal" v-model="form.discount" dir="ltr"
                             @input="form.discount = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                            :readonly="form.include_in_package"
+                            :readonly="form.include_in_package || quote.status === 'converted'"
                             :class="[
                                 'w-full px-4 py-3 border-2 rounded-2xl text-center font-mono focus:ring-4 transition-all text-sm font-bold',
-                                form.include_in_package
+                                form.include_in_package || quote.status === 'converted'
                                     ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-red-500/50 cursor-not-allowed opacity-70'
                                     : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-red-500 focus:ring-red-500/10 focus:border-red-500'
                             ]" />
@@ -167,8 +180,9 @@
                             {{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr"
+                            :disabled="quote.status === 'converted'"
                             @input="form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold" />
+                            class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500" />
                     </div>
                 </div>
 
@@ -198,6 +212,7 @@
                         {{ $t('quotes.service_modal.service') }}
                     </label>
                     <SearchableSelect v-model="form.quote_line_id" :options="serviceOptions" option-label="label"
+                        :disabled="quote.status === 'converted'"
                         option-value="value" :placeholder="$t('common.none')" />
                 </div>
 
@@ -206,13 +221,17 @@
             <!-- Toggles Section (Shown if line is selected OR showToggles prop is true) -->
             <transition enter-active-class="transition-all duration-300 ease-out" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0">
                 <div v-if="form.quote_line_id || showToggles" class="flex gap-4 px-2">
-                    <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" v-model="form.include_in_package" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700 dark:bg-gray-800">
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">{{ $t('work_orders.item.include_in_package') }}</span>
+                    <label class="flex items-center gap-2" :class="quote.status === 'converted' ? 'cursor-not-allowed' : 'cursor-pointer group'">
+                        <input type="checkbox" v-model="form.include_in_package" 
+                            :disabled="quote.status === 'converted'"
+                            class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700 dark:bg-gray-800 disabled:opacity-50">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider transition-colors" :class="quote.status !== 'converted' ? 'group-hover:text-emerald-500' : ''">{{ $t('work_orders.item.include_in_package') }}</span>
                     </label>
-                    <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" v-model="form.hide_on_print" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700 dark:bg-gray-800">
-                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider group-hover:text-emerald-500 transition-colors">{{ $t('work_orders.item.hide_on_print') }}</span>
+                    <label class="flex items-center gap-2" :class="quote.status === 'converted' ? 'cursor-not-allowed' : 'cursor-pointer group'">
+                        <input type="checkbox" v-model="form.hide_on_print" 
+                            :disabled="quote.status === 'converted'"
+                            class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300 dark:border-gray-700 dark:bg-gray-800 disabled:opacity-50">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider transition-colors" :class="quote.status !== 'converted' ? 'group-hover:text-emerald-500' : ''">{{ $t('work_orders.item.hide_on_print') }}</span>
                     </label>
                 </div>
             </transition>
@@ -223,9 +242,9 @@
             <div class="flex items-center justify-between w-full">
                 <button type="button" @click="$emit('close')"
                     class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-all uppercase tracking-widest">
-                    {{ $t('common.cancel') }}
+                    {{ quote.status === 'converted' ? $t('common.close') : $t('common.cancel') }}
                 </button>
-                <button type="button" @click="submitForm"
+                <button v-if="quote.status !== 'converted'" type="button" @click="submitForm"
                     :disabled="form.processing || !form.name || !form.qty || (form.unit_price === '' || form.unit_price === null) || (form.source !== 'warehouse' && !form.unit_id)"
                     class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50">
                     {{ form.processing ? $t('common.loading') : $t('common.save') }}

@@ -44,7 +44,7 @@ class CustomerStoreRequest extends FormRequest
                 'max:30',
                 'regex:/^\+?966\d{9}$/',
             ],
-            'email' => ['nullable', 'email', 'max:255'],
+            'email' => ['nullable', 'string', 'email:rfc,dns', 'max:255'],
             'notes' => ['nullable', 'string'],
             'tax_number' => ['nullable', 'string', 'max:50'],
             'address_line' => ['nullable', 'string', 'max:500'],

@@ -191,9 +191,7 @@
                     </div>
                 </div>
 
-
-
-                <!-- 2. Left Card: Financial Summary (Match mockup) -->
+                <!-- 2. Left Card: Financial Summary -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -340,140 +338,121 @@
                 </button>
             </div>
 
-
             <!-- Services Tab Content -->
-            <div v-show="activeTab === 'services'" id="departments-section" class="space-y-6">
+            <div v-show="activeTab === 'services'" id="departments-section" class="space-y-3">
                 <template v-for="dept in visibleDepartments" :key="dept.id">
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <!-- Department Header -->
-                        <div
-                            class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-between">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                {{ getName(dept) }}
-                            </h3>
-                            <div v-if="quote.status === 'draft' || quote.status === 'sent'" class="flex items-center gap-2">
-                                <!-- Delete Dept Button (Conditional) -->
-                                <button v-if="getLinesForDept(dept.id).length === 0" @click="removeDepartment(dept.id)"
-                                    class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                                    :title="$t('quotes.confirm_remove_department')">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                    <div class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        <!-- Department Header - matching WorkOrder style -->
+                        <div class="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-transparent dark:from-gray-900/50 dark:to-transparent">
+                            <div class="flex items-center gap-3 flex-1">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                                    <span class="text-indigo-600 dark:text-indigo-400">🔧</span>
+                                </div>
+                                <span class="font-semibold text-gray-900 dark:text-white">{{ getName(dept) }}</span>
+                                <span class="text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                                    {{ getLinesForDept(dept.id).length }} {{ $t('quotes.show.services_count') }}
+                                </span>
+                            </div>
 
-                                <button @click="openServiceModal(dept.id)"
-                                    class="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
+                            <div class="flex items-center gap-2">
+                                <!-- Delete Dept Button (Conditional) -->
+                                <button
+                                    v-if="(quote.status === 'draft' || quote.status === 'sent') && getLinesForDept(dept.id).length === 0"
+                                    @click.stop="removeDepartment(dept.id)"
+                                    class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
+                                    :title="$t('quotes.confirm_remove_department')">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
-                                    {{ $t('quotes.show.add_service') }}
                                 </button>
                             </div>
                         </div>
 
-                        <!-- Services List -->
-                        <div class="p-6">
-                            <div v-if="getLinesForDept(dept.id).length > 0" class="space-y-4">
-                                <div v-for="line in getLinesForDept(dept.id)" :key="line.id"
-                                    class="group flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all">
-
-                                    <!-- Service Info -->
-                                    <div class="flex items-start gap-4">
-                                        <div class="pt-1">
-                                            <div
-                                                class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <!-- Department Content -->
+                        <div class="p-4 space-y-2 bg-gray-50/50 dark:bg-gray-900/30">
+                            <!-- Services List -->
+                            <div class="flex flex-col gap-3">
+                                <div v-for="(line, index) in getLinesForDept(dept.id)" :key="line.id"
+                                    class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 transition-all hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 group relative">
+                                    <div class="flex items-center justify-between">
+                                        <!-- Right Side: Icon + Title + Price -->
+                                        <div class="flex items-start gap-4 flex-1 min-w-0">
+                                            <!-- Status Icon -->
+                                            <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 flex items-center justify-center">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                 </svg>
                                             </div>
-                                        </div>
-                                        <div>
-                                            <h4 @click="editLine(line)"
-                                                class="font-medium text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                                {{ line.description || getName(line.service) }}
-                                            </h4>
-                                            <!-- Parts Summary Tag -->
-                                            <!-- <div v-if="line.parts_count > 0" class="flex items-center gap-1 mt-1 text-xs text-gray-500">
-                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                                                {{ line.parts_count }} Parts Linked
-                                            </div> -->
-                                        </div>
-                                    </div>
 
-                                    <!-- Price & Actions -->
-                                    <div class="flex items-center gap-6">
-                                        <!-- Prices Group (like WorkOrder) -->
-                                        <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 px-3 py-1.5 rounded-lg">
-                                            <!-- Labor/Service -->
-                                            <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium" :title="$t('work_orders.item.service_cost')">
-                                                <span class="text-indigo-500">🔧</span>
-                                                <span class="font-mono">{{ formatCurrency((line.unit_price * (line.qty || 1)) - (line.discount_amount || 0)) }}</span>
+                                            <div class="flex-1 min-w-0">
+                                                <!-- Title Row -->
+                                                <div class="flex items-baseline gap-2 mb-1">
+                                                    <span class="text-gray-400 font-medium font-mono text-sm leading-none">{{ index + 1 }}.</span>
+                                                    <button @click="editLine(line)" type="button"
+                                                        class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-tight">
+                                                        {{ line.description || getName(line.service) }}
+                                                    </button>
+                                                </div>
+
+                                                <!-- Meta Row: Price badge -->
+                                                <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                                                    <!-- Prices Group -->
+                                                    <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-md">
+                                                        <!-- Labor/Service cost -->
+                                                        <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium" :title="$t('work_orders.item.service_cost')">
+                                                            <span class="text-indigo-500">🔧</span>
+                                                            <span class="font-mono">{{ formatCurrency((line.unit_price * (line.qty || 1)) - (line.discount_amount || 0)) }}</span>
+                                                        </div>
+                                                        <!-- Parts (if any) -->
+                                                        <div v-if="line.parts_total > 0" class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium border-s border-gray-200 dark:border-gray-600 ps-3" :title="$t('work_orders.item.parts_cost')">
+                                                            <span class="text-amber-500">🔩</span>
+                                                            <span class="font-mono">{{ formatCurrency(line.parts_total) }}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Discount indicator -->
+                                                    <span v-if="line.discount_amount > 0" class="text-xs text-red-500 line-through font-mono">
+                                                        {{ formatCurrency(line.unit_price * line.qty) }}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <!-- Parts (if any) -->
-                                            <div v-if="line.parts_total > 0" class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium border-s border-gray-200 dark:border-gray-600 ps-3" :title="$t('work_orders.item.parts_cost')">
-                                                <span class="text-amber-500">🔩</span>
-                                                <span class="font-mono">{{ formatCurrency(line.parts_total) }}</span>
-                                            </div>
                                         </div>
 
-                                        <!-- Discount indicator -->
-                                        <p v-if="line.discount_amount > 0"
-                                            class="text-xs text-red-500 line-through font-mono">
-                                            {{ formatCurrency(line.unit_price * line.qty) }}
-                                        </p>
-
-                                        <!-- Actions -->
-                                        <div v-if="quote.status === 'draft' || quote.status === 'sent'"
-                                            class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <!-- Left Side: Actions -->
+                                        <div v-if="quote.status === 'draft' || quote.status === 'sent'" class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700 ps-3">
                                             <button @click="editLine(line)"
-                                                class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                                                    </path>
+                                                class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                :title="$t('common.edit')">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
                                                 </svg>
                                             </button>
                                             <button @click="deleteLine(line)"
-                                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                    viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                                    </path>
+                                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                                :title="$t('common.delete')">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                 </svg>
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div v-else class="text-center py-8">
-                                <div
-                                    class="w-12 h-12 bg-gray-100 dark:bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-400">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-                                        </path>
-                                    </svg>
-                                </div>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">
-                                    {{ $t('quotes.show.no_services') }}
-                                </p>
-                                <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="openServiceModal(dept.id)"
-                                    class="text-blue-600 hover:underline text-sm font-medium">
-                                    {{ $t('quotes.show.add_service') }}
-                                </button>
-                            </div>
+
+                            <!-- Empty State -->
+                            <p v-if="getLinesForDept(dept.id).length === 0"
+                                class="text-center text-gray-400 dark:text-gray-500 py-4 text-sm">
+                                {{ $t('quotes.show.no_services') }}
+                            </p>
+
+                            <!-- Add Service Button (dashed, matching WorkOrder style) -->
+                            <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="openServiceModal(dept.id)"
+                                class="w-full flex items-center justify-center gap-2 py-2 text-sm text-indigo-600 dark:text-indigo-400 border border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors mt-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                {{ $t('quotes.show.add_service') }}
+                            </button>
                         </div>
                     </div>
                 </template>
@@ -506,12 +485,19 @@
 
         <ConfirmModal />
 
+        <!-- Share Modal -->
+        <QuoteShareModal 
+            :show="showShareModal" 
+            :quote="quote" 
+            @close="showShareModal = false"
+            @print="printQuote"
+        />
     </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Head, Link, useForm, router } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -523,6 +509,7 @@ import QuoteServiceModal from '@/Components/Quotes/QuoteServiceModal.vue';
 import QuoteDepartmentModal from '@/Components/Quotes/QuoteDepartmentModal.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
+import QuoteShareModal from '@/Components/Quotes/QuoteShareModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 
@@ -572,6 +559,7 @@ const showServiceModal = ref(false);
 const showDepartmentModal = ref(false);
 const showEditModal = ref(false);
 const showPartModal = ref(false);
+const showShareModal = ref(false);
 const editingLine = ref(null);
 const editingPart = ref(null);
 const activeDepartmentId = ref(null);
@@ -595,29 +583,10 @@ const approveQuote = async () => {
     }
 };
 
-const rejectQuote = async () => {
-    const confirmed = await confirm({
-        title: t('quotes.messages.confirm_reject_title'),
-        message: t('quotes.messages.confirm_reject'),
-        confirmText: t('quotes.actions.reject'),
-        type: 'danger'
-    });
-
-    if (confirmed) {
-        router.post(route('app.quotes.reject', props.quote.id), {}, {
-            onSuccess: () => successToast(t('quotes.messages.rejected_success')),
-        });
-    }
-};
-
 // Computed: Sort departments by sort_order
-const visibleDepartments = computed(() => {
-    // We want to show departments that are associated with the quote
-    // Since quote.departments relation contains the linked departments.
-    // We should map them to include the sort order from full departments list if needed,
-    // but usually relation data is enough.
-    return [...(props.quoteDepartments || [])].sort((a, b) => a.sort_order - b.sort_order);
-});
+const visibleDepartments = computed(() =>
+    [...(props.quoteDepartments || [])].sort((a, b) => a.sort_order - b.sort_order)
+);
 
 // Computed: Get active department's services for the modal dropdown
 const activeDepartmentServices = computed(() => {
@@ -627,9 +596,7 @@ const activeDepartmentServices = computed(() => {
 
 // Helper: Get lines for a specific department
 const getLinesForDept = (deptId) => {
-    // Ensure linesByDepartment is an object and deptId entry is an array
-    const linesMap = props.linesByDepartment ?? {};
-    const lines = linesMap[deptId];
+    const lines = (props.linesByDepartment ?? {})[deptId];
     return Array.isArray(lines) ? lines : [];
 };
 
@@ -825,19 +792,9 @@ async function deleteLine(line) {
     }
 }
 
-// Share quote via WhatsApp or copy link
+// Share quote via custom modal
 function shareQuote() {
-    const url = window.location.href;
-    if (navigator.share) {
-        navigator.share({
-            title: t('quotes.share_title', { code: props.quote.code }),
-            url: url
-        });
-    } else {
-        navigator.clipboard.writeText(url);
-        // TODO: Show toast notification
-        alert(t('common.link_copied'));
-    }
+    showShareModal.value = true;
 }
 
 // Print quote
@@ -898,12 +855,4 @@ async function deletePart(part) {
     }
 }
 
-function getSourceBadgeClass(source) {
-    const classes = {
-        warehouse: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-        external: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-        customer: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-    };
-    return classes[source] || classes.external;
-}
 </script>
