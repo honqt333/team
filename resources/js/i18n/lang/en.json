@@ -129,5 +129,32 @@
             "sku": "SKU",
             "barcode": "Barcode"
         }
+    },
+    "center_settings": {
+        "tabs": {
+            "profile": "Profile",
+            "contact": "Contact & Address",
+            "branding": "Branding",
+            "working_hours": "Working Hours",
+            "print": "Print & Terms"
+        },
+        "print": {
+            "document_titles": "Document Titles",
+            "quote_title": "Quote Title",
+            "work_order_title": "Work Order Title",
+            "invoice_title": "Invoice Title",
+            "terms_and_conditions": "Terms and Conditions",
+            "quote_terms": "Quote Terms",
+            "work_order_terms": "Work Order Terms",
+            "invoice_terms": "Invoice Terms",
+            "terms_placeholder": "Write terms and conditions here...",
+            "visual_preferences": "Visual Preferences",
+            "show_logo": "Show Logo on Prints",
+            "show_stamp": "Show Stamp on Prints",
+            "show_qr_code": "Show QR Code",
+            "primary_color": "Primary Theme Color",
+            "footer_text": "Footer Text",
+            "footer_placeholder": "This text will appear at the bottom of all printed documents..."
+        }
     }
 }
