@@ -210,6 +210,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     
     // System Settings
     Route::get('/settings/system', [\App\Http\Controllers\App\SystemSettingsController::class, 'index'])->name('settings.system');
+    Route::get('/settings/print', [\App\Http\Controllers\App\SystemSettingsController::class, 'printSettings'])->name('settings.print');
     Route::put('/settings/system', [\App\Http\Controllers\App\SystemSettingsController::class, 'update'])->name('settings.system.update');
 
     // Users Settings

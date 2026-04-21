@@ -26,8 +26,9 @@
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('system_settings.title')
-                            }}</h1>
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ $t('system_settings.title') }}
+                            </h1>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ currentSectionTitle }}
                             </p>
@@ -88,6 +89,7 @@
                         </svg>
                         {{ $t('system_settings.sections.condition_items') }}
                     </button>
+
                     <span
                         class="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium text-gray-400 dark:text-gray-500 cursor-not-allowed">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,9 +104,8 @@
             </div>
 
 
-            <!-- Makes/Models/Colors Section -->
-            <!-- Makes/Models/Colors Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <!-- Makes/Models/Colors/Condition Items Section -->
+            <div v-if="['makes', 'models', 'colors', 'condition-items'].includes(activeSection)" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <!-- Toolbar -->
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -565,9 +566,10 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
-        <!-- Modals -->
+<!-- Modals -->
         <MakeFormModal v-if="showMakeModal" :make="editingMake" @close="closeMakeModal" @saved="handleSaved" />
 
         <ModelFormModal v-if="showModelModal" :model="editingModel" :makes="makesForFilter" @close="closeModelModal"
@@ -606,6 +608,7 @@ const props = defineProps({
     condition_items: Object,
     settings: Object,
     global_sms_enabled: Boolean,
+
     activeSection: {
         type: String,
         default: 'makes'
@@ -622,10 +625,9 @@ watch(() => props.filters?.make_id, (newVal) => {
     selectedMake.value = newVal ? Number(newVal) : '';
 });
 
-// Settings Form
-
-
 const globalSmsEnabled = computed(() => props.global_sms_enabled);
+
+
 
 // Modal state
 const showMakeModal = ref(false);

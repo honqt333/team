@@ -124,10 +124,15 @@ class InvoicesController extends Controller
 
         $template = \App\Models\InvoiceTemplate::getDefault($invoice->tenant_id, 'tax_invoice');
 
+        $labels = $template->getAllLabels();
+        if ($invoice->tenant->invoice_title) {
+            $labels['document_title'] = $invoice->tenant->invoice_title;
+        }
+
         return Inertia::render('Invoices/Print', [
             'invoice' => $invoice,
             'template' => $template,
-            'labels' => $template->getAllLabels(),
+            'labels' => $labels,
         ]);
     }
 

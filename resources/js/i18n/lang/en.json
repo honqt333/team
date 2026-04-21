@@ -14,6 +14,7 @@
         "cancel": "Cancel",
         "delete": "Delete",
         "save": "Save",
+        "apply": "Apply",
         "loading": "Loading...",
         "success": "Success",
         "error": "Error",
@@ -155,6 +156,36 @@
             "primary_color": "Primary Theme Color",
             "footer_text": "Footer Text",
             "footer_placeholder": "This text will appear at the bottom of all printed documents..."
+        }
+    },
+    "print_settings": {
+        "document_titles": "Document Titles",
+        "document_title": "Document Title",
+        "edit_doc_settings": "Edit Document Settings",
+        "quote_title": "Quote Title",
+        "work_order_title": "Work Order Title",
+        "invoice_title": "Invoice Title",
+        "terms_and_conditions": "Terms and Conditions",
+        "quote_terms": "Quote Terms",
+        "work_order_terms": "Work Order Terms",
+        "invoice_terms": "Invoice Terms",
+        "terms_placeholder": "Write terms and conditions here...",
+        "visual_preferences": "Visual Preferences",
+        "show_logo": "Show Logo",
+        "show_stamp": "Show Stamp",
+        "show_qr_code": "Show QR Code",
+        "primary_color": "Primary Color",
+        "footer_text": "Footer Text",
+        "footer_placeholder": "Text to appear at bottom of pages...",
+        "note": "Note: Print terms on first page applies only if terms are short (3 lines or less), otherwise they print on a separate page.",
+        "columns": {
+            "id": "#",
+            "name": "Name",
+            "print_terms": "Print Terms",
+            "terms_first_page": "Terms on First Page",
+            "show_stamp": "Stamp",
+            "show_iban": "IBAN",
+            "updated_at": "Updated By"
         }
     }
 }

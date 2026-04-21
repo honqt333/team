@@ -113,9 +113,15 @@
             </div>
         </div>
 
+        <!-- Terms & Conditions (Print Only) -->
+        <div v-if="page.props.tenant?.invoice_terms" class="mt-8 pt-6 border-t border-gray-200">
+            <h3 class="text-xs font-bold text-gray-900 mb-2">الشروط والأحكام</h3>
+            <p class="text-[10px] text-gray-600 whitespace-pre-wrap leading-tight">{{ page.props.tenant.invoice_terms }}</p>
+        </div>
+
         <!-- Footer -->
-        <div v-if="template?.footer_text" class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4">
-            {{ template.footer_text }}
+        <div v-if="template?.footer_text || page.props.tenant?.print_settings?.footer_text" class="text-center text-sm text-gray-500 border-t border-gray-200 pt-4 mt-4">
+            {{ page.props.tenant?.print_settings?.footer_text || template.footer_text }}
         </div>
         <div class="text-center text-sm text-gray-400 mt-4">
             {{ labels.thank_you }}
@@ -139,6 +145,9 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 
 const { t } = useI18n();
 

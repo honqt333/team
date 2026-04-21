@@ -2,7 +2,7 @@
     <div class="print-container bg-white min-h-screen p-8" :dir="isRtl ? 'rtl' : 'ltr'">
         <!-- Reusable Print Header -->
         <PrintHeader 
-            :title="isRtl ? 'فاتورة أولية' : 'Proforma Invoice'"
+            :title="page.props.tenant?.work_order_title || (isRtl ? 'فاتورة أولية' : 'Proforma Invoice')"
             :subtitle="workOrder.code"
             :work-order="workOrder"
         />
@@ -185,6 +185,12 @@
             </div>
         </div>
 
+        <!-- Terms & Conditions (Print Only) -->
+        <div v-if="page.props.tenant?.work_order_terms" class="mt-12 pt-6 border-t border-gray-200">
+            <h3 class="text-sm font-bold text-gray-900 mb-2">{{ isRtl ? 'الشروط والأحكام' : 'Terms & Conditions' }}</h3>
+            <p class="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{{ page.props.tenant.work_order_terms }}</p>
+        </div>
+
         <!-- Print Button -->
         <div class="fixed bottom-4 left-4 print:hidden">
             <button @click="printPage" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg flex items-center gap-2">
@@ -200,7 +206,10 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePage } from '@inertiajs/vue3';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
+
+const page = usePage();
 
 const props = defineProps({
     workOrder: Object,

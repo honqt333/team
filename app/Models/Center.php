@@ -36,22 +36,11 @@ class Center extends Model
         'logo_dark_path',
         'logo_invoice_path',
         'stamp_path',
-        // Document Titles
-        'quote_title',
-        'work_order_title',
-        'invoice_title',
-        // Terms & Conditions
-        'quote_terms',
-        'work_order_terms',
-        'invoice_terms',
-        // Visual Print Settings
-        'print_settings',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'is_main' => 'boolean',
-        'print_settings' => 'array',
     ];
 
     public function tenant(): BelongsTo

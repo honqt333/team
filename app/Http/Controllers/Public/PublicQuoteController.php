@@ -21,6 +21,7 @@ class PublicQuoteController extends Controller
             ->where('uuid', $uuid)
             ->with([
                 'center',
+                'tenant',
                 'customer',
                 'vehicle.make',
                 'vehicle.model',
@@ -61,6 +62,10 @@ class PublicQuoteController extends Controller
                     'email'         => $quote->center->email,
                     'logo_light_url' => $quote->center->logo_light_url,
                     'logo_dark_url'  => $quote->center->logo_dark_url,
+                ] : null,
+                'tenant' => $quote->tenant ? [
+                    'quote_title' => $quote->tenant->quote_title,
+                    'quote_terms' => $quote->tenant->quote_terms,
                 ] : null,
                 'customer' => $quote->customer ? [
                     'id'    => $quote->customer->id,

@@ -130,6 +130,30 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
                 </a>
+
+                <!-- Print Settings -->
+                <a v-if="can('settings.company.manage')" href="/app/settings/print"
+                    class="group flex items-center gap-5 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-600 hover:bg-amber-50/50 dark:hover:bg-amber-900/20 transition-all">
+                    <div
+                        class="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-amber-500/30">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h3
+                            class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                            {{ $t('settings.cards.print.title') }}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                            {{ $t('settings.cards.print.description') }}
+                        </p>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400 group-hover:text-amber-500 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-all"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
             </div>
         </div>
     </AppLayout>

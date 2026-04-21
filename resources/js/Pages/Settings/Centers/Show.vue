@@ -354,115 +354,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Print & Terms Tab -->
-                    <div v-if="activeTab === 'print'" class="space-y-8">
-                        <!-- Document Titles -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                {{ $t('center_settings.print.document_titles') }}
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.print.quote_title') }}</label>
-                                    <input v-model="form.print.quote_title" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" :placeholder="$t('quotes.title')" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.print.work_order_title') }}</label>
-                                    <input v-model="form.print.work_order_title" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" :placeholder="$t('work_orders.title')" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.print.invoice_title') }}</label>
-                                    <input v-model="form.print.invoice_title" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" :placeholder="$t('invoices.title')" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="border-gray-200 dark:border-gray-700" />
-
-                        <!-- Terms & Conditions -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                {{ $t('center_settings.print.terms_and_conditions') }}
-                            </h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.print.quote_terms') }}</label>
-                                    <textarea v-model="form.print.quote_terms" rows="3" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" :placeholder="$t('center_settings.print.terms_placeholder')"></textarea>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.print.work_order_terms') }}</label>
-                                    <textarea v-model="form.print.work_order_terms" rows="3" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" :placeholder="$t('center_settings.print.terms_placeholder')"></textarea>
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.print.invoice_terms') }}</label>
-                                    <textarea v-model="form.print.invoice_terms" rows="3" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" :placeholder="$t('center_settings.print.terms_placeholder')"></textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="border-gray-200 dark:border-gray-700" />
-
-                        <!-- Visual Settings -->
-                        <div class="space-y-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                {{ $t('center_settings.print.visual_preferences') }}
-                            </h3>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="space-y-4">
-                                    <!-- Toggles -->
-                                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('center_settings.print.show_logo') }}</span>
-                                        <label class="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" v-model="form.print.settings.show_logo" class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                        </label>
-                                    </div>
-                                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('center_settings.print.show_stamp') }}</span>
-                                        <label class="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" v-model="form.print.settings.show_stamp" class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                        </label>
-                                    </div>
-                                    <div class="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('center_settings.print.show_qr_code') }}</span>
-                                        <label class="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" v-model="form.print.settings.show_qr_code" class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="space-y-4">
-                                    <!-- Primary Color Picker -->
-                                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('center_settings.print.primary_color') }}</label>
-                                        <div class="flex items-center gap-4">
-                                            <input v-model="form.print.settings.primary_color" type="color" class="w-12 h-12 rounded-lg border-0 p-0 overflow-hidden cursor-pointer bg-transparent" />
-                                            <input v-model="form.print.settings.primary_color" type="text" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm" dir="ltr" />
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Footer Text -->
-                                    <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('center_settings.print.footer_text') }}</label>
-                                        <textarea v-model="form.print.settings.footer_text" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm" :placeholder="$t('center_settings.print.footer_placeholder')"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end pt-4">
-                            <button @click="savePrintSettings()" :disabled="saving" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50">
-                                {{ saving ? $t('common.loading') : $t('common.save') }}
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -518,7 +409,6 @@ const tabs = computed(() => [
     { id: 'contact', label: t('center_settings.tabs.contact') },
     { id: 'branding', label: t('center_settings.tabs.branding') },
     { id: 'working_hours', label: t('center_settings.tabs.working_hours') },
-    { id: 'print', label: t('center_settings.tabs.print') },
 ]);
 
 const form = ref({
@@ -550,21 +440,6 @@ const form = ref({
         open_time: wh.open_time?.slice(0, 5) ?? '08:00',
         close_time: wh.close_time?.slice(0, 5) ?? '17:00',
     })) ?? [],
-    print: {
-        quote_title: props.print_settings?.quote_title ?? '',
-        work_order_title: props.print_settings?.work_order_title ?? '',
-        invoice_title: props.print_settings?.invoice_title ?? '',
-        quote_terms: props.print_settings?.quote_terms ?? '',
-        work_order_terms: props.print_settings?.work_order_terms ?? '',
-        invoice_terms: props.print_settings?.invoice_terms ?? '',
-        settings: {
-            show_logo: props.print_settings?.settings?.show_logo ?? true,
-            show_stamp: props.print_settings?.settings?.show_stamp ?? true,
-            show_qr_code: props.print_settings?.settings?.show_qr_code ?? true,
-            primary_color: props.print_settings?.settings?.primary_color ?? '#fbbf24',
-            footer_text: props.print_settings?.settings?.footer_text ?? '',
-        }
-    }
 });
 
 const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
@@ -631,25 +506,6 @@ function saveWorkingHours() {
     router.put(`/app/settings/centers/${props.center.id}`, {
         section: 'working_hours',
         working_hours: form.value.working_hours,
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            success(t('common.saved_success'));
-        },
-        onError: (errors) => {
-            error(Object.values(errors).flat().join('\n'));
-        },
-        onFinish: () => {
-            saving.value = false;
-        },
-    });
-}
-
-function savePrintSettings() {
-    saving.value = true;
-    router.put(`/app/settings/centers/${props.center.id}`, {
-        section: 'print',
-        ...form.value.print,
     }, {
         preserveScroll: true,
         onSuccess: () => {

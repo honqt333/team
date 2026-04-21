@@ -20,8 +20,8 @@
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     </div>
                     <div>
-                        <h1 class="font-black text-gray-900 dark:text-white text-base leading-tight">{{ centerName }}</h1>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('quotes.public.quote_offer') }}</p>
+                        <h1 class="font-black text-gray-900 dark:text-white text-base leading-tight">{{ quote.tenant?.quote_title || centerName }}</h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ quote.tenant?.quote_title ? centerName : t('quotes.public.quote_offer') }}</p>
                     </div>
                 </div>
                 <!-- Quote Code Badge -->
@@ -140,11 +140,11 @@
             </div>
 
             <!-- Notes / Complaint -->
-            <div v-if="quote.customer_complaint || quote.notes" class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm">
+            <div v-if="quote.customer_complaint || quote.notes || quote.tenant?.quote_terms" class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm">
                 <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700/50">
                     <h2 class="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider">{{ t('quotes.public.notes') }}</h2>
                 </div>
-                <div class="p-5 space-y-3">
+                <div class="p-5 space-y-4">
                     <div v-if="quote.customer_complaint">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ t('quotes.form.customer_complaint') }}</p>
                         <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ quote.customer_complaint }}</p>
@@ -152,6 +152,11 @@
                     <div v-if="quote.notes">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ t('quotes.form.notes') }}</p>
                         <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ quote.notes }}</p>
+                    </div>
+                    <!-- Terms & Conditions -->
+                    <div v-if="quote.tenant?.quote_terms" class="pt-4 border-t border-gray-50 dark:border-gray-700/50">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('center_settings.tabs.print') }}</p>
+                        <p class="text-[11px] text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">{{ quote.tenant.quote_terms }}</p>
                     </div>
                 </div>
             </div>

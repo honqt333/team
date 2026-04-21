@@ -74,21 +74,6 @@ class CenterSettingsController extends Controller
                 'open_time' => $wh->open_time,
                 'close_time' => $wh->close_time,
             ]),
-            'print_settings' => [
-                'quote_title' => $center->quote_title,
-                'work_order_title' => $center->work_order_title,
-                'invoice_title' => $center->invoice_title,
-                'quote_terms' => $center->quote_terms,
-                'work_order_terms' => $center->work_order_terms,
-                'invoice_terms' => $center->invoice_terms,
-                'settings' => $center->print_settings ?? [
-                    'show_logo' => true,
-                    'show_stamp' => true,
-                    'show_qr_code' => true,
-                    'primary_color' => '#fbbf24', // amber-400
-                    'footer_text' => '',
-                ],
-            ],
         ]);
     }
 
@@ -113,9 +98,6 @@ class CenterSettingsController extends Controller
                 break;
             case 'working_hours':
                 $this->updateWorkingHours($request, $center);
-                break;
-            case 'print':
-                $this->updatePrintSettings($request, $center);
                 break;
             default:
                 return back()->withErrors(['section' => 'Invalid section']);
@@ -216,34 +198,6 @@ class CenterSettingsController extends Controller
                 ]
             );
         }
-    }
-
-    private function updatePrintSettings(Request $request, Center $center): void
-    {
-        $validated = $request->validate([
-            'quote_title' => 'nullable|string|max:255',
-            'work_order_title' => 'nullable|string|max:255',
-            'invoice_title' => 'nullable|string|max:255',
-            'quote_terms' => 'nullable|string',
-            'work_order_terms' => 'nullable|string',
-            'invoice_terms' => 'nullable|string',
-            'settings' => 'nullable|array',
-            'settings.show_logo' => 'nullable|boolean',
-            'settings.show_stamp' => 'nullable|boolean',
-            'settings.show_qr_code' => 'nullable|boolean',
-            'settings.primary_color' => 'nullable|string|max:7',
-            'settings.footer_text' => 'nullable|string',
-        ]);
-
-        $center->update([
-            'quote_title' => $validated['quote_title'],
-            'work_order_title' => $validated['work_order_title'],
-            'invoice_title' => $validated['invoice_title'],
-            'quote_terms' => $validated['quote_terms'],
-            'work_order_terms' => $validated['work_order_terms'],
-            'invoice_terms' => $validated['invoice_terms'],
-            'print_settings' => $validated['settings'],
-        ]);
     }
 
     /**

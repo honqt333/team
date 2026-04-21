@@ -34,6 +34,16 @@ class Tenant extends Model
         'two_factor_enabled',
         'two_factor_enforcement',
         'sms_2fa_enabled',
+        // Document Titles
+        'quote_title',
+        'work_order_title',
+        'invoice_title',
+        // Terms & Conditions
+        'quote_terms',
+        'work_order_terms',
+        'invoice_terms',
+        // Visual Print Settings
+        'print_settings',
     ];
     
     protected function casts(): array
@@ -43,6 +53,7 @@ class Tenant extends Model
             'suspended_at' => 'datetime',
             'two_factor_enabled' => 'boolean',
             'sms_2fa_enabled' => 'boolean',
+            'print_settings' => 'array',
         ];
     }
 
