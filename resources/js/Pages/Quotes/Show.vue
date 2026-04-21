@@ -32,7 +32,7 @@
                     </button>
 
                     <!-- Edit Quote -->
-                    <button v-if="quote.status !== 'converted' && quote.status !== 'rejected'" @click="openEditModal"
+                    <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="openEditModal"
                         class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-all shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -51,7 +51,7 @@
                     </button>
                     
                     <!-- Delete (Conditional) -->
-                    <button v-if="quote.status !== 'converted'" @click="deleteQuote"
+                    <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="deleteQuote"
                         class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
