@@ -432,6 +432,7 @@ class QuoteController extends Controller
         $this->authorize('view', $quote);
 
         $quote->load([
+            'center',
             'customer',
             'vehicle.make',
             'vehicle.customer',

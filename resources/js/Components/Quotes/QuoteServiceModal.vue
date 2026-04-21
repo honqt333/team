@@ -66,7 +66,7 @@
                     {{ $t('quotes.service_modal.description') }}
                 </label>
                 <textarea v-model="form.description" rows="3"
-                    :disabled="quote.status === 'converted'"
+                    :disabled="isReadOnly"
                     class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:text-gray-500"
                     :placeholder="$t('quotes.service_modal.description_placeholder')"></textarea>
             </div>
@@ -90,9 +90,9 @@
                 <div class="relative">
                     <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
                         @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                        :disabled="isPriceLocked || quote.status === 'converted'" :class="[
+                        :disabled="isPriceLocked || isReadOnly" :class="[
                             'w-full py-3 pl-4 pr-16 border rounded-xl font-mono text-right focus:ring-2 focus:border-blue-500',
-                            (isPriceLocked || quote.status === 'converted')
+                            (isPriceLocked || isReadOnly)
                                 ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                                 : isPriceBelowMinimum
                                     ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
@@ -121,35 +121,17 @@
                     </label>
                     <div class="flex items-center gap-2">
                         <button type="button" 
-                            :disabled="quote.status === 'converted'"
-                            @click="form.discount_type = 'none'" :class="[
-                            'px-3 py-1 text-sm rounded-lg transition-colors',
-                            form.discount_type === 'none'
-                                ? 'bg-gray-600 text-white'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
-                            quote.status === 'converted' ? 'cursor-not-allowed opacity-50' : ''
+                            isReadOnly ? 'cursor-not-allowed opacity-50' : ''
                         ]">
                             {{ $t('quotes.service_modal.no_discount') }}
                         </button>
                         <button type="button" 
-                            :disabled="quote.status === 'converted'"
-                            @click="form.discount_type = 'fixed'" :class="[
-                            'px-3 py-1 text-sm rounded-lg transition-colors',
-                            form.discount_type === 'fixed'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
-                            quote.status === 'converted' ? 'cursor-not-allowed opacity-50' : ''
+                            isReadOnly ? 'cursor-not-allowed opacity-50' : ''
                         ]">
                             {{ $t('quotes.service_modal.fixed') }}
                         </button>
                         <button type="button" 
-                            :disabled="quote.status === 'converted'"
-                            @click="form.discount_type = 'percentage'" :class="[
-                            'px-3 py-1 text-sm rounded-lg transition-colors',
-                            form.discount_type === 'percentage'
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400',
-                            quote.status === 'converted' ? 'cursor-not-allowed opacity-50' : ''
+                            isReadOnly ? 'cursor-not-allowed opacity-50' : ''
                         ]">
                             %
                         </button>
@@ -162,11 +144,11 @@
                         {{ $t('quotes.service_modal.discount_value') }}
                     </label>
                     <input type="text" inputmode="decimal" v-model="form.discount_value" dir="ltr"
-                        :disabled="quote.status === 'converted'"
+                        :disabled="isReadOnly"
                         @input="form.discount_value = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
                         :class="[
                         'w-full px-4 py-3 border rounded-xl font-mono text-end focus:ring-2',
-                        quote.status === 'converted'
+                        isReadOnly
                             ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                             : isPriceBelowMinimum
                                 ? 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20 focus:ring-red-500 focus:border-red-500'
@@ -237,7 +219,7 @@
                 <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {{ $t('quotes.show.tabs.linked_parts') }}
                 </h4>
-                <button v-if="quote.status !== 'converted'" type="button" @click="openPartModal()"
+                <button v-if="!isReadOnly" type="button" @click="openPartModal()"
                     class="px-3 py-1.5 text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -247,7 +229,7 @@
             </div>
 
             <!-- Parts Display Component -->
-            <PartsDisplay :parts="allParts" :read-only="quote.status === 'converted'" :show-vat="quote.is_taxed" :show-service="false"
+            <PartsDisplay :parts="allParts" :read-only="isReadOnly" :show-vat="quote.is_taxed" :show-service="false"
                 :compact-grid="true" :pending-check="part => !part.id" storage-key="quote_service_modal_parts_view"
                 :empty-message="$t('work_orders.item.no_parts')" :add-button-text="$t('work_orders.item.add_part')"
                 @edit="handlePartEdit" @delete="handlePartDelete" @add="openPartModal()" />
@@ -271,9 +253,9 @@
         <template #footer>
             <button type="button" @click="$emit('close')"
                 class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                {{ quote.status === 'converted' ? $t('common.close') : $t('common.cancel') }}
+                {{ isReadOnly ? $t('common.close') : $t('common.cancel') }}
             </button>
-            <button v-if="quote.status !== 'converted'" type="button" @click="submitForm"
+            <button v-if="!isReadOnly" type="button" @click="submitForm"
                 :disabled="form.processing || isPriceBelowMinimum"
                 class="px-6 py-2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 transition-all">
                 {{ form.processing ? $t('common.loading') : $t('common.save') }}
@@ -328,6 +310,10 @@ const form = useForm({
 });
 
 // Computed
+const isReadOnly = computed(() => {
+    return ['approved', 'rejected', 'converted'].includes(props.quote.status);
+});
+
 const calculatedTotal = computed(() => {
     const price = parseFloat(form.unit_price) || 0;
     const qty = 1; // Always 1

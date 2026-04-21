@@ -7,7 +7,7 @@
         "hour": "ساعة",
         "day": "يوم",
         "none": "لا يوجد",
-        "our_center": "المركز",
+        "our_center": "مركزنا",
         "fixed_amount": "مبلغ ثابت",
         "percentage": "نسبة مئوية",
         "center": "المركز",
@@ -1088,7 +1088,7 @@
             "copy_link": "نسخ الرابط",
             "more_options": "خيارات إضافية",
             "system_menu": "استخدام قائمة النظام للمشاركة",
-            "whatsapp_message": "السلام عليكم، تفضل عرض السعر الخاص بك رقم {code} من مركز {center}. يمكنك الاطلاع عليه هنا: {url}",
+            "whatsapp_message": "السلام عليكم، تفضل عرض السعر الخاص بك رقم {code} من {center}. يمكنك الاطلاع عليه هنا: {url}",
             "system_share_text": "عرض سعر من {center}",
             "share_title": "مشاركة التقييم {code}"
         },
