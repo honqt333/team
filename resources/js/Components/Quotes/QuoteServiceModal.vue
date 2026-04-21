@@ -121,18 +121,36 @@
                     </label>
                     <div class="flex items-center gap-2">
                         <button type="button" 
-                            isReadOnly ? 'cursor-not-allowed opacity-50' : ''
-                        ]">
+                            @click="form.discount_type = 'none'"
+                            :class="[
+                                'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
+                                form.discount_type === 'none'
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                isReadOnly ? 'cursor-not-allowed opacity-50' : ''
+                            ]">
                             {{ $t('quotes.service_modal.no_discount') }}
                         </button>
                         <button type="button" 
-                            isReadOnly ? 'cursor-not-allowed opacity-50' : ''
-                        ]">
+                            @click="form.discount_type = 'fixed'"
+                            :class="[
+                                'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
+                                form.discount_type === 'fixed'
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                isReadOnly ? 'cursor-not-allowed opacity-50' : ''
+                            ]">
                             {{ $t('quotes.service_modal.fixed') }}
                         </button>
                         <button type="button" 
-                            isReadOnly ? 'cursor-not-allowed opacity-50' : ''
-                        ]">
+                            @click="form.discount_type = 'percentage'"
+                            :class="[
+                                'px-3 py-1.5 text-xs font-medium rounded-lg border transition-all',
+                                form.discount_type === 'percentage'
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+                                isReadOnly ? 'cursor-not-allowed opacity-50' : ''
+                            ]">
                             %
                         </button>
                     </div>
