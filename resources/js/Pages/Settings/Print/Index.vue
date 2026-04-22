@@ -72,7 +72,7 @@
                                         <button @click="openEditModal(key)" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline text-start">
                                             {{ doc.name }}
                                         </button>
-                                        <button @click="openEditModal(key)" class="text-[10px] text-gray-400 hover:text-amber-500 transition-colors text-start">
+                                        <button @click="openTermsList(key)" class="text-[10px] text-gray-400 hover:text-amber-500 transition-colors text-start">
                                             {{ $t('print_settings.terms_and_conditions') }}
                                         </button>
                                     </div>
@@ -170,6 +170,15 @@
             @close="editingDoc = null"
             @save="handleDocSave"
         />
+
+        <!-- Terms List Modal -->
+        <TermsListModal 
+            v-if="editingTermsDoc" 
+            :show="true" 
+            :document="form.documents[editingTermsDoc]" 
+            @close="editingTermsDoc = null"
+            @save="handleDocSave"
+        />
     </AppLayout>
 </template>
 
@@ -180,6 +189,7 @@ import { Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useToast } from '@/Composables/useToast';
 import TermsModal from './Modals/TermsModal.vue';
+import TermsListModal from './Modals/TermsListModal.vue';
 
 const { t } = useI18n();
 const { success } = useToast();
@@ -201,13 +211,22 @@ const form = useForm({
 });
 
 const editingDoc = ref(null);
+const editingTermsDoc = ref(null);
 
 function openEditModal(key) {
     editingDoc.value = key;
 }
 
+function openTermsList(key) {
+    editingTermsDoc.value = key;
+}
+
 function handleDocSave(newDoc) {
-    form.documents[editingDoc.value] = { ...newDoc };
+    if (editingDoc.value) {
+        form.documents[editingDoc.value] = { ...newDoc };
+    } else if (editingTermsDoc.value) {
+        form.documents[editingTermsDoc.value] = { ...newDoc };
+    }
 }
 
 function save() {

@@ -186,6 +186,14 @@
             "show_stamp": "Stamp",
             "show_iban": "IBAN",
             "updated_at": "Updated By"
-        }
+        },
+        "name_ar": "Name (Arabic)",
+        "name_en": "Name (English)",
+        "signatures": "Signatures",
+        "add_signature": "Add Signature",
+        "signature_name": "Signature Name",
+        "order_by": "Order By",
+        "value": "Value",
+        "show": "Show"
     }
 }

@@ -53,12 +53,14 @@ class SystemSettingsController extends Controller
             $existing = $printSettings['documents'][$key] ?? [];
             $documents[$key] = [
                 'name' => $name,
-                'title' => $existing['title'] ?? ($tenant->{"{$key}_title"} ?? $name),
-                'terms' => $existing['terms'] ?? ($tenant->{"{$key}_terms"} ?? ''),
+                'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? ($tenant->{"{$key}_title"} ?? $name)),
+                'title_en' => $existing['title_en'] ?? ($existing['title'] ?? $name),
+                'terms' => is_array($existing['terms'] ?? null) ? $existing['terms'] : [['text_ar' => $existing['terms'] ?? ($tenant->{"{$key}_terms"} ?? ''), 'text_en' => '', 'order' => 1]],
                 'print_terms' => $existing['print_terms'] ?? true,
                 'terms_first_page' => $existing['terms_first_page'] ?? false,
                 'show_stamp' => $existing['show_stamp'] ?? true,
                 'show_iban' => $existing['show_iban'] ?? false,
+                'signatures' => $existing['signatures'] ?? [],
                 'updated_at' => $existing['updated_at'] ?? null,
                 'updated_by' => $existing['updated_by'] ?? null,
             ];
@@ -127,12 +129,12 @@ class SystemSettingsController extends Controller
                         'visual' => $validated['visual'],
                     ],
                     // Keep legacy columns in sync for now if they exist
-                    'quote_title' => $newDocuments['quote']['title'] ?? $tenant->quote_title,
-                    'work_order_title' => $newDocuments['work_order']['title'] ?? $tenant->work_order_title,
-                    'invoice_title' => $newDocuments['invoice']['title'] ?? $tenant->invoice_title,
-                    'quote_terms' => $newDocuments['quote']['terms'] ?? $tenant->quote_terms,
-                    'work_order_terms' => $newDocuments['work_order']['terms'] ?? $tenant->work_order_terms,
-                    'invoice_terms' => $newDocuments['invoice']['terms'] ?? $tenant->invoice_terms,
+                    'quote_title' => $newDocuments['quote']['title_ar'] ?? ($newDocuments['quote']['title'] ?? $tenant->quote_title),
+                    'work_order_title' => $newDocuments['work_order']['title_ar'] ?? ($newDocuments['work_order']['title'] ?? $tenant->work_order_title),
+                    'invoice_title' => $newDocuments['invoice']['title_ar'] ?? ($newDocuments['invoice']['title'] ?? $tenant->invoice_title),
+                    'quote_terms' => is_array($newDocuments['quote']['terms'] ?? null) ? ($newDocuments['quote']['terms'][0]['text_ar'] ?? '') : ($newDocuments['quote']['terms'] ?? $tenant->quote_terms),
+                    'work_order_terms' => is_array($newDocuments['work_order']['terms'] ?? null) ? ($newDocuments['work_order']['terms'][0]['text_ar'] ?? '') : ($newDocuments['work_order']['terms'] ?? $tenant->work_order_terms),
+                    'invoice_terms' => is_array($newDocuments['invoice']['terms'] ?? null) ? ($newDocuments['invoice']['terms'][0]['text_ar'] ?? '') : ($newDocuments['invoice']['terms'] ?? $tenant->invoice_terms),
                 ]);
                 break;
         }

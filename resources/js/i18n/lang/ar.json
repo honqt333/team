@@ -2355,6 +2355,14 @@
             "show_stamp": "الختم",
             "show_iban": "رقم الآيبان",
             "updated_at": "قام بالتحديث"
-        }
+        },
+        "name_ar": "الاسم بالعربية",
+        "name_en": "الاسم بالانجليزية",
+        "signatures": "التوقيع",
+        "add_signature": "إضافة توقيع",
+        "signature_name": "اسم التوقيع",
+        "order_by": "ترتيب حسب",
+        "value": "القيمة (Value)",
+        "show": "إظهار"
     }
 }
