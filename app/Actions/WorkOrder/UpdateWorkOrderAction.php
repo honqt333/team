@@ -74,6 +74,51 @@ class UpdateWorkOrderAction
                 $this->syncPhotos($workOrder, $data['photos']);
             }
 
+            // Sync Odometer to Vehicle History if changed
+            if (isset($data['odometer']) && $data['odometer'] !== null) {
+                $vehicle = \App\Models\Vehicle::find($workOrder->vehicle_id);
+                if ($vehicle) {
+                    $shouldUpdate = true;
+                    // If new odometer is lower than vehicle's CURRENT odometer (not the one in work order), only update if explicitly allowed
+                    if ($vehicle->odometer && $data['odometer'] < $vehicle->odometer && $data['odometer'] != $workOrder->odometer) {
+                        if (!isset($data['allow_lower_odometer']) || !$data['allow_lower_odometer']) {
+                            $shouldUpdate = false;
+                        }
+                    }
+
+                    if ($shouldUpdate) {
+                        $existingLog = \App\Models\VehicleMileageLog::where('reference_type', WorkOrder::class)
+                            ->where('reference_id', $workOrder->id)
+                            ->first();
+
+                        if ($existingLog) {
+                            if ($existingLog->mileage != $data['odometer']) {
+                                $existingLog->update([
+                                    'mileage' => $data['odometer'],
+                                    'difference' => $data['odometer'] - ($existingLog->previous_mileage ?? 0),
+                                ]);
+                                $vehicle->update(['odometer' => $data['odometer']]);
+                            }
+                        } else {
+                            \App\Models\VehicleMileageLog::create([
+                                'vehicle_id' => $vehicle->id,
+                                'tenant_id' => $user->tenant_id,
+                                'center_id' => $user->current_center_id,
+                                'reference_type' => WorkOrder::class,
+                                'reference_id' => $workOrder->id,
+                                'mileage' => $data['odometer'],
+                                'previous_mileage' => $vehicle->odometer,
+                                'difference' => $data['odometer'] - ($vehicle->odometer ?? 0),
+                                'created_by' => $user->id,
+                                'reference_code' => $workOrder->code,
+                                'recorded_at' => now(),
+                            ]);
+                            $vehicle->update(['odometer' => $data['odometer']]);
+                        }
+                    }
+                }
+            }
+
             return $workOrder;
         });
     }

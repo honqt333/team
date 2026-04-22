@@ -66,6 +66,7 @@ class WorkOrderStoreRequest extends FormRequest
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
             'odometer' => ['nullable', 'integer', 'min:0'],
+            'allow_lower_odometer' => ['nullable', 'boolean'],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:20'],
             'entry_date' => ['nullable', 'date'],

@@ -92,10 +92,10 @@
             <!-- Top Section: Financial Summary & Customer Info -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- 1. Right Card: Vehicle & Customer Info -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full">
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 flex flex-col h-full">
                     <!-- Gray Header: Plate + Model + Color -->
                     <Link :href="route('vehicles.show', workOrder.vehicle?.id || 1)"
-                        class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/60 border-b border-gray-100 dark:border-gray-700 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors group">
+                        class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/60 border-b border-gray-100 dark:border-gray-700 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors group rounded-t-2xl">
                         <!-- Spacer -->
                         <div class="w-8"></div>
                         <!-- Center: Plate + Model -->
@@ -143,36 +143,58 @@
                         <!-- Customer info (right side) -->
                         <div class="flex-1 flex flex-col gap-2.5 items-end">
                             <!-- Customer Name -->
-                            <Link :href="route('customers.show', workOrder.customer?.id || 1)"
-                                class="flex items-center gap-2 text-base font-bold text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                <span>{{ workOrder.customer?.name }}</span>
-                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                                </svg>
-                            </Link>
+                            <div class="relative group/customer">
+                                <Link :href="route('customers.show', workOrder.customer?.id || 1)"
+                                    class="flex items-center justify-end gap-2 text-base font-bold text-gray-800 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                    <span>{{ workOrder.customer?.name }}</span>
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
+                                </Link>
+                                <div class="absolute bottom-full right-0 mb-2 hidden group-hover/customer:block z-50 pointer-events-none">
+                                    <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                                        {{ $t('customers.view_profile') || 'عرض ملف العميل' }}
+                                    </div>
+                                    <div class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1"></div>
+                                </div>
+                            </div>
 
                             <!-- Contact Name (if exists) -->
-                            <div v-if="workOrder.contact_name" class="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                            <div v-if="workOrder.contact_name" class="relative group/contact flex items-center justify-end gap-1.5 text-xs text-gray-500 font-medium">
                                 <span>{{ workOrder.contact_name }}</span>
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                                 </svg>
+                                <div class="absolute bottom-full right-0 mb-2 hidden group-hover/contact:block z-50 pointer-events-none">
+                                    <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                                        {{ $t('work_orders.form.contact_name') || 'اسم جهة الاتصال' }}
+                                    </div>
+                                    <div class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1"></div>
+                                </div>
                             </div>
 
                             <!-- WhatsApp Only -->
-                            <a :href="`https://wa.me/${(workOrder.contact_phone || workOrder.customer?.phone)?.replace(/\+/g, '').replace(/\s/g, '')}`"
-                                target="_blank"
-                                class="flex items-center gap-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors">
-                                <span class="text-sm font-mono font-semibold" dir="ltr">{{ workOrder.contact_phone || workOrder.customer?.phone }}</span>
-                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                                </svg>
-                            </a>
+                            <div class="relative group/whatsapp">
+                                <a :href="`https://wa.me/${(workOrder.contact_phone || workOrder.customer?.phone)?.replace(/\+/g, '').replace(/\s/g, '')}`"
+                                    target="_blank"
+                                    class="flex items-center justify-end gap-2 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors">
+                                    <span class="text-sm font-mono font-semibold" dir="ltr">{{ workOrder.contact_phone || workOrder.customer?.phone }}</span>
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                                    </svg>
+                                </a>
+                                <div class="absolute bottom-full right-0 mb-2 hidden group-hover/whatsapp:block z-50 pointer-events-none">
+                                    <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
+                                        {{ $t('common.open_in_whatsapp') || 'فتح باستخدام الواتساب' }}
+                                    </div>
+                                    <div class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Bottom: VIN + Odometer -->
-                    <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+                    <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 rounded-b-2xl">
                         <!-- VIN -->
                         <div class="relative group/vin">
                             <span class="text-xs font-mono text-gray-500 dark:text-gray-400 cursor-default">
@@ -190,8 +212,8 @@
                             <svg class="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                             </svg>
-                            <span class="text-sm font-bold text-teal-600 dark:text-teal-400 font-mono cursor-default">
-                                {{ workOrder.mileage ? Number(workOrder.mileage).toLocaleString() + ' كم' : '—' }}
+                            <span class="text-sm font-bold text-teal-600 dark:text-teal-400 font-mono cursor-default" dir="ltr">
+                                {{ workOrder.odometer ? Number(workOrder.odometer).toLocaleString() + ' km' : '—' }}
                             </span>
                             <div class="absolute bottom-full right-0 mb-2 hidden group-hover/odo:block z-50 pointer-events-none">
                                 <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
@@ -274,7 +296,7 @@
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <!-- Info Cards -->
                 <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <!-- Entry Date -->
                         <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3">
                             <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('work_orders.form.entry_date') }}</p>
@@ -309,16 +331,6 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                                 {{ durationInfo.text }}
-                            </p>
-                        </div>
-                        <!-- Mileage -->
-                        <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('work_orders.form.mileage') }}</p>
-                            <p class="font-medium text-gray-900 dark:text-white flex items-center gap-2">
-                                <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                                </svg>
-                                {{ workOrder.mileage ? formatNumber(workOrder.mileage) + ' km' : '-' }}
                             </p>
                         </div>
                     </div>
@@ -594,7 +606,8 @@
                             :empty-message="$t('work_orders.show.no_parts')"
                             :add-button-text="$t('inventory.parts.add_to_wo')"
                             @delete="deleteWorkOrderPart"
-                            @add="showAddPartModal = true"
+                            @edit="editWorkOrderPart"
+                            @add="openAddPartModal"
                         />
                     </div>
 
@@ -720,35 +733,30 @@
             @saved="handleSaved"
         />
 
-        <!-- Item Edit Modal (comprehensive with tabs) -->
-        <WorkOrderItemModal
-            v-if="showItemModal"
-            :show="showItemModal"
+        <!-- Item Edit/Add Modal (unified) -->
+        <WorkOrderServiceModal
+            v-if="showItemModal || showServiceModal"
+            :show="showItemModal || showServiceModal"
             :work-order="workOrder"
             :item="selectedItem"
-            :technicians="technicians"
-            @close="closeItemModal"
-            @saved="handleItemSaved"
-        />
-
-        <!-- Service Add Modal (simple add) -->
-        <WorkOrderServiceModal
-            v-if="showServiceModal && !selectedItem"
-            :show="showServiceModal"
-            :work-order="workOrder"
-            :item="null"
             :department-id="selectedDepartmentId"
-            :services="departmentServices"
-            @close="closeServiceModal"
-            @saved="handleServiceSaved"
+            :services="services"
+            :technicians="technicians"
+            :inventory-units="inventoryUnits"
+            @close="showItemModal ? closeItemModal() : closeServiceModal()"
+            @saved="showItemModal ? handleItemSaved() : handleServiceSaved()"
         />
 
         <!-- Add Part Modal -->
-        <AddPartModal
-            v-model="showAddPartModal"
-            :work-order-id="workOrder.id"
+        <WorkOrderPartModal
+            :show="showAddPartModal"
+            :workOrder="workOrder"
+            :part="selectedPartToEdit"
+            :units="inventoryUnits"
             :warehouses="warehouses"
-            :parts="inventoryParts"
+            :show-service-select="true"
+            :workOrderItems="workOrder.items"
+            @close="closeAddPartModal"
             @saved="handlePartSaved"
         />
 
@@ -786,8 +794,7 @@ import { useConfirm } from '@/Composables/useConfirm';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import WorkOrderServiceModal from '@/Components/WorkOrders/WorkOrderServiceModal.vue';
-import WorkOrderItemModal from '@/Components/WorkOrders/WorkOrderItemModal.vue';
-import AddPartModal from '@/Components/Inventory/AddPartModal.vue';
+import WorkOrderPartModal from '@/Components/WorkOrders/WorkOrderPartModal.vue';
 import PrintOptionsModal from '@/Components/WorkOrders/PrintOptionsModal.vue';
 import PaymentsSection from '@/Components/WorkOrders/PaymentsSection.vue';
 import TechniciansSection from '@/Components/WorkOrders/TechniciansSection.vue';
@@ -809,6 +816,7 @@ const props = defineProps({
     technicians: { type: Array, default: () => [] },
     warehouses: { type: Array, default: () => [] },
     inventoryParts: { type: Array, default: () => [] },
+    inventoryUnits: { type: Array, default: () => [] },
 });
 
 const { t } = useI18n();
@@ -819,18 +827,26 @@ const { confirm } = useConfirm();
 
 function getColorHex(colorName) {
     if (!colorName) return '#9ca3af';
-    const trimmedColor = colorName.trim();
+    const trimmedColor = String(colorName).trim();
     if (props.colors && props.colors.length > 0) {
+        const searchColor = trimmedColor.toLowerCase();
         const found = props.colors.find(c =>
-            c.name_ar === trimmedColor ||
-            c.name_en === trimmedColor ||
-            c.hex === trimmedColor
+            (c.name_ar && c.name_ar.toLowerCase() === searchColor) ||
+            (c.name_en && c.name_en.toLowerCase() === searchColor) ||
+            (c.hex_code && c.hex_code.toLowerCase() === searchColor)
         );
-        if (found && found.hex) {
-            return found.hex;
-        }
+        if (found && found.hex_code) return found.hex_code;
     }
-    return '#9ca3af';
+
+    const colorMap = {
+        'أبيض': '#ffffff', 'أسود': '#111827', 'فضي': '#9ca3af', 'رمادي': '#4b5563',
+        'أحمر': '#dc2626', 'أزرق': '#2563eb', 'أخضر': '#16a34a', 'ذهبي': '#ca8a04',
+        'بني': '#78350f', 'برتقالي': '#ea580c',
+        'white': '#ffffff', 'black': '#111827', 'silver': '#9ca3af', 'gray': '#4b5563',
+        'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a', 'gold': '#ca8a04',
+        'brown': '#78350f', 'orange': '#ea580c',
+    };
+    return colorMap[trimmedColor.toLowerCase()] || colorMap[trimmedColor] || '#9ca3af';
 }
 
 const showEditModal = ref(false);
@@ -840,6 +856,22 @@ const expandedDepartments = ref([]);
 const showAddPartModal = ref(false);
 const showPrintModal = ref(false);
 const showPaymentsListModal = ref(false);
+const selectedPartToEdit = ref(null);
+
+function openAddPartModal() {
+    selectedPartToEdit.value = null;
+    showAddPartModal.value = true;
+}
+
+function editWorkOrderPart(part) {
+    selectedPartToEdit.value = part;
+    showAddPartModal.value = true;
+}
+
+function closeAddPartModal() {
+    showAddPartModal.value = false;
+    selectedPartToEdit.value = null;
+}
 
 // Read-only mode for closed work orders
 const isReadOnly = computed(() => {
@@ -886,15 +918,9 @@ const durationInfo = computed(() => {
     }
 });
 
-// All parts from all work order items
+// All parts from the work order (using the loaded relationship)
 const allWorkOrderParts = computed(() => {
-    const parts = [];
-    props.workOrder.items?.forEach(item => {
-        item.parts?.forEach(part => {
-            parts.push({ ...part, workOrderItemId: item.id });
-        });
-    });
-    return parts;
+    return props.workOrder.parts || [];
 });
 
 // Normalized parts for PartsDisplay component
@@ -957,36 +983,37 @@ const totals = computed(() => {
             t.services.tax += calculatedTax;
             t.services.total += total;
             t.services.amount += amount;
+        });
+    }
 
-            if (line.parts && line.parts.length > 0) {
-                line.parts.forEach(part => {
-                    const partQty = Number(part.qty || 0);
-                    const partUnitPrice = Number(part.unit_price || 0);
-                    const partDiscount = Number(part.discount || 0);
-                    
-                    const partPrice = partQty * partUnitPrice;
-                    const partNet = partPrice - partDiscount;
+    // Parts calculation (using unified parts relationship)
+    if (props.workOrder?.parts && props.workOrder.parts.length > 0) {
+        props.workOrder.parts.forEach(part => {
+            const partQty = Number(part.qty || 0);
+            const partUnitPrice = Number(part.unit_price || 0);
+            const partDiscount = Number(part.discount || 0);
+            
+            const partPrice = partQty * partUnitPrice;
+            const partNet = partPrice - partDiscount;
 
-                    t.parts.price += partPrice;
-                    t.parts.discount += partDiscount;
+            t.parts.price += partPrice;
+            t.parts.discount += partDiscount;
 
-                    let partAmount = partNet;
-                    let partTax = 0;
+            let partAmount = partNet;
+            let partTax = 0;
 
-                    if (taxEnabled) {
-                        if (isInclusive) {
-                            partAmount = partNet / taxFactor;
-                            partTax = partNet - partAmount;
-                        } else {
-                            partTax = partNet * (taxRate / 100);
-                        }
-                    }
-
-                    t.parts.amount += partAmount;
-                    t.parts.tax += partTax;
-                    t.parts.total += partTax + partAmount;
-                });
+            if (taxEnabled) {
+                if (isInclusive) {
+                    partAmount = partNet / taxFactor;
+                    partTax = partNet - partAmount;
+                } else {
+                    partTax = partNet * (taxRate / 100);
+                }
             }
+
+            t.parts.amount += partAmount;
+            t.parts.tax += partTax;
+            t.parts.total += partTax + partAmount;
         });
     }
 
@@ -1070,8 +1097,10 @@ watch(() => props.workOrder.damage_marks, (newVal, oldVal) => {
 const showPaymentModalFromHeader = ref(false);
 
 // Handle part saved
-function handlePartSaved() {
-    showAddPartModal.value = false;
+function handlePartSaved(data, options = {}) {
+    if (options.close !== false) {
+        showAddPartModal.value = false;
+    }
     success(t('common.saved_success'));
     router.reload();
 }

@@ -262,6 +262,7 @@ class WorkOrderController
             'photos', 
             'departments',
             'payments.receivedBy',
+            'parts.part',
         ]);
 
         // Group items by department_id for accordion display
@@ -304,6 +305,11 @@ class WorkOrderController
             ->select('id', 'sku', 'name_ar', 'name_en')
             ->get();
 
+        // Get units for addPartModal
+        $inventoryUnits = \App\Models\InventoryUnit::where('is_active', true)
+            ->select('id', 'name_ar', 'name_en')
+            ->get();
+
         return Inertia::render('WorkOrders/Show', [
             'workOrder' => $workOrder,
             'itemsByDepartment' => $itemsByDepartment,
@@ -316,6 +322,7 @@ class WorkOrderController
             'technicians' => $technicians,
             'warehouses' => $warehouses,
             'inventoryParts' => $inventoryParts,
+            'inventoryUnits' => $inventoryUnits,
         ]);
     }
 
@@ -393,11 +400,26 @@ class WorkOrderController
             'unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
             'discount_value' => 'nullable|numeric|min:0',
+            // Pending parts validation
+            'pending_parts' => ['nullable', 'array'],
+            'pending_parts.*.source' => ['required_with:pending_parts', 'in:warehouse,external,customer'],
+            'pending_parts.*.name' => ['required_with:pending_parts', 'string', 'max:255'],
+            'pending_parts.*.part_id' => ['nullable', 'exists:parts,id'],
+            'pending_parts.*.warehouse_id' => ['nullable', 'exists:warehouses,id'],
+            'pending_parts.*.qty' => ['required_with:pending_parts', 'numeric', 'min:0.01'],
+            'pending_parts.*.unit_price' => ['required_with:pending_parts', 'numeric', 'min:0'],
+            'pending_parts.*.discount' => ['nullable', 'numeric', 'min:0'],
+            // Pending technicians validation
+            'pending_technicians' => ['nullable', 'array'],
+            'pending_technicians.*.user_id' => ['required_with:pending_technicians', 'exists:users,id'],
+            // Pending notes validation
+            'pending_notes' => ['nullable', 'array'],
+            'pending_notes.*.content' => ['required_with:pending_notes', 'string'],
         ]);
 
         $service = \App\Models\Service::find($validated['service_id']);
 
-        $work_order->items()->create([
+        $line = $work_order->items()->create([
             'tenant_id' => $work_order->tenant_id,
             'center_id' => $work_order->center_id,
             'service_id' => $validated['service_id'],
@@ -409,6 +431,53 @@ class WorkOrderController
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
         ]);
+
+        // Save pending parts linked to the new service item
+        if (!empty($request->pending_parts)) {
+            $partsService = app(\App\Services\Inventory\WorkOrderPartsService::class);
+            $allowNegative = auth()->user()->can('inventory.override_negative_stock');
+            foreach ($request->pending_parts as $partData) {
+                $partsService->addPart([
+                    'work_order_id' => $work_order->id,
+                    'work_order_item_id' => $line->id,
+                    'tenant_id' => $work_order->tenant_id,
+                    'center_id' => $work_order->center_id,
+                    'part_id' => $partData['part_id'] ?? null,
+                    'warehouse_id' => $partData['warehouse_id'] ?? null,
+                    'source' => $partData['source'],
+                    'name' => $partData['name'],
+                    'part_number' => $partData['part_number'] ?? null,
+                    'unit_id' => $partData['unit_id'] ?? null,
+                    'notes' => $partData['notes'] ?? null,
+                    'qty' => $partData['qty'],
+                    'unit_price' => $partData['unit_price'],
+                    'discount' => $partData['discount'] ?? 0,
+                    'include_in_package' => $partData['include_in_package'] ?? true,
+                    'hide_on_print' => $partData['hide_on_print'] ?? false,
+                ], $allowNegative);
+            }
+        }
+
+        // Save pending technicians
+        if (!empty($request->pending_technicians)) {
+            foreach ($request->pending_technicians as $tech) {
+                $line->technicians()->attach($tech['user_id'], [
+                    'assigned_at' => now()
+                ]);
+            }
+        }
+
+        // Save pending notes
+        if (!empty($request->pending_notes)) {
+            foreach ($request->pending_notes as $note) {
+                $line->itemNotes()->create([
+                    'tenant_id' => $work_order->tenant_id,
+                    'center_id' => $work_order->center_id,
+                    'content' => $note['content'],
+                    'user_id' => $request->user()->id,
+                ]);
+            }
+        }
 
         return redirect()->back()->with('success', __('messages.service_added'));
     }
@@ -649,18 +718,28 @@ class WorkOrderController
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'part_id' => 'nullable|exists:parts,id',
+            'warehouse_id' => 'nullable|exists:warehouses,id',
             'part_number' => 'nullable|string|max:100',
             'source' => 'required|in:' . implode(',', \App\Models\WorkOrderItemPart::SOURCES),
+            'unit_id' => 'nullable|exists:inventory_units,id',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'include_in_package' => 'boolean',
+            'hide_on_print' => 'boolean',
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $part = $item->parts()->create([
+        $partsService = app(\App\Services\Inventory\WorkOrderPartsService::class);
+        $allowNegative = auth()->user()->can('inventory.override_negative_stock');
+        $part = $partsService->addPart([
+            'work_order_id' => $work_order->id,
+            'work_order_item_id' => $item->id,
             'tenant_id' => $work_order->tenant_id,
             'center_id' => $work_order->center_id,
             ...$validated,
-        ]);
+        ], $allowNegative);
 
         $message = __('messages.part_added');
         return $request->expectsJson()
@@ -677,10 +756,15 @@ class WorkOrderController
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'part_id' => 'nullable|exists:parts,id',
             'part_number' => 'nullable|string|max:100',
             'source' => 'required|in:' . implode(',', \App\Models\WorkOrderItemPart::SOURCES),
+            'unit_id' => 'nullable|exists:inventory_units,id',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'include_in_package' => 'boolean',
+            'hide_on_print' => 'boolean',
             'notes' => 'nullable|string|max:500',
         ]);
 

@@ -189,14 +189,14 @@
         </div>
 
         <!-- Empty State -->
-        <div v-if="parts.length === 0" class="text-center py-20 bg-gray-50/50 dark:bg-gray-900/30 rounded-[3rem] border-2 border-dashed border-gray-100 dark:border-gray-800">
-            <div class="w-20 h-20 mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-xl flex items-center justify-center mb-6 text-gray-300">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+        <div v-if="parts.length === 0" class="flex flex-col items-center justify-center py-10 px-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-[2rem] border-2 border-dashed border-gray-200 dark:border-gray-700 transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50">
+            <div class="w-14 h-14 mb-4 rounded-2xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center text-gray-400 group-hover:text-emerald-500 transition-colors">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
             </div>
-            <p class="text-gray-900 dark:text-white font-black uppercase tracking-widest text-sm mb-2">{{ emptyMessage || $t('quotes.show.no_parts') }}</p>
-            <p class="text-gray-400 text-xs font-bold mb-8 uppercase tracking-widest">{{ $t('quotes.parts_display.empty_hint') || 'ابدأ بإضافة قطع الغيار للتقييم' }}</p>
+            <p class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider mb-1">{{ emptyMessage || $t('quotes.show.no_parts') }}</p>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">{{ $t('quotes.parts_display.empty_hint') || 'ابدأ بإضافة قطع الغيار للتقييم' }}</p>
             <button v-if="!readOnly" @click="$emit('add')"
-                class="inline-flex items-center gap-3 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-xl shadow-emerald-500/20">
+                class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                 {{ addButtonText || $t('quotes.show.add_part') }}
             </button>

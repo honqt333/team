@@ -40,10 +40,14 @@ const props = defineProps({
     compact: {
         type: Boolean,
         default: false,
+    },
+    asyncSearch: {
+        type: Boolean,
+        default: false,
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'change']);
+const emit = defineEmits(['update:modelValue', 'change', 'search']);
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
 
@@ -80,12 +84,20 @@ const getOptionValue = (option) => {
 
 // Filtered options based on search
 const filteredOptions = computed(() => {
+    if (props.asyncSearch) return props.options; // Let parent handle filtering
     if (!searchQuery.value) return props.options;
     const query = searchQuery.value.toLowerCase();
     return props.options.filter(option => {
         const label = String(getOptionLabel(option)).toLowerCase();
         return label.includes(query);
     });
+});
+
+// Emit search event for async mode
+watch(searchQuery, (val) => {
+    if (props.asyncSearch && isOpen.value) {
+        emit('search', val);
+    }
 });
 
 // Selected option object
@@ -109,7 +121,8 @@ const inputValue = computed({
     },
     set(val) {
         searchQuery.value = toEnglish(val);
-        if (!isOpen.value) isOpen.value = true;
+        if (!isOpen.value && !props.asyncSearch) isOpen.value = true;
+        if (props.asyncSearch && val.length > 0) isOpen.value = true;
     }
 });
 
@@ -130,7 +143,11 @@ onUnmounted(() => {
 const openDropdown = () => {
     if (props.disabled) return;
     isOpen.value = true;
-    searchQuery.value = ''; 
+    if (searchQuery.value === '') {
+        if (props.asyncSearch) emit('search', '');
+    } else {
+        searchQuery.value = ''; 
+    }
     highlightedIndex.value = -1;
     nextTick(() => {
         if(inputRef.value) inputRef.value.focus();
@@ -283,14 +300,19 @@ const scrollToHighlighted = () => {
                         {'font-medium': getOptionValue(option) === modelValue}
                     ]"
                 >
-                    <span>{{ getOptionLabel(option) }}</span>
+                    <slot name="option" :option="option">
+                        <span>{{ getOptionLabel(option) }}</span>
+                    </slot>
                     <svg v-if="getOptionValue(option) === modelValue" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </li>
             </ul>
-            <div v-else class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+            <div v-else-if="!asyncSearch || (asyncSearch && searchQuery.length >= 2)" class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                 {{ t('common.no_results') || 'No results found' }}
+            </div>
+            <div v-else class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                {{ t('inventory.parts.search') || 'Type to search...' }}
             </div>
         </div>
         

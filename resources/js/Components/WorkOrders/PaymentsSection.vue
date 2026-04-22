@@ -178,7 +178,7 @@ const filteredPayments = computed(() => {
 });
 
 const formatPrice = (amount) => {
-    return new Intl.NumberFormat(isRtl.value ? 'ar-SA' : 'en-US', {
+    return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount || 0);
@@ -186,12 +186,12 @@ const formatPrice = (amount) => {
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA' : 'en-US');
+    return new Date(date).toLocaleDateString('en-US');
 };
 
 const formatDateTime = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleString(isRtl.value ? 'ar-SA' : 'en-US', {
+    return new Date(date).toLocaleString('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',

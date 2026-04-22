@@ -58,36 +58,29 @@
             <div class="bg-gray-50 dark:bg-gray-900/40 rounded-3xl p-6 space-y-5 border border-gray-100 dark:border-gray-800">
                 
                 <!-- Warehouse Search -->
-                <div v-if="form.source === 'warehouse' && !selectedPart" class="relative" ref="searchWrapper">
+                <div v-if="form.source === 'warehouse' && !selectedPart" class="relative">
                     <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2 ms-1">
                         {{ $t('inventory.parts.search_label') }}
                     </label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-                        <input type="text" v-model="partSearch" @input="debouncedSearch"
-                            :placeholder="$t('inventory.parts.search')"
-                            class="w-full ps-12 pe-4 py-3.5 border-2 border-gray-100 dark:border-gray-700 rounded-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm" />
-                        
-                        <!-- Search Results -->
-                        <transition enter-active-class="transition ease-out duration-200" enter-from-class="opacity-0 scale-95" enter-to-class="opacity-100 scale-100">
-                            <div v-if="searchResults.length > 0"
-                                class="absolute z-30 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-2xl max-h-64 overflow-auto backdrop-blur-xl">
-                                <button v-for="result in searchResults" :key="result.id" type="button"
-                                    @click="selectPart(result)"
-                                    class="w-full px-5 py-3 text-start hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors border-b border-gray-50 dark:border-gray-700 last:border-0 group/item">
-                                    <div class="flex items-center justify-between">
-                                        <div class="font-bold text-gray-900 dark:text-white group-hover/item:text-emerald-600 transition-colors">{{ toEnglish(getName(result)) }}</div>
-                                        <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(result.sku) }}</span>
-                                    </div>
-                                    <div class="text-[10px] text-emerald-600 font-bold mt-0.5">{{ formatCurrency(result.default_sale_price) }}</div>
-                                </button>
+                    <SearchableSelect
+                        v-model="form.part_id"
+                        :options="searchResults"
+                        :async-search="true"
+                        @search="handleAsyncSearch"
+                        @change="handlePartSelectChange"
+                        :placeholder="$t('inventory.parts.search')"
+                        class="w-full"
+                    >
+                        <template #option="{ option }">
+                            <div class="flex items-center justify-between w-full">
+                                <div>
+                                    <div class="font-bold text-gray-900 dark:text-white">{{ toEnglish(getName(option)) }}</div>
+                                    <div class="text-[10px] text-emerald-600 font-bold mt-0.5">{{ formatCurrency(option.default_sale_price) }}</div>
+                                </div>
+                                <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(option.sku || option.barcode || '---') }}</span>
                             </div>
-                        </transition>
-                    </div>
+                        </template>
+                    </SearchableSelect>
                 </div>
 
                 <!-- Selected Part Banner (Small) -->
@@ -394,25 +387,11 @@ const availableStock = computed(() => {
     return selectedPart.value.inventory_balances_sum_qty_on_hand || 0;
 });
 
-// Click outside handler
-const handleClickOutside = (event) => {
-    if (searchWrapper.value && !searchWrapper.value.contains(event.target)) {
-        searchResults.value = [];
-    }
-};
-
-onMounted(() => window.addEventListener('mousedown', handleClickOutside));
-onUnmounted(() => window.removeEventListener('mousedown', handleClickOutside));
-
 // Methods
-const debouncedSearch = debounce(async () => {
-    if (partSearch.value.length < 2) {
-        searchResults.value = [];
-        return;
-    }
+const handleAsyncSearch = debounce(async (query) => {
     try {
         const response = await axios.get(route('app.inventory.parts.search'), {
-            params: { q: partSearch.value }
+            params: { q: query || '' }
         });
         searchResults.value = response.data;
     } catch (e) {
@@ -420,6 +399,13 @@ const debouncedSearch = debounce(async () => {
     }
 }, 300);
 
+const handlePartSelectChange = (partId) => {
+    if (!partId) return;
+    const part = searchResults.value.find(p => p.id === partId);
+    if (part) selectPart(part);
+};
+
+// Methods
 function selectPart(part) {
     selectedPart.value = part;
     form.part_id = part.id;
@@ -438,6 +424,7 @@ function clearPartSelection() {
     form.part_number = '';
     form.unit_price = 0;
     form.unit_id = null;
+    if (form.source === 'warehouse') handleAsyncSearch(''); // Refresh default list
 }
 
 function submitForm() {
@@ -459,6 +446,7 @@ watch(() => form.source, (newSource) => {
     if (isPopulating.value) return; // Skip if we are just loading data
     if (newSource === 'customer') form.unit_price = 0;
     if (newSource !== 'warehouse') clearPartSelection();
+    if (newSource === 'warehouse' && !selectedPart.value) handleAsyncSearch(''); // Pre-fetch
 });
 
 watch(() => form.include_in_package, (isIncluded) => {
@@ -506,6 +494,7 @@ watch([() => props.show, () => props.part], ([isOpen, part]) => {
             form.part_id = null;
             selectedPart.value = null;
             partSearch.value = '';
+            if (form.source === 'warehouse') handleAsyncSearch('');
         }
         
         // Use timeout to ensure reactivity settles before re-enabling watchers

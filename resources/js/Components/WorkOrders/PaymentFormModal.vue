@@ -48,16 +48,14 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('payments.form.method') }} <span class="text-red-500">*</span>
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.payment_method"
-                            class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500"
-                            :class="{ 'border-red-500': errors.payment_method }"
-                        >
-                            <option value="">{{ $t('common.select') }}</option>
-                            <option v-for="method in paymentMethods" :key="method.value" :value="method.value">
-                                {{ method.label }}
-                            </option>
-                        </select>
+                            :options="paymentMethods"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('common.select')"
+                            :class="{ 'border-red-500 rounded-xl': errors.payment_method }"
+                        />
                         <p v-if="errors.payment_method" class="mt-1 text-sm text-red-500">{{ errors.payment_method }}</p>
                     </div>
 
@@ -68,12 +66,12 @@
                         </label>
                         <div class="relative">
                             <input
-                                type="number"
-                                step="0.01"
-                                min="0.01"
+                                type="text"
+                                inputmode="decimal"
                                 v-model="form.amount"
+                                @input="forceEnglishNumbers"
                                 dir="ltr"
-                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-left font-mono"
+                                class="w-full pr-4 pl-14 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 text-left font-mono"
                                 :class="{ 'border-red-500': errors.amount }"
                                 :placeholder="$t('payments.form.amount_placeholder')"
                             />
@@ -168,6 +166,7 @@ import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
@@ -212,6 +211,32 @@ const paymentMethods = computed(() => [
     { value: 'other', label: t('payments.methods.other') },
 ]);
 
+const forceEnglishNumbers = (event) => {
+    let val = event.target.value;
+    if (!val) {
+        form.value.amount = '';
+        return;
+    }
+    
+    // Replace Arabic numerals
+    const arabicNumbers = [/٠/g, /١/g, /٢/g, /٣/g, /٤/g, /٥/g, /٦/g, /٧/g, /٨/g, /٩/g];
+    for (let i = 0; i < 10; i++) {
+        val = val.replace(arabicNumbers[i], i.toString());
+    }
+    
+    // Remove everything except numbers and dots
+    val = val.replace(/[^\d.]/g, '');
+    
+    // Ensure only one decimal point
+    const parts = val.split('.');
+    if (parts.length > 2) {
+        val = parts[0] + '.' + parts.slice(1).join('');
+    }
+    
+    form.value.amount = val;
+    event.target.value = val;
+};
+
 const formatPrice = (amount) => {
     return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
         minimumFractionDigits: 2,
@@ -249,11 +274,11 @@ function validate() {
     errors.value = {};
     
     if (!form.value.payment_method) {
-        errors.value.payment_method = t('validation.required');
+        errors.value.payment_method = t('common.validation.required', { field: t('payments.form.method') });
     }
     
     if (!form.value.amount || parseFloat(form.value.amount) <= 0) {
-        errors.value.amount = t('validation.required');
+        errors.value.amount = t('common.validation.required', { field: t('payments.form.amount') });
     }
 
     if (form.value.type === 'refund' && parseFloat(form.value.amount) > props.totalPaid) {
@@ -261,7 +286,7 @@ function validate() {
     }
     
     if (!form.value.payment_date) {
-        errors.value.payment_date = t('validation.required');
+        errors.value.payment_date = t('common.validation.required', { field: t('payments.form.date') });
     }
     
     return Object.keys(errors.value).length === 0;

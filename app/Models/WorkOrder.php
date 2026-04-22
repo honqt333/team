@@ -141,6 +141,14 @@ class WorkOrder extends Model
         return $this->hasMany(Payment::class)->orderByDesc('payment_date');
     }
 
+    /**
+     * Get all parts associated with this work order (both general and item-linked).
+     */
+    public function parts(): HasMany
+    {
+        return $this->hasMany(WorkOrderItemPart::class);
+    }
+
     // ==================== Payment Helpers ====================
 
     /**

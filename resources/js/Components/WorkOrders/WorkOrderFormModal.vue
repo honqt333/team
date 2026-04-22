@@ -125,170 +125,144 @@
 
                     <!-- Selected Vehicle/Customer Info -->
                     <div v-if="selectedVehicle"
-                        class="relative bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 dark:from-indigo-900/30 dark:via-purple-900/20 dark:to-pink-900/20 rounded-2xl p-5 border border-indigo-300/50 dark:border-indigo-700/50 overflow-hidden">
-                        <!-- Decorative Background -->
-                        <div
-                            class="absolute top-0 end-0 w-32 h-32 bg-gradient-to-br from-indigo-400/20 to-purple-400/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2">
-                        </div>
+                        class="relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
 
-                        <!-- Header -->
-                        <div class="flex items-center gap-3 mb-4">
-                            <div
-                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h4 class="font-semibold text-gray-900 dark:text-white">{{ $t('common.selected') }}</h4>
-                                <p class="text-sm text-indigo-600 dark:text-indigo-400" dir="ltr">
-                                    {{ toEnglish(selectedVehicle.plate_number) }}
-                                </p>
+                        <!-- Header / Plate Section -->
+                        <div class="bg-gray-50 dark:bg-gray-900/50 p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-white dark:bg-gray-800 border-2 border-gray-700 dark:border-gray-500 rounded-md px-3 py-1 flex flex-col items-center justify-center min-w-[100px] shadow-sm">
+                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight" dir="ltr">{{ toEnglish(selectedVehicle.plate_number) }}</span>
+                                    <div class="w-full h-px bg-gray-200 dark:bg-gray-600 my-0.5"></div>
+                                    <span class="text-[8px] font-bold text-gray-400 tracking-widest uppercase">KSA</span>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{{ $t('common.selected') }}</span>
+                                    <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">{{ getVehicleDisplay(selectedVehicle) }}</h4>
+                                </div>
                             </div>
                             <button type="button" @click="clearSelection"
-                                class="ms-auto p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
-                                <svg class="w-5 h-5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12" />
+                                class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
 
                         <!-- Info Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <!-- Customer Name -->
-                            <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{
-                                        $t('quotes.form_tabs.customer_name') }}</label>
+                        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Column 1: Technical Details -->
+                            <div class="space-y-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('vehicles.form.vin') }}</span>
+                                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono">{{ selectedVehicle.vin || '—' }}</span>
+                                    </div>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white truncate">{{
-                                    toEnglish(selectedVehicle.customer?.name) }}</p>
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('vehicles.form.year') }}</span>
+                                            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ toEnglish(selectedVehicle.year) || '—' }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.828 2.828a2 2 0 010 2.828l-8.486 8.486" /></svg>
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('vehicles.form.color') }}</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <span v-if="selectedVehicle.color" class="w-2.5 h-2.5 rounded-full border border-gray-300 dark:border-gray-600" :style="{ backgroundColor: getColorHex(selectedVehicle.color) }"></span>
+                                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ selectedVehicle.color || '—' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- Phone -->
-                            <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                    </svg>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{
-                                        $t('quotes.form_tabs.phone')
-                                        }}</label>
+                            <!-- Column 2: Customer Details -->
+                            <div class="space-y-3 pt-4 sm:pt-0 sm:ps-4 sm:border-s border-gray-100 dark:border-gray-700">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm ring-2 ring-white dark:ring-gray-800">
+                                        {{ selectedVehicle.customer?.name?.[0]?.toUpperCase() || 'C' }}
+                                    </div>
+                                    <div class="flex flex-col min-w-0">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('quotes.form_tabs.customer_name') }}</span>
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white truncate">{{ selectedVehicle.customer?.name }}</span>
+                                    </div>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    toEnglish(selectedVehicle.customer?.phone) }}</p>
-                            </div>
-
-                            <!-- Plate Number -->
-                            <div class="bg-white/60 dark:bg-gray-800/60 rounded-xl p-3 backdrop-blur-sm">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                    </svg>
-                                    <label class="text-xs text-gray-500 dark:text-gray-400">{{
-                                        $t('vehicles.plate_number')
-                                        }}</label>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('quotes.form_tabs.phone') }}</span>
+                                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono" dir="ltr">{{ toEnglish(selectedVehicle.customer?.phone) }}</span>
+                                    </div>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white" dir="ltr">{{
-                                    toEnglish(selectedVehicle.plate_number)
-                                    }}</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Additional Fields: Mileage, Contact, Dates -->
-                    <div v-if="selectedVehicle" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Odometer -->
-                        <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    {{ $t('work_orders.form.odometer') }}
+                    <!-- Odometer (standalone like Quote form) -->
+                    <div v-if="selectedVehicle"
+                        class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {{ $t('work_orders.form.odometer') }}
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <label v-if="selectedVehicle && lastVehicleOdometer > 0" class="flex items-center gap-2 cursor-pointer group">
+                                    <div class="relative">
+                                        <input type="checkbox" v-model="form.allow_lower_odometer" class="sr-only peer" />
+                                        <div class="w-8 h-4 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-indigo-500 transition-all after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"></div>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-gray-500 group-hover:text-indigo-600 transition-colors uppercase tracking-wider">
+                                        {{ $t('quotes.allow_lower_odometer') }}
+                                    </span>
                                 </label>
-                                <div class="flex items-center gap-3">
-                                    <!-- Allow Lower Toggle -->
-                                    <label v-if="selectedVehicle && lastVehicleOdometer > 0" class="flex items-center gap-2 cursor-pointer group">
-                                        <div class="relative">
-                                            <input type="checkbox" v-model="form.allow_lower_odometer" class="sr-only peer" />
-                                            <div class="w-8 h-4 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-checked:bg-indigo-500 transition-all after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4 rtl:peer-checked:after:-translate-x-4"></div>
-                                        </div>
-                                        <span class="text-[10px] font-bold text-gray-500 group-hover:text-indigo-600 transition-colors uppercase tracking-wider">
-                                            {{ $t('quotes.allow_lower_odometer') }}
-                                        </span>
-                                    </label>
-
-                                    <button v-if="selectedVehicle" type="button" @click="showMileageModal = true"
-                                        class="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        {{ $t('vehicles.mileage.history') }}
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="relative">
-                                <input v-model="form.odometer" type="text" inputmode="numeric"
-                                    @input="form.odometer = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
-                                    :placeholder="$t('work_orders.form.odometer_placeholder')"
-                                    class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
-                                <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
-                                </div>
-                            </div>
-
-                            <!-- Odometer Conflict Warning -->
-                            <div v-if="showOdometerWarning"
-                                class="mt-2 flex items-start gap-2 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg border border-red-100 dark:border-red-800/50">
-                                <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                </svg>
-                                <span>{{ $t('vehicles.mileage.lower_warning', { last: toEnglish(lastVehicleOdometer) }) }}</span>
-                            </div>
-
-                            <!-- Hint for last known -->
-                            <div v-else-if="selectedVehicle && lastVehicleOdometer > 0"
-                                class="mt-1.5 px-1 flex items-center gap-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {{ $t('vehicles.mileage.last_recorded') }}: {{ toEnglish(lastVehicleOdometer) }} km
+                                <button type="button" @click="showMileageModal = true"
+                                    class="text-xs text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ $t('vehicles.mileage.history') }}
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Contact Name -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('work_orders.form.contact_name') }}
-                            </label>
-                            <input v-model="form.contact_name" type="text"
-                                :placeholder="$t('work_orders.form.contact_name_placeholder')"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
+                        <div class="relative">
+                            <input v-model="form.odometer" type="text" inputmode="numeric"
+                                @input="form.odometer = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
+                                :placeholder="$t('work_orders.form.odometer_placeholder')"
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                            <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">km</span>
+                            </div>
                         </div>
-
-                        <!-- Contact Phone -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('work_orders.form.contact_phone') }}
-                            </label>
-                            <input v-model="form.contact_phone" type="tel" dir="ltr"
-                                :placeholder="$t('work_orders.form.contact_phone_placeholder')"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
+                        <div v-if="showOdometerWarning"
+                            class="mt-2 flex items-start gap-2 text-[10px] font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg border border-red-100 dark:border-red-800/50">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>{{ $t('vehicles.mileage.lower_warning', { last: toEnglish(lastVehicleOdometer) }) }}</span>
                         </div>
+                        <div v-else-if="selectedVehicle && lastVehicleOdometer > 0"
+                            class="mt-1.5 px-1 flex items-center gap-1.5 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ $t('vehicles.mileage.last_recorded') }}: {{ toEnglish(lastVehicleOdometer) }} km
+                        </div>
+                    </div>
 
+                    <!-- Dates Grid -->
+                    <div v-if="selectedVehicle" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <!-- Entry Date -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -299,7 +273,7 @@
                         </div>
 
                         <!-- Expected End Date -->
-                        <div class="md:col-span-2 md:w-1/2">
+                        <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 {{ $t('work_orders.form.expected_end_date') }}
                             </label>
@@ -396,6 +370,7 @@ import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
+import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
 import VehiclePhotoUploader from '@/Components/WorkOrders/VehiclePhotoUploader.vue';
 import axios from 'axios';
@@ -696,4 +671,38 @@ const showOdometerWarning = computed(() => {
     if (!selectedVehicle.value || !form.odometer || lastVehicleOdometer.value <= 0) return false;
     return Number(form.odometer) < lastVehicleOdometer.value;
 });
+
+function getVehicleDisplay(vehicle) {
+    if (!vehicle) return '';
+    const make = vehicle.make?.name_ar || vehicle.make?.name_en || vehicle.make?.name || vehicle.make_other || '';
+    const model = vehicle.model?.name_ar || vehicle.model?.name_en || vehicle.model?.name || vehicle.model_other || '';
+    return [make, model].filter(Boolean).join(' ');
+}
+
+function getColorHex(colorName) {
+    if (!colorName) return '#9ca3af';
+    const trimmedColor = String(colorName).trim();
+    
+    // 1. Try to find in props.colors from database (Most Accurate)
+    if (props.colors && props.colors.length > 0) {
+        const searchColor = trimmedColor.toLowerCase();
+        const found = props.colors.find(c => 
+            (c.name_ar && c.name_ar.toLowerCase() === searchColor) || 
+            (c.name_en && c.name_en.toLowerCase() === searchColor) || 
+            (c.hex_code && c.hex_code.toLowerCase() === searchColor)
+        );
+        if (found && found.hex_code) return found.hex_code;
+    }
+
+    // 2. Fallback to hardcoded map if not in database
+    const colorMap = {
+        'أبيض': '#ffffff', 'أسود': '#111827', 'فضي': '#9ca3af', 'رمادي': '#4b5563',
+        'أحمر': '#dc2626', 'أزرق': '#2563eb', 'أخضر': '#16a34a', 'ذهبي': '#ca8a04',
+        'بني': '#78350f', 'برتقالي': '#ea580c',
+        'white': '#ffffff', 'black': '#111827', 'silver': '#9ca3af', 'gray': '#4b5563',
+        'red': '#dc2626', 'blue': '#2563eb', 'green': '#16a34a', 'gold': '#ca8a04',
+        'brown': '#78350f', 'orange': '#ea580c',
+    };
+    return colorMap[trimmedColor.toLowerCase()] || colorMap[trimmedColor] || '#9ca3af';
+}
 </script>

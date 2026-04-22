@@ -125,6 +125,7 @@
         "date": "التاريخ",
         "records": "سجل",
         "save_changes": "حفظ التغييرات",
+        "save_and_add_another": "حفظ وإضافة آخر",
         "view_details": "عرض التفاصيل",
         "km": "كم",
         "unit": "الوحدة",
@@ -139,7 +140,8 @@
         "manual_update": "تحديث يدوي",
         "alert": "تنبيه",
         "link_copied": "تم نسخ الرابط بنجاح",
-        "copied": "تم النسخ"
+        "copied": "تم النسخ",
+        "open_in_whatsapp": "فتح باستخدام الواتساب"
     },
     "nav": {
         "brand": "Carag",
@@ -168,6 +170,7 @@
     },
     "customers": {
         "title": "إدارة العملاء",
+        "view_profile": "عرض ملف العميل",
         "add": "إضافة عميل",
         "search": "بحث...",
         "empty": "لا يوجد عملاء حالياً",
@@ -378,6 +381,7 @@
         "total": "الإجمالي",
         "balance": "المتبقي",
         "cost_and_payment": "التكلفة والدفع",
+        "services": "الخدمات",
         "services_total": "الخدمات",
         "parts_total": "قطع الغيار",
         "price": "السعر",

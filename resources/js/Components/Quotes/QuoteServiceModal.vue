@@ -14,30 +14,32 @@
         </template>
 
         <!-- Tabs -->
-        <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
-            <nav class="flex gap-4 -mb-px">
-                <button @click="activeTab = 'service'" :class="[
-                    'pb-2 text-sm font-medium border-b-2 transition-colors',
-                    activeTab === 'service'
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+        <div class="mb-6 p-1.5 bg-gray-100/80 dark:bg-gray-800/80 rounded-2xl flex gap-1.5">
+            <button @click="activeTab = 'service'" :class="[
+                'flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300',
+                activeTab === 'service'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50'
+            ]">
+                {{ $t('quotes.show.tabs.service_info') }}
+            </button>
+            
+            <button @click="activeTab = 'parts'" :class="[
+                'flex-1 py-2.5 px-4 text-sm font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2',
+                activeTab === 'parts'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-200/50 dark:hover:bg-gray-700/50'
+            ]">
+                {{ $t('quotes.show.tabs.linked_parts') }}
+                <span v-if="allParts.length > 0" :class="[
+                    'px-2 py-0.5 text-xs rounded-full transition-colors',
+                    activeTab === 'parts' 
+                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400' 
+                        : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
                 ]">
-                    {{ $t('quotes.show.tabs.service_info') }}
-                </button>
-                <!-- Parts tab always visible -->
-                <button @click="activeTab = 'parts'" :class="[
-                    'pb-2 text-sm font-medium border-b-2 transition-colors',
-                    activeTab === 'parts'
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                ]">
-                    {{ $t('quotes.show.tabs.linked_parts') }}
-                    <span v-if="allParts.length > 0"
-                        class="ms-1 px-1.5 py-0.5 text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 rounded-full">
-                        {{ toEnglish(allParts.length) }}
-                    </span>
-                </button>
-            </nav>
+                    {{ toEnglish(allParts.length) }}
+                </span>
+            </button>
         </div>
 
         <!-- Service Tab -->
@@ -47,14 +49,13 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ $t('quotes.service_modal.service') }}
                 </label>
-                <select v-if="!line" v-model="form.service_id"
-                    class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    required>
-                    <option value="">{{ $t('common.choose') }}</option>
-                    <option v-for="service in services" :key="service.id" :value="service.id">
-                        {{ toEnglish(getName(service)) }}
-                    </option>
-                </select>
+                <SearchableSelect v-if="!line" v-model="form.service_id"
+                    :options="serviceOptions"
+                    option-label="label"
+                    option-value="value"
+                    :placeholder="$t('common.choose')"
+                    class="w-full"
+                />
                 <div v-else class="px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-xl text-gray-900 dark:text-white">
                     {{ toEnglish(getName(line.service)) }}
                 </div>
@@ -77,15 +78,6 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ $t('quotes.service_modal.price') }}
                     </label>
-                    <!-- Lock indicator when price override not allowed -->
-                    <span v-if="isPriceLocked"
-                        class="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                        {{ $t('pricing.price_locked') }}
-                    </span>
                 </div>
                 <div class="relative">
                     <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
@@ -291,6 +283,7 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { router } from '@inertiajs/vue3';
 import { useConfirm } from '@/Composables/useConfirm';
 
@@ -344,6 +337,14 @@ const calculatedTotal = computed(() => {
     }
 
     return Math.max(0, (price - discount) * qty);
+});
+
+// Map services to SearchableSelect options
+const serviceOptions = computed(() => {
+    return (props.services || []).map(s => ({
+        value: s.id,
+        label: toEnglish(getName(s))
+    }));
 });
 
 // Get the currently selected service

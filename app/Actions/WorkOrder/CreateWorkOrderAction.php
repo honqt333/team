@@ -69,6 +69,40 @@ class CreateWorkOrderAction
                 $this->syncPhotos($workOrder, $data['photos']);
             }
 
+            // Sync Odometer to Vehicle History
+            if (isset($data['odometer']) && $data['odometer'] !== null) {
+                $vehicle = \App\Models\Vehicle::find($data['vehicle_id']);
+                if ($vehicle) {
+                    $shouldUpdate = true;
+                    // If new odometer is lower, only update if explicitly allowed
+                    if ($vehicle->odometer && $data['odometer'] < $vehicle->odometer) {
+                        if (!isset($data['allow_lower_odometer']) || !$data['allow_lower_odometer']) {
+                            $shouldUpdate = false;
+                        }
+                    }
+
+                    if ($shouldUpdate) {
+                        // Log history
+                        \App\Models\VehicleMileageLog::create([
+                            'vehicle_id' => $vehicle->id,
+                            'tenant_id' => $user->tenant_id,
+                            'center_id' => $user->current_center_id,
+                            'reference_type' => WorkOrder::class,
+                            'reference_id' => $workOrder->id,
+                            'mileage' => $data['odometer'],
+                            'previous_mileage' => $vehicle->odometer,
+                            'difference' => $data['odometer'] - ($vehicle->odometer ?? 0),
+                            'created_by' => $user->id,
+                            'reference_code' => $workOrder->code,
+                            'recorded_at' => now(),
+                        ]);
+
+                        // Update vehicle odometer
+                        $vehicle->update(['odometer' => $data['odometer']]);
+                    }
+                }
+            }
+
             return $workOrder;
         });
     }
