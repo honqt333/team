@@ -15,7 +15,7 @@
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ document.name }}
+                            {{ $t('print_settings.' + docKey) }}
                         </h3>
                     </div>
                     <button @click="$emit('close')" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
@@ -36,7 +36,7 @@
                                 v-model="localDoc.title_ar" 
                                 type="text" 
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-end"
-                                :placeholder="document.name"
+                                :placeholder="$t('print_settings.' + docKey)"
                             />
                         </div>
                         <div class="space-y-2">
@@ -47,7 +47,7 @@
                                 v-model="localDoc.title_en" 
                                 type="text" 
                                 class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
-                                :placeholder="document.name"
+                                :placeholder="$t('print_settings.' + docKey)"
                             />
                         </div>
                     </div>
@@ -184,7 +184,8 @@ import SignatureModal from './SignatureModal.vue';
 
 const props = defineProps({
     show: Boolean,
-    document: Object
+    document: Object,
+    docKey: String
 });
 
 const emit = defineEmits(['close', 'save']);

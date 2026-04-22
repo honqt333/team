@@ -33,7 +33,13 @@
         "unsaved_changes_message": "You have unsaved changes. Are you sure you want to close?",
         "yes_close": "Yes, Close",
         "customer": "Customer",
-        "vehicle": "Vehicle"
+        "vehicle": "Vehicle",
+        "lang": {
+            "ar": "العربية",
+            "en": "English"
+        },
+        "order": "Order",
+        "processing": "Processing..."
     },
     "quotes": {
         "status": {
@@ -169,6 +175,26 @@
         "quote_terms": "Quote Terms",
         "work_order_terms": "Work Order Terms",
         "invoice_terms": "Invoice Terms",
+        "parts_invoice_title": "Parts Invoice Title",
+        "parts_invoice_terms": "Parts Invoice Terms",
+        "receipt_title": "Receipt Title",
+        "receipt_terms": "Receipt Terms",
+        "payments_title": "Payments Title",
+        "payments_terms": "Payments Terms",
+        "receipt_voucher_title": "Receipt Voucher Title",
+        "receipt_voucher_terms": "Receipt Voucher Terms",
+        "payment_voucher_title": "Payment Voucher Title",
+        "payment_voucher_terms": "Payment Voucher Terms",
+        "bad_debts_title": "Bad Debts Title",
+        "bad_debts_terms": "Bad Debts Terms",
+        "condition_report_title": "Condition Report Title",
+        "condition_report_terms": "Condition Report Terms",
+        "return_invoice_title": "Return Invoice Title",
+        "return_invoice_terms": "Return Invoice Terms",
+        "proforma_invoice_title": "Proforma Invoice Title",
+        "proforma_invoice_terms": "Proforma Invoice Terms",
+        "purchase_invoice_title": "Purchase Invoice Title",
+        "purchase_invoice_terms": "Purchase Invoice Terms",
         "terms_placeholder": "Write terms and conditions here...",
         "visual_preferences": "Visual Preferences",
         "show_logo": "Show Logo",
@@ -194,6 +220,35 @@
         "signature_name": "Signature Name",
         "order_by": "Order By",
         "value": "Value",
-        "show": "Show"
+        "show": "Show",
+        "quote": "Quote",
+        "work_order": "Work Order",
+        "invoice": "Invoice",
+        "parts_invoice": "Parts Invoice",
+        "receipt": "Receipt",
+        "payments": "Payments",
+        "receipt_voucher": "Receipt Voucher",
+        "payment_voucher": "Payment Voucher",
+        "bad_debts": "Bad Debts",
+        "condition_report": "Condition Report",
+        "return_invoice": "Return Invoice",
+        "proforma_invoice": "Proforma Invoice",
+        "purchase_invoice": "Purchase Invoice"
+    },
+    "teaser": {
+        "coming_soon": "Coming Soon",
+        "title": "Something Great is Coming",
+        "subtitle": "The next generation of workshop management is almost here. Stay tuned for the all-new Khidmh Pro.",
+        "notify_me": "Notify Me",
+        "placeholder": "Enter your email",
+        "back_to_login": "Login to Dashboard",
+        "features": {
+            "print": "Advanced Print System",
+            "print_desc": "Complete printing control for invoices, quotes, vouchers, and all documents.",
+            "finance": "Precise Financials",
+            "finance_desc": "Integrated accounting, VAT management, and financial tracking for your workshop.",
+            "speed": "High Performance",
+            "speed_desc": "Optimized for speed and reliability, ensuring a smooth experience at all times."
+        }
     }
 }

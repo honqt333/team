@@ -15,7 +15,7 @@
                             </svg>
                         </div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ $t('print_settings.terms_and_conditions') }} - {{ document.name }}
+                            {{ $t('print_settings.terms_and_conditions') }} - {{ $t('print_settings.' + docKey) }}
                         </h3>
                     </div>
                     <button @click="$emit('close')" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
@@ -54,7 +54,7 @@
                         <table class="w-full text-start border-collapse">
                             <thead class="bg-gray-50/50 dark:bg-gray-800/50">
                                 <tr class="border-b border-gray-100 dark:border-gray-700">
-                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center w-16">#</th>
+                                    <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center w-16">{{ $t('print_settings.columns.id') }}</th>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider">{{ $t('print_settings.terms_and_conditions') }}</th>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center w-40">{{ $t('print_settings.columns.updated_at') }}</th>
                                     <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wider text-center w-24">{{ $t('common.actions') }}</th>
@@ -68,7 +68,7 @@
                                             <p class="text-sm font-bold text-gray-700 dark:text-gray-200 line-clamp-2" :dir="$i18n.locale === 'ar' ? 'rtl' : 'ltr'">
                                                 {{ $i18n.locale === 'ar' ? term.text_ar : (term.text_en || term.text_ar) }}
                                             </p>
-                                            <span class="text-[10px] text-gray-400">Order: {{ term.order }}</span>
+                                            <span class="text-[10px] text-gray-400">{{ $t('print_settings.order_by') }}: {{ term.order }}</span>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
@@ -141,11 +141,15 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import TermEditModal from './TermEditModal.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     show: Boolean,
-    document: Object
+    document: Object,
+    docKey: String
 });
 
 const emit = defineEmits(['close', 'save']);
@@ -203,7 +207,7 @@ function saveTerm(term) {
 }
 
 function deleteTerm(index) {
-    if (confirm('Are you sure?')) {
+    if (confirm(t('common.unsaved_changes_message'))) {
         localTerms.value.splice(index, 1);
     }
 }

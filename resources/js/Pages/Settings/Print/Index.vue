@@ -70,7 +70,7 @@
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
                                         <button @click="openEditModal(key)" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline text-start">
-                                            {{ doc.name }}
+                                            {{ $t('print_settings.' + key) }}
                                         </button>
                                         <button @click="openTermsList(key)" class="text-[10px] text-gray-400 hover:text-amber-500 transition-colors text-start">
                                             {{ $t('print_settings.terms_and_conditions') }}
@@ -167,6 +167,7 @@
             v-if="editingDoc" 
             :show="true" 
             :document="form.documents[editingDoc]" 
+            :doc-key="editingDoc"
             @close="editingDoc = null"
             @save="handleDocSave"
         />
@@ -176,6 +177,7 @@
             v-if="editingTermsDoc" 
             :show="true" 
             :document="form.documents[editingTermsDoc]" 
+            :doc-key="editingTermsDoc"
             @close="editingTermsDoc = null"
             @save="handleDocSave"
         />

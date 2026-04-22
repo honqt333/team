@@ -493,7 +493,7 @@
                         <!-- Language toggle -->
                         <button @click="toggleLocale"
                             class="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            {{ currentLocale === 'ar' ? $t('common.lang.en') : $t('common.lang.ar') }}
+                            {{ currentLocale === 'ar' ? 'English' : 'العربية' }}
                         </button>
 
                         <!-- Theme toggle -->
