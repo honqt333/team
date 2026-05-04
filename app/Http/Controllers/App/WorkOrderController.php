@@ -262,7 +262,7 @@ class WorkOrderController
             'photos', 
             'departments',
             'payments.receivedBy',
-            'parts.part',
+            'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
         ]);
 
         // Group items by department_id for accordion display
@@ -503,6 +503,11 @@ class WorkOrderController
     public function deleteItem(WorkOrder $work_order, \App\Models\WorkOrderItem $item): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $work_order);
+
+        // Rule: Cannot delete item if it has parts or technicians
+        if ($item->parts()->exists() || $item->technicians()->exists()) {
+            return redirect()->back()->with('error', __('messages.cannot_delete_item_has_parts_or_technicians'));
+        }
 
         $item->delete();
 

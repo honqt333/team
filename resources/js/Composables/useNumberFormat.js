@@ -114,6 +114,20 @@ export function useNumberFormat() {
         return formatNumber(value, 0);
     }
 
+    /**
+     * Format quantity/stock (strip trailing zeros).
+     * 
+     * @param {number|string|null|undefined} value - The value to format
+     * @returns {string} Formatted quantity
+     */
+    function formatQuantity(value) {
+        if (value === null || value === undefined || value === '') return '0';
+        const num = typeof value === 'string' ? parseFloat(toEnglish(value)) : value;
+        if (isNaN(num)) return '0';
+        // This naturally strips trailing zeros: 40.000 -> "40", 40.500 -> "40.5"
+        return num.toString();
+    }
+
     return {
         // Conversion functions
         toEnglish,
@@ -123,6 +137,7 @@ export function useNumberFormat() {
         // Formatting functions
         formatNumber,
         formatCurrency,
-        formatInteger
+        formatInteger,
+        formatQuantity
     };
 }

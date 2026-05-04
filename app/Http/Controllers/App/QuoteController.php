@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\QuoteRequest;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\Part;
 use App\Models\Quote;
 use App\Models\QuoteLine;
 use App\Models\QuotePart;
@@ -438,7 +439,7 @@ class QuoteController extends Controller
             'vehicle.customer',
             'vehicle.model',
             'lines.service.department',
-            'parts.part',
+            'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
             'parts.quoteLine',
             'departments',
             'createdByUser',
@@ -753,6 +754,25 @@ class QuoteController extends Controller
             'hide_on_print' => ['boolean'],
         ]);
 
+        // Validate min price if warehouse part
+        if ($validated['source'] === 'warehouse' && !empty($validated['part_id'])) {
+            $part = Part::find($validated['part_id']);
+            if ($part && $part->min_sale_price > 0) {
+                $qty = (float) ($validated['qty'] ?: 1);
+                $unitDiscount = (float) ($validated['discount'] ?? 0) / $qty;
+                $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
+                
+                if ($finalPrice < (float) $part->min_sale_price) {
+                    return redirect()->back()->withErrors([
+                        'unit_price' => __('pricing.final_price_below_minimum', [
+                            'final' => number_format($finalPrice, 2),
+                            'min' => number_format((float) $part->min_sale_price, 2),
+                        ])
+                    ]);
+                }
+            }
+        }
+
         $quote->parts()->create($validated);
 
         $quote->recalculateTotals();
@@ -791,6 +811,28 @@ class QuoteController extends Controller
             'include_in_package' => ['boolean'],
             'hide_on_print' => ['boolean'],
         ]);
+
+        // Validate min price if warehouse part
+        $source = $validated['source'] ?? $quotePart->source;
+        $partId = $validated['part_id'] ?? $quotePart->part_id;
+        if ($source === 'warehouse' && !empty($partId)) {
+            $part = Part::find($partId);
+            if ($part && $part->min_sale_price > 0) {
+                $qty = (float) ($validated['qty'] ?? $quotePart->qty);
+                $unitDiscount = (float) ($validated['discount'] ?? $quotePart->discount) / $qty;
+                $unitPrice = (float) ($validated['unit_price'] ?? $quotePart->unit_price);
+                $finalPrice = $unitPrice - $unitDiscount;
+                
+                if ($finalPrice < (float) $part->min_sale_price) {
+                    return redirect()->back()->withErrors([
+                        'unit_price' => __('pricing.final_price_below_minimum', [
+                            'final' => number_format($finalPrice, 2),
+                            'min' => number_format((float) $part->min_sale_price, 2),
+                        ])
+                    ]);
+                }
+            }
+        }
 
         $quotePart->update($validated);
 

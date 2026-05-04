@@ -14,6 +14,7 @@ return [
     'cannot_put_on_hold' => 'Cannot put work order on hold in this status',
     'cannot_resume' => 'Work order is not on hold',
     'cannot_cancel_has_technicians_or_parts' => 'Cannot cancel work order - has assigned technicians or parts',
+    'cannot_cancel_has_relations' => 'Cannot cancel work order - please delete all services, parts, technicians, and refund any payments first',
     'cannot_complete_items_pending' => 'Cannot complete work order - pending items exist',
     
     // Work Order Items
@@ -41,6 +42,10 @@ return [
     // Notes
     'note_added' => 'Note added successfully',
     'note_deleted' => 'Note deleted successfully',
-
+    // Service Deletion
+    'service_has_quote_lines' => 'Cannot delete service - used in :count quotes',
+    'service_has_work_order_items' => 'Cannot delete service - used in :count work orders',
+    'service_has_quote_lines_with_codes' => 'Cannot delete service - used in quotes: :codes',
+    'service_has_work_order_items_with_codes' => 'Cannot delete service - used in work orders: :codes',
 
 ];

@@ -26,9 +26,9 @@ class QuoteApprovalController extends Controller
             abort(403, 'This quote cannot be approved.');
         }
 
-        // Cannot approve a quote without services
-        if ($quote->lines()->count() === 0) {
-            abort(400, 'Cannot approve a quote without services.');
+        // Cannot approve a quote without services or parts
+        if ($quote->lines()->count() === 0 && $quote->parts()->count() === 0) {
+            abort(400, 'Cannot approve an empty quote.');
         }
 
         // First, mark as approved
@@ -41,7 +41,7 @@ class QuoteApprovalController extends Controller
         // Then convert to work order
         try {
             $workOrder = $this->conversionService->convert($quote, auth()->user());
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Revert approval if conversion fails
             $quote->update([
                 'status' => Quote::STATUS_DRAFT,
@@ -49,7 +49,7 @@ class QuoteApprovalController extends Controller
                 'approved_by' => null,
             ]);
             
-            abort(500, 'Failed to convert quote to work order.');
+            abort(500, 'Failed to convert quote to work order: ' . $e->getMessage());
         }
 
         // Notify quote creator about approval
@@ -80,9 +80,9 @@ class QuoteApprovalController extends Controller
             abort(403, 'This quote cannot be rejected.');
         }
 
-        // Cannot reject a quote without services
-        if ($quote->lines()->count() === 0) {
-            abort(400, 'Cannot reject a quote without services.');
+        // Cannot reject a quote without services or parts
+        if ($quote->lines()->count() === 0 && $quote->parts()->count() === 0) {
+            abort(400, 'Cannot reject an empty quote.');
         }
 
         $quote->update([

@@ -375,9 +375,11 @@
             "description_placeholder": "Enter service description...",
             "qty": "Quantity",
             "price": "Service price",
+            "pricing": "Pricing",
             "discount_method": "How to calculate the discount",
             "no_discount": "Without discount",
             "fixed": "Fixed amount",
+            "discount": "Discount",
             "discount_value": "Discount value",
             "total_cost": "Service cost"
         },
@@ -605,7 +607,9 @@
                 "activities": "Activities",
                 "attachments": "Attachments"
             },
-            "add_service": "Add a service"
+            "add_service": "Add a service",
+            "no_departments_in_center": "No departments or services have been added to this center.",
+            "click_here_to_add": "Click here to add"
         },
         "actions": {
             "start_work": "Start working",
@@ -711,6 +715,7 @@
             "add": "Add Part",
             "edit": "Edit Item",
             "basic_info": "Basic Information",
+            "part_details": "Part details",
             "name": "Name",
             "name_ar": "Name (Arabic)",
             "name_en": "Name (English)",
@@ -817,6 +822,7 @@
             "empty": "There are no credits",
             "insufficient": "The quantity demanded is greater than what is available",
             "insufficient_warning": "Attention: Quantity required is greater than what is available in stock",
+            "insufficient_warning_with_qty": "Attention: Requested quantity ({requested}) is greater than available stock ({available})",
             "available": "Available",
             "total_qty": "Total inventory",
             "avg_cost": "Average cost",

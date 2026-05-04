@@ -79,7 +79,7 @@
                         </div>
                         <div class="p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
                             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('work_orders.item.qty') }}</p>
-                            <p class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">{{ toEnglish(part.qty) }} <span class="text-[10px]">{{ getUnitName(part) }}</span></p>
+                            <p class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">{{ formatQuantity(part.qty) }} <span class="text-[10px]">{{ getUnitName(part) }}</span></p>
                         </div>
                         <div class="p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
                             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('quotes.tax_summary.vat') }}</p>
@@ -118,11 +118,17 @@
 
                 <!-- Actions Overlay -->
                 <div v-if="!readOnly" class="absolute top-12 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
-                    <button @click="$emit('edit', part)" class="p-2.5 bg-white dark:bg-gray-800 shadow-xl rounded-xl text-emerald-600 hover:scale-110 active:scale-95 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    <button @click="$emit('edit', part)" 
+                        :title="part.status === 'issued' ? $t('quotes.parts.issue_more') : $t('common.edit')"
+                        class="p-2.5 bg-white dark:bg-gray-800 shadow-xl rounded-xl text-emerald-600 hover:scale-110 active:scale-95 transition-all">
+                        <svg v-if="part.status === 'issued'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                     </button>
-                    <button @click="$emit('delete', part)" class="p-2.5 bg-white dark:bg-gray-800 shadow-xl rounded-xl text-red-500 hover:scale-110 active:scale-95 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <button @click="$emit('delete', part)" 
+                        :title="part.status === 'issued' ? $t('quotes.parts.return_to_warehouse') : $t('common.delete')"
+                        class="p-2.5 bg-white dark:bg-gray-800 shadow-xl rounded-xl text-red-500 hover:scale-110 active:scale-95 transition-all">
+                        <svg v-if="part.status === 'issued'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" /></svg>
+                        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                     </button>
                 </div>
             </div>
@@ -166,7 +172,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-end font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{{ formatCurrency(part.unit_price) }}</td>
-                            <td class="px-6 py-4 text-center font-mono text-xs font-black text-emerald-600 dark:text-emerald-400">{{ toEnglish(part.qty) }}</td>
+                            <td class="px-6 py-4 text-center font-mono text-xs font-black text-emerald-600 dark:text-emerald-400">{{ formatQuantity(part.qty) }}</td>
                             <td class="px-6 py-4 text-end font-mono text-xs font-bold text-gray-900 dark:text-white">
                                 {{ formatCurrency((part.unit_price * part.qty) - (part.discount || 0)) }}
                             </td>
@@ -178,8 +184,18 @@
                             </td>
                             <td v-if="!readOnly" class="px-6 py-4">
                                 <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button @click="$emit('edit', part)" class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                                    <button @click="$emit('delete', part)" class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                    <button @click="$emit('edit', part)" 
+                                        :title="part.status === 'issued' ? $t('quotes.parts.issue_more') : $t('common.edit')"
+                                        class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors">
+                                        <svg v-if="part.status === 'issued'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                                        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </button>
+                                    <button @click="$emit('delete', part)" 
+                                        :title="part.status === 'issued' ? $t('quotes.parts.return_to_warehouse') : $t('common.delete')"
+                                        class="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                        <svg v-if="part.status === 'issued'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z" /></svg>
+                                        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -223,7 +239,7 @@ const props = defineProps({
 
 const emit = defineEmits(['edit', 'delete', 'add']);
 const { getName } = useLocalized();
-const { formatCurrency, toEnglish } = useNumberFormat();
+const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
 
 // View mode state
 const viewMode = ref('grid');

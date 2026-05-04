@@ -39,8 +39,12 @@ class WorkOrderPartsService
                 'name' => $data['name'],
                 'part_number' => $data['part_number'] ?? null,
                 'source' => $data['source'] ?? WorkOrderItemPart::SOURCE_WAREHOUSE,
+                'unit_id' => $data['unit_id'] ?? null,
                 'qty' => $data['qty'],
                 'unit_price' => $data['unit_price'],
+                'discount' => $data['discount'] ?? 0,
+                'include_in_package' => $data['include_in_package'] ?? false,
+                'hide_on_print' => $data['hide_on_print'] ?? false,
                 'notes' => $data['notes'] ?? null,
                 'status' => WorkOrderItemPart::STATUS_PENDING,
             ]);
@@ -64,11 +68,25 @@ class WorkOrderPartsService
             $newQty = (float) ($data['qty'] ?? $oldQty);
             $delta = $newQty - $oldQty;
 
-            // Update basic fields
+            // If part or warehouse changed, delegate to changePart
+            if (
+                (isset($data['part_id']) && $partLine->part_id != $data['part_id']) ||
+                (isset($data['warehouse_id']) && $partLine->warehouse_id != $data['warehouse_id']) ||
+                (isset($data['source']) && $partLine->source !== $data['source'])
+            ) {
+                return $this->changePart($partLine, $data, $allowNegative);
+            }
+
+            // Update all fields
             $partLine->fill([
+                'work_order_item_id' => array_key_exists('work_order_item_id', $data) ? $data['work_order_item_id'] : $partLine->work_order_item_id,
                 'name' => $data['name'] ?? $partLine->name,
                 'part_number' => $data['part_number'] ?? $partLine->part_number,
                 'unit_price' => $data['unit_price'] ?? $partLine->unit_price,
+                'unit_id' => array_key_exists('unit_id', $data) ? $data['unit_id'] : $partLine->unit_id,
+                'discount' => $data['discount'] ?? $partLine->discount,
+                'include_in_package' => $data['include_in_package'] ?? $partLine->include_in_package,
+                'hide_on_print' => $data['hide_on_print'] ?? $partLine->hide_on_print,
                 'notes' => $data['notes'] ?? $partLine->notes,
             ]);
 
@@ -97,9 +115,17 @@ class WorkOrderPartsService
 
             // Update to new part/warehouse
             $partLine->update([
-                'part_id' => $data['part_id'],
-                'warehouse_id' => $data['warehouse_id'],
+                'part_id' => $data['part_id'] ?? $partLine->part_id,
+                'warehouse_id' => $data['warehouse_id'] ?? $partLine->warehouse_id,
+                'source' => $data['source'] ?? $partLine->source,
+                'work_order_item_id' => array_key_exists('work_order_item_id', $data) ? $data['work_order_item_id'] : $partLine->work_order_item_id,
                 'name' => $data['name'] ?? $partLine->name,
+                'part_number' => $data['part_number'] ?? $partLine->part_number,
+                'unit_id' => array_key_exists('unit_id', $data) ? $data['unit_id'] : $partLine->unit_id,
+                'discount' => $data['discount'] ?? $partLine->discount,
+                'include_in_package' => $data['include_in_package'] ?? $partLine->include_in_package,
+                'hide_on_print' => $data['hide_on_print'] ?? $partLine->hide_on_print,
+                'notes' => $data['notes'] ?? $partLine->notes,
                 'qty' => $data['qty'] ?? $partLine->qty,
                 'unit_price' => $data['unit_price'] ?? $partLine->unit_price,
                 'status' => WorkOrderItemPart::STATUS_PENDING,

@@ -485,12 +485,19 @@
                                                         <div class="flex items-baseline gap-2 mb-1">
                                                             <span class="text-gray-400 font-medium font-mono text-sm leading-none">{{ index + 1 }}.</span>
                                                             <button 
+                                                                v-if="!isReadOnly"
                                                                 @click.stop="openEditServiceModal(item)"
                                                                 type="button"
                                                                 class="font-bold text-gray-900 dark:text-white text-lg hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-tight"
                                                             >
                                                                 {{ item.title || getName(item.service) }}
                                                             </button>
+                                                            <span 
+                                                                v-else
+                                                                class="font-bold text-gray-900 dark:text-white text-lg text-start leading-tight"
+                                                            >
+                                                                {{ item.title || getName(item.service) }}
+                                                            </span>
                                                         </div>
 
                                                         <!-- Meta Row: Price | Technician -->
@@ -531,7 +538,7 @@
                                                         {{ formatDate(item.created_at) }}
                                                     </span>
 
-                                                    <div class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700 ps-3">
+                                                    <div v-if="!isReadOnly" class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700 ps-3">
                                                         <button 
                                                             @click.stop="openEditServiceModal(item)"
                                                             class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
@@ -562,6 +569,7 @@
 
                                     <!-- Add Service Button -->
                                     <button
+                                        v-if="!isReadOnly"
                                         @click="openAddServiceModal(dept.id)"
                                         class="w-full flex items-center justify-center gap-2 py-2 text-sm text-indigo-600 dark:text-indigo-400 border border-dashed border-indigo-300 dark:border-indigo-700 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
                                     >
@@ -579,7 +587,15 @@
                             <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                                 <span class="text-2xl">🔧</span>
                             </div>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.show.no_services') }}</p>
+                            <div v-if="departments.length === 0" class="space-y-1">
+                                <p class="text-gray-500 dark:text-gray-400">
+                                    {{ $t('work_orders.show.no_departments_in_center') }}
+                                </p>
+                                <Link :href="route('services.index')" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+                                    {{ $t('work_orders.show.click_here_to_add') }}
+                                </Link>
+                            </div>
+                            <p v-else class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.show.no_services') }}</p>
                         </div>
                     </div>
 
@@ -743,6 +759,7 @@
             :services="services"
             :technicians="technicians"
             :inventory-units="inventoryUnits"
+            :read-only="isReadOnly"
             @close="showItemModal ? closeItemModal() : closeServiceModal()"
             @saved="showItemModal ? handleItemSaved() : handleServiceSaved()"
         />
@@ -822,7 +839,7 @@ const props = defineProps({
 const { t } = useI18n();
 const { getName } = useLocalized();
 const { formatNumber, formatCurrency } = useNumberFormat();
-const { success } = useToast();
+const { success, error: errorToast } = useToast();
 const { confirm } = useConfirm();
 
 function getColorHex(colorName) {
@@ -923,16 +940,41 @@ const allWorkOrderParts = computed(() => {
     return props.workOrder.parts || [];
 });
 
-// Normalized parts for PartsDisplay component
 const normalizedPartsForDisplay = computed(() => {
-    return allWorkOrderParts.value.map(part => ({
-        ...part,
-        name: part.part?.name_ar || part.part?.name_en || part.name || '',
-        part_number: part.part?.sku || '',
-        source: part.source || 'warehouse',
-        total: (part.qty * part.unit_price) - (part.discount || 0),
-        discount: part.discount || 0,
-    }));
+    const isInclusive = props.workOrder?.pricing_mode_snapshot === 'inclusive';
+    const taxRate = Number(props.workOrder?.tax_rate_snapshot || 15);
+    const taxFactor = 1 + (taxRate / 100);
+    const taxEnabled = !!props.workOrder?.tax_enabled_snapshot;
+
+    return allWorkOrderParts.value.map(part => {
+        const qty = Number(part.qty || 0);
+        const unitPrice = Number(part.unit_price || 0);
+        const discount = Number(part.discount || 0);
+        const net = (qty * unitPrice) - discount;
+        
+        let taxAmount = 0;
+        let amount = net;
+        
+        if (taxEnabled) {
+            if (isInclusive) {
+                amount = net / taxFactor;
+                taxAmount = net - amount;
+            } else {
+                taxAmount = net * (taxRate / 100);
+            }
+        }
+
+        return {
+            ...part,
+            name: part.part?.name_ar || part.part?.name_en || part.name || '',
+            part_number: part.part?.sku || '',
+            source: part.source || 'warehouse',
+            total: net,
+            discount: discount,
+            tax_amount: taxAmount,
+            total_incl_tax: isInclusive ? net : (net + taxAmount)
+        };
+    });
 });
 
 // Payment computed properties
@@ -1102,7 +1144,7 @@ function handlePartSaved(data, options = {}) {
         showAddPartModal.value = false;
     }
     success(t('common.saved_success'));
-    router.reload();
+    router.reload({ only: ['workOrder', 'itemsByDepartment'] });
 }
 
 // Delete photo
@@ -1274,9 +1316,7 @@ async function deleteServiceItem(item) {
 
     if (confirmed) {
         router.delete(route('work-orders.items.destroy', { work_order: props.workOrder.id, item: item.id }), {
-            onSuccess: () => {
-                success(t('common.deleted_success'));
-            },
+            preserveScroll: true
         });
     }
 }
@@ -1384,6 +1424,10 @@ async function changeStatus(newStatus) {
             onSuccess: () => {
                 success(t('common.saved_success'));
             },
+            onError: (err) => {
+                const msg = err.status || Object.values(err)[0] || t('common.error');
+                errorToast(msg);
+            }
         });
     }
 }

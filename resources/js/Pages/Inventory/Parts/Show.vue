@@ -61,7 +61,7 @@
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600">
                         <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $t('inventory.stock.total_qty') || 'إجمالي المخزون' }}</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-white font-mono">
-                            {{ totalStock }} <span class="text-sm text-gray-500 font-normal">{{ part.unit?.name_ar }}</span>
+                            {{ formatQuantity(totalStock) }} <span class="text-sm text-gray-500 font-normal">{{ part.unit?.name_ar }}</span>
                         </div>
                     </div>
                     
@@ -69,7 +69,7 @@
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600">
                         <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $t('inventory.stock.avg_cost') || 'متوسط التكلفة' }}</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-white font-mono">
-                            {{ formatCurrency(avgCost) }}
+                            {{ formatCurrency(avgCost) }} <span class="text-sm text-gray-500 font-normal">{{ $t('common.currency_sar') }}</span>
                         </div>
                     </div>
 
@@ -77,7 +77,7 @@
                     <div class="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 border border-gray-100 dark:border-gray-600">
                         <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">{{ $t('inventory.parts.default_sale_price') }}</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-white font-mono">
-                            {{ formatCurrency(part.default_sale_price) }}
+                            {{ formatCurrency(part.default_sale_price) }} <span class="text-sm text-gray-500 font-normal">{{ $t('common.currency_sar') }}</span>
                         </div>
                     </div>
 
@@ -104,7 +104,7 @@
                                 <div class="text-xs text-gray-500 dark:text-gray-400">{{ balance.warehouse?.center?.name || 'الفرع الرئيسي' }}</div>
                             </div>
                             <div class="text-end">
-                                <div class="font-bold text-gray-900 dark:text-white font-mono">{{ balance.qty_on_hand }}</div>
+                                <div class="font-bold text-gray-900 dark:text-white font-mono">{{ formatQuantity(balance.qty_on_hand) }}</div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 font-mono">{{ formatCurrency(balance.wac_cost) }} / {{ part.unit?.name_ar }}</div>
                             </div>
                         </div>
@@ -168,7 +168,7 @@
 
                                     <!-- Stock Balance Logic -->
                                     <td class="px-3 py-3 text-center font-mono text-gray-500">
-                                        {{ Number(move.balance_after) - Number(move.qty) }}
+                                        {{ formatQuantity(Number(move.balance_after) - Number(move.qty)) }}
                                     </td>
                                     
                                     <td class="px-3 py-3 text-center whitespace-nowrap">
@@ -176,12 +176,12 @@
                                             'font-mono font-medium',
                                             move.qty > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                                         ]">
-                                            {{ move.qty > 0 ? '+' : '' }}{{ move.qty }}
+                                            {{ move.qty > 0 ? '+' : '' }}{{ formatQuantity(move.qty) }}
                                         </span>
                                     </td>
 
                                     <td class="px-3 py-3 text-center font-mono font-bold text-gray-700 dark:text-gray-200">
-                                        {{ move.balance_after }}
+                                        {{ formatQuantity(move.balance_after) }}
                                     </td>
 
                                     <!-- Cost Data -->
@@ -261,6 +261,7 @@ import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useI18n } from 'vue-i18n';
 import CreateModal from './CreateModal.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     part: Object,
@@ -272,6 +273,7 @@ const props = defineProps({
 
 const { t } = useI18n();
 const page = usePage();
+const { formatQuantity, formatCurrency } = useNumberFormat();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
 
 const showEditModal = ref(false);
@@ -301,13 +303,7 @@ const formatDate = (date) => {
     });
 };
 
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('ar-SA', {
-        style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 2,
-    }).format(value || 0);
-};
+
 
 const getMoveTypeLabel = (type) => {
     const labels = {

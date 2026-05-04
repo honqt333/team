@@ -6,6 +6,7 @@ use App\Models\Quote;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Models\WorkOrderItemPart;
 use App\Support\TenancyContext;
 use Illuminate\Support\Facades\DB;
 
@@ -48,8 +49,9 @@ class QuoteConversionService
             ]);
 
             // Copy quote lines to work order items
+            $lineIdMap = [];
             foreach ($quote->lines as $quoteLine) {
-                WorkOrderItem::create([
+                $workOrderItem = WorkOrderItem::create([
                     'work_order_id' => $workOrder->id,
                     'service_id' => $quoteLine->service_id,
                     'tenant_id' => $quote->tenant_id,
@@ -66,6 +68,30 @@ class QuoteConversionService
                     'line_total' => $quoteLine->line_total,
                     'price_locked' => true, // Lock prices from quote
                     'total' => $quoteLine->line_total, // Legacy field
+                ]);
+                $lineIdMap[$quoteLine->id] = $workOrderItem->id;
+            }
+
+            // Copy quote parts to work order item parts
+            foreach ($quote->parts as $quotePart) {
+                WorkOrderItemPart::create([
+                    'work_order_id' => $workOrder->id,
+                    'work_order_item_id' => $quotePart->quote_line_id ? ($lineIdMap[$quotePart->quote_line_id] ?? null) : null,
+                    'tenant_id' => $quote->tenant_id,
+                    'center_id' => $quote->center_id,
+                    'part_id' => $quotePart->part_id,
+                    'unit_id' => $quotePart->unit_id,
+                    'source' => $quotePart->source,
+                    'name' => $quotePart->name,
+                    'part_number' => $quotePart->part_number,
+                    'notes' => $quotePart->description,
+                    'qty' => $quotePart->qty,
+                    'unit_price' => $quotePart->unit_price,
+                    'discount' => $quotePart->discount,
+                    'total' => $quotePart->total,
+                    'include_in_package' => $quotePart->include_in_package,
+                    'hide_on_print' => $quotePart->hide_on_print,
+                    'status' => WorkOrderItemPart::STATUS_PENDING,
                 ]);
             }
 

@@ -51,6 +51,16 @@ class WorkOrderItemPart extends Model
         'reversed_at',
         'reversed_by',
         'reversal_move_id',
+        // New Quote Fields
+        'unit_id',
+        'discount',
+        'include_in_package',
+        'hide_on_print',
+    ];
+
+    protected $appends = [
+        'tax_amount',
+        'grand_total'
     ];
 
     protected $casts = [
@@ -60,6 +70,9 @@ class WorkOrderItemPart extends Model
         'cost_snapshot' => 'decimal:4',
         'issued_at' => 'datetime',
         'reversed_at' => 'datetime',
+        'discount' => 'decimal:2',
+        'include_in_package' => 'boolean',
+        'hide_on_print' => 'boolean',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -69,9 +82,51 @@ class WorkOrderItemPart extends Model
     protected static function booted(): void
     {
         static::saving(function (WorkOrderItemPart $part) {
-            $part->total = bcmul($part->qty, $part->unit_price, 2);
+            // total = (qty * unit_price) - discount
+            $subtotal = bcmul($part->qty, $part->unit_price, 2);
+            $part->total = bcsub($subtotal, $part->discount ?? 0, 2);
+            if ($part->total < 0) $part->total = 0;
         });
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Accessors
+    // ─────────────────────────────────────────────────────────────
+
+    public function getTaxAmountAttribute(): float
+    {
+        $workOrder = $this->workOrder;
+        if (!$workOrder || !$workOrder->tax_enabled_snapshot) {
+            return 0;
+        }
+
+        $rate = (string) ($workOrder->tax_rate_snapshot ?? 15);
+        $isInclusive = $workOrder->pricing_mode_snapshot === 'inclusive';
+        $total = (string) $this->total;
+
+        if ($isInclusive) {
+            // formula: total - (total / (1 + (rate / 100)))
+            $divisor = bcadd('1', bcdiv($rate, '100', 4), 4);
+            $net = bcdiv($total, $divisor, 2);
+            return (float) bcsub($total, $net, 2);
+        }
+
+        // formula: total * (rate / 100)
+        return (float) bcmul($total, bcdiv($rate, '100', 4), 2);
+    }
+
+    public function getGrandTotalAttribute(): float
+    {
+        $workOrder = $this->workOrder;
+        $total = (string) $this->total;
+        
+        if (!$workOrder || !$workOrder->tax_enabled_snapshot || $workOrder->pricing_mode_snapshot === 'inclusive') {
+            return (float) $total;
+        }
+
+        return (float) bcadd($total, (string) $this->tax_amount, 2);
+    }
+
 
     // ─────────────────────────────────────────────────────────────
     // Relationships

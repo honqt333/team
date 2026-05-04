@@ -192,7 +192,10 @@ class PartsController extends Controller
             ->search($request->input('q'))
             ->with(['unit'])
             ->withSum('inventoryBalances', 'qty_on_hand')
-            ->limit(20)
+            ->when($request->boolean('hide_out_of_stock'), function($query) {
+                $query->having('inventory_balances_sum_qty_on_hand', '>', 0);
+            })
+            ->limit(50)
             ->get();
 
         return response()->json($parts);

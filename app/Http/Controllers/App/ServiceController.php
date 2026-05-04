@@ -166,19 +166,46 @@ class ServiceController
     {
         $this->authorize('delete', $service);
 
-        // Check if service has related data in quotes
-        $quoteLineCount = \App\Models\QuoteLine::where('service_id', $service->id)->count();
-        if ($quoteLineCount > 0) {
+        // Check if service has related data in ACTIVE quotes
+        $quotes = \App\Models\Quote::whereHas('lines', function ($query) use ($service) {
+                $query->where('service_id', $service->id);
+            })
+            ->whereIn('status', [
+                \App\Models\Quote::STATUS_DRAFT,
+                \App\Models\Quote::STATUS_SENT,
+                \App\Models\Quote::STATUS_APPROVED
+            ])
+            ->limit(5)
+            ->pluck('code');
+
+        if ($quotes->isNotEmpty()) {
             return back()->withErrors([
-                'service' => __('messages.service_has_quote_lines', ['count' => $quoteLineCount])
+                'service' => __('messages.service_has_quote_lines_with_codes', [
+                    'count' => $quotes->count(),
+                    'codes' => $quotes->implode(', ')
+                ])
             ]);
         }
 
-        // Check if service has related data in work orders
-        $workOrderItemCount = \App\Models\WorkOrderItem::where('service_id', $service->id)->count();
-        if ($workOrderItemCount > 0) {
+        // Check if service has related data in ACTIVE work orders
+        $workOrders = \App\Models\WorkOrder::whereHas('items', function ($query) use ($service) {
+                $query->where('service_id', $service->id);
+            })
+            ->whereIn('status', [
+                \App\Models\WorkOrder::STATUS_DRAFT,
+                \App\Models\WorkOrder::STATUS_OPEN,
+                \App\Models\WorkOrder::STATUS_IN_PROGRESS,
+                \App\Models\WorkOrder::STATUS_ON_HOLD
+            ])
+            ->limit(5)
+            ->pluck('code');
+
+        if ($workOrders->isNotEmpty()) {
             return back()->withErrors([
-                'service' => __('messages.service_has_work_order_items', ['count' => $workOrderItemCount])
+                'service' => __('messages.service_has_work_order_items_with_codes', [
+                    'count' => $workOrders->count(),
+                    'codes' => $workOrders->implode(', ')
+                ])
             ]);
         }
 

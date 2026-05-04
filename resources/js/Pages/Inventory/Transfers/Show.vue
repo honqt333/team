@@ -90,9 +90,9 @@
                         <tr v-for="item in transfer.items" :key="item.id">
                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ item.part?.sku }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ item.part?.name_ar || item.part?.name_en }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ item.qty_requested }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ item.qty_sent }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ item.qty_received }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ formatQuantity(item.qty_requested) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ formatQuantity(item.qty_sent) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ formatQuantity(item.qty_received) }}</td>
                             <td class="px-6 py-4 text-end" v-if="transfer.status === 'draft'">
                                 <button @click="removeItem(item)" class="text-red-500 hover:text-red-700">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,11 +141,14 @@
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     transfer: Object,
     parts: Array,
 });
+
+const { formatQuantity } = useNumberFormat();
 
 const showAddModal = ref(false);
 const showCancelModal = ref(false);

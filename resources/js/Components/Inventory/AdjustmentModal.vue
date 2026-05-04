@@ -16,7 +16,7 @@
                     @search="searchParts"
                 />
                 <p v-if="selectedPart" class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                    {{ $t('inventory.stock.available') }}: {{ selectedPart.qty_on_hand || 0 }}
+                    {{ $t('inventory.stock.available') }}: {{ formatQuantity(selectedPart.qty_on_hand || 0) }}
                 </p>
                 <p v-if="errors.part_id" class="mt-1 text-sm text-red-500">{{ errors.part_id }}</p>
             </div>
@@ -107,6 +107,7 @@ import { useToast } from '@/Composables/useToast';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import axios from 'axios';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     show: Boolean,
@@ -116,6 +117,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 
 const { success, error: showError } = useToast();
+const { formatQuantity } = useNumberFormat();
 const processing = ref(false);
 const errors = reactive({});
 const parts = ref([]);

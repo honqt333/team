@@ -36,15 +36,15 @@
             <!-- Stats Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ stats.total_items }}</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatQuantity(stats.total_items) }}</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.total_items') }}</div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="text-2xl font-bold text-green-600 dark:text-green-400 font-mono" dir="ltr">{{ stats.in_stock }}</div>
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-400 font-mono" dir="ltr">{{ formatQuantity(stats.in_stock) }}</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.in_stock') }}</div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 font-mono" dir="ltr">{{ stats.low_stock }}</div>
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 font-mono" dir="ltr">{{ formatQuantity(stats.low_stock) }}</div>
                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.low_stock') }}</div>
                 </div>
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
@@ -146,11 +146,11 @@
                                         'inline-flex px-2 py-1 rounded-full text-sm font-medium font-mono',
                                         getStockStatusClass(balance)
                                     ]" dir="ltr">
-                                        {{ formatDecimal(balance.qty_on_hand) }} {{ balance.part?.unit?.name_ar || balance.part?.unit }}
+                                        {{ formatQuantity(balance.qty_on_hand) }} {{ balance.part?.unit?.name_ar || balance.part?.unit }}
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-600 dark:text-gray-300">
-                                    <span class="font-mono" dir="ltr">{{ formatDecimal(balance.part?.min_qty || 0) }}</span>
+                                    <span class="font-mono" dir="ltr">{{ formatQuantity(balance.part?.min_qty || 0) }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
                                     <span class="font-mono" dir="ltr">{{ formatCurrency(balance.wac_cost) }}</span>
@@ -187,7 +187,7 @@
                             'px-2 py-0.5 rounded text-xs font-bold font-mono',
                             getStockStatusClass(balance)
                         ]" dir="ltr">
-                            {{ formatDecimal(balance.qty_on_hand) }} {{ $t('inventory.units.piece') }}
+                            {{ formatQuantity(balance.qty_on_hand) }} {{ $t('inventory.units.piece') }}
                         </span>
                     </div>
 
@@ -204,15 +204,15 @@
                         <div class="space-y-1.5 pt-2 border-t border-gray-50 dark:border-gray-700">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.wac') }}:</span>
-                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatDecimal(balance.wac_cost) }}</span>
+                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatCurrency(balance.wac_cost) }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.default_sale_price') }}:</span>
-                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatDecimal(balance.part?.default_sale_price) }}</span>
+                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatCurrency(balance.part?.default_sale_price) }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.min_qty') }}:</span>
-                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatDecimal(balance.part?.min_qty) }}</span>
+                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatQuantity(balance.part?.min_qty) }}</span>
                             </div>
                         </div>
 
@@ -220,7 +220,7 @@
                         <div class="flex justify-start pt-2">
                              <div class="inline-flex items-center gap-1 border border-red-400 rounded px-2 py-1 text-xs text-red-500 dark:text-red-400 bg-white dark:bg-gray-800">
                                 <span>{{ $t('inventory.parts.min_sale_price') }}:</span>
-                                <span class="font-bold font-mono" dir="ltr">{{ formatDecimal(balance.part?.min_sale_price) }}</span>
+                                <span class="font-bold font-mono" dir="ltr">{{ formatCurrency(balance.part?.min_sale_price) }}</span>
                             </div>
                         </div>
                     </div>
@@ -269,6 +269,7 @@ import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { debounce } from 'lodash-es';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     balances: Object,
@@ -278,6 +279,8 @@ const props = defineProps({
     filters: Object,
     stats: Object,
 });
+
+const { formatQuantity, formatCurrency } = useNumberFormat();
 
 const localFilters = ref({
     search: props.filters?.search || '',
@@ -305,22 +308,6 @@ const applyFilters = () => {
 };
 
 const debouncedSearch = debounce(applyFilters, 300);
-
-const formatDecimal = (value) => {
-    if (!value) return '0';
-    return Number(value).toLocaleString('en-US', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    });
-};
-
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', { // English numbers requested
-        style: 'decimal', // Using decimal style to control format manually easily or just use currency with custom formatting
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-    }).format(value || 0);
-};
 
 const getStockStatusClass = (balance) => {
     const qty = balance.qty_on_hand;

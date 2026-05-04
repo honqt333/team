@@ -35,7 +35,8 @@ class WorkOrderUpdateRequest extends FormRequest
                     ->where('tenant_id', $tenantId)
                     ->where('center_id', $centerId),
                 function ($attribute, $value, $fail) {
-                    $customerId = $this->customer_id ?? $this->route('work_order')->customer_id;
+                    $workOrder = $this->route('workOrder') ?? $this->route('work_order');
+                    $customerId = $this->customer_id ?? ($workOrder ? $workOrder->customer_id : null);
                     if ($value && $customerId) {
                         $vehicle = \App\Models\Vehicle::find($value);
                         if ($vehicle && $vehicle->customer_id != $customerId) {
@@ -89,6 +90,20 @@ class WorkOrderUpdateRequest extends FormRequest
             'items.*.title' => ['required_with:items', 'string', 'max:255'],
             'items.*.qty' => ['required_with:items', 'numeric', 'min:0.01'],
             'items.*.unit_price' => ['required_with:items', 'numeric', 'min:0'],
+        ];
+    }
+
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                if ($this->status === WorkOrder::STATUS_CANCELLED) {
+                    $workOrder = $this->route('workOrder') ?? $this->route('work_order');
+                    if ($workOrder && !$workOrder->canBeCancelled()) {
+                        $validator->errors()->add('status', __('messages.cannot_cancel_has_relations'));
+                    }
+                }
+            }
         ];
     }
 }

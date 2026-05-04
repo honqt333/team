@@ -34,8 +34,12 @@ class WorkOrderPartsController extends Controller
             'name' => 'required|string|max:255',
             'part_number' => 'nullable|string|max:100',
             'source' => 'required|in:warehouse,external,customer',
+            'unit_id' => 'nullable|exists:inventory_units,id',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'include_in_package' => 'boolean',
+            'hide_on_print' => 'boolean',
             'notes' => 'nullable|string|max:500',
         ]);
 
@@ -66,6 +70,23 @@ class WorkOrderPartsController extends Controller
             }
         }
 
+        // Validate min price if warehouse part
+        if ($validated['source'] === 'warehouse' && !empty($validated['part_id'])) {
+            $part = Part::find($validated['part_id']);
+            if ($part && $part->min_sale_price > 0) {
+                $qty = (float) ($validated['qty'] ?: 1);
+                $unitDiscount = (float) ($validated['discount'] ?? 0) / $qty;
+                $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
+                
+                if ($finalPrice < (float) $part->min_sale_price) {
+                    return back()->with('error', __('pricing.final_price_below_minimum', [
+                        'final' => number_format($finalPrice, 2),
+                        'min' => number_format((float) $part->min_sale_price, 2),
+                    ]));
+                }
+            }
+        }
+
         try {
             $validated['work_order_id'] = $workOrder->id;
             $validated['tenant_id'] = $workOrder->tenant_id;
@@ -90,10 +111,40 @@ class WorkOrderPartsController extends Controller
         }
 
         $validated = $request->validate([
+            'work_order_item_id' => 'nullable|exists:work_order_items,id',
+            'part_id' => 'nullable|exists:parts,id',
+            'warehouse_id' => 'nullable|exists:warehouses,id',
+            'name' => 'required|string|max:255',
+            'part_number' => 'nullable|string|max:100',
+            'source' => 'required|in:warehouse,external,customer',
+            'unit_id' => 'nullable|exists:inventory_units,id',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'include_in_package' => 'boolean',
+            'hide_on_print' => 'boolean',
             'notes' => 'nullable|string|max:500',
         ]);
+
+        // Validate min price if warehouse part
+        $source = $validated['source'] ?? $workOrderPart->source;
+        $partId = $validated['part_id'] ?? $workOrderPart->part_id;
+        if ($source === 'warehouse' && !empty($partId)) {
+            $part = Part::find($partId);
+            if ($part && $part->min_sale_price > 0) {
+                $qty = (float) ($validated['qty'] ?? $workOrderPart->qty);
+                $unitDiscount = (float) ($validated['discount'] ?? $workOrderPart->discount) / $qty;
+                $unitPrice = (float) ($validated['unit_price'] ?? $workOrderPart->unit_price);
+                $finalPrice = $unitPrice - $unitDiscount;
+                
+                if ($finalPrice < (float) $part->min_sale_price) {
+                    return back()->with('error', __('pricing.final_price_below_minimum', [
+                        'final' => number_format($finalPrice, 2),
+                        'min' => number_format((float) $part->min_sale_price, 2),
+                    ]));
+                }
+            }
+        }
 
         $allowNegative = auth()->user()->can('inventory.override_negative_stock');
 

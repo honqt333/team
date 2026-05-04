@@ -187,21 +187,18 @@ class WorkOrder extends Model
      */
     public function canBeCancelled(): bool
     {
-        // Check if any item has technicians
-        $hasTechnicians = $this->items()
-            ->whereHas('technicians')
-            ->exists();
-
-        if ($hasTechnicians) {
+        // Check if has payments
+        if ($this->payments()->exists()) {
             return false;
         }
 
-        // Check if any item has parts
-        $hasParts = $this->items()
-            ->whereHas('parts')
-            ->exists();
+        // Check if has items (services) or technicians
+        if ($this->items()->exists()) {
+            return false;
+        }
 
-        if ($hasParts) {
+        // Check if has any parts
+        if ($this->parts()->exists()) {
             return false;
         }
 

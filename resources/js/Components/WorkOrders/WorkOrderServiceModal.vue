@@ -48,7 +48,7 @@
                             {{ $t('quotes.service_modal.service') }}
                         </label>
                         <SearchableSelect
-                            v-if="!item"
+                            v-if="!item && !props.readOnly"
                             v-model="form.service_id"
                             :options="serviceOptions"
                             option-label="label"
@@ -60,7 +60,7 @@
                             v-else 
                             class="px-4 py-3 bg-gray-100 dark:bg-gray-900 rounded-xl text-gray-900 dark:text-white"
                         >
-                            {{ getName(item.service) }}
+                            {{ getName(item?.service) }}
                         </div>
                     </div>
 
@@ -89,9 +89,9 @@
                             <div class="relative">
                                 <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
                                     @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                                    :disabled="isPriceLocked" :class="[
+                                    :disabled="isPriceLocked || props.readOnly" :class="[
                                         'w-full py-3 pl-4 pr-16 border rounded-xl font-mono text-right focus:ring-2 focus:border-indigo-500',
-                                        isPriceLocked
+                                        isPriceLocked || props.readOnly
                                             ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                                             : isPriceBelowMinimum
                                                 ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
@@ -114,7 +114,7 @@
                     </div>
 
                     <!-- Discount Section -->
-                    <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <div v-if="!props.readOnly" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ $t('quotes.service_modal.discount_method') }}
@@ -230,7 +230,7 @@
                     </div>
 
                     <!-- Status Selection for Edit mode -->
-                    <div v-if="item" class="mt-4">
+                    <div v-if="item && !props.readOnly" class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {{ $t('work_orders.item.status') }}
                         </label>
@@ -262,7 +262,7 @@
                         <div class="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
                         {{ $t('quotes.show.tabs.linked_parts') }}
                     </h4>
-                    <button v-if="!isReadOnly" type="button" @click="openPartModal()"
+                    <button v-if="!isReadOnly && !props.readOnly" type="button" @click="openPartModal()"
                         class="px-3 py-1.5 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center gap-1 shadow-sm">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -272,7 +272,7 @@
                 </div>
                 <PartsDisplay 
                     :parts="allParts" 
-                    :read-only="false" 
+                    :read-only="props.readOnly" 
                     :show-vat="workOrder.is_taxed" 
                     :show-service="false"
                     :compact-grid="true" 
@@ -313,7 +313,7 @@
 
             <!-- Technicians Tab -->
             <div v-show="activeTab === 'technicians'" class="space-y-4">
-                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <div v-if="!props.readOnly" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                     <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ $t('work_orders.item.assign_technician') }}</h4>
                     <div class="flex gap-2">
                         <select v-model="technicianForm.user_id" class="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm">
@@ -328,7 +328,7 @@
                 <div class="space-y-2">
                     <div v-for="tech in (item ? localTechnicians : pendingTechnicians)" :key="tech.id || tech.user_id" class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                         <span class="text-sm text-gray-900 dark:text-white">{{ tech.name }}</span>
-                        <button type="button" @click="removeTechnician(tech)" class="text-red-500 hover:text-red-600">
+                        <button v-if="!props.readOnly" type="button" @click="removeTechnician(tech)" class="text-red-500 hover:text-red-600">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
@@ -338,7 +338,7 @@
             <!-- Notes Tab -->
             <div v-show="activeTab === 'notes'" class="space-y-4">
                 <!-- Add Note -->
-                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <div v-if="!props.readOnly" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                     <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ $t('work_orders.item.add_note') }}</h4>
                     <textarea
                         v-model="noteForm.content"
@@ -371,6 +371,7 @@
                                 </div>
                             </div>
                             <button
+                                v-if="!props.readOnly"
                                 type="button"
                                 @click="removeNote(note)"
                                 class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -391,9 +392,10 @@
                 @click="$emit('close')"
                 class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
             >
-                {{ $t('common.cancel') }}
+                {{ $t('common.close') }}
             </button>
             <button
+                v-if="!props.readOnly"
                 type="button"
                 @click="submitForm"
                 :disabled="saving || isPriceBelowMinimum"
@@ -428,6 +430,7 @@ const props = defineProps({
     services: Array,
     technicians: { type: Array, default: () => [] },
     inventoryUnits: { type: Array, default: () => [] },
+    readOnly: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -608,11 +611,16 @@ function closePartModal() {
 
 function onPartSaved(savedPart, options = {}) {
     if (savedPart.isPending || !props.item) {
-        if (editingLinkedPart.value && editingLinkedPart.value.temp_id) {
-            const index = pendingParts.value.findIndex(p => p.temp_id === editingLinkedPart.value.temp_id);
-            if (index !== -1) pendingParts.value[index] = savedPart;
+        if (savedPart.tempId) {
+            const index = pendingParts.value.findIndex(p => p.tempId === savedPart.tempId);
+            if (index !== -1) {
+                pendingParts.value[index] = { ...savedPart, total: calculatePartTotal(savedPart) };
+            } else {
+                pendingParts.value.push({ ...savedPart, total: calculatePartTotal(savedPart) });
+            }
         } else {
-            pendingParts.value.push({ ...savedPart, total: calculatePartTotal(savedPart), temp_id: Date.now() });
+            const newTempId = Date.now();
+            pendingParts.value.push({ ...savedPart, total: calculatePartTotal(savedPart), tempId: newTempId });
         }
     } else {
         if (editingLinkedPart.value && editingLinkedPart.value.id) {
@@ -622,7 +630,7 @@ function onPartSaved(savedPart, options = {}) {
             linkedParts.value.push(savedPart);
         }
         // In edit mode, we should refresh from backend to get fresh data
-        router.reload({ only: ['workOrder'] });
+        router.reload({ only: ['workOrder', 'itemsByDepartment'] });
     }
     
     toastSuccess(t('common.saved_success'));
@@ -636,12 +644,15 @@ function handlePartEdit(part) { openPartModal(part); }
 
 function handlePartDelete(part) {
     if (!part.id) {
-        pendingParts.value = pendingParts.value.filter(p => p.temp_id !== part.temp_id);
+        pendingParts.value = pendingParts.value.filter(p => p.tempId !== part.tempId);
         return;
     }
     if (confirm(t('common.confirm_delete'))) {
-        router.delete(route('app.work-orders.items.parts.destroy', { work_order: props.workOrder.id, item: props.item.id, part: part.id }), {
-            onSuccess: () => { linkedParts.value = linkedParts.value.filter(p => p.id !== part.id); }
+        router.delete(route('work-orders.parts.destroy', { workOrderPart: part.id }), {
+            onSuccess: () => { 
+                linkedParts.value = linkedParts.value.filter(p => p.id !== part.id);
+                router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+            }
         });
     }
 }

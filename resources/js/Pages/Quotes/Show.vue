@@ -483,6 +483,9 @@
             :units="inventoryUnits" :show-service-select="true" :show-toggles="false" @close="closePartModal"
             @saved="onPartSaved" />
 
+        <QuoteApprovalModal :show="showApprovalModal" :quote="quote" 
+            @close="showApprovalModal = false" @confirm="submitApproval" />
+
         <ConfirmModal />
 
         <!-- Share Modal -->
@@ -510,6 +513,7 @@ import QuoteDepartmentModal from '@/Components/Quotes/QuoteDepartmentModal.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import QuotePartModal from '@/Components/Quotes/QuotePartModal.vue';
 import QuoteShareModal from '@/Components/Quotes/QuoteShareModal.vue';
+import QuoteApprovalModal from '@/Components/Quotes/QuoteApprovalModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 
@@ -560,6 +564,7 @@ const showDepartmentModal = ref(false);
 const showEditModal = ref(false);
 const showPartModal = ref(false);
 const showShareModal = ref(false);
+const showApprovalModal = ref(false);
 const editingLine = ref(null);
 const editingPart = ref(null);
 const activeDepartmentId = ref(null);
@@ -568,19 +573,30 @@ const activeTab = ref('services'); // 'services' or 'parts'
 const { success: successToast, error: errorToast } = useToast();
 
 const approveQuote = async () => {
-    const confirmed = await confirm({
-        title: t('quotes.messages.confirm_approve_title'),
-        message: t('quotes.messages.confirm_approve'),
-        confirmText: t('quotes.actions.approve'),
-        type: 'success'
-    });
-
-    if (confirmed) {
-        router.post(route('app.quotes.approve', props.quote.id), {}, {
-            onSuccess: () => successToast(t('quotes.messages.approved_success')),
-            onError: (err) => errorToast(err.message || t('common.error'))
+    const warehouseParts = (props.quote.parts || []).filter(p => p.source === 'warehouse');
+    
+    if (warehouseParts.length > 0) {
+        showApprovalModal.value = true;
+    } else {
+        const confirmed = await confirm({
+            title: t('quotes.messages.confirm_approve_title'),
+            message: t('quotes.messages.confirm_approve'),
+            confirmText: t('quotes.actions.approve'),
+            type: 'success'
         });
+
+        if (confirmed) {
+            submitApproval();
+        }
     }
+};
+
+const submitApproval = () => {
+    showApprovalModal.value = false;
+    router.post(route('app.quotes.approve', props.quote.id), {}, {
+        onSuccess: () => successToast(t('quotes.messages.approved_success')),
+        onError: (err) => errorToast(err.message || t('common.error'))
+    });
 };
 
 // Computed: Sort departments by sort_order

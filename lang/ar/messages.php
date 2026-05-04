@@ -14,6 +14,7 @@ return [
     'cannot_put_on_hold' => 'لا يمكن تعليق كرت العمل في هذه الحالة',
     'cannot_resume' => 'كرت العمل ليس معلقاً',
     'cannot_cancel_has_technicians_or_parts' => 'لا يمكن إلغاء كرت العمل - يوجد فنيين أو قطع غيار مرتبطة',
+    'cannot_cancel_has_relations' => 'لا يمكن إلغاء كرت العمل - يرجى حذف جميع الخدمات، القطع، الفنيين، وإعادة أي مدفوعات أولاً',
     'cannot_complete_items_pending' => 'لا يمكن إكمال كرت العمل - هناك خدمات غير مكتملة',
     
     // Work Order Items
@@ -22,6 +23,7 @@ return [
     'service_deleted' => 'تم حذف الخدمة بنجاح',
     'item_status_updated' => 'تم تحديث حالة الخدمة',
     'cannot_change_item_status' => 'لا يمكن تغيير حالة الخدمة - يوجد فنيين أو قطع غيار مرتبطة',
+    'cannot_delete_item_has_parts_or_technicians' => 'لا يمكن إلغاء الخدمة حتى يتم إزالة جميع قطع الغيار والفنيين!',
     
     // Departments
     'department_added' => 'تمت إضافة القسم بنجاح',
@@ -45,5 +47,7 @@ return [
     // Service Deletion
     'service_has_quote_lines' => 'لا يمكن حذف الخدمة - يوجد :count تقييم يستخدم هذه الخدمة',
     'service_has_work_order_items' => 'لا يمكن حذف الخدمة - يوجد :count كرت عمل يستخدم هذه الخدمة',
+    'service_has_quote_lines_with_codes' => 'لا يمكن حذف الخدمة - مستخدمة في التقييمات: :codes',
+    'service_has_work_order_items_with_codes' => 'لا يمكن حذف الخدمة - مستخدمة في كروت العمل: :codes',
 
 ];
