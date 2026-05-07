@@ -266,7 +266,7 @@ class PurchasingService
      */
     protected function updatePurchaseOrderStatus(PurchaseOrder $po): void
     {
-        $po->refresh();
+        $po->load('items');
         
         $allReceived = $po->items->every(fn($item) => $item->is_fully_received);
         $anyReceived = $po->items->some(fn($item) => $item->qty_received > 0);

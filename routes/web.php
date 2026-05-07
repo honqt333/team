@@ -129,6 +129,14 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::post('/work-orders/{work_order}/cancel', [WorkOrderController::class, 'cancel'])->name('work-orders.cancel');
     Route::post('/work-orders/{work_order}/complete', [WorkOrderController::class, 'complete'])->name('work-orders.complete');
     
+    // Work Order Inspections
+    Route::get('/work-orders/{workOrder}/inspections/templates', [\App\Http\Controllers\App\WorkOrderInspectionController::class, 'getTemplates'])->name('work-orders.inspections.templates');
+    Route::post('/work-orders/{workOrder}/inspections', [\App\Http\Controllers\App\WorkOrderInspectionController::class, 'store'])->name('work-orders.inspections.store');
+    Route::get('/work-orders/{workOrder}/inspections/{inspection}', [\App\Http\Controllers\App\WorkOrderInspectionController::class, 'show'])->name('work-orders.inspections.show');
+    
+    // Work Order Signatures
+    Route::post('/work-orders/{workOrder}/signatures', [\App\Http\Controllers\App\WorkOrderSignatureController::class, 'store'])->name('work-orders.signatures.store');
+    
     // Work Order Print Routes
     Route::get('/work-orders/{workOrder}/print/condition', [WorkOrderController::class, 'printCondition'])->name('work-orders.print.condition');
     Route::get('/work-orders/{workOrder}/print/services', [WorkOrderController::class, 'printServices'])->name('work-orders.print.services');
@@ -160,7 +168,11 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::delete('/work-orders/{work_order}/items/{item}/notes/{note}', [WorkOrderController::class, 'deleteNote'])->name('work-orders.items.notes.destroy');
     
     // Work Order Photos
+    Route::post('/work-orders/{workOrder}/photos', [WorkOrderController::class, 'uploadPhotos'])->name('work-orders.photos.store');
     Route::delete('/work-orders/{workOrder}/photos/{photo}', [WorkOrderController::class, 'deletePhoto'])->name('work-orders.photos.destroy');
+
+    Route::post('/work-orders/{workOrder}/attachments', [WorkOrderController::class, 'uploadAttachments'])->name('work-orders.attachments.store');
+    Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderController::class, 'destroyAttachment'])->name('work-orders.attachments.destroy');
     
     // Quotes
     Route::get('/quotes', [QuoteController::class, 'index'])->name('app.quotes.index');

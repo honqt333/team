@@ -599,17 +599,52 @@
             "no_parts": "There are no spare parts",
             "tabs": {
                 "services": "Services",
-                "parts": "Spare parts",
+                "parts": "Spare Parts",
                 "technicians": "Technicians",
                 "payments": "Payments",
-                "condition": "Status report",
-                "photos": "Pictures",
+                "condition": "Condition Report",
+                "photos": "Photos",
                 "activities": "Activities",
-                "attachments": "Attachments"
+                "attachments": "Attachments",
+                "inspections": "Inspection Checklist",
+                "signatures": "Digital Signatures"
+            },
+            "signatures": {
+                "reception": "Reception Signature",
+                "delivery": "Delivery Signature",
+                "sign_now": "Sign Now",
+                "signed_at": "Signed at {date}",
+                "save": "Save Signature",
+                "reception_hint": "Customer signature upon vehicle check-in and initial condition acknowledgment.",
+                "delivery_hint": "Customer signature upon vehicle delivery after service completion."
             },
             "add_service": "Add a service",
             "no_departments_in_center": "No departments or services have been added to this center.",
             "click_here_to_add": "Click here to add"
+        },
+        "activities": {
+            "title": "Activity Log",
+            "no_activities": "No activities recorded yet",
+            "actions": {
+                "created": "Work order created",
+                "updated": "Work order updated",
+                "status_changed": "Status changed to :status",
+                "item_added": "Service added: :title",
+                "item_updated": "Service updated: :title",
+                "item_deleted": "Service deleted: :title",
+                "part_added": "Part added: :name",
+                "part_updated": "Part updated: :name",
+                "part_deleted": "Part deleted: :name",
+                "payment_added": "Payment added: :amount",
+                "photos_uploaded": "Photos uploaded",
+                "attachments_uploaded": "Attachments uploaded",
+                "technician_assigned": "Technician :name assigned to :service",
+                "technician_removed": "Technician removed from :service",
+                "condition_updated": "Vehicle condition report updated",
+                "inspection_completed": "Inspection completed: :template",
+                "signed_reception": "Reception signature recorded",
+                "signed_delivery": "Delivery signature recorded"
+            }
         },
         "actions": {
             "start_work": "Start working",

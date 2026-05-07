@@ -62,8 +62,12 @@ class GoodsReceivedNotesController extends Controller
 
         $grn = $this->purchasingService->createGoodsReceivedNote($purchaseOrder, $validated);
 
+        if ($request->boolean('post_now')) {
+            $this->purchasingService->postGoodsReceivedNote($grn, auth()->id());
+        }
+
         return redirect()->route('app.purchasing.grn.show', $grn->id)
-            ->with('success', __('purchasing.grn.created'));
+            ->with('success', $request->boolean('post_now') ? __('purchasing.grn.posted') : __('purchasing.grn.created'));
     }
 
     /**

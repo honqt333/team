@@ -103,6 +103,8 @@ class CreateWorkOrderAction
                 }
             }
 
+            $workOrder->logActivity('created', __('work_orders.activities.actions.created'));
+
             return $workOrder;
         });
     }

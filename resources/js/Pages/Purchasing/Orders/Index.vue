@@ -143,8 +143,6 @@ const props = defineProps({
     suppliers: Array,
     statuses: Array,
     filters: Object,
-    statuses: Array,
-    filters: Object,
     warehouses: Array,
     defaultWarehouse: Object,
 });

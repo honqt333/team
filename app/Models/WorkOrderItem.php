@@ -17,6 +17,7 @@ class WorkOrderItem extends Model
     // Status constants
     public const STATUS_PENDING = 'pending';
     public const STATUS_IN_PROGRESS = 'in_progress';
+    public const STATUS_READY_FOR_QC = 'ready_for_qc';
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_ON_HOLD = 'on_hold';
     public const STATUS_CANCELLED = 'cancelled';
@@ -24,6 +25,7 @@ class WorkOrderItem extends Model
     public const STATUSES = [
         self::STATUS_PENDING,
         self::STATUS_IN_PROGRESS,
+        self::STATUS_READY_FOR_QC,
         self::STATUS_COMPLETED,
         self::STATUS_ON_HOLD,
         self::STATUS_CANCELLED,
@@ -58,6 +60,9 @@ class WorkOrderItem extends Model
         'tax_amount',
         'line_total_excl_tax',
         'line_total_incl_tax',
+        'warranty_expires_at',
+        'warranty_value_snapshot',
+        'warranty_unit_snapshot',
     ];
 
     protected $appends = [
@@ -112,6 +117,17 @@ class WorkOrderItem extends Model
                 }
                 if ($item->status === self::STATUS_COMPLETED && !$item->completed_at) {
                     $item->completed_at = now();
+
+                    // Calculate warranty if service has warranty defined
+                    if ($item->service && $item->service->warranty_value > 0) {
+                        $item->warranty_value_snapshot = $item->service->warranty_value;
+                        $item->warranty_unit_snapshot = $item->service->warranty_unit;
+                        
+                        $unit = $item->service->warranty_unit; // days, weeks, months, years
+                        $value = $item->service->warranty_value;
+                        
+                        $item->warranty_expires_at = now()->add($value, $unit);
+                    }
                 }
             }
         });

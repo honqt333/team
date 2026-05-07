@@ -263,6 +263,8 @@ class WorkOrderController
             'departments',
             'payments.receivedBy',
             'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
+            'attachments.user',
+            'activities.user',
         ]);
 
         // Group items by department_id for accordion display
@@ -365,21 +367,38 @@ class WorkOrderController
             'damage_marks' => 'nullable|array',
         ]);
 
-        $workOrder->update([
-            'fuel_level' => $validated['fuel_level'] ?? $workOrder->fuel_level,
-        ]);
+        $hasChanges = false;
+        
+        if ($workOrder->fuel_level != ($validated['fuel_level'] ?? $workOrder->fuel_level)) {
+            $hasChanges = true;
+            $workOrder->update([
+                'fuel_level' => $validated['fuel_level'],
+            ]);
+        }
 
         // Update damage marks through relationship
         if (isset($validated['damage_marks'])) {
-            $workOrder->damageMarks()->delete();
-            foreach ($validated['damage_marks'] as $mark) {
-                $workOrder->damageMarks()->create([
-                    'x' => $mark['x'] ?? 0,
-                    'y' => $mark['y'] ?? 0,
-                    'color' => $mark['color'] ?? 'red',
-                    'description' => $mark['description'] ?? '',
-                ]);
+            // Simplified change detection: Compare counts or content
+            // For now, let's just compare the count and maybe a simple hash/string representation
+            $oldMarks = $workOrder->damageMarks->map(fn($m) => (float)$m->x . "," . (float)$m->y . "," . $m->color)->sort()->values()->toArray();
+            $newMarks = collect($validated['damage_marks'])->map(fn($m) => (float)($m['x'] ?? 0) . "," . (float)($m['y'] ?? 0) . "," . ($m['color'] ?? 'red'))->sort()->values()->toArray();
+            
+            if ($oldMarks !== $newMarks) {
+                $hasChanges = true;
+                $workOrder->damageMarks()->delete();
+                foreach ($validated['damage_marks'] as $mark) {
+                    $workOrder->damageMarks()->create([
+                        'x' => $mark['x'] ?? 0,
+                        'y' => $mark['y'] ?? 0,
+                        'color' => $mark['color'] ?? 'red',
+                        'description' => $mark['description'] ?? '',
+                    ]);
+                }
             }
+        }
+
+        if ($hasChanges) {
+            $workOrder->logActivity('condition_updated', __('work_orders.activities.actions.condition_updated'));
         }
 
         return back();
@@ -479,6 +498,8 @@ class WorkOrderController
             }
         }
 
+        $work_order->logActivity('item_added', __('work_orders.activities.actions.item_added', ['title' => $line->title]));
+
         return redirect()->back()->with('success', __('messages.service_added'));
     }
 
@@ -497,6 +518,8 @@ class WorkOrderController
 
         $item->update($validated);
 
+        $work_order->logActivity('item_updated', __('work_orders.activities.actions.item_updated', ['title' => $item->title]));
+
         return redirect()->back()->with('success', __('messages.service_updated'));
     }
 
@@ -509,7 +532,10 @@ class WorkOrderController
             return redirect()->back()->with('error', __('messages.cannot_delete_item_has_parts_or_technicians'));
         }
 
+        $title = $item->title;
         $item->delete();
+
+        $work_order->logActivity('item_deleted', __('work_orders.activities.actions.item_deleted', ['title' => $title]));
 
         return redirect()->back()->with('success', __('messages.service_deleted'));
     }
@@ -568,6 +594,8 @@ class WorkOrderController
 
         $work_order->putOnHold();
 
+        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.on_hold')]));
+
         return redirect()->back()->with('success', __('messages.work_order_on_hold'));
     }
 
@@ -581,6 +609,8 @@ class WorkOrderController
         if (!$work_order->resume()) {
             return redirect()->back()->with('error', __('messages.cannot_resume'));
         }
+
+        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.open')]));
 
         return redirect()->back()->with('success', __('messages.work_order_resumed'));
     }
@@ -599,6 +629,8 @@ class WorkOrderController
 
         $work_order->update(['status' => WorkOrder::STATUS_CANCELLED]);
 
+        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.cancelled')]));
+
         return redirect()->back()->with('success', __('messages.work_order_cancelled'));
     }
 
@@ -613,6 +645,8 @@ class WorkOrderController
         if (!$work_order->markAsCompleted()) {
             return redirect()->back()->with('error', __('messages.cannot_complete_items_pending'));
         }
+
+        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.done')]));
 
         return redirect()->back()->with('success', __('messages.work_order_completed'));
     }
@@ -689,6 +723,11 @@ class WorkOrderController
             ]
         ]);
 
+        $work_order->logActivity('technician_assigned', __('work_orders.activities.actions.technician_assigned', [
+            'name' => \App\Models\User::find($validated['user_id'])->name,
+            'service' => $item->title
+        ]));
+
         $message = __('messages.technician_assigned');
         return $request->expectsJson()
             ? response()->json(['success' => $message, 'technicians' => $item->technicians])
@@ -702,7 +741,13 @@ class WorkOrderController
     {
         $this->authorize('update', $work_order);
 
+        $name = $user->name;
         $item->technicians()->detach($user->id);
+
+        $work_order->logActivity('technician_removed', __('work_orders.activities.actions.technician_removed', [
+            'name' => $name,
+            'service' => $item->title
+        ]));
 
         $message = __('messages.technician_removed');
         return request()->expectsJson()
@@ -746,6 +791,8 @@ class WorkOrderController
             ...$validated,
         ], $allowNegative);
 
+        $work_order->logActivity('part_added', __('work_orders.activities.actions.part_added', ['name' => $validated['name']]));
+
         $message = __('messages.part_added');
         return $request->expectsJson()
             ? response()->json(['success' => $message, 'part' => $part])
@@ -775,6 +822,8 @@ class WorkOrderController
 
         $part->update($validated);
 
+        $work_order->logActivity('part_updated', __('work_orders.activities.actions.part_updated', ['name' => $validated['name']]));
+
         $message = __('messages.part_updated');
         return $request->expectsJson()
             ? response()->json(['success' => $message, 'part' => $part->fresh()])
@@ -788,7 +837,10 @@ class WorkOrderController
     {
         $this->authorize('update', $work_order);
 
+        $name = $part->name;
         $part->delete();
+
+        $work_order->logActivity('part_deleted', __('work_orders.activities.actions.part_deleted', ['name' => $name]));
 
         $message = __('messages.part_deleted');
         return request()->expectsJson()
@@ -1029,6 +1081,8 @@ class WorkOrderController
             'received_by' => auth()->id(),
         ]);
 
+        $workOrder->logActivity('payment_added', __('work_orders.activities.actions.payment_added', ['amount' => $validated['amount']]));
+
         return back()->with('success', __('payments.saved_successfully'));
     }
 
@@ -1094,5 +1148,85 @@ class WorkOrderController
         $photo->delete();
 
         return back()->with('success', __('messages.photo_deleted'));
+    }
+
+    /**
+     * Upload photos to work order.
+     */
+    public function uploadPhotos(Request $request, WorkOrder $workOrder)
+    {
+        $this->authorize('update', $workOrder);
+
+        $request->validate([
+            'photos' => 'required|array',
+            'photos.*.file' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB
+            'photos.*.type' => 'nullable|string|in:general,before,after,damage',
+            'photos.*.caption' => 'nullable|string|max:255',
+        ]);
+
+        foreach ($request->file('photos') as $index => $photoFile) {
+            $file = $photoFile['file'];
+            $type = $request->input("photos.$index.type") ?? 'general';
+            $caption = $request->input("photos.$index.caption");
+
+            $path = $file->store('work-orders/' . $workOrder->id . '/photos', 'public');
+
+            $workOrder->photos()->create([
+                'path' => $path,
+                'type' => $type,
+                'caption' => $caption,
+            ]);
+        }
+
+        $workOrder->logActivity('photos_uploaded', __('work_orders.activities.actions.photos_uploaded'));
+
+        return back()->with('success', __('messages.photos_uploaded_successfully'));
+    }
+
+    /**
+     * Upload attachments to work order.
+     */
+    public function uploadAttachments(Request $request, WorkOrder $workOrder)
+    {
+        $this->authorize('update', $workOrder);
+
+        $request->validate([
+            'attachments' => 'required|array',
+            'attachments.*' => 'required|file|mimes:pdf,jpg,png|max:1024', // 1MB
+        ]);
+
+        foreach ($request->file('attachments') as $file) {
+            $path = $file->store('work-orders/' . $workOrder->id . '/attachments', 'public');
+
+            $workOrder->attachments()->create([
+                'tenant_id' => $workOrder->tenant_id,
+                'file_name' => $file->getClientOriginalName(),
+                'path' => $path,
+                'file_type' => $file->getClientOriginalExtension(),
+                'file_size' => $file->getSize(),
+                'user_id' => auth()->id(),
+            ]);
+        }
+
+        $workOrder->logActivity('attachments_uploaded', __('work_orders.activities.actions.attachments_uploaded'));
+
+        return back()->with('success', __('messages.attachments_uploaded_successfully'));
+    }
+
+    /**
+     * Delete an attachment.
+     */
+    public function destroyAttachment(WorkOrder $workOrder, \App\Models\WorkOrderAttachment $attachment)
+    {
+        $this->authorize('update', $workOrder);
+
+        if ($attachment->work_order_id !== $workOrder->id) {
+            abort(403);
+        }
+
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($attachment->path);
+        $attachment->delete();
+
+        return back()->with('success', __('messages.attachment_deleted'));
     }
 }

@@ -22,6 +22,7 @@ class WorkOrder extends Model
     public const STATUS_IN_PROGRESS = 'in_progress';
     public const STATUS_ON_HOLD = 'on_hold';
     public const STATUS_DONE = 'done';
+    public const STATUS_READY_FOR_QC = 'ready_for_qc';
     public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
@@ -29,6 +30,7 @@ class WorkOrder extends Model
         self::STATUS_OPEN,
         self::STATUS_IN_PROGRESS,
         self::STATUS_ON_HOLD,
+        self::STATUS_READY_FOR_QC,
         self::STATUS_DONE,
         self::STATUS_CANCELLED,
     ];
@@ -64,6 +66,10 @@ class WorkOrder extends Model
         'total_incl_tax',
         'total_taxable_amount',
         'tax_breakdown',
+        'reception_signature',
+        'delivery_signature',
+        'reception_signed_at',
+        'delivery_signed_at',
     ];
 
     protected $casts = [
@@ -74,6 +80,8 @@ class WorkOrder extends Model
         'mileage' => 'integer',
         'fuel_level' => 'float',
         'tax_breakdown' => 'array',
+        'reception_signed_at' => 'datetime',
+        'delivery_signed_at' => 'datetime',
     ];
 
     // ==================== Relationships ====================
@@ -149,6 +157,36 @@ class WorkOrder extends Model
         return $this->hasMany(WorkOrderItemPart::class);
     }
 
+    /**
+     * Get the attachments for this work order.
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(WorkOrderAttachment::class)->orderByDesc('created_at');
+    }
+
+    /**
+     * Get the activities for this work order.
+     */
+    public function activities(): HasMany
+    {
+        return $this->hasMany(WorkOrderActivity::class)->orderByDesc('created_at');
+    }
+
+    /**
+     * Log an activity for this work order.
+     */
+    public function logActivity(string $action, ?string $description = null, ?array $changes = null): void
+    {
+        $this->activities()->create([
+            'tenant_id' => $this->tenant_id,
+            'user_id' => auth()->id(),
+            'action' => $action,
+            'description' => $description,
+            'changes' => $changes,
+        ]);
+    }
+
     // ==================== Payment Helpers ====================
 
     /**
@@ -187,8 +225,8 @@ class WorkOrder extends Model
      */
     public function canBeCancelled(): bool
     {
-        // Check if has payments
-        if ($this->payments()->exists()) {
+        // Check if has active payments (not fully refunded)
+        if ($this->total_paid > 0) {
             return false;
         }
 

@@ -304,6 +304,7 @@
                 :part="editingLinkedPart" 
                 :workOrderItemId="item?.id"
                 :units="inventoryUnits" 
+                :warehouses="warehouses"
                 :show-service-select="false" 
                 :show-toggles="true" 
                 :pending-mode="!item"
@@ -430,6 +431,7 @@ const props = defineProps({
     services: Array,
     technicians: { type: Array, default: () => [] },
     inventoryUnits: { type: Array, default: () => [] },
+    warehouses: { type: Array, default: () => [] },
     readOnly: { type: Boolean, default: false },
 });
 

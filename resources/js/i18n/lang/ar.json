@@ -3,6 +3,7 @@
         "app_name": "خدمة برو",
         "app_slogan": "نظام ادارة مراكز خدمات السيارات",
         "save": "حفظ",
+        "save_as_draft": "حفظ كمسودة",
         "apply": "تطبيق",
         "minute": "دقيقة",
         "hour": "ساعة",
@@ -15,6 +16,8 @@
         "employee": "موظف",
         "no_records": "لا يوجد سجلات",
         "cancel": "إلغاء",
+        "close": "إغلاق",
+        "clear": "مسح",
         "monthly": "شهري",
         "system": "النظام",
         "from": "من",
@@ -23,6 +26,8 @@
         "create": "إنشاء",
         "update": "تحديث",
         "delete": "حذف",
+        "confirm": "تأكيد",
+        "max": "الحد الأقصى",
         "search": "بحث",
         "share": "مشاركة",
         "loading": "جار التحميل...",
@@ -96,6 +101,8 @@
         "created_by": "أنشئ بواسطة",
         "updated_at": "تاريخ التحديث",
         "notes": "ملاحظات",
+        "general_info": "المعلومات العامة",
+        "by": "بواسطة",
         "select": "اختر",
         "all": "الكل",
         "all_categories": "جميع الفئات",
@@ -141,7 +148,12 @@
         "alert": "تنبيه",
         "link_copied": "تم نسخ الرابط بنجاح",
         "copied": "تم النسخ",
-        "open_in_whatsapp": "فتح باستخدام الواتساب"
+        "open_in_whatsapp": "فتح باستخدام الواتساب",
+        "photos_uploaded_successfully": "تم رفع الصور بنجاح",
+        "attachments_uploaded_successfully": "تم رفع المرفقات بنجاح",
+        "attachment_deleted": "تم حذف المرفق بنجاح",
+        "invalid_file_type": "نوع الملف غير صالح: {file}",
+        "file_too_large": "حجم الملف كبير جداً: {file} (الحد الأقصى {size})"
     },
     "nav": {
         "brand": "Carag",
@@ -377,6 +389,30 @@
         "payments_receipt_desc": "جميع المدفوعات المسجلة على هذا الكرت"
     },
     "work_orders": {
+        "activities": {
+            "title": "سجل الأنشطة",
+            "no_activities": "لا يوجد أنشطة مسجلة بعد",
+            "actions": {
+                "created": "تم إنشاء كرت العمل",
+                "updated": "تم تحديث بيانات كرت العمل",
+                "status_changed": "تم تغيير حالة كرت العمل إلى :status",
+                "item_added": "تمت إضافة خدمة: :title",
+                "item_updated": "تعديل مسمى الخدمة: :title",
+                "item_deleted": "تم حذف خدمة: :title",
+                "part_added": "تمت إضافة قطعة: :name",
+                "part_updated": "تم تحديث قطعة: :name",
+                "part_deleted": "تم حذف قطعة: :name",
+                "payment_added": "تمت إضافة دفعة بقيمة :amount",
+                "photos_uploaded": "تم رفع صور جديدة",
+                "attachments_uploaded": "تم رفع مرفقات جديدة",
+                "technician_assigned": "تم تعيين فني: :name للخدمة :service",
+                "technician_removed": "تم إزالة فني من الخدمة :service",
+                "condition_updated": "تم تحديث تقرير حالة المركبة",
+                "inspection_completed": "تم إكمال فحص: :template",
+                "signed_reception": "تم توقيع الاستلام",
+                "signed_delivery": "تم توقيع التسليم"
+            }
+        },
         "title": "أوامر العمل",
         "total": "الإجمالي",
         "balance": "المتبقي",
@@ -443,7 +479,8 @@
             "condition_report": "تقرير حالة المركبة",
             "photos": "صور المركبة",
             "technicians": "الفنيين",
-            "payments": "المدفوعات"
+            "payments": "المدفوعات",
+            "inspections": "الفحص المنهجي"
         },
         "form": {
             "customer": "العميل",
@@ -490,6 +527,7 @@
             "draft": "مسودة",
             "open": "مفتوح",
             "in_progress": "قيد التنفيذ",
+            "ready_for_qc": "جاهز للفحص (QC)",
             "done": "مكتمل",
             "cancelled": "ملغي"
         },
@@ -504,7 +542,18 @@
                 "condition": "تقرير الحالة",
                 "photos": "الصور",
                 "activities": "الأنشطة",
-                "attachments": "المرفقات"
+                "attachments": "المرفقات",
+                "inspections": "الفحوصات المنهجية",
+                "signatures": "التوقيعات الرقمية"
+            },
+            "signatures": {
+                "reception": "توقيع الاستلام",
+                "delivery": "توقيع التسليم",
+                "sign_now": "التوقيع الآن",
+                "signed_at": "تم التوقيع في {date}",
+                "save": "حفظ التوقيع",
+                "reception_hint": "توقيع العميل عند إدخال المركبة للمركز وإقرار الحالة المبدئية.",
+                "delivery_hint": "توقيع العميل عند استلام المركبة بعد انتهاء العمل وإقرار جودة الخدمة."
             },
             "add_service": "إضافة خدمة",
             "no_departments_in_center": "لم يتم إضافة قسم أو خدمة الى هذا المركز .",
@@ -542,6 +591,23 @@
                 "note": "ملاحظة"
             }
         },
+        "systematic": {
+            "title": "نظام الفحص المنهجي",
+            "start_inspection": "بدء فحص جديد",
+            "select_template": "اختر نموذج الفحص",
+            "performed_by": "قام بالفحص",
+            "performed_at": "تاريخ الفحص",
+            "result_good": "جيد",
+            "result_warning": "يحتاج متابعة",
+            "result_danger": "خطير / يحتاج استبدال",
+            "result_na": "غير منطبق",
+            "save_inspection": "حفظ نتائج الفحص",
+            "no_inspections": "لم يتم إجراء فحوصات منهجية بعد",
+            "view_results": "عرض النتائج",
+            "template": "النموذج",
+            "category": "الفئة",
+            "item": "العنصر"
+        },
         "photos": {
             "title": "صور المركبة",
             "images": "صورة",
@@ -575,6 +641,7 @@
             "status": "الحالة",
             "status_pending": "قيد الانتظار",
             "status_in_progress": "جاري",
+            "status_ready_for_qc": "فحص الجودة",
             "status_completed": "مكتمل",
             "status_on_hold": "معلق",
             "status_cancelled": "ملغاة",
@@ -1409,8 +1476,8 @@
             "description_placeholder": "أدخل وصف تفصيلي للقطعة",
             "additional_info": "معلومات إضافية",
             "inventory_pricing": "المخزون والتسعير",
-            "make_model_placeholder": "الماركة والموديل",
-            "make_model_hint": "لم تقم بتحديد الماركة والموديل",
+            "make_model_placeholder": " ",
+            "make_model_hint": " ",
             "min_qty": "الحد الأدنى للمخزون",
             "min_qty_hint": "تنبيه عند انخفاض المخزون",
             "reorder_qty": "كمية إعادة الطلب",
@@ -1677,12 +1744,18 @@
         "items": {
             "add": "إضافة صنف",
             "edit": "تعديل صنف",
-            "select_part": "اختر قطعة الغيار"
+            "select_part": "اختر قطعة الغيار",
+            "qty_ordered": "الكمية المطلوبة",
+            "qty_received": "الكمية المستلمة",
+            "qty_pending": "الكمية المتبقية",
+            "receive_now": "استلام الآن"
         },
         "grn": {
             "title": "سندات الاستلام",
             "subtitle": "استلام البضاعة من الموردين",
             "create": "إنشاء سند استلام",
+            "create_for": "إنشاء سند استلام للأمر",
+            "for_po": "تابع لأمر الشراء",
             "delivery_note": "رقم إذن التسليم",
             "received_date": "تاريخ الاستلام",
             "qty_ordered": "المطلوب",
@@ -1691,7 +1764,16 @@
             "created": "تم إنشاء سند الاستلام",
             "posted": "تم ترحيل سند الاستلام للمخزون",
             "cancelled": "تم إلغاء سند الاستلام",
-            "post": "ترحيل للمخزون"
+            "post": "ترحيل للمخزون",
+            "save_and_post": "حفظ وترحيل للمخزون",
+            "save_as_draft": "حفظ كمسودة",
+            "posted_at": "تاريخ الترحيل",
+            "over_reception": "استلام كمية زائدة",
+            "statuses": {
+                "draft": "مسودة",
+                "posted": "مرحل",
+                "cancelled": "ملغي"
+            }
         }
     },
     "invoices": {

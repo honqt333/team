@@ -50,4 +50,9 @@ return [
     'service_has_quote_lines_with_codes' => 'لا يمكن حذف الخدمة - مستخدمة في التقييمات: :codes',
     'service_has_work_order_items_with_codes' => 'لا يمكن حذف الخدمة - مستخدمة في كروت العمل: :codes',
 
+    // Photos & Attachments
+    'photo_deleted' => 'تم حذف الصورة بنجاح',
+    'photos_uploaded_successfully' => 'تم رفع الصور بنجاح',
+    'attachments_uploaded_successfully' => 'تم رفع المرفقات بنجاح',
+    'attachment_deleted' => 'تم حذف المرفق بنجاح',
 ];

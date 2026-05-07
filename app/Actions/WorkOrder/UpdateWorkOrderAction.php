@@ -13,20 +13,18 @@ class UpdateWorkOrderAction
     {
         return DB::transaction(function () use ($workOrder, $user, $data) {
             // Update main work order fields
-            $workOrder->update([
-                'customer_id' => $data['customer_id'] ?? $workOrder->customer_id,
-                'vehicle_id' => $data['vehicle_id'] ?? $workOrder->vehicle_id,
-                'status' => $data['status'] ?? $workOrder->status,
-                'notes' => $data['notes'] ?? $workOrder->notes,
-                // New Fields
-                'customer_complaint' => $data['customer_complaint'] ?? $workOrder->customer_complaint,
-                'initial_assessment' => $data['initial_assessment'] ?? $workOrder->initial_assessment,
-                'odometer' => $data['odometer'] ?? $workOrder->odometer,
-                'contact_name' => $data['contact_name'] ?? $workOrder->contact_name,
-                'contact_phone' => $data['contact_phone'] ?? $workOrder->contact_phone,
-                'entry_date' => $data['entry_date'] ?? $workOrder->entry_date,
-                'expected_end_date' => $data['expected_end_date'] ?? $workOrder->expected_end_date,
-            ]);
+            $fields = [
+                'customer_id', 'vehicle_id', 'status', 'notes',
+                'customer_complaint', 'initial_assessment', 'odometer',
+                'contact_name', 'contact_phone', 'entry_date', 'expected_end_date'
+            ];
+
+            foreach ($fields as $field) {
+                if (array_key_exists($field, $data)) {
+                    $workOrder->{$field} = $data[$field];
+                }
+            }
+            $workOrder->save();
 
             // Handle status transitions
             if (isset($data['status'])) {
@@ -118,6 +116,8 @@ class UpdateWorkOrderAction
                     }
                 }
             }
+
+            $workOrder->logActivity('updated', __('work_orders.activities.actions.updated'));
 
             return $workOrder;
         });
