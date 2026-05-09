@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\PurchaseOrder;
 use App\Models\WorkOrder;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
@@ -146,5 +147,87 @@ class InvoicesController extends Controller
         $data = $this->invoiceService->getProformaData($workOrder);
 
         return Inertia::render('Invoices/PrintProforma', $data);
+    }
+
+    /**
+     * Invoices Hub - landing page
+     */
+    public function hub()
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = auth()->user()->current_center_id;
+
+        $salesCount = Invoice::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->count();
+
+        $purchasesCount = PurchaseOrder::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->count();
+
+        return Inertia::render('Invoices/Hub', [
+            'salesCount'     => $salesCount,
+            'purchasesCount' => $purchasesCount,
+        ]);
+    }
+
+    /**
+     * Sales Invoices index
+     */
+    public function salesIndex(Request $request)
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = auth()->user()->current_center_id;
+
+        $query = Invoice::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->with(['customer', 'workOrder'])
+            ->when($request->input('search'), function ($q, $search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('invoice_number', 'like', "%{$search}%")
+                          ->orWhereHas('customer', fn($c) => $c->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->input('payment_status'), fn($q, $s) => $q->where('payment_status', $s))
+            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('issue_date', '>=', $d))
+            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
+            ->orderBy('issue_date', 'desc');
+
+        $invoices = $query->paginate(25)->withQueryString();
+
+        return Inertia::render('Invoices/Sales/Index', [
+            'invoices' => $invoices,
+            'filters'  => $request->only(['search', 'payment_status', 'date_from', 'date_to']),
+        ]);
+    }
+
+    /**
+     * Purchase Invoices index
+     */
+    public function purchasesIndex(Request $request)
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = auth()->user()->current_center_id;
+
+        $query = PurchaseOrder::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->with(['supplier'])
+            ->when($request->input('search'), function ($q, $search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('code', 'like', "%{$search}%")
+                          ->orWhereHas('supplier', fn($s) => $s->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->input('status'), fn($q, $s) => $q->where('status', $s))
+            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('order_date', '>=', $d))
+            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('order_date', '<=', $d))
+            ->orderBy('order_date', 'desc');
+
+        $purchaseOrders = $query->paginate(25)->withQueryString();
+
+        return Inertia::render('Invoices/Purchasing/Index', [
+            'purchaseOrders' => $purchaseOrders,
+            'filters'        => $request->only(['search', 'status', 'date_from', 'date_to']),
+        ]);
     }
 }

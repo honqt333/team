@@ -136,6 +136,8 @@
         "view_details": "عرض التفاصيل",
         "km": "كم",
         "unit": "الوحدة",
+        "list": "قائمة",
+        "grid": "شبكة",
         "validation": {
             "required": "حقل {field} مطلوب",
             "required_fields": "يرجى تعبئة جميع الحقول المطلوبة"
@@ -692,6 +694,13 @@
     },
     "services_management": {
         "title": "إدارة الخدمات",
+        "inspections": "الفحوصات المنهجية",
+        "inspections_empty": "لا توجد فحوصات",
+        "add_inspection": "إضافة فحص",
+        "edit_inspection": "تعديل فحص",
+        "delete_inspection": "حذف الفحص",
+        "enable_inspections": "تفعيل تبويب الفحوصات في كرت العمل",
+        "enable_inspections_desc": "عند التعطيل، سيختفي تبويب الفحوصات المنهجية تماماً من صفحة عرض كرت العمل.",
         "add": "إضافة خدمة",
         "edit": "تعديل خدمة",
         "search": "بحث في الخدمات...",
@@ -1790,6 +1799,28 @@
         "tax_invoice": "فاتورة ضريبية",
         "already_exists": "الفاتورة موجودة بالفعل لهذا الأمر",
         "work_order_not_completed": "أمر العمل غير مكتمل",
+        "hub": {
+            "title": "الفواتير",
+            "subtitle": "إدارة فواتير المبيعات والمشتريات",
+            "sales_invoices": "فواتير المبيعات",
+            "sales_invoices_hint": "عرض وإدارة فواتير البيع والفواتير المرجعة",
+            "purchase_invoices": "فواتير المشتريات",
+            "purchase_invoices_hint": "عرض وإدارة فواتير الشراء وإرجاعات الشراء"
+        },
+        "sales": {
+            "title": "فواتير المبيعات",
+            "subtitle": "إدارة فواتير البيع والفواتير المرجعة",
+            "tab_invoices": "فواتير المبيعات",
+            "tab_returns": "الفواتير المرجعة",
+            "no_returns": "لا توجد فواتير مرجعة"
+        },
+        "purchases": {
+            "title": "فواتير المشتريات",
+            "subtitle": "إدارة فواتير الشراء وإرجاعات الشراء",
+            "tab_invoices": "فواتير المشتريات",
+            "tab_returns": "إرجاعات الشراء",
+            "no_returns": "لا توجد إرجاعات شراء"
+        },
         "status": {
             "draft": "مسودة",
             "valid": "صالحة",

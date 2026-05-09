@@ -174,6 +174,14 @@ class WorkOrder extends Model
     }
 
     /**
+     * Get the inspections for this work order.
+     */
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(WorkOrderInspection::class)->orderByDesc('performed_at');
+    }
+
+    /**
      * Log an activity for this work order.
      */
     public function logActivity(string $action, ?string $description = null, ?array $changes = null): void

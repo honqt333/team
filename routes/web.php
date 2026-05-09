@@ -254,11 +254,11 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::patch('/settings/colors/{color}/toggle-active', [\App\Http\Controllers\App\VehicleColorController::class, 'toggleActive'])->name('settings.colors.toggle');
 
     // Vehicle Condition Items
-    Route::get('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'index'])->name('settings.condition-items.index');
-    Route::post('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'store'])->name('settings.condition-items.store');
-    Route::put('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'update'])->name('settings.condition-items.update');
-    Route::delete('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'destroy'])->name('settings.condition-items.destroy');
-    Route::patch('/settings/condition-items/{conditionItem}/toggle-active', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'toggleActive'])->name('settings.condition-items.toggle');
+    Route::get('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'index'])->name('app.condition-items.index');
+    Route::post('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'store'])->name('app.condition-items.store');
+    Route::put('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'update'])->name('app.condition-items.update');
+    Route::delete('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'destroy'])->name('app.condition-items.destroy');
+    Route::patch('/settings/condition-items/{conditionItem}/toggle-active', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'toggleActive'])->name('app.condition-items.toggle');
     
     // Departments
     Route::apiResource('departments', \App\Http\Controllers\App\DepartmentController::class);
@@ -267,6 +267,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     // Services
     Route::apiResource('services', \App\Http\Controllers\App\ServiceController::class);
     Route::patch('/services/{service}/toggle-active', [\App\Http\Controllers\App\ServiceController::class, 'toggleActive']);
+    Route::post('/services/toggle-inspections-setting', [\App\Http\Controllers\App\ServiceController::class, 'toggleInspectionsSetting'])->name('app.services.toggle-inspections-setting');
     
     // API endpoints (Refactored to separate Controller)
     Route::get('/api/customers', [CustomerController::class, 'apiIndex']);
@@ -496,10 +497,19 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     // Invoices & Payments
     // ───────────────────────────────────────────────────────────────
     Route::prefix('invoices')->name('app.invoices.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\App\InvoicesController::class, 'index'])->name('index');
+        // Hub (landing page)
+        Route::get('/', [\App\Http\Controllers\App\InvoicesController::class, 'hub'])->name('hub');
+
+        // Sales Invoices
+        Route::get('/sales', [\App\Http\Controllers\App\InvoicesController::class, 'salesIndex'])->name('sales.index');
+
+        // Purchase Invoices
+        Route::get('/purchases', [\App\Http\Controllers\App\InvoicesController::class, 'purchasesIndex'])->name('purchases.index');
+
+        // Individual invoice show / print (existing)
         Route::get('/{invoice}', [\App\Http\Controllers\App\InvoicesController::class, 'show'])->name('show');
         Route::get('/{invoice}/print', [\App\Http\Controllers\App\InvoicesController::class, 'print'])->name('print');
-        
+
         // Payments on Invoice
         Route::post('/{invoice}/payments', [\App\Http\Controllers\App\PaymentsController::class, 'store'])->name('payments.store');
         Route::post('/{invoice}/pay-full', [\App\Http\Controllers\App\PaymentsController::class, 'payFull'])->name('payments.pay-full');

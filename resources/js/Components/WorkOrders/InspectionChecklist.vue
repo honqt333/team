@@ -22,33 +22,29 @@ const props = defineProps({
 const { t } = useI18n();
 const { success, error: toastError } = useToast();
 
-const templates = ref([]);
+const items = ref([]);
 const inspections = ref(props.workOrder.inspections || []);
 const loading = ref(false);
 const showNewInspectionModal = ref(false);
-const selectedTemplate = ref(null);
 const inspectionForm = ref({
-    template_id: null,
     results: []
 });
 
-const fetchTemplates = async () => {
+const fetchItems = async () => {
     try {
         const response = await axios.get(route('work-orders.inspections.templates', props.workOrder.id));
-        templates.value = response.data;
+        items.value = response.data;
     } catch (e) {
-        console.error('Error fetching templates', e);
+        console.error('Error fetching items', e);
     }
 };
 
 onMounted(() => {
-    fetchTemplates();
+    fetchItems();
 });
 
-const startInspection = (template) => {
-    selectedTemplate.value = template;
-    inspectionForm.value.template_id = template.id;
-    inspectionForm.value.results = template.items.map(item => ({
+const startInspection = () => {
+    inspectionForm.value.results = items.value.map(item => ({
         item_id: item.id,
         status: 'good',
         notes: ''
@@ -99,11 +95,9 @@ const viewInspection = (inspection) => {
                 {{ $t('work_orders.systematic.title') }}
             </h3>
             <div v-if="!readOnly" class="flex gap-2">
-                <div v-for="template in templates" :key="template.id">
-                    <PrimaryButton @click="startInspection(template)">
-                        {{ $t('work_orders.systematic.start_inspection') }}: {{ template.name[$i18n.locale] || template.name['ar'] }}
-                    </PrimaryButton>
-                </div>
+                <PrimaryButton @click="startInspection">
+                    {{ $t('work_orders.systematic.start_inspection') }}
+                </PrimaryButton>
             </div>
         </div>
 
@@ -117,14 +111,14 @@ const viewInspection = (inspection) => {
             >
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-                        {{ inspection.template?.name[$i18n.locale] || inspection.template?.name['ar'] }}
+                        {{ $t('work_orders.systematic.title') }}
                     </span>
                     <span class="text-[10px] text-gray-400 font-mono">
                         {{ new Date(inspection.performed_at).toLocaleDateString($i18n.locale) }}
                     </span>
                 </div>
                 <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-4">
-                    <span>👤 {{ inspection.performed_by_user?.name }}</span>
+                    <span>👤 {{ inspection.performed_by?.name || inspection.performed_user?.name }}</span>
                 </div>
                 
                 <div class="flex gap-2">
@@ -153,7 +147,7 @@ const viewInspection = (inspection) => {
             <div class="p-6">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                        {{ selectedTemplate?.name[$i18n.locale] || selectedTemplate?.name['ar'] }}
+                        {{ $t('work_orders.systematic.title') }}
                     </h2>
                     <button @click="showNewInspectionModal = false" class="text-gray-400 hover:text-gray-500">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -161,7 +155,7 @@ const viewInspection = (inspection) => {
                 </div>
 
                 <div class="space-y-8 max-h-[70vh] overflow-y-auto px-2">
-                    <div v-for="(group, category) in Object.groupBy(selectedTemplate?.items || [], i => i.category?.[$i18n.locale] || i.category?.['ar'] || 'Other')" :key="category">
+                    <div v-for="(group, category) in Object.groupBy(items || [], i => i[`category_${$i18n.locale}`] || i.category_ar || 'Other')" :key="category">
                         <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
                             {{ category }}
                         </h4>
@@ -169,8 +163,7 @@ const viewInspection = (inspection) => {
                             <div v-for="item in group" :key="item.id" class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
                                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                                     <div class="flex-1">
-                                        <p class="font-bold text-gray-900 dark:text-white">{{ item.name[$i18n.locale] || item.name['ar'] }}</p>
-                                        <p v-if="item.description" class="text-xs text-gray-500 mt-1">{{ item.description[$i18n.locale] || item.description['ar'] }}</p>
+                                        <p class="font-bold text-gray-900 dark:text-white">{{ item[`name_${$i18n.locale}`] || item.name_ar }}</p>
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <label 
@@ -224,10 +217,10 @@ const viewInspection = (inspection) => {
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ selectedInspection?.template?.name[$i18n.locale] || selectedInspection?.template?.name['ar'] }}
+                            {{ $t('work_orders.systematic.title') }}
                         </h2>
                         <p class="text-sm text-gray-500 mt-1">
-                            {{ $t('work_orders.systematic.performed_by') }}: {{ selectedInspection?.performed_by_user?.name }} 
+                            {{ $t('work_orders.systematic.performed_by') }}: {{ selectedInspection?.performed_by?.name || selectedInspection?.performed_user?.name }} 
                             • {{ $t('work_orders.systematic.performed_at') }}: {{ new Date(selectedInspection?.performed_at).toLocaleString($i18n.locale) }}
                         </p>
                     </div>
@@ -240,7 +233,7 @@ const viewInspection = (inspection) => {
                     <div v-for="result in selectedInspection?.results" :key="result.item_id" class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
                         <div class="flex-1">
                             <p class="font-bold text-gray-900 dark:text-white">
-                                {{ selectedInspection.template?.items?.find(i => i.id === result.item_id)?.name[$i18n.locale] || selectedInspection.template?.items?.find(i => i.id === result.item_id)?.name['ar'] }}
+                                {{ selectedInspection.items?.find(i => i.id === result.item_id)?.[`name_${$i18n.locale}`] || selectedInspection.items?.find(i => i.id === result.item_id)?.name_ar }}
                             </p>
                             <p v-if="result.notes" class="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">"{{ result.notes }}"</p>
                         </div>

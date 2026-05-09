@@ -265,6 +265,7 @@ class WorkOrderController
             'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
             'attachments.user',
             'activities.user',
+            'inspections.performedBy',
         ]);
 
         // Group items by department_id for accordion display
@@ -312,6 +313,8 @@ class WorkOrderController
             ->select('id', 'name_ar', 'name_en')
             ->get();
 
+        $enableSystematicInspections = \App\Models\Setting::where('key', 'enable_systematic_inspections')->value('value') ?? 'true';
+
         return Inertia::render('WorkOrders/Show', [
             'workOrder' => $workOrder,
             'itemsByDepartment' => $itemsByDepartment,
@@ -325,6 +328,7 @@ class WorkOrderController
             'warehouses' => $warehouses,
             'inventoryParts' => $inventoryParts,
             'inventoryUnits' => $inventoryUnits,
+            'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
         ]);
     }
 

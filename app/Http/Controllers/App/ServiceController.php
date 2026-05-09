@@ -4,6 +4,8 @@ namespace App\Http\Controllers\App;
 
 use App\Models\Department;
 use App\Models\Service;
+use App\Models\VehicleConditionItem;
+use App\Models\Setting;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,13 +47,37 @@ class ServiceController
             ->ordered()
             ->get();
 
+        // Get inspection condition items
+        $conditionItems = VehicleConditionItem::with('updatedBy:id,name')
+            ->orderedBySource()
+            ->ordered()
+            ->get();
+            
+        $enableSystematicInspections = Setting::where('key', 'enable_systematic_inspections')->value('value') ?? 'true';
+
         \Illuminate\Support\Facades\Log::info('Packages found in index:', ['count' => $packages->count(), 'sample' => $packages->take(1)->toArray()]);
 
         return Inertia::render('Services/Index', [
             'departments' => $departments,
             'unassignedServices' => $unassignedServices,
             'packages' => $packages,
+            'conditionItems' => $conditionItems,
+            'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
         ]);
+    }
+
+    public function toggleInspectionsSetting(Request $request): RedirectResponse
+    {
+        $setting = Setting::firstOrCreate(
+            ['key' => 'enable_systematic_inspections'],
+            ['group' => 'work_orders', 'value' => 'true']
+        );
+
+        $currentValue = filter_var($setting->value, FILTER_VALIDATE_BOOLEAN);
+        $setting->value = $currentValue ? 'false' : 'true';
+        $setting->save();
+
+        return redirect()->back()->with('success', __('common.updated_success'));
     }
 
     public function store(Request $request): RedirectResponse

@@ -17,6 +17,8 @@ class VehicleConditionItem extends Model
         'center_id',
         'name_ar',
         'name_en',
+        'category_ar',
+        'category_en',
         'is_active',
         'sort_order',
         'updated_by',

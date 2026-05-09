@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
-use App\Models\InspectionTemplate;
+use App\Models\VehicleConditionItem;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderInspection;
 use Illuminate\Http\Request;
@@ -16,11 +16,12 @@ class WorkOrderInspectionController extends Controller
      */
     public function getTemplates(WorkOrder $workOrder)
     {
-        $templates = InspectionTemplate::where('is_active', true)
-            ->with('items')
+        $items = VehicleConditionItem::where('is_active', true)
+            ->orderedBySource()
+            ->ordered()
             ->get();
 
-        return response()->json($templates);
+        return response()->json($items);
     }
 
     /**
@@ -29,9 +30,8 @@ class WorkOrderInspectionController extends Controller
     public function store(Request $request, WorkOrder $workOrder)
     {
         $validated = $request->validate([
-            'template_id' => 'required|exists:inspection_templates,id',
             'results' => 'required|array',
-            'results.*.item_id' => 'required|exists:inspection_items,id',
+            'results.*.item_id' => 'required|exists:vehicle_condition_items,id',
             'results.*.status' => 'required|in:good,warning,danger,na',
             'results.*.notes' => 'nullable|string|max:500',
         ]);
@@ -40,14 +40,13 @@ class WorkOrderInspectionController extends Controller
             'tenant_id' => $workOrder->tenant_id,
             'center_id' => $workOrder->center_id,
             'work_order_id' => $workOrder->id,
-            'template_id' => $validated['template_id'],
             'performed_by' => auth()->id(),
             'performed_at' => now(),
             'results' => $validated['results'],
         ]);
 
         $workOrder->logActivity('inspection_completed', __('work_orders.activities.actions.inspection_completed', [
-            'template' => $inspection->template->name[app()->getLocale()] ?? $inspection->template->name['ar']
+            'template' => __('services_management.inspections')
         ]));
 
         return back()->with('success', __('messages.inspection_saved'));
@@ -58,7 +57,10 @@ class WorkOrderInspectionController extends Controller
      */
     public function show(WorkOrder $workOrder, WorkOrderInspection $inspection)
     {
-        $inspection->load(['template.items', 'performedBy']);
+        $inspection->load(['performedBy']);
+        // We also need the current condition items so we can show names
+        $items = VehicleConditionItem::all();
+        $inspection->items = $items;
         
         return response()->json($inspection);
     }

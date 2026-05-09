@@ -1094,6 +1094,7 @@ const props = defineProps({
     warehouses: { type: Array, default: () => [] },
     inventoryParts: { type: Array, default: () => [] },
     inventoryUnits: { type: Array, default: () => [] },
+    enableSystematicInspections: { type: Boolean, default: true },
 });
 
 const { t, te } = useI18n();
@@ -1603,18 +1604,26 @@ async function deleteServiceItem(item) {
     }
 }
 
-const tabs = [
-    { key: 'services', label: t('work_orders.show.tabs.services'), icon: '🔧' },
-    { key: 'parts', label: t('work_orders.show.tabs.parts'), icon: '🔩' },
-    { key: 'technicians', label: t('work_orders.show.tabs.technicians'), icon: '👷' },
-    { key: 'payments', label: t('work_orders.show.tabs.payments'), icon: '💰' },
-    { key: 'condition', label: t('work_orders.show.tabs.condition'), icon: '🚗' },
-    { key: 'photos', label: t('work_orders.show.tabs.photos'), icon: '📸' },
-    { key: 'attachments', label: t('work_orders.show.tabs.attachments'), icon: '📎' },
-    { key: 'inspections', label: t('work_orders.show.tabs.inspections'), icon: '🔍' },
-    { key: 'signatures', label: t('work_orders.show.tabs.signatures'), icon: '✍️' },
-    { key: 'activities', label: t('work_orders.show.tabs.activities'), icon: '📋' },
-];
+const tabs = computed(() => {
+    const allTabs = [
+        { key: 'services', label: t('work_orders.show.tabs.services'), icon: '🔧' },
+        { key: 'parts', label: t('work_orders.show.tabs.parts'), icon: '🔩' },
+        { key: 'technicians', label: t('work_orders.show.tabs.technicians'), icon: '👷' },
+        { key: 'payments', label: t('work_orders.show.tabs.payments'), icon: '💰' },
+        { key: 'condition', label: t('work_orders.show.tabs.condition'), icon: '🚗' },
+        { key: 'photos', label: t('work_orders.show.tabs.photos'), icon: '📸' },
+        { key: 'attachments', label: t('work_orders.show.tabs.attachments'), icon: '📎' },
+        { key: 'inspections', label: t('work_orders.show.tabs.inspections'), icon: '🔍' },
+        { key: 'signatures', label: t('work_orders.show.tabs.signatures'), icon: '✍️' },
+        { key: 'activities', label: t('work_orders.show.tabs.activities'), icon: '📋' },
+    ];
+
+    if (props.enableSystematicInspections) {
+        return allTabs;
+    }
+
+    return allTabs.filter(tab => tab.key !== 'inspections');
+});
 
 // Compute back URL based on work order status
 const backUrl = computed(() => {

@@ -134,6 +134,8 @@
         "view_details": "View details",
         "km": "How much?",
         "unit": "Unity",
+        "list": "List",
+        "grid": "Grid",
         "validation": {
             "required": "{field} field is required",
             "required_fields": "Please fill out all required fields"
@@ -1303,7 +1305,14 @@
         }
     },
     "services_management": {
-        "title": "Service management",
+        "title": "Services Management",
+        "inspections": "Systematic Inspections",
+        "inspections_empty": "No inspections found",
+        "add_inspection": "Add Inspection",
+        "edit_inspection": "Edit Inspection",
+        "delete_inspection": "Delete Inspection",
+        "enable_inspections": "Enable Inspections Tab in Work Orders",
+        "enable_inspections_desc": "When disabled, the systematic inspections tab will be completely hidden from the Work Order show page.",
         "add": "Add a service",
         "edit": "Modify service",
         "search": "Search services...",
@@ -1824,10 +1833,32 @@
         "tax_invoice": "Tax invoice",
         "already_exists": "The bill already exists for this",
         "work_order_not_completed": "The work order is incomplete",
+        "hub": {
+            "title": "Invoices",
+            "subtitle": "Manage sales and purchase invoices",
+            "sales_invoices": "Sales Invoices",
+            "sales_invoices_hint": "View and manage sales invoices and credit notes",
+            "purchase_invoices": "Purchase Invoices",
+            "purchase_invoices_hint": "View and manage purchase invoices and returns"
+        },
+        "sales": {
+            "title": "Sales Invoices",
+            "subtitle": "Manage sales invoices and credit notes",
+            "tab_invoices": "Sales Invoices",
+            "tab_returns": "Credit Notes",
+            "no_returns": "No credit notes found"
+        },
+        "purchases": {
+            "title": "Purchase Invoices",
+            "subtitle": "Manage purchase invoices and returns",
+            "tab_invoices": "Purchase Invoices",
+            "tab_returns": "Purchase Returns",
+            "no_returns": "No purchase returns found"
+        },
         "status": {
             "draft": "Draft",
             "valid": "Valid",
-            "reported": "Informant",
+            "reported": "Reported",
             "cancelled": "Canceled",
             "unpaid": "Unpaid",
             "partial": "Partially paid",
@@ -1840,7 +1871,7 @@
         "grand_total": "Total including tax",
         "total_paid": "Paid",
         "balance": "Remaining",
-        "all_statuses": "All cases",
+        "all_statuses": "All statuses",
         "date_from": "From date",
         "date_to": "To date"
     },

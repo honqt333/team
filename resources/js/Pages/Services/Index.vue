@@ -121,7 +121,7 @@
                             <span>{{ $t('services_management.add') }}</span>
                         </button>
                     </template>
-                    <template v-else>
+                    <template v-else-if="activeTab === 'packages'">
                         <!-- Add Package Button -->
                         <button v-if="can('services.create')" @click="openCreatePackageModal"
                             class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all">
@@ -130,6 +130,16 @@
                                     d="M12 4v16m8-8H4" />
                             </svg>
                             <span>{{ $t('packages.add') }}</span>
+                        </button>
+                    </template>
+                    <template v-else-if="activeTab === 'inspections'">
+                        <!-- Add Inspection Button -->
+                        <button @click="openInspectionModal()"
+                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span>{{ $t('services_management.add_inspection') }}</span>
                         </button>
                     </template>
                 </div>
@@ -689,10 +699,153 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Inspections Tab Content -->
+            <div v-if="activeTab === 'inspections'" class="space-y-6">
+                <!-- Empty State -->
+                <div v-if="filteredConditionItems.length === 0"
+                    class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700">
+                    <div
+                        class="w-16 h-16 mx-auto rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                    </div>
+                    <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{
+                        $t('services_management.inspections_empty') }}
+                    </p>
+                    <button @click="openInspectionModal()"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 mt-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        {{ $t('services_management.add_inspection') }}
+                    </button>
+                </div>
+
+                <!-- Inspections List -->
+                <div v-else class="space-y-6">
+                    <!-- Toggle Setting & Add Button Header -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 gap-4 mb-4">
+                        <div class="flex items-center gap-3">
+                            <button 
+                                @click="toggleInspectionsSetting"
+                                :class="[
+                                    'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                                    enableSystematicInspections ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-700'
+                                ]"
+                                role="switch"
+                                :aria-checked="enableSystematicInspections"
+                            >
+                                <span 
+                                    aria-hidden="true" 
+                                    :class="[
+                                        'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                                        enableSystematicInspections 
+                                            ? ($i18n.locale === 'ar' ? '-translate-x-5' : 'translate-x-5') 
+                                            : 'translate-x-0'
+                                    ]"
+                                />
+                            </button>
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ $t('services_management.enable_inspections') }}</h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $t('services_management.enable_inspections_desc') }}</p>
+                            </div>
+                        </div>
+                        <button @click="openInspectionModal()"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium shadow-md shadow-amber-500/20 hover:shadow-lg transition-all text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            {{ $t('services_management.add_inspection') }}
+                        </button>
+                    </div>
+
+                    <!-- Grouped Items -->
+                    <div v-for="(group, categoryName) in groupedConditionItems" :key="categoryName" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ categoryName }}</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700/50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 w-16">
+                                            {{ $t('services_management.columns.number') }}
+                                        </th>
+                                        <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                            {{ $t('services_management.columns.name') }}
+                                        </th>
+                                        <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 w-32">
+                                            {{ $t('common.status') }}
+                                        </th>
+                                        <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 w-32">
+                                            {{ $t('services_management.columns.actions') }}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                    <tr v-for="(item, index) in group" :key="item.id"
+                                        class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ index + 1 }}</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <button @click="openInspectionModal(item)"
+                                                class="font-medium text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors cursor-pointer"
+                                                :disabled="item.source === 'system'">
+                                                {{ getName(item) }}
+                                            </button>
+                                            <span v-if="item.source === 'system'" class="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                                {{ $t('common.system') }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-center">
+                                        <span :class="item.is_active
+                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
+                                            : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'"
+                                            class="px-2 py-0.5 text-xs font-medium rounded-full">
+                                            {{ item.is_active ? $t('common.active') : $t('common.inactive') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center justify-center gap-1">
+                                            <button @click.stop="toggleInspectionActive(item)"
+                                                :disabled="item.source === 'system'"
+                                                :class="[
+                                                    'px-2 py-0.5 text-xs font-medium rounded-full transition-all',
+                                                    item.source === 'system' ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500 dark:bg-gray-800' : 'hover:opacity-80',
+                                                    item.is_active && item.source !== 'system' ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' : '',
+                                                    !item.is_active && item.source !== 'system' ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' : ''
+                                                ]">
+                                                {{ item.is_active ? $t('common.active') : $t('common.inactive') }}
+                                            </button>
+                                            <button @click.stop="openInspectionModal(item)"
+                                                :disabled="item.source === 'system'"
+                                                :class="['p-1.5 rounded-lg transition-colors', item.source === 'system' ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20']">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                            </button>
+                                            <button @click.stop="deleteInspection(item)"
+                                                :disabled="item.source === 'system'"
+                                                :class="['p-1.5 rounded-lg transition-colors', item.source === 'system' ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20']">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-
-        <!-- Service Form Modal -->
+    <!-- Service Form Modal -->
         <ServiceFormModal :show="showModal" :service="selectedService" :departments="departments" @close="closeModal"
             @saved="handleSaved" />
 
@@ -707,6 +860,10 @@
         <!-- Package Form Modal -->
         <PackageFormModal :show="showPackageModal" :service="selectedPackage" :departments="departments"
             :available-services="availableServices" @close="closePackageModal" @saved="handlePackageSaved" />
+
+        <!-- Condition Item Form Modal -->
+        <ConditionItemFormModal :show="showInspectionModal" :item="selectedInspection" @close="closeInspectionModal"
+            @saved="handleInspectionSaved" />
     </AppLayout>
 </template>
 
@@ -719,6 +876,7 @@ import ServiceFormModal from '@/Components/ServiceFormModal.vue';
 import PackageFormModal from '@/Components/PackageFormModal.vue';
 import ServiceQuickEditModal from '@/Components/ServiceQuickEditModal.vue';
 import DepartmentFormModal from '@/Components/DepartmentFormModal.vue';
+import ConditionItemFormModal from '@/Components/ConditionItemFormModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -742,6 +900,14 @@ const props = defineProps({
     packages: {
         type: Array,
         default: () => [],
+    },
+    conditionItems: {
+        type: Array,
+        default: () => [],
+    },
+    enableSystematicInspections: {
+        type: Boolean,
+        default: true,
     },
 });
 
@@ -768,6 +934,10 @@ const selectedServiceForQuickEdit = ref(null);
 // Package modal state
 const showPackageModal = ref(false);
 const selectedPackage = ref(null);
+
+// Inspection modal state
+const showInspectionModal = ref(false);
+const selectedInspection = ref(null);
 
 // Open all departments by default on mount
 onMounted(() => {
@@ -812,9 +982,20 @@ const filteredPackages = computed(() => {
     );
 });
 
+const filteredConditionItems = computed(() => {
+    if (!searchQuery.value) return props.conditionItems;
+
+    const query = searchQuery.value.toLowerCase();
+    return props.conditionItems.filter(item =>
+        item.name_ar?.toLowerCase().includes(query) ||
+        item.name_en?.toLowerCase().includes(query)
+    );
+});
+
 // Tab Configuration
 const IconServices = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>` };
 const IconPackages = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>` };
+const IconInspections = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>` };
 
 const tabs = computed(() => [
     {
@@ -836,6 +1017,16 @@ const tabs = computed(() => [
         gradientFrom: '#a855f7', // purple-500
         gradientTo: '#9333ea',   // purple-600
         count: props.packages?.length || 0
+    },
+    {
+        key: 'inspections',
+        label: t('services_management.inspections'),
+        icon: IconInspections,
+        iconColor: 'text-amber-500',
+        bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+        gradientFrom: '#f59e0b', // amber-500
+        gradientTo: '#d97706',   // amber-600
+        count: props.conditionItems?.length || 0
     }
 ]);
 
@@ -1006,4 +1197,76 @@ function handlePackageSaved() {
     activeTab.value = 'packages';
     router.reload({ only: ['departments', 'unassignedServices', 'packages'] });
 }
+// Inspection Methods
+const toggleInspectionsSetting = () => {
+    router.post(route('app.services.toggle-inspections-setting'), {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            success(t('common.updated_success'));
+        }
+    });
+};
+
+const groupedConditionItems = computed(() => {
+    const items = filteredConditionItems.value;
+    const groups = {};
+    
+    // Determine the current locale
+    const locale = useI18n().locale.value || 'en';
+    
+    items.forEach(item => {
+        const category = locale === 'ar' 
+            ? (item.category_ar || item.category_en || 'أخرى')
+            : (item.category_en || item.category_ar || 'Other');
+            
+        if (!groups[category]) {
+            groups[category] = [];
+        }
+        groups[category].push(item);
+    });
+    
+    return groups;
+});
+
+const openInspectionModal = (item = null) => {
+    selectedInspection.value = item;
+    showInspectionModal.value = true;
+};
+
+const closeInspectionModal = () => {
+    showInspectionModal.value = false;
+    setTimeout(() => {
+        selectedInspection.value = null;
+    }, 200);
+};
+
+const handleInspectionSaved = () => {
+    success(selectedInspection.value ? t('common.updated_success') : t('common.created_success'));
+};
+
+const toggleInspectionActive = (item) => {
+    if (item.source === 'system') return;
+
+    router.put(route('app.condition-items.toggle-active', item.id), {}, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
+const deleteInspection = (item) => {
+    if (item.source === 'system') return;
+
+    confirm(
+        t('services_management.delete_inspection'),
+        t('common.delete_confirmation'),
+        () => {
+            router.delete(route('app.condition-items.destroy', item.id), {
+                preserveScroll: true,
+                onSuccess: () => {
+                    success(t('common.deleted_success'));
+                },
+            });
+        }
+    );
+};
 </script>
