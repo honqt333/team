@@ -16,7 +16,11 @@ class WorkOrderInspectionController extends Controller
      */
     public function getTemplates(WorkOrder $workOrder)
     {
-        $items = VehicleConditionItem::where('is_active', true)
+        $items = VehicleConditionItem::whereHas('category', function ($query) {
+                $query->where('is_active', true);
+            })
+            ->where('is_active', true)
+            ->with('category')
             ->orderedBySource()
             ->ordered()
             ->get();
@@ -59,7 +63,7 @@ class WorkOrderInspectionController extends Controller
     {
         $inspection->load(['performedBy']);
         // We also need the current condition items so we can show names
-        $items = VehicleConditionItem::all();
+        $items = VehicleConditionItem::with('category')->get();
         $inspection->items = $items;
         
         return response()->json($inspection);

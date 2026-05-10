@@ -15,4 +15,20 @@ class SettingsController extends Controller
     {
         return Inertia::render('Settings/Index');
     }
+
+    /**
+     * Display the integrations dashboard.
+     */
+    public function integrations(): Response
+    {
+        return Inertia::render('Settings/Integrations');
+    }
+
+    /**
+     * Display the website builder dashboard.
+     */
+    public function website(): Response
+    {
+        return Inertia::render('Settings/Website');
+    }
 }

@@ -17,8 +17,7 @@ class VehicleConditionItem extends Model
         'center_id',
         'name_ar',
         'name_en',
-        'category_ar',
-        'category_en',
+        'category_id',
         'is_active',
         'sort_order',
         'updated_by',
@@ -48,6 +47,11 @@ class VehicleConditionItem extends Model
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(VehicleConditionCategory::class, 'category_id');
     }
 
     public function updatedBy(): BelongsTo

@@ -25,32 +25,23 @@
             <!-- Form -->
             <form @submit.prevent="submit" class="p-6">
                 <div class="space-y-5">
-                    <!-- Category Fields -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('common.category') }} (العربية) <span class="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                v-model="form.category_ar"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
-                                required
-                            />
-                            <p v-if="form.errors.category_ar" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.category_ar }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('common.category') }} (English)
-                            </label>
-                            <input
-                                type="text"
-                                v-model="form.category_en"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
-                                dir="ltr"
-                            />
-                            <p v-if="form.errors.category_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.category_en }}</p>
-                        </div>
+                    
+                    <!-- Category Dropdown -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            {{ $t('common.category') }} <span class="text-red-500">*</span>
+                        </label>
+                        <select
+                            v-model="form.category_id"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                            required
+                        >
+                            <option value="" disabled>{{ $t('common.select') }}</option>
+                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                                {{ cat.name }}
+                            </option>
+                        </select>
+                        <p v-if="form.errors.category_id" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.category_id }}</p>
                     </div>
 
                     <!-- Arabic Name -->
@@ -70,13 +61,14 @@
                     <!-- English Name -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            {{ $t('services_management.form.name_en') }}
+                            {{ $t('services_management.form.name_en') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
                             v-model="form.name_en"
                             class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
                             dir="ltr"
+                            required
                         />
                         <p v-if="form.errors.name_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_en }}</p>
                     </div>
@@ -129,6 +121,14 @@ import Modal from '@/Components/Modal.vue';
 const props = defineProps({
     show: Boolean,
     item: Object,
+    categories: {
+        type: Array,
+        default: () => []
+    },
+    initialCategoryId: {
+        type: [Number, String],
+        default: ''
+    }
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -138,8 +138,7 @@ const isEdit = computed(() => !!props.item);
 const form = useForm({
     name_ar: '',
     name_en: '',
-    category_ar: '',
-    category_en: '',
+    category_id: '',
     is_active: true,
 });
 
@@ -148,11 +147,13 @@ watch(() => props.show, (show) => {
         if (props.item) {
             form.name_ar = props.item.name_ar || '';
             form.name_en = props.item.name_en || '';
-            form.category_ar = props.item.category_ar || '';
-            form.category_en = props.item.category_en || '';
+            form.category_id = props.item.category_id || '';
             form.is_active = props.item.is_active ?? true;
         } else {
             form.reset();
+            if (props.initialCategoryId) {
+                form.category_id = props.initialCategoryId;
+            }
         }
     }
 });

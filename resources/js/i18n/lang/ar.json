@@ -42,8 +42,8 @@
         "add": "إضافة",
         "remove": "إزالة",
         "total": "الإجمالي",
-        "active": "فعال",
-        "inactive": "غير فعال",
+        "active": "مفعل",
+        "inactive": "غير مفعل",
         "print": "طباعة",
         "actions": "الإجراءات",
         "btn_create_work_order": "إنشاء أمر عمل",
@@ -53,6 +53,7 @@
         "confirm_delete_title": "تأكيد الحذف",
         "confirm_delete_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
         "delete_confirm": "تأكيد الحذف",
+        "delete_confirmation": "هل أنت متأكد من رغبتك في الحذف؟ لا يمكن التراجع عن هذا الإجراء.",
         "delete_confirm_message": "هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.",
         "confirm": "تأكيد",
         "deleted_success": "تم الحذف بنجاح",
@@ -108,6 +109,7 @@
         "all_categories": "جميع الفئات",
         "all_centers": "جميع الفروع",
         "name": "الاسم",
+        "category": "الفئة",
         "title": "العنوان",
         "content": "المحتوى",
         "basic_info": "البيانات الأساسية",
@@ -175,7 +177,10 @@
         "settings": "الإعدادات",
         "quotes": "التقييمات",
         "employee_portal": "بوابتي",
-        "payroll": "مسيرات الرواتب"
+        "payroll": "مسيرات الرواتب",
+        "reports": "التقارير",
+        "integrations": "التكاملات",
+        "website": "الموقع"
     },
     "theme": {
         "toggle": "تبديل المظهر",
@@ -697,10 +702,15 @@
         "inspections": "الفحوصات المنهجية",
         "inspections_empty": "لا توجد فحوصات",
         "add_inspection": "إضافة فحص",
+        "add_inspection_category": "إضافة قسم فحص",
         "edit_inspection": "تعديل فحص",
+        "edit_inspection_category": "تعديل قسم فحص",
         "delete_inspection": "حذف الفحص",
+        "delete_inspection_category": "حذف قسم فحص",
+        "cannot_delete_has_items": "لا يمكن حذف القسم لأنه يحتوي على فحوصات. قم بحذف الفحوصات أولاً.",
         "enable_inspections": "تفعيل تبويب الفحوصات في كرت العمل",
         "enable_inspections_desc": "عند التعطيل، سيختفي تبويب الفحوصات المنهجية تماماً من صفحة عرض كرت العمل.",
+        "active_hint": "تفعيل أو تعطيل هذا الفحص في النظام",
         "add": "إضافة خدمة",
         "edit": "تعديل خدمة",
         "search": "بحث في الخدمات...",
@@ -743,6 +753,8 @@
         "form": {
             "department": "القسم",
             "no_department": "بدون قسم",
+            "category_ar": "القسم بالعربية",
+            "category_en": "القسم بالإنجليزية",
             "name_ar": "الاسم بالعربية",
             "name_ar_placeholder": "مثال: فحص كمبيوتر",
             "name_en": "الاسم بالإنجليزية",
@@ -2545,5 +2557,22 @@
             "speed": "أداء عالي السرعة",
             "speed_desc": "مُحسَّن للسرعة والموثوقية لضمان تجربة سلسة في جميع الأوقات."
         }
+    },
+    "reports": {
+        "title": "التقارير",
+        "subtitle": "مركز التقارير والتحليلات - نظرة شاملة على أداء مركزك",
+        "payments": "المدفوعات",
+        "orders": "الطلبات",
+        "services": "الخدمات",
+        "invoices": "الفواتير",
+        "purchase_invoices": "فواتير الشراء",
+        "inventory_activities": "أنشطة المخزون",
+        "customers": "العملاء",
+        "partners": "الشركاء",
+        "suppliers": "الموردين",
+        "employees": "الموظفون / العمال",
+        "vehicles": "المركبات",
+        "financial_summary": "الملخص المالي",
+        "cash_flow": "حركة الصندوق"
     }
 }

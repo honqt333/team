@@ -134,12 +134,12 @@
                     </template>
                     <template v-else-if="activeTab === 'inspections'">
                         <!-- Add Inspection Button -->
-                        <button @click="openInspectionModal()"
+                        <button @click="openCategoryModal()"
                             class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            <span>{{ $t('services_management.add_inspection') }}</span>
+                            <span>{{ $t('services_management.add_inspection_category') }}</span>
                         </button>
                     </template>
                 </div>
@@ -703,7 +703,7 @@
             <!-- Inspections Tab Content -->
             <div v-if="activeTab === 'inspections'" class="space-y-6">
                 <!-- Empty State -->
-                <div v-if="filteredConditionItems.length === 0"
+                <div v-if="filteredConditionCategories.length === 0"
                     class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center border border-gray-200 dark:border-gray-700">
                     <div
                         class="w-16 h-16 mx-auto rounded-full bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-4">
@@ -714,12 +714,12 @@
                     <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{
                         $t('services_management.inspections_empty') }}
                     </p>
-                    <button @click="openInspectionModal()"
+                    <button @click="openCategoryModal()"
                         class="inline-flex items-center gap-2 px-5 py-2.5 mt-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        {{ $t('services_management.add_inspection') }}
+                        {{ $t('services_management.add_inspection_category') }}
                     </button>
                 </div>
 
@@ -752,21 +752,60 @@
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $t('services_management.enable_inspections_desc') }}</p>
                             </div>
                         </div>
-                        <button @click="openInspectionModal()"
-                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-medium shadow-md shadow-amber-500/20 hover:shadow-lg transition-all text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            {{ $t('services_management.add_inspection') }}
-                        </button>
+
                     </div>
 
-                    <!-- Grouped Items -->
-                    <div v-for="(group, categoryName) in groupedConditionItems" :key="categoryName" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-                            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ categoryName }}</h3>
+                    <!-- Categories and Items -->
+                    <div v-for="category in filteredConditionCategories" :key="category.id" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4 shadow-sm">
+                        <div class="px-4 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300">{{ getName(category) }}</h3>
+                                <span :class="category.is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'" class="px-2 py-0.5 text-[10px] font-medium rounded-full">
+                                    {{ category.is_active ? $t('common.active') : $t('common.inactive') }}
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button @click="toggleCategoryActive(category)"
+                                    :disabled="category.source === 'system'"
+                                    :class="[
+                                        'px-2 py-0.5 text-[10px] font-medium rounded-full transition-all',
+                                        category.source === 'system' ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-500 dark:bg-gray-800' : 'hover:opacity-80',
+                                        category.is_active && category.source !== 'system' ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300' : '',
+                                        !category.is_active && category.source !== 'system' ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300' : ''
+                                    ]">
+                                    {{ category.is_active ? $t('common.active') : $t('common.inactive') }}
+                                </button>
+                                <div class="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-1"></div>
+                                <button @click="openInspectionModal(null, category.id)"
+                                    class="p-1 text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition-colors"
+                                    :title="$t('services_management.add_inspection')">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </button>
+                                <button @click="openCategoryModal(category)"
+                                    class="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                    :title="$t('common.edit')">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button @click="deleteCategory(category)"
+                                    :disabled="category.items && category.items.length > 0 || category.source === 'system'"
+                                    :class="[
+                                        'p-1 rounded-lg transition-colors',
+                                        category.items && category.items.length > 0 || category.source === 'system' 
+                                            ? 'text-gray-300 cursor-not-allowed' 
+                                            : 'text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20'
+                                    ]"
+                                    :title="category.items && category.items.length > 0 ? $t('services_management.cannot_delete_has_items') : $t('common.delete')">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
-                        <div class="overflow-x-auto">
+                        <div class="overflow-x-auto" v-if="category.items && category.items.length > 0">
                             <table class="w-full text-sm">
                                 <thead class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700/50">
                                     <tr>
@@ -785,7 +824,7 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                    <tr v-for="(item, index) in group" :key="item.id"
+                                    <tr v-for="(item, index) in category.items" :key="item.id"
                                         class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
                                         <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ index + 1 }}</td>
                                     <td class="px-4 py-3">
@@ -861,9 +900,23 @@
         <PackageFormModal :show="showPackageModal" :service="selectedPackage" :departments="departments"
             :available-services="availableServices" @close="closePackageModal" @saved="handlePackageSaved" />
 
+        <!-- Condition Category Form Modal -->
+        <ConditionCategoryFormModal 
+            :show="showCategoryModal" 
+            :category="selectedCategory" 
+            @close="closeCategoryModal"
+            @saved="handleCategorySaved" 
+        />
+
         <!-- Condition Item Form Modal -->
-        <ConditionItemFormModal :show="showInspectionModal" :item="selectedInspection" @close="closeInspectionModal"
-            @saved="handleInspectionSaved" />
+        <ConditionItemFormModal 
+            :show="showInspectionModal" 
+            :item="selectedInspection" 
+            :initialCategoryId="initialCategoryForModal" 
+            :categories="conditionCategories"
+            @close="closeInspectionModal"
+            @saved="handleInspectionSaved" 
+        />
     </AppLayout>
 </template>
 
@@ -877,6 +930,7 @@ import PackageFormModal from '@/Components/PackageFormModal.vue';
 import ServiceQuickEditModal from '@/Components/ServiceQuickEditModal.vue';
 import DepartmentFormModal from '@/Components/DepartmentFormModal.vue';
 import ConditionItemFormModal from '@/Components/ConditionItemFormModal.vue';
+import ConditionCategoryFormModal from '@/Components/ConditionCategoryFormModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useToast } from '@/Composables/useToast';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -901,7 +955,7 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
-    conditionItems: {
+    conditionCategories: {
         type: Array,
         default: () => [],
     },
@@ -938,6 +992,9 @@ const selectedPackage = ref(null);
 // Inspection modal state
 const showInspectionModal = ref(false);
 const selectedInspection = ref(null);
+const selectedCategory = ref(null);
+
+const showCategoryModal = ref(false);
 
 // Open all departments by default on mount
 onMounted(() => {
@@ -982,14 +1039,42 @@ const filteredPackages = computed(() => {
     );
 });
 
-const filteredConditionItems = computed(() => {
-    if (!searchQuery.value) return props.conditionItems;
+const filteredConditionCategories = computed(() => {
+    if (!props.conditionCategories) return [];
 
-    const query = searchQuery.value.toLowerCase();
-    return props.conditionItems.filter(item =>
-        item.name_ar?.toLowerCase().includes(query) ||
-        item.name_en?.toLowerCase().includes(query)
-    );
+    let result = [...props.conditionCategories];
+
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        // Filter categories that match search or have items that match search
+        result = result.filter(cat => {
+            const catMatch = (cat.name_ar && cat.name_ar.toLowerCase().includes(query)) ||
+                             (cat.name_en && cat.name_en.toLowerCase().includes(query));
+            const itemMatch = cat.items && cat.items.some(item => 
+                (item.name_ar && item.name_ar.toLowerCase().includes(query)) ||
+                (item.name_en && item.name_en.toLowerCase().includes(query))
+            );
+            return catMatch || itemMatch;
+        });
+        
+        // Also map the categories to only include matching items if the category itself doesn't match
+        result = result.map(cat => {
+            const catMatch = (cat.name_ar && cat.name_ar.toLowerCase().includes(query)) ||
+                             (cat.name_en && cat.name_en.toLowerCase().includes(query));
+            
+            if (catMatch) return cat; // If category matches, show all its items
+            
+            return {
+                ...cat,
+                items: cat.items ? cat.items.filter(item => 
+                    (item.name_ar && item.name_ar.toLowerCase().includes(query)) ||
+                    (item.name_en && item.name_en.toLowerCase().includes(query))
+                ) : []
+            };
+        });
+    }
+
+    return result;
 });
 
 // Tab Configuration
@@ -1026,7 +1111,7 @@ const tabs = computed(() => [
         bgColor: 'bg-amber-100 dark:bg-amber-900/30',
         gradientFrom: '#f59e0b', // amber-500
         gradientTo: '#d97706',   // amber-600
-        count: props.conditionItems?.length || 0
+        count: props.conditionCategories?.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) || 0
     }
 ]);
 
@@ -1207,29 +1292,63 @@ const toggleInspectionsSetting = () => {
     });
 };
 
-const groupedConditionItems = computed(() => {
-    const items = filteredConditionItems.value;
-    const groups = {};
-    
-    // Determine the current locale
-    const locale = useI18n().locale.value || 'en';
-    
-    items.forEach(item => {
-        const category = locale === 'ar' 
-            ? (item.category_ar || item.category_en || 'أخرى')
-            : (item.category_en || item.category_ar || 'Other');
-            
-        if (!groups[category]) {
-            groups[category] = [];
-        }
-        groups[category].push(item);
-    });
-    
-    return groups;
-});
+// Category Methods
+const openCategoryModal = (category = null) => {
+    selectedCategory.value = category;
+    showCategoryModal.value = true;
+};
 
-const openInspectionModal = (item = null) => {
+const closeCategoryModal = () => {
+    showCategoryModal.value = false;
+    setTimeout(() => {
+        selectedCategory.value = null;
+    }, 200);
+};
+
+const handleCategorySaved = () => {
+    success(selectedCategory.value ? t('common.updated_success') : t('common.created_success'));
+};
+
+const toggleCategoryActive = (category) => {
+    if (category.source === 'system') return;
+
+    router.patch(route('app.condition-categories.toggle', category.id), {}, {
+        preserveScroll: true,
+        preserveState: true,
+    });
+};
+
+const deleteCategory = async (category) => {
+    if (category.source === 'system') return;
+
+    const confirmed = await confirm({
+        title: t('services_management.delete_inspection_category'),
+        message: t('common.delete_confirmation'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+
+    if (!confirmed) return;
+
+    router.delete(route('app.condition-categories.destroy', category.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            success(t('common.deleted_success'));
+        },
+        onError: (errors) => {
+            if (errors.error) {
+                error(errors.error);
+            }
+        }
+    });
+};
+
+const initialCategoryForModal = ref(null);
+
+const openInspectionModal = (item = null, categoryData = null) => {
     selectedInspection.value = item;
+    initialCategoryForModal.value = categoryData;
     showInspectionModal.value = true;
 };
 
@@ -1237,6 +1356,7 @@ const closeInspectionModal = () => {
     showInspectionModal.value = false;
     setTimeout(() => {
         selectedInspection.value = null;
+        initialCategoryForModal.value = null;
     }, 200);
 };
 
@@ -1247,26 +1367,30 @@ const handleInspectionSaved = () => {
 const toggleInspectionActive = (item) => {
     if (item.source === 'system') return;
 
-    router.put(route('app.condition-items.toggle-active', item.id), {}, {
+    router.patch(route('app.condition-items.toggle', item.id), {}, {
         preserveScroll: true,
         preserveState: true,
     });
 };
 
-const deleteInspection = (item) => {
+const deleteInspection = async (item) => {
     if (item.source === 'system') return;
 
-    confirm(
-        t('services_management.delete_inspection'),
-        t('common.delete_confirmation'),
-        () => {
-            router.delete(route('app.condition-items.destroy', item.id), {
-                preserveScroll: true,
-                onSuccess: () => {
-                    success(t('common.deleted_success'));
-                },
-            });
-        }
-    );
+    const confirmed = await confirm({
+        title: t('services_management.delete_inspection'),
+        message: t('common.delete_confirmation'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+
+    if (!confirmed) return;
+
+    router.delete(route('app.condition-items.destroy', item.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            success(t('common.deleted_success'));
+        },
+    });
 };
 </script>

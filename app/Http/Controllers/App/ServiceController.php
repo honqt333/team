@@ -48,7 +48,7 @@ class ServiceController
             ->get();
 
         // Get inspection condition items
-        $conditionItems = VehicleConditionItem::with('updatedBy:id,name')
+        $conditionCategories = \App\Models\VehicleConditionCategory::with(['items.updatedBy:id,name', 'updatedBy:id,name'])
             ->orderedBySource()
             ->ordered()
             ->get();
@@ -61,7 +61,7 @@ class ServiceController
             'departments' => $departments,
             'unassignedServices' => $unassignedServices,
             'packages' => $packages,
-            'conditionItems' => $conditionItems,
+            'conditionCategories' => $conditionCategories,
             'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
         ]);
     }

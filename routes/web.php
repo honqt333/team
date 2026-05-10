@@ -201,6 +201,8 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::get('/settings/integrations', [SettingsController::class, 'integrations'])->name('settings.integrations');
+    Route::get('/settings/website', [SettingsController::class, 'website'])->name('settings.website');
     
     // Company Profile Settings
     Route::get('/settings/company', [\App\Http\Controllers\App\CompanyProfileController::class, 'index'])->name('settings.company');
@@ -259,6 +261,11 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::put('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'update'])->name('app.condition-items.update');
     Route::delete('/settings/condition-items/{conditionItem}', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'destroy'])->name('app.condition-items.destroy');
     Route::patch('/settings/condition-items/{conditionItem}/toggle-active', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'toggleActive'])->name('app.condition-items.toggle');
+
+    Route::post('/settings/condition-categories', [\App\Http\Controllers\App\VehicleConditionCategoryController::class, 'store'])->name('app.condition-categories.store');
+    Route::put('/settings/condition-categories/{conditionCategory}', [\App\Http\Controllers\App\VehicleConditionCategoryController::class, 'update'])->name('app.condition-categories.update');
+    Route::delete('/settings/condition-categories/{conditionCategory}', [\App\Http\Controllers\App\VehicleConditionCategoryController::class, 'destroy'])->name('app.condition-categories.destroy');
+    Route::patch('/settings/condition-categories/{conditionCategory}/toggle-active', [\App\Http\Controllers\App\VehicleConditionCategoryController::class, 'toggleActive'])->name('app.condition-categories.toggle');
     
     // Departments
     Route::apiResource('departments', \App\Http\Controllers\App\DepartmentController::class);
@@ -491,6 +498,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
 
         // Attendance Settings
         Route::put('/settings/attendance', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateAttendanceSettings'])->name('settings.attendance.update');
+    });
+
+    // ───────────────────────────────────────────────────────────────
+    // Reports Module
+    // ───────────────────────────────────────────────────────────────
+    Route::prefix('reports')->name('app.reports.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\App\ReportsController::class, 'hub'])->name('hub');
     });
 
     // ───────────────────────────────────────────────────────────────

@@ -82,9 +82,18 @@ const getStatusLabel = (status) => {
 const selectedInspection = ref(null);
 const showViewModal = ref(false);
 
-const viewInspection = (inspection) => {
-    selectedInspection.value = inspection;
-    showViewModal.value = true;
+const viewInspection = async (inspection) => {
+    try {
+        loading.value = true;
+        const response = await axios.get(route('work-orders.inspections.show', [props.workOrder.id, inspection.id]));
+        selectedInspection.value = response.data;
+        showViewModal.value = true;
+    } catch (e) {
+        console.error('Error fetching inspection details', e);
+        toastError(t('common.error_occurred'));
+    } finally {
+        loading.value = false;
+    }
 };
 </script>
 
@@ -155,9 +164,9 @@ const viewInspection = (inspection) => {
                 </div>
 
                 <div class="space-y-8 max-h-[70vh] overflow-y-auto px-2">
-                    <div v-for="(group, category) in Object.groupBy(items || [], i => i[`category_${$i18n.locale}`] || i.category_ar || 'Other')" :key="category">
+                    <div v-for="(group, categoryName) in Object.groupBy(items || [], i => i.category ? (i.category[`name_${$i18n.locale}`] || i.category.name_ar) : 'Other')" :key="categoryName">
                         <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
-                            {{ category }}
+                            {{ categoryName }}
                         </h4>
                         <div class="space-y-4">
                             <div v-for="item in group" :key="item.id" class="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border border-gray-100 dark:border-gray-800">
@@ -229,18 +238,28 @@ const viewInspection = (inspection) => {
                     </button>
                 </div>
 
-                <div class="space-y-6 max-h-[70vh] overflow-y-auto px-2">
-                    <div v-for="result in selectedInspection?.results" :key="result.item_id" class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <div class="flex-1">
-                            <p class="font-bold text-gray-900 dark:text-white">
-                                {{ selectedInspection.items?.find(i => i.id === result.item_id)?.[`name_${$i18n.locale}`] || selectedInspection.items?.find(i => i.id === result.item_id)?.name_ar }}
-                            </p>
-                            <p v-if="result.notes" class="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">"{{ result.notes }}"</p>
-                        </div>
-                        <div class="flex flex-col items-end gap-1">
-                            <span :class="getStatusColor(result.status)" class="text-xs font-bold uppercase tracking-wider">
-                                {{ getStatusLabel(result.status) }}
-                            </span>
+                <div class="space-y-8 max-h-[70vh] overflow-y-auto px-2">
+                    <div v-for="(group, categoryName) in Object.groupBy(selectedInspection?.results || [], r => {
+                        const item = selectedInspection?.items?.find(i => i.id === r.item_id);
+                        return item?.category ? (item.category[`name_${$i18n.locale}`] || item.category.name_ar) : 'Other';
+                    })" :key="categoryName">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
+                            {{ categoryName }}
+                        </h4>
+                        <div class="space-y-3">
+                            <div v-for="result in group" :key="result.item_id" class="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
+                                <div class="flex-1">
+                                    <p class="font-bold text-gray-900 dark:text-white">
+                                        {{ selectedInspection.items?.find(i => i.id === result.item_id)?.[`name_${$i18n.locale}`] || selectedInspection.items?.find(i => i.id === result.item_id)?.name_ar }}
+                                    </p>
+                                    <p v-if="result.notes" class="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">"{{ result.notes }}"</p>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span :class="getStatusColor(result.status)" class="text-xs font-bold uppercase tracking-wider">
+                                        {{ getStatusLabel(result.status) }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

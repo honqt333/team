@@ -162,7 +162,7 @@
 
                     <!-- Inventory Collapsible Section -->
                     <div v-if="can('inventory.view')">
-                        <a href="/app/inventory" @click="inventoryExpanded = true" :class="[
+                        <button @click="inventoryExpanded = !inventoryExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/inventory')
                                 ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
@@ -175,13 +175,12 @@
                                 </svg>
                                 {{ $t('inventory.title') }}
                             </div>
-                            <svg @click.prevent.stop="inventoryExpanded = !inventoryExpanded"
-                                :class="['w-4 h-4 transition-transform cursor-pointer hover:text-emerald-600', inventoryExpanded ? 'rotate-180' : '']"
+                            <svg :class="['w-4 h-4 transition-transform', inventoryExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </a>
+                        </button>
 
                         <div v-show="inventoryExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/inventory/parts" :class="[
@@ -308,7 +307,7 @@
 
                     <!-- HR Section -->
                     <div v-if="can('hr.view')" class="mt-2">
-                        <a href="/app/hr" @click="hrExpanded = true" :class="[
+                        <button @click="hrExpanded = !hrExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/hr')
                                 ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
@@ -321,13 +320,12 @@
                                 </svg>
                                 {{ $t('hr.title') }}
                             </div>
-                            <svg @click.prevent.stop="hrExpanded = !hrExpanded"
-                                :class="['w-4 h-4 transition-transform cursor-pointer hover:text-violet-600', hrExpanded ? 'rotate-180' : '']"
+                            <svg :class="['w-4 h-4 transition-transform', hrExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </a>
+                        </button>
 
                         <div v-show="hrExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/hr/employees" :class="[
@@ -387,6 +385,19 @@
                         </div>
                     </div>
 
+                    <!-- Reports Link -->
+                    <a href="/app/reports" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/reports')
+                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        {{ $t('nav.reports') }}
+                    </a>
+
                     <!-- Divider -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
 
@@ -402,6 +413,30 @@
                                 d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {{ $t('nav.employee_portal') }}
+                    </a>
+
+                    <a v-if="can('settings.company.manage')" href="/app/settings/website" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/settings/website')
+                            ? 'bg-rose-50 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                        {{ $t('nav.website') }}
+                    </a>
+
+                    <a v-if="can('settings.company.manage')" href="/app/settings/integrations" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/settings/integrations')
+                            ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        {{ $t('nav.integrations') }}
                     </a>
 
                     <a v-if="can('settings.company.manage') || can('settings.centers.view') || can('users.view') || can('crm.vehicles.settings.view')"
@@ -725,7 +760,7 @@
 
                     <!-- Inventory Section (Mobile) -->
                     <div v-if="can('inventory.view')">
-                        <a href="/app/inventory" @click="inventoryExpanded = true" :class="[
+                        <button @click="inventoryExpanded = !inventoryExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/inventory')
                                 ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
@@ -738,13 +773,12 @@
                                 </svg>
                                 {{ $t('inventory.title') }}
                             </div>
-                            <svg @click.prevent.stop="inventoryExpanded = !inventoryExpanded"
-                                :class="['w-4 h-4 transition-transform cursor-pointer hover:text-emerald-600', inventoryExpanded ? 'rotate-180' : '']"
+                            <svg :class="['w-4 h-4 transition-transform', inventoryExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </a>
+                        </button>
 
                         <div v-show="inventoryExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/inventory/parts" @click="mobileMenuOpen = false" :class="[
@@ -878,7 +912,7 @@
 
                     <!-- HR Section (Mobile) -->
                     <div>
-                        <a href="/app/hr" @click="hrExpanded = true; mobileMenuOpen = false" :class="[
+                        <button @click="hrExpanded = !hrExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/hr')
                                 ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
@@ -891,13 +925,12 @@
                                 </svg>
                                 {{ $t('hr.title') }}
                             </div>
-                            <svg @click.prevent.stop="hrExpanded = !hrExpanded"
-                                :class="['w-4 h-4 transition-transform cursor-pointer hover:text-violet-600', hrExpanded ? 'rotate-180' : '']"
+                            <svg :class="['w-4 h-4 transition-transform', hrExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </a>
+                        </button>
 
                         <div v-show="hrExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/hr/employees" @click="mobileMenuOpen = false" :class="[
@@ -961,6 +994,19 @@
                     <!-- Divider -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
 
+                    <!-- Reports Link (Mobile) -->
+                    <a href="/app/reports" @click="mobileMenuOpen = false" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/reports')
+                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        {{ $t('nav.reports') }}
+                    </a>
+
                     <!-- Employee Portal Link (Mobile) -->
                     <a v-if="hasRole('employee')" href="/app/my" @click="mobileMenuOpen = false" :class="[
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
@@ -973,6 +1019,32 @@
                                 d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         {{ $t('nav.employee_portal') }}
+                    </a>
+
+                    <a v-if="can('settings.company.manage')"
+                        href="/app/settings/website" @click="mobileMenuOpen = false" :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/settings/website')
+                                ? 'bg-rose-50 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                        {{ $t('nav.website') }}
+                    </a>
+
+                    <a v-if="can('settings.company.manage')"
+                        href="/app/settings/integrations" @click="mobileMenuOpen = false" :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/settings/integrations')
+                                ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        {{ $t('nav.integrations') }}
                     </a>
 
                     <a v-if="can('settings.company.manage') || can('settings.centers.view') || can('users.view') || can('crm.vehicles.settings.view')"
