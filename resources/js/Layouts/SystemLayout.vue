@@ -39,6 +39,24 @@
                         الرئيسية
                     </a>
 
+                    <!-- Website Management -->
+                    <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">الموقع العام</p>
+
+                    <a
+                        href="/system/settings/website"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/system/settings/website')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ]"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                        </svg>
+                        إعدادات الموقع
+                    </a>
+
                     <!-- Client Management -->
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">إدارة العملاء</p>
 
@@ -295,7 +313,21 @@
                         {{ new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
                     </div>
 
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-3">
+                        <!-- Theme Toggle -->
+                        <button
+                            @click="toggleThemeHandler"
+                            class="p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                            :title="isDark ? 'الوضع النهاري' : 'الوضع الليلي'"
+                        >
+                            <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"/>
+                            </svg>
+                            <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                            </svg>
+                        </button>
+
                         <!-- User Dropdown -->
                         <div class="relative">
                             <button
@@ -412,6 +444,25 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                         </svg>
                         الرئيسية
+                    </a>
+
+                    <!-- Website Management -->
+                    <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">الموقع العام</p>
+
+                    <a
+                        href="/system/settings/website"
+                        @click="mobileMenuOpen = false"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/system/settings/website')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ]"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+                        </svg>
+                        إعدادات الموقع
                     </a>
 
                     <!-- Client Management -->
@@ -674,9 +725,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { toggleTheme } from '@/theme.js';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Toast from '@/Components/Toast.vue';
 
@@ -685,10 +737,20 @@ const { locale } = useI18n();
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);
+const isDark = ref(false);
 const isRtl = computed(() => locale.value === 'ar');
+
+onMounted(() => {
+    isDark.value = document.documentElement.classList.contains('dark');
+});
 
 const handleLogout = () => {
     router.post(route('logout'));
+};
+
+const toggleThemeHandler = () => {
+    toggleTheme();
+    isDark.value = document.documentElement.classList.contains('dark');
 };
 
 const isActive = (href) => {

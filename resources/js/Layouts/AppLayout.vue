@@ -162,7 +162,7 @@
 
                     <!-- Inventory Collapsible Section -->
                     <div v-if="can('inventory.view')">
-                        <button @click="inventoryExpanded = !inventoryExpanded" :class="[
+                        <a href="/app/inventory" @click="inventoryExpanded = !inventoryExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/inventory')
                                 ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
@@ -175,12 +175,12 @@
                                 </svg>
                                 {{ $t('inventory.title') }}
                             </div>
-                            <svg :class="['w-4 h-4 transition-transform', inventoryExpanded ? 'rotate-180' : '']"
+                            <svg @click.stop.prevent="inventoryExpanded = !inventoryExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', inventoryExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </button>
+                        </a>
 
                         <div v-show="inventoryExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/inventory/parts" :class="[
@@ -255,7 +255,7 @@
 
                     <!-- Purchasing Collapsible Section -->
                     <div v-if="can('purchasing.suppliers.view')" class="mt-2">
-                        <button @click="purchasingExpanded = !purchasingExpanded; inventoryExpanded = false" :class="[
+                        <a href="/app/purchasing/suppliers" @click="purchasingExpanded = !purchasingExpanded; inventoryExpanded = false" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/purchasing')
                                 ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
@@ -268,12 +268,12 @@
                                 </svg>
                                 {{ $t('purchasing.title') }}
                             </div>
-                            <svg :class="['w-4 h-4 transition-transform', purchasingExpanded ? 'rotate-180' : '']"
+                            <svg @click.stop.prevent="purchasingExpanded = !purchasingExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', purchasingExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </button>
+                        </a>
 
                         <div v-show="purchasingExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/purchasing/suppliers" :class="[
@@ -307,7 +307,7 @@
 
                     <!-- HR Section -->
                     <div v-if="can('hr.view')" class="mt-2">
-                        <button @click="hrExpanded = !hrExpanded" :class="[
+                        <a href="/app/hr" @click="hrExpanded = !hrExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/hr')
                                 ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
@@ -320,12 +320,12 @@
                                 </svg>
                                 {{ $t('hr.title') }}
                             </div>
-                            <svg :class="['w-4 h-4 transition-transform', hrExpanded ? 'rotate-180' : '']"
+                            <svg @click.stop.prevent="hrExpanded = !hrExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', hrExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </button>
+                        </a>
 
                         <div v-show="hrExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/hr/employees" :class="[
@@ -760,7 +760,7 @@
 
                     <!-- Inventory Section (Mobile) -->
                     <div v-if="can('inventory.view')">
-                        <button @click="inventoryExpanded = !inventoryExpanded" :class="[
+                        <a href="/app/inventory" @click="inventoryExpanded = !inventoryExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/inventory')
                                 ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
@@ -773,12 +773,12 @@
                                 </svg>
                                 {{ $t('inventory.title') }}
                             </div>
-                            <svg :class="['w-4 h-4 transition-transform', inventoryExpanded ? 'rotate-180' : '']"
+                            <svg @click.stop.prevent="inventoryExpanded = !inventoryExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', inventoryExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </button>
+                        </a>
 
                         <div v-show="inventoryExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/inventory/parts" @click="mobileMenuOpen = false" :class="[
@@ -857,7 +857,7 @@
 
                     <!-- Purchasing Section (Mobile) -->
                     <div class="mt-2">
-                        <button @click="purchasingExpanded = !purchasingExpanded" :class="[
+                        <a href="/app/purchasing/suppliers" @click="purchasingExpanded = !purchasingExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/purchasing')
                                 ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
@@ -870,12 +870,12 @@
                                 </svg>
                                 {{ $t('purchasing.title') }}
                             </div>
-                            <svg :class="['w-4 h-4 transition-transform', purchasingExpanded ? 'rotate-180' : '']"
+                            <svg @click.stop.prevent="purchasingExpanded = !purchasingExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', purchasingExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </button>
+                        </a>
 
                         <div v-show="purchasingExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/purchasing/suppliers" @click="mobileMenuOpen = false" :class="[
@@ -912,7 +912,7 @@
 
                     <!-- HR Section (Mobile) -->
                     <div>
-                        <button @click="hrExpanded = !hrExpanded" :class="[
+                        <a href="/app/hr" @click="hrExpanded = !hrExpanded" :class="[
                             'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
                             isActive('/app/hr')
                                 ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
@@ -925,12 +925,12 @@
                                 </svg>
                                 {{ $t('hr.title') }}
                             </div>
-                            <svg :class="['w-4 h-4 transition-transform', hrExpanded ? 'rotate-180' : '']"
+                            <svg @click.stop.prevent="hrExpanded = !hrExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', hrExpanded ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
-                        </button>
+                        </a>
 
                         <div v-show="hrExpanded" class="ps-4 mt-1 space-y-1">
                             <a href="/app/hr/employees" @click="mobileMenuOpen = false" :class="[

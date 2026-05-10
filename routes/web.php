@@ -607,6 +607,10 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::get('/settings/general', [\App\Http\Controllers\System\GeneralSettingsController::class, 'index'])->name('system.settings.general');
     Route::put('/settings/general', [\App\Http\Controllers\System\GeneralSettingsController::class, 'update'])->name('system.settings.general.update');
     
+    // Website Settings
+    Route::get('/settings/website', [\App\Http\Controllers\System\WebsiteSettingsController::class, 'index'])->name('system.settings.website');
+    Route::put('/settings/website', [\App\Http\Controllers\System\WebsiteSettingsController::class, 'update'])->name('system.settings.website.update');
+    
     // Subscription Invoices
     Route::get('/invoices', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index');
     Route::get('/invoices/{invoice}', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'show'])->name('system.invoices.show');
