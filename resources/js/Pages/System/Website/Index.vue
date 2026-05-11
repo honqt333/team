@@ -19,11 +19,14 @@ const tabs = [
     { id: 'features', name: 'المميزات التنافسية', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
     { id: 'pricing', name: 'خطط الأسعار', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1c-1.11 0-2.08.402-2.599 1M12 8V7m0 11c-1.11 0-2.08-.402-2.599-1M12 18v1m0-1c1.11 0 2.08-.402 2.599-1' },
     { id: 'stats', name: 'مؤشرات الأداء', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-    { id: 'testimonials', name: 'آراء العملاء', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
+    { id: 'testimonials', name: 'عملائنا (الشركاء)', icon: 'M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z' },
     { id: 'faq', name: 'الأسئلة الشائعة', icon: 'M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+    { id: 'contact', name: 'نموذج التواصل', icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
     { id: 'pages', name: 'الصفحات الثابتة', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
     { id: 'maintenance', name: 'وضع الصيانة', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' },
     { id: 'footer', name: 'التذييل (Footer)', icon: 'M12 15l-4-4h8l-4 4z' },
+    { id: 'announcement', name: 'شريط الإعلانات', icon: 'M11 5.882V19.297A2.497 2.497 0 0012.5 22.5a2.497 2.497 0 002.5-2.5 2.497 2.497 0 00-1.5-2.297V5.882c2.556.19 4.5 2.307 4.5 4.868v.25c0 2.69 2.19 4.88 4.88 4.88.04 0 .08 0 .12-.005V13.88c-1.586 0-2.88-1.294-2.88-2.88v-.25c0-4.14-3.36-7.5-7.5-7.5s-7.5 3.36-7.5 7.5v.25c0 1.586-1.294 2.88-2.88 2.88v1.995c.04.004.08.005.12.005 2.69 0 4.88-2.19 4.88-4.88v-.25c0-2.561 1.944-4.678 4.5-4.868z' },
+    { id: 'integrations', name: 'التكاملات والربط', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
     { id: 'seo_social', name: 'SEO وبيانات التواصل', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
 ];
 
@@ -63,11 +66,35 @@ const form = useForm({
         landing_pricing_title_ar: props.settings.landing_pricing_title_ar, landing_pricing_title_en: props.settings.landing_pricing_title_en,
         landing_pricing_subtitle_ar: props.settings.landing_pricing_subtitle_ar, landing_pricing_subtitle_en: props.settings.landing_pricing_subtitle_en,
 
+        landing_features_enabled: props.settings.landing_features_enabled,
+        landing_pricing_enabled: props.settings.landing_pricing_enabled,
+        landing_stats_enabled: props.settings.landing_stats_enabled,
+        landing_faq_enabled: props.settings.landing_faq_enabled,
+        landing_testimonials_enabled: props.settings.landing_testimonials_enabled,
+        landing_contact_enabled: props.settings.landing_contact_enabled,
+
         website_contact_email: props.settings.website_contact_email, website_contact_phone: props.settings.website_contact_phone,
         website_whatsapp_number: props.settings.website_whatsapp_number, website_address_ar: props.settings.website_address_ar,
         website_address_en: props.settings.website_address_en, website_facebook_url: props.settings.website_facebook_url,
         website_twitter_url: props.settings.website_twitter_url, website_instagram_url: props.settings.website_instagram_url,
         website_linkedin_url: props.settings.website_linkedin_url,
+
+        website_whatsapp_floating_enabled: props.settings.website_whatsapp_floating_enabled,
+        website_whatsapp_floating_number: props.settings.website_whatsapp_floating_number,
+        website_chatbot_enabled: props.settings.website_chatbot_enabled,
+        website_chatbot_script: props.settings.website_chatbot_script,
+        website_scripts_header: props.settings.website_scripts_header,
+        website_scripts_footer: props.settings.website_scripts_footer,
+
+        website_announcement_enabled: props.settings.website_announcement_enabled,
+        website_announcement_text_ar: props.settings.website_announcement_text_ar,
+        website_announcement_text_en: props.settings.website_announcement_text_en,
+        website_announcement_url: props.settings.website_announcement_url,
+        website_announcement_bg_color: props.settings.website_announcement_bg_color,
+        website_announcement_text_color: props.settings.website_announcement_text_color,
+
+        website_login_button_text_ar: props.settings.website_login_button_text_ar,
+        website_login_button_text_en: props.settings.website_login_button_text_en,
     }
 });
 
@@ -97,7 +124,7 @@ const submit = () => {
                     </p>
                 </div>
                 <div class="mt-4 flex md:mt-0 gap-3">
-                    <a href="/" target="_blank" class="btn-outline flex items-center">
+                    <a :href="route('public.landing.preview')" target="_blank" class="btn-outline flex items-center">
                         <svg class="w-4 h-4 ml-2 -mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                         معاينة الموقع
                     </a>
@@ -270,11 +297,26 @@ const submit = () => {
                                 
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1">زر الإجراء (CTA) <span class="badge-lang">AR</span></label><input v-model="form.settings.landing_hero_cta_text_ar" class="input-enterprise" /></div>
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1" dir="ltr">CTA Button <span class="badge-lang">EN</span></label><input v-model="form.settings.landing_hero_cta_text_en" class="input-enterprise text-left" dir="ltr" /></div>
+
+                                <div class="col-span-full grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-dashed border-gray-200 dark:border-gray-700">
+                                    <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1">نص زر تسجيل الدخول <span class="badge-lang">AR</span></label><input v-model="form.settings.website_login_button_text_ar" class="input-enterprise" /></div>
+                                    <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1" dir="ltr">Login Button Text <span class="badge-lang">EN</span></label><input v-model="form.settings.website_login_button_text_en" class="input-enterprise text-left" dir="ltr" /></div>
+                                </div>
                             </div>
                         </div>
 
                         <!-- 5. Features -->
                         <div v-if="activeTab === 'features'" class="space-y-8">
+                            <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 border rounded-lg shadow-sm">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">تفعيل قسم المميزات</h4>
+                                    <p class="text-xs text-gray-500">إظهار أو إخفاء هذا القسم من الواجهة الرئيسية.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.settings.landing_features_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-b pb-8">
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1">عنوان القسم <span class="badge-lang">AR</span></label><input v-model="form.settings.landing_features_title_ar" class="input-enterprise" /></div>
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1" dir="ltr">Section Title <span class="badge-lang">EN</span></label><input v-model="form.settings.landing_features_title_en" class="input-enterprise text-left" dir="ltr" /></div>
@@ -302,6 +344,16 @@ const submit = () => {
                         <!-- 6. Pricing & 7. Stats & 8. Testimonials & 9. FAQ -->
                         <!-- Using similar CRM pattern -->
                         <div v-if="activeTab === 'pricing'" class="space-y-8">
+                            <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 border rounded-lg shadow-sm">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">تفعيل قسم الباقات والأسعار</h4>
+                                    <p class="text-xs text-gray-500">إظهار أو إخفاء خطط الأسعار من الواجهة الرئيسية.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.settings.landing_pricing_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
                              <h3 class="text-lg leading-6 font-semibold text-gray-900 border-b pb-4">إعدادات قسم الباقات</h3>
                              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1">عنوان القسم <span class="badge-lang">AR</span></label><input v-model="form.settings.landing_pricing_title_ar" class="input-enterprise" /></div>
@@ -315,9 +367,19 @@ const submit = () => {
                             </p>
                         </div>
 
-                        <div v-if="activeTab === 'stats'">
-                            <div class="flex items-center justify-between mb-6">
-                                <h3 class="text-lg leading-6 font-semibold text-gray-900">مؤشرات الأداء (Stats)</h3>
+                        <div v-if="activeTab === 'stats'" class="space-y-6">
+                            <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 border rounded-lg shadow-sm">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">تفعيل قسم مؤشرات الأداء</h4>
+                                    <p class="text-xs text-gray-500">إظهار أو إخفاء الأرقام والإحصائيات من الواجهة الرئيسية.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.settings.landing_stats_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between mb-6 border-t pt-6">
+                                <h3 class="text-lg leading-6 font-semibold text-gray-900">إدارة المؤشرات</h3>
                                 <button @click="addItem('landing_stats_list', { label_ar: '', label_en: '', value: '' })" class="btn-outline">إضافة مؤشر</button>
                             </div>
                             <div class="space-y-3">
@@ -330,7 +392,79 @@ const submit = () => {
                             </div>
                         </div>
 
-                        <!-- 10. Pages -->
+                        <!-- 8. Testimonials (Clients) -->
+                        <div v-if="activeTab === 'testimonials'" class="space-y-6">
+                            <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 border rounded-lg shadow-sm">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">تفعيل قسم عملائنا (شركاء النجاح)</h4>
+                                    <p class="text-xs text-gray-500">إظهار أو إخفاء شعارات الشركات والورش الموثوقة.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.settings.landing_testimonials_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between mb-6 border-t pt-6">
+                                <h3 class="text-lg leading-6 font-semibold text-gray-900">إدارة شعارات العملاء</h3>
+                                <button @click="addItem('landing_testimonials_list', { name: '', logo_url: '' })" class="btn-outline">إضافة عميل</button>
+                            </div>
+                            <div class="space-y-3">
+                                <div v-for="(client, index) in form.settings.landing_testimonials_list" :key="index" class="p-4 border border-gray-200 rounded-lg flex gap-4 items-center bg-gray-50">
+                                    <div class="flex-1"><label class="text-xs text-gray-500 block mb-1">اسم العميل/الشركة</label><input v-model="client.name" class="input-enterprise" /></div>
+                                    <div class="flex-1"><label class="text-xs text-gray-500 block mb-1">رابط الشعار (صورة)</label><input v-model="client.logo_url" class="input-enterprise text-left font-mono" dir="ltr" placeholder="https://" /></div>
+                                    <button @click="removeItem('landing_testimonials_list', index)" class="text-gray-400 hover:text-red-600 mt-5"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 9. FAQ -->
+                        <div v-if="activeTab === 'faq'" class="space-y-6">
+                            <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 border rounded-lg shadow-sm">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">تفعيل قسم الأسئلة الشائعة</h4>
+                                    <p class="text-xs text-gray-500">إظهار أو إخفاء قسم الأسئلة المتكررة من الواجهة الرئيسية.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.settings.landing_faq_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between mb-6 border-t pt-6">
+                                <h3 class="text-lg leading-6 font-semibold text-gray-900">إدارة الأسئلة الشائعة</h3>
+                                <button @click="addItem('landing_faq_list', { q_ar: '', a_ar: '', q_en: '', a_en: '' })" class="btn-outline">إضافة سؤال</button>
+                            </div>
+                            <div class="space-y-4">
+                                <div v-for="(faq, index) in form.settings.landing_faq_list" :key="index" class="p-4 border border-gray-200 rounded-lg bg-gray-50 relative group">
+                                    <button @click="removeItem('landing_faq_list', index)" class="absolute top-4 left-4 text-gray-400 hover:text-red-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div><label class="text-xs text-gray-500 mb-1 flex justify-between">السؤال <span class="badge-lang">AR</span></label><input v-model="faq.q_ar" class="input-enterprise" /></div>
+                                        <div><label class="text-xs text-gray-500 mb-1 flex justify-between" dir="ltr">Question <span class="badge-lang">EN</span></label><input v-model="faq.q_en" class="input-enterprise text-left" dir="ltr" /></div>
+                                        <div><label class="text-xs text-gray-500 mb-1 flex justify-between">الإجابة <span class="badge-lang">AR</span></label><textarea v-model="faq.a_ar" rows="3" class="input-enterprise"></textarea></div>
+                                        <div><label class="text-xs text-gray-500 mb-1 flex justify-between" dir="ltr">Answer <span class="badge-lang">EN</span></label><textarea v-model="faq.a_en" rows="3" class="input-enterprise text-left" dir="ltr"></textarea></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 10. Contact Us Form Toggle -->
+                        <div v-if="activeTab === 'contact'" class="space-y-6">
+                            <div class="flex items-center justify-between bg-white dark:bg-gray-800 p-4 border rounded-lg shadow-sm">
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">تفعيل نموذج التواصل</h4>
+                                    <p class="text-xs text-gray-500">إظهار أو إخفاء قسم "تواصل معنا" من الواجهة الرئيسية.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.settings.landing_contact_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                            <div class="p-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+                                <h3 class="font-bold text-blue-800 mb-2">إعدادات بريد الاستقبال</h3>
+                                <p class="text-sm text-blue-700 mb-4">يتم إرسال رسائل الزوار القادمة من نموذج التواصل إلى البريد الإلكتروني المحدد في تبويب (SEO وبيانات التواصل). يرجى التأكد من إضافة بريد صالح هناك.</p>
+                            </div>
+                        </div>
+
+                        <!-- 11. Pages -->
                         <div v-if="activeTab === 'pages'" class="space-y-10">
                             <div>
                                 <h3 class="text-lg leading-6 font-semibold text-gray-900 border-b pb-4 mb-6">الوثائق القانونية</h3>
@@ -393,6 +527,114 @@ const submit = () => {
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1" dir="ltr">Short About <span class="badge-lang">EN</span></label><textarea v-model="form.settings.website_footer_about_en" rows="3" class="input-enterprise text-left" dir="ltr"></textarea></div>
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1">حقوق النشر <span class="badge-lang">AR</span></label><input v-model="form.settings.website_copyright_text_ar" class="input-enterprise" /></div>
                                 <div><label class="text-sm font-medium text-gray-700 flex justify-between mb-1" dir="ltr">Copyrights <span class="badge-lang">EN</span></label><input v-model="form.settings.website_copyright_text_en" class="input-enterprise text-left" dir="ltr" /></div>
+                            </div>
+                        </div>
+
+                        <!-- 13. Announcement Bar -->
+                        <div v-if="activeTab === 'announcement'" class="space-y-8">
+                            <div class="flex items-center justify-between border-b pb-4">
+                                <h3 class="text-lg leading-6 font-semibold text-gray-900">شريط الإعلانات العلوي</h3>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.settings.website_announcement_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                </label>
+                            </div>
+                            
+                            <div :class="{'opacity-50 pointer-events-none': form.settings.website_announcement_enabled != '1'}" class="space-y-6 transition-opacity">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700 flex justify-between mb-1">نص الإعلان <span class="badge-lang">AR</span></label>
+                                        <input v-model="form.settings.website_announcement_text_ar" class="input-enterprise" placeholder="مثال: خصم 20% لفترة محدودة!" />
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700 flex justify-between mb-1" dir="ltr">Announcement Text <span class="badge-lang">EN</span></label>
+                                        <input v-model="form.settings.website_announcement_text_en" class="input-enterprise text-left" dir="ltr" placeholder="Example: 20% Discount for limited time!" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 mb-1 block">رابط الإعلان (اختياري)</label>
+                                    <input v-model="form.settings.website_announcement_url" class="input-enterprise text-left" dir="ltr" placeholder="https://..." />
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700 mb-1 block">لون الخلفية</label>
+                                        <div class="flex gap-2">
+                                            <input type="color" v-model="form.settings.website_announcement_bg_color" class="h-10 w-20 rounded-lg border-gray-300" />
+                                            <input v-model="form.settings.website_announcement_bg_color" class="input-enterprise font-mono" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700 mb-1 block">لون النص</label>
+                                        <div class="flex gap-2">
+                                            <input type="color" v-model="form.settings.website_announcement_text_color" class="h-10 w-20 rounded-lg border-gray-300" />
+                                            <input v-model="form.settings.website_announcement_text_color" class="input-enterprise font-mono" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 13. Integrations -->
+                        <div v-if="activeTab === 'integrations'" class="space-y-12">
+                            <div class="border border-green-100 bg-green-50/30 rounded-xl p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-green-900 flex items-center gap-2">
+                                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.067 2.877 1.215 3.076.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.615 11.615 0 0012.03 0C5.399 0 .007 5.391 0 12.02c0 2.119.554 4.188 1.606 6.006L0 24l6.135-1.61a11.604 11.604 0 005.891 1.607h.005c6.632 0 12.023-5.391 12.027-12.021a11.615 11.615 0 00-3.644-8.283z"/></svg>
+                                            زر الواتساب العائم
+                                        </h3>
+                                        <p class="text-xs text-green-700">تفعيل زر دردشة سريع يظهر أسفل الصفحة.</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" v-model="form.settings.website_whatsapp_floating_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-600"></div>
+                                    </label>
+                                </div>
+                                <div :class="{'opacity-50 pointer-events-none': form.settings.website_whatsapp_floating_enabled != '1'}" class="grid grid-cols-1 gap-4 transition-opacity">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">رقم الواتساب المستهدف</label>
+                                    <input v-model="form.settings.website_whatsapp_floating_number" class="input-enterprise text-left font-mono" dir="ltr" placeholder="+966" />
+                                    <p class="text-[10px] text-gray-500">ملاحظة: تأكد من إضافة رمز الدولة (مثال: 9665xxxxxxxx).</p>
+                                </div>
+                            </div>
+
+                            <div class="border border-indigo-100 bg-indigo-50/30 rounded-xl p-6">
+                                <div class="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 class="text-lg font-bold text-indigo-900 flex items-center gap-2">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                            تكامل الشات بوت (Chatbot)
+                                        </h3>
+                                        <p class="text-xs text-indigo-700">ربط أنظمة الدردشة مثل Tawk.to, Intercom, Zendesk.</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" v-model="form.settings.website_chatbot_enabled" true-value="1" false-value="0" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                                    </label>
+                                </div>
+                                <div :class="{'opacity-50 pointer-events-none': form.settings.website_chatbot_enabled != '1'}" class="grid grid-cols-1 gap-4 transition-opacity">
+                                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">كود التكامل (Widget Script)</label>
+                                    <textarea v-model="form.settings.website_chatbot_script" rows="8" class="input-enterprise font-mono text-left" dir="ltr" placeholder="<!-- Paste your script code here -->"></textarea>
+                                    <p class="text-[10px] text-gray-500">تحذير: قم بلصق الكود البرمجي كما هو من مزود الخدمة. تأكد من صحة الكود لتجنب أخطاء برمجية في الموقع.</p>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-100 bg-gray-50/30 rounded-xl p-6">
+                                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                                    أكواد إضافية (Custom Scripts)
+                                </h3>
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">سكريبتات رأس الصفحة (Header Scripts)</label>
+                                        <textarea v-model="form.settings.website_scripts_header" rows="5" class="input-enterprise font-mono text-left" dir="ltr" placeholder="<!-- Google Analytics, Facebook Pixel, etc. -->"></textarea>
+                                        <p class="text-[10px] text-gray-500">تظهر هذه الأكواد داخل وسم <span class="font-mono">&lt;head&gt;</span>.</p>
+                                    </div>
+                                    <div>
+                                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">سكريبتات تذييل الصفحة (Footer Scripts)</label>
+                                        <textarea v-model="form.settings.website_scripts_footer" rows="5" class="input-enterprise font-mono text-left" dir="ltr" placeholder="<!-- Tracking pixels, custom widgets, etc. -->"></textarea>
+                                        <p class="text-[10px] text-gray-500">تظهر هذه الأكواد قبل إغلاق وسم <span class="font-mono">&lt;/body&gt;</span>.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

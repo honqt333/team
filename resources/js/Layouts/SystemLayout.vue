@@ -57,6 +57,25 @@
                         إعدادات الموقع
                     </a>
 
+                    <a
+                        href="/system/settings/contact-messages"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/system/settings/contact-messages')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ]"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="flex-1">رسائل الزوار</span>
+                        <span v-if="$page.props.auth.unread_contact_messages_count > 0" 
+                              class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                            {{ $page.props.auth.unread_contact_messages_count }}
+                        </span>
+                    </a>
+
                     <!-- Client Management -->
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6">إدارة العملاء</p>
 
@@ -463,6 +482,26 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
                         </svg>
                         إعدادات الموقع
+                    </a>
+
+                    <a
+                        href="/system/settings/contact-messages"
+                        @click="mobileMenuOpen = false"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/system/settings/contact-messages')
+                                ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ]"
+                    >
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="flex-1">رسائل الزوار</span>
+                        <span v-if="$page.props.auth.unread_contact_messages_count > 0" 
+                              class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                            {{ $page.props.auth.unread_contact_messages_count }}
+                        </span>
                     </a>
 
                     <!-- Client Management -->

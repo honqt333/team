@@ -30,6 +30,9 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/landing-preview', [\App\Http\Controllers\Public\PublicLandingController::class, 'preview'])->name('public.landing.preview');
+Route::post('/landing-preview/contact', [\App\Http\Controllers\Public\PublicLandingController::class, 'submitContact'])->name('public.landing.contact');
+
 // Phone Verification (Registration)
 Route::post('/phone/send-otp', [\App\Http\Controllers\Auth\PhoneVerificationController::class, 'sendOtp'])->name('phone.send-otp');
 Route::post('/phone/verify-otp', [\App\Http\Controllers\Auth\PhoneVerificationController::class, 'verifyOtp'])->name('phone.verify-otp');
@@ -610,6 +613,11 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // Website Settings
     Route::get('/settings/website', [\App\Http\Controllers\System\WebsiteSettingsController::class, 'index'])->name('system.settings.website');
     Route::put('/settings/website', [\App\Http\Controllers\System\WebsiteSettingsController::class, 'update'])->name('system.settings.website.update');
+
+    // Contact Messages
+    Route::get('/settings/contact-messages', [\App\Http\Controllers\System\ContactMessageController::class, 'index'])->name('system.contact_messages.index');
+    Route::put('/settings/contact-messages/{contactMessage}/read', [\App\Http\Controllers\System\ContactMessageController::class, 'markAsRead'])->name('system.contact_messages.read');
+    Route::delete('/settings/contact-messages/{contactMessage}', [\App\Http\Controllers\System\ContactMessageController::class, 'destroy'])->name('system.contact_messages.destroy');
     
     // Subscription Invoices
     Route::get('/invoices', [\App\Http\Controllers\System\SubscriptionInvoicesController::class, 'index'])->name('system.invoices.index');

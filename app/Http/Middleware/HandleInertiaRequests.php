@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'locale' => app()->getLocale(),
             'auth' => [
                 'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,
                 'permissions' => $user ? ($isTenantUser ? $user->getAllPermissions()->pluck('name') : ($user->permissions ?? [])) : [],
@@ -48,6 +49,7 @@ class HandleInertiaRequests extends Middleware
                     ? InternalNotification::where('user_id', $user->id)->where('tenant_id', $user->tenant_id)->whereNull('read_at')->count()
                     + ($tenant ? SystemAnnouncement::forTenant($tenant->id)->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $tenant->id))->count() : 0)
                     : 0,
+                'unread_contact_messages_count' => \App\Models\ContactMessage::where('is_read', false)->count(),
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
