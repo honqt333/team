@@ -377,7 +377,7 @@ onMounted(() => {
         <button @click="switchLang" class="lang-btn">{{ isRtl?'EN':'AR' }}</button>
         <Link :href="route('login')" class="btn-ghost-sm">{{ isRtl ? settings.login_button_text_ar : settings.login_button_text_en }}</Link>
         <Link :href="route('register')" class="btn-primary-sm">{{ t('hero_cta_text_ar','hero_cta_text_en') }}</Link>
-        <button @click="isMobileMenuOpen=!isMobileMenuOpen" class="icon-btn md-hidden">
+        <button @click="isMobileMenuOpen=!isMobileMenuOpen" class="icon-btn lg-hidden">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="isMobileMenuOpen?'M6 18L18 6M6 6l12 12':'M4 6h16M4 12h16M4 18h16'"/></svg>
         </button>
       </div>
@@ -696,8 +696,9 @@ html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
 .btn-primary-sm:hover{background:#4f46e5;transform:translateY(-1px);box-shadow:0 12px 32px rgba(99,102,241,.4)}
 .btn-ghost-sm{padding:.625rem 1.25rem;border-radius:12px;border:1px solid var(--border);color:var(--text);font-size:.875rem;font-weight:700;text-decoration:none;letter-spacing:.03em;transition:all .2s;background:transparent}
 .btn-ghost-sm:hover{background:rgba(99,102,241,.1);color:#6366f1;border-color:rgba(99,102,241,.3)}
-.md-hidden{display:none}
-@media(max-width:768px){.nav-links{display:none}.md-hidden{display:flex}}
+.btn-ghost-sm:hover{background:rgba(99,102,241,.1);color:#6366f1;border-color:rgba(99,102,241,.3)}
+.lg-hidden{display:none}
+@media(max-width:1024px){.nav-links{display:none}.lg-hidden{display:flex}}
 .mobile-menu{position:absolute;inset-x:0;top:100%;background:var(--glass);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);padding:1.5rem;display:flex;flex-direction:column;gap:1rem}
 .mobile-link{font-size:1.125rem;font-weight:700;color:var(--text);text-decoration:none;padding:.75rem 0;border-bottom:1px solid var(--border)}
 .mobile-actions{display:flex;gap:.75rem;padding-top:1rem}
@@ -809,8 +810,8 @@ html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
 .btn-cta-white:hover{transform:translateY(-4px);box-shadow:0 30px 60px rgba(0,0,0,.3)}
 .lp-footer{position:relative;z-index:10;border-top:1px solid var(--border);padding:5rem 1.5rem 2rem}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4rem;margin-bottom:4rem}
-@media(max-width:900px){.footer-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.footer-grid{grid-template-columns:1fr}}
+@media(max-width:1024px){.footer-grid{grid-template-columns:1fr 1fr;gap:3rem}}
+@media(max-width:640px){.footer-grid{grid-template-columns:1fr;gap:2.5rem;text-align:center}.socials{justify-content:center}}
 .footer-logo{font-size:1.75rem;font-weight:900;margin-bottom:1rem}
 .footer-logo em{color:#6366f1;font-style:normal}
 .footer-about{font-size:.9rem;color:var(--text2);line-height:1.7;margin-bottom:1.5rem}
