@@ -43,36 +43,30 @@
                                 v-model="localFilters.search"
                                 :placeholder="$t('common.search')"
                                 class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                                @input="debouncedSearch"
                             />
                         </div>
 
                         <!-- Status Filter -->
-                        <select
+                        <SearchableSelect
                             v-model="localFilters.payment_status"
-                            class="ps-4 pe-8 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                            :options="paymentStatusOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="t('invoices.all_statuses')"
                             @change="applyFilters"
-                        >
-                            <option value="">{{ $t('invoices.all_statuses') }}</option>
-                            <option value="unpaid">{{ $t('invoices.status.unpaid') }}</option>
-                            <option value="partial">{{ $t('invoices.status.partial') }}</option>
-                            <option value="paid">{{ $t('invoices.status.paid') }}</option>
-                        </select>
+                            class="w-full"
+                        />
 
                         <!-- Date From -->
-                        <input
+                        <CustomDatePicker
                             v-model="localFilters.date_from"
-                            type="date"
-                            class="px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            @change="applyFilters"
+                            :placeholder="$t('work_orders.filters.date_from')"
                         />
 
                         <!-- Date To -->
-                        <input
+                        <CustomDatePicker
                             v-model="localFilters.date_to"
-                            type="date"
-                            class="px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            @change="applyFilters"
+                            :placeholder="$t('work_orders.filters.date_to')"
                         />
 
                         <!-- View Toggle (same as Customers) -->
@@ -286,10 +280,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { debounce } from 'lodash-es';
 
@@ -326,6 +322,13 @@ const localFilters = ref({
     date_to: props.filters?.date_to || '',
 });
 
+const paymentStatusOptions = [
+    { value: '', label: t('invoices.all_statuses') },
+    { value: 'unpaid', label: t('invoices.status.unpaid') },
+    { value: 'partial', label: t('invoices.status.partial') },
+    { value: 'paid', label: t('invoices.status.paid') },
+];
+
 const applyFilters = () => {
     router.get(route('app.invoices.sales.index'), {
         search: localFilters.value.search || undefined,
@@ -335,7 +338,11 @@ const applyFilters = () => {
     }, { preserveState: true, preserveScroll: true, replace: true });
 };
 
-const debouncedSearch = debounce(applyFilters, 350);
+const debouncedApplyFilters = debounce(applyFilters, 400);
+
+watch(localFilters, () => {
+    debouncedApplyFilters();
+}, { deep: true });
 
 // Persist view mode
 const setView = (mode) => {
@@ -345,11 +352,11 @@ const setView = (mode) => {
 
 const formatDate = (date) => {
     if (!date) return '—';
-    return new Date(date).toLocaleDateString('ar-SA');
+    return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
 };
 
 const formatCurrency = (amount) =>
-    new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'SAR', numberingSystem: 'latn' }).format(amount || 0);
 
 const statusClass = (status) => {
     const map = {

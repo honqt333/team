@@ -75,6 +75,8 @@ class PublicLandingController extends Controller
             
             'login_button_text_ar' => Setting::get('website.login.button.text.ar', 'دخول'),
             'login_button_text_en' => Setting::get('website.login.button.text.en', 'Login'),
+
+            'social_links' => json_decode(Setting::get('website.social.links', '[]'), true),
             
             'facebook_url' => Setting::get('website.facebook.url', ''),
             'twitter_url' => Setting::get('website.twitter.url', ''),

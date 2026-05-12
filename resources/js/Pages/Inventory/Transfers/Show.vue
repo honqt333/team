@@ -116,10 +116,14 @@
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('inventory.parts.title') }}</label>
-                                <select v-model="newItem.part_id" class="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required>
-                                    <option value="">-- {{ $t('common.select') }} --</option>
-                                    <option v-for="part in parts" :key="part.id" :value="part.id">{{ part.sku }} - {{ part.name_ar }}</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="newItem.part_id"
+                                    :options="parts"
+                                    :option-label="opt => `${opt.sku} - ${opt.name_ar || opt.name_en}`"
+                                    option-value="id"
+                                    :placeholder="$t('common.select')"
+                                    required
+                                />
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('inventory.transfers.qty_requested') }}</label>
@@ -141,6 +145,7 @@
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({

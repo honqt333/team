@@ -36,6 +36,34 @@
                                 class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
                         </div>
 
+                        <!-- Date From -->
+                        <div class="w-full sm:w-36">
+                            <CustomDatePicker
+                                v-model="dateFrom"
+                                :placeholder="$t('work_orders.filters.date_from')"
+                            />
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="w-full sm:w-36">
+                            <CustomDatePicker
+                                v-model="dateTo"
+                                :placeholder="$t('work_orders.filters.date_to')"
+                            />
+                        </div>
+
+                        <!-- Print Button -->
+                        <button
+                            v-if="can('quotes.view')"
+                            @click="printQuotes"
+                            class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-amber-600 dark:hover:text-amber-400 transition-all"
+                            :title="$t('common.print')"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                        </button>
+
                         <!-- View Toggle -->
                         <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
                             <button @click="viewMode = 'grid'" :class="[
@@ -401,12 +429,110 @@
         <!-- Quote Form Modal -->
         <QuoteFormModal :show="showModal" :quote="selectedQuote" :customers="customers" :departments="departments"
             :makes="makes" :colors="colors" :modelsByMake="modelsByMake" @close="closeModal" @saved="handleSaved" />
+
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <!-- Header -->
+                <div class="print-header">
+                    <!-- Arabic Layout: Logo right, info beside it -->
+                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
+                        <!-- Logo -->
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img 
+                                :src="$page.props.tenant.logo_url" 
+                                :alt="$page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                        </div>
+                        <!-- Center Info -->
+                        <div class="flex-1 text-right">
+                            <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                الفرع: {{ $page.props.center?.name }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                البريد: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
+                                السجل التجاري: {{ $page.props.tenant?.cr_number }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- English Layout: Logo left with info beside it -->
+                    <div v-else class="flex items-start gap-4 mb-4">
+                        <!-- Logo -->
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img 
+                                :src="$page.props.tenant.logo_url" 
+                                :alt="$page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                        </div>
+                        <!-- Center Info -->
+                        <div class="flex-1">
+                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                Branch: {{ $page.props.center?.name }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                Email: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
+                                CR: {{ $page.props.tenant?.cr_number }}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Title centered -->
+                    <div class="border-t pt-4 border-gray-300 text-center">
+                        <h2 class="text-lg font-bold">{{ $t('quotes.title') }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ $t('quotes.columns.code') }}</th>
+                            <th>{{ isRtl ? 'التاريخ' : 'Date' }}</th>
+                            <th>{{ $t('quotes.columns.customer') }}</th>
+                            <th>{{ isRtl ? 'اللوحة' : 'Plate' }}</th>
+                            <th>{{ $t('quotes.columns.vehicle') }}</th>
+                            <th>{{ $t('quotes.columns.status') }}</th>
+                            <th>{{ $t('quotes.columns.total') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(quote, index) in allQuotes" :key="quote.id">
+                            <td>{{ toEnglish(index + 1) }}</td>
+                            <td class="font-bold">{{ toEnglish(quote.code) }}</td>
+                            <td>{{ formatDate(quote.created_at) }}</td>
+                            <td>{{ quote.customer?.name || '-' }}</td>
+                            <td dir="ltr" class="font-bold">{{ toEnglish(quote.vehicle?.plate_number) || '-' }}</td>
+                            <td>{{ getVehicleName(quote.vehicle) }}</td>
+                            <td>{{ $t(`quotes.status.${quote.status}`) }}</td>
+                            <td class="font-bold">{{ (quote.total || 0).toLocaleString() }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
@@ -415,6 +541,7 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
@@ -456,15 +583,26 @@ const props = defineProps({
     },
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const isRtl = computed(() => locale.value === 'ar');
 const { success } = useToast();
 const { confirm } = useConfirm();
 const { formatCurrency: formatCurrencyEN, toEnglish } = useNumberFormat();
 const { can } = usePermission();
+const page = usePage();
+
 const showModal = ref(false);
 const selectedQuote = ref(null);
 const activeTab = ref(localStorage.getItem('quotesActiveTab') || 'pending');
 const viewMode = ref(localStorage.getItem('quotesViewMode') || 'grid');
+
+// Filters
+const searchQuery = ref(props.filters.search || '');
+const dateFrom = ref(props.filters.date_from || '');
+const dateTo = ref(props.filters.date_to || '');
+
+// Determine current status from URL filters
+const currentStatus = computed(() => props.filters.status || 'pending');
 
 // Infinite Scroll Refs
 const allQuotes = ref(props.quotes?.data || []);
@@ -472,6 +610,57 @@ const nextPageUrl = ref(props.quotes?.next_page_url);
 const loadingMore = ref(false);
 const loadMoreSentinel = ref(null);
 let observer = null;
+
+
+
+// Printing
+const printing = ref(false);
+
+const printQuotes = async () => {
+    try {
+        printing.value = true;
+        
+        // Fetch all quotes for printing if there are multiple pages
+        if (props.quotes?.total > allQuotes.value.length) {
+            const response = await axios.get(route('quotes.api.index'), {
+                params: {
+                    status: currentStatus.value,
+                    search: searchQuery.value,
+                    date_from: dateFrom.value,
+                    date_to: dateTo.value,
+                    per_page: -1 // Custom flag to get all
+                }
+            });
+            allQuotes.value = response.data.data || response.data;
+        }
+
+        // Wait for DOM update
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        window.print();
+    } catch (error) {
+        console.error('Print failed:', error);
+    } finally {
+        printing.value = false;
+    }
+};
+
+const filterQuotes = () => {
+    router.get(route('app.quotes.index'), {
+        status: currentStatus.value,
+        search: searchQuery.value,
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
+
+watch([dateFrom, dateTo], () => {
+    filterQuotes();
+});
 
 // Watch props change (filters, etc)
 watch(() => props.quotes, (newVal) => {
@@ -589,15 +778,12 @@ const filterTabs = computed(() => [
     },
 ]);
 
-// Determine current status from URL filters
-const currentStatus = computed(() => props.filters.status || 'pending');
-
-const searchQuery = ref(props.filters.search || '');
-
 function setStatusFilter(status) {
     router.get(route('app.quotes.index'), {
         status: status,
         search: searchQuery.value,
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -623,6 +809,8 @@ watch(searchQuery, debounce((value) => {
     router.get(route('app.quotes.index'), {
         search: value,
         status: currentStatus.value,
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -665,6 +853,8 @@ function clearFilters() {
         status: '',
         dateRange: 'all',
     };
+    dateFrom.value = '';
+    dateTo.value = '';
 }
 
 function getStatusClass(status) {

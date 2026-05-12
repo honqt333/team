@@ -40,6 +40,14 @@ class CustomerController
             $query->where('type', request('type'));
         }
 
+        if (request('date_from')) {
+            $query->whereDate('created_at', '>=', request('date_from'));
+        }
+
+        if (request('date_to')) {
+            $query->whereDate('created_at', '<=', request('date_to'));
+        }
+
         $customers = $query->withCount(['vehicles', 'quotes', 'workOrders'])
             ->orderBy('id', 'desc')
             ->paginate(15)
@@ -47,7 +55,7 @@ class CustomerController
 
         return Inertia::render('Customers/Index', [
             'customers' => $customers,
-            'filters' => request()->only(['search', 'type']),
+            'filters' => request()->only(['search', 'type', 'date_from', 'date_to']),
         ]);
     }
 
@@ -86,6 +94,14 @@ class CustomerController
 
         if (request('type')) {
             $query->where('type', request('type'));
+        }
+
+        if (request('date_from')) {
+            $query->whereDate('created_at', '>=', request('date_from'));
+        }
+
+        if (request('date_to')) {
+            $query->whereDate('created_at', '<=', request('date_to'));
         }
 
         return response()->json($query->orderBy('id', 'desc')->paginate(15));

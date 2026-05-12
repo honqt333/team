@@ -25,22 +25,23 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">النوع</label>
-                            <select v-model="form.type" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                <option value="info">معلومات</option>
-                                <option value="warning">تحذير</option>
-                                <option value="important">هام</option>
-                                <option value="maintenance">صيانة</option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.type"
+                                :options="typeOptions"
+                                option-label="label"
+                                option-value="value"
+                                placeholder="اختر النوع"
+                            />
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الفئة المستهدفة</label>
-                            <select v-model="form.target" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                <option value="all">كل المستأجرين</option>
-                                <option value="active">النشطين فقط</option>
-                                <option value="trial">التجريبي فقط</option>
-                                <option value="expired">المنتهية اشتراكاتهم</option>
-                                <option value="specific">مستأجرين محددين</option>
-                            </select>
+                            <SearchableSelect
+                                v-model="form.target"
+                                :options="targetOptions"
+                                option-label="label"
+                                option-value="value"
+                                placeholder="اختر الفئة" 
+                            />
                         </div>
                     </div>
                     
@@ -93,6 +94,7 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     tenants: Array,

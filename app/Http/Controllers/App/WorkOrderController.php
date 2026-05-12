@@ -21,43 +21,6 @@ class WorkOrderController
 {
     use AuthorizesRequests;
 
-    /**
-     * Hub page with quick-access cards
-     */
-    public function hub(): Response
-    {
-        $this->authorize("viewAny", WorkOrder::class);
-
-        // Count open work orders (open, in_progress, draft)
-        $openCount = WorkOrder::whereIn('status', ['open', 'in_progress', 'draft'])->count();
-        
-        // Count completed work orders (done but not closed)
-        $completedCount = WorkOrder::where('status', 'done')->count();
-        
-        // Count closed work orders (closed, cancelled)
-        $closedCount = WorkOrder::whereIn('status', ['closed', 'cancelled'])->count();
-
-        $customers = Customer::select("id", "name", "phone")->get();
-        $makes = VehicleMake::ordered()->get();
-        $colors = \App\Models\VehicleColor::active()->ordered()->get();
-        $departments = \App\Models\Department::active()->ordered()->get();
-        
-        $modelsByMake = \App\Models\VehicleModel::query()
-            ->select('id', 'make_id', 'name_ar', 'name_en')
-            ->get()
-            ->groupBy('make_id');
-
-        return Inertia::render("WorkOrders/Hub", [
-            "openCount" => $openCount,
-            "completedCount" => $completedCount,
-            "closedCount" => $closedCount,
-            "customers" => $customers,
-            "makes" => $makes,
-            "colors" => $colors,
-            "modelsByMake" => $modelsByMake,
-            "departments" => $departments,
-        ]);
-    }
 
     public function apiIndex(): JsonResponse
     {
@@ -84,8 +47,18 @@ class WorkOrderController
                     $query->whereIn('status', ['open', 'in_progress', 'draft']);
                 }
             })
-            ->when($status === 'closed', function ($query) {
-                $query->whereIn('status', ['done', 'cancelled', 'closed']);
+            ->when($status === 'closed', function ($query) use ($subFilter) {
+                if ($subFilter === 'postpaid') {
+                    $query->where('status', 'done')
+                        ->whereRaw('((SELECT IFNULL(SUM(total), 0) FROM work_order_items WHERE work_order_items.work_order_id = work_orders.id) + (SELECT IFNULL(SUM(total), 0) FROM work_order_item_parts WHERE work_order_item_parts.work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount ELSE -amount END), 0) FROM payments WHERE payments.work_order_id = work_orders.id)');
+                } elseif ($subFilter === 'bad_debt') {
+                    // Placeholder for bad debt logic - usually manual or specific status
+                    $query->where('status', 'cancelled');
+                } elseif ($subFilter === 'closed_all') {
+                    $query->where('status', 'done');
+                } else {
+                    $query->whereIn('status', ['done', 'cancelled']);
+                }
             })
             ->when(request("search"), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -93,6 +66,11 @@ class WorkOrderController
                       ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
                       ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
                 });
+            })
+            ->when(request("date_from"), fn($query, $date) => $query->whereDate('created_at', '>=', $date))
+            ->when(request("date_to"), fn($query, $date) => $query->whereDate('created_at', '<=', $date))
+            ->when(request("customer_type"), function ($query, $type) {
+                $query->whereHas('customer', fn($c) => $c->where('type', $type));
             })
             ->orderByDesc("created_at")
             ->paginate(15)
@@ -106,12 +84,26 @@ class WorkOrderController
         $this->authorize("viewAny", WorkOrder::class);
 
         $status = request("status");
-        $subFilter = request("sub_filter"); // New sub-filter for tabs
+        $subFilter = request("sub_filter");
 
-        // Base query for counting
-        $baseQuery = WorkOrder::query();
-        
-        // Calculate counts for filter tabs (only for open status)
+        // Dependencies for Create Modal (always needed for Dashboard/Index)
+        $customers = Customer::select("id", "name", "phone")->get();
+        $makes = VehicleMake::ordered()->get();
+        $colors = \App\Models\VehicleColor::active()->ordered()->get();
+        $departments = \App\Models\Department::active()->ordered()->get();
+        $modelsByMake = \App\Models\VehicleModel::query()
+            ->select('id', 'make_id', 'name_ar', 'name_en')
+            ->get()
+            ->groupBy('make_id');
+
+        // Main counts for Dashboard
+        $counts = [
+            'open' => WorkOrder::whereIn('status', ['open', 'in_progress', 'draft'])->count(),
+            'completed' => WorkOrder::where('status', 'done')->count(),
+            'closed' => WorkOrder::whereIn('status', ['closed', 'cancelled'])->count(),
+        ];
+
+        // Filter tabs counts (for open and closed status)
         $filterCounts = [];
         if ($status === 'open') {
             $filterCounts = [
@@ -121,83 +113,75 @@ class WorkOrderController
                     ->whereNotNull('expected_end_date')
                     ->where('expected_end_date', '<', now()->startOfDay())
                     ->count(),
-                'pending_payment' => 0, // TODO: Add when payment columns exist
+                'pending_payment' => 0,
+            ];
+        } elseif ($status === 'closed') {
+            $filterCounts = [
+                'closed_all' => WorkOrder::where('status', 'done')->count(),
+                'postpaid' => WorkOrder::where('status', 'done')
+                    ->whereRaw('((SELECT IFNULL(SUM(total), 0) FROM work_order_items WHERE work_order_items.work_order_id = work_orders.id) + (SELECT IFNULL(SUM(total), 0) FROM work_order_item_parts WHERE work_order_item_parts.work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount ELSE -amount END), 0) FROM payments WHERE payments.work_order_id = work_orders.id)')
+                    ->count(),
+                'bad_debt' => WorkOrder::where('status', 'cancelled')->count(),
             ];
         }
 
-        $workOrders = WorkOrder::with(["customer", "vehicle.make", "items"])
-            ->when($status === 'open', function ($query) use ($subFilter) {
-                if ($subFilter === 'overdue') {
-                    $query->whereIn('status', ['open', 'in_progress'])
-                        ->whereNotNull('expected_end_date')
-                        ->where('expected_end_date', '<', now()->startOfDay());
-                } elseif ($subFilter === 'pending_payment') {
-                    // TODO: Filter by pending payment when columns exist
-                    $query->whereIn('status', ['open', 'in_progress', 'done']);
-                } elseif ($subFilter === 'draft') {
-                    $query->where('status', 'draft');
-                } elseif ($subFilter === 'in_progress') {
-                    $query->whereIn('status', ['open', 'in_progress']);
-                } else {
-                    // Default: all open statuses
-                    $query->whereIn('status', ['open', 'in_progress', 'draft']);
-                }
-            })
-            ->when($status === 'closed', function ($query) {
-                $query->whereIn('status', ['done', 'cancelled']);
-            })
-            ->when(request("search"), function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where("id", "like", "%{$search}%")
-                      ->orWhere("code", "like", "%{$search}%")
-                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
-                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
-                });
-            })
-            ->when(request("date_from"), function ($query, $dateFrom) {
-                $query->whereDate('created_at', '>=', $dateFrom);
-            })
-            ->when(request("date_to"), function ($query, $dateTo) {
-                $query->whereDate('created_at', '<=', $dateTo);
-            })
-            ->when(request("customer_type"), function ($query, $customerType) {
-                $query->whereHas('customer', function ($q) use ($customerType) {
-                    $q->where('type', $customerType);
-                });
-            })
-            ->orderByDesc("created_at")
-            ->paginate(15)
-            ->withQueryString();
-
-        $customers = Customer::select("id", "name", "phone")->get();
-        $makes = VehicleMake::ordered()->get();
-        $colors = \App\Models\VehicleColor::active()->ordered()->get();
-        $departments = \App\Models\Department::active()->ordered()->get();
-        
-        $modelsByMake = \App\Models\VehicleModel::query()
-            ->select('id', 'make_id', 'name_ar', 'name_en')
-            ->get()
-            ->groupBy('make_id');
-        
-        // Get services grouped by department
-        $services = Service::active()
-            ->orderBy("department_id")
-            ->orderBy("sort_order")
-            ->get()
-            ->groupBy("department_id");
+        // If no status is provided, we default to Dashboard view in frontend
+        // But we still might want to return some initial data
+        $workOrders = null;
+        if ($status) {
+            $workOrders = WorkOrder::with(["customer", "vehicle.make", "items"])
+                ->when($status === 'open', function ($query) use ($subFilter) {
+                    if ($subFilter === 'overdue') {
+                        $query->whereIn('status', ['open', 'in_progress'])
+                            ->whereNotNull('expected_end_date')
+                            ->where('expected_end_date', '<', now()->startOfDay());
+                    } elseif ($subFilter === 'draft') {
+                        $query->where('status', 'draft');
+                    } else {
+                        $query->whereIn('status', ['open', 'in_progress', 'draft']);
+                    }
+                })
+                ->when($status === 'closed', function ($query) use ($subFilter) {
+                    if ($subFilter === 'postpaid') {
+                        $query->where('status', 'done')
+                            ->whereRaw('((SELECT IFNULL(SUM(total), 0) FROM work_order_items WHERE work_order_items.work_order_id = work_orders.id) + (SELECT IFNULL(SUM(total), 0) FROM work_order_item_parts WHERE work_order_item_parts.work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount ELSE -amount END), 0) FROM payments WHERE payments.work_order_id = work_orders.id)');
+                    } elseif ($subFilter === 'bad_debt') {
+                        $query->where('status', 'cancelled');
+                    } elseif ($subFilter === 'closed_all') {
+                        $query->where('status', 'done');
+                    } else {
+                        $query->whereIn('status', ['done', 'cancelled']);
+                    }
+                })
+                ->when(request("search"), function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where("id", "like", "%{$search}%")
+                          ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
+                          ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                    });
+                })
+                ->when(request("date_from"), fn($query, $date) => $query->whereDate('created_at', '>=', $date))
+                ->when(request("date_to"), fn($query, $date) => $query->whereDate('created_at', '<=', $date))
+                ->when(request("customer_type"), function ($query, $type) {
+                    $query->whereHas('customer', fn($c) => $c->where('type', $type));
+                })
+                ->orderByDesc("created_at")
+                ->paginate(15)
+                ->withQueryString();
+        }
 
         return Inertia::render("WorkOrders/Index", [
             "workOrders" => $workOrders,
+            "counts" => $counts,
+            "filterCounts" => $filterCounts,
+            "statusFilter" => $status,
+            "subFilter" => $subFilter,
             "customers" => $customers,
             "makes" => $makes,
             "colors" => $colors,
             "modelsByMake" => $modelsByMake,
             "departments" => $departments,
-            "services" => $services,
-            "filters" => request()->only(["search", "status", "sub_filter", "date_from", "date_to", "customer_type"]),
-            "statusFilter" => $status,
-            "subFilter" => $subFilter,
-            "filterCounts" => $filterCounts,
+            "filters" => request()->only(["search", "date_from", "date_to", "status", "sub_filter"]),
         ]);
     }
 

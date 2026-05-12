@@ -2,7 +2,7 @@
     <div class="print-container bg-white min-h-screen p-8" :dir="isRtl ? 'rtl' : 'ltr'">
         <!-- Reusable Print Header -->
         <PrintHeader 
-            :title="page.props.tenant?.work_order_title || (isRtl ? 'أمر العمل' : 'Work Order')"
+            :title="page.props.tenant?.work_order_title || $t('work_orders.print_view.work_order')"
             :subtitle="workOrder.code"
             :work-order="workOrder"
         />
@@ -10,19 +10,19 @@
         <!-- Customer & Vehicle Info -->
         <div class="grid grid-cols-2 gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
             <div>
-                <p class="mb-1"><span class="text-gray-500">{{ isRtl ? 'العميل:' : 'Customer:' }}</span> <span class="font-bold mr-2">{{ workOrder.customer?.name }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ isRtl ? 'الهاتف:' : 'Phone:' }}</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.customer?.phone }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ isRtl ? 'تاريخ الدخول:' : 'Entry Date:' }}</span> <span class="font-bold mr-2">{{ formatDate(workOrder.entry_date) }}</span></p>
+                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.customer') }}:</span> <span class="font-bold mr-2">{{ workOrder.customer?.name }}</span></p>
+                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.phone') }}:</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.customer?.phone }}</span></p>
+                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.entry_date') }}:</span> <span class="font-bold mr-2">{{ formatDate(workOrder.entry_date) }}</span></p>
             </div>
             <div :class="isRtl ? 'text-left' : 'text-right'">
-                <p class="mb-1"><span class="text-gray-500">{{ isRtl ? 'المركبة:' : 'Vehicle:' }}</span> <span class="font-bold mr-2">{{ vehicleName }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ isRtl ? 'اللوحة:' : 'Plate:' }}</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.plate_number }}</span></p>
+                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.vehicle') }}:</span> <span class="font-bold mr-2">{{ vehicleName }}</span></p>
+                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.plate') }}:</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.plate_number }}</span></p>
             </div>
         </div>
 
         <!-- Services by Department -->
         <div class="mb-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">{{ isRtl ? 'الخدمات المطلوبة' : 'Required Services' }}</h3>
+            <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">{{ $t('work_orders.print_view.required_services') }}</h3>
             
             <div v-for="(items, deptId) in itemsByDepartment" :key="deptId" class="mb-4">
                 <h4 class="font-semibold text-gray-700 bg-gray-100 px-3 py-2 rounded">
@@ -32,9 +32,9 @@
                     <thead>
                         <tr class="border-b">
                             <th class="py-2 text-right w-10">#</th>
-                            <th class="py-2 text-right">{{ isRtl ? 'الخدمة' : 'Service' }}</th>
-                            <th class="py-2 text-center w-32">{{ isRtl ? 'الفني' : 'Technician' }}</th>
-                            <th class="py-2 text-center w-20">{{ isRtl ? 'الحالة' : 'Status' }}</th>
+                            <th class="py-2 text-right">{{ $t('work_orders.print_view.service') }}</th>
+                            <th class="py-2 text-center w-32">{{ $t('work_orders.print_view.technician') }}</th>
+                            <th class="py-2 text-center w-20">{{ $t('work_orders.print_view.status') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -55,29 +55,29 @@
 
         <!-- Customer Complaint -->
         <div v-if="workOrder.customer_complaint" class="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-            <h3 class="font-bold text-orange-700 mb-2">{{ isRtl ? 'شكوى العميل' : 'Customer Complaint' }}</h3>
+            <h3 class="font-bold text-orange-700 mb-2">{{ $t('work_orders.print_view.customer_complaint') }}</h3>
             <p class="text-gray-700 whitespace-pre-wrap">{{ workOrder.customer_complaint }}</p>
         </div>
 
         <!-- Signatures -->
         <div class="mt-8 pt-4 border-t grid grid-cols-3 gap-4 text-center text-sm text-gray-600">
             <div>
-                <p class="mb-8">{{ isRtl ? 'توقيع المدير' : 'Manager' }}</p>
+                <p class="mb-8">{{ $t('work_orders.print_view.manager_signature') }}</p>
                 <p class="border-t pt-2">_________________</p>
             </div>
             <div>
-                <p class="mb-8">{{ isRtl ? 'توقيع الفني' : 'Technician' }}</p>
+                <p class="mb-8">{{ $t('work_orders.print_view.technician_signature') }}</p>
                 <p class="border-t pt-2">_________________</p>
             </div>
             <div>
-                <p class="mb-8">{{ isRtl ? 'توقيع العميل' : 'Customer' }}</p>
+                <p class="mb-8">{{ $t('work_orders.print_view.customer_signature') }}</p>
                 <p class="border-t pt-2">_________________</p>
             </div>
         </div>
 
         <!-- Terms & Conditions (Print Only) -->
         <div v-if="page.props.tenant?.work_order_terms" class="mt-12 pt-6 border-t border-gray-200">
-            <h3 class="text-sm font-bold text-gray-900 mb-2">{{ isRtl ? 'الشروط والأحكام' : 'Terms & Conditions' }}</h3>
+            <h3 class="text-sm font-bold text-gray-900 mb-2">{{ $t('work_orders.print_view.terms_conditions') }}</h3>
             <p class="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{{ page.props.tenant.work_order_terms }}</p>
         </div>
 
@@ -87,7 +87,7 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                 </svg>
-                {{ isRtl ? 'طباعة' : 'Print' }}
+                {{ $t('work_orders.print_view.print_btn') }}
             </button>
         </div>
     </div>
@@ -124,7 +124,7 @@ const formatDate = (date) => {
 const getDepartmentName = (deptId) => {
     const dept = props.departments?.[deptId];
     if (dept) return isRtl.value ? dept.name_ar : dept.name_en;
-    return isRtl.value ? 'خدمات أخرى' : 'Other Services';
+    return $t('common.other');
 };
 
 const getStatusClass = (status) => ({
@@ -135,9 +135,12 @@ const getStatusClass = (status) => ({
 }[status] || 'bg-gray-100 text-gray-600');
 
 const getStatusLabel = (status) => {
-    const labels = isRtl.value 
-        ? { pending: 'معلق', in_progress: 'قيد العمل', completed: 'مكتمل', cancelled: 'ملغي' }
-        : { pending: 'Pending', in_progress: 'In Progress', completed: 'Completed', cancelled: 'Cancelled' };
+    const labels = { 
+        pending: $t('work_orders.item.status_pending'), 
+        in_progress: $t('work_orders.item.status_in_progress'), 
+        completed: $t('work_orders.item.status_completed'), 
+        cancelled: $t('work_orders.item.status_cancelled') 
+    };
     return labels[status] || status;
 };
 

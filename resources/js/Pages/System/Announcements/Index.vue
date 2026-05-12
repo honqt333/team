@@ -13,11 +13,14 @@
             
             <!-- Filters -->
             <div class="flex gap-4">
-                <select v-model="status" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    <option value="">الكل</option>
-                    <option value="published">منشور</option>
-                    <option value="draft">مسودة</option>
-                </select>
+                <SearchableSelect
+                    v-model="status"
+                    :options="statusOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="حالة الإعلان"
+                    @change="applyFilters"
+                />
             </div>
             
             <!-- Table -->
@@ -71,6 +74,7 @@
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 
 const { confirm } = useConfirm();
@@ -81,6 +85,12 @@ const props = defineProps({
 });
 
 const status = ref(props.filters?.status || '');
+
+const statusOptions = [
+    { value: '', label: 'الكل' },
+    { value: 'published', label: 'منشور' },
+    { value: 'draft', label: 'مسودة' },
+];
 
 const applyFilters = () => {
     router.get('/system/announcements', { status: status.value || undefined }, { preserveState: true });

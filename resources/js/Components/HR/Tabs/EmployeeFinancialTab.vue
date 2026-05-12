@@ -266,6 +266,8 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import BankInfoTab from '@/Components/HR/Tabs/Financial/BankInfoTab.vue';
 import SalariesTab from '@/Components/HR/Tabs/Financial/SalariesTab.vue';
 import PaymentHistoryTab from '@/Components/HR/Tabs/Financial/PaymentHistoryTab.vue';
@@ -278,6 +280,15 @@ const props = defineProps({
     otherPayments: { type: Array, default: () => [] },
 });
 
+const { t } = useI18n();
+
+const periodTypeOptions = [
+    { value: 'indefinite', label: t('hr.financial.periods.indefinite') },
+    { value: 'fixed_period', label: t('hr.financial.periods.fixed_period') },
+    { value: 'one_time', label: t('hr.financial.periods.one_time') },
+];
+
+const { t: t_nav } = useI18n();
 const tabs = [
     { key: 'bank', label: 'hr.financial.tabs.bank_info', icon: '🏦' },
     { key: 'salaries', label: 'hr.financial.tabs.salaries', icon: '💰' },

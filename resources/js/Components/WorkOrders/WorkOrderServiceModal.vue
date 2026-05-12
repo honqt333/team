@@ -317,10 +317,14 @@
                 <div v-if="!props.readOnly" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                     <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ $t('work_orders.item.assign_technician') }}</h4>
                     <div class="flex gap-2">
-                        <select v-model="technicianForm.user_id" class="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm">
-                            <option value="">{{ $t('common.choose') }}</option>
-                            <option v-for="tech in availableTechnicians" :key="tech.id" :value="tech.id">{{ tech.name }}</option>
-                        </select>
+                        <SearchableSelect
+                            v-model="technicianForm.user_id"
+                            :options="availableTechnicians"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('common.choose')"
+                            class="flex-1"
+                        />
                         <button type="button" @click="assignTechnician" :disabled="techniciansLoading || !technicianForm.user_id" class="px-4 py-2 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 disabled:opacity-50 transition-colors">
                             {{ $t('common.add') }}
                         </button>

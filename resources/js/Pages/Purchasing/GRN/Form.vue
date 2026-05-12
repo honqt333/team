@@ -35,11 +35,14 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                         {{ $t('inventory.warehouses.title') }} <span class="text-red-500">*</span>
                                     </label>
-                                    <select v-model="form.warehouse_id" required
-                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all">
-                                        <option value="" disabled>{{ $t('inventory.warehouses.select') }}</option>
-                                        <option :value="purchaseOrder.warehouse_id">{{ purchaseOrder.warehouse?.name }}</option>
-                                    </select>
+                                    <SearchableSelect
+                                        v-model="form.warehouse_id"
+                                        :options="warehouseOptions"
+                                        option-label="name"
+                                        option-value="id"
+                                        :placeholder="$t('inventory.warehouses.select')"
+                                        required
+                                    />
                                     <div v-if="form.errors.warehouse_id" class="text-red-500 text-xs mt-1">{{ form.errors.warehouse_id }}</div>
                                 </div>
 
@@ -149,10 +152,19 @@
 import { computed } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     purchaseOrder: Object,
     pendingItems: Array,
+});
+
+const warehouseOptions = computed(() => {
+    if (!props.purchaseOrder?.warehouse) return [];
+    return [{
+        id: props.purchaseOrder.warehouse_id,
+        name: props.purchaseOrder.warehouse.name
+    }];
 });
 
 const form = useForm({

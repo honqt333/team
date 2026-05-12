@@ -5,18 +5,14 @@
             <!-- Country Selector -->
             <div class="flex items-center gap-2">
                 <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ $t('vehicles.plate.country') }}</span>
-                <div class="relative">
-                    <select 
-                        v-model="selectedCountry"
-                        class="appearance-none px-3 py-1.5 pe-8 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-transparent cursor-pointer"
-                    >
-                        <option value="SA">🇸🇦 {{ $t('vehicles.plate.countries.sa') }}</option>
-                        <option value="OTHER">🌍 {{ $t('vehicles.plate.countries.other') }}</option>
-                    </select>
-                    <svg class="absolute end-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                    </svg>
-                </div>
+                <SearchableSelect
+                    v-model="selectedCountry"
+                    :options="countryOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="{{ $t('vehicles.plate.country') }}"
+                    class="min-w-[150px]"
+                />
             </div>
 
             <!-- Skip Format Checkbox -->
@@ -171,6 +167,11 @@ const plateLetters = [
 ];
 
 const arabicNums = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+
+const countryOptions = [
+    { value: 'SA', label: '🇸🇦 ' + 'Saudi Arabia' },
+    { value: 'OTHER', label: '🌍 ' + 'Other' },
+];
 
 const selectedCountry = ref('SA');
 const skipFormat = ref(false);

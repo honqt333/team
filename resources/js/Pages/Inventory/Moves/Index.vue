@@ -34,6 +34,17 @@
                         </svg>
                             <span class="hidden sm:inline">{{ $t('inventory.moves.adjust') }}</span>
                         </button>
+
+                        <!-- Print Button -->
+                        <button
+                            @click="printMoves"
+                            class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-purple-600 dark:hover:text-purple-400 transition-all"
+                            :title="$t('common.print')"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -214,21 +225,96 @@
                 </div>
             </div>
         </div>
-    </AppLayout>
 
-    <!-- Modals -->
-    <ReceiptModal
-        :show="showReceiptModal"
-        :warehouse-id="warehouse?.id"
-        @close="showReceiptModal = false"
-        @saved="() => {}"
-    />
-    <AdjustmentModal
-        :show="showAdjustmentModal"
-        :warehouse-id="warehouse?.id"
-        @close="showAdjustmentModal = false"
-        @saved="() => {}"
-    />
+        <!-- Modals -->
+        <ReceiptModal
+            :show="showReceiptModal"
+            :warehouse-id="warehouse?.id"
+            @close="showReceiptModal = false"
+            @saved="() => {}"
+        />
+        <AdjustmentModal
+            :show="showAdjustmentModal"
+            :warehouse-id="warehouse?.id"
+            @close="showAdjustmentModal = false"
+            @saved="() => {}"
+        />
+
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <!-- Header -->
+                <div class="print-header">
+                    <!-- Arabic Layout -->
+                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
+                        </div>
+                        <div class="flex-1 text-right">
+                            <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                الفرع: {{ $page.props.center?.name }}
+                            </p>
+                            <p class="text-sm" v-if="warehouse?.name">المستودع: {{ warehouse.name }}</p>
+                        </div>
+                    </div>
+                    <!-- English Layout -->
+                    <div v-else class="flex items-start gap-4 mb-4">
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
+                        </div>
+                        <div class="flex-1">
+                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                Branch: {{ $page.props.center?.name }}
+                            </p>
+                            <p class="text-sm" v-if="warehouse?.name">Warehouse: {{ warehouse.name }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-4 border-gray-300 text-center">
+                        <h2 class="text-lg font-bold">{{ $t('inventory.moves.title') }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ $t('inventory.moves.columns.part') }}</th>
+                            <th>{{ $t('inventory.moves.columns.action') }}</th>
+                            <th>{{ $t('inventory.moves.columns.stock_before') }}</th>
+                            <th>{{ $t('inventory.moves.columns.qty') }}</th>
+                            <th>{{ $t('inventory.moves.columns.stock_after') }}</th>
+                            <th>{{ $t('inventory.moves.columns.cost_price') }}</th>
+                            <th>{{ $t('inventory.moves.columns.cost_amount') }}</th>
+                            <th>{{ $t('inventory.moves.columns.updated_at') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(move, index) in allMovesForPrint" :key="move.id" :class="move.reversed_at ? 'opacity-50 line-through' : ''">
+                            <td>{{ toEnglish(index + 1) }}</td>
+                            <td>
+                                <div class="font-bold">{{ move.part?.name_ar }}</div>
+                                <div class="text-xs font-mono">{{ toEnglish(move.part?.sku) }}</div>
+                            </td>
+                            <td>{{ getMoveTypeLabel(move.move_type) }}</td>
+                            <td class="font-mono">{{ toEnglish(calculateStockBefore(move)) }}</td>
+                            <td class="font-mono font-bold" :class="move.qty > 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ move.qty > 0 ? '+' : '' }}{{ toEnglish(move.qty) }}
+                            </td>
+                            <td class="font-mono">{{ toEnglish(move.balance_after) }}</td>
+                            <td class="font-mono">{{ toEnglish(formatCurrency(move.unit_cost)) }}</td>
+                            <td class="font-mono">{{ toEnglish(formatCurrency(move.total_cost)) }}</td>
+                            <td class="text-xs">{{ formatDate(move.posted_at) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </Teleport>
+    </AppLayout>
 </template>
 
 <script setup>
@@ -237,13 +323,17 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import ReceiptModal from '@/Components/Inventory/ReceiptModal.vue';
 import AdjustmentModal from '@/Components/Inventory/AdjustmentModal.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const isRtl = computed(() => locale.value === 'ar');
 const page = usePage();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     moves: Object,
@@ -261,6 +351,37 @@ const localFilters = ref({
     date_from: props.filters?.date_from || '',
     date_to: props.filters?.date_to || '',
 });
+
+// Printing
+const printing = ref(false);
+const allMovesForPrint = ref(props.moves?.data || []);
+
+const printMoves = async () => {
+    try {
+        printing.value = true;
+        
+        // Fetch all if there are multiple pages
+        if (props.moves?.total > props.moves?.data?.length) {
+            const response = await axios.get(route('app.inventory.moves.index'), {
+                params: {
+                    ...localFilters.value,
+                    per_page: -1
+                }
+            });
+            allMovesForPrint.value = response.data.data || [];
+        } else {
+            allMovesForPrint.value = props.moves?.data || [];
+        }
+
+        // Wait for DOM
+        await new Promise(resolve => setTimeout(resolve, 100));
+        window.print();
+    } catch (error) {
+        console.error('Print failed:', error);
+    } finally {
+        printing.value = false;
+    }
+};
 
 const applyFilters = () => {
     router.get(route('app.inventory.moves.index'), {

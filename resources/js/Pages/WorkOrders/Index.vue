@@ -4,23 +4,17 @@
             <!-- Header Section -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-3 sm:gap-4">
-                    <!-- Back + Title + Count -->
+                    <!-- Title + Icon + Count -->
                     <div class="flex items-center gap-4">
-                        <!-- Back Button -->
-                        <Link
-                            :href="route('work-orders.hub')"
-                            class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-300 transition-all"
-                        >
-                            <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </Link>
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" :class="statusFilter === 'closed' ? 'bg-gradient-to-br from-slate-500 to-gray-600 shadow-slate-500/30' : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30'">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" :class="statusFilter ? (statusFilter === 'closed' ? 'bg-gradient-to-br from-slate-500 to-gray-600 shadow-slate-500/30' : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30') : 'bg-gradient-to-br from-indigo-600 to-purple-600 shadow-indigo-500/30'">
                             <svg v-if="statusFilter === 'closed'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg v-else-if="statusFilter === 'open'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                            <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                             </svg>
                         </div>
                         <div>
@@ -28,150 +22,215 @@
                             <p v-if="workOrders" class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ toEnglish(workOrders.total) }} {{ $t('work_orders.total_count') }}
                             </p>
+                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ $t('work_orders.hub.subtitle') }}
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Actions Row -->
-                    <!-- Filters Row - Responsive Grid -->
-                    <div class="w-full mt-4 lg:mt-0">
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3">
-                            <!-- Search -->
-                            <div class="col-span-2 md:col-span-1 lg:w-48">
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                        </svg>
-                                    </div>
-                                    <input
-                                        type="text"
-                                        v-model="searchQuery"
-                                        :placeholder="$t('work_orders.search')"
-                                        class="w-full ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                    />
-                                </div>
-                            </div>
-
-                            <!-- Date From -->
-                            <div class="lg:w-36">
-                                <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
-                                    {{ $t('work_orders.filters.date_from') }}
-                                </label>
-                                <input
-                                    type="date"
-                                    v-model="dateFrom"
-                                    dir="ltr"
-                                    class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                />
-                            </div>
-
-                            <!-- Date To -->
-                            <div class="lg:w-36">
-                                <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
-                                    {{ $t('work_orders.filters.date_to') }}
-                                </label>
-                                <input
-                                    type="date"
-                                    v-model="dateTo"
-                                    dir="ltr"
-                                    class="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                />
-                            </div>
-
-                            <!-- Customer Type Filter -->
-                            <div class="lg:w-40">
-                                <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
-                                    {{ $t('work_orders.filters.customer_type') }}
-                                </label>
-                                <SearchableSelect
-                                    v-model="customerTypeFilter"
-                                    :options="customerTypeOptions"
-                                    option-label="label"
-                                    option-value="value"
-                                    :placeholder="$t('work_orders.filters.all_types')"
-                                    :label="''"
-                                />
-                            </div>
-
-                            <!-- Actions Group -->
-                            <div class="col-span-2 md:col-span-3 lg:col-span-1 flex items-end justify-end gap-2 lg:ms-auto">
-                                <!-- Print/Export Buttons -->
-                                <div class="flex gap-1.5">
-                                    <!-- Print -->
-                                    <button
-                                        v-if="can('crm.work_orders.print')"
-                                        @click="printWorkOrders"
-                                        class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all"
-                                        :title="$t('common.print')"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                        </svg>
-                                    </button>
-                                    <!-- Export -->
-                                    <button
-                                        v-if="can('crm.work_orders.export')"
-                                        @click="exportWorkOrders"
-                                        :disabled="exporting"
-                                        class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all disabled:opacity-50"
-                                        :title="$t('common.export')"
-                                    >
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- View Toggle -->
-                                <div class="hidden sm:flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
-                                    <button
-                                        @click="viewMode = 'grid'"
-                                        :class="[
-                                            'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                            viewMode === 'grid'
-                                                ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                        ]"
-                                    >
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
-                                        </svg>
-                                    </button>
-                                    <button
-                                        @click="viewMode = 'list'"
-                                        :class="[
-                                            'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                            viewMode === 'list'
-                                                ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                        ]"
-                                    >
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Add Button -->
-                                <button
-                                    v-if="can('crm.work_orders.create')"
-                                    @click="showCreateModal = true"
-                                    class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                    </svg>
-                                    <span class="hidden sm:inline">{{ $t('work_orders.add') }}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
 
-            <!-- Filter Tabs (only for open status) - Modern Compact Design -->
-            <div v-if="statusFilter === 'open'" class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap gap-3">
+            <!-- Dashboard / Quick Access View -->
+            <div v-if="!statusFilter" class="space-y-8">
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- New Card -->
+                    <button
+                        @click="showCreateModal = true"
+                        class="group relative bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-3xl p-8 border-2 border-dashed border-indigo-200 dark:border-indigo-800 hover:border-indigo-400 dark:hover:border-indigo-600 hover:shadow-xl transition-all duration-300 text-center"
+                    >
+                        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 transition-colors">
+                            {{ $t('work_orders.hub.new_card') }}
+                        </h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('work_orders.hub.new_card_hint') }}
+                        </p>
+                    </button>
+
+                    <!-- Open Cards -->
+                    <Link
+                        :href="route('work-orders.index', { status: 'open' })"
+                        class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-3xl p-8 border border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-xl transition-all duration-300 text-center"
+                    >
+                        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 transition-colors">
+                            {{ $t('work_orders.hub.open_cards') }}
+                        </h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('work_orders.hub.open_cards_hint') }}
+                        </p>
+                        <div v-if="counts?.open > 0" class="absolute top-4 end-4 px-3 py-1 bg-emerald-500 text-white text-sm font-bold rounded-full shadow-lg">
+                            {{ toEnglish(counts.open) }}
+                        </div>
+                    </Link>
+
+                    <!-- Closed Cards -->
+                    <Link
+                        :href="route('work-orders.index', { status: 'closed' })"
+                        class="group relative bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-800/20 rounded-3xl p-8 border border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-xl transition-all duration-300 text-center"
+                    >
+                        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-slate-500 to-gray-600 flex items-center justify-center shadow-lg shadow-slate-500/30 group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-slate-600 transition-colors">
+                            {{ $t('work_orders.hub.closed_cards') }}
+                        </h3>
+                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('work_orders.hub.closed_cards_hint') }}
+                        </p>
+                        <div v-if="counts?.closed > 0" class="absolute top-4 end-4 px-3 py-1 bg-slate-500 text-white text-sm font-bold rounded-full shadow-lg">
+                            {{ toEnglish(counts.closed) }}
+                        </div>
+                    </Link>
+                </div>
+            </div>
+
+            <!-- List/Grid View Section (visible only when status filter is active) -->
+            <div v-if="statusFilter" class="space-y-6">
+
+                <!-- Filters & Actions Row -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3">
+                        <!-- Search -->
+                        <div class="col-span-2 md:col-span-1 lg:w-48">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    v-model="searchQuery"
+                                    :placeholder="$t('work_orders.search')"
+                                    class="w-full ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Date From -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
+                                {{ $t('work_orders.filters.date_from') }}
+                            </label>
+                            <CustomDatePicker
+                                v-model="dateFrom"
+                                @change="applyFilters"
+                            />
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
+                                {{ $t('work_orders.filters.date_to') }}
+                            </label>
+                            <CustomDatePicker
+                                v-model="dateTo"
+                                @change="applyFilters"
+                            />
+                        </div>
+
+                        <!-- Customer Type Filter -->
+                        <div class="lg:w-40">
+                            <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
+                                {{ $t('work_orders.filters.customer_type') }}
+                            </label>
+                            <SearchableSelect
+                                v-model="customerTypeFilter"
+                                :options="customerTypeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :placeholder="$t('work_orders.filters.all_types')"
+                                :label="''"
+                            />
+                        </div>
+
+                        <!-- Actions Group -->
+                        <div class="col-span-2 md:col-span-3 lg:col-span-1 flex items-end justify-end gap-2 lg:ms-auto">
+                            <!-- Print/Export Buttons -->
+                            <div class="flex gap-1.5">
+                                <button
+                                    v-if="can('crm.work_orders.print')"
+                                    @click="printWorkOrders"
+                                    class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all"
+                                    :title="$t('common.print')"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                    </svg>
+                                </button>
+                                <button
+                                    v-if="can('crm.work_orders.export')"
+                                    @click="exportWorkOrders"
+                                    :disabled="exporting"
+                                    class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all disabled:opacity-50"
+                                    :title="$t('common.export')"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- View Toggle -->
+                            <div class="hidden sm:flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
+                                <button
+                                    @click="viewMode = 'grid'"
+                                    :class="[
+                                        'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                        viewMode === 'grid'
+                                            ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                    ]"
+                                >
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+                                    </svg>
+                                </button>
+                                <button
+                                    @click="viewMode = 'list'"
+                                    :class="[
+                                        'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                        viewMode === 'list'
+                                            ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                    ]"
+                                >
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <!-- Add Button -->
+                            <button
+                                v-if="can('crm.work_orders.create')"
+                                @click="showCreateModal = true"
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                <span class="hidden sm:inline">{{ $t('work_orders.hub.new_card') }}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Tabs -->
+                <div v-if="statusFilter" class="flex flex-wrap gap-3">
                 <button
                     v-for="tab in filterTabs"
                     :key="tab.key"
@@ -224,10 +283,9 @@
                     </svg>
                 </button>
                 </div>
-            </div>
 
-            <!-- Loading State -->
-            <div v-if="!workOrders" class="flex flex-col items-center justify-center py-16">
+                <!-- Loading State -->
+                <div v-if="!workOrders" class="flex flex-col items-center justify-center py-16">
                 <div class="relative">
                     <div class="w-12 h-12 border-4 border-indigo-200 dark:border-indigo-900 rounded-full"></div>
                     <div class="absolute top-0 left-0 w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
@@ -553,17 +611,18 @@
                 </div>
             </div>
 
-            <!-- Infinite Scroll Sentinel -->
-            <div ref="loadMoreSentinel" class="py-6 flex justify-center w-full">
-                <div v-if="loadingMore" class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
-                </div>
-                <div v-else-if="allWorkOrders.length >= (workOrders?.total || 0) && (workOrders?.total || 0) > 0" class="text-sm text-gray-400 dark:text-gray-600">
-                    {{ $t('work_orders.all_loaded') || 'All work orders loaded' }}
+                <!-- Infinite Scroll Sentinel -->
+                <div ref="loadMoreSentinel" class="py-6 flex justify-center w-full">
+                    <div v-if="loadingMore" class="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
+                    </div>
+                    <div v-else-if="allWorkOrders.length >= (workOrders?.total || 0) && (workOrders?.total || 0) > 0" class="text-sm text-gray-400 dark:text-gray-600">
+                        {{ $t('work_orders.all_loaded') || 'All work orders loaded' }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -586,7 +645,7 @@
                 <!-- Header -->
                 <div class="print-header">
                     <!-- Arabic Layout: Logo right, info beside it -->
-                    <div class="flex items-start gap-4 mb-4" style="direction: rtl;">
+                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
                         <!-- Logo -->
                         <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
                             <img 
@@ -598,6 +657,9 @@
                         <!-- Center Info -->
                         <div class="flex-1 text-right">
                             <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                الفرع: {{ $page.props.center?.name }}
+                            </p>
                             <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
                                 هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
                             </p>
@@ -609,11 +671,39 @@
                             </p>
                         </div>
                     </div>
+
+                    <!-- English Layout: Logo left with info beside it -->
+                    <div v-else class="flex items-start gap-4 mb-4">
+                        <!-- Logo -->
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img 
+                                :src="$page.props.tenant.logo_url" 
+                                :alt="$page.props.tenant?.name"
+                                class="w-full h-full object-contain"
+                            />
+                        </div>
+                        <!-- Center Info -->
+                        <div class="flex-1">
+                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                Branch: {{ $page.props.center?.name }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                Email: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                            </p>
+                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
+                                CR: {{ $page.props.tenant?.cr_number }}
+                            </p>
+                        </div>
+                    </div>
                     
                     <!-- Title centered -->
                     <div class="border-t pt-4 border-gray-300 text-center">
                         <h2 class="text-lg font-bold">{{ $t('work_orders.title') }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString('ar-SA') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
                     </div>
                 </div>
 
@@ -623,34 +713,40 @@
                         <tr>
                             <th>#</th>
                             <th>{{ $t('work_orders.columns.code') }}</th>
+                            <th>{{ $t('work_orders.columns.created_at') }}</th>
                             <th>{{ $t('work_orders.columns.customer') }}</th>
+                            <th>{{ $t('work_orders.columns.contact_name') }}</th>
                             <th>{{ $t('work_orders.columns.vehicle') }}</th>
                             <th>{{ $t('work_orders.columns.status') }}</th>
-                            <th>{{ $t('work_orders.columns.invoice_total') }}</th>
-                            <th>{{ $t('work_orders.columns.paid_amount') }}</th>
+                            <th>{{ $t('work_orders.columns.total') }}</th>
+                            <th>{{ $t('work_orders.columns.paid') }}</th>
                             <th>{{ $t('work_orders.columns.balance') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(order, index) in allWorkOrders" :key="order.id">
-                            <td>{{ index + 1 }}</td>
-                            <td>{{ order.code }}</td>
+                            <td>{{ toEnglish(index + 1) }}</td>
+                            <td class="font-mono font-bold">#{{ toEnglish(order.code || order.id) }}</td>
+                            <td>{{ formatDate(order.created_at) }}</td>
                             <td>{{ order.customer?.name || '-' }}</td>
-                            <td dir="ltr" class="text-left font-sans">{{ order.vehicle?.plate_number || '-' }}</td>
+                            <td>{{ order.contact_name || '-' }}</td>
+                            <td dir="ltr" class="font-bold">{{ toEnglish(order.vehicle?.plate_number) || '-' }}</td>
                             <td>
                                 <span class="print-badge">
                                     {{ $t(`work_orders.status.${order.status}`) }}
                                 </span>
                             </td>
-                            <td>{{ (order.total || 0).toLocaleString() }}</td>
-                            <td>{{ (order.paid_amount || 0).toLocaleString() }}</td>
-                            <td>{{ ((order.total || 0) - (order.paid_amount || 0)).toLocaleString() }}</td>
+                            <td class="font-bold">{{ (order.total || 0).toLocaleString() }}</td>
+                            <td class="text-green-600">{{ (order.paid_amount || 0).toLocaleString() }}</td>
+                            <td :class="getBalance(order) > 0 ? 'text-red-600 font-bold' : ''">
+                                {{ getBalance(order).toLocaleString() }}
+                            </td>
                         </tr>
                     </tbody>
                 </table>
                 
                 <div class="mt-8 text-center text-xs text-gray-400">
-                    {{ $page.props.auth.user.name }} - {{ new Date().toLocaleString('ar-SA') }}
+                    {{ $page.props.auth.user.name }} - {{ new Date().toLocaleString('en-GB', { numberingSystem: 'latn' }) }}
                 </div>
             </div>
         </Teleport>
@@ -666,11 +762,13 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import SortIcon from '@/Components/Common/SortIcon.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const isRtl = computed(() => locale.value === 'ar');
 const { success } = useToast();
 const { toEnglish } = useNumberFormat();
 
@@ -719,6 +817,15 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    counts: {
+        type: Object,
+        default: () => ({ open: 0, closed: 0, completed: 0 }),
+    },
+});
+
+const pageTitle = computed(() => {
+    if (!props.statusFilter) return t('work_orders.hub.title');
+    return props.statusFilter === 'closed' ? t('work_orders.list.closed_title') : t('work_orders.list.open_title');
 });
 
 // Infinite Scroll Refs
@@ -789,57 +896,97 @@ const IconOpen = { template: `<svg fill="none" stroke="currentColor" viewBox="0 
 const IconDraft = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>` };
 const IconOverdue = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
 const IconPending = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
+const IconClosed = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
+const IconPostpaid = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>` };
+const IconBadDebt = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
 
-const filterTabs = computed(() => [
-    { 
-        key: 'in_progress', 
-        label: t('work_orders.filters.open'), 
-        icon: IconOpen, 
-        iconColor: 'text-emerald-500', 
-        bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
-        gradientFrom: '#10b981',
-        gradientTo: '#059669',
-        count: props.filterCounts.open || 0 
-    },
-    { 
-        key: 'draft', 
-        label: t('work_orders.filters.draft'), 
-        icon: IconDraft, 
-        iconColor: 'text-slate-500', 
-        bgColor: 'bg-slate-100 dark:bg-slate-900/30',
-        gradientFrom: '#64748b',
-        gradientTo: '#475569',
-        count: props.filterCounts.draft || 0 
-    },
-    { 
-        key: 'overdue', 
-        label: t('work_orders.filters.overdue'), 
-        icon: IconOverdue, 
-        iconColor: 'text-red-500', 
-        bgColor: 'bg-red-100 dark:bg-red-900/30',
-        gradientFrom: '#ef4444',
-        gradientTo: '#dc2626',
-        count: props.filterCounts.overdue || 0 
-    },
-    { 
-        key: 'pending_payment', 
-        label: t('work_orders.filters.pending_payment'), 
-        icon: IconPending, 
-        iconColor: 'text-amber-500', 
-        bgColor: 'bg-amber-100 dark:bg-amber-900/30',
-        gradientFrom: '#f59e0b',
-        gradientTo: '#d97706',
-        count: props.filterCounts.pending_payment || 0 
-    },
-]);
-
-const currentSubFilter = computed(() => props.subFilter || 'in_progress');
-
-const pageTitle = computed(() => {
-    if (props.statusFilter === 'open') return t('work_orders.list.open_title');
-    if (props.statusFilter === 'closed') return t('work_orders.list.closed_title');
-    return t('work_orders.list.all_title');
+const filterTabs = computed(() => {
+    if (props.statusFilter === 'open') {
+        return [
+            { 
+                key: 'in_progress', 
+                label: t('work_orders.filters.open'), 
+                icon: IconOpen, 
+                iconColor: 'text-emerald-500', 
+                bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+                gradientFrom: '#10b981',
+                gradientTo: '#059669',
+                count: props.filterCounts.open || 0 
+            },
+            { 
+                key: 'draft', 
+                label: t('work_orders.filters.draft'), 
+                icon: IconDraft, 
+                iconColor: 'text-slate-500', 
+                bgColor: 'bg-slate-100 dark:bg-slate-900/30',
+                gradientFrom: '#64748b',
+                gradientTo: '#475569',
+                count: props.filterCounts.draft || 0 
+            },
+            { 
+                key: 'overdue', 
+                label: t('work_orders.filters.overdue'), 
+                icon: IconOverdue, 
+                iconColor: 'text-red-500', 
+                bgColor: 'bg-red-100 dark:bg-red-900/30',
+                gradientFrom: '#ef4444',
+                gradientTo: '#dc2626',
+                count: props.filterCounts.overdue || 0 
+            },
+            { 
+                key: 'pending_payment', 
+                label: t('work_orders.filters.pending_payment'), 
+                icon: IconPending, 
+                iconColor: 'text-amber-500', 
+                bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+                gradientFrom: '#f59e0b',
+                gradientTo: '#d97706',
+                count: props.filterCounts.pending_payment || 0 
+            },
+        ];
+    } else if (props.statusFilter === 'closed') {
+        return [
+            { 
+                key: 'closed_all', 
+                label: t('work_orders.filters.closed_all') || 'كروت الصيانة المغلقة', 
+                icon: IconClosed, 
+                iconColor: 'text-slate-500', 
+                bgColor: 'bg-slate-100 dark:bg-slate-900/30',
+                gradientFrom: '#64748b',
+                gradientTo: '#475569',
+                count: props.filterCounts.closed_all || 0 
+            },
+            { 
+                key: 'postpaid', 
+                label: t('work_orders.filters.postpaid') || 'الفواتير الآجلة', 
+                icon: IconPostpaid, 
+                iconColor: 'text-indigo-500', 
+                bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+                gradientFrom: '#6366f1',
+                gradientTo: '#4f46e5',
+                count: props.filterCounts.postpaid || 0 
+            },
+            { 
+                key: 'bad_debt', 
+                label: t('work_orders.filters.bad_debt') || 'ديون معدمة', 
+                icon: IconBadDebt, 
+                iconColor: 'text-red-500', 
+                bgColor: 'bg-red-100 dark:bg-red-900/30',
+                gradientFrom: '#ef4444',
+                gradientTo: '#dc2626',
+                count: props.filterCounts.bad_debt || 0 
+            },
+        ];
+    }
+    return [];
 });
+
+const currentSubFilter = computed(() => {
+    if (props.statusFilter === 'open') return props.subFilter || 'in_progress';
+    if (props.statusFilter === 'closed') return props.subFilter || 'closed_all';
+    return props.subFilter;
+});
+
 
 const showCreateModal = ref(false);
 const viewMode = ref(localStorage.getItem('workOrdersViewMode') || 'grid');
@@ -887,7 +1034,7 @@ function applyFilters() {
 // Watch filters and apply with debounce
 const debouncedApplyFilters = debounce(applyFilters, 400);
 
-watch([dateFrom, dateTo, customerTypeFilter], () => {
+watch([searchQuery, dateFrom, dateTo, customerTypeFilter], () => {
     debouncedApplyFilters();
 });
 
@@ -952,7 +1099,10 @@ function setSubFilter(filter) {
     router.get(route('work-orders.index'), { 
         status: props.statusFilter,
         sub_filter: filter,
-        search: searchQuery.value 
+        search: searchQuery.value,
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
+        customer_type: customerTypeFilter.value,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -960,17 +1110,6 @@ function setSubFilter(filter) {
     });
 }
 
-watch(searchQuery, debounce((value) => {
-    router.get(route('work-orders.index'), { 
-        status: props.statusFilter,
-        sub_filter: props.subFilter,
-        search: value 
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-    });
-}, 300));
 
 watch(viewMode, (newMode) => {
     localStorage.setItem('workOrdersViewMode', newMode);
@@ -1005,7 +1144,8 @@ function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('en-GB', { 
         year: 'numeric',
         month: '2-digit',
-        day: '2-digit'
+        day: '2-digit',
+        numberingSystem: 'latn'
     });
 }
 

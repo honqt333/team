@@ -67,6 +67,8 @@ class VehicleController
                 });
             })
             ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
+            ->when($request->date_from, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -91,6 +93,8 @@ class VehicleController
                 });
             })
             ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
+            ->when($request->date_from, fn ($q, $date) => $q->whereDate('created_at', '>=', $date))
+            ->when($request->date_to, fn ($q, $date) => $q->whereDate('created_at', '<=', $date))
             ->latest()
             ->paginate(20)
             ->withQueryString();
@@ -123,7 +127,7 @@ class VehicleController
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
-            'filters' => $request->only(['search', 'make_id']),
+            'filters' => $request->only(['search', 'make_id', 'date_from', 'date_to']),
         ]);
     }
 

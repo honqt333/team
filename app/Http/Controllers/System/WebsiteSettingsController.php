@@ -45,6 +45,8 @@ class WebsiteSettingsController extends Controller
                 'website_login_button_text_ar' => Setting::get('website.login.button.text.ar', 'دخول'),
                 'website_login_button_text_en' => Setting::get('website.login.button.text.en', 'Login'),
 
+                'website_social_links' => json_decode(Setting::get('website.social.links', '[]'), true),
+
                 'website_facebook_url' => Setting::get('website.facebook.url', ''),
                 'website_twitter_url' => Setting::get('website.twitter.url', ''),
                 'website_instagram_url' => Setting::get('website.instagram.url', ''),

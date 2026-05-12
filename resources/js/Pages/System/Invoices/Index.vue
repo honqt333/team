@@ -42,12 +42,15 @@
                     class="flex-1 min-w-[200px] rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                     @keyup.enter="applyFilters"
                 />
-                <select v-model="status" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
-                    <option value="">كل الحالات</option>
-                    <option value="pending">معلقة</option>
-                    <option value="paid">مدفوعة</option>
-                    <option value="cancelled">ملغية</option>
-                </select>
+                <SearchableSelect
+                    v-model="status"
+                    :options="invoiceStatusOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="كل الحالات"
+                    @change="applyFilters"
+                    class="min-w-[200px] w-full"
+                />
             </div>
             
             <!-- Table -->
@@ -123,6 +126,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 
 const props = defineProps({
@@ -133,6 +137,13 @@ const props = defineProps({
 
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
+
+const invoiceStatusOptions = [
+    { value: '', label: 'كل الحالات' },
+    { value: 'pending', label: 'معلقة' },
+    { value: 'paid', label: 'مدفوعة' },
+    { value: 'cancelled', label: 'ملغية' },
+];
 
 const applyFilters = () => {
     router.get('/system/invoices', {

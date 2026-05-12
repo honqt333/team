@@ -21,36 +21,6 @@ class InvoicesController extends Controller
     }
 
     /**
-     * List all invoices
-     */
-    public function index(Request $request)
-    {
-        $tenantId = auth()->user()->tenant_id;
-        $centerId = auth()->user()->current_center_id;
-
-        $query = Invoice::where('tenant_id', $tenantId)
-            ->where('center_id', $centerId)
-            ->with(['customer', 'workOrder'])
-            ->when($request->input('search'), function ($q, $search) {
-                $q->where(function ($query) use ($search) {
-                    $query->where('invoice_number', 'like', "%{$search}%")
-                          ->orWhereHas('customer', fn($c) => $c->where('name', 'like', "%{$search}%"));
-                });
-            })
-            ->when($request->input('payment_status'), fn($q, $status) => $q->where('payment_status', $status))
-            ->when($request->input('date_from'), fn($q, $date) => $q->whereDate('issue_date', '>=', $date))
-            ->when($request->input('date_to'), fn($q, $date) => $q->whereDate('issue_date', '<=', $date))
-            ->orderBy('issue_date', 'desc');
-
-        $invoices = $query->paginate(25)->withQueryString();
-
-        return Inertia::render('Invoices/Index', [
-            'invoices' => $invoices,
-            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to']),
-        ]);
-    }
-
-    /**
      * Show single invoice
      */
     public function show(Invoice $invoice)

@@ -191,14 +191,14 @@ const page = usePage();
 const unitOptions = computed(() => {
     return props.units.map(unit => ({
         value: unit.id,
-        label: page.props.auth.user.locale === 'ar' ? unit.name_ar : (unit.name_en || unit.name_ar)
+        label: isAr.value ? unit.name_ar : (unit.name_en || unit.name_ar)
     }));
 });
 
 const categoryOptions = computed(() => {
     return props.categories.map(cat => ({
         value: cat.id,
-        label: page.props.auth.user.locale === 'ar' ? cat.name_ar : (cat.name_en || cat.name_ar)
+        label: isAr.value ? cat.name_ar : (cat.name_en || cat.name_ar)
     }));
 });
 

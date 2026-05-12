@@ -35,15 +35,13 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ $t('common.department') }}
                 </label>
-                <select
+                <SearchableSelect
                     v-model="form.department_id"
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
-                >
-                    <option :value="null">{{ $t('common.none') }}</option>
-                    <option v-for="dept in departments" :key="dept.id" :value="dept.id">
-                        {{ dept.name_ar }}
-                    </option>
-                </select>
+                    :options="departmentOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="{{ $t('common.choose') }}"
+                />
             </div>
 
             <!-- Type & Amount (for allowance/deduction only) -->
@@ -69,13 +67,13 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('common.type') }}
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.type"
-                            class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
-                        >
-                            <option value="fixed">{{ $t('hr.settings.types.fixed') }}</option>
-                            <option value="percentage">{{ $t('hr.settings.types.percentage') }}</option>
-                        </select>
+                            :options="payrollTypeOptions"
+                            option-label="label"
+                            option-value="value"
+                            placeholder="{{ $t('common.choose') }}"
+                        />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -96,13 +94,13 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('hr.settings.calculation_base') }}
                     </label>
-                    <select
+                    <SearchableSelect
                         v-model="form.calculation_base"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
-                    >
-                        <option value="base_salary">{{ $t('hr.settings.calculation_bases.base_salary') }}</option>
-                        <option value="monthly_contribution">{{ $t('hr.settings.calculation_bases.monthly_contribution') }}</option>
-                    </select>
+                        :options="calculationBaseOptions"
+                        option-label="label"
+                        option-value="value"
+                        placeholder="{{ $t('common.choose') }}"
+                    />
                 </div>
             </div>
 
@@ -146,6 +144,7 @@ import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();

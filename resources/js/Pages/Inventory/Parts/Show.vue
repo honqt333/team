@@ -34,7 +34,7 @@
                     </div>
                      <div class="flex items-center gap-2">
                         <button
-                            v-if="can('inventory.parts.edit')"
+                            v-if="can('inventory.parts.update')"
                             @click="editPart"
                             class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm"
                         >

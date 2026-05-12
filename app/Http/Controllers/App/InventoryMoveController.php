@@ -46,6 +46,13 @@ class InventoryMoveController extends Controller
             ->when($request->input('date_to'), fn($q, $date) => $q->whereDate('posted_at', '<=', $date))
             ->orderBy('posted_at', 'desc');
 
+        if ($request->input('per_page') == -1) {
+            return response()->json([
+                'data' => $query->get(),
+                'warehouse' => $warehouse
+            ]);
+        }
+
         $moves = $query->paginate(50)->withQueryString();
 
         $moveTypes = [

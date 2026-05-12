@@ -64,8 +64,15 @@ class QuoteController extends Controller
                     $query->where('created_at', '>=', $date);
                 }
             })
-            ->orderByDesc("created_at")
-            ->paginate(20)
+            ->when($request->date_from, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
+            ->when($request->date_to, fn($query, $date) => $query->whereDate('created_at', '<=', $date))
+            ->orderByDesc("created_at");
+
+        if ($request->per_page == -1) {
+            return response()->json($quotes->get());
+        }
+
+        $quotes = $quotes->paginate(20)
             ->withQueryString();
 
         return response()->json($quotes);
@@ -121,6 +128,8 @@ class QuoteController extends Controller
                     $query->where('created_at', '>=', $date);
                 }
             })
+            ->when($request->date_from, fn($query, $date) => $query->whereDate('created_at', '>=', $date))
+            ->when($request->date_to, fn($query, $date) => $query->whereDate('created_at', '<=', $date))
             ->orderByDesc("created_at")
             ->paginate(20)
             ->withQueryString();
@@ -157,7 +166,7 @@ class QuoteController extends Controller
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
-            'filters' => array_merge($request->only(['search', 'date_range']), ['status' => $status]),
+            'filters' => array_merge($request->only(['search', 'date_range', 'date_from', 'date_to']), ['status' => $status]),
             'filterCounts' => $filterCounts,
         ]);
     }

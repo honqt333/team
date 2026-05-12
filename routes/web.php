@@ -103,8 +103,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     
     // Work Orders - Hub and Index
     Route::get('/work-orders/export', [WorkOrderController::class, 'export'])->name('work-orders.export');
-    Route::get('/work-orders', [WorkOrderController::class, 'hub'])->name('work-orders.hub');
-    Route::get('/work-orders/list', [WorkOrderController::class, 'index'])->name('work-orders.index');
+    Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
     Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update'])->name('work-orders.update');

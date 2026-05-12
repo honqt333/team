@@ -45,14 +45,14 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {{ $t('inventory.warehouses.title') }} *
                         </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.warehouse_id"
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                            :options="warehouses"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('common.select')"
                             required
-                        >
-                            <option value="">-- {{ $t('common.select') }} --</option>
-                            <option v-for="wh in warehouses" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
-                        </select>
+                        />
                     </div>
 
                     <!-- Part Selection (if from warehouse) -->
@@ -60,31 +60,15 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {{ $t('inventory.parts.title') }} *
                         </label>
-                        <div class="relative">
-                            <input
-                                type="text"
-                                v-model="partSearch"
-                                @input="searchParts"
-                                :placeholder="$t('inventory.parts.search_placeholder')"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                            />
-                            <!-- Dropdown -->
-                            <div 
-                                v-if="showPartDropdown && filteredParts.length"
-                                class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto"
-                            >
-                                <button
-                                    v-for="part in filteredParts"
-                                    :key="part.id"
-                                    type="button"
-                                    @click="selectPart(part)"
-                                    class="w-full px-4 py-2 text-start hover:bg-gray-100 dark:hover:bg-gray-600 text-sm"
-                                >
-                                    <span class="font-medium text-gray-900 dark:text-white">{{ part.sku }}</span>
-                                    <span class="text-gray-500 dark:text-gray-400"> - {{ part.name_ar || part.name_en }}</span>
-                                </button>
-                            </div>
-                        </div>
+                        <SearchableSelect
+                            v-model="form.part_id"
+                            :options="parts"
+                            :option-label="opt => `${opt.sku} - ${opt.name_ar || opt.name_en}`"
+                            option-value="id"
+                            :placeholder="$t('inventory.parts.search_placeholder')"
+                            @change="onPartChange"
+                            required
+                        />
                         <!-- Selected Part -->
                         <div v-if="selectedPart" class="mt-2 p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg flex items-center justify-between">
                             <div>
@@ -192,6 +176,7 @@ import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { debounce } from 'lodash-es';
 import axios from 'axios';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     modelValue: Boolean,
@@ -213,13 +198,21 @@ const form = ref({
     notes: '',
 });
 
-const partSearch = ref('');
-const showPartDropdown = ref(false);
-const filteredParts = ref([]);
-const selectedPart = ref(null);
+const selectedPart = computed(() => props.parts.find(p => p.id === form.value.part_id));
 const stockInfo = ref(null);
 const processing = ref(false);
 const error = ref('');
+
+const onPartChange = (partId) => {
+    const part = props.parts.find(p => p.id === partId);
+    if (part) {
+        form.value.name = part.name_ar || part.name_en;
+        checkStock();
+    } else {
+        form.value.name = '';
+        stockInfo.value = null;
+    }
+};
 
 const canSubmit = computed(() => {
     if (form.value.source === 'warehouse') {
@@ -243,42 +236,11 @@ const resetForm = () => {
         unit_price: 0,
         notes: '',
     };
-    partSearch.value = '';
-    selectedPart.value = null;
     stockInfo.value = null;
     error.value = '';
 };
 
-const searchParts = debounce(() => {
-    if (partSearch.value.length < 2) {
-        filteredParts.value = [];
-        showPartDropdown.value = false;
-        return;
-    }
-    const search = partSearch.value.toLowerCase();
-    filteredParts.value = props.parts.filter(p => 
-        p.sku.toLowerCase().includes(search) ||
-        p.name_ar?.toLowerCase().includes(search) ||
-        p.name_en?.toLowerCase().includes(search)
-    ).slice(0, 10);
-    showPartDropdown.value = true;
-}, 200);
 
-const selectPart = (part) => {
-    selectedPart.value = part;
-    form.value.part_id = part.id;
-    form.value.name = part.name_ar || part.name_en;
-    partSearch.value = '';
-    showPartDropdown.value = false;
-    checkStock();
-};
-
-const clearPart = () => {
-    selectedPart.value = null;
-    form.value.part_id = '';
-    form.value.name = '';
-    stockInfo.value = null;
-};
 
 const checkStock = async () => {
     if (!form.value.warehouse_id || !form.value.part_id) {

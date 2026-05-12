@@ -491,13 +491,14 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('common.center') }} *
                     </label>
-                    <select v-model="deviceForm.center_id"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                        required>
-                        <option v-for="center in centers" :key="center.id" :value="center.id">
-                            {{ center.name }}
-                        </option>
-                    </select>
+                    <SearchableSelect
+                        v-model="deviceForm.center_id"
+                        :options="centerOptions"
+                        option-label="label"
+                        option-value="value"
+                        placeholder="{{ $t('common.choose') }}"
+                        required
+                    />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -642,6 +643,7 @@ import SettingsTable from '@/Components/HR/SettingsTable.vue';
 import HRSettingModal from '@/Components/HR/HRSettingModal.vue';
 import RegulationModal from '@/Components/HR/RegulationModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 

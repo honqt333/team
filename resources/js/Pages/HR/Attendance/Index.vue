@@ -40,17 +40,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                             </svg>
                         </button>
-                    <!-- Print Button -->
-                    <a 
-                        :href="route('app.hr.attendance.print', { date: selectedDate })" 
-                        target="_blank"
-                        class="p-2 text-violet-600 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors border border-violet-200"
+                    <button
+                        @click="() => window.open(route('app.hr.attendance.print', { date: selectedDate }), '_blank')"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                         :title="$t('common.print')"
                     >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                         </svg>
-                    </a>
+                        <span class="hidden sm:inline">{{ $t('common.print') }}</span>
+                    </button>
                     </div>
                 </div>
             </div>
@@ -219,16 +218,14 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                         {{ $t('hr.attendance.status') }}
                     </label>
-                    <select 
+                    <SearchableSelect
                         v-model="editForm.status"
-                        class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500"
-                    >
-                        <option value="present">{{ $t('hr.attendance.present') }}</option>
-                        <option value="absent">{{ $t('hr.attendance.absent') }}</option>
-                        <option value="late">{{ $t('hr.attendance.late') }}</option>
-                        <option value="leave">{{ $t('hr.attendance.leave') }}</option>
-                        <option value="holiday">{{ $t('hr.attendance.holiday') }}</option>
-                    </select>
+                        :options="attendanceStatusOptions"
+                        option-label="label"
+                        option-value="value"
+                        placeholder="{{ $t('common.choose') }}"
+                        class="w-full"
+                    />
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -291,6 +288,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useI18n } from 'vue-i18n';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     employees: Array,
@@ -300,6 +298,14 @@ const props = defineProps({
 
 const { t } = useI18n();
 const { success, error } = useToast();
+
+const attendanceStatusOptions = [
+    { value: 'present', label: t('hr.attendance.present') },
+    { value: 'absent', label: t('hr.attendance.absent') },
+    { value: 'late', label: t('hr.attendance.late') },
+    { value: 'leave', label: t('hr.attendance.leave') },
+    { value: 'holiday', label: t('hr.attendance.holiday') },
+];
 
 const selectedDate = ref(props.filters.date);
 const editingAttendance = ref(null);

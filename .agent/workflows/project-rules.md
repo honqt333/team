@@ -11,8 +11,9 @@ description: Project standards and development guidelines for Carag - MANDATORY 
 ## 📋 قبل أي عمل - اقرأ هذا أولاً
 
 1. **اقرأ** `/Partner Reference.md` لفهم رؤية المنتج
-2. **اقرأ** هذا الملف كاملاً
-3. **لا تبدأ** بدون فهم السياق
+2. **اقرأ** `.agent/workflows/system-reference.md` لفهم معايير الواجهات (UI Standards)
+3. **اقرأ** هذا الملف كاملاً
+4. **لا تبدأ** بدون فهم السياق
 
 ---
 

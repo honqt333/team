@@ -16,19 +16,32 @@
                         </div>
                     </div>
                     <!-- View Toggle -->
-                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                        <button 
-                            @click="viewMode = 'list'"
-                            :class="['p-2 rounded-md transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']"
+                    <div class="flex items-center gap-2">
+                        <!-- Print Button -->
+                        <button
+                            @click="printStock"
+                            class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-emerald-600 dark:hover:text-emerald-400 transition-all"
+                            :title="$t('common.print')"
                         >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            </svg>
                         </button>
-                        <button 
-                            @click="viewMode = 'grid'"
-                            :class="['p-2 rounded-md transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                        </button>
+
+                        <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                            <button 
+                                @click="viewMode = 'list'"
+                                :class="['p-2 rounded-md transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                            </button>
+                            <button 
+                                @click="viewMode = 'grid'"
+                                :class="['p-2 rounded-md transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -260,16 +273,92 @@
                 </div>
             </div>
         </div>
+
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <!-- Header -->
+                <div class="print-header">
+                    <!-- Arabic Layout -->
+                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
+                        </div>
+                        <div class="flex-1 text-right">
+                            <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                الفرع: {{ $page.props.center?.name }}
+                            </p>
+                            <p class="text-sm" v-if="warehouse?.name">المستودع: {{ warehouse.name }}</p>
+                        </div>
+                    </div>
+                    <!-- English Layout -->
+                    <div v-else class="flex items-start gap-4 mb-4">
+                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
+                            <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
+                        </div>
+                        <div class="flex-1">
+                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                Branch: {{ $page.props.center?.name }}
+                            </p>
+                            <p class="text-sm" v-if="warehouse?.name">Warehouse: {{ warehouse.name }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border-t pt-4 border-gray-300 text-center">
+                        <h2 class="text-lg font-bold">{{ $t('inventory.stock.title') }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ $t('inventory.parts.sku_barcode') }}</th>
+                            <th>{{ $t('inventory.parts.name') }}</th>
+                            <th>{{ $t('inventory.stock.qty') }}</th>
+                            <th>{{ $t('inventory.stock.wac') }}</th>
+                            <th>{{ $t('inventory.parts.price') }}</th>
+                            <th>{{ $t('inventory.parts.min_sale_price') }}</th>
+                            <th>{{ isRtl ? 'القيمة الإجمالية' : 'Total Value' }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(balance, index) in allBalancesForPrint" :key="balance.id">
+                            <td>{{ toEnglish(index + 1) }}</td>
+                            <td class="font-mono">{{ toEnglish(balance.part?.sku) }}</td>
+                            <td>{{ isRtl ? balance.part?.name_ar : (balance.part?.name_en || balance.part?.name_ar) }}</td>
+                            <td class="font-mono">{{ toEnglish(formatQuantity(balance.qty_on_hand)) }} {{ isRtl ? balance.part?.unit?.name_ar : (balance.part?.unit?.name_en || balance.part?.unit?.name_ar) }}</td>
+                            <td class="font-mono">{{ toEnglish(formatCurrency(balance.wac_cost)) }}</td>
+                            <td class="font-mono">{{ toEnglish(formatCurrency(balance.part?.default_sale_price)) }}</td>
+                            <td class="font-mono">{{ toEnglish(formatCurrency(balance.part?.min_sale_price)) }}</td>
+                            <td class="font-mono font-bold">{{ toEnglish(formatCurrency(balance.qty_on_hand * balance.wac_cost)) }}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="font-bold bg-gray-50">
+                            <td colspan="7" class="text-end px-4 py-2">{{ isRtl ? 'الإجمالي العام للمخزون' : 'Grand Total Stock Value' }}</td>
+                            <td class="px-4 py-2 font-mono">{{ toEnglish(formatCurrency(stats.total_value)) }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { ref, watch, computed } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { debounce } from 'lodash-es';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import axios from 'axios';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     balances: Object,
@@ -280,7 +369,10 @@ const props = defineProps({
     stats: Object,
 });
 
-const { formatQuantity, formatCurrency } = useNumberFormat();
+const { formatQuantity, formatCurrency, toEnglish } = useNumberFormat();
+const { t, locale } = useI18n();
+const isRtl = computed(() => locale.value === 'ar');
+const page = usePage();
 
 const localFilters = ref({
     search: props.filters?.search || '',
@@ -294,6 +386,37 @@ const viewMode = ref(localStorage.getItem('inventory_stock_view_mode') || 'list'
 watch(viewMode, (mode) => {
     localStorage.setItem('inventory_stock_view_mode', mode);
 });
+
+// Printing
+const printing = ref(false);
+const allBalancesForPrint = ref(props.balances?.data || []);
+
+const printStock = async () => {
+    try {
+        printing.value = true;
+        
+        // Fetch all if there are multiple pages
+        if (props.balances?.total > props.balances?.data?.length) {
+            const response = await axios.get(route('app.inventory.stock.index'), {
+                params: {
+                    ...localFilters.value,
+                    per_page: -1
+                }
+            });
+            allBalancesForPrint.value = response.data.data || [];
+        } else {
+            allBalancesForPrint.value = props.balances?.data || [];
+        }
+
+        // Wait for DOM
+        await new Promise(resolve => setTimeout(resolve, 100));
+        window.print();
+    } catch (error) {
+        console.error('Print failed:', error);
+    } finally {
+        printing.value = false;
+    }
+};
 
 const applyFilters = () => {
     router.get(route('app.inventory.stock.index'), {

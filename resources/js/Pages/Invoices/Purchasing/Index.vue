@@ -43,38 +43,30 @@
                                 v-model="localFilters.search"
                                 :placeholder="$t('common.search')"
                                 class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                                @input="debouncedSearch"
                             />
                         </div>
 
                         <!-- Status Filter -->
-                        <select
+                        <SearchableSelect
                             v-model="localFilters.status"
-                            class="ps-4 pe-8 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                            :options="purchasingStatusOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="t('invoices.all_statuses')"
                             @change="applyFilters"
-                        >
-                            <option value="">{{ $t('invoices.all_statuses') }}</option>
-                            <option value="draft">{{ $t('purchasing.orders.statuses.draft') }}</option>
-                            <option value="sent">{{ $t('purchasing.orders.statuses.sent') }}</option>
-                            <option value="partial">{{ $t('purchasing.orders.statuses.partial') }}</option>
-                            <option value="received">{{ $t('purchasing.orders.statuses.received') }}</option>
-                            <option value="cancelled">{{ $t('purchasing.orders.statuses.cancelled') }}</option>
-                        </select>
+                            class="w-full"
+                        />
 
                         <!-- Date From -->
-                        <input
+                        <CustomDatePicker
                             v-model="localFilters.date_from"
-                            type="date"
-                            class="px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                            @change="applyFilters"
+                            :placeholder="$t('work_orders.filters.date_from')"
                         />
 
                         <!-- Date To -->
-                        <input
+                        <CustomDatePicker
                             v-model="localFilters.date_to"
-                            type="date"
-                            class="px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
-                            @change="applyFilters"
+                            :placeholder="$t('work_orders.filters.date_to')"
                         />
 
                         <!-- View Toggle -->
@@ -277,10 +269,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { debounce } from 'lodash-es';
 
@@ -317,6 +311,15 @@ const localFilters = ref({
     date_to: props.filters?.date_to || '',
 });
 
+const purchasingStatusOptions = [
+    { value: '', label: t('invoices.all_statuses') },
+    { value: 'draft', label: t('purchasing.orders.statuses.draft') },
+    { value: 'sent', label: t('purchasing.orders.statuses.sent') },
+    { value: 'partial', label: t('purchasing.orders.statuses.partial') },
+    { value: 'received', label: t('purchasing.orders.statuses.received') },
+    { value: 'cancelled', label: t('purchasing.orders.statuses.cancelled') },
+];
+
 const applyFilters = () => {
     router.get(route('app.invoices.purchases.index'), {
         search: localFilters.value.search || undefined,
@@ -326,7 +329,11 @@ const applyFilters = () => {
     }, { preserveState: true, preserveScroll: true, replace: true });
 };
 
-const debouncedSearch = debounce(applyFilters, 350);
+const debouncedApplyFilters = debounce(applyFilters, 400);
+
+watch(localFilters, () => {
+    debouncedApplyFilters();
+}, { deep: true });
 
 // Persist view mode
 const setView = (mode) => {
@@ -336,11 +343,11 @@ const setView = (mode) => {
 
 const formatDate = (date) => {
     if (!date) return '—';
-    return new Date(date).toLocaleDateString('ar-SA');
+    return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
 };
 
 const formatCurrency = (amount) =>
-    new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'SAR', numberingSystem: 'latn' }).format(amount || 0);
 
 const orderStatusClass = (status) => {
     const map = {

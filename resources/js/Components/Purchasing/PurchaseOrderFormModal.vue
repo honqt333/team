@@ -46,11 +46,14 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             {{ $t('inventory.warehouses.title') }} <span class="text-red-500">*</span>
                         </label>
-                        <select v-model="form.warehouse_id" required
-                            class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-                            <option value="" disabled>{{ $t('inventory.warehouses.select') }}</option>
-                            <option v-for="wh in warehouses" :key="wh.id" :value="wh.id">{{ wh.name }}</option>
-                        </select>
+                        <SearchableSelect 
+                            v-model="form.warehouse_id" 
+                            :options="warehouses"
+                            option-label="name"
+                            option-value="id"
+                            :placeholder="$t('inventory.warehouses.select')"
+                            required
+                        />
                         <div v-if="form.errors.warehouse_id" class="text-red-500 text-xs mt-1">{{
                             form.errors.warehouse_id }}
                         </div>
@@ -271,12 +274,13 @@
                                 class="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                                 <td class="px-4 py-2 text-gray-400">{{ index + 1 }}</td>
                                 <td class="px-4 py-2">
-                                    <select v-model="payment.payment_method"
-                                        class="w-full px-2 py-1.5 text-sm border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 focus:ring-1 focus:ring-blue-500">
-                                        <option value="cash">{{ $t('payments.methods.cash') }}</option>
-                                        <option value="transfer">{{ $t('payments.methods.transfer') }}</option>
-                                        <option value="check">{{ $t('payments.methods.check') }}</option>
-                                    </select>
+                                    <SearchableSelect 
+                                        v-model="payment.payment_method"
+                                        :options="paymentMethods"
+                                        option-label="name"
+                                        option-value="id"
+                                        compact
+                                    />
                                 </td>
                                 <td class="px-4 py-2">
                                     <input type="date" v-model="payment.payment_date"
@@ -402,6 +406,12 @@ const showItemModal = ref(false);
 const editingItem = ref(null);
 const editingItemIndex = ref(-1);
 const submitting = ref(false);
+
+const paymentMethods = computed(() => [
+    { id: 'cash', name: t('payments.methods.cash') || 'Cash' },
+    { id: 'transfer', name: t('payments.methods.transfer') || 'Transfer' },
+    { id: 'check', name: t('payments.methods.check') || 'Check' },
+]);
 
 const form = useForm({
     warehouse_id: props.order?.warehouse_id || props.defaultWarehouse?.id || '',

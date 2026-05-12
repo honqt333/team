@@ -11,12 +11,13 @@
                 <!-- Default Gateway -->
                 <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">البوابة الافتراضية</h2>
-                    <select v-model="form.default_gateway" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                        <option value="moyasar">Moyasar</option>
-                        <option value="tap">Tap</option>
-                        <option value="paytabs">PayTabs</option>
-                        <option value="bank_transfer">تحويل بنكي فقط</option>
-                    </select>
+                    <SearchableSelect
+                        v-model="form.default_gateway"
+                        :options="gatewayOptions"
+                        option-label="label"
+                        option-value="value"
+                        placeholder="اختر البوابة"
+                    />
                 </div>
                 
                 <!-- Payment Methods -->
@@ -213,11 +214,19 @@
 
 <script setup>
 import { useForm } from '@inertiajs/vue3';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 
 const props = defineProps({
     settings: Object,
 });
+
+const gatewayOptions = [
+    { value: 'moyasar', label: 'Moyasar' },
+    { value: 'tap', label: 'Tap' },
+    { value: 'paytabs', label: 'PayTabs' },
+    { value: 'bank_transfer', label: 'تحويل بنكي فقط' },
+];
 
 const form = useForm({
     default_gateway: props.settings?.default_gateway || 'moyasar',

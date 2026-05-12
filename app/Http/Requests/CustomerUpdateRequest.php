@@ -28,9 +28,9 @@ class CustomerUpdateRequest extends FormRequest
         $customerId = $this->route('customer')?->id;
 
         return [
-            'type' => ['sometimes', 'string', Rule::in(['individual', 'company'])],
+            'type' => ['sometimes', 'string', Rule::in(['individual', 'company', 'government', 'vip'])],
             'name' => ['sometimes', 'string', 'max:255'],
-            'contact_name' => ['nullable', 'string', 'max:255', 'required_if:type,company'],
+            'contact_name' => ['nullable', 'string', 'max:255', 'required_if:type,company', 'required_if:type,government'],
             'phone' => [
                 'sometimes',
                 'string',

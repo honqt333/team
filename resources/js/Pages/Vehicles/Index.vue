@@ -48,6 +48,23 @@
                                 :label="''"
                             />
                         </div>
+                        <!-- Date Range Filters (Temporarily Disabled)
+                        <div class="flex items-center gap-2">
+                            <div class="w-40">
+                                <CustomDatePicker
+                                    v-model="dateFrom"
+                                    :placeholder="$t('common.from')"
+                                />
+                            </div>
+                            <div class="w-40">
+                                <CustomDatePicker
+                                    v-model="dateTo"
+                                    :placeholder="$t('common.to')"
+                                />
+                            </div>
+                        </div>
+                        -->
+
 
                         <!-- Export/Print Buttons -->
                         <div class="flex gap-2">
@@ -357,6 +374,9 @@
                         <!-- Center Info -->
                         <div class="flex-1 text-right">
                             <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                الفرع: {{ $page.props.center?.name }}
+                            </p>
                             <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
                                 هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
                             </p>
@@ -382,6 +402,9 @@
                         <!-- Center Info -->
                         <div class="flex-1">
                             <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
+                                Branch: {{ $page.props.center?.name }}
+                            </p>
                             <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
                                 Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
                             </p>
@@ -447,6 +470,7 @@ import { useNumberFormat } from "@/Composables/useNumberFormat";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import VehicleFormModal from "@/Components/Vehicles/VehicleFormModal.vue";
 import SearchableSelect from "@/Components/SearchableSelect.vue";
+import CustomDatePicker from "@/Components/CustomDatePicker.vue";
 import { usePermission } from "@/Composables/usePermission";
 
 const props = defineProps({
@@ -494,6 +518,8 @@ const showModal = ref(false);
 const selectedVehicle = ref(null);
 const searchQuery = ref(props.filters.search || "");
 const filterMakeId = ref(props.filters.make_id || "");
+const dateFrom = ref(props.filters.date_from || "");
+const dateTo = ref(props.filters.date_to || "");
 const viewMode = ref(localStorage.getItem("vehiclesViewMode") || "grid");
 const exporting = ref(false);
 
@@ -524,6 +550,8 @@ const loadMore = async () => {
         params.set('page', page);
         if (searchQuery.value) params.set('search', searchQuery.value);
         if (filterMakeId.value) params.set('make_id', filterMakeId.value);
+        // if (dateFrom.value) params.set('date_from', dateFrom.value);
+        // if (dateTo.value) params.set('date_to', dateTo.value);
         // Add other filters if any
         
         const apiUrl = '/app/api/vehicles-index?' + params.toString();
@@ -607,22 +635,27 @@ const debounce = (fn, delay) => {
     };
 };
 
-watch(searchQuery, debounce((value) => {
-    const params = { search: value || undefined, make_id: filterMakeId.value || undefined };
-    router.get(route("vehicles.index"), params, {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-    });
-}, 300));
+const applyFilters = () => {
+    router.get(
+        route("vehicles.index"),
+        {
+            search: searchQuery.value || undefined,
+            make_id: filterMakeId.value || undefined,
+            // date_from: dateFrom.value || undefined,
+            // date_to: dateTo.value || undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        }
+    );
+};
 
-watch(filterMakeId, (value) => {
-    const params = { search: searchQuery.value || undefined, make_id: value || undefined };
-    router.get(route("vehicles.index"), params, {
-        preserveState: true,
-        preserveScroll: true,
-        replace: true,
-    });
+const debouncedApplyFilters = debounce(applyFilters, 400);
+
+watch([searchQuery, filterMakeId /*, dateFrom, dateTo*/], () => {
+    debouncedApplyFilters();
 });
 
 watch(viewMode, (newMode) => {

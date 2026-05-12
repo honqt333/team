@@ -10,12 +10,14 @@
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {{ $t('hr.settings.regulations.category') }} <span class="text-red-500">*</span>
                 </label>
-                <select v-model="form.category" required
-                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500">
-                    <option v-for="(label, key) in categories" :key="key" :value="key">
-                        {{ label }}
-                    </option>
-                </select>
+                <SearchableSelect
+                    v-model="form.category"
+                    :options="categoryOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="{{ $t('common.choose') }}"
+                    required
+                />
             </div>
 
             <!-- Title AR -->
@@ -83,6 +85,7 @@ import { computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
 const { t } = useI18n();

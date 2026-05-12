@@ -98,7 +98,7 @@
                         {{ $t('nav.vehicles') }}
                     </a>
 
-                    <a v-if="can('crm.work_orders.view')" href="/app/work-orders" :class="[
+                    <Link v-if="can('crm.work_orders.view')" :href="route('work-orders.index')" :class="[
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                         isActive('/app/work-orders')
                             ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300'
@@ -109,7 +109,7 @@
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                         </svg>
                         {{ $t('nav.work_orders') }}
-                    </a>
+                    </Link>
 
                     <a v-if="can('quotes.view')" href="/app/quotes" :class="[
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
@@ -124,7 +124,7 @@
                         {{ $t('nav.quotes') }}
                     </a>
 
-                    <a v-if="can('invoices.view')" href="/app/invoices" :class="[
+                    <Link v-if="can('invoices.view')" :href="route('app.invoices.hub')" :class="[
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                         isActive('/app/invoices')
                             ? 'bg-green-50 dark:bg-green-900/50 text-green-700 dark:text-green-300'
@@ -135,7 +135,7 @@
                                 d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                         {{ $t('nav.invoices') }}
-                    </a>
+                    </Link>
 
                     <!-- Divider -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
@@ -1071,7 +1071,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { usePage, router } from '@inertiajs/vue3';
+import { usePage, router, Link } from '@inertiajs/vue3';
 import { toggleTheme } from '@/theme.js';
 import { setLocale, getCurrentLocale } from '@/i18n/index.js';
 import Toast from '@/Components/Toast.vue';

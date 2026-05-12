@@ -104,9 +104,15 @@
                                             <Link :href="route('app.hr.payroll.show', run.id)" class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                                 👁️
                                             </Link>
-                                            <a :href="route('app.hr.payroll.print', run.id)" target="_blank" class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                                🖨️
-                                            </a>
+                                            <button 
+                                                @click="() => window.open(route('app.hr.payroll.print', run.id), '_blank')"
+                                                class="p-2 text-gray-400 hover:text-violet-600 dark:hover:text-violet-400 hover:bg-violet-50 dark:hover:bg-violet-900/30 rounded-xl transition-all"
+                                                :title="$t('common.print')"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
