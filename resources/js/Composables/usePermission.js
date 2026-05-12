@@ -1,4 +1,6 @@
 import { usePage } from '@inertiajs/vue3';
+// Force sync comment
+
 
 export function usePermission() {
     /**
