@@ -374,9 +374,6 @@
                         <!-- Center Info -->
                         <div class="flex-1 text-right">
                             <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
-                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
-                                الفرع: {{ $page.props.center?.name }}
-                            </p>
                             <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
                                 هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
                             </p>
@@ -402,9 +399,6 @@
                         <!-- Center Info -->
                         <div class="flex-1">
                             <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
-                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
-                                Branch: {{ $page.props.center?.name }}
-                            </p>
                             <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
                                 Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
                             </p>

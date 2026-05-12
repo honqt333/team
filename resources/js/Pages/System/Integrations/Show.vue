@@ -41,14 +41,13 @@
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 dir="ltr"
                             />
-                            <SearchableSelect
+                            <select 
                                 v-else
                                 v-model="form.config[field.key]"
-                                :options="stringOptionList(field.options)"
-                                option-label="label"
-                                option-value="value"
-                                placeholder="اختر قيمة"
-                            />
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            >
+                                <option v-for="opt in field.options" :key="opt" :value="opt">{{ opt }}</option>
+                            </select>
                             <p v-if="form.errors[`config.${field.key}`]" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors[`config.${field.key}`] }}
                             </p>
@@ -185,7 +184,6 @@
 import { ref, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     integration: Object,
@@ -210,10 +208,6 @@ const purposes = props.purposes || {
     all: { label: 'الكل', description: 'لجميع الرسائل' },
     otp: { label: 'رموز التحقق', description: 'للتحقق الثنائي فقط' },
     notifications: { label: 'الإشعارات', description: 'للرسائل الإشعارية فقط' },
-};
-
-const stringOptionList = (options) => {
-    return (options || []).map((opt) => ({ value: opt, label: opt }));
 };
 
 // Balance state

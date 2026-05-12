@@ -39,7 +39,7 @@
                     </div>
 
                     <button
-                        v-if="canAny(['inventory.parts.create', 'inventory.parts.view'])"
+                        v-if="can('inventory.parts.create')"
                         @click="createPart"
                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                     >
@@ -146,7 +146,7 @@
                                 <td class="px-4 py-3 text-end">
                                     <div class="flex items-center justify-end gap-2">
                                         <button
-                                            v-if="canAny(['inventory.parts.update', 'inventory.parts.view'])"
+                                            v-if="can('inventory.parts.edit')"
                                             @click="editPart(part)"
                                             class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
                                         >
@@ -373,7 +373,7 @@ const props = defineProps({
 
 const page = usePage();
 const { t, locale } = useI18n();
-const { can, canAny } = usePermission();
+const { can } = usePermission();
 const { formatQuantity, formatCurrency } = useNumberFormat();
 
 const computedCategories = computed(() => {

@@ -47,15 +47,15 @@
                         </div>
 
                         <!-- Status Filter -->
-                        <SearchableSelect
+                        <select
                             v-model="localFilters.payment_status"
-                            :options="paymentStatusOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="t('invoices.all_statuses')"
-                            @change="applyFilters"
-                            class="w-full"
-                        />
+                            class="ps-4 pe-8 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        >
+                            <option value="">{{ $t('invoices.all_statuses') }}</option>
+                            <option value="unpaid">{{ $t('invoices.status.unpaid') }}</option>
+                            <option value="partial">{{ $t('invoices.status.partial') }}</option>
+                            <option value="paid">{{ $t('invoices.status.paid') }}</option>
+                        </select>
 
                         <!-- Date From -->
                         <CustomDatePicker
@@ -285,7 +285,6 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { debounce } from 'lodash-es';
 
@@ -321,13 +320,6 @@ const localFilters = ref({
     date_from: props.filters?.date_from || '',
     date_to: props.filters?.date_to || '',
 });
-
-const paymentStatusOptions = [
-    { value: '', label: t('invoices.all_statuses') },
-    { value: 'unpaid', label: t('invoices.status.unpaid') },
-    { value: 'partial', label: t('invoices.status.partial') },
-    { value: 'paid', label: t('invoices.status.paid') },
-];
 
 const applyFilters = () => {
     router.get(route('app.invoices.sales.index'), {

@@ -70,13 +70,6 @@ class InventoryBalanceController extends Controller
             ->when($request->input('stock_status') === 'out_of_stock', fn($q) => $q->where('qty_on_hand', '<=', 0))
             ->orderBy('qty_on_hand', 'desc');
 
-        if ($request->input('per_page') == -1) {
-            return response()->json([
-                'data' => $query->get(),
-                'warehouse' => $warehouse
-            ]);
-        }
-
         $balances = $query->paginate(25)->withQueryString();
 
         // Get categories for filter

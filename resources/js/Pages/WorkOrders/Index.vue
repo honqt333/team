@@ -229,8 +229,8 @@
                     </div>
                 </div>
 
-                <!-- Filter Tabs -->
-                <div v-if="statusFilter" class="flex flex-wrap gap-3">
+                <!-- Filter Tabs (only for open status) -->
+                <div v-if="statusFilter === 'open'" class="flex flex-wrap gap-3">
                 <button
                     v-for="tab in filterTabs"
                     :key="tab.key"
@@ -645,7 +645,7 @@
                 <!-- Header -->
                 <div class="print-header">
                     <!-- Arabic Layout: Logo right, info beside it -->
-                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
+                    <div class="flex items-start gap-4 mb-4" style="direction: rtl;">
                         <!-- Logo -->
                         <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
                             <img 
@@ -657,9 +657,6 @@
                         <!-- Center Info -->
                         <div class="flex-1 text-right">
                             <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
-                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
-                                الفرع: {{ $page.props.center?.name }}
-                            </p>
                             <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
                                 هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
                             </p>
@@ -671,39 +668,11 @@
                             </p>
                         </div>
                     </div>
-
-                    <!-- English Layout: Logo left with info beside it -->
-                    <div v-else class="flex items-start gap-4 mb-4">
-                        <!-- Logo -->
-                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
-                            <img 
-                                :src="$page.props.tenant.logo_url" 
-                                :alt="$page.props.tenant?.name"
-                                class="w-full h-full object-contain"
-                            />
-                        </div>
-                        <!-- Center Info -->
-                        <div class="flex-1">
-                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
-                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-bold text-indigo-600">
-                                Branch: {{ $page.props.center?.name }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
-                                Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
-                                Email: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
-                                CR: {{ $page.props.tenant?.cr_number }}
-                            </p>
-                        </div>
-                    </div>
                     
                     <!-- Title centered -->
                     <div class="border-t pt-4 border-gray-300 text-center">
                         <h2 class="text-lg font-bold">{{ $t('work_orders.title') }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString('ar-SA') }}</p>
                     </div>
                 </div>
 
@@ -713,34 +682,28 @@
                         <tr>
                             <th>#</th>
                             <th>{{ $t('work_orders.columns.code') }}</th>
-                            <th>{{ $t('work_orders.columns.created_at') }}</th>
                             <th>{{ $t('work_orders.columns.customer') }}</th>
-                            <th>{{ $t('work_orders.columns.contact_name') }}</th>
                             <th>{{ $t('work_orders.columns.vehicle') }}</th>
                             <th>{{ $t('work_orders.columns.status') }}</th>
-                            <th>{{ $t('work_orders.columns.total') }}</th>
-                            <th>{{ $t('work_orders.columns.paid') }}</th>
+                            <th>{{ $t('work_orders.columns.invoice_total') }}</th>
+                            <th>{{ $t('work_orders.columns.paid_amount') }}</th>
                             <th>{{ $t('work_orders.columns.balance') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(order, index) in allWorkOrders" :key="order.id">
-                            <td>{{ toEnglish(index + 1) }}</td>
-                            <td class="font-mono font-bold">#{{ toEnglish(order.code || order.id) }}</td>
-                            <td>{{ formatDate(order.created_at) }}</td>
+                            <td>{{ index + 1 }}</td>
+                            <td>{{ order.code }}</td>
                             <td>{{ order.customer?.name || '-' }}</td>
-                            <td>{{ order.contact_name || '-' }}</td>
-                            <td dir="ltr" class="font-bold">{{ toEnglish(order.vehicle?.plate_number) || '-' }}</td>
+                            <td dir="ltr" class="text-left font-sans">{{ order.vehicle?.plate_number || '-' }}</td>
                             <td>
                                 <span class="print-badge">
                                     {{ $t(`work_orders.status.${order.status}`) }}
                                 </span>
                             </td>
-                            <td class="font-bold">{{ (order.total || 0).toLocaleString() }}</td>
-                            <td class="text-green-600">{{ (order.paid_amount || 0).toLocaleString() }}</td>
-                            <td :class="getBalance(order) > 0 ? 'text-red-600 font-bold' : ''">
-                                {{ getBalance(order).toLocaleString() }}
-                            </td>
+                            <td>{{ (order.total || 0).toLocaleString() }}</td>
+                            <td>{{ (order.paid_amount || 0).toLocaleString() }}</td>
+                            <td>{{ ((order.total || 0) - (order.paid_amount || 0)).toLocaleString() }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -767,8 +730,7 @@ import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
-const { t, locale } = useI18n();
-const isRtl = computed(() => locale.value === 'ar');
+const { t } = useI18n();
 const { success } = useToast();
 const { toEnglish } = useNumberFormat();
 
@@ -896,96 +858,51 @@ const IconOpen = { template: `<svg fill="none" stroke="currentColor" viewBox="0 
 const IconDraft = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>` };
 const IconOverdue = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
 const IconPending = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
-const IconClosed = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
-const IconPostpaid = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>` };
-const IconBadDebt = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
 
-const filterTabs = computed(() => {
-    if (props.statusFilter === 'open') {
-        return [
-            { 
-                key: 'in_progress', 
-                label: t('work_orders.filters.open'), 
-                icon: IconOpen, 
-                iconColor: 'text-emerald-500', 
-                bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
-                gradientFrom: '#10b981',
-                gradientTo: '#059669',
-                count: props.filterCounts.open || 0 
-            },
-            { 
-                key: 'draft', 
-                label: t('work_orders.filters.draft'), 
-                icon: IconDraft, 
-                iconColor: 'text-slate-500', 
-                bgColor: 'bg-slate-100 dark:bg-slate-900/30',
-                gradientFrom: '#64748b',
-                gradientTo: '#475569',
-                count: props.filterCounts.draft || 0 
-            },
-            { 
-                key: 'overdue', 
-                label: t('work_orders.filters.overdue'), 
-                icon: IconOverdue, 
-                iconColor: 'text-red-500', 
-                bgColor: 'bg-red-100 dark:bg-red-900/30',
-                gradientFrom: '#ef4444',
-                gradientTo: '#dc2626',
-                count: props.filterCounts.overdue || 0 
-            },
-            { 
-                key: 'pending_payment', 
-                label: t('work_orders.filters.pending_payment'), 
-                icon: IconPending, 
-                iconColor: 'text-amber-500', 
-                bgColor: 'bg-amber-100 dark:bg-amber-900/30',
-                gradientFrom: '#f59e0b',
-                gradientTo: '#d97706',
-                count: props.filterCounts.pending_payment || 0 
-            },
-        ];
-    } else if (props.statusFilter === 'closed') {
-        return [
-            { 
-                key: 'closed_all', 
-                label: t('work_orders.filters.closed_all') || 'كروت الصيانة المغلقة', 
-                icon: IconClosed, 
-                iconColor: 'text-slate-500', 
-                bgColor: 'bg-slate-100 dark:bg-slate-900/30',
-                gradientFrom: '#64748b',
-                gradientTo: '#475569',
-                count: props.filterCounts.closed_all || 0 
-            },
-            { 
-                key: 'postpaid', 
-                label: t('work_orders.filters.postpaid') || 'الفواتير الآجلة', 
-                icon: IconPostpaid, 
-                iconColor: 'text-indigo-500', 
-                bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
-                gradientFrom: '#6366f1',
-                gradientTo: '#4f46e5',
-                count: props.filterCounts.postpaid || 0 
-            },
-            { 
-                key: 'bad_debt', 
-                label: t('work_orders.filters.bad_debt') || 'ديون معدمة', 
-                icon: IconBadDebt, 
-                iconColor: 'text-red-500', 
-                bgColor: 'bg-red-100 dark:bg-red-900/30',
-                gradientFrom: '#ef4444',
-                gradientTo: '#dc2626',
-                count: props.filterCounts.bad_debt || 0 
-            },
-        ];
-    }
-    return [];
-});
+const filterTabs = computed(() => [
+    { 
+        key: 'in_progress', 
+        label: t('work_orders.filters.open'), 
+        icon: IconOpen, 
+        iconColor: 'text-emerald-500', 
+        bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+        gradientFrom: '#10b981',
+        gradientTo: '#059669',
+        count: props.filterCounts.open || 0 
+    },
+    { 
+        key: 'draft', 
+        label: t('work_orders.filters.draft'), 
+        icon: IconDraft, 
+        iconColor: 'text-slate-500', 
+        bgColor: 'bg-slate-100 dark:bg-slate-900/30',
+        gradientFrom: '#64748b',
+        gradientTo: '#475569',
+        count: props.filterCounts.draft || 0 
+    },
+    { 
+        key: 'overdue', 
+        label: t('work_orders.filters.overdue'), 
+        icon: IconOverdue, 
+        iconColor: 'text-red-500', 
+        bgColor: 'bg-red-100 dark:bg-red-900/30',
+        gradientFrom: '#ef4444',
+        gradientTo: '#dc2626',
+        count: props.filterCounts.overdue || 0 
+    },
+    { 
+        key: 'pending_payment', 
+        label: t('work_orders.filters.pending_payment'), 
+        icon: IconPending, 
+        iconColor: 'text-amber-500', 
+        bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+        gradientFrom: '#f59e0b',
+        gradientTo: '#d97706',
+        count: props.filterCounts.pending_payment || 0 
+    },
+]);
 
-const currentSubFilter = computed(() => {
-    if (props.statusFilter === 'open') return props.subFilter || 'in_progress';
-    if (props.statusFilter === 'closed') return props.subFilter || 'closed_all';
-    return props.subFilter;
-});
+const currentSubFilter = computed(() => props.subFilter || 'in_progress');
 
 
 const showCreateModal = ref(false);
@@ -1099,10 +1016,7 @@ function setSubFilter(filter) {
     router.get(route('work-orders.index'), { 
         status: props.statusFilter,
         sub_filter: filter,
-        search: searchQuery.value,
-        date_from: dateFrom.value,
-        date_to: dateTo.value,
-        customer_type: customerTypeFilter.value,
+        search: searchQuery.value 
     }, {
         preserveState: true,
         preserveScroll: true,

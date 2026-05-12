@@ -79,32 +79,18 @@ class EmployeeController extends Controller
     /**
      * Print employees list.
      */
-    public function print(Request $request)
+    public function print()
     {
         $this->authorize('viewAny', Employee::class);
         
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
         $isSuperAdmin = auth()->user()->hasRole('super_admin');
-        $status = $request->get('status', 'active');
 
         $employees = Employee::where('tenant_id', $tenantId)
-            ->when($request->id, fn($q) => $q->where('id', $request->id))
-            ->when(!$request->id, function($query) use ($isSuperAdmin, $centerId, $request, $status) {
-                $query->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
-                    ->when($isSuperAdmin && $request->center_id, fn($q) => $q->where('center_id', $request->center_id))
-                    ->when($status === 'active', fn($q) => $q->active())
-                    ->when($status === 'inactive', fn($q) => $q->where('status', '!=', 'active'))
-                    ->when($request->search, function ($q, $search) {
-                        $q->where(function ($sq) use ($search) {
-                            $sq->where('name_ar', 'like', "%{$search}%")
-                                ->orWhere('name_en', 'like', "%{$search}%")
-                                ->orWhere('employee_number', 'like', "%{$search}%")
-                                ->orWhere('phone', 'like', "%{$search}%");
-                        });
-                    });
-            })
-            ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en', 'center:id,name'])
+            ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
+            ->active()
+            ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en'])
             ->orderBy('name_ar')
             ->get();
 
@@ -115,7 +101,7 @@ class EmployeeController extends Controller
         return Inertia::render('HR/Employees/Print', [
             'employees' => $employees,
             'tenant' => auth()->user()->tenant,
-            'center' => \App\Models\Center::find($request->center_id ?: $centerId),
+            'center' => \App\Models\Center::find($centerId),
             'stats' => [
                 'by_department' => $byDepartment,
                 'by_job_title' => $byJobTitle,

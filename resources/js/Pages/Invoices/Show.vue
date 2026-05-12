@@ -142,14 +142,16 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('payments.method') }}</label>
-                                <SearchableSelect
-                                v-model="paymentForm.payment_method"
-                                :options="paymentMethodOptions"
-                                option-label="label"
-                                option-value="value"
-                                :placeholder="t('payments.method')"
-                                required
-                            />
+                                <select
+                                    v-model="paymentForm.payment_method"
+                                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    required
+                                >
+                                    <option value="cash">{{ $t('payments.methods.cash') }}</option>
+                                    <option value="card">{{ $t('payments.methods.card') }}</option>
+                                    <option value="transfer">{{ $t('payments.methods.transfer') }}</option>
+                                    <option value="credit">{{ $t('payments.methods.credit') }}</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('payments.reference') }}</label>
@@ -214,7 +216,6 @@
 import { computed, reactive } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useI18n } from 'vue-i18n';
 
@@ -232,13 +233,6 @@ const paymentForm = useForm({
     payment_method: 'cash',
     reference: '',
 });
-
-const paymentMethodOptions = [
-    { value: 'cash', label: t('payments.methods.cash') },
-    { value: 'card', label: t('payments.methods.card') },
-    { value: 'transfer', label: t('payments.methods.transfer') },
-    { value: 'credit', label: t('payments.methods.credit') },
-];
 
 const submitPayment = () => {
     paymentForm.post(route('app.invoices.payments.store', props.invoice.id), {

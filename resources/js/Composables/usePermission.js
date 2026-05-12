@@ -6,50 +6,39 @@ export function usePermission() {
      * @param {string} permission 
      * @returns {boolean}
      */
-    function hasRole(role) {
-        const user = usePage().props.auth.user;
-        if (!user) return false;
-        
-        // System admin bypass
-        if (user.is_system_admin) return true;
-        
-        const roles = user.roles || [];
-        return roles.some(r => {
-            const roleName = typeof r === 'object' ? r.name : r;
-            return roleName === role;
-        });
-    }
-
-    function isAnyAdmin() {
-        const user = usePage().props.auth.user;
-        if (!user) return false;
-        
-        // Emergency bypass for main admin
-        if (user.email === 'admin@khidmh.pro' || user.is_system_admin) return true;
-        
-        const roles = user.roles || [];
-        return roles.some(r => {
-            const name = typeof r === 'object' ? r.name : r;
-            return ['super_admin', 'admin', 'owner'].includes(name);
-        });
-    }
-
     function can(permission) {
-        if (isAnyAdmin()) return true;
         const permissions = usePage().props.auth.permissions || [];
         return permissions.includes(permission);
     }
 
+    /**
+     * Check if user has ANY of the given permissions
+     * @param {string[]} permissions 
+     * @returns {boolean}
+     */
     function canAny(permissions) {
-        if (isAnyAdmin()) return true;
         const userPermissions = usePage().props.auth.permissions || [];
         return permissions.some(p => userPermissions.includes(p));
     }
 
+    /**
+     * Check if user has ALL of the given permissions
+     * @param {string[]} permissions 
+     * @returns {boolean}
+     */
     function canAll(permissions) {
-        if (isAnyAdmin()) return true;
         const userPermissions = usePage().props.auth.permissions || [];
         return permissions.every(p => userPermissions.includes(p));
+    }
+
+    /**
+     * Check if user has a specific role
+     * @param {string} role 
+     * @returns {boolean}
+     */
+    function hasRole(role) {
+        const roles = usePage().props.auth.user?.roles || [];
+        return roles.some(r => r.name === role || r === role);
     }
 
     return {

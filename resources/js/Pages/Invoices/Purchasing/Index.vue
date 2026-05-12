@@ -47,15 +47,17 @@
                         </div>
 
                         <!-- Status Filter -->
-                        <SearchableSelect
+                        <select
                             v-model="localFilters.status"
-                            :options="purchasingStatusOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="t('invoices.all_statuses')"
-                            @change="applyFilters"
-                            class="w-full"
-                        />
+                            class="ps-4 pe-8 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all"
+                        >
+                            <option value="">{{ $t('invoices.all_statuses') }}</option>
+                            <option value="draft">{{ $t('purchasing.orders.statuses.draft') }}</option>
+                            <option value="sent">{{ $t('purchasing.orders.statuses.sent') }}</option>
+                            <option value="partial">{{ $t('purchasing.orders.statuses.partial') }}</option>
+                            <option value="received">{{ $t('purchasing.orders.statuses.received') }}</option>
+                            <option value="cancelled">{{ $t('purchasing.orders.statuses.cancelled') }}</option>
+                        </select>
 
                         <!-- Date From -->
                         <CustomDatePicker
@@ -274,7 +276,6 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { debounce } from 'lodash-es';
 
@@ -310,15 +311,6 @@ const localFilters = ref({
     date_from: props.filters?.date_from || '',
     date_to: props.filters?.date_to || '',
 });
-
-const purchasingStatusOptions = [
-    { value: '', label: t('invoices.all_statuses') },
-    { value: 'draft', label: t('purchasing.orders.statuses.draft') },
-    { value: 'sent', label: t('purchasing.orders.statuses.sent') },
-    { value: 'partial', label: t('purchasing.orders.statuses.partial') },
-    { value: 'received', label: t('purchasing.orders.statuses.received') },
-    { value: 'cancelled', label: t('purchasing.orders.statuses.cancelled') },
-];
 
 const applyFilters = () => {
     router.get(route('app.invoices.purchases.index'), {

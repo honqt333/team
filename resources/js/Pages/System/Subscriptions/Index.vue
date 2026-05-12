@@ -48,24 +48,25 @@
                             @keyup.enter="applyFilters"
                         />
                     </div>
-                    <SearchableSelect
-                        v-model="statusFilter"
-                        :options="statusOptions"
-                        option-label="label"
-                        option-value="value"
-                        placeholder="حالة الاشتراك"
+                    <select 
+                        v-model="statusFilter" 
                         @change="applyFilters"
-                        class="w-full"
-                    />
-                    <SearchableSelect
-                        v-model="planFilter"
-                        :options="planOptions"
-                        option-label="label"
-                        option-value="value"
-                        placeholder="اختر الباقة"
+                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    >
+                        <option value="all">جميع الحالات</option>
+                        <option value="active">نشط</option>
+                        <option value="trial">تجريبي</option>
+                        <option value="cancelled">ملغي</option>
+                        <option value="expired">منتهي</option>
+                    </select>
+                    <select 
+                        v-model="planFilter" 
                         @change="applyFilters"
-                        class="w-full"
-                    />
+                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                    >
+                        <option value="">جميع الباقات</option>
+                        <option v-for="plan in plans" :key="plan.id" :value="plan.id">{{ plan.name_ar }}</option>
+                    </select>
                 </div>
             </div>
             
@@ -202,27 +203,16 @@
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الباقة</label>
-                                        <SearchableSelect
-                                            v-model="form.plan_id"
-                                            :options="planOptions.slice(1)"
-                                            option-label="label"
-                                            option-value="value"
-                                            placeholder="اختر الباقة"
-                                            class="w-full"
-                                            required
-                                        />
+                                        <select v-model="form.plan_id" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <option v-for="plan in plans" :key="plan.id" :value="plan.id">{{ plan.name_ar }}</option>
+                                        </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">دورة الفوترة</label>
-                                        <SearchableSelect
-                                            v-model="form.billing_cycle"
-                                            :options="billingCycleOptions"
-                                            option-label="label"
-                                            option-value="value"
-                                            placeholder="اختر دورة الفوترة"
-                                            class="w-full"
-                                            required
-                                        />
+                                        <select v-model="form.billing_cycle" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
+                                            <option value="monthly">شهري</option>
+                                            <option value="yearly">سنوي</option>
+                                        </select>
                                     </div>
                                 </div>
                                 
@@ -262,7 +252,6 @@
 import { ref, computed } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     subscriptions: Object,
@@ -271,24 +260,6 @@ const props = defineProps({
     stats: Object,
     eligibleTenants: Array,
 });
-
-const statusOptions = [
-    { value: 'all', label: 'جميع الحالات' },
-    { value: 'active', label: 'نشط' },
-    { value: 'trial', label: 'تجريبي' },
-    { value: 'cancelled', label: 'ملغي' },
-    { value: 'expired', label: 'منتهي' },
-];
-
-const planOptions = computed(() => [
-    { value: '', label: 'جميع الباقات' },
-    ...props.plans.map((plan) => ({ value: plan.id, label: plan.name_ar })),
-]);
-
-const billingCycleOptions = [
-    { value: 'monthly', label: 'شهري' },
-    { value: 'yearly', label: 'سنوي' },
-];
 
 const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || 'all');

@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import { useToast } from '@/Composables/useToast';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     settings: Object,
@@ -29,19 +28,6 @@ const tabs = [
     { id: 'announcement', name: 'شريط الإعلانات', icon: 'M11 5.882V19.297A2.497 2.497 0 0012.5 22.5a2.497 2.497 0 002.5-2.5 2.497 2.497 0 00-1.5-2.297V5.882c2.556.19 4.5 2.307 4.5 4.868v.25c0 2.69 2.19 4.88 4.88 4.88.04 0 .08 0 .12-.005V13.88c-1.586 0-2.88-1.294-2.88-2.88v-.25c0-4.14-3.36-7.5-7.5-7.5s-7.5 3.36-7.5 7.5v.25c0 1.586-1.294 2.88-2.88 2.88v1.995c.04.004.08.005.12.005 2.69 0 4.88-2.19 4.88-4.88v-.25c0-2.561 1.944-4.678 4.5-4.868z' },
     { id: 'integrations', name: 'التكاملات والربط', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
     { id: 'seo_social', name: 'SEO وبيانات التواصل', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
- ];
-
-const socialPlatformOptions = [
-    { value: 'facebook', label: 'Facebook' },
-    { value: 'twitter', label: 'X (Twitter)' },
-    { value: 'instagram', label: 'Instagram' },
-    { value: 'linkedin', label: 'LinkedIn' },
-    { value: 'youtube', label: 'YouTube' },
-    { value: 'tiktok', label: 'TikTok' },
-    { value: 'snapchat', label: 'Snapchat' },
-    { value: 'whatsapp', label: 'WhatsApp' },
-    { value: 'telegram', label: 'Telegram' },
-    { value: 'custom', label: 'Custom (Generic)' },
 ];
 
 const form = useForm({
@@ -689,14 +675,18 @@ const submit = () => {
                                         <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
                                             <div class="sm:col-span-3">
                                                 <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">المنصة</label>
-                                                <SearchableSelect
-                                                    v-model="link.platform"
-                                                    :options="socialPlatformOptions"
-                                                    option-label="label"
-                                                    option-value="value"
-                                                    placeholder="اختر المنصة"
-                                                    class="input-enterprise"
-                                                />
+                                                <select v-model="link.platform" class="input-enterprise">
+                                                    <option value="facebook">Facebook</option>
+                                                    <option value="twitter">X (Twitter)</option>
+                                                    <option value="instagram">Instagram</option>
+                                                    <option value="linkedin">LinkedIn</option>
+                                                    <option value="youtube">YouTube</option>
+                                                    <option value="tiktok">TikTok</option>
+                                                    <option value="snapchat">Snapchat</option>
+                                                    <option value="whatsapp">WhatsApp</option>
+                                                    <option value="telegram">Telegram</option>
+                                                    <option value="custom">Custom (Generic)</option>
+                                                </select>
                                             </div>
                                             <div class="sm:col-span-8">
                                                 <label class="text-[10px] uppercase font-bold text-gray-500 mb-1 block">الرابط الكامل (URL)</label>

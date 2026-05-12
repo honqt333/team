@@ -45,15 +45,12 @@
                     class="flex-1 min-w-[200px] rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                     @keyup.enter="applyFilters"
                 />
-                <SearchableSelect
-                    v-model="status"
-                    :options="statusOptions"
-                    option-label="label"
-                    option-value="value"
-                    placeholder="كل الحالات"
-                    @change="applyFilters"
-                    class="min-w-[200px]"
-                />
+                <select v-model="status" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm">
+                    <option value="">كل الحالات</option>
+                    <option value="pending">معلقة</option>
+                    <option value="overdue">متأخرة</option>
+                    <option value="paid">مدفوعة</option>
+                </select>
             </div>
             
             <!-- Table -->
@@ -137,13 +134,11 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">طريقة الدفع</label>
-                                <SearchableSelect
-                                    v-model="markPaidForm.gateway"
-                                    :options="gatewayOptions"
-                                    option-label="label"
-                                    option-value="value"
-                                    placeholder="اختر طريقة الدفع"
-                                />
+                                <select v-model="markPaidForm.gateway" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                    <option value="manual">يدوي</option>
+                                    <option value="bank_transfer">تحويل بنكي</option>
+                                    <option value="cash">نقدي</option>
+                                </select>
                             </div>
                         </div>
                         <div class="flex gap-3 mt-6">
@@ -164,7 +159,6 @@
 <script setup>
 import { ref } from 'vue';
 import { router } from '@inertiajs/vue3';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 
 const props = defineProps({
@@ -175,20 +169,6 @@ const props = defineProps({
 
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
-
-const statusOptions = [
-    { value: '', label: 'كل الحالات' },
-    { value: 'pending', label: 'معلقة' },
-    { value: 'overdue', label: 'متأخرة' },
-    { value: 'paid', label: 'مدفوعة' },
-];
-
-const gatewayOptions = [
-    { value: 'manual', label: 'يدوي' },
-    { value: 'bank_transfer', label: 'تحويل بنكي' },
-    { value: 'cash', label: 'نقدي' },
-];
-
 const showMarkPaidModal = ref(false);
 const selectedInstallment = ref(null);
 const markingPaid = ref(false);

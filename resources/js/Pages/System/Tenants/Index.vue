@@ -24,15 +24,16 @@
                     </div>
                     
                     <!-- Status Filter -->
-                    <SearchableSelect
-                        v-model="statusFilter"
-                        :options="statusOptions"
-                        option-label="label"
-                        option-value="value"
-                        placeholder="حالة المستأجر"
+                    <select 
+                        v-model="statusFilter" 
                         @change="applyFilters"
-                        class="w-full"
-                    />
+                        class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
+                    >
+                        <option value="">جميع الحالات</option>
+                        <option value="active">نشط</option>
+                        <option value="trial">تجريبي</option>
+                        <option value="suspended">معلّق</option>
+                    </select>
                 </div>
             </div>
             
@@ -122,7 +123,6 @@
 import { ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
-import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     tenants: Object,

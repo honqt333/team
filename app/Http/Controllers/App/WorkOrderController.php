@@ -47,18 +47,8 @@ class WorkOrderController
                     $query->whereIn('status', ['open', 'in_progress', 'draft']);
                 }
             })
-            ->when($status === 'closed', function ($query) use ($subFilter) {
-                if ($subFilter === 'postpaid') {
-                    $query->where('status', 'done')
-                        ->whereRaw('((SELECT IFNULL(SUM(total), 0) FROM work_order_items WHERE work_order_items.work_order_id = work_orders.id) + (SELECT IFNULL(SUM(total), 0) FROM work_order_item_parts WHERE work_order_item_parts.work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount ELSE -amount END), 0) FROM payments WHERE payments.work_order_id = work_orders.id)');
-                } elseif ($subFilter === 'bad_debt') {
-                    // Placeholder for bad debt logic - usually manual or specific status
-                    $query->where('status', 'cancelled');
-                } elseif ($subFilter === 'closed_all') {
-                    $query->where('status', 'done');
-                } else {
-                    $query->whereIn('status', ['done', 'cancelled']);
-                }
+            ->when($status === 'closed', function ($query) {
+                $query->whereIn('status', ['done', 'cancelled', 'closed']);
             })
             ->when(request("search"), function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -103,7 +93,7 @@ class WorkOrderController
             'closed' => WorkOrder::whereIn('status', ['closed', 'cancelled'])->count(),
         ];
 
-        // Filter tabs counts (for open and closed status)
+        // Filter tabs counts (for open status)
         $filterCounts = [];
         if ($status === 'open') {
             $filterCounts = [
@@ -114,14 +104,6 @@ class WorkOrderController
                     ->where('expected_end_date', '<', now()->startOfDay())
                     ->count(),
                 'pending_payment' => 0,
-            ];
-        } elseif ($status === 'closed') {
-            $filterCounts = [
-                'closed_all' => WorkOrder::where('status', 'done')->count(),
-                'postpaid' => WorkOrder::where('status', 'done')
-                    ->whereRaw('((SELECT IFNULL(SUM(total), 0) FROM work_order_items WHERE work_order_items.work_order_id = work_orders.id) + (SELECT IFNULL(SUM(total), 0) FROM work_order_item_parts WHERE work_order_item_parts.work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount ELSE -amount END), 0) FROM payments WHERE payments.work_order_id = work_orders.id)')
-                    ->count(),
-                'bad_debt' => WorkOrder::where('status', 'cancelled')->count(),
             ];
         }
 
@@ -141,17 +123,8 @@ class WorkOrderController
                         $query->whereIn('status', ['open', 'in_progress', 'draft']);
                     }
                 })
-                ->when($status === 'closed', function ($query) use ($subFilter) {
-                    if ($subFilter === 'postpaid') {
-                        $query->where('status', 'done')
-                            ->whereRaw('((SELECT IFNULL(SUM(total), 0) FROM work_order_items WHERE work_order_items.work_order_id = work_orders.id) + (SELECT IFNULL(SUM(total), 0) FROM work_order_item_parts WHERE work_order_item_parts.work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount ELSE -amount END), 0) FROM payments WHERE payments.work_order_id = work_orders.id)');
-                    } elseif ($subFilter === 'bad_debt') {
-                        $query->where('status', 'cancelled');
-                    } elseif ($subFilter === 'closed_all') {
-                        $query->where('status', 'done');
-                    } else {
-                        $query->whereIn('status', ['done', 'cancelled']);
-                    }
+                ->when($status === 'closed', function ($query) {
+                    $query->whereIn('status', ['done', 'cancelled', 'closed']);
                 })
                 ->when(request("search"), function ($query, $search) {
                     $query->where(function ($q) use ($search) {
