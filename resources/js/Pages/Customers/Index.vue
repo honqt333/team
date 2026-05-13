@@ -1,133 +1,117 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <div class="relative group">
-                <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[2.5rem] blur opacity-[0.04] group-hover:opacity-[0.07] transition duration-700"></div>
+            <!-- Header Section -->
+            <PageHeader
+                 :title="$t('customers.title')"
+                 :subtitle="$t('customers.subtitle')"
+                 :totalCount="customers ? toEnglish(customers.total) : null"
+                 :countLabel="$t('customers.total_count')"
+             >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </template>
 
-                <div class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] p-6 border border-gray-100 dark:border-gray-700 shadow-xl shadow-indigo-500/5 overflow-hidden">
-                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/5 dark:bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                    <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-purple-500/5 dark:bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <button v-if="can('crm.customers.export') || isAnyAdmin()" @click="exportCustomers"
+                            :disabled="exporting" :title="$t('common.export')"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </button>
+                        <button v-if="can('crm.customers.import') || isAnyAdmin()" @click="showImportModal = true"
+                            :title="$t('common.import')"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                            </svg>
+                        </button>
+                        <button v-if="can('crm.customers.print') || isAnyAdmin()" @click="printCustomers"
+                            :title="$t('common.print')"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
 
-                    <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/35 flex items-center justify-center text-white shrink-0 ring-4 ring-indigo-50 dark:ring-indigo-900/20 transition-transform group-hover:scale-[1.03] duration-500">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                        <div class="flex gap-1.5">
+                            <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'grid'
+                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
                                 </svg>
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-4 mb-2">
-                                    <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-                                        {{ $t('customers.title') }}
-                                    </h1>
-                                    <div v-if="customers" class="flex items-center gap-2 px-3 py-1 bg-indigo-50/50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full text-xs font-black border border-indigo-100/50 dark:border-indigo-800/30 shadow-sm">
-                                        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                                        {{ customers.total }} {{ $t('customers.total_count') }}
-                                    </div>
-                                </div>
-                                <p class="hidden sm:block text-gray-500 dark:text-gray-400 font-bold">{{ $t('customers.subtitle') || 'إدارة العملاء والبيانات المسجلة في النظام' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap items-center gap-4">
-                            <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
-                                <button v-if="can('crm.customers.export') || isAnyAdmin()" @click="exportCustomers"
-                                    :disabled="exporting" :title="$t('common.export')"
-                                    class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </button>
-                                <button v-if="can('crm.customers.import') || isAnyAdmin()" @click="showImportModal = true"
-                                    :title="$t('common.import')"
-                                    class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                    </svg>
-                                </button>
-                                <button v-if="can('crm.customers.print') || isAnyAdmin()" @click="printCustomers"
-                                    :title="$t('common.print')"
-                                    class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                    </svg>
-                                </button>
-
-                                <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
-
-                                <div class="flex gap-1.5">
-                                    <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
-                                        :class="[
-                                            'p-2.5 rounded-xl transition-all shadow-sm',
-                                            viewMode === 'grid'
-                                                ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                                : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                        ]">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                                        </svg>
-                                    </button>
-                                    <button @click="viewMode = 'list'" :title="$t('common.list_view')"
-                                        :class="[
-                                            'p-2.5 rounded-xl transition-all shadow-sm',
-                                            viewMode === 'list'
-                                                ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                                : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                        ]">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button v-if="can('crm.customers.create') || isAnyAdmin()" @click="openCreateModal"
-                                class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add">
-                                <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                </div>
-                                <span class="text-sm tracking-tight">{{ $t('customers.add') }}</span>
+                            </button>
+                            <button @click="viewMode = 'list'" :title="$t('common.list_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'list'
+                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
                             </button>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Search and Filters Bar -->
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="relative flex-1 group">
-                    <div
-                        class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                    <input type="text" v-model="searchQuery"
-                        class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none shadow-sm"
-                        :placeholder="$t('customers.search')" />
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <div class="w-full sm:w-48">
-                        <SearchableSelect v-model="typeFilter" :options="typeOptions" option-label="label"
-                            option-value="value" :placeholder="$t('customers.filter.all_types')" :label="''"
-                            class="!rounded-2xl" />
-                    </div>
-
-                    <button @click="searchQuery = ''; typeFilter = ''"
-                        class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
-                        :title="$t('common.reset')">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
+                    <button v-if="can('crm.customers.create') || isAnyAdmin()" @click="openCreateModal"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add">
+                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                        <span class="text-sm tracking-tight">{{ $t('customers.add') }}</span>
                     </button>
-                </div>
-            </div>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="relative flex-1 group">
+                            <div
+                                class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" v-model="searchQuery"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none shadow-sm"
+                                :placeholder="$t('customers.search')" />
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="w-full sm:w-48">
+                                <SearchableSelect v-model="typeFilter" :options="typeOptions" option-label="label"
+                                    option-value="value" :placeholder="$t('customers.filter.all_types')" :label="''"
+                                    class="!rounded-2xl" />
+                            </div>
+
+                            <button @click="resetFilters"
+                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </PageHeader>
 
             <!-- Loading State -->
             <div v-if="!customers" class="flex flex-col items-center justify-center py-16">
@@ -519,7 +503,9 @@ import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
 import { usePermission } from '@/Composables/usePermission';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import CustomerImportModal from '@/Components/Customers/CustomerImportModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -539,6 +525,7 @@ const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { success, error, info } = useToast();
 const { can, isAnyAdmin } = usePermission();
+const { toEnglish } = useNumberFormat();
 
 const typeOptions = computed(() => [
     { value: '', label: t('customers.filter.all_types') },
@@ -663,6 +650,16 @@ function exportCustomers() {
         exporting.value = false;
     }, 2000);
 }
+
+const resetFilters = () => {
+    searchQuery.value = '';
+    typeFilter.value = '';
+    router.get(route('customers.index'), {}, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
 
 // Print customers list - Load All & Print
 async function printCustomers() {

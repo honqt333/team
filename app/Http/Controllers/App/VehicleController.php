@@ -54,7 +54,7 @@ class VehicleController
     {
         $this->authorize('viewAny', Vehicle::class);
 
-        $user = $request->user();
+        $user = auth()->user();
         
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
@@ -173,25 +173,35 @@ class VehicleController
         $this->authorize('view', $vehicle);
 
         // Load relationships
-        $vehicle->load(['customer', 'make', 'model']);
+        $vehicle->load([
+            'customer', 
+            'make', 
+            'model', 
+            'mileageLogs' => fn($q) => $q->with('creator')->latest()
+        ]);
 
         // Get all related data
         $workOrders = $vehicle->workOrders()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
         $quotes = $vehicle->quotes()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
+        
+        // Fetch invoices via work orders
+        $invoices = \App\Models\Invoice::whereIn('work_order_id', $workOrders->pluck('id'))
+            ->latest()
+            ->get();
 
         // Count related data
         $counts = [
             'workOrders' => $workOrders->count(),
             'quotes' => $quotes->count(),
             'mileageLogs' => $vehicle->mileageLogs()->count(),
-            'invoices' => 0, // Placeholder
-            'payments' => 0, // Placeholder
+            'invoices' => $invoices->count(),
+            'ratings' => $quotes->count(), // "التقييمات" refers to quotes in this system
         ];
 
         // Check if can be deleted (protected if has history)
         $canDelete = $counts['quotes'] === 0 && $counts['workOrders'] === 0;
 
-        // Get form data for modals (reusing logic from Index/CustomerController)
+        // Get form data for modals
         $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en']);
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
         $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
@@ -205,11 +215,12 @@ class VehicleController
 
         return Inertia::render('Vehicles/Show', [
             'vehicle' => $vehicle,
-            'customer' => $vehicle->customer, // Pass explicitly for convenience
+            'customer' => $vehicle->customer,
             'counts' => $counts,
             'canDelete' => $canDelete,
             'workOrders' => $workOrders,
             'quotes' => $quotes,
+            'invoices' => $invoices,
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,

@@ -1,5 +1,6 @@
 {
     "common": {
+        "code": "Code",
         "minute": "Minute",
         "hour": "Hour",
         "day": "Day",
@@ -415,6 +416,8 @@
         }
     },
     "vehicles": {
+        "title": "Vehicle management",
+        "subtitle": "Manage vehicles and registered data in the system",
         "columns": {
             "plate_number": "Plate Number"
         },
@@ -1200,6 +1203,7 @@
     },
     "customers": {
         "title": "Customer management",
+        "subtitle": "Manage customers and registered data in the system",
         "view_profile": "View Profile",
         "add": "Add a client",
         "search": "Search...",
@@ -1896,6 +1900,7 @@
         }
     },
     "invoices": {
+        "empty": "No invoices for this vehicle",
         "title": "Invoices",
         "invoice": "Invoice",
         "invoices": "Invoices",

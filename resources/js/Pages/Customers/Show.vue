@@ -79,7 +79,7 @@
                                 </div>
 
                                 <div class="flex-1">
-                                    <div class="flex flex-wrap items-center gap-3 mb-3">
+                                    <div class="flex flex-wrap items-center gap-3 mb-1">
                                         <h1 class="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                             {{ customer.name }}
                                         </h1>
@@ -90,6 +90,7 @@
                                             {{ $t(`customers.type.${customer.type}`) }}
                                         </div>
                                     </div>
+                                    <p class="text-sm font-bold text-indigo-500/80 dark:text-indigo-400/80 mb-4">{{ $t('customers.subtitle') }}</p>
                                     
                                     <div class="flex flex-wrap items-center gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
                                         <span v-if="(customer.type === 'company' || customer.type === 'government') && customer.contact_name"
@@ -172,55 +173,58 @@
             </div>
 
             <!-- Tabs Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-indigo-500/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="space-y-4">
                 <!-- Tabs Navigation -->
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <div class="p-1.5 bg-gray-50 dark:bg-gray-900/60 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-inner overflow-x-auto no-scrollbar">
-                        <div class="flex items-center gap-1.5 min-w-max">
-                            <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
-                                'group flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all whitespace-nowrap',
+                <div class="p-1 bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner overflow-x-auto no-scrollbar">
+                    <div class="flex items-center gap-1 min-w-max">
+                        <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
+                            'group relative flex items-center gap-3 px-5 py-2.5 rounded-2xl transition-all duration-500 ease-out overflow-hidden',
+                            activeTab === tab.key
+                                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-500/30 scale-[1.01]'
+                                : 'text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-800 hover:shadow-lg hover:shadow-gray-200/50 dark:hover:shadow-black/20 hover:-translate-y-0.5'
+                        ]">
+                            <!-- Animated Background Glow for Active -->
+                            <div v-if="activeTab === tab.key" class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] animate-[shimmer_2s_infinite]"></div>
+                            
+                            <div :class="[
+                                'w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-500',
                                 activeTab === tab.key
-                                    ? 'bg-white dark:bg-gray-800 shadow-sm border border-gray-200/80 dark:border-gray-700'
-                                    : 'border border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-white/60 dark:hover:bg-gray-800/40'
+                                    ? 'bg-white/20 rotate-[12deg] scale-105 shadow-inner'
+                                    : 'bg-white dark:bg-gray-800 shadow-sm group-hover:rotate-[-6deg] group-hover:scale-105'
                             ]">
-                                <span :class="[
-                                    'w-9 h-9 rounded-xl flex items-center justify-center transition-all',
-                                    activeTab === tab.key
-                                        ? 'bg-indigo-50 dark:bg-indigo-900/30'
-                                        : 'bg-gray-100 dark:bg-gray-800 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30'
-                                ]">
-                                    <component :is="tab.icon" :class="[
-                                        'w-4 h-4 transition-colors',
-                                        activeTab === tab.key ? tab.activeColor : 'text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
-                                    ]" />
-                                </span>
+                                <component :is="tab.icon" :class="[
+                                    'w-4.5 h-4.5 transition-all duration-500',
+                                    activeTab === tab.key ? 'text-white scale-105' : 'text-indigo-500 dark:text-indigo-400 group-hover:text-purple-600'
+                                ]" />
+                            </div>
 
-                                <span class="text-sm font-black tracking-tight">
-                                    {{ tab.label }}
-                                </span>
-
+                            <div class="flex flex-col items-start relative z-10">
                                 <span :class="[
-                                    'min-w-[30px] h-6 px-2 rounded-full text-[11px] font-black flex items-center justify-center transition-colors',
-                                    activeTab === tab.key
-                                        ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                                        : 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
-                                ]">
-                                    {{ tab.count }}
-                                </span>
-                            </button>
-                        </div>
+                                    'text-[9px] font-black uppercase tracking-[0.15em] transition-colors duration-500',
+                                    activeTab === tab.key ? 'text-white/70' : 'text-gray-400 dark:text-gray-500'
+                                ]">{{ tab.label }}</span>
+                                <div class="flex items-baseline gap-1.5">
+                                    <span class="text-base font-black leading-none">{{ toEnglish(tab.count) }}</span>
+                                    <span v-if="activeTab === tab.key" class="w-1 h-1 rounded-full bg-white animate-pulse"></span>
+                                </div>
+                            </div>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Tab Content -->
-                <div class="p-6">
+                <!-- Tab Content Container -->
+                <div class="bg-white dark:bg-gray-800 rounded-[2rem] shadow-2xl shadow-indigo-500/5 border border-gray-100/50 dark:border-gray-700/50 p-6 min-h-[400px] relative overflow-hidden">
+                    <!-- Background Decoration -->
+                    <div class="absolute top-0 right-0 p-16 opacity-[0.01] dark:opacity-[0.02] pointer-events-none select-none -translate-y-8 translate-x-8">
+                        <component :is="tabs.find(t => t.key === activeTab)?.icon" class="w-64 h-64" />
+                    </div>
                     <!-- ========== VEHICLES TAB ========== -->
-                    <div v-if="activeTab === 'vehicles'" class="space-y-4">
+                    <div v-if="activeTab === 'vehicles'" class="space-y-6">
                         <!-- Toolbar -->
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                             <div class="flex items-center gap-3">
                                 <!-- Search -->
-                                <div class="relative">
+                                <div class="relative group">
                                     <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
@@ -264,8 +268,7 @@
                             <div v-for="vehicle in filteredVehicles" :key="vehicle.id"
                                 @click="router.visit(route('vehicles.show', vehicle.id))"
                                 class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden">
-
-
+                                
                                 <!-- Background Logo Watermark -->
                                 <div v-if="vehicle.make?.logo_path"
                                     class="absolute inset-0 flex items-center justify-center opacity-[0.06] dark:opacity-[0.3] pointer-events-none select-none z-0 overflow-hidden">
@@ -434,7 +437,6 @@
                                     </button>
                                 </div>
                             </div>
-                            <!-- Add button hidden - only showing existing work orders -->
                         </div>
 
                         <!-- Grid View -->
@@ -527,7 +529,6 @@
                                 </svg>
                             </div>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('customers.no_work_orders') }}</p>
-
                         </div>
                     </div>
 
@@ -562,7 +563,6 @@
                                     </button>
                                 </div>
                             </div>
-                            <!-- Add button hidden - only showing existing quotes -->
                         </div>
 
                         <!-- Grid View -->
@@ -641,7 +641,6 @@
                                 </svg>
                             </div>
                             <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('customers.no_quotes') }}</p>
-
                         </div>
                     </div>
 
@@ -666,7 +665,7 @@
                     <div v-if="activeTab === 'payments'" class="space-y-4">
                         <!-- Search Box -->
                         <div class="flex items-center gap-3">
-                            <div class="relative">
+                            <div class="relative group">
                                 <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
@@ -802,6 +801,7 @@ import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
 import CustomerMergeModal from '@/Components/Customers/CustomerMergeModal.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     customer: Object,
@@ -822,6 +822,7 @@ const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { confirm } = useConfirm();
 const { can, isAnyAdmin } = usePermission();
+const { toEnglish } = useNumberFormat();
 
 const headerEmail = computed(() => (props.customer?.email || '').trim());
 const headerAddress = computed(() => {
@@ -849,7 +850,7 @@ const showMergeModal = ref(false);
 const selectedVehicle = ref(null);
 
 // Tab & view states
-const activeTab = ref('vehicles');
+const activeTab = ref(localStorage.getItem('customer_active_tab') || 'vehicles');
 const vehicleViewMode = ref(localStorage.getItem('customer_vehicle_view_mode') || 'grid');
 const workOrderViewMode = ref(localStorage.getItem('customer_work_order_view_mode') || 'grid');
 const quoteViewMode = ref(localStorage.getItem('customer_quote_view_mode') || 'grid');
@@ -861,6 +862,7 @@ const quoteSearch = ref('');
 const paymentSearch = ref('');
 
 // Persistence watchers
+watch(activeTab, (val) => localStorage.setItem('customer_active_tab', val));
 watch(vehicleViewMode, (val) => localStorage.setItem('customer_vehicle_view_mode', val));
 watch(workOrderViewMode, (val) => localStorage.setItem('customer_work_order_view_mode', val));
 watch(quoteViewMode, (val) => localStorage.setItem('customer_quote_view_mode', val));
@@ -1005,19 +1007,76 @@ function formatPrice(amount) {
     return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    }).format(amount || 0) + ' ' + t('common.currency');
+    }).format(amount);
 }
 
-// Modal handlers
-function openVehicleModal() { selectedVehicle.value = null; showVehicleModal.value = true; }
-function openVehicleEditModal(vehicle) { selectedVehicle.value = vehicle; showVehicleModal.value = true; }
-function openWorkOrderModal() { showWorkOrderModal.value = true; }
-function openQuoteModal() { showQuoteModal.value = true; }
-async function confirmDelete() { if (!props.canDelete) return; const confirmed = await confirm({ title: t("customers.delete_confirm_title"), message: t("customers.delete_confirm_message"), confirmText: t("common.delete"), cancelText: t("common.cancel"), type: "danger" }); if (confirmed) deleteCustomer(); }
+function openVehicleModal() {
+    selectedVehicle.value = null;
+    showVehicleModal.value = true;
+}
 
-function deleteCustomer() { router.delete(route('customers.destroy', props.customer.id)); }
-function handleCustomerSaved() { showEditModal.value = false; router.reload(); }
-function handleVehicleSaved() { showVehicleModal.value = false; router.reload(); }
-function handleWorkOrderSaved() { showWorkOrderModal.value = false; router.reload(); }
-function handleQuoteSaved() { showQuoteModal.value = false; router.reload(); }
+function openVehicleEditModal(vehicle) {
+    selectedVehicle.value = vehicle;
+    showVehicleModal.value = true;
+}
+
+function openWorkOrderModal() {
+    showWorkOrderModal.value = true;
+}
+
+function openQuoteModal() {
+    showQuoteModal.value = true;
+}
+
+function handleCustomerSaved() {
+    showEditModal.value = false;
+    router.reload({ preserveScroll: true });
+}
+
+function handleVehicleSaved() {
+    showVehicleModal.value = false;
+    router.reload({ preserveScroll: true });
+}
+
+function handleWorkOrderSaved() {
+    showWorkOrderModal.value = false;
+    router.reload({ preserveScroll: true });
+}
+
+function handleQuoteSaved() {
+    showQuoteModal.value = false;
+    router.reload({ preserveScroll: true });
+}
+
+async function confirmDelete() {
+    const result = await confirm({
+         title: t('common.delete_confirm'),
+         message: t('customers.delete_confirm_message'),
+         confirmText: t('common.delete'),
+         type: 'danger'
+     });
+
+    if (result) {
+        router.delete(route('customers.destroy', props.customer.id), {
+            onSuccess: () => {
+                // Success handled by Inertia flash
+            }
+        });
+    }
+}
 </script>
+
+<style scoped>
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+</style>

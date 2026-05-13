@@ -2,141 +2,115 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-3 sm:gap-4">
-                    <!-- Title + Count -->
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+            <PageHeader
+                :title="$t('vehicles.title')"
+                :subtitle="$t('vehicles.subtitle')"
+                :totalCount="vehicles ? toEnglish(vehicles.total) : null"
+                :countLabel="$t('vehicles.total_count')"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <button v-if="can('crm.vehicles.export') || isAnyAdmin()" @click="exportVehicles"
+                            :disabled="exporting" :title="$t('common.export')"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('vehicles.title') }}</h1>
-                            <p v-if="vehicles" class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ toEnglish(vehicles.total) }} {{ $t('vehicles.total_count') }}
-                            </p>
+                        </button>
+                        <button v-if="can('crm.vehicles.print') || isAnyAdmin()" @click="printVehicles"
+                            :title="$t('common.print')"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
+
+                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                        <div class="flex gap-1.5">
+                            <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'grid'
+                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                </svg>
+                            </button>
+                            <button @click="viewMode = 'list'" :title="$t('common.list_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'list'
+                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Actions Row -->
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <!-- Search -->
-                        <div class="relative">
-                            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <button v-if="can('crm.vehicles.create') || isAnyAdmin()" @click="openCreateModal"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add">
+                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                        <span class="text-sm tracking-tight">{{ $t('vehicles.add') }}</span>
+                    </button>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="relative flex-1 group">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
                             <input
                                 type="text"
                                 v-model="searchQuery"
                                 :placeholder="$t('vehicles.search')"
-                                class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none shadow-sm"
                             />
                         </div>
 
-                        <!-- Make Filter -->
-                        <div class="w-full sm:w-48">
-                            <SearchableSelect
-                                v-model="filterMakeId"
-                                :options="makeOptions"
-                                option-label="label"
-                                option-value="value"
-                                :placeholder="$t('vehicles.filter.all_makes')"
-                                :label="''"
-                            />
-                        </div>
-                        <!-- Date Range Filters (Temporarily Disabled)
-                        <div class="flex items-center gap-2">
-                            <div class="w-40">
-                                <CustomDatePicker
-                                    v-model="dateFrom"
-                                    :placeholder="$t('common.from')"
+                        <div class="flex items-center gap-3">
+                            <div class="w-full sm:w-48">
+                                <SearchableSelect
+                                    v-model="filterMakeId"
+                                    :options="makeOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('vehicles.filter.all_makes')"
+                                    :label="''"
+                                    class="!rounded-2xl"
                                 />
                             </div>
-                            <div class="w-40">
-                                <CustomDatePicker
-                                    v-model="dateTo"
-                                    :placeholder="$t('common.to')"
-                                />
-                            </div>
-                        </div>
-                        -->
 
-
-                        <!-- Export/Print Buttons -->
-                        <div class="flex gap-2">
-                            <!-- Export -->
-                            <button
-                                v-if="can('crm.vehicles.export') || isAnyAdmin()"
-                                @click="exportVehicles"
-                                :disabled="exporting"
-                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
-                                :title="$t('common.export')"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </button>
-                            <!-- Print -->
-                            <button
-                                v-if="can('crm.vehicles.print') || isAnyAdmin()"
-                                @click="printVehicles"
-                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
-                                :title="$t('common.print')"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                            <button @click="resetFilters"
+                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                 </svg>
                             </button>
                         </div>
-
-                        <!-- View Toggle -->
-                        <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
-                            <button
-                                @click="viewMode = 'grid'"
-                                :class="[
-                                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                    viewMode === 'grid'
-                                        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                ]"
-                            >
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
-                                </svg>
-                            </button>
-                            <button
-                                @click="viewMode = 'list'"
-                                :class="[
-                                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                    viewMode === 'list'
-                                        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                ]"
-                            >
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Add Button -->
-                        <button
-                            v-if="can('crm.vehicles.create') || isAnyAdmin()"
-                            @click="openCreateModal"
-                            class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
-                            <span>{{ $t('vehicles.add') }}</span>
-                        </button>
                     </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Loading State -->
             <div v-if="!vehicles" class="flex flex-col items-center justify-center py-16">
@@ -170,102 +144,44 @@
             </div>
 
             <!-- Grid View -->
-            <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5 gap-4">
+            <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
                 <div
                     v-for="vehicle in allVehicles"
                     :key="vehicle.id"
                     @click="visitShowPage(vehicle)"
-                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-teal-500 transition-all duration-300 shadow-lg shadow-gray-200/50 dark:shadow-black/20 hover:shadow-teal-500/10 cursor-pointer overflow-hidden"
                 >
-                    <!-- Background Logo Watermark -->
-                    <div 
-                        v-if="vehicle.make?.logo_path"
-                        class="absolute inset-0 flex items-center justify-center opacity-[0.06] dark:opacity-[0.3] pointer-events-none select-none z-0 overflow-hidden"
-                    >
-                        <img 
-                            :src="`/storage/${vehicle.make.logo_path}`" 
-                            class="w-3/4 h-3/4 object-contain grayscale dark:brightness-150 transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700"
-                            alt=""
-                        />
+                    <!-- Logo Watermark -->
+                    <div v-if="vehicle.make?.logo_path" class="absolute inset-0 flex items-center justify-center opacity-[0.05] dark:opacity-[0.15] pointer-events-none select-none z-0">
+                        <img :src="`/storage/${vehicle.make.logo_path}`" class="w-2/3 h-2/3 object-contain grayscale" alt="" />
                     </div>
 
-                    <!-- Card Content -->
-                    <div class="relative z-10 flex flex-col h-full">
-                        <!-- Header: Plate & Status -->
-                        <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-900/50">
-                            <!-- Plate Number Badge -->
-                            <div class="flex items-center gap-2">
-                                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-0.5 shadow-sm">
-                                    <span class="text-lg font-bold text-gray-900 dark:text-gray-100 tracking-wider font-mono">
-                                        {{ toEnglish(vehicle.plate_number) }}
-                                    </span>
-                                </div>
-                            </div>
-                            <!-- Color Dot -->
-                            <span 
-                                v-if="vehicle.color" 
-                                class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-700 shadow-sm" 
-                                :style="{ backgroundColor: getColorHex(vehicle.color) }"
-                                :title="vehicle.color"
-                            ></span>
+                    <div class="relative z-10 p-5 flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 bg-gray-900 text-white rounded-lg font-mono font-bold tracking-widest text-sm shadow-md">
+                                {{ toEnglish(vehicle.plate_number) }}
+                            </span>
+                            <div v-if="vehicle.color" class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-700 shadow-sm" :style="{ backgroundColor: getColorHex(vehicle.color) }"></div>
                         </div>
 
-                        <!-- Body: Vehicle Info -->
-                        <div class="p-4 flex-1">
-                            <div class="mb-3">
-                                <div class="flex items-baseline justify-between mb-1">
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-                                        {{ vehicle.display_make || $t('common.na') }}
-                                    </h3>
-                                    <span v-if="vehicle.year" class="px-2 py-0.5 text-xs font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md">
-                                        {{ toEnglish(vehicle.year) }}
-                                    </span>
-                                </div>
-                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">
-                                    {{ vehicle.display_model || '' }}
-                                </p>
-                            </div>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white group-hover:text-teal-600 transition-colors truncate">
+                                {{ vehicle.display_make || $t('common.na') }}
+                            </h3>
+                            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider truncate">
+                                {{ vehicle.display_model || '' }}
+                            </p>
+                        </div>
 
-                            <!-- Customer Info -->
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="w-6 h-6 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 text-blue-600 dark:text-blue-400">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                    </svg>
-                                </div>
-                                <span class="text-sm text-gray-600 dark:text-gray-300 truncate">
-                                    {{ vehicle.customer?.name || $t('common.unknown') }}
-                                </span>
+                        <div class="mt-auto pt-4 border-t border-gray-50 dark:border-gray-700/50 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-indigo-600 dark:text-indigo-400">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
                             </div>
-
-                            <!-- Contact Buttons -->
-                            <div class="grid grid-cols-2 gap-2">
-                                <!-- Call Button -->
-                                <a
-                                    v-if="vehicle.customer?.phone"
-                                    :href="`tel:${vehicle.customer.phone}`"
-                                    @click.stop
-                                    class="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors text-sm font-medium"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-                                    </svg>
-                                    <span>{{ $t('common.call') }}</span>
-                                </a>
-                                <!-- WhatsApp Button -->
-                                <a
-                                    v-if="getWhatsAppNumber(vehicle.customer)"
-                                    :href="`https://wa.me/${getWhatsAppNumber(vehicle.customer)}`"
-                                    target="_blank"
-                                    @click.stop
-                                    class="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 transition-colors text-sm font-medium"
-                                >
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.355-5.033c0-5.458 4.441-9.898 9.899-9.898 2.645 0 5.132 1.03 7.002 2.901l.001.001c1.868 1.87 2.898 4.357 2.898 7.002 0 5.459-4.441 9.899-9.897 9.899L12.05 21.785z"/>
-                                    </svg>
-                                    <span>{{ $t('customers.quick.whatsapp') }}</span>
-                                </a>
-                            </div>
+                            <span class="text-sm font-bold text-gray-700 dark:text-gray-300 truncate">
+                                {{ vehicle.customer?.name || $t('common.unknown') }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -449,6 +365,7 @@ import axios from "axios";
 import { useToast } from "@/Composables/useToast";
 import { useNumberFormat } from "@/Composables/useNumberFormat";
 import AppLayout from "@/Layouts/AppLayout.vue";
+import PageHeader from "@/Components/PageHeader.vue";
 import VehicleFormModal from "@/Components/Vehicles/VehicleFormModal.vue";
 import SearchableSelect from "@/Components/SearchableSelect.vue";
 import CustomDatePicker from "@/Components/CustomDatePicker.vue";
@@ -644,6 +561,12 @@ watch(viewMode, (newMode) => {
 });
 
 // Navigation handler
+const resetFilters = () => {
+    searchQuery.value = "";
+    filterMakeId.value = "";
+    applyFilters();
+};
+
 function visitShowPage(vehicle) {
     router.visit(route("vehicles.show", vehicle.id));
 }

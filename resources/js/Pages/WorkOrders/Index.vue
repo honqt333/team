@@ -2,34 +2,152 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-3 sm:gap-4">
-                    <!-- Title + Icon + Count -->
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" :class="statusFilter ? (statusFilter === 'closed' ? 'bg-gradient-to-br from-slate-500 to-gray-600 shadow-slate-500/30' : 'bg-gradient-to-br from-emerald-500 to-teal-600 shadow-emerald-500/30') : 'bg-gradient-to-br from-indigo-600 to-purple-600 shadow-indigo-500/30'">
-                            <svg v-if="statusFilter === 'closed'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            <PageHeader
+                :title="pageTitle"
+                :subtitle="workOrders ? null : $t('work_orders.hub.subtitle')"
+                :totalCount="workOrders ? toEnglish(workOrders.total) : null"
+                :countLabel="$t('work_orders.total_count')"
+            >
+                <template #icon>
+                    <div class="w-full h-full flex items-center justify-center transition-all duration-500"
+                        :class="statusFilter ? (statusFilter === 'closed' ? 'bg-gradient-to-br from-slate-500 to-gray-600' : 'bg-gradient-to-br from-emerald-500 to-teal-600') : 'bg-gradient-to-br from-indigo-600 to-purple-600'">
+                        <svg v-if="statusFilter === 'closed'" class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <svg v-else-if="statusFilter === 'open'" class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        <svg v-else class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                    </div>
+                </template>
+
+                <template #actions v-if="statusFilter">
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <button v-if="can('crm.work_orders.export') || isAnyAdmin()" @click="exportWorkOrders"
+                            :disabled="exporting" :title="$t('common.export')"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <svg v-else-if="statusFilter === 'open'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </button>
+                        <button v-if="can('crm.work_orders.print') || isAnyAdmin()" @click="printWorkOrders"
+                            :title="$t('common.print')"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
-                            <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ pageTitle }}</h1>
-                            <p v-if="workOrders" class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ toEnglish(workOrders.total) }} {{ $t('work_orders.total_count') }}
-                            </p>
-                            <p v-else class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ $t('work_orders.hub.subtitle') }}
-                            </p>
+                        </button>
+
+                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                        <div class="flex gap-1.5">
+                            <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'grid'
+                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                </svg>
+                            </button>
+                            <button @click="viewMode = 'list'" :title="$t('common.list_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'list'
+                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
-                </div>
-            </div>
+                    <button v-if="can('crm.work_orders.create') || isAnyAdmin()" @click="showCreateModal = true"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add">
+                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                        <span class="text-sm tracking-tight">{{ $t('work_orders.add') }}</span>
+                    </button>
+                </template>
+
+                <template #filters v-if="statusFilter">
+                    <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3">
+                        <!-- Search -->
+                        <div class="col-span-2 md:col-span-1 lg:w-48">
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-indigo-500 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="text"
+                                    v-model="searchQuery"
+                                    :placeholder="$t('work_orders.search')"
+                                    class="block w-full ps-11 pe-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none shadow-sm"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Date From -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
+                                {{ $t('work_orders.filters.date_from') }}
+                            </label>
+                            <CustomDatePicker
+                                v-model="dateFrom"
+                                @change="applyFilters"
+                                class="!rounded-2xl"
+                            />
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
+                                {{ $t('work_orders.filters.date_to') }}
+                            </label>
+                            <CustomDatePicker
+                                v-model="dateTo"
+                                @change="applyFilters"
+                                class="!rounded-2xl"
+                            />
+                        </div>
+
+                        <!-- Customer Type Filter -->
+                        <div class="lg:w-40">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
+                                {{ $t('work_orders.filters.customer_type') }}
+                            </label>
+                            <SearchableSelect
+                                v-model="customerTypeFilter"
+                                :options="customerTypeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :placeholder="$t('work_orders.filters.all_types')"
+                                :label="''"
+                                class="!rounded-2xl"
+                            />
+                        </div>
+
+                        <button @click="resetFilters"
+                            class="p-3 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                            :title="$t('common.reset')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                </template>
+            </PageHeader>
 
             <!-- Dashboard / Quick Access View -->
             <div v-if="!statusFilter" class="space-y-8">
@@ -99,135 +217,6 @@
 
             <!-- List/Grid View Section (visible only when status filter is active) -->
             <div v-if="statusFilter" class="space-y-6">
-
-                <!-- Filters & Actions Row -->
-                <div class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div class="grid grid-cols-2 md:grid-cols-3 lg:flex lg:flex-wrap items-end gap-3">
-                        <!-- Search -->
-                        <div class="col-span-2 md:col-span-1 lg:w-48">
-                            <div class="relative">
-                                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                                    </svg>
-                                </div>
-                                <input
-                                    type="text"
-                                    v-model="searchQuery"
-                                    :placeholder="$t('work_orders.search')"
-                                    class="w-full ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                />
-                            </div>
-                        </div>
-
-                        <!-- Date From -->
-                        <div class="lg:w-36">
-                            <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
-                                {{ $t('work_orders.filters.date_from') }}
-                            </label>
-                            <CustomDatePicker
-                                v-model="dateFrom"
-                                @change="applyFilters"
-                            />
-                        </div>
-
-                        <!-- Date To -->
-                        <div class="lg:w-36">
-                            <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
-                                {{ $t('work_orders.filters.date_to') }}
-                            </label>
-                            <CustomDatePicker
-                                v-model="dateTo"
-                                @change="applyFilters"
-                            />
-                        </div>
-
-                        <!-- Customer Type Filter -->
-                        <div class="lg:w-40">
-                            <label class="block text-[10px] text-gray-500 dark:text-gray-400 mb-1 px-1">
-                                {{ $t('work_orders.filters.customer_type') }}
-                            </label>
-                            <SearchableSelect
-                                v-model="customerTypeFilter"
-                                :options="customerTypeOptions"
-                                option-label="label"
-                                option-value="value"
-                                :placeholder="$t('work_orders.filters.all_types')"
-                                :label="''"
-                            />
-                        </div>
-
-                        <!-- Actions Group -->
-                        <div class="col-span-2 md:col-span-3 lg:col-span-1 flex items-end justify-end gap-2 lg:ms-auto">
-                            <!-- Print/Export Buttons -->
-                            <div class="flex gap-1.5">
-                                <button
-                                    v-if="can('crm.work_orders.print')"
-                                    @click="printWorkOrders"
-                                    class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all"
-                                    :title="$t('common.print')"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                                    </svg>
-                                </button>
-                                <button
-                                    v-if="can('crm.work_orders.export')"
-                                    @click="exportWorkOrders"
-                                    :disabled="exporting"
-                                    class="flex items-center justify-center w-10 h-10 text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all disabled:opacity-50"
-                                    :title="$t('common.export')"
-                                >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- View Toggle -->
-                            <div class="hidden sm:flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
-                                <button
-                                    @click="viewMode = 'grid'"
-                                    :class="[
-                                        'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                        viewMode === 'grid'
-                                            ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                    ]"
-                                >
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
-                                    </svg>
-                                </button>
-                                <button
-                                    @click="viewMode = 'list'"
-                                    :class="[
-                                        'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                        viewMode === 'list'
-                                            ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                                    ]"
-                                >
-                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <!-- Add Button -->
-                            <button
-                                v-if="can('crm.work_orders.create')"
-                                @click="showCreateModal = true"
-                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                                </svg>
-                                <span class="hidden sm:inline">{{ $t('work_orders.hub.new_card') }}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Filter Tabs (only for open status) -->
                 <div v-if="statusFilter === 'open'" class="flex flex-wrap gap-3">
@@ -722,6 +711,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import SortIcon from '@/Components/Common/SortIcon.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -904,6 +894,14 @@ const filterTabs = computed(() => [
 
 const currentSubFilter = computed(() => props.subFilter || 'in_progress');
 
+
+const resetFilters = () => {
+    searchQuery.value = '';
+    dateFrom.value = null;
+    dateTo.value = null;
+    customerTypeFilter.value = '';
+    applyFilters();
+};
 
 const showCreateModal = ref(false);
 const viewMode = ref(localStorage.getItem('workOrdersViewMode') || 'grid');
