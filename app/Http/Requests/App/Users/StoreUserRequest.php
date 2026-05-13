@@ -41,6 +41,7 @@ class StoreUserRequest extends FormRequest
             'centers.*' => ['exists:centers,id'],
             'role_id' => ['nullable', 'exists:roles,id'],
             'employee_id' => ['nullable', 'exists:hr_employees,id'],
+            'is_system_admin' => ['forbidden'],
         ];
     }
 }

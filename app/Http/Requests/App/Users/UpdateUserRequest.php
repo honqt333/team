@@ -53,6 +53,7 @@ class UpdateUserRequest extends FormRequest
             'centers' => ['required', 'array', 'min:1'],
             'centers.*' => ['exists:centers,id'],
             'role_id' => ['nullable', 'exists:roles,id'],
+            'is_system_admin' => ['forbidden'],
             // Note: employee_id linking is removed - it's automatic via EmployeeObserver
         ];
     }
