@@ -1,57 +1,59 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-gray-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('inventory.settings.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.settings.subtitle') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('inventory.settings.title')"
+                :subtitle="$t('inventory.settings.subtitle')"
+                gradientFrom="from-slate-600"
+                gradientTo="to-gray-700"
+                glowFrom="from-slate-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </template>
 
-            <!-- Tabs -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="border-b border-gray-200 dark:border-gray-700">
-                    <nav class="flex -mb-px">
+                <template #filters>
+                    <div class="inline-flex items-center p-1.5 bg-slate-900/40 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
                         <button
                             v-for="tab in tabs"
                             :key="tab.key"
                             @click="activeTab = tab.key"
                             :class="[
-                                'px-6 py-4 text-sm font-medium border-b-2 transition-colors',
+                                'flex items-center gap-3 px-10 py-3 text-sm font-black rounded-xl transition-all duration-500',
                                 activeTab === tab.key
-                                    ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
-                                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
+                                    ? 'bg-white text-slate-900 shadow-xl scale-[1.02] ring-1 ring-white/50'
+                                    : 'text-slate-100 hover:text-white hover:bg-white/10'
                             ]"
                         >
-                            {{ tab.icon }} {{ tab.label }}
+                            <span class="text-xl transform transition-transform duration-500" :class="activeTab === tab.key ? 'scale-110' : ''">{{ tab.icon }}</span>
+                            <span class="tracking-tight uppercase">{{ tab.label }}</span>
                         </button>
-                    </nav>
-                </div>
-
-                <div class="p-6">
+                    </div>
+                </template>
+            </PageHeader>
                     <!-- Units Tab -->
                     <div v-show="activeTab === 'units'" class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('inventory.settings.units.title') }}</h3>
+                        <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('inventory.settings.units.title') }}</h3>
+                            </div>
                             <button
                                 @click="showUnitModal = true; editingUnit = null"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 transition-all group/add"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                {{ $t('common.add') }}
+                                <span class="text-sm tracking-tight">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -114,16 +116,23 @@
 
                     <!-- Categories Tab -->
                     <div v-show="activeTab === 'categories'" class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('inventory.settings.categories.title') }}</h3>
+                        <div class="flex justify-between items-center bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2z"/>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('inventory.settings.categories.title') }}</h3>
+                            </div>
                             <button
                                 @click="showCategoryModal = true; editingCategory = null"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors"
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:-translate-y-0.5 transition-all group/add"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                {{ $t('common.add') }}
+                                <span class="text-sm tracking-tight">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -184,8 +193,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
         <!-- Unit Modal -->
         <Teleport to="body">
@@ -272,6 +279,7 @@ import { ref, reactive } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 

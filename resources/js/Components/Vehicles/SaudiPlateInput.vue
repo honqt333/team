@@ -8,7 +8,7 @@
                 <div class="relative">
                     <select 
                         v-model="selectedCountry"
-                        class="appearance-none px-3 py-1.5 pe-8 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-transparent cursor-pointer"
+                        class="appearance-none px-3 py-1.5 pe-8 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer"
                     >
                         <option value="SA">🇸🇦 {{ $t('vehicles.plate.countries.sa') }}</option>
                         <option value="OTHER">🌍 {{ $t('vehicles.plate.countries.other') }}</option>
@@ -24,7 +24,7 @@
                 <input 
                     type="checkbox" 
                     v-model="skipFormat"
-                    class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-teal-600 focus:ring-teal-500 cursor-pointer"
+                    class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                 />
                 <span class="text-xs text-gray-600 dark:text-gray-400">{{ $t('vehicles.plate.skip_format') }}</span>
             </label>
@@ -118,7 +118,7 @@
                         inputmode="numeric"
                         placeholder="1234"
                         dir="ltr"
-                        class="w-full px-3 py-1.5 text-sm text-center border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-teal-500"
+                        class="w-full px-3 py-1.5 text-sm text-center border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-blue-500"
                         :class="error && !plateNumbers ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
                         @input="onNumbersInput($event)"
                     />
@@ -136,7 +136,7 @@
                 :value="freeTextPlate"
                 :placeholder="$t('vehicles.form.plate_placeholder')"
                 dir="ltr"
-                class="w-full px-3 py-2 text-center font-semibold border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-teal-500"
+                class="w-full px-3 py-2 text-center font-semibold border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500"
                 :class="error && !freeTextPlate ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
                 @input="onFreeTextInput($event)"
             />

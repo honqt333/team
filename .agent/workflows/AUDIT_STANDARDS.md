@@ -38,9 +38,12 @@ description: وثيقة معايير نظام "خدمة برو" (Khidmh Pro Stan
   - استخدام `font-bold` و `rounded-xl` للأزرار داخل الشريط.
 
 ### **التنقل (Navigation)**
-- **زر الرجوع الموحد**: استخدام مكون `<BackButton />` حصراً.
-- **التصميم**: خلفية بيضاء، حدود رمادية خفيفة، أيقونة متحركة عند التمرير (`group-hover:-translate-x-1`).
-- **الخط**: `font-bold` مع شفافية `text-gray-500` وتغير إلى `text-indigo-600` عند التمرير.
+- **زر الرجوع الموحد (Premium Show Header)**: 
+  - التصميم: استخدام `rounded-2xl` مع `backdrop-blur-md` وخلفية شفافة جزئياً (`bg-white/80` أو `dark:bg-gray-800/80`).
+  - الأيقونة: أيقونة سهم `M14 5l7 7-7 7M21 12H3` أو `M10 19l-7-7m0 0l7-7m-7 7h18` مع خاصية `rtl:rotate-180`.
+  - الألوان: نص وأيقونة باللون `text-indigo-600` (أو لون الموديول) مع حدود `border-gray-100`.
+  - التفاعل: `hover:shadow-md hover:border-indigo-200 transition-all duration-300`.
+- **زر الرجوع الافتراضي (Default BackButton)**: استخدام مكون `<BackButton />` في الحالات البسيطة.
 
 ### **العناصر التفاعلية**
 - **الحواف (Borders)**: استخدام `rounded-xl` للأزرار والعناصر المتوسطة، و `rounded-2xl` أو `rounded-3xl` للبطاقات الكبيرة والمودالات.
@@ -61,7 +64,7 @@ description: وثيقة معايير نظام "خدمة برو" (Khidmh Pro Stan
 ---
 
 ## ٣. معايير اللغة والترجمة (Localization & i18n)
-
+    
 ### **دعم اللغتين (Bilingual Support)**
 - **الاتجاه (RTL/LTR)**: التأكد من استخدام كلاسات الاتجاه مثل `rtl:rotate-180` أو `start-0` بدلاً من `left-0`.
 - **الترجمة**: منع كتابة أي نصوص ثابتة (Hardcoded)؛ يجب استخدام `$t('key.name')`.

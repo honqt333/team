@@ -1,110 +1,136 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('inventory.stock.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ warehouse?.name }}</p>
-                        </div>
-                    </div>
-                    <!-- View Toggle -->
-                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                        <button 
-                            @click="viewMode = 'list'"
-                            :class="['p-2 rounded-md transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                        </button>
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('inventory.stock.title')"
+                :subtitle="$t('inventory.stock.subtitle') + (warehouse ? ` - ${warehouse.name}` : '')"
+                :totalCount="balances.total"
+                :countLabel="$t('inventory.stock.title')"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-700"
+                glowFrom="from-emerald-500"
+                badgeBg="bg-emerald-50/50 dark:bg-emerald-900/30"
+                badgeText="text-emerald-600 dark:text-emerald-400"
+                badgeBorder="border-emerald-100/50 dark:border-emerald-800/30"
+                badgeDot="bg-emerald-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
                         <button 
                             @click="viewMode = 'grid'"
-                            :class="['p-2 rounded-md transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300']"
+                            :title="$t('common.grid_view')"
+                            :class="[
+                                'p-2.5 rounded-xl transition-all shadow-sm',
+                                viewMode === 'grid'
+                                    ? 'bg-blue-600 text-white shadow-blue-500/20'
+                                    : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                            ]"
                         >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
+                            </svg>
+                        </button>
+                        <button 
+                            @click="viewMode = 'list'"
+                            :title="$t('common.list_view')"
+                            :class="[
+                                'p-2.5 rounded-xl transition-all shadow-sm',
+                                viewMode === 'list'
+                                    ? 'bg-blue-600 text-white shadow-blue-500/20'
+                                    : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                            ]"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
                         </button>
                     </div>
-                </div>
-            </div>
+                </template>
 
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatQuantity(stats.total_items) }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.total_items') }}</div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="text-2xl font-bold text-green-600 dark:text-green-400 font-mono" dir="ltr">{{ formatQuantity(stats.in_stock) }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.in_stock') }}</div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 font-mono" dir="ltr">{{ formatQuantity(stats.low_stock) }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.low_stock') }}</div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrency(stats.total_value) }}</div>
-                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.total_value') }}</div>
-                </div>
-            </div>
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <!-- Search Box -->
+                        <div class="relative group flex-1 w-full">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-emerald-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                v-model="localFilters.search"
+                                type="text"
+                                :placeholder="$t('inventory.stock.search_placeholder')"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none shadow-sm placeholder-gray-400"
+                                @input="debouncedSearch"
+                            />
+                        </div>
 
-            <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="w-64" v-if="warehouses && warehouses.length > 1">
-                        <SearchableSelect
-                            v-model="localFilters.warehouse_id"
-                            :options="warehouses"
-                            option-label="name"
-                            option-value="id"
-                            :placeholder="$t('inventory.stock.select_warehouse') || 'اختر المستودع'"
-                            :label="''"
-                            @change="applyFilters"
-                        />
+                        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                            <!-- Warehouse Filter -->
+                            <div class="w-full md:w-48" v-if="warehouses && warehouses.length > 1">
+                                <SearchableSelect
+                                    v-model="localFilters.warehouse_id"
+                                    :options="warehouses"
+                                    option-label="name"
+                                    option-value="id"
+                                    :placeholder="$t('inventory.stock.select_warehouse') || 'اختر المستودع'"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Category Filter -->
+                            <div class="w-full md:w-48">
+                                <SearchableSelect
+                                    v-model="localFilters.category"
+                                    :options="[{id: '', name: $t('common.all_categories')}, ...categories]"
+                                    option-label="name"
+                                    option-value="id"
+                                    :placeholder="$t('common.all_categories')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Stock Status Filter -->
+                            <div class="w-full md:w-40">
+                                <SearchableSelect
+                                    v-model="localFilters.stock_status"
+                                    :options="[
+                                        {value: '', label: $t('common.all')},
+                                        {value: 'in_stock', label: $t('inventory.stock.in_stock')},
+                                        {value: 'low_stock', label: $t('inventory.stock.low_stock')},
+                                        {value: 'out_of_stock', label: $t('inventory.stock.out_of_stock')}
+                                    ]"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('common.all')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Reset Button -->
+                            <button 
+                                @click="resetFilters"
+                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex-1 min-w-[200px]">
-                        <input
-                            v-model="localFilters.search"
-                            type="text"
-                            :placeholder="$t('inventory.stock.search_placeholder')"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500"
-                            @input="debouncedSearch"
-                        />
-                    </div>
-                    <div class="w-48">
-                        <SearchableSelect
-                            v-model="localFilters.category"
-                            :options="[{id: '', name: $t('common.all_categories')}, ...categories]"
-                            option-label="name"
-                            option-value="id"
-                            :placeholder="$t('common.all_categories')"
-                            :label="''"
-                            @change="applyFilters"
-                        />
-                    </div>
-                    <div class="w-48">
-                        <SearchableSelect
-                            v-model="localFilters.stock_status"
-                            :options="[
-                                {value: '', label: $t('common.all')},
-                                {value: 'in_stock', label: $t('inventory.stock.in_stock')},
-                                {value: 'low_stock', label: $t('inventory.stock.low_stock')},
-                                {value: 'out_of_stock', label: $t('inventory.stock.out_of_stock')}
-                            ]"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('common.all')"
-                            :label="''"
-                            @change="applyFilters"
-                        />
-                    </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- View Content -->
             <div v-if="viewMode === 'list'" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -267,6 +293,7 @@
 import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { debounce } from 'lodash-es';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -307,6 +334,14 @@ const applyFilters = () => {
     });
 };
 
+const resetFilters = () => {
+    localFilters.value.search = '';
+    localFilters.value.stock_status = '';
+    localFilters.value.category = '';
+    localFilters.value.warehouse_id = props.warehouse?.id || '';
+    applyFilters();
+};
+
 const debouncedSearch = debounce(applyFilters, 300);
 
 const getStockStatusClass = (balance) => {
@@ -314,10 +349,10 @@ const getStockStatusClass = (balance) => {
     const minQty = balance.part?.min_qty || 0;
     
     if (qty <= 0) {
-        return 'bg-slate-700 text-white'; // Out of stock - Dark as per image
+        return 'bg-red-500 text-white shadow-sm'; // Out of stock
     } else if (qty <= minQty) {
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400';
+        return 'bg-yellow-500 text-white shadow-sm'; // Low stock
     }
-    return 'bg-slate-700 text-white'; // Default stock badge per image
+    return 'bg-blue-600 text-white shadow-sm'; // Normal stock
 };
 </script>

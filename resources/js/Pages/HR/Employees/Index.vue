@@ -2,140 +2,166 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <Link :href="route('app.hr.index')"
-                            class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 rtl:rotate-180" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </Link>
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('hr.employees.title') }}
-                            </h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.employees.subtitle') }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <!-- View Toggle -->
-                        <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                            <button @click="viewMode = 'grid'" :class="[
-                                'p-2 rounded-md transition-all',
-                                viewMode === 'grid'
-                                    ? 'bg-white dark:bg-gray-600 text-violet-600 dark:text-violet-400 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                            ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </button>
-                            <button @click="viewMode = 'list'" :class="[
-                                'p-2 rounded-md transition-all',
-                                viewMode === 'list'
-                                    ? 'bg-white dark:bg-gray-600 text-violet-600 dark:text-violet-400 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                            ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                        </div>
+            <PageHeader
+                :title="$t('hr.employees.title')"
+                :subtitle="$t('hr.employees.subtitle')"
+                :totalCount="counts.active + counts.inactive"
+                :countLabel="$t('hr.employees.title')"
+                gradientFrom="from-violet-600"
+                gradientTo="to-purple-700"
+                glowFrom="from-violet-500"
+                badgeBg="bg-violet-50/50 dark:bg-violet-900/30"
+                badgeText="text-violet-600 dark:text-violet-400"
+                badgeBorder="border-violet-100/50 dark:border-violet-800/30"
+                badgeDot="bg-violet-500"
+                backUrl="app.hr.index"
+            >
+                <template #back>
+                    <Link :href="route('app.hr.index')"
+                        class="w-10 h-10 rounded-xl bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-center hover:bg-white dark:hover:bg-gray-800 text-gray-400 hover:text-violet-600 shadow-sm transition-all border border-gray-100/50 dark:border-gray-700/50 group/back"
+                        :title="$t('common.back')">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                </template>
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </template>
 
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
                         <!-- Print Button -->
                         <a :href="route('app.hr.employees.print')" target="_blank"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
+                            class="p-2.5 text-gray-500 hover:text-violet-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
+                            :title="$t('common.print')">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
-                            {{ $t('common.print') }}
                         </a>
 
-                        <button 
-                            v-if="can('hr.employees.create')"
-                            @click="showAddModal = true"
-                            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span class="hidden sm:inline">{{ $t('hr.employees.add') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                        <!-- Divider -->
+                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
-            <!-- Filters & Content -->
-            <div class="space-y-6">
-                <!-- Tabs & Search -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-                    <div
-                        class="flex flex-col md:flex-row justify-between items-center border-b border-gray-200 dark:border-gray-700">
-                        <!-- Tabs -->
-                        <div class="w-full md:w-auto px-4">
-                            <nav class="flex gap-4">
-                                <button @click="changeStatus('active')" :class="[
-                                    'py-4 px-2 text-sm font-medium border-b-2 transition-colors',
-                                    currentStatus === 'active'
-                                        ? 'border-violet-500 text-violet-600 dark:text-violet-400'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                        <!-- View Toggle Group -->
+                        <div class="flex items-center gap-1">
+                            <button 
+                                @click="viewMode = 'grid'"
+                                :title="$t('common.grid_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'grid'
+                                        ? 'bg-violet-600 text-white shadow-violet-500/20'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
+                                </svg>
+                            </button>
+                            <button 
+                                @click="viewMode = 'list'"
+                                :title="$t('common.list_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'list'
+                                        ? 'bg-violet-600 text-white shadow-violet-500/20'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Add Employee Button -->
+                    <button
+                        v-if="can('hr.employees.create') || isAnyAdmin()"
+                        @click="showAddModal = true"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-700 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add"
+                    >
+                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm tracking-tight">{{ $t('hr.employees.add') }}</span>
+                    </button>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <!-- Status Segmented Control -->
+                        <div class="flex p-1.5 bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner w-full md:w-auto">
+                            <button
+                                v-for="status in ['active', 'inactive']"
+                                :key="status"
+                                @click="changeStatus(status)"
+                                :class="[
+                                    'flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300',
+                                    currentStatus === status
+                                        ? 'bg-white dark:bg-gray-800 text-violet-600 dark:text-violet-400 shadow-md ring-1 ring-gray-200/50 dark:ring-gray-700/50'
+                                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400'
+                                ]"
+                            >
+                                {{ $t(`common.${status}`) }}
+                                <span :class="[
+                                    'ms-2 px-2 py-0.5 rounded-lg text-[9px]',
+                                    currentStatus === status
+                                        ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400'
+                                        : 'bg-gray-100 text-gray-600 dark:bg-gray-700/50 dark:text-gray-500'
                                 ]">
-                                    {{ $t('common.active') }}
-                                    <span
-                                        class="ms-2 px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                        {{ counts.active }}
-                                    </span>
-                                </button>
-                                <button @click="changeStatus('inactive')" :class="[
-                                    'py-4 px-2 text-sm font-medium border-b-2 transition-colors',
-                                    currentStatus !== 'active'
-                                        ? 'border-violet-500 text-violet-600 dark:text-violet-400'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'
-                                ]">
-                                    {{ $t('common.inactive') }}
-                                    <span
-                                        class="ms-2 px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
-                                        {{ counts.inactive }}
-                                    </span>
-                                </button>
-                            </nav>
+                                    {{ counts[status] }}
+                                </span>
+                            </button>
                         </div>
 
-                        <!-- Search & Filter -->
-                        <div class="w-full md:w-auto p-3 flex gap-3 items-center">
-                            <div class="w-48" v-if="centers.length > 1">
-                                <SearchableSelect v-model="selectedCenter"
-                                    :options="[{ id: '', name: $t('common.all_centers') }, ...centers]"
-                                    option-label="name" option-value="id" :placeholder="$t('common.all_centers')"
-                                    @update:modelValue="search" />
-                            </div>
+                        <!-- Center Filter -->
+                        <div class="w-full md:w-56" v-if="centers.length > 1">
+                            <SearchableSelect
+                                v-model="selectedCenter"
+                                :options="[{ id: '', name: $t('common.all_centers') }, ...centers]"
+                                option-label="name"
+                                option-value="id"
+                                :placeholder="$t('common.all_centers')"
+                                :label="''"
+                                @update:modelValue="search"
+                            />
+                        </div>
 
-                            <div class="relative w-full md:w-64">
-                                <input v-model="searchQuery" type="text" :placeholder="$t('common.search')"
-                                    class="w-full ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
-                                    @keyup.enter="search" />
-                                <svg class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none"
-                                    stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <!-- Search Box -->
+                        <div class="relative group flex-1 w-full">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-violet-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
+                            <input
+                                v-model="searchQuery"
+                                type="text"
+                                :placeholder="$t('common.search')"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-violet-500/10 focus:border-violet-500 transition-all outline-none shadow-sm placeholder-gray-400"
+                                @keyup.enter="search"
+                            />
                         </div>
+
+                        <!-- Reset Button -->
+                        <button 
+                            @click="resetFilters"
+                            class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                            :title="$t('common.reset')"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
                     </div>
-                </div>
+                </template>
+            </PageHeader>
 
                 <!-- Grid View -->
                 <div v-if="viewMode === 'grid'"
@@ -144,10 +170,10 @@
                         class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow group relative overflow-hidden">
                         <div class="absolute top-0 end-0 p-4">
                             <span :class="[
-                                'px-2 py-1 rounded-lg text-xs font-semibold',
+                                'px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm transition-all',
                                 employee.status === 'active'
-                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                    : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/30'
+                                    : 'bg-gray-50 text-gray-600 border-gray-100 dark:bg-gray-800/30 dark:text-gray-400 dark:border-gray-700/30'
                             ]">
                                 {{ $t(`hr.employees.status.${employee.status}`) }}
                             </span>
@@ -291,8 +317,6 @@
                     </nav>
                 </div>
             </div>
-            <!-- ... unchanged ... -->
-        </div>
 
         <!-- Add Employee Modal -->
         <EmployeeFormModal :show="showAddModal" :job-titles="jobTitles" :nationalities="nationalities"
@@ -306,9 +330,10 @@ import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import EmployeeFormModal from '@/Components/HR/EmployeeFormModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { usePermission } from '@/Composables/usePermission';
 
-const { can } = usePermission();
+const { can, isAnyAdmin } = usePermission();
 
 const props = defineProps({
     employees: Object,
@@ -346,4 +371,10 @@ function search() {
         center_id: selectedCenter.value
     }, { preserveState: true });
 }
+
+const resetFilters = () => {
+    searchQuery.value = '';
+    selectedCenter.value = '';
+    changeStatus('active');
+};
 </script>

@@ -4,80 +4,102 @@
 
         <div class="space-y-6">
             <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex items-center gap-4">
-                        <Link href="/app/hr" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                             <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                            </svg>
-                        </Link>
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('hr.attendance.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.attendance.subtitle') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Date Filter -->
-                    <div class="flex items-center gap-2">
-                        <button @click="changeDate(-1)" class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </button>
-                        <input 
-                            type="date" 
-                            v-model="selectedDate"
-                            class="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        >
-                        <button @click="changeDate(1)" class="p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                            <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </button>
-                    <!-- Print Button -->
-                    <a 
-                        :href="route('app.hr.attendance.print', { date: selectedDate })" 
-                        target="_blank"
-                        class="p-2 text-violet-600 bg-violet-50 hover:bg-violet-100 rounded-lg transition-colors border border-violet-200"
-                        :title="$t('common.print')"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            <PageHeader
+                :title="$t('hr.attendance.title')"
+                :subtitle="$t('hr.attendance.subtitle')"
+                gradientFrom="from-orange-500"
+                gradientTo="to-amber-600"
+                glowFrom="from-orange-400"
+                badgeBg="bg-orange-50/50 dark:bg-orange-900/30"
+                badgeText="text-orange-600 dark:text-orange-400"
+                badgeBorder="border-orange-100/50 dark:border-orange-800/30"
+                badgeDot="bg-orange-500"
+            >
+                <template #back>
+                    <Link href="/app/hr"
+                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-orange-50 dark:hover:bg-orange-900/20 text-orange-600 dark:text-orange-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
+                        :title="$t('common.back')">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
                         </svg>
-                    </a>
+                    </Link>
+                </template>
+
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <!-- Print Button -->
+                        <a 
+                            :href="route('app.hr.attendance.print', { date: selectedDate })" 
+                            target="_blank"
+                            class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
+                            :title="$t('common.print')"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </a>
                     </div>
-                </div>
-            </div>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <!-- Date Navigation -->
+                        <div class="flex items-center gap-2 p-1.5 bg-gray-100/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner w-full md:w-auto">
+                            <button @click="changeDate(-1)" class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm">
+                                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/>
+                                </svg>
+                            </button>
+                            
+                            <div class="lg:w-48">
+                                <CustomDatePicker
+                                    v-model="selectedDate"
+                                    class="!rounded-2xl"
+                                />
+                            </div>
+
+                            <button @click="changeDate(1)" class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm">
+                                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Spacer for alignment -->
+                        <div class="flex-1"></div>
+                    </div>
+                </template>
+            </PageHeader>
 
             <!-- Stats Overview -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('common.total') }}</p>
-                    <span class="text-3xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</span>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border-t-4 border-gray-400 dark:border-gray-600 shadow-xl shadow-gray-200/10 dark:shadow-none">
+                    <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ $t('common.total') }}</p>
+                    <span class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ stats.total }}</span>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('hr.attendance.present') }}</p>
-                    <span class="text-3xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.present }}</span>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border-t-4 border-emerald-500 dark:border-emerald-700 shadow-xl shadow-emerald-200/10 dark:shadow-none">
+                    <p class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">{{ $t('hr.attendance.present') }}</p>
+                    <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">{{ stats.present }}</span>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('hr.attendance.absent') }}</p>
-                    <span class="text-3xl font-bold text-red-600 dark:text-red-400">{{ stats.absent }}</span>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border-t-4 border-red-500 dark:border-red-700 shadow-xl shadow-red-200/10 dark:shadow-none">
+                    <p class="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest mb-1">{{ $t('hr.attendance.absent') }}</p>
+                    <span class="text-3xl font-black text-red-600 dark:text-red-400 tracking-tight">{{ stats.absent }}</span>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('hr.attendance.leave') }}</p>
-                    <span class="text-3xl font-bold text-blue-600 dark:text-blue-400">{{ stats.leave }}</span>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border-t-4 border-blue-500 dark:border-blue-700 shadow-xl shadow-blue-200/10 dark:shadow-none">
+                    <p class="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-1">{{ $t('hr.attendance.leave') }}</p>
+                    <span class="text-3xl font-black text-blue-600 dark:text-blue-400 tracking-tight">{{ stats.leave }}</span>
                 </div>
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('hr.attendance.late') }}</p>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-2xl border-t-4 border-orange-500 dark:border-orange-700 shadow-xl shadow-orange-200/10 dark:shadow-none">
+                    <p class="text-[10px] font-black text-orange-600 dark:text-orange-400 uppercase tracking-widest mb-1">{{ $t('hr.attendance.late') }}</p>
                     <div class="flex items-baseline gap-2">
-                        <span class="text-3xl font-bold text-orange-600 dark:text-orange-400">{{ stats.late_count || 0 }}</span>
-                        <span v-if="stats.total_late_minutes" class="text-sm text-gray-500">({{ stats.total_late_minutes }} {{ $t('common.minutes') }})</span>
+                        <span class="text-3xl font-black text-orange-600 dark:text-orange-400 tracking-tight">{{ stats.late_count || 0 }}</span>
+                        <span v-if="stats.total_late_minutes" class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">({{ stats.total_late_minutes }} {{ $t('common.minutes') }})</span>
                     </div>
                 </div>
             </div>
@@ -130,13 +152,13 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <span v-if="employee.attendance" :class="[
-                                        'px-2.5 py-1 rounded-lg text-xs font-medium',
+                                        'px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm transition-all',
                                         getStatusColor(employee.attendance.status)
                                     ]">
                                         {{ $t(`hr.attendance.${employee.attendance.status}`) }}
                                     </span>
-                                    <span v-else class="text-xs text-gray-400">
-                                        —
+                                    <span v-else class="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                                        {{ $t('hr.attendance.not_marked') }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-center font-mono text-sm">
@@ -288,6 +310,8 @@
 import { ref, watch, reactive } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useI18n } from 'vue-i18n';
@@ -323,11 +347,11 @@ function changeDate(days) {
 
 function getStatusColor(status) {
     switch (status) {
-        case 'present': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
-        case 'absent': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
-        case 'late': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400';
-        case 'leave': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400';
-        default: return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+        case 'present': return 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/30';
+        case 'absent': return 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/30';
+        case 'late': return 'bg-orange-50 text-orange-700 border-orange-100 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800/30';
+        case 'leave': return 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/30';
+        default: return 'bg-gray-50 text-gray-700 border-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
     }
 }
 

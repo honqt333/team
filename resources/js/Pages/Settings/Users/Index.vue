@@ -3,6 +3,7 @@ import { ref, watch } from 'vue';
 import { Head, router, usePage, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue';
 import UserFormModal from './UserFormModal.vue';
@@ -84,41 +85,51 @@ const toggleUserActive = (user) => {
     <AppLayout>
         <div class="space-y-6">
             <!-- Header & Tabs -->
-            <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div class="flex items-center gap-4">
+            <PageHeader
+                :title="t('users.title')"
+                :subtitle="t('users.description')"
+                gradientFrom="from-violet-600"
+                gradientTo="to-purple-700"
+                glowFrom="from-violet-500"
+                badgeBg="bg-violet-50/50 dark:bg-violet-900/30"
+                badgeText="text-violet-600 dark:text-violet-400"
+                badgeBorder="border-violet-100/50 dark:border-violet-800/30"
+                badgeDot="bg-violet-500"
+            >
+                <template #back>
+                    <Link :href="route('settings.index')"
+                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-violet-50 dark:hover:bg-violet-900/20 text-violet-600 dark:text-violet-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
+                        :title="$t('common.back')">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                </template>
 
-                         <Link :href="route('settings.index')" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </Link>
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('users.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('users.description') }}</p>
-                        </div>
-                    </div>
-                    
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </template>
+
+                <template #actions>
                     <button 
                         v-if="can('users.create')"
                         @click="openCreateModal"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
+                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-violet-500/25 active:scale-95 overflow-hidden"
                     >
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span class="hidden sm:inline">{{ t('users.create_new') }}</span>
+                        <span class="relative hidden sm:inline">{{ t('users.create_new') }}</span>
                     </button>
-                </div>
+                </template>
 
-                <UserManagementTabs active-tab="users" class="mt-6" />
-            </div>
+                <template #filters>
+                    <UserManagementTabs active-tab="users" />
+                </template>
+            </PageHeader>
 
             <!-- Filters & Content -->
             <div class="space-y-6">

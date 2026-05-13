@@ -2,19 +2,23 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-500/30">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('nav.website') }}</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">تحكم بالواجهة العامة لمركزك على الإنترنت وصفحة الحجوزات</p>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('nav.website')"
+                subtitle="تحكم بالواجهة العامة لمركزك على الإنترنت وصفحة الحجوزات"
+                gradientFrom="from-pink-500"
+                gradientTo="to-rose-600"
+                glowFrom="from-pink-500"
+                badgeBg="bg-pink-50/50 dark:bg-pink-900/30"
+                badgeText="text-pink-600 dark:text-pink-400"
+                badgeBorder="border-pink-100/50 dark:border-pink-800/30"
+                badgeDot="bg-pink-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Coming Soon Placeholder -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-200 dark:border-gray-700">
@@ -40,6 +44,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

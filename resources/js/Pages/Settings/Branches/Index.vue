@@ -2,50 +2,47 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <!-- Back Button & Title -->
-                    <div class="flex items-center gap-4">
-                        <Link href="/app/settings"
-                            class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-                            <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            {{ $t('common.back') }}
-                        </Link>
+            <PageHeader
+                :title="$t('company_profile.branches.title')"
+                :subtitle="$t('company_profile.branches.subtitle')"
+                gradientFrom="from-blue-600"
+                gradientTo="to-cyan-600"
+                glowFrom="from-blue-500"
+                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
+                badgeText="text-blue-600 dark:text-blue-400"
+                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
+                badgeDot="bg-blue-500"
+            >
+                <template #back>
+                    <Link href="/app/settings"
+                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
+                        :title="$t('common.back')">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                </template>
 
-                        <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </template>
 
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{
-                                $t('company_profile.branches.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{
-                                $t('company_profile.branches.subtitle') }}</p>
-                        </div>
-                    </div>
-
-                    <!-- Add Button (disabled for now) -->
+                <template #actions>
                     <button
-                        class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors flex items-center gap-2"
-                        disabled>
+                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+                        disabled
+                    >
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        {{ $t('company_profile.branches.add') }}
+                        <span class="relative">{{ $t('company_profile.branches.add') }}</span>
                     </button>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Branches List -->
             <div
@@ -182,6 +179,7 @@
 <script setup>
 import { computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { Link } from '@inertiajs/vue3';
 
 const props = defineProps({

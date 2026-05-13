@@ -790,9 +790,10 @@
 
 <script setup>
 import { ref, computed, h, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import BackButton from '@/Components/BackButton.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';

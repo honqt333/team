@@ -2,39 +2,44 @@
     <AppLayout :title="$t('invoices.sales.title')">
         <div class="space-y-6">
 
-            <!-- Header Section (same as Customers) -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-3 sm:gap-4">
+            <!-- Header Section -->
+            <PageHeader
+                :title="$t('invoices.sales.title')"
+                :subtitle="$t('invoices.sales.subtitle')"
+                :totalCount="invoices ? toEnglish(invoices.total) : null"
+                :countLabel="$t('invoices.sales.tab_invoices')"
+                gradientFrom="from-blue-600"
+                gradientTo="to-indigo-600"
+                glowFrom="from-blue-600"
+                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
+                badgeText="text-blue-600 dark:text-blue-400"
+                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
+                badgeDot="bg-blue-500"
+            >
+                <template #back>
+                    <Link
+                        :href="route('app.invoices.hub')"
+                        :title="$t('common.back')"
+                        class="p-2.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600"
+                    >
+                        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </Link>
+                </template>
 
-                    <!-- Title + Icon + Count -->
-                    <div class="flex items-center gap-4">
-                        <Link
-                            :href="route('app.invoices.hub')"
-                            class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex-shrink-0"
-                        >
-                            <svg class="w-5 h-5 text-gray-500 dark:text-gray-400 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </Link>
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('invoices.sales.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ toEnglish(invoices.total) }} {{ $t('invoices.sales.subtitle') }}
-                            </p>
-                        </div>
-                    </div>
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </template>
 
-                    <!-- Actions Row -->
+                <template #actions>
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         <!-- Search -->
-                        <div class="relative">
-                            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </div>
@@ -42,20 +47,22 @@
                                 type="text"
                                 v-model="localFilters.search"
                                 :placeholder="$t('common.search')"
-                                class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-100 dark:border-gray-700 rounded-xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-md text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
                             />
                         </div>
 
                         <!-- Status Filter -->
-                        <select
-                            v-model="localFilters.payment_status"
-                            class="ps-4 pe-8 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                        >
-                            <option value="">{{ $t('invoices.all_statuses') }}</option>
-                            <option value="unpaid">{{ $t('invoices.status.unpaid') }}</option>
-                            <option value="partial">{{ $t('invoices.status.partial') }}</option>
-                            <option value="paid">{{ $t('invoices.status.paid') }}</option>
-                        </select>
+                        <div class="w-full sm:w-48">
+                            <SearchableSelect
+                                v-model="localFilters.payment_status"
+                                :options="statusOptions"
+                                option-label="label"
+                                option-value="value"
+                                :placeholder="$t('invoices.all_statuses')"
+                                class="!rounded-2xl"
+                                compact
+                            />
+                        </div>
 
                         <!-- Date From -->
                         <CustomDatePicker
@@ -69,38 +76,38 @@
                             :placeholder="$t('work_orders.filters.date_to')"
                         />
 
-                        <!-- View Toggle (same as Customers) -->
-                        <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
+                        <!-- View Toggle -->
+                        <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
                             <button
                                 @click="viewMode = 'grid'"
                                 :class="[
-                                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
                                     viewMode === 'grid'
-                                        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                        ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
                                 ]"
                             >
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
                                 </svg>
                             </button>
                             <button
                                 @click="viewMode = 'list'"
                                 :class="[
-                                    'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
                                     viewMode === 'list'
-                                        ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                                        ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
                                 ]"
                             >
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
                             </button>
                         </div>
                     </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Tabs -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -284,12 +291,20 @@ import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { debounce } from 'lodash-es';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
+
+const statusOptions = [
+    { value: 'unpaid', label: t('invoices.status.unpaid') },
+    { value: 'partial', label: t('invoices.status.partial') },
+    { value: 'paid', label: t('invoices.status.paid') },
+];
 
 const props = defineProps({
     invoices: { type: Object, default: () => ({}) },

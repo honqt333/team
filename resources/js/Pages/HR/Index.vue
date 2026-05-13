@@ -2,19 +2,23 @@
     <AppLayout>
         <div class="space-y-8">
             <!-- Header Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('hr.title') }}</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $t('hr.subtitle') }}</p>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('hr.title')"
+                :subtitle="$t('hr.subtitle')"
+                gradientFrom="from-violet-600"
+                gradientTo="to-purple-700"
+                glowFrom="from-violet-500"
+                badgeBg="bg-violet-50/50 dark:bg-violet-900/30"
+                badgeText="text-violet-600 dark:text-violet-400"
+                badgeBorder="border-violet-100/50 dark:border-violet-800/30"
+                badgeDot="bg-violet-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Quick Access Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -100,15 +104,36 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6" v-if="recentEmployees.length > 0">
                  <!-- Mini Recent Employees Table -->
                  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold text-gray-900 dark:text-white">{{ $t('hr.employees.title') }}</h3>
-                        <Link :href="route('app.hr.employees.index')" class="text-xs text-indigo-600 hover:underline">{{ $t('common.view_details') }}</Link>
+                    <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/30 dark:bg-gray-900/30">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center text-violet-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-black text-gray-900 dark:text-white tracking-tight uppercase text-sm">{{ $t('hr.employees.title') }}</h3>
+                        </div>
+                        <Link :href="route('app.hr.employees.index')" class="text-xs font-bold text-violet-600 hover:text-violet-700 dark:text-violet-400 transition-colors flex items-center gap-1">
+                            {{ $t('common.view_details') }}
+                            <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Link>
                     </div>
-                    <table class="w-full text-sm text-left rtl:text-right">
-                        <tbody>
-                            <tr v-for="emp in recentEmployees" :key="emp.id" class="border-b last:border-0 dark:border-gray-700">
-                                <td class="px-6 py-3 font-medium">{{ isRtl ? emp.name_ar : emp.name_en }}</td>
-                                <td class="px-6 py-3 text-gray-500">{{ emp.job_title?.name_ar || '-' }}</td>
+                    <table class="w-full text-sm">
+                        <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                            <tr v-for="emp in recentEmployees" :key="emp.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-gray-900 dark:text-white">{{ isRtl ? emp.name_ar : emp.name_en }}</span>
+                                        <span class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mt-0.5">{{ emp.employee_id || '#EMP-' + emp.id }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-end">
+                                    <span class="inline-flex px-2 py-0.5 rounded-md text-[10px] font-black bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 uppercase tracking-widest border border-gray-200 dark:border-gray-600">
+                                        {{ emp.job_title?.name_ar || '-' }}
+                                    </span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -122,6 +147,7 @@
 import { computed } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

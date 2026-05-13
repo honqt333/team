@@ -2,19 +2,23 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('nav.integrations') }}</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">متجر التطبيقات وإضافات النظام للربط مع الخدمات الخارجية</p>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('nav.integrations')"
+                subtitle="متجر التطبيقات وإضافات النظام للربط مع الخدمات الخارجية"
+                gradientFrom="from-indigo-500"
+                gradientTo="to-blue-600"
+                glowFrom="from-indigo-500"
+                badgeBg="bg-indigo-50/50 dark:bg-indigo-900/30"
+                badgeText="text-indigo-600 dark:text-indigo-400"
+                badgeBorder="border-indigo-100/50 dark:border-indigo-800/30"
+                badgeDot="bg-indigo-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Coming Soon Placeholder -->
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-12 text-center shadow-sm border border-gray-200 dark:border-gray-700">
@@ -34,6 +38,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();

@@ -2,147 +2,148 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-3 sm:gap-4">
-                    <!-- Title + Count -->
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-600 to-emerald-600 flex items-center justify-center shadow-lg shadow-teal-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{
-                                $t('services_management.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ totalServices }} {{ $t('services_management.total_count') }}
-                            </p>
+            <PageHeader
+                :title="$t('services_management.title')"
+                :subtitle="$t('services_management.subtitle')"
+                :totalCount="headerConfig.count"
+                :countLabel="headerConfig.countLabel"
+                :gradientFrom="headerConfig.gradientFrom"
+                :gradientTo="headerConfig.gradientTo"
+                :glowFrom="headerConfig.glowFrom"
+                :badgeBg="headerConfig.badgeBg"
+                :badgeText="headerConfig.badgeText"
+                :badgeBorder="headerConfig.badgeBorder"
+                :badgeDot="headerConfig.badgeDot"
+            >
+                <template #icon>
+                    <!-- Dynamic Icon based on Active Tab -->
+                    <svg v-if="activeTab === 'services'" :class="['w-8 h-8', headerConfig.badgeText]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <svg v-else-if="activeTab === 'packages'" :class="['w-8 h-8', headerConfig.badgeText]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    <svg v-else-if="activeTab === 'inspections'" :class="['w-8 h-8', headerConfig.badgeText]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                        <template v-if="activeTab === 'services'">
+                            <!-- Add Department Button -->
+                            <button v-if="can('services.departments.manage') || isAnyAdmin()" @click="openCreateDepartmentModal"
+                                class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-orange-200 dark:border-orange-700 text-orange-600 dark:text-orange-400 rounded-xl font-bold shadow-sm hover:shadow-md hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>{{ $t('departments.add') }}</span>
+                            </button>
+
+                            <!-- Add Service Button -->
+                            <button v-if="can('services.create') || isAnyAdmin()" @click="openCreateModal"
+                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-black shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 hover:-translate-y-0.5 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>{{ $t('services_management.add') }}</span>
+                            </button>
+                        </template>
+
+                        <template v-else-if="activeTab === 'packages'">
+                            <!-- Add Package Button -->
+                            <button v-if="can('services.create') || isAnyAdmin()" @click="openCreatePackageModal"
+                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>{{ $t('packages.add') }}</span>
+                            </button>
+                        </template>
+
+                        <template v-else-if="activeTab === 'inspections'">
+                            <!-- Add Inspection Button -->
+                            <button v-if="can('services.create') || isAnyAdmin()" @click="openCategoryModal()"
+                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>{{ $t('services_management.add_inspection_category') }}</span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="relative flex-1 group">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-teal-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                v-model="searchQuery"
+                                :placeholder="$t('services_management.search')"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all outline-none shadow-sm"
+                            />
                         </div>
                     </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Filter Tabs - Modern Compact Design -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap gap-3">
-                    <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
-                        'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
+            <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-md rounded-2xl p-2 shadow-sm border border-gray-100 dark:border-gray-700/50 flex flex-wrap gap-2">
+                <button 
+                    v-for="tab in tabs" 
+                    :key="tab.key" 
+                    @click="activeTab = tab.key" 
+                    :class="[
+                        'relative flex items-center gap-3 px-6 py-3 rounded-xl transition-all duration-300 group',
                         activeTab === tab.key
-                            ? 'text-white shadow-lg'
-                            : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700'
+                            ? 'text-white shadow-lg scale-[1.02]'
+                            : 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
                     ]"
-                        :style="activeTab === tab.key ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})` : ''">
-                        <!-- Icon -->
-                        <div :class="[
-                            'w-8 h-8 rounded-lg flex items-center justify-center',
-                            activeTab === tab.key
-                                ? 'bg-white/20'
-                                : tab.bgColor
-                        ]">
-                            <component :is="tab.icon" :class="[
-                                'w-4 h-4',
-                                activeTab === tab.key ? 'text-white' : tab.iconColor
-                            ]" />
-                        </div>
-
-                        <!-- Label & Count -->
-                        <div class="flex items-center gap-2">
-                            <span :class="[
-                                'font-medium text-sm',
-                                activeTab === tab.key ? 'text-white' : 'text-gray-700 dark:text-gray-300'
-                            ]">
-                                {{ tab.label }}
-                            </span>
-                            <span :class="[
-                                'px-2 py-0.5 rounded-full text-xs font-bold',
-                                activeTab === tab.key
-                                    ? 'bg-white/20 text-white'
-                                    : tab.bgColor + ' ' + tab.iconColor
-                            ]">
-                                {{ tab.count }}
-                            </span>
-                        </div>
-
-                        <!-- Selected Check -->
-                        <svg v-if="activeTab === tab.key" class="w-4 h-4 text-white/80" fill="currentColor"
-                            viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clip-rule="evenodd" />
+                    :style="activeTab === tab.key ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})` : ''"
+                >
+                    <!-- Icon Container -->
+                    <div :class="[
+                        'w-8 h-8 rounded-lg flex items-center justify-center transition-colors',
+                        activeTab === tab.key ? 'bg-white/20' : tab.bgColor
+                    ]">
+                        <!-- Services Icon -->
+                        <svg v-if="tab.key === 'services'" :class="['w-4 h-4', activeTab === tab.key ? 'text-white' : tab.iconColor]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                    </button>
-                </div>
-            </div>
-
-
-
-
-
-            <!-- Controls Row -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <!-- Search -->
-                <div class="relative">
-                    <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        <!-- Packages Icon -->
+                        <svg v-else-if="tab.key === 'packages'" :class="['w-4 h-4', activeTab === tab.key ? 'text-white' : tab.iconColor]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                        <!-- Inspections Icon -->
+                        <svg v-else-if="tab.key === 'inspections'" :class="['w-4 h-4', activeTab === tab.key ? 'text-white' : tab.iconColor]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
                     </div>
-                    <input type="text" v-model="searchQuery" :placeholder="$t('services_management.search')"
-                        class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all" />
-                </div>
 
-                <!-- Actions -->
-                <div class="flex items-center gap-3">
-                    <template v-if="activeTab === 'services'">
-                        <!-- Add Department Button -->
-                        <button v-if="can('services.departments.manage')" @click="openCreateDepartmentModal"
-                            class="flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-700 border border-orange-300 dark:border-orange-600 text-orange-600 dark:text-orange-400 rounded-xl font-medium hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>{{ $t('departments.add') }}</span>
-                        </button>
+                    <!-- Label & Count -->
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-sm tracking-tight">{{ tab.label }}</span>
+                        <span :class="[
+                            'px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider',
+                            activeTab === tab.key
+                                ? 'bg-white/20 text-white'
+                                : tab.bgColor + ' ' + tab.iconColor
+                        ]">
+                            {{ tab.count }}
+                        </span>
+                    </div>
 
-                        <!-- Add Service Button -->
-                        <button v-if="can('services.create')" @click="openCreateModal"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg shadow-teal-500/30 hover:shadow-xl hover:shadow-teal-500/40 hover:-translate-y-0.5 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>{{ $t('services_management.add') }}</span>
-                        </button>
-                    </template>
-                    <template v-else-if="activeTab === 'packages'">
-                        <!-- Add Package Button -->
-                        <button v-if="can('services.create')" @click="openCreatePackageModal"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>{{ $t('packages.add') }}</span>
-                        </button>
-                    </template>
-                    <template v-else-if="activeTab === 'inspections'">
-                        <!-- Add Inspection Button -->
-                        <button @click="openCategoryModal()"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>{{ $t('services_management.add_inspection_category') }}</span>
-                        </button>
-                    </template>
-                </div>
+                    <!-- Active Indicator Dot -->
+                    <div v-if="activeTab === tab.key" class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-sm"></div>
+                </button>
             </div>
 
             <!-- Services Tab Content -->
@@ -925,6 +926,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import ServiceFormModal from '@/Components/ServiceFormModal.vue';
 import PackageFormModal from '@/Components/PackageFormModal.vue';
 import ServiceQuickEditModal from '@/Components/ServiceQuickEditModal.vue';
@@ -940,7 +942,7 @@ const { t } = useI18n();
 const { confirm } = useConfirm();
 const { success, error } = useToast();
 const { getName } = useLocalized();
-const { can } = usePermission();
+const { can, isAnyAdmin } = usePermission();
 
 const props = defineProps({
     departments: {
@@ -1078,35 +1080,28 @@ const filteredConditionCategories = computed(() => {
 });
 
 // Tab Configuration
-const IconServices = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>` };
-const IconPackages = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>` };
-const IconInspections = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>` };
-
 const tabs = computed(() => [
     {
         key: 'services',
         label: t('services_management.title'),
-        icon: IconServices,
-        iconColor: 'text-indigo-500',
-        bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
-        gradientFrom: '#6366f1', // indigo-500
-        gradientTo: '#4f46e5',   // indigo-600
+        iconColor: 'text-teal-500',
+        bgColor: 'bg-teal-100 dark:bg-teal-900/30',
+        gradientFrom: '#0d9488', // teal-600
+        gradientTo: '#059669',   // emerald-600
         count: totalServices.value
     },
     {
         key: 'packages',
         label: t('packages.title'),
-        icon: IconPackages,
-        iconColor: 'text-purple-500',
-        bgColor: 'bg-purple-100 dark:bg-purple-900/30',
-        gradientFrom: '#a855f7', // purple-500
-        gradientTo: '#9333ea',   // purple-600
+        iconColor: 'text-indigo-500',
+        bgColor: 'bg-indigo-100 dark:bg-indigo-900/30',
+        gradientFrom: '#6366f1', // indigo-500
+        gradientTo: '#4f46e5',   // indigo-600
         count: props.packages?.length || 0
     },
     {
         key: 'inspections',
         label: t('services_management.inspections'),
-        icon: IconInspections,
         iconColor: 'text-amber-500',
         bgColor: 'bg-amber-100 dark:bg-amber-900/30',
         gradientFrom: '#f59e0b', // amber-500
@@ -1114,6 +1109,34 @@ const tabs = computed(() => [
         count: props.conditionCategories?.reduce((acc, cat) => acc + (cat.items?.length || 0), 0) || 0
     }
 ]);
+
+const headerConfig = computed(() => {
+    const activeTabData = tabs.value.find(t => t.key === activeTab.value) || tabs.value[0];
+    return {
+        ...activeTabData,
+        countLabel: activeTab.value === 'services' ? t('services_management.services') : 
+                   activeTab.value === 'packages' ? t('packages.items') : 
+                   t('services_management.inspections'),
+        glowFrom: activeTab.value === 'services' ? 'from-teal-600' :
+                  activeTab.value === 'packages' ? 'from-indigo-600' :
+                  'from-amber-600',
+        glowTo: activeTab.value === 'services' ? 'to-emerald-600' :
+                activeTab.value === 'packages' ? 'to-purple-600' :
+                'to-orange-600',
+        badgeBg: activeTab.value === 'services' ? 'bg-teal-50/50 dark:bg-teal-900/30' :
+                 activeTab.value === 'packages' ? 'bg-indigo-50/50 dark:bg-indigo-900/30' :
+                 'bg-amber-50/50 dark:bg-amber-900/30',
+        badgeText: activeTab.value === 'services' ? 'text-teal-600 dark:text-teal-400' :
+                   activeTab.value === 'packages' ? 'text-indigo-600 dark:text-indigo-400' :
+                   'text-amber-600 dark:text-amber-400',
+        badgeBorder: activeTab.value === 'services' ? 'border-teal-100/50 dark:border-teal-800/30' :
+                     activeTab.value === 'packages' ? 'border-indigo-100/50 dark:border-indigo-800/30' :
+                     'border-amber-100/50 dark:border-amber-800/30',
+        badgeDot: activeTab.value === 'services' ? 'bg-teal-500' :
+                  activeTab.value === 'packages' ? 'bg-indigo-500' :
+                  'bg-amber-500',
+    };
+});
 
 const availableServices = computed(() => {
     // Collect all services from departments

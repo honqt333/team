@@ -4,13 +4,25 @@
             <!-- Header Section -->
             <PageHeader
                 :title="pageTitle"
-                :subtitle="workOrders ? null : $t('work_orders.hub.subtitle')"
+                :subtitle="pageSubtitle"
                 :totalCount="workOrders ? toEnglish(workOrders.total) : null"
                 :countLabel="$t('work_orders.total_count')"
             >
+                <template #back v-if="statusFilter">
+                    <!-- Standard Back Button -->
+                    <Link :href="route('work-orders.index')"
+                        :title="$t('common.back')"
+                        class="p-2.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600">
+                        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </Link>
+                </template>
+
                 <template #icon>
                     <div class="w-full h-full flex items-center justify-center transition-all duration-500"
-                        :class="statusFilter ? (statusFilter === 'closed' ? 'bg-gradient-to-br from-slate-500 to-gray-600' : 'bg-gradient-to-br from-emerald-500 to-teal-600') : 'bg-gradient-to-br from-indigo-600 to-purple-600'">
+                        :class="statusFilter ? (statusFilter === 'closed' ? 'bg-gradient-to-br from-slate-500 to-gray-600' : 'bg-gradient-to-br from-blue-600 to-cyan-600') : 'bg-gradient-to-br from-indigo-600 to-purple-600'">
                         <svg v-if="statusFilter === 'closed'" class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -24,59 +36,63 @@
                 </template>
 
                 <template #actions v-if="statusFilter">
-                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
-                        <button v-if="can('crm.work_orders.export') || isAnyAdmin()" @click="exportWorkOrders"
-                            :disabled="exporting" :title="$t('common.export')"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </button>
-                        <button v-if="can('crm.work_orders.print') || isAnyAdmin()" @click="printWorkOrders"
-                            :title="$t('common.print')"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                        </button>
-
-                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
-
-                        <div class="flex gap-1.5">
-                            <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'grid'
-                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]">
+                    <div class="flex items-center gap-4">
+                        <!-- Actions Group -->
+                        <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                            <button v-if="can('crm.work_orders.export') || isAnyAdmin()" @click="exportWorkOrders"
+                                :disabled="exporting" :title="$t('common.export')"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </button>
-                            <button @click="viewMode = 'list'" :title="$t('common.list_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'list'
-                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]">
+                            <button v-if="can('crm.work_orders.print') || isAnyAdmin()" @click="printWorkOrders"
+                                :title="$t('common.print')"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                             </button>
+
+                            <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                            <div class="flex gap-1.5">
+                                <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'grid'
+                                            ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                    </svg>
+                                </button>
+                                <button @click="viewMode = 'list'" :title="$t('common.list_view')"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'list'
+                                            ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
+
+                        <!-- Create Button -->
+                        <button v-if="can('crm.work_orders.create') || isAnyAdmin()" @click="showCreateModal = true"
+                            class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add">
+                            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                            <span class="tracking-tight">{{ $t('work_orders.hub.new_card') }}</span>
+                        </button>
                     </div>
-
-                    <button v-if="can('crm.work_orders.create') || isAnyAdmin()" @click="showCreateModal = true"
-                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add">
-                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </div>
-                        <span class="text-sm tracking-tight">{{ $t('work_orders.add') }}</span>
-                    </button>
                 </template>
 
                 <template #filters v-if="statusFilter">
@@ -218,8 +234,8 @@
             <!-- List/Grid View Section (visible only when status filter is active) -->
             <div v-if="statusFilter" class="space-y-6">
 
-                <!-- Filter Tabs (only for open status) -->
-                <div v-if="statusFilter === 'open'" class="flex flex-wrap gap-3">
+                <!-- Filter Tabs (for open and closed status) -->
+                <div v-if="statusFilter === 'open' || statusFilter === 'closed'" class="flex flex-wrap gap-3">
                 <button
                     v-for="tab in filterTabs"
                     :key="tab.key"
@@ -707,7 +723,7 @@
 
 <script setup>
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -780,6 +796,11 @@ const pageTitle = computed(() => {
     return props.statusFilter === 'closed' ? t('work_orders.list.closed_title') : t('work_orders.list.open_title');
 });
 
+const pageSubtitle = computed(() => {
+    if (!props.statusFilter) return t('work_orders.hub.subtitle');
+    return props.statusFilter === 'closed' ? t('work_orders.list.closed_subtitle') : t('work_orders.list.open_subtitle');
+});
+
 // Infinite Scroll Refs
 const allWorkOrders = ref(props.workOrders?.data || []);
 const nextPageUrl = ref(props.workOrders?.next_page_url);
@@ -848,51 +869,103 @@ const IconOpen = { template: `<svg fill="none" stroke="currentColor" viewBox="0 
 const IconDraft = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>` };
 const IconOverdue = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
 const IconPending = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
+const IconDone = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>` };
+const IconBadDebt = { template: `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>` };
 
-const filterTabs = computed(() => [
-    { 
-        key: 'in_progress', 
-        label: t('work_orders.filters.open'), 
-        icon: IconOpen, 
-        iconColor: 'text-emerald-500', 
-        bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
-        gradientFrom: '#10b981',
-        gradientTo: '#059669',
-        count: props.filterCounts.open || 0 
-    },
-    { 
-        key: 'draft', 
-        label: t('work_orders.filters.draft'), 
-        icon: IconDraft, 
-        iconColor: 'text-slate-500', 
-        bgColor: 'bg-slate-100 dark:bg-slate-900/30',
-        gradientFrom: '#64748b',
-        gradientTo: '#475569',
-        count: props.filterCounts.draft || 0 
-    },
-    { 
-        key: 'overdue', 
-        label: t('work_orders.filters.overdue'), 
-        icon: IconOverdue, 
-        iconColor: 'text-red-500', 
-        bgColor: 'bg-red-100 dark:bg-red-900/30',
-        gradientFrom: '#ef4444',
-        gradientTo: '#dc2626',
-        count: props.filterCounts.overdue || 0 
-    },
-    { 
-        key: 'pending_payment', 
-        label: t('work_orders.filters.pending_payment'), 
-        icon: IconPending, 
-        iconColor: 'text-amber-500', 
-        bgColor: 'bg-amber-100 dark:bg-amber-900/30',
-        gradientFrom: '#f59e0b',
-        gradientTo: '#d97706',
-        count: props.filterCounts.pending_payment || 0 
-    },
-]);
+const filterTabs = computed(() => {
+    if (props.statusFilter === 'closed') {
+        return [
+            { 
+                key: 'closed', 
+                label: t('work_orders.filters.closed_cards'), 
+                icon: IconDone, 
+                iconColor: 'text-slate-500', 
+                bgColor: 'bg-slate-100 dark:bg-slate-900/30',
+                gradientFrom: '#64748b',
+                gradientTo: '#475569',
+                count: props.filterCounts.closed || 0 
+            },
+            { 
+                key: 'credit_invoices', 
+                label: t('work_orders.filters.credit_invoices'), 
+                icon: IconPending, 
+                iconColor: 'text-orange-500', 
+                bgColor: 'bg-orange-100 dark:bg-orange-900/30',
+                gradientFrom: '#f97316',
+                gradientTo: '#ea580c',
+                count: props.filterCounts.credit_invoices || 0 
+            },
+            { 
+                key: 'bad_debts', 
+                label: t('work_orders.filters.bad_debts'), 
+                icon: IconBadDebt, 
+                iconColor: 'text-red-600', 
+                bgColor: 'bg-red-100 dark:bg-red-900/30',
+                gradientFrom: '#dc2626',
+                gradientTo: '#b91c1c',
+                count: props.filterCounts.bad_debts || 0 
+            },
+            { 
+                key: 'cancelled', 
+                label: t('work_orders.filters.cancelled_cards'), 
+                icon: IconDraft, 
+                iconColor: 'text-gray-500', 
+                bgColor: 'bg-gray-100 dark:bg-gray-900/30',
+                gradientFrom: '#9ca3af',
+                gradientTo: '#6b7280',
+                count: props.filterCounts.cancelled || 0 
+            },
+        ];
+    }
 
-const currentSubFilter = computed(() => props.subFilter || 'in_progress');
+    return [
+        { 
+            key: 'in_progress', 
+            label: t('work_orders.filters.open'), 
+            icon: IconOpen, 
+            iconColor: 'text-blue-500', 
+            bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+            gradientFrom: '#3b82f6',
+            gradientTo: '#2563eb',
+            count: props.filterCounts.open || 0 
+        },
+        { 
+            key: 'draft', 
+            label: t('work_orders.filters.draft'), 
+            icon: IconDraft, 
+            iconColor: 'text-slate-500', 
+            bgColor: 'bg-slate-100 dark:bg-slate-900/30',
+            gradientFrom: '#64748b',
+            gradientTo: '#475569',
+            count: props.filterCounts.draft || 0 
+        },
+        { 
+            key: 'overdue', 
+            label: t('work_orders.filters.overdue'), 
+            icon: IconOverdue, 
+            iconColor: 'text-red-500', 
+            bgColor: 'bg-red-100 dark:bg-red-900/30',
+            gradientFrom: '#ef4444',
+            gradientTo: '#dc2626',
+            count: props.filterCounts.overdue || 0 
+        },
+        { 
+            key: 'pending_payment', 
+            label: t('work_orders.filters.pending_payment'), 
+            icon: IconPending, 
+            iconColor: 'text-amber-500', 
+            bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+            gradientFrom: '#f59e0b',
+            gradientTo: '#d97706',
+            count: props.filterCounts.pending_payment || 0 
+        },
+    ];
+});
+
+const currentSubFilter = computed(() => {
+    if (props.subFilter) return props.subFilter;
+    return props.statusFilter === 'closed' ? 'closed' : 'in_progress';
+});
 
 
 const resetFilters = () => {
@@ -1031,7 +1104,7 @@ function getStatusClass(status) {
     const classes = {
         draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
         open: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
-        in_progress: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300',
+        in_progress: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
         done: 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300',
         cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
     };
@@ -1130,7 +1203,7 @@ function getStatusGradient(status) {
     const classes = {
         draft: 'from-gray-400 to-gray-500',
         open: 'from-blue-400 to-blue-500',
-        in_progress: 'from-amber-400 to-amber-500',
+        in_progress: 'from-indigo-400 to-indigo-500',
         done: 'from-emerald-400 to-emerald-500',
         cancelled: 'from-red-400 to-red-500',
     };

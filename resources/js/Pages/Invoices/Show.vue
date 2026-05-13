@@ -2,34 +2,57 @@
     <AppLayout :title="`${$t('invoices.invoice')} #${invoice.invoice_number}`">
         <div class="space-y-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex items-center gap-3">
-                        <Link :href="route('app.invoices.hub')" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </Link>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                                {{ $t('invoices.invoice') }} #{{ invoice.invoice_number }}
-                            </h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                {{ formatDate(invoice.issue_date) }}
-                            </p>
+            <div class="relative group">
+                <!-- Background Glow -->
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-[2.25rem] blur opacity-[0.04] group-hover:opacity-[0.08] transition duration-700"></div>
+
+                <div class="relative bg-white dark:bg-gray-800 rounded-[2rem] p-6 shadow-sm border border-gray-100 dark:border-gray-700/50">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                        <div class="flex items-center gap-5">
+                            <!-- Back Button -->
+                            <Link :href="route('app.invoices.hub')"
+                                :title="$t('common.back')"
+                                class="p-2.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600">
+                                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                            </Link>
+
+                            <!-- Icon -->
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 shadow-xl shadow-blue-500/20 flex items-center justify-center text-white shrink-0 ring-4 ring-gray-50 dark:ring-gray-900/20">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+
+                            <!-- Title Info -->
+                            <div>
+                                <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                                    {{ $t('invoices.invoice') }} #{{ invoice.invoice_number }}
+                                </h1>
+                                <div class="flex items-center gap-3 mt-1.5">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                        {{ formatDate(invoice.issue_date) }}
+                                    </p>
+                                    <div class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+                                    <span :class="statusClass(invoice.payment_status)" class="px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider">
+                                        {{ $t(`invoices.status.${invoice.payment_status}`) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-3">
+                            <Link :href="route('app.invoices.print', invoice.id)" target="_blank"
+                                class="flex items-center gap-2.5 px-6 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-white rounded-2xl font-bold border border-gray-100 dark:border-gray-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                </svg>
+                                <span>{{ $t('invoices.print') }}</span>
+                            </Link>
                         </div>
                     </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <span :class="statusClass(invoice.payment_status)" class="inline-flex px-3 py-1.5 rounded-full text-sm font-medium">
-                        {{ $t(`invoices.status.${invoice.payment_status}`) }}
-                    </span>
-                    <Link :href="route('app.invoices.print', invoice.id)" target="_blank" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                        </svg>
-                        {{ $t('invoices.print') }}
-                    </Link>
                 </div>
             </div>
 

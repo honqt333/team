@@ -2,63 +2,58 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Back Button & Header Section -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <!-- Back Button -->
-                        <Link href="/app/settings"
-                            class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-                            <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            {{ $t('common.back') }}
-                        </Link>
+            <PageHeader
+                :title="$t('company_profile.title')"
+                :subtitle="$t('company_profile.subtitle')"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-600"
+                glowFrom="from-emerald-500"
+                badgeBg="bg-emerald-50/50 dark:bg-emerald-900/30"
+                badgeText="text-emerald-600 dark:text-emerald-400"
+                badgeBorder="border-emerald-100/50 dark:border-emerald-800/30"
+                badgeDot="bg-emerald-500"
+            >
+                <template #back>
+                    <Link href="/app/settings"
+                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
+                        :title="$t('common.back')">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                </template>
 
-                        <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </template>
 
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('company_profile.title')
-                            }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('company_profile.subtitle') }}</p>
-                        </div>
-                    </div>
-                    <span
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <template #filters>
+                    <nav class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                        <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" 
+                            class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest transition-all relative group shrink-0"
+                            :class="activeTab === tab.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'"
+                        >
+                            {{ tab.label }}
+                            <div v-if="activeTab === tab.id" class="absolute bottom-0 left-0 w-full h-1 bg-emerald-600 dark:bg-emerald-400 rounded-t-full shadow-[0_-2px_8px_rgba(16,185,129,0.4)]"></div>
+                        </button>
+                    </nav>
+                </template>
+
+                <template #actions>
+                    <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-black uppercase tracking-wider bg-emerald-50/50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-800/30">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8.5 12.5l-2-2 1-1 1 1 3-3 1 1-4 4z" />
                         </svg>
                         {{ $t('company_profile.tenant_level') }}
                     </span>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
-            <!-- Tabs Navigation -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="border-b border-gray-200 dark:border-gray-700">
-                    <nav class="flex -mb-px overflow-x-auto" aria-label="Tabs">
-                        <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" :class="[
-                            activeTab === tab.id
-                                ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
-                            'whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors'
-                        ]">
-                            {{ tab.label }}
-                        </button>
-                    </nav>
-                </div>
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 overflow-hidden">
+                <div class="p-8">
 
-                <!-- Tab Content -->
-                <div class="p-6">
                     <!-- Entity Profile Tab -->
                     <div v-if="activeTab === 'profile'" class="space-y-6">
                         <!-- Logo + Company Summary Row -->
@@ -886,10 +881,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import L from 'leaflet';

@@ -2,65 +2,65 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <Link :href="route('app.hr.index')"
-                            class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 rtl:rotate-180" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </Link>
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-500 to-slate-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('hr.settings.title') }}
-                            </h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('hr.settings.subtitle') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('hr.settings.title')"
+                :subtitle="$t('hr.settings.subtitle')"
+                gradientFrom="from-slate-600"
+                gradientTo="to-gray-700"
+                glowFrom="from-slate-500"
+                badgeBg="bg-slate-50/50 dark:bg-slate-900/30"
+                badgeText="text-slate-600 dark:text-slate-400"
+                badgeBorder="border-slate-100/50 dark:border-slate-800/30"
+                badgeDot="bg-slate-500"
+            >
+                <template #back>
+                    <Link :href="route('app.hr.index')"
+                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-900/20 text-slate-600 dark:text-slate-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
+                        :title="$t('common.back')">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                </template>
 
-            <!-- Tabs -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="border-b border-gray-200 dark:border-gray-700">
-                    <nav class="flex -mb-px overflow-x-auto">
-                        <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" :class="[
-                            'px-6 py-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                            activeTab === tab.key
-                                ? 'border-violet-500 text-violet-600 dark:text-violet-400'
-                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300'
-                        ]">
-                            {{ tab.icon }} {{ tab.label }}
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </template>
+
+                <template #filters>
+                    <nav class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+                        <button v-for="tab in tabs" :key="tab.key" @click="activeTab = tab.key" 
+                            class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest transition-all relative group shrink-0"
+                            :class="activeTab === tab.key ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'"
+                        >
+                            <span class="text-base">{{ tab.icon }}</span>
+                            {{ tab.label }}
+                            <div v-if="activeTab === tab.key" class="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-t-full shadow-[0_-2px_8px_rgba(79,70,229,0.4)]"></div>
                         </button>
                     </nav>
-                </div>
+                </template>
+            </PageHeader>
 
-                <div class="p-6">
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700/50 overflow-hidden">
+                <div class="p-8">
+
                     <!-- Employee Types Tab -->
                     <div v-show="activeTab === 'employee_types'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
                                 $t('hr.settings.employee_types.title') }}</h3>
                             <button @click="openModal('employee_type')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add">
+                                <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -76,12 +76,13 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
                                 $t('hr.settings.job_titles.title') }}</h3>
                             <button @click="openModal('job_title')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add">
+                                <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -97,12 +98,13 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
                                 $t('hr.settings.allowances.title') }}</h3>
                             <button @click="openModal('allowance')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-black shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all group/add">
+                                <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -118,12 +120,13 @@
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{
                                 $t('hr.settings.deductions.title') }}</h3>
                             <button @click="openModal('deduction')"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white rounded-2xl font-black shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-0.5 transition-all group/add">
+                                <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -143,12 +146,13 @@
                                     $t('hr.settings.biometric_devices.subtitle') }}</p>
                             </div>
                             <button @click="openDeviceModal()"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add">
+                                <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -217,12 +221,13 @@
                                 }}</p>
                             </div>
                             <button @click="openShiftModal()"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add">
+                                <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <span class="tracking-tight uppercase">{{ $t('common.add') }}</span>
                             </button>
                         </div>
 
@@ -408,12 +413,13 @@
                                     $t('hr.settings.regulations.subtitle') }}</p>
                             </div>
                             <button @click="openRegulationModal()"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('hr.settings.regulations.add') }}
+                                class="inline-flex items-center justify-center gap-3 px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all group/add">
+                                <div class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                </div>
+                                <span class="tracking-tight uppercase">{{ $t('hr.settings.regulations.add') }}</span>
                             </button>
                         </div>
 
@@ -638,16 +644,19 @@ import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import SettingsTable from '@/Components/HR/SettingsTable.vue';
 import HRSettingModal from '@/Components/HR/HRSettingModal.vue';
 import RegulationModal from '@/Components/HR/RegulationModal.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
+import { usePermission } from '@/Composables/usePermission';
 
 const { t } = useI18n();
 const { success } = useToast();
 const { confirm } = useConfirm();
+const { can, isAnyAdmin } = usePermission();
 
 const props = defineProps({
     employeeTypes: Array,

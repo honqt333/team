@@ -2,108 +2,142 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg text-white">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{
-                                $t('purchasing.suppliers.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('purchasing.suppliers.subtitle')
-                                }}</p>
-                        </div>
-                    </div>
+            <PageHeader
+                :title="$t('purchasing.suppliers.title')"
+                :subtitle="$t('purchasing.suppliers.subtitle')"
+                :totalCount="suppliers.total"
+                :countLabel="$t('purchasing.suppliers.title')"
+                gradientFrom="from-orange-600"
+                gradientTo="to-red-700"
+                glowFrom="from-orange-500"
+                badgeBg="bg-orange-50/50 dark:bg-orange-900/30"
+                badgeText="text-orange-600 dark:text-orange-400"
+                badgeBorder="border-orange-100/50 dark:border-orange-800/30"
+                badgeDot="bg-orange-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                </template>
 
-                    <div class="flex items-center gap-3">
-                        <!-- View Toggle -->
-                        <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                            <button @click="viewMode = 'grid'" :class="[
-                                'p-2 rounded-md transition-all',
-                                viewMode === 'grid'
-                                    ? 'bg-white dark:bg-gray-600 text-orange-600 shadow-sm'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                            ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </button>
-                            <button @click="viewMode = 'list'" :class="[
-                                'p-2 rounded-md transition-all',
-                                viewMode === 'list'
-                                    ? 'bg-white dark:bg-gray-600 text-orange-600 shadow-sm'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                            ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Export/Print Buttons -->
-                        <div class="flex gap-2">
-                            <!-- Export -->
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <!-- Export/Print Group -->
+                        <div class="flex items-center gap-1">
                             <button @click="exportSuppliers" :disabled="exporting"
-                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
+                                class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
                                 :title="$t('common.export')">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </button>
-                            <!-- Print -->
                             <button @click="printSuppliers"
-                                class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+                                class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
                                 :title="$t('common.print')">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                             </button>
                         </div>
 
-                        <button v-if="can('purchasing.suppliers.create')" @click="createSupplier"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span class="hidden sm:inline">{{ $t('purchasing.suppliers.add') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                        <!-- Divider -->
+                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
-            <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="flex-1 min-w-[200px]">
-                        <div class="relative">
-                            <input v-model="localFilters.search" type="text"
-                                :placeholder="$t('purchasing.suppliers.search_placeholder')"
-                                class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500"
-                                @input="debouncedSearch" />
-                            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                        <!-- View Toggle Group -->
+                        <div class="flex items-center gap-1">
+                            <button 
+                                @click="viewMode = 'grid'"
+                                :title="$t('common.grid_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'grid'
+                                        ? 'bg-orange-600 text-white shadow-orange-500/20'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
+                                </svg>
+                            </button>
+                            <button 
+                                @click="viewMode = 'list'"
+                                :title="$t('common.list_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'list'
+                                        ? 'bg-orange-600 text-white shadow-orange-500/20'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    <div class="w-48">
-                        <SearchableSelect v-model="localFilters.status" :options="statusOptions" option-label="label"
-                            option-value="value" :placeholder="$t('common.all')" :label="''" @change="applyFilters" />
+
+                    <!-- Add Supplier Button -->
+                    <button
+                        v-if="can('purchasing.suppliers.create') || isAnyAdmin()"
+                        @click="createSupplier"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-2xl font-black shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:-translate-y-0.5 transition-all group/add"
+                    >
+                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <span class="text-sm tracking-tight">{{ $t('purchasing.suppliers.add') }}</span>
+                    </button>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <!-- Search Box -->
+                        <div class="relative group flex-1 w-full">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-orange-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                v-model="localFilters.search"
+                                type="text"
+                                :placeholder="$t('purchasing.suppliers.search_placeholder')"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all outline-none shadow-sm placeholder-gray-400"
+                                @input="debouncedSearch"
+                            />
+                        </div>
+
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <!-- Status Filter -->
+                            <div class="w-full md:w-48">
+                                <SearchableSelect
+                                    v-model="localFilters.status"
+                                    :options="statusOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('common.all')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Reset Button -->
+                            <button 
+                                @click="resetFilters"
+                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- GRID VIEW -->
             <div v-if="viewMode === 'grid'" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
@@ -139,10 +173,10 @@
                                 </div>
 
                                 <span :class="[
-                                    'mt-1.5 ms-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest uppercase border',
+                                    'mt-1.5 ms-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[9px] font-black tracking-widest uppercase border shadow-sm transition-all',
                                     supplier.is_active
-                                        ? 'bg-emerald-50/50 text-emerald-700 border-emerald-100/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30'
-                                        : 'bg-gray-50/50 text-gray-600 border-gray-100/50 dark:bg-gray-800/30 dark:text-gray-400 dark:border-gray-700/30'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/30'
+                                        : 'bg-gray-50 text-gray-600 border-gray-100 dark:bg-gray-800/30 dark:text-gray-400 dark:border-gray-700/30'
                                 ]">
                                     {{ supplier.is_active ? $t('common.active') : $t('common.inactive') }}
                                 </span>
@@ -302,10 +336,10 @@
                                 </td>
                                 <td class="px-4 py-3 text-end">
                                     <span :class="[
-                                        'inline-flex px-2 py-1 rounded-full text-xs font-medium',
+                                        'inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm transition-all',
                                         supplier.is_active
-                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                                            : 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300'
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/30'
+                                            : 'bg-gray-50 text-gray-600 border-gray-100 dark:bg-gray-800/30 dark:text-gray-400 dark:border-gray-700/30'
                                     ]">
                                         {{ supplier.is_active ? $t('common.active') : $t('common.inactive') }}
                                     </span>
@@ -425,6 +459,7 @@ import CreateModal from './CreateModal.vue';
 import { useI18n } from 'vue-i18n';
 import { usePermission } from '@/Composables/usePermission';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 
 const props = defineProps({
     suppliers: Object,
@@ -433,7 +468,7 @@ const props = defineProps({
 
 const page = usePage();
 const { t, locale } = useI18n();
-const { can } = usePermission();
+const { can, isAnyAdmin } = usePermission();
 
 const isRtl = computed(() => locale.value === 'ar');
 const exporting = ref(false);
@@ -477,6 +512,12 @@ const applyFilters = () => {
 };
 
 const debouncedSearch = debounce(applyFilters, 300);
+
+const resetFilters = () => {
+    localFilters.value.search = '';
+    localFilters.value.status = '';
+    applyFilters();
+};
 
 function formatCurrency(value) {
     if (!value && value !== 0) return '-';

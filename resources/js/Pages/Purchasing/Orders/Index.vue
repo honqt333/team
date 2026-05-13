@@ -2,50 +2,107 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <PageHeader
+                :title="$t('purchasing.orders.title')"
+                :subtitle="$t('purchasing.orders.subtitle')"
+                :totalCount="orders.total"
+                :countLabel="$t('purchasing.orders.title')"
+                gradientFrom="from-blue-600"
+                gradientTo="to-indigo-700"
+                glowFrom="from-blue-500"
+                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
+                badgeText="text-blue-600 dark:text-blue-400"
+                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
+                badgeDot="bg-blue-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <!-- Export/Print Group -->
+                        <div class="flex items-center gap-1">
+                            <button @click="exportOrders"
+                                class="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
+                                :title="$t('common.export')">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </button>
+                            <button @click="printOrders"
+                                class="p-2.5 text-gray-500 hover:text-blue-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
+                                :title="$t('common.print')">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Create Order Button -->
+                    <button
+                        v-if="can('purchasing.pos.create') || isAnyAdmin()"
+                        @click="openCreateModal"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add"
+                    >
+                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
                             </svg>
                         </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{
-                                $t('purchasing.orders.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('purchasing.orders.subtitle') }}
-                            </p>
+                        <span class="text-sm tracking-tight">{{ $t('purchasing.orders.add') }}</span>
+                    </button>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <!-- Search Box -->
+                        <div class="relative group flex-1 w-full">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                v-model="localFilters.search"
+                                type="text"
+                                :placeholder="$t('purchasing.orders.search_placeholder')"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none shadow-sm placeholder-gray-400"
+                                @input="debouncedSearch"
+                            />
+                        </div>
+
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <!-- Status Filter -->
+                            <div class="w-full md:w-56">
+                                <SearchableSelect
+                                    v-model="localFilters.status"
+                                    :options="statusOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('purchasing.orders.all_statuses')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Reset Button -->
+                            <button 
+                                @click="resetFilters"
+                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    <button v-if="can('purchasing.pos.create')" @click="openCreateModal"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        <span class="hidden sm:inline">{{ $t('purchasing.orders.add') }}</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="flex-1 min-w-[200px]">
-                        <input v-model="localFilters.search" type="text"
-                            :placeholder="$t('purchasing.orders.search_placeholder')"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                            @input="debouncedSearch" />
-                    </div>
-                    <div class="w-64">
-                        <SearchableSelect v-model="localFilters.status" :options="statusOptions" option-label="label"
-                            option-value="value" :placeholder="$t('purchasing.orders.all_statuses')" :label="''"
-                            @change="applyFilters" />
-                    </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Orders Table -->
             <div
@@ -132,11 +189,13 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import PurchaseOrderFormModal from '@/Components/Purchasing/PurchaseOrderFormModal.vue';
+import { usePermission } from '@/Composables/usePermission';
 
 const { t } = useI18n();
 const page = usePage();
-const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
+const { can, isAnyAdmin } = usePermission();
 
 const props = defineProps({
     orders: Object,
@@ -161,6 +220,20 @@ const applyFilters = () => {
 
 const debouncedSearch = debounce(applyFilters, 300);
 
+const resetFilters = () => {
+    localFilters.value.search = '';
+    localFilters.value.status = '';
+    applyFilters();
+};
+
+const exportOrders = () => {
+    // Implement export if needed
+};
+
+const printOrders = () => {
+    window.print();
+};
+
 const formatDate = (date) => new Date(date).toLocaleDateString('ar-SA');
 
 const formatCurrency = (value) => new Intl.NumberFormat('ar-SA', {
@@ -181,13 +254,13 @@ const getStatusLabel = (status) => {
 
 const getStatusBadgeClass = (status) => {
     const classes = {
-        'draft': 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300',
-        'sent': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-        'partial': 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
-        'received': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-        'cancelled': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+        'draft': 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800/50 dark:text-gray-400 dark:border-gray-700',
+        'sent': 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/30',
+        'partial': 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800/30',
+        'received': 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/30',
+        'cancelled': 'bg-red-50 text-red-700 border-red-100 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/30',
     };
-    return `inline-flex px-2 py-1 rounded-full text-xs font-medium ${classes[status] || 'bg-gray-100'}`;
+    return `inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm ${classes[status] || 'bg-gray-100'}`;
 };
 
 const statusOptions = computed(() => {

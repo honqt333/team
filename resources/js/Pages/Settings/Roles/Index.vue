@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { Head, router, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue';
 import RoleFormModal from './RoleFormModal.vue';
@@ -67,40 +68,50 @@ const deleteRole = () => {
         <div class="space-y-6">
 
 
-            <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                    <div class="flex items-center gap-4">
+            <PageHeader
+                :title="t('roles.title')"
+                :subtitle="t('roles.page_description')"
+                gradientFrom="from-pink-500"
+                gradientTo="to-rose-600"
+                glowFrom="from-pink-500"
+                badgeBg="bg-pink-50/50 dark:bg-pink-900/30"
+                badgeText="text-pink-600 dark:text-pink-400"
+                badgeBorder="border-pink-100/50 dark:border-pink-800/30"
+                badgeDot="bg-pink-500"
+            >
+                <template #back>
+                    <Link :href="route('settings.index')"
+                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-pink-50 dark:hover:bg-pink-900/20 text-pink-600 dark:text-pink-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
+                        :title="$t('common.back')">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                </template>
 
-                         <Link :href="route('settings.index')" class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                            </svg>
-                        </Link>
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-500 to-rose-600 flex items-center justify-center shadow-lg shadow-pink-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ t('roles.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('roles.page_description') }}</p>
-                        </div>
-                    </div>
-                    
-                    <button
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <button 
                         @click="openCreateModal"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all"
+                        class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-pink-500/25 active:scale-95 overflow-hidden"
                     >
-                        <svg class="-ml-1 mr-2 h-5 w-5 rtl:ml-2 rtl:mr-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>
-                        <span class="hidden sm:inline">{{ t('roles.add') }}</span>
+                        <span class="relative hidden sm:inline">{{ t('roles.add') }}</span>
                     </button>
-                </div>
-                
-                <UserManagementTabs active-tab="roles" class="mt-6" />
-            </div>
+                </template>
+
+                <template #filters>
+                    <UserManagementTabs active-tab="roles" />
+                </template>
+            </PageHeader>
 
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

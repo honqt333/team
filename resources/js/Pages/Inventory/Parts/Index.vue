@@ -1,97 +1,139 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('inventory.parts.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.subtitle') }}</p>
-                        </div>
-                    </div>
-                <div class="flex items-center gap-3">
-                    <!-- View Toggle -->
-                    <div class="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg flex items-center">
-                        <button 
-                            @click="toggleView('list')"
-                            :class="['p-1.5 rounded-md transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
-                            title="List View"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                            </svg>
-                        </button>
-                        <button 
-                            @click="toggleView('grid')"
-                            :class="['p-1.5 rounded-md transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow-sm text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200']"
-                            title="Grid View"
-                        >
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                            </svg>
-                        </button>
-                    </div>
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('inventory.parts.title')"
+                :subtitle="$t('inventory.parts.subtitle')"
+                :totalCount="parts.total"
+                :countLabel="$t('inventory.parts.title')"
+                gradientFrom="from-blue-600"
+                gradientTo="to-indigo-700"
+                glowFrom="from-blue-500"
+                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
+                badgeText="text-blue-600 dark:text-blue-400"
+                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
+                badgeDot="bg-blue-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                </template>
 
-                    <button
-                        v-if="can('inventory.parts.create')"
-                        @click="createPart"
-                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span class="hidden sm:inline">{{ $t('inventory.parts.add') }}</span>
-                    </button>
-                </div>
-                </div>
-            </div>
+                <template #actions>
+                    <div class="flex items-center gap-3">
+                        <!-- Actions Glass Container -->
+                        <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                            <button 
+                                @click="toggleView('grid')"
+                                :title="$t('common.grid_view')"
+                                :class="[
+                                    'p-2 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'grid'
+                                        ? 'bg-blue-600 text-white shadow-blue-500/20'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                                </svg>
+                            </button>
+                            <button 
+                                @click="toggleView('list')"
+                                :title="$t('common.list_view')"
+                                :class="[
+                                    'p-2 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'list'
+                                        ? 'bg-blue-600 text-white shadow-blue-500/20'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
+                        </div>
 
-            <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="flex-1 min-w-[200px]">
-                        <input
-                            v-model="localFilters.search"
-                            type="text"
-                            :placeholder="$t('inventory.parts.search_placeholder')"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                            @input="debouncedSearch"
-                        />
+                        <!-- Add Part Button -->
+                        <button
+                            v-if="can('inventory.parts.create') || isAnyAdmin()"
+                            @click="createPart"
+                            class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add"
+                        >
+                            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm tracking-tight">{{ $t('inventory.parts.add') }}</span>
+                        </button>
                     </div>
-                    <div class="w-48">
-                        <SearchableSelect
-                            v-model="localFilters.status"
-                            :options="[
-                                {value: '', label: $t('common.all')},
-                                {value: 'active', label: $t('common.active')},
-                                {value: 'inactive', label: $t('common.inactive')}
-                            ]"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('common.all')"
-                            :label="''"
-                            @change="applyFilters"
-                        />
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <!-- Search Box -->
+                        <div class="relative group flex-1 w-full">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                v-model="localFilters.search"
+                                type="text"
+                                :placeholder="$t('inventory.parts.search_placeholder')"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none shadow-sm placeholder-gray-400"
+                                @input="debouncedSearch"
+                            />
+                        </div>
+
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <!-- Status Filter -->
+                            <div class="w-full md:w-48">
+                                <SearchableSelect
+                                    v-model="localFilters.status"
+                                    :options="[
+                                        {value: '', label: $t('common.all')},
+                                        {value: 'active', label: $t('common.active')},
+                                        {value: 'inactive', label: $t('common.inactive')}
+                                    ]"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('common.status')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Category Filter -->
+                            <div class="w-full md:w-64" v-if="categories.length">
+                                <SearchableSelect
+                                    v-model="localFilters.category"
+                                    :options="computedCategories"
+                                    option-label="name"
+                                    option-value="id"
+                                    :placeholder="$t('inventory.parts.all_categories')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Reset Button -->
+                            <button 
+                                @click="resetFilters"
+                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="w-64" v-if="categories.length">
-                        <SearchableSelect
-                            v-model="localFilters.category"
-                            :options="computedCategories"
-                            option-label="name"
-                            option-value="id"
-                            :placeholder="$t('inventory.parts.all_categories')"
-                            :label="''"
-                            @change="applyFilters"
-                        />
-                    </div>
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Parts Table -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -351,6 +393,7 @@ import { ref, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { debounce } from 'lodash-es';
 import CreateModal from './CreateModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -373,7 +416,7 @@ const props = defineProps({
 
 const page = usePage();
 const { t, locale } = useI18n();
-const { can } = usePermission();
+const { can, isAnyAdmin } = usePermission();
 const { formatQuantity, formatCurrency } = useNumberFormat();
 
 const computedCategories = computed(() => {
@@ -423,6 +466,13 @@ const applyFilters = () => {
         category: localFilters.value.category || undefined,
         status: localFilters.value.status || undefined,
     }, { preserveState: true, preserveScroll: true });
+};
+
+const resetFilters = () => {
+    localFilters.value.search = '';
+    localFilters.value.category = '';
+    localFilters.value.status = '';
+    applyFilters();
 };
 
 const debouncedSearch = debounce(applyFilters, 300);

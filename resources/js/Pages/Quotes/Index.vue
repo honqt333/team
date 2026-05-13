@@ -2,129 +2,133 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Section -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-3 sm:gap-4">
-                    <!-- Title + Count -->
-                    <div class="flex items-center gap-4">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30 text-white">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('quotes.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ toEnglish(quotes?.total || 0) }} {{
-                                $t('quotes.total_count') }}</p>
+            <PageHeader
+                :title="$t('quotes.title')"
+                :subtitle="$t('quotes.subtitle')"
+                :totalCount="quotes ? toEnglish(quotes.total) : null"
+                :countLabel="$t('quotes.total_count')"
+                gradientFrom="from-amber-500"
+                gradientTo="to-orange-600"
+                glowFrom="from-amber-500"
+                glowTo="to-orange-600"
+                badgeBg="bg-amber-50/50 dark:bg-amber-900/30"
+                badgeText="text-amber-600 dark:text-amber-400"
+                badgeBorder="border-amber-100/50 dark:border-amber-800/30"
+                badgeDot="bg-amber-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <div class="flex gap-1.5">
+                            <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'grid'
+                                        ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                </svg>
+                            </button>
+                            <button @click="viewMode = 'list'" :title="$t('common.list_view')"
+                                :class="[
+                                    'p-2.5 rounded-xl transition-all shadow-sm',
+                                    viewMode === 'list'
+                                        ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
+                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                ]">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Actions Row -->
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        <!-- Search -->
-                        <div class="relative">
-                            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
+                    <button v-if="can('quotes.create')" @click="openCreateModal"
+                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all group/add">
+                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                            </svg>
+                        </div>
+                        <span class="text-sm tracking-tight">{{ $t('quotes.add') }}</span>
+                    </button>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col gap-6">
+                        <!-- Search Bar -->
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-amber-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <input type="text" v-model="searchQuery" :placeholder="$t('quotes.search')"
-                                class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all" />
+                            <input type="text" v-model="searchQuery"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all outline-none shadow-sm"
+                                :placeholder="$t('quotes.search')" />
                         </div>
 
-                        <!-- View Toggle -->
-                        <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
-                            <button @click="viewMode = 'grid'" :class="[
-                                'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                viewMode === 'grid'
-                                    ? 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 shadow-sm'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                            ]">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z" />
-                                </svg>
-                            </button>
-                            <button @click="viewMode = 'list'" :class="[
-                                'flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all',
-                                viewMode === 'list'
-                                    ? 'bg-white dark:bg-gray-800 text-amber-600 dark:text-amber-400 shadow-sm'
-                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                            ]">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Add Button -->
-                        <button v-if="can('quotes.create')" @click="openCreateModal"
-                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-xl font-medium shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span>{{ $t('quotes.add') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filter Tabs - Modern Compact Design -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap gap-3">
-                    <button v-for="tab in filterTabs" :key="tab.key" @click="setStatusFilter(tab.key)" :class="[
-                        'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
-                        currentStatus === tab.key
-                            ? 'text-white shadow-lg'
-                            : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700'
-                    ]"
-                        :style="currentStatus === tab.key ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})` : ''">
-                        <!-- Icon -->
-                        <div :class="[
-                            'w-8 h-8 rounded-lg flex items-center justify-center',
-                            currentStatus === tab.key
-                                ? 'bg-white/20'
-                                : tab.bgColor
-                        ]">
-                            <component :is="tab.icon" :class="[
-                                'w-4 h-4',
-                                currentStatus === tab.key ? 'text-white' : tab.iconColor
-                            ]" />
-                        </div>
-
-                        <!-- Label & Count -->
-                        <div class="flex items-center gap-2">
-                            <span :class="[
-                                'font-medium text-sm',
-                                currentStatus === tab.key ? 'text-white' : 'text-gray-700 dark:text-gray-300'
-                            ]">
-                                {{ tab.label }}
-                            </span>
-                            <span :class="[
-                                'px-2 py-0.5 rounded-full text-xs font-bold',
+                        <!-- Filter Tabs -->
+                        <div class="flex flex-wrap gap-3">
+                            <button v-for="tab in filterTabs" :key="tab.key" @click="setStatusFilter(tab.key)" :class="[
+                                'relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200',
                                 currentStatus === tab.key
-                                    ? 'bg-white/20 text-white'
-                                    : tab.bgColor + ' ' + tab.iconColor
-                            ]">
-                                {{ toEnglish(tab.count) }}
-                            </span>
-                        </div>
+                                    ? 'text-white shadow-lg'
+                                    : 'bg-white dark:bg-gray-800 hover:shadow-md border border-gray-200 dark:border-gray-700'
+                            ]"
+                                :style="currentStatus === tab.key ? `background: linear-gradient(135deg, ${tab.gradientFrom}, ${tab.gradientTo})` : ''">
+                                <!-- Icon -->
+                                <div :class="[
+                                    'w-8 h-8 rounded-lg flex items-center justify-center',
+                                    currentStatus === tab.key
+                                        ? 'bg-white/20'
+                                        : tab.bgColor
+                                ]">
+                                    <component :is="tab.icon" :class="[
+                                        'w-4 h-4',
+                                        currentStatus === tab.key ? 'text-white' : tab.iconColor
+                                    ]" />
+                                </div>
 
-                        <!-- Selected Check -->
-                        <svg v-if="currentStatus === tab.key" class="w-4 h-4 text-white/80" fill="currentColor"
-                            viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
+                                <!-- Label & Count -->
+                                <div class="flex items-center gap-2">
+                                    <span :class="[
+                                        'font-medium text-sm',
+                                        currentStatus === tab.key ? 'text-white' : 'text-gray-700 dark:text-gray-300'
+                                    ]">
+                                        {{ tab.label }}
+                                    </span>
+                                    <span :class="[
+                                        'px-2 py-0.5 rounded-full text-xs font-bold',
+                                        currentStatus === tab.key
+                                            ? 'bg-white/20 text-white'
+                                            : tab.bgColor + ' ' + tab.iconColor
+                                    ]">
+                                        {{ toEnglish(tab.count) }}
+                                    </span>
+                                </div>
+
+                                <!-- Selected Check -->
+                                <svg v-if="currentStatus === tab.key" class="w-4 h-4 text-white/80" fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd"
+                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </PageHeader>
 
 
             <!-- Loading State -->
@@ -414,6 +418,7 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { usePermission } from '@/Composables/usePermission';
 

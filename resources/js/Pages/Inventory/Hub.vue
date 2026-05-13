@@ -2,19 +2,23 @@
     <AppLayout>
         <div class="space-y-8">
             <!-- Header Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('inventory.hub.title') }}</h1>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ $t('inventory.hub.subtitle') }}</p>
-                    </div>
-                </div>
-            </div>
+            <PageHeader
+                :title="$t('inventory.hub.title')"
+                :subtitle="$t('inventory.hub.subtitle')"
+                gradientFrom="from-emerald-600"
+                gradientTo="to-teal-700"
+                glowFrom="from-emerald-500"
+                badgeBg="bg-emerald-50/50 dark:bg-emerald-900/30"
+                badgeText="text-emerald-600 dark:text-emerald-400"
+                badgeBorder="border-emerald-100/50 dark:border-emerald-800/30"
+                badgeDot="bg-emerald-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                </template>
+            </PageHeader>
 
             <!-- Quick Access Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -128,6 +132,7 @@
 <script setup>
 import { Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { toEnglish } = useNumberFormat();

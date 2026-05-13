@@ -1,80 +1,122 @@
 <template>
     <AppLayout>
         <div class="space-y-6">
-            <!-- Header -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between flex-wrap gap-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ $t('inventory.moves.title') }}</h1>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ warehouse?.name }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button
-                            @click="showReceiptModal = true"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-                        >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                            <span class="hidden sm:inline">{{ $t('inventory.moves.receipt') }}</span>
-                        </button>
-                        <button
-                            @click="showAdjustmentModal = true"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors"
-                        >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
-                        </svg>
-                            <span class="hidden sm:inline">{{ $t('inventory.moves.adjust') }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            <!-- Page Header -->
+            <PageHeader
+                :title="$t('inventory.moves.title')"
+                :subtitle="$t('inventory.moves.subtitle') + (warehouse ? ` - ${warehouse.name}` : '')"
+                :totalCount="moves.total"
+                :countLabel="$t('inventory.moves.title')"
+                gradientFrom="from-purple-600"
+                gradientTo="to-indigo-700"
+                glowFrom="from-purple-500"
+                badgeBg="bg-purple-50/50 dark:bg-purple-900/30"
+                badgeText="text-purple-600 dark:text-purple-400"
+                badgeBorder="border-purple-100/50 dark:border-purple-800/30"
+                badgeDot="bg-purple-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                </template>
 
-            <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                <div class="flex flex-wrap items-center gap-4">
-                    <div class="flex-1 min-w-[200px]">
-                        <input
-                            v-model="localFilters.search"
-                            type="text"
-                            :placeholder="$t('inventory.moves.search_placeholder')"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500"
-                            @input="debouncedSearch"
-                        />
+                <template #actions>
+                    <div class="flex items-center gap-3">
+                        <!-- Receipt Button -->
+                        <button
+                            v-if="can('inventory.receipts.create') || isAnyAdmin()"
+                            @click="showReceiptModal = true"
+                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-green-700 dark:text-green-400 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group/receipt border border-green-50 dark:border-green-900/30"
+                        >
+                            <div class="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-900/50 flex items-center justify-center group-hover/receipt:rotate-90 transition-transform duration-300">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm tracking-tight">{{ $t('inventory.moves.receipt') }}</span>
+                        </button>
+
+                        <!-- Adjustment Button -->
+                        <button
+                            v-if="can('inventory.adjustments.create') || isAnyAdmin()"
+                            @click="showAdjustmentModal = true"
+                            class="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-yellow-700 dark:text-yellow-400 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group/adjust border border-yellow-50 dark:border-yellow-900/30"
+                        >
+                            <div class="w-7 h-7 rounded-lg bg-yellow-50 dark:bg-yellow-900/50 flex items-center justify-center group-hover/adjust:rotate-12 transition-transform duration-300">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+                                </svg>
+                            </div>
+                            <span class="text-sm tracking-tight">{{ $t('inventory.moves.adjust') }}</span>
+                        </button>
                     </div>
-                    <div class="w-64">
-                        <SearchableSelect
-                            v-model="localFilters.type"
-                            :options="moveTypeOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('inventory.moves.all_types')"
-                            :label="''"
-                            @change="applyFilters"
-                        />
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-col md:flex-row items-center gap-4">
+                        <!-- Search Box -->
+                        <div class="relative group flex-1 w-full">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-purple-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                v-model="localFilters.search"
+                                type="text"
+                                :placeholder="$t('inventory.moves.search_placeholder')"
+                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-purple-500/10 focus:border-purple-500 transition-all outline-none shadow-sm placeholder-gray-400"
+                                @input="debouncedSearch"
+                            />
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                            <!-- Type Filter -->
+                            <div class="w-full md:w-56">
+                                <SearchableSelect
+                                    v-model="localFilters.type"
+                                    :options="moveTypeOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :placeholder="$t('inventory.moves.all_types')"
+                                    :label="''"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Date From -->
+                            <div class="w-full md:w-44">
+                                <CustomDatePicker
+                                    v-model="localFilters.date_from"
+                                    :placeholder="$t('work_orders.filters.date_from')"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Date To -->
+                            <div class="w-full md:w-44">
+                                <CustomDatePicker
+                                    v-model="localFilters.date_to"
+                                    :placeholder="$t('work_orders.filters.date_to')"
+                                    @change="applyFilters"
+                                />
+                            </div>
+
+                            <!-- Reset Button -->
+                            <button 
+                                @click="resetFilters"
+                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                :title="$t('common.reset')"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
-                    <input
-                        v-model="localFilters.date_from"
-                        type="date"
-                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    />
-                    <input
-                        v-model="localFilters.date_to"
-                        type="date"
-                        class="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                        @change="applyFilters"
-                    />
-                </div>
-            </div>
+                </template>
+            </PageHeader>
 
             <!-- Moves Table -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -235,6 +277,8 @@
 import { ref, computed } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import { debounce } from 'lodash-es';
 import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -272,6 +316,14 @@ const applyFilters = () => {
         preserveState: true,
         preserveScroll: true,
     });
+};
+
+const resetFilters = () => {
+    localFilters.value.search = '';
+    localFilters.value.type = '';
+    localFilters.value.date_from = '';
+    localFilters.value.date_to = '';
+    applyFilters();
 };
 
 const debouncedSearch = debounce(applyFilters, 300);
@@ -319,15 +371,15 @@ const moveTypeOptions = computed(() => {
 
 const getMoveTypeBadgeClass = (type) => {
     const classes = {
-        'receipt': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
-        'issue_to_workorder': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-        'adjustment_in': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-        'adjustment_out': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
-        'transfer_in': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-        'transfer_out': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-        'reversal': 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300',
+        'receipt': 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-200/50 dark:border-green-800/30',
+        'issue_to_workorder': 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200/50 dark:border-red-800/30',
+        'adjustment_in': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-200/50 dark:border-blue-800/30',
+        'adjustment_out': 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-200/50 dark:border-orange-800/30',
+        'transfer_in': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/30',
+        'transfer_out': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/30',
+        'reversal': 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/30',
     };
-    return `inline-flex px-2 py-1 rounded-full text-xs font-medium ${classes[type] || 'bg-gray-100 text-gray-700'}`;
+    return `inline-flex px-2.5 py-1 rounded-full text-xs font-bold shadow-sm ${classes[type] || 'bg-gray-100 text-gray-700'}`;
 };
 
 // Calculate stock before from balance_after - qty
