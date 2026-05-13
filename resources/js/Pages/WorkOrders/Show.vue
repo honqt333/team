@@ -2,97 +2,88 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Actions Bar -->
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <!-- Action Buttons (Left) -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <!-- Back Button -->
-                    <Link :href="backUrl"
-                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 hover:text-gray-700 transition-all shadow-sm">
-                        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <!-- Left side: Back and Main Actions -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <BackButton :href="backUrl" />
 
-                    <!-- Print Button -->
-                    <button @click="showPrintModal = true"
-                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-all shadow-sm"
-                        :title="$t('common.print')">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                    </button>
+                    <div class="flex items-center gap-1.5 p-1.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <!-- Print Button -->
+                        <button @click="showPrintModal = true"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                            :title="$t('common.print')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
 
-                    <!-- Payments Button -->
-                    <button v-if="!isReadOnly" @click="showPaymentsListModal = true"
-                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-all shadow-sm"
-                        :title="$t('payments.title')">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                        </svg>
-                    </button>
+                        <!-- Payments Button -->
+                        <button v-if="!isReadOnly" @click="showPaymentsListModal = true"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                            :title="$t('payments.title')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                            </svg>
+                        </button>
 
-                    <!-- Edit Button -->
-                    <button v-if="!isReadOnly" @click="showEditModal = true"
-                        class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-all shadow-sm"
-                        :title="$t('common.edit')">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </button>
+                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                        <!-- Edit Button -->
+                        <button v-if="!isReadOnly" @click="showEditModal = true"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                            :title="$t('common.edit')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </button>
+                    </div>
 
                     <!-- Status Change Buttons -->
-                    <template v-if="workOrder.status === 'open'">
-                        <button @click="changeStatus('in_progress')"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-xl hover:bg-amber-600 shadow-sm transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{{ $t('work_orders.actions.start_work') }}</span>
-                        </button>
-                    </template>
-                    <template v-if="workOrder.status === 'in_progress'">
-                        <button @click="changeStatus('done')"
-                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-xl hover:bg-green-700 shadow-sm transition-colors">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M5 13l4 4L19 7" />
-                            </svg>
-                            <span>{{ $t('work_orders.actions.complete') }}</span>
-                        </button>
-                    </template>
-                    <template v-if="workOrder.status !== 'done' && workOrder.status !== 'cancelled'">
-                        <button @click="changeStatus('cancelled')"
-                            class="p-2 rounded-xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm"
+                    <div v-if="!isReadOnly" class="flex items-center gap-2">
+                        <template v-if="workOrder.status === 'open'">
+                            <button @click="changeStatus('in_progress')"
+                                class="flex items-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-2xl font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                </svg>
+                                <span>{{ $t('work_orders.actions.start_work') }}</span>
+                            </button>
+                        </template>
+                        <template v-if="workOrder.status === 'in_progress'">
+                            <button @click="changeStatus('done')"
+                                class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>{{ $t('work_orders.actions.complete') }}</span>
+                            </button>
+                        </template>
+                        <button v-if="workOrder.status !== 'done' && workOrder.status !== 'cancelled'" @click="changeStatus('cancelled')"
+                            class="p-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm"
                             :title="$t('work_orders.actions.cancel')">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
-                    </template>
+                    </div>
                 </div>
 
-                <!-- Work Order Info (Right) -->
-                <div class="flex items-center gap-3">
-                    <div class="flex flex-col items-end">
+                <!-- Right side: Code and Status -->
+                <div class="flex items-center gap-4">
+                    <div class="text-end">
                         <div class="flex items-center gap-3">
-                            <span :class="statusBadgeClass">{{ $t(`work_orders.status.${workOrder.status}`) }}</span>
-                            <div class="flex items-center gap-2">
-                                <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">{{
-                                    workOrder.code }}</h1>
-                            </div>
-                            <div
-                                class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 shadow-inner">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span :class="statusBadgeClass" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">{{ $t(`work_orders.status.${workOrder.status}`) }}</span>
+                            <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{{ workOrder.code }}</h1>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/30 flex items-center justify-center text-white shrink-0">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                             </div>
                         </div>
@@ -1059,6 +1050,7 @@
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import BackButton from '@/Components/BackButton.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';

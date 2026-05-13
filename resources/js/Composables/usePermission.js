@@ -43,11 +43,21 @@ export function usePermission() {
         return roles.some(r => r.name === role || r === role);
     }
 
+    /**
+     * Check if user is system admin or tenant admin
+     * @returns {boolean}
+     */
+    function isAnyAdmin() {
+        const user = usePage().props.auth.user;
+        return user?.is_system_admin || hasRole('admin') || hasRole('super_admin') || hasRole('super-admin');
+    }
+
     return {
         can,
         canAny,
         canAll,
-        hasRole
+        hasRole,
+        isAnyAdmin
     };
 }
 

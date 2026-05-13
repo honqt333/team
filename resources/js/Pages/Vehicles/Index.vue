@@ -70,7 +70,7 @@
                         <div class="flex gap-2">
                             <!-- Export -->
                             <button
-                                v-if="can('crm.vehicles.export')"
+                                v-if="can('crm.vehicles.export') || isAnyAdmin()"
                                 @click="exportVehicles"
                                 :disabled="exporting"
                                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all disabled:opacity-50"
@@ -82,7 +82,7 @@
                             </button>
                             <!-- Print -->
                             <button
-                                v-if="can('crm.vehicles.print')"
+                                v-if="can('crm.vehicles.print') || isAnyAdmin()"
                                 @click="printVehicles"
                                 class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
                                 :title="$t('common.print')"
@@ -125,9 +125,9 @@
 
                         <!-- Add Button -->
                         <button
-                            v-if="can('crm.vehicles.create')"
+                            v-if="can('crm.vehicles.create') || isAnyAdmin()"
                             @click="openCreateModal"
-                            class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base w-full sm:w-auto bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all"
+                            class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-sm sm:text-base w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all"
                         >
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -158,9 +158,9 @@
                 <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ $t('vehicles.empty') }}</p>
                 <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('vehicles.empty_hint') }}</p>
                 <button
-                    v-if="can('crm.vehicles.create')"
+                    v-if="can('crm.vehicles.create') || isAnyAdmin()"
                     @click="openCreateModal"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl transition-all"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl font-medium shadow-lg shadow-indigo-500/30 hover:shadow-xl transition-all"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -361,60 +361,48 @@
             <div class="print-section hidden">
                 <!-- Header -->
                 <div class="print-header">
-                    <!-- Arabic Layout: Logo right, info beside it -->
-                    <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
-                        <!-- Logo -->
-                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
-                            <img 
-                                :src="$page.props.tenant.logo_url" 
-                                :alt="$page.props.tenant?.name"
-                                class="w-full h-full object-contain"
-                            />
+                    <div class="grid grid-cols-3 items-start">
+                        <!-- Column 1: Info (Right in Arabic, Left in English) -->
+                        <div :class="isRtl ? 'text-right' : 'text-left'">
+                            <h1 class="text-xl font-bold">
+                                {{ isRtl ? ($page.props.tenant?.trade_name || $page.props.tenant?.name) : ($page.props.tenant?.name_en || $page.props.tenant?.name) }}
+                            </h1>
+                            <!-- Branch Logic -->
+                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-medium text-gray-600">
+                                {{ isRtl ? $page.props.center?.name : ($page.props.center?.name_en || $page.props.center?.name) }}
+                            </p>
+                            <div class="mt-2 text-[10px] space-y-0.5 text-gray-500">
+                                <p v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                    {{ isRtl ? 'الهاتف' : 'Phone' }}: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
+                                </p>
+                                <p v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                    {{ isRtl ? 'البريد' : 'Email' }}: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                                </p>
+                                <p v-if="$page.props.tenant?.cr_number">
+                                    {{ isRtl ? 'السجل التجاري' : 'CR' }}: {{ $page.props.tenant?.cr_number }}
+                                </p>
+                            </div>
                         </div>
-                        <!-- Center Info -->
-                        <div class="flex-1 text-right">
-                            <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
-                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
-                                هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
-                                البريد: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
-                                السجل التجاري: {{ $page.props.tenant?.cr_number }}
-                            </p>
+
+                        <!-- Column 2: Logo (Always Center) -->
+                        <div class="flex justify-center">
+                            <div v-if="$page.props.tenant?.logo_url" class="w-24 h-24 flex-shrink-0">
+                                <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
+                            </div>
                         </div>
+
+                        <!-- Column 3: Empty (For Balance) -->
+                        <div></div>
                     </div>
-                    
-                    <!-- English Layout: Logo left with info beside it -->
-                    <div v-else class="flex items-start gap-4 mb-4">
-                        <!-- Logo -->
-                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
-                            <img 
-                                :src="$page.props.tenant.logo_url" 
-                                :alt="$page.props.tenant?.name"
-                                class="w-full h-full object-contain"
-                            />
-                        </div>
-                        <!-- Center Info -->
-                        <div class="flex-1">
-                            <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
-                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
-                                Phone: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
-                                Email: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
-                                CR: {{ $page.props.tenant?.cr_number }}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Title centered (both languages) -->
-                    <div class="border-t pt-4 border-gray-300 text-center">
-                        <h2 class="text-lg font-bold">{{ $t('vehicles.title') }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' : 'en-US') }}</p>
+
+                    <!-- Report Title -->
+                    <div class="mt-8 text-center">
+                        <h2 class="text-lg font-bold border-y-2 border-gray-100 py-2 uppercase tracking-wider">
+                            {{ $t('vehicles.title') }}
+                        </h2>
+                        <p class="text-[10px] text-gray-400 mt-1" dir="ltr">
+                            {{ new Date().toLocaleDateString('en-GB').split('/').reverse().join('/') }}
+                        </p>
                     </div>
                 </div>
 
@@ -422,7 +410,7 @@
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th style="width: 40px;">#</th>
                             <th>{{ $t('vehicles.form.plate') }}</th>
                             <th>{{ $t('vehicles.form.make') }}</th>
                             <th>{{ $t('vehicles.form.model') }}</th>
@@ -434,20 +422,19 @@
                     <tbody>
                         <tr v-for="(vehicle, index) in allVehicles" :key="vehicle.id">
                             <td>{{ index + 1 }}</td>
-                            <td class="text-left font-bold" dir="ltr">{{ toEnglish(vehicle.plate_number) }}</td>
+                            <td class="font-bold">{{ toEnglish(vehicle.plate_number) }}</td>
                             <td>{{ vehicle.display_make || '-' }}</td>
                             <td>{{ vehicle.display_model || '-' }}</td>
                             <td>{{ toEnglish(vehicle.year) || '-' }}</td>
                             <td>{{ vehicle.customer?.name || '-' }}</td>
-                            <td dir="ltr" class="text-left font-sans">
-                                {{ toEnglish(vehicle.customer?.phone) || '-' }}
-                            </td>
+                            <td dir="ltr">{{ toEnglish(vehicle.customer?.phone) || '-' }}</td>
                         </tr>
                     </tbody>
                 </table>
-                
-                <div class="mt-8 text-center text-xs text-gray-400">
-                    {{ $page.props.auth.user.name }} - {{ new Date().toLocaleString('ar-SA') }}
+
+                <!-- Footer -->
+                <div class="mt-8 text-center text-[10px] text-gray-400">
+                    {{ $page.props.auth.user.name }} - <span dir="ltr">{{ new Date().toLocaleString('en-GB') }}</span>
                 </div>
             </div>
         </Teleport>
@@ -498,7 +485,7 @@ const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { success } = useToast();
 const { toEnglish } = useNumberFormat();
-const { can } = usePermission();
+const { can, isAnyAdmin } = usePermission();
 
 const makeOptions = computed(() => [
     { value: '', label: t('vehicles.filter.all_makes') },
@@ -724,5 +711,41 @@ function getColorHex(colorName) {
     return colorMap[colorName.toLowerCase()] || colorMap[colorName] || "#9ca3af";
 }
 </script>
+
+<style scoped>
+@media print {
+    .print-section {
+        display: block !important;
+        font-family: 'Tajawal', 'Noto Kufi Arabic', sans-serif !important;
+        padding: 20px;
+        background: white;
+    }
+
+    .print-header {
+        margin-bottom: 30px;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 20px;
+    }
+
+    .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+    .print-table th,
+    .print-table td {
+        border: 1px solid #e5e7eb;
+        padding: 8px;
+        text-align: center !important;
+    }
+
+    .print-table th {
+        background-color: #f9fafb !important;
+        -webkit-print-color-adjust: exact;
+        font-weight: bold;
+    }
+}
+</style>
 
 

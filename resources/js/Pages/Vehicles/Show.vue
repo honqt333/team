@@ -1,38 +1,36 @@
 <template>
     <AppLayout>
-        <div class="space-y-4">
+        <div class="space-y-6">
             <!-- Back Button -->
-            <Link :href="route('vehicles.index')"
-                class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                {{ $t('common.back') }}
-            </Link>
+            <div class="flex items-center justify-between">
+                <BackButton :href="route('vehicles.index')" />
+            </div>
 
             <!-- Main Card -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden relative">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-teal-500/5 border border-gray-100 dark:border-gray-700 overflow-hidden relative">
+                <!-- Background Decoration -->
+                <div class="absolute top-0 right-0 p-8 opacity-[0.03] dark:opacity-[0.05] pointer-events-none select-none">
+                    <svg class="w-64 h-64 text-teal-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                    </svg>
+                </div>
 
                 <!-- Background Logo Watermark -->
                 <div v-if="vehicle.make?.logo_path"
-                    class="absolute top-0 end-0 p-6 pointer-events-none opacity-[0.05] dark:opacity-[0.1]">
+                    class="absolute top-0 end-0 p-8 pointer-events-none opacity-[0.05] dark:opacity-[0.1]">
                     <img :src="`/storage/${vehicle.make.logo_path}`" class="w-64 h-64 object-contain grayscale"
                         alt="" />
                 </div>
 
                 <!-- Header Section -->
-                <div
-                    class="bg-gradient-to-r from-teal-500/10 via-cyan-500/5 to-transparent dark:from-teal-900/30 dark:via-cyan-900/10 p-6 border-b border-gray-200 dark:border-gray-700 relative z-10">
-                    <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+                <div class="relative p-8 border-b border-gray-100 dark:border-gray-700 z-10">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                         <!-- Vehicle Info -->
-                        <div class="flex items-center gap-4 flex-1">
-                            <div
-                                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 shadow-lg flex items-center justify-center text-white overflow-hidden p-1">
+                        <div class="flex items-center gap-6 flex-1">
+                            <div class="w-20 h-20 rounded-[2rem] bg-gradient-to-br from-teal-500 to-cyan-600 shadow-xl shadow-teal-500/30 flex items-center justify-center text-white shrink-0 ring-4 ring-teal-50 dark:ring-teal-900/10 overflow-hidden p-2">
                                 <img v-if="vehicle.make?.logo_path" :src="`/storage/${vehicle.make.logo_path}`"
                                     class="w-full h-full object-contain brightness-0 invert" alt="" />
-                                <svg v-else class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg v-else class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -41,85 +39,67 @@
                             </div>
 
                             <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-1">
-                                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                                <div class="flex items-center gap-4 mb-2">
+                                    <h1 class="text-3xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                         {{ getVehicleName(vehicle) }}
-                                    </h2>
-                                    <span v-if="vehicle.color"
-                                        class="px-2 py-0.5 text-xs rounded-full border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 flex items-center gap-1.5">
-                                        <span
-                                            class="w-2.5 h-2.5 rounded-full border border-gray-300 dark:border-gray-500"
-                                            :style="{ backgroundColor: getColorHex(vehicle.color) }"></span>
+                                    </h1>
+                                    <div class="px-4 py-1.5 bg-gray-900 dark:bg-gray-700 rounded-xl border-2 border-gray-800 dark:border-gray-600 shadow-sm flex items-center gap-2">
+                                        <span class="text-lg font-black text-white tracking-widest font-mono">
+                                            {{ vehicle.plate_number }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-medium text-gray-500 dark:text-gray-400">
+                                    <span v-if="vehicle.color" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
+                                        <span class="w-3 h-3 rounded-full shadow-sm" :style="{ backgroundColor: getColorHex(vehicle.color) }"></span>
                                         {{ vehicle.color }}
                                     </span>
-                                </div>
-                                <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 font-mono">
-                                    <span
-                                        class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-bold tracking-wider">
-                                        {{ vehicle.plate_number }}
+                                    <span v-if="vehicle.vin" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
+                                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                        </svg>
+                                        <span class="font-mono">{{ vehicle.vin }}</span>
                                     </span>
-                                    <span v-if="vehicle.vin" class="flex items-center gap-1">
-                                        <span class="text-xs uppercase tracking-widest text-gray-400">VIN:</span>
-                                        {{ vehicle.vin }}
-                                    </span>
-                                    
-                                    <!-- Odometer Badge -->
-                                    <div v-if="vehicle.odometer" class="flex items-center gap-1.5 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 px-3 py-1 rounded-xl border border-teal-100 dark:border-teal-800/50">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <span v-if="vehicle.odometer" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
+                                        <svg class="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                         </svg>
-                                        <span class="font-black">{{ vehicle.odometer.toLocaleString() }}</span>
-                                        <span class="text-[10px] uppercase font-bold opacity-70">KM</span>
-                                    </div>
+                                        <span class="font-bold">{{ vehicle.odometer?.toLocaleString() }} {{ $t('common.km') }}</span>
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Stats -->
-                        <div class="flex items-center gap-4">
-                            <!-- Customer Link -->
-                            <Link v-if="vehicle.customer" :href="route('customers.show', vehicle.customer.id)"
-                                class="flex items-center gap-3 px-4 py-2 bg-white/50 dark:bg-gray-700/50 rounded-xl hover:bg-white dark:hover:bg-gray-700 transition-colors group">
-                                <div
-                                    class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-200 dark:group-hover:bg-indigo-900/50 transition-colors">
-                                    <span class="font-bold">{{ vehicle.customer.name.charAt(0).toUpperCase() }}</span>
+                        <!-- Quick Actions / Status -->
+                        <div class="flex flex-col items-end gap-3">
+                             <Link v-if="vehicle.customer" :href="route('customers.show', vehicle.customer.id)"
+                                class="flex items-center gap-3 px-5 py-3 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all group">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
                                 </div>
-                                <div>
-                                    <p
-                                        class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                                        {{ vehicle.customer.name }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ vehicle.customer.phone }}</p>
+                                <div class="text-start">
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('customers.title') }}</p>
+                                    <p class="text-sm font-black text-gray-900 dark:text-white">{{ vehicle.customer?.name }}</p>
                                 </div>
-                            </Link>
-
-                            <div class="h-10 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
-
-                            <div class="text-center px-4 py-2 bg-white/50 dark:bg-gray-700/50 rounded-xl">
-                                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ counts.workOrders
-                                    }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('customers.work_orders') }}
-                                </p>
-                            </div>
-                            <div class="text-center px-4 py-2 bg-white/50 dark:bg-gray-700/50 rounded-xl">
-                                <p class="text-2xl font-bold text-amber-600 dark:text-amber-400">{{ counts.quotes }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('customers.quotes') }}</p>
-                            </div>
+                             </Link>
                         </div>
                     </div>
                 </div>
 
                 <!-- Actions Bar -->
-                <div
-                    class="px-6 py-3 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center gap-2">
-                    <button v-if="can('crm.vehicles.update')" @click="showEditModal = true"
-                        class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        {{ $t('common.edit') }}
-                    </button>
+                <div class="px-8 py-4 bg-gray-50/50 dark:bg-gray-900/30 border-b border-gray-100 dark:border-gray-700 flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button v-if="can('crm.vehicles.update')" @click="showEditModal = true"
+                            class="flex items-center gap-2.5 px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 font-bold text-sm border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-teal-300 transition-all shadow-sm">
+                            <svg class="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            {{ $t('common.edit') }}
+                        </button>
+                    </div>
 
                     <button v-if="can('crm.work_orders.create')" @click="openWorkOrderModal"
                         class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-lg hover:bg-indigo-700 transition-colors">
@@ -453,6 +433,7 @@
 import { ref, computed, h, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import BackButton from '@/Components/BackButton.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
