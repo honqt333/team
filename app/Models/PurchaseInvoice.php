@@ -17,7 +17,7 @@ class PurchaseInvoice extends Model
     protected $fillable = [
         'tenant_id', 'center_id', 'supplier_id', 'purchase_order_id',
         'invoice_number', 'code', 'issue_date', 'due_date', 'status',
-        'subtotal', 'tax_amount', 'total', 'notes', 'attachment_path',
+        'subtotal', 'tax_amount', 'discount_amount', 'total', 'balance', 'notes', 'attachment_path',
     ];
 
     protected $casts = [
@@ -25,7 +25,9 @@ class PurchaseInvoice extends Model
         'due_date'   => 'date',
         'subtotal'   => 'decimal:2',
         'tax_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
         'total'      => 'decimal:2',
+        'balance'    => 'decimal:2',
     ];
 
     // Relationships
@@ -44,7 +46,7 @@ class PurchaseInvoice extends Model
     // Code generator: PINV-0001
     public static function generateCode(int $tenantId): string
     {
-        $last = static::where('tenant_id', $tenantId)->lockForUpdate()->count();
+        $last = static::where('tenant_id', $tenantId)->withTrashed()->count();
         return 'PINV-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
     }
 }

@@ -6,6 +6,8 @@ use App\Models\GoodsReceivedNote;
 use App\Models\GrnItem;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\PurchaseInvoice;
+use App\Models\PurchaseInvoiceLine;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -252,6 +254,13 @@ class PurchasingService
             // Update PO status based on received quantities
             $this->updatePurchaseOrderStatus($po);
 
+            // Create invoice from GRN (Wrapped in try-catch to prevent blocking GRN posting)
+            try {
+                $this->createInvoiceFromGrn($grn);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Failed to auto-create invoice for GRN {$grn->code}: " . $e->getMessage());
+            }
+
             return $grn->fresh();
         });
     }
@@ -292,5 +301,63 @@ class PurchasingService
         } elseif ($anyReceived) {
             $po->update(['status' => PurchaseOrder::STATUS_PARTIAL]);
         }
+    }
+
+    /**
+     * Create a purchase invoice from a GRN.
+     */
+    public function createInvoiceFromGrn(GoodsReceivedNote $grn): PurchaseInvoice
+    {
+        return DB::transaction(function () use ($grn) {
+            $po = $grn->purchaseOrder;
+            
+            $invoice = PurchaseInvoice::create([
+                'tenant_id' => $po->tenant_id,
+                'center_id' => $po->center_id,
+                'supplier_id' => $po->supplier_id,
+                'purchase_order_id' => $po->id,
+                'invoice_number' => $grn->delivery_note, // Use delivery note as reference
+                'code' => PurchaseInvoice::generateCode($po->tenant_id),
+                'issue_date' => $grn->received_date,
+                'due_date' => $po->due_date,
+                'status' => PurchaseInvoice::STATUS_OPEN,
+                'notes' => "Auto-generated from GRN: {$grn->code}",
+            ]);
+
+            $grn->update(['purchase_invoice_id' => $invoice->id]);
+
+            $subtotal = 0;
+            $taxAmount = 0;
+
+            foreach ($grn->items as $item) {
+                $poItem = $item->purchaseOrderItem;
+                $taxRate = $poItem->tax_rate ?? 15.00;
+                
+                $lineSubtotal = $item->line_total; // calculated as qty_received * unit_cost
+                $lineTax = bcdiv(bcmul($lineSubtotal, $taxRate, 4), 100, 2);
+                $lineTotal = bcadd($lineSubtotal, $lineTax, 2);
+
+                PurchaseInvoiceLine::create([
+                    'purchase_invoice_id' => $invoice->id,
+                    'part_id' => $item->part_id,
+                    'qty' => $item->qty_received,
+                    'unit_cost' => $item->unit_cost,
+                    'tax_rate' => $taxRate,
+                    'tax_amount' => $lineTax,
+                    'total' => $lineTotal,
+                ]);
+
+                $subtotal = bcadd($subtotal, $lineSubtotal, 2);
+                $taxAmount = bcadd($taxAmount, $lineTax, 2);
+            }
+
+            $invoice->update([
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxAmount,
+                'total' => bcadd($subtotal, $taxAmount, 2),
+            ]);
+
+            return $invoice;
+        });
     }
 }

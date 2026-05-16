@@ -82,6 +82,7 @@ class GoodsReceivedNotesController extends Controller
             'warehouse',
             'items.part',
             'postedByUser:id,name',
+            'purchaseInvoice',
         ]);
 
         return Inertia::render('Purchasing/GRN/Show', [
@@ -115,5 +116,28 @@ class GoodsReceivedNotesController extends Controller
         $this->purchasingService->cancelGoodsReceivedNote($goodsReceivedNote, auth()->id(), $validated['reason'] ?? null);
 
         return back()->with('success', __('purchasing.grn.cancelled'));
+    }
+
+    /**
+     * Create invoice from GRN manually.
+     */
+    public function createInvoice(GoodsReceivedNote $goodsReceivedNote)
+    {
+        $this->authorize('update', $goodsReceivedNote);
+
+        if ($goodsReceivedNote->purchase_invoice_id) {
+            return back()->with('error', __('invoices.already_exists'));
+        }
+
+        if ($goodsReceivedNote->status !== GoodsReceivedNote::STATUS_POSTED) {
+            return back()->with('error', 'يجب ترحيل السند أولاً قبل إنشاء الفاتورة');
+        }
+
+        try {
+            $this->purchasingService->createInvoiceFromGrn($goodsReceivedNote);
+            return back()->with('success', __('invoices.created'));
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 }

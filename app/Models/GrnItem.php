@@ -58,7 +58,9 @@ class GrnItem extends Model
     protected static function booted(): void
     {
         static::saving(function (GrnItem $item) {
-            $item->line_total = bcmul($item->qty_received, $item->unit_cost, 2);
+            if (is_numeric($item->qty_received) && is_numeric($item->unit_cost)) {
+                $item->line_total = bcmul((string)$item->qty_received, (string)$item->unit_cost, 2);
+            }
         });
     }
 }

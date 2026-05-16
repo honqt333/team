@@ -23,6 +23,11 @@ class PurchaseOrderItem extends Model
         'notes',
     ];
 
+    protected $appends = [
+        'qty_pending',
+        'is_fully_received',
+    ];
+
     protected $casts = [
         'qty_ordered' => 'decimal:3',
         'qty_received' => 'decimal:3',

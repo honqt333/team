@@ -29,6 +29,7 @@ class GoodsReceivedNote extends Model
         'cancelled_at',
         'cancelled_by',
         'cancel_reason',
+        'purchase_invoice_id',
     ];
 
     protected $casts = [
@@ -64,6 +65,11 @@ class GoodsReceivedNote extends Model
     public function cancelledByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    public function purchaseInvoice(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseInvoice::class);
     }
 
     // ─────────────────────────────────────────────────────────────

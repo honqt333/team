@@ -199,7 +199,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
 
 
     // Tenants
-    Route::resource('tenants', \App\Http\Controllers\App\TenantsController::class);
+    Route::resource('tenants', \App\Http\Controllers\System\TenantsController::class);
     
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
@@ -379,11 +379,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::post('/orders/{purchaseOrder}/receive', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'store'])->name('grn.store');
         Route::get('/grn/{goodsReceivedNote}', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'show'])->name('grn.show');
         Route::post('/grn/{goodsReceivedNote}/post', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'post'])->name('grn.post');
+        Route::post('/grn/{goodsReceivedNote}/create-invoice', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'createInvoice'])->name('grn.create-invoice');
         Route::post('/grn/{goodsReceivedNote}/cancel', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'cancel'])->name('grn.cancel');
 
-        // Purchase Invoices (separate from POs)
-        Route::get('/invoices', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'index'])->name('invoices.index');
-        Route::get('/invoices/{purchaseInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'show'])->name('invoices.show');
+        // Purchase Invoices (Moved to Invoices module)
+        Route::get('/invoices', function () {
+            return redirect()->route('app.invoices.purchases.index');
+        });
     });
 
     // ───────────────────────────────────────────────────────────────
@@ -524,6 +526,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
 
         // Purchase Invoices
         Route::get('/purchases', [\App\Http\Controllers\App\InvoicesController::class, 'purchasesIndex'])->name('purchases.index');
+        Route::get('/purchases/{purchaseInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'show'])->name('purchases.show');
 
         // Individual invoice show / print (existing)
         Route::get('/{invoice}', [\App\Http\Controllers\App\InvoicesController::class, 'show'])->name('show');

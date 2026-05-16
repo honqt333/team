@@ -6,11 +6,11 @@
             <PageHeader
                 :title="$t('invoices.sales.title')"
                 :subtitle="$t('invoices.sales.subtitle')"
-                :totalCount="invoices ? toEnglish(invoices.total) : null"
+                :totalCount="invoices?.total ? toEnglish(invoices.total) : '0'"
                 :countLabel="$t('invoices.sales.tab_invoices')"
                 gradientFrom="from-blue-600"
                 gradientTo="to-indigo-600"
-                glowFrom="from-blue-600"
+                glowFrom="from-blue-500"
                 badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
                 badgeText="text-blue-600 dark:text-blue-400"
                 badgeBorder="border-blue-100/50 dark:border-blue-800/30"
@@ -20,26 +20,64 @@
                     <Link
                         :href="route('app.invoices.hub')"
                         :title="$t('common.back')"
-                        class="p-2.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600"
+                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600 group"
                     >
-                        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </Link>
                 </template>
 
                 <template #icon>
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                 </template>
 
                 <template #actions>
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div class="flex items-center gap-4">
+                        <!-- Actions Group -->
+                        <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                            <div class="flex gap-1.5">
+                                <button
+                                    @click="setView('grid')"
+                                    :title="$t('common.grid_view')"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'grid'
+                                            ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                    </svg>
+                                </button>
+                                <button
+                                    @click="setView('list')"
+                                    :title="$t('common.list_view')"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'list'
+                                            ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-wrap items-end gap-3">
                         <!-- Search -->
-                        <div class="relative group">
-                            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="relative group lg:w-48">
+                            <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                                 </svg>
                             </div>
@@ -47,12 +85,31 @@
                                 type="text"
                                 v-model="localFilters.search"
                                 :placeholder="$t('common.search')"
-                                class="w-full sm:w-64 ps-10 pe-4 py-2.5 text-sm border border-gray-100 dark:border-gray-700 rounded-xl bg-white/50 dark:bg-gray-900/50 backdrop-blur-md text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm"
+                                class="block w-full ps-11 pe-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none shadow-sm"
+                            />
+                        </div>
+
+                        <!-- Date From -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('work_orders.filters.date_from') }}</label>
+                            <CustomDatePicker
+                                v-model="localFilters.date_from"
+                                class="!rounded-2xl"
+                            />
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('work_orders.filters.date_to') }}</label>
+                            <CustomDatePicker
+                                v-model="localFilters.date_to"
+                                class="!rounded-2xl"
                             />
                         </div>
 
                         <!-- Status Filter -->
-                        <div class="w-full sm:w-48">
+                        <div class="lg:w-40">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('common.status') }}</label>
                             <SearchableSelect
                                 v-model="localFilters.payment_status"
                                 :options="statusOptions"
@@ -63,77 +120,48 @@
                                 compact
                             />
                         </div>
-
-                        <!-- Date From -->
-                        <CustomDatePicker
-                            v-model="localFilters.date_from"
-                            :placeholder="$t('work_orders.filters.date_from')"
-                        />
-
-                        <!-- Date To -->
-                        <CustomDatePicker
-                            v-model="localFilters.date_to"
-                            :placeholder="$t('work_orders.filters.date_to')"
-                        />
-
-                        <!-- View Toggle -->
-                        <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
-                            <button
-                                @click="viewMode = 'grid'"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'grid'
-                                        ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </button>
-                            <button
-                                @click="viewMode = 'list'"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'list'
-                                        ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
-                        </div>
                     </div>
                 </template>
             </PageHeader>
 
-            <!-- Tabs -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="flex border-b border-gray-200 dark:border-gray-700 px-2 pt-2 gap-1 overflow-x-auto">
-                    <button
-                        v-for="tab in tabs"
-                        :key="tab.key"
-                        @click="activeTab = tab.key"
-                        :class="[
-                            'flex items-center gap-2 px-5 py-3 text-sm font-semibold whitespace-nowrap transition-all duration-200 border-b-2 -mb-px',
-                            activeTab === tab.key
-                                ? 'border-blue-600 text-blue-700 dark:text-blue-400'
-                                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-                        ]"
-                    >
+            <!-- Premium Tabs Section -->
+            <div class="flex flex-wrap gap-3">
+                <button
+                    v-for="tab in tabs"
+                    :key="tab.key"
+                    @click="activeTab = tab.key"
+                    :class="[
+                        'relative flex items-center gap-3 px-5 py-3 rounded-2xl transition-all duration-300 group',
+                        activeTab === tab.key
+                            ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+                            : 'bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md'
+                    ]"
+                >
+                    <!-- Tab Icon Container -->
+                    <div :class="[
+                        'w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-300',
+                        activeTab === tab.key
+                            ? 'bg-white/20'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
+                    ]">
                         <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-html="tab.iconPath"/>
+                    </div>
+
+                    <span class="font-black tracking-tight text-sm uppercase">
                         {{ tab.label }}
-                        <span
-                            v-if="tab.count > 0"
-                            :class="activeTab === tab.key
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
-                            class="min-w-[20px] h-5 px-1.5 text-xs font-bold rounded-full flex items-center justify-center"
-                        >{{ toEnglish(tab.count) }}</span>
-                    </button>
-                </div>
+                    </span>
+
+                    <!-- Tab Count Badge -->
+                    <span v-if="tab.count > 0" :class="[
+                        'px-2 py-0.5 rounded-lg text-[10px] font-black min-w-[24px] text-center',
+                        activeTab === tab.key
+                            ? 'bg-white/20 text-white'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ]">
+                        {{ toEnglish(tab.count) }}
+                    </span>
+                </button>
+            </div>
 
                 <!-- Tab Content -->
                 <div class="p-0">
@@ -282,7 +310,6 @@
 
                 </div>
             </div>
-        </div>
     </AppLayout>
 </template>
 

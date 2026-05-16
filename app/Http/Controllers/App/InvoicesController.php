@@ -131,7 +131,7 @@ class InvoicesController extends Controller
             ->where('center_id', $centerId)
             ->count();
 
-        $purchasesCount = PurchaseOrder::where('tenant_id', $tenantId)
+        $purchasesCount = \App\Models\PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->count();
 
@@ -179,25 +179,32 @@ class InvoicesController extends Controller
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
-        $query = PurchaseOrder::where('tenant_id', $tenantId)
+        $query = \App\Models\PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
-            ->with(['supplier'])
+            ->with(['supplier', 'purchaseOrder'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('code', 'like', "%{$search}%")
+                          ->orWhere('invoice_number', 'like', "%{$search}%")
                           ->orWhereHas('supplier', fn($s) => $s->where('name', 'like', "%{$search}%"));
                 });
             })
             ->when($request->input('status'), fn($q, $s) => $q->where('status', $s))
-            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('order_date', '>=', $d))
-            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('order_date', '<=', $d))
-            ->orderBy('order_date', 'desc');
+            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('issue_date', '>=', $d))
+            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
+            ->orderBy('issue_date', 'desc');
 
-        $purchaseOrders = $query->paginate(25)->withQueryString();
+        $invoices = $query->paginate(25)->withQueryString();
 
         return Inertia::render('Invoices/Purchasing/Index', [
-            'purchaseOrders' => $purchaseOrders,
-            'filters'        => $request->only(['search', 'status', 'date_from', 'date_to']),
+            'invoices' => $invoices,
+            'filters'  => $request->only(['search', 'status', 'date_from', 'date_to']),
+            'statuses' => [
+                \App\Models\PurchaseInvoice::STATUS_DRAFT,
+                \App\Models\PurchaseInvoice::STATUS_OPEN,
+                \App\Models\PurchaseInvoice::STATUS_PAID,
+                \App\Models\PurchaseInvoice::STATUS_CANCELLED,
+            ],
         ]);
     }
 }
