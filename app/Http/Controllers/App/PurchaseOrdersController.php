@@ -52,6 +52,7 @@ class PurchaseOrdersController extends Controller
             ],
             'defaultWarehouse' => Warehouse::forCenter($centerId)->default()->first(),
             'warehouses' => Warehouse::forCenter($centerId)->active()->get(['id', 'name']),
+            'units' => \App\Models\InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
         ]);
     }
 
@@ -69,6 +70,7 @@ class PurchaseOrdersController extends Controller
             'suppliers' => $suppliers,
             'warehouses' => Warehouse::forCenter($user->current_center_id)->active()->get(['id', 'name']),
             'defaultWarehouse' => $warehouse,
+            'units' => \App\Models\InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
         ]);
     }
 
@@ -83,6 +85,8 @@ class PurchaseOrdersController extends Controller
             'warehouse_id' => 'required|exists:warehouses,id',
             'order_date' => 'required|date',
             'expected_date' => 'nullable|date|after_or_equal:order_date',
+            'create_credit_invoice' => 'nullable|boolean',
+            'due_date' => 'nullable|date',
             'notes' => 'nullable|string|max:1000',
             'terms' => 'nullable|string|max:2000',
             'items' => 'required|array|min:1',

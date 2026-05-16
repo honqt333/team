@@ -23,6 +23,16 @@
 
                 <template #actions>
                     <div class="flex items-center gap-3">
+                        <!-- Print Button -->
+                        <button 
+                            @click="handlePrint"
+                            :title="$t('common.print')"
+                            class="p-2.5 rounded-xl transition-all shadow-lg bg-white dark:bg-gray-800 text-gray-400 hover:text-purple-600 hover:bg-white dark:hover:bg-gray-800 border border-gray-100 dark:border-gray-700"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
                         <!-- Receipt Button -->
                         <button
                             v-if="can('inventory.receipts.create') || isAnyAdmin()"
@@ -54,7 +64,7 @@
                 </template>
 
                 <template #filters>
-                    <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="flex flex-col md:flex-row items-center gap-4 no-print">
                         <!-- Search Box -->
                         <div class="relative group flex-1 w-full">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-purple-500 transition-colors">
@@ -124,18 +134,81 @@
                     <table class="w-full" dir="rtl">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.row_number') }}</th>
-                                <th class="px-3 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.part') }}</th>
-                                <th class="px-3 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.action') }}</th>
-                                <th class="px-3 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.details') }}</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.stock_before') }}</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.qty') }}</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.stock_after') }}</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.cost_price') }}</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.wac') }}</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.cost_amount') }}</th>
-                                <th class="px-3 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('inventory.moves.columns.updated_at') }}</th>
-                                <th class="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400">{{ $t('common.actions') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('id')">
+                                    <div class="flex items-center justify-center gap-1">
+                                        {{ $t('inventory.moves.columns.row_number') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'id' && localFilters.order === 'asc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'id' && localFilters.order === 'desc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('sku')">
+                                    <div class="flex items-center gap-1">
+                                        {{ $t('inventory.moves.columns.part') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'sku' && localFilters.order === 'asc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'sku' && localFilters.order === 'desc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.action') }}</th>
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.details') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('balance_after')">
+                                    <div class="flex items-center justify-center gap-1">
+                                        {{ $t('inventory.moves.columns.stock_before') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'balance_after' && localFilters.order === 'asc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'balance_after' && localFilters.order === 'desc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('qty')">
+                                    <div class="flex items-center justify-center gap-1">
+                                        {{ $t('inventory.moves.columns.qty') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'qty' && localFilters.order === 'asc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'qty' && localFilters.order === 'desc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.stock_after') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('unit_cost')">
+                                    <div class="flex items-center justify-center gap-1">
+                                        {{ $t('inventory.moves.columns.cost_price') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'unit_cost' && localFilters.order === 'asc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'unit_cost' && localFilters.order === 'desc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.wac') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('total_cost')">
+                                    <div class="flex items-center justify-center gap-1">
+                                        {{ $t('inventory.moves.columns.cost_amount') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'total_cost' && localFilters.order === 'asc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'total_cost' && localFilters.order === 'desc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('posted_at')">
+                                    <div class="flex items-center gap-1">
+                                        {{ $t('inventory.moves.columns.updated_at') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'posted_at' && localFilters.order === 'asc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'posted_at' && localFilters.order === 'desc'" class="w-3 h-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -144,68 +217,70 @@
                                 move.reversed_at ? 'opacity-50 line-through' : ''
                             ]">
                                 <!-- # -->
-                                <td class="px-3 py-3 text-center text-sm text-gray-500 dark:text-gray-400">{{ (moves.current_page - 1) * moves.per_page + index + 1 }}</td>
+                                <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400">{{ (moves.current_page - 1) * moves.per_page + index + 1 }}</td>
                                 
                                 <!-- Part -->
-                                <td class="px-3 py-3 text-start">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ move.part?.name_ar }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400 font-mono" dir="ltr">{{ move.part?.sku }}</div>
+                                <td class="px-4 py-4 text-start">
+                                    <Link :href="route('app.inventory.parts.show', move.part_id)" class="group/part">
+                                        <div class="text-sm font-bold text-blue-600 dark:text-blue-400 group-hover/part:text-blue-700 dark:group-hover/part:text-blue-300 group-hover/part:underline transition-all">{{ move.part?.name_ar }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 font-mono" dir="ltr">{{ move.part?.sku }}</div>
+                                    </Link>
                                 </td>
                                 
                                 <!-- Action/Type -->
-                                <td class="px-3 py-3 text-start">
+                                <td class="px-4 py-4 text-start">
                                     <span :class="getMoveTypeBadgeClass(move.move_type)">
                                         {{ getMoveTypeLabel(move.move_type) }}
                                     </span>
                                 </td>
                                 
                                 <!-- Details/Notes -->
-                                <td class="px-3 py-3 text-start text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate" :title="move.notes">
+                                <td class="px-4 py-4 text-start text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate" :title="move.notes">
                                     {{ move.notes || '-' }}
                                 </td>
                                 
                                 <!-- Stock Before -->
-                                <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
                                     {{ calculateStockBefore(move) }}
                                 </td>
                                 
-                                <!-- Quantity -->
-                                <td class="px-3 py-3 text-center">
+                                 <!-- Quantity -->
+                                <td class="px-4 py-4 text-center">
                                     <span :class="[
                                         'font-mono text-sm font-medium',
                                         move.qty > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                                     ]">
-                                        {{ move.qty > 0 ? '+' : '' }}{{ move.qty }}
+                                        {{ move.qty > 0 ? '+' : '' }}{{ Number(move.qty).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 }) }}
                                     </span>
                                 </td>
                                 
                                 <!-- Stock After -->
-                                <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
-                                    {{ move.balance_after }}
+                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                    {{ Number(move.balance_after).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 }) }}
                                 </td>
                                 
                                 <!-- Cost Price (Unit Cost) -->
-                                <td class="px-3 py-3 text-center text-sm text-gray-900 dark:text-white font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-900 dark:text-white font-mono">
                                     {{ formatCurrency(move.unit_cost) }}
                                 </td>
                                 
                                 <!-- WAC (Weighted Average Cost) -->
-                                <td class="px-3 py-3 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
                                     {{ formatCurrency(move.wac_after) }}
                                 </td>
                                 
                                 <!-- Cost Amount (Total Cost) -->
-                                <td class="px-3 py-3 text-center text-sm text-gray-900 dark:text-white font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-900 dark:text-white font-mono">
                                     {{ formatCurrency(move.total_cost) }}
                                 </td>
                                 
                                 <!-- Updated At -->
-                                <td class="px-3 py-3 text-start text-sm text-gray-600 dark:text-gray-300" dir="ltr">
+                                <td class="px-4 py-4 text-start text-sm text-gray-600 dark:text-gray-300" dir="ltr">
                                     {{ formatDate(move.posted_at) }}
                                 </td>
                                 
                                 <!-- Actions -->
-                                <td class="px-3 py-3 text-center">
+                                <td class="px-4 py-4 text-center">
                                     <button
                                         v-if="canReverse(move)"
                                         @click="reverseMove(move)"
@@ -271,6 +346,53 @@
         @close="showAdjustmentModal = false"
         @saved="() => {}"
     />
+
+    <!-- Print Section -->
+    <Teleport to="body">
+        <div class="print-section hidden">
+            <!-- Header -->
+            <PrintHeader 
+                :title="$t('inventory.moves.title')" 
+                :subtitle="warehouse ? warehouse.name : ''"
+            />
+
+            <!-- Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">#</th>
+                        <th>{{ $t('inventory.moves.columns.part') }}</th>
+                        <th>{{ $t('inventory.moves.columns.action') }}</th>
+                        <th>{{ $t('inventory.moves.columns.qty') }}</th>
+                        <th>{{ $t('inventory.moves.columns.stock_after') }}</th>
+                        <th>{{ $t('inventory.moves.columns.cost_price') }}</th>
+                        <th>{{ $t('inventory.moves.columns.updated_at') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(move, index) in moves.data" :key="move.id">
+                        <td>{{ index + 1 }}</td>
+                        <td class="font-bold">
+                            {{ move.part?.name_ar }}<br/>
+                            <small class="text-gray-500">{{ move.part?.sku }}</small>
+                        </td>
+                        <td>{{ getMoveTypeLabel(move.move_type) }}</td>
+                        <td dir="ltr" :class="move.qty > 0 ? 'text-green-600' : 'text-red-600'">
+                            {{ move.qty > 0 ? '+' : '' }}{{ formatQuantity(move.qty) }}
+                        </td>
+                        <td>{{ formatQuantity(move.balance_after) }}</td>
+                        <td>{{ formatCurrency(move.unit_cost) }}</td>
+                        <td dir="ltr" class="text-[10px]">{{ formatDate(move.posted_at) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Footer -->
+            <div class="mt-8 text-center text-[10px] text-gray-400 border-t pt-4">
+                {{ $t('common.printed_by') }}: {{ $page.props.auth.user.name }} | {{ new Date().toLocaleString() }}
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <script setup>
@@ -284,10 +406,12 @@ import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import ReceiptModal from '@/Components/Inventory/ReceiptModal.vue';
 import AdjustmentModal from '@/Components/Inventory/AdjustmentModal.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import { usePermission } from '@/Composables/usePermission';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
-const page = usePage();
-const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
+const { can, isAnyAdmin } = usePermission();
 
 const props = defineProps({
     moves: Object,
@@ -302,20 +426,38 @@ const showAdjustmentModal = ref(false);
 const localFilters = ref({
     search: props.filters?.search || '',
     type: props.filters?.type || '',
+    part_id: props.filters?.part_id || '',
     date_from: props.filters?.date_from || '',
     date_to: props.filters?.date_to || '',
+    sort: props.filters?.sort || 'posted_at',
+    order: props.filters?.order || 'desc',
 });
+
+const { formatQuantity, formatCurrency } = useNumberFormat();
 
 const applyFilters = () => {
     router.get(route('app.inventory.moves.index'), {
         search: localFilters.value.search || undefined,
         type: localFilters.value.type || undefined,
+        part_id: localFilters.value.part_id || undefined,
         date_from: localFilters.value.date_from || undefined,
         date_to: localFilters.value.date_to || undefined,
+        sort: localFilters.value.sort || undefined,
+        order: localFilters.value.order || undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
     });
+};
+
+const sortBy = (field) => {
+    if (localFilters.value.sort === field) {
+        localFilters.value.order = localFilters.value.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        localFilters.value.sort = field;
+        localFilters.value.order = 'asc';
+    }
+    applyFilters();
 };
 
 const resetFilters = () => {
@@ -330,21 +472,15 @@ const debouncedSearch = debounce(applyFilters, 300);
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleString('ar-SA', {
+    // Force en-US for English numerals
+    return new Date(date).toLocaleString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
+        hour12: true
     });
-};
-
-const formatCurrency = (value) => {
-    return new Intl.NumberFormat('ar-SA', {
-        style: 'currency',
-        currency: 'SAR',
-        minimumFractionDigits: 2,
-    }).format(value || 0);
 };
 
 const getMoveTypeLabel = (type) => {
@@ -386,14 +522,25 @@ const getMoveTypeBadgeClass = (type) => {
 const calculateStockBefore = (move) => {
     const balanceAfter = parseFloat(move.balance_after) || 0;
     const qty = parseFloat(move.qty) || 0;
-    return (balanceAfter - qty).toFixed(3).replace(/\.?0+$/, '');
+    const before = balanceAfter - qty;
+    // Format with en-US to ensure English numerals
+    return before.toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+        useGrouping: false
+    });
 };
 
 const canReverse = (move) => {
     if (move.reversed_at) return false;
+    
+    // Restricted types that should be reversed from their own modules
+    const restrictedTypes = ['issue_to_workorder', 'transfer_in', 'transfer_out'];
+    if (restrictedTypes.includes(move.move_type)) return false;
+
     if (move.move_type === 'receipt') return can('inventory.receipts.cancel');
     if (move.move_type.startsWith('adjustment')) return can('inventory.adjustments.cancel');
-    if (move.move_type === 'issue_to_workorder') return can('inventory.issue.reverse');
+    
     return false;
 };
 
@@ -404,4 +551,11 @@ const reverseMove = (move) => {
         preserveScroll: true,
     });
 };
+const handlePrint = () => {
+    window.print();
+};
 </script>
+
+<style scoped>
+/* Scoped styles for screen adjustments */
+</style>

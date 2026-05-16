@@ -39,6 +39,8 @@ class PurchasingService
                 'expected_date' => $data['expected_date'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'terms' => $data['terms'] ?? null,
+                'create_credit_invoice' => $data['create_credit_invoice'] ?? false,
+                'due_date' => $data['due_date'] ?? null,
             ]);
 
             // Add items if provided
@@ -175,6 +177,20 @@ class PurchasingService
             // Add items
             if (!empty($data['items'])) {
                 foreach ($data['items'] as $item) {
+                    $poItem = PurchaseOrderItem::findOrFail($item['purchase_order_item_id']);
+                    
+                    // Validate quantity (cannot receive more than pending)
+                    if ($item['qty_received'] > $poItem->qty_pending) {
+                        throw ValidationException::withMessages([
+                            "items.{$item['purchase_order_item_id']}" => [
+                                __('purchasing.grn.over_receiving_error', [
+                                    'part' => $poItem->part->name_ar ?? $poItem->part->name_en,
+                                    'pending' => $poItem->qty_pending
+                                ])
+                            ],
+                        ]);
+                    }
+
                     GrnItem::create([
                         'goods_received_note_id' => $grn->id,
                         'purchase_order_item_id' => $item['purchase_order_item_id'],

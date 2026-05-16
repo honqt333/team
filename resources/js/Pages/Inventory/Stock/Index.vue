@@ -15,6 +15,14 @@
                 badgeBorder="border-emerald-100/50 dark:border-emerald-800/30"
                 badgeDot="bg-emerald-500"
             >
+                <template #back>
+                    <Link :href="route('app.inventory.hub')" class="p-2 -ml-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-full transition-all">
+                        <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                </template>
+
                 <template #icon>
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -23,6 +31,15 @@
 
                 <template #actions>
                     <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <button 
+                            @click="handlePrint"
+                            :title="$t('common.print')"
+                            class="p-2.5 rounded-xl transition-all shadow-sm text-gray-400 hover:text-emerald-600 hover:bg-white dark:hover:bg-gray-800"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
                         <button 
                             @click="viewMode = 'grid'"
                             :title="$t('common.grid_view')"
@@ -55,7 +72,7 @@
                 </template>
 
                 <template #filters>
-                    <div class="flex flex-col md:flex-row items-center gap-4">
+                    <div class="flex flex-col md:flex-row items-center gap-4 no-print">
                         <!-- Search Box -->
                         <div class="relative group flex-1 w-full">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none text-gray-400 group-focus-within:text-emerald-500 transition-colors">
@@ -133,20 +150,56 @@
             </PageHeader>
 
             <!-- View Content -->
-            <div v-if="viewMode === 'list'" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div :class="['list-view-content', { 'hidden': viewMode !== 'list' }]" class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">#</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.parts.sku_barcode') }}</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.parts.name') }}</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.parts.description') }}</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.stock.qty') }}</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.stock.min_qty') }}</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.stock.wac') }}</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.parts.price') }}</th>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.parts.min_sale_price') }}</th>
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('sku')">
+                                    <div class="flex items-center gap-1">
+                                        {{ $t('inventory.parts.part_number') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'sku' && localFilters.order === 'asc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'sku' && localFilters.order === 'desc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('name')">
+                                    <div class="flex items-center gap-1">
+                                        {{ $t('inventory.parts.name') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'name' && localFilters.order === 'asc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'name' && localFilters.order === 'desc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.description') }}</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('qty_on_hand')">
+                                    <div class="flex items-center justify-center gap-1">
+                                        {{ $t('inventory.stock.available') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'qty_on_hand' && localFilters.order === 'asc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'qty_on_hand' && localFilters.order === 'desc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.stock.min_qty') }}</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('wac_cost')">
+                                    <div class="flex items-center justify-center gap-1">
+                                        {{ $t('inventory.stock.avg_cost') }}
+                                        <div class="flex flex-col">
+                                            <svg v-if="localFilters.sort === 'wac_cost' && localFilters.order === 'asc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 15l7-7 7 7" /></svg>
+                                            <svg v-else-if="localFilters.sort === 'wac_cost' && localFilters.order === 'desc'" class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                                            <svg v-else class="w-3 h-3 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.price') }}</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.min_sale_price') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -159,11 +212,11 @@
                                     <div v-if="balance.part?.barcode" class="text-xs text-gray-500 font-mono"><span dir="ltr">{{ balance.part?.barcode }}</span></div>
                                 </td>
                                 <td class="px-4 py-3 text-start">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                        <Link :href="route('app.inventory.parts.show', balance.part_id)" class="hover:text-blue-600 hover:underline">
+                                    <Link :href="route('app.inventory.parts.show', balance.part_id)" class="group/part">
+                                        <div class="text-sm font-bold text-blue-600 dark:text-blue-400 group-hover/part:text-blue-700 dark:group-hover/part:text-blue-300 group-hover/part:underline transition-all">
                                             {{ balance.part?.name_ar }}
-                                        </Link>
-                                    </div>
+                                        </div>
+                                    </Link>
                                     <div v-if="balance.part?.name_en" class="text-xs text-gray-500 dark:text-gray-400">{{ balance.part?.name_en }}</div>
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate">{{ balance.part?.description || '-' }}</td>
@@ -199,7 +252,7 @@
             </div>
 
             <!-- Grid View -->
-            <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div :class="['grid-view-content', { 'hidden': viewMode !== 'grid' }]" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 no-print">
                 <div v-for="balance in balances.data" :key="balance.id" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow relative overflow-hidden group">
                     
                     <!-- Header -->
@@ -287,6 +340,48 @@
             </div>
         </div>
     </AppLayout>
+
+    <!-- Print Section -->
+    <Teleport to="body">
+        <div class="print-section hidden">
+            <!-- Header -->
+            <PrintHeader 
+                :title="$t('inventory.stock.title')" 
+                :subtitle="warehouse ? warehouse.name : ''"
+            />
+
+            <!-- Table -->
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px;">#</th>
+                        <th>{{ $t('inventory.parts.part_number') }}</th>
+                        <th>{{ $t('inventory.parts.name') }}</th>
+                        <th>{{ $t('inventory.parts.category') }}</th>
+                        <th>{{ $t('inventory.stock.available') }}</th>
+                        <th>{{ $t('inventory.stock.avg_cost') }}</th>
+                        <th>{{ $t('inventory.parts.price') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(balance, index) in balances.data" :key="balance.id">
+                        <td>{{ index + 1 }}</td>
+                        <td class="font-bold">{{ balance.part?.sku }}</td>
+                        <td>{{ balance.part?.name_ar }}</td>
+                        <td>{{ balance.part?.category?.name_ar || '-' }}</td>
+                        <td>{{ formatQuantity(balance.qty_on_hand) }} {{ balance.part?.unit?.name_ar || '' }}</td>
+                        <td>{{ formatCurrency(balance.wac_cost) }}</td>
+                        <td>{{ formatCurrency(balance.part?.default_sale_price) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Footer -->
+            <div class="mt-8 text-center text-[10px] text-gray-400 border-t pt-4">
+                {{ $t('common.printed_by') }}: {{ $page.props.auth.user.name }} | {{ new Date().toLocaleString() }}
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <script setup>
@@ -295,6 +390,7 @@ import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { debounce } from 'lodash-es';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
@@ -314,6 +410,8 @@ const localFilters = ref({
     stock_status: props.filters?.stock_status || '',
     category: props.filters?.category || '',
     warehouse_id: props.filters?.warehouse_id || props.warehouse?.id || '',
+    sort: props.filters?.sort || 'qty_on_hand',
+    order: props.filters?.order || 'desc',
 });
 
 const viewMode = ref(localStorage.getItem('inventory_stock_view_mode') || 'list');
@@ -328,10 +426,22 @@ const applyFilters = () => {
         stock_status: localFilters.value.stock_status || undefined,
         category: localFilters.value.category || undefined,
         warehouse_id: localFilters.value.warehouse_id || undefined,
+        sort: localFilters.value.sort || undefined,
+        order: localFilters.value.order || undefined,
     }, {
         preserveState: true,
         preserveScroll: true,
     });
+};
+
+const sortBy = (field) => {
+    if (localFilters.value.sort === field) {
+        localFilters.value.order = localFilters.value.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        localFilters.value.sort = field;
+        localFilters.value.order = 'asc';
+    }
+    applyFilters();
 };
 
 const resetFilters = () => {
@@ -355,4 +465,11 @@ const getStockStatusClass = (balance) => {
     }
     return 'bg-blue-600 text-white shadow-sm'; // Normal stock
 };
+const handlePrint = () => {
+    window.print();
+};
 </script>
+
+<style scoped>
+/* Scoped styles for screen-only adjustments if needed */
+</style>

@@ -25,6 +25,15 @@
 
                 <template #actions>
                     <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                        <button @click="printQuotes" :title="$t('common.print')"
+                            class="p-2.5 text-gray-500 hover:text-amber-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
+
+                        <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
                         <div class="flex gap-1.5">
                             <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
                                 :class="[
@@ -321,59 +330,109 @@
             <div v-else
                 class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('quotes.columns.code') }}
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">#</th>
+                                <th @click="toggleSort('code')" class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div class="flex items-center gap-1.5">
+                                        {{ $t('quotes.columns.code') }}
+                                        <SortIcon :active="sortColumn === 'code'" :direction="sortDirection" />
+                                    </div>
                                 </th>
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('quotes.columns.vehicle') }}
+                                <th @click="toggleSort('vehicle')" class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div class="flex items-center gap-1.5">
+                                        {{ $t('quotes.columns.vehicle') }}
+                                        <SortIcon :active="sortColumn === 'vehicle'" :direction="sortDirection" />
+                                    </div>
                                 </th>
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('quotes.columns.customer') }}
+                                <th @click="toggleSort('customer')" class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div class="flex items-center gap-1.5">
+                                        {{ $t('quotes.columns.customer') }}
+                                        <SortIcon :active="sortColumn === 'customer'" :direction="sortDirection" />
+                                    </div>
                                 </th>
-                                <th
-                                    class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('quotes.columns.status') }}
+                                <th @click="toggleSort('services')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        {{ $t('quotes.card.services') }}
+                                        <SortIcon :active="sortColumn === 'services'" :direction="sortDirection" />
+                                    </div>
                                 </th>
-                                <th
-                                    class="px-5 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('quotes.columns.total') }}
+                                <th @click="toggleSort('subtotal')" class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        {{ $t('quotes.form.subtotal') }}
+                                        <SortIcon :active="sortColumn === 'subtotal'" :direction="sortDirection" />
+                                    </div>
+                                </th>
+                                <th @click="toggleSort('discount')" class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        {{ $t('quotes.form.discount') }}
+                                        <SortIcon :active="sortColumn === 'discount'" :direction="sortDirection" />
+                                    </div>
+                                </th>
+                                <th @click="toggleSort('total')" class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <div class="flex items-center justify-end gap-1.5">
+                                        {{ $t('quotes.columns.total') }}
+                                        <SortIcon :active="sortColumn === 'total'" :direction="sortDirection" />
+                                    </div>
+                                </th>
+                                <th @click="toggleSort('date')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-24">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        {{ $t('common.created_at') }}
+                                        <SortIcon :active="sortColumn === 'date'" :direction="sortDirection" />
+                                    </div>
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="quote in filteredQuotes" :key="quote.id" @click="navigateToShow(quote)"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors">
-                                <td class="px-5 py-4">
-                                    <span class="text-sm font-bold text-gray-900 dark:text-gray-100">
-                                        {{ quote.code }}
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                            <tr v-for="(quote, index) in sortedQuotes" :key="quote.id" @click="navigateToShow(quote)"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors group">
+                                <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                    {{ toEnglish(index + 1) }}
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
+                                        #{{ toEnglish(quote.code) }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-4">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-bold text-gray-900 dark:text-gray-100">{{
-                                            quote.vehicle?.plate_number }}</span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{
-                                            getVehicleName(quote.vehicle) }}</span>
+                                <td class="px-4 py-4">
+                                    <div class="flex items-center gap-2">
+                                        <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-sm font-bold text-gray-800 dark:text-gray-200 font-mono" dir="ltr">
+                                            {{ toEnglish(quote.vehicle?.plate_number) || '-' }}
+                                        </span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
+                                            {{ getVehicleName(quote.vehicle) }}
+                                        </span>
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-gray-700 dark:text-gray-300">
-                                    {{ quote.customer?.name }}
+                                <td class="px-4 py-4">
+                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
+                                        {{ quote.customer?.name || '-' }}
+                                    </div>
                                 </td>
-                                <td class="px-5 py-4">
-                                    <span class="px-2 py-1 text-[10px] font-bold rounded-full uppercase tracking-wider"
-                                        :class="getStatusClass(quote.status)">
-                                        {{ $t(`quotes.status.${quote.status}`) }}
+                                <td class="px-4 py-4 text-center">
+                                    <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold">
+                                        {{ toEnglish(quote.lines_count || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-4 text-end">
-                                    <span class="text-sm font-bold text-amber-600 dark:text-amber-400">
-                                        {{ formatCurrency(quote.total) }}
+                                <td class="px-4 py-4 text-end">
+                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                        {{ formatNumber(quote.subtotal || 0) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-end">
+                                    <span class="text-sm font-medium text-red-600 dark:text-red-400">
+                                        {{ formatNumber(quote.total_discount || 0) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-end">
+                                    <span class="text-sm font-black text-amber-600 dark:text-amber-400">
+                                        {{ formatNumber(quote.total || 0) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-4 text-center whitespace-nowrap">
+                                    <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
+                                        {{ formatDate(quote.created_at) }}
                                     </span>
                                 </td>
                             </tr>
@@ -405,6 +464,43 @@
         <!-- Quote Form Modal -->
         <QuoteFormModal :show="showModal" :quote="selectedQuote" :customers="customers" :departments="departments"
             :makes="makes" :colors="colors" :modelsByMake="modelsByMake" @close="closeModal" @saved="handleSaved" />
+
+        <!-- Print Section (Teleported to body for printing) -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <PrintHeader :title="$t('quotes.title')" />
+
+                <!-- Table -->
+                <table class="print-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>{{ $t('quotes.columns.code') }}</th>
+                            <th>{{ $t('common.date') }}</th>
+                            <th>{{ $t('quotes.columns.vehicle') }}</th>
+                            <th>{{ $t('quotes.columns.customer') }}</th>
+                            <th>{{ $t('quotes.card.services') }}</th>
+                            <th>{{ $t('quotes.columns.total') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(quote, index) in sortedQuotes" :key="quote.id">
+                            <td>{{ toEnglish(index + 1) }}</td>
+                            <td>{{ toEnglish(quote.code) }}</td>
+                            <td>{{ formatDate(quote.created_at) }}</td>
+                            <td dir="ltr" class="text-left font-sans">{{ toEnglish(quote.vehicle?.plate_number) || '-' }}</td>
+                            <td>{{ quote.customer?.name || '-' }}</td>
+                            <td>{{ toEnglish(quote.lines_count || 0) }}</td>
+                            <td>{{ formatNumber(quote.total || 0) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="mt-8 text-center text-xs text-gray-400">
+                    {{ $page.props.auth.user.name }}
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
@@ -420,6 +516,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import SortIcon from '@/Components/Common/SortIcon.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
@@ -767,6 +865,90 @@ function navigateToShow(quote) {
 function closeModal() {
     showModal.value = false;
     selectedQuote.value = null;
+}
+
+// ==================== Sorting Logic ====================
+const sortColumn = ref('');
+const sortDirection = ref('asc'); // 'asc' or 'desc'
+
+function toggleSort(column) {
+    if (sortColumn.value === column) {
+        // Toggle direction
+        sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        // New column
+        sortColumn.value = column;
+        sortDirection.value = 'asc';
+    }
+}
+
+// Sorted quotes based on selected column
+const sortedQuotes = computed(() => {
+    if (!sortColumn.value) return filteredQuotes.value;
+    
+    const sorted = [...filteredQuotes.value].sort((a, b) => {
+        let valA, valB;
+        
+        switch (sortColumn.value) {
+            case 'code':
+                valA = a.code || '';
+                valB = b.code || '';
+                break;
+            case 'vehicle':
+                valA = a.vehicle?.plate_number || '';
+                valB = b.vehicle?.plate_number || '';
+                break;
+            case 'customer':
+                valA = a.customer?.name || '';
+                valB = b.customer?.name || '';
+                break;
+            case 'services':
+                valA = a.lines_count || 0;
+                valB = b.lines_count || 0;
+                break;
+            case 'subtotal':
+                valA = parseFloat(a.subtotal) || 0;
+                valB = parseFloat(b.subtotal) || 0;
+                break;
+            case 'discount':
+                valA = parseFloat(a.total_discount) || 0;
+                valB = parseFloat(b.total_discount) || 0;
+                break;
+            case 'total':
+                valA = parseFloat(a.total) || 0;
+                valB = parseFloat(b.total) || 0;
+                break;
+            case 'date':
+                valA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                valB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                break;
+            default:
+                return 0;
+        }
+        
+        if (valA < valB) return sortDirection.value === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection.value === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    return sorted;
+});
+
+// Print quotes
+async function printQuotes() {
+    // We can only print what's currently loaded in allQuotes
+    // If the user wants to print everything, they should scroll to the bottom first
+    // Or we could fetch everything here, but usually printing current view is expected
+    
+    // Check if we need to load more data to have everything (up to a limit for performance)
+    if (nextPageUrl.value && allQuotes.value.length < (props.quotes?.total || 0)) {
+        // Option to warn user or just print what's loaded
+        // For now, print what's loaded like in WorkOrders
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Trigger print
+    window.print();
 }
 
 function handleSaved() {

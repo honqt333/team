@@ -9,6 +9,39 @@
 
         <template #content>
             <div class="space-y-6">
+                <!-- Image Upload Section -->
+                <div class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl bg-gray-50/50 dark:bg-gray-900/30 transition-all hover:bg-gray-100 dark:hover:bg-gray-800/50 group relative overflow-hidden">
+                    <input
+                        type="file"
+                        ref="imageInput"
+                        class="hidden"
+                        accept="image/*"
+                        @change="handleImageChange"
+                    />
+                    
+                    <div v-if="imagePreview" class="relative group/preview">
+                        <img :src="imagePreview" class="w-32 h-32 object-cover rounded-2xl shadow-xl border-4 border-white dark:border-gray-800 transition-transform group-hover/preview:scale-105" />
+                        <button 
+                            @click="removeImage"
+                            class="absolute -top-2 -right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg opacity-0 group-hover/preview:opacity-100 transition-opacity"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+                    
+                    <div v-else @click="imageInput.click()" class="flex flex-col items-center cursor-pointer">
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <span class="text-sm font-bold text-gray-600 dark:text-gray-400">{{ $t('inventory.parts.add_image') || 'Add Part Image' }}</span>
+                        <span class="text-[10px] text-gray-400 mt-1">{{ $t('common.max_size', {size: '2MB'}) }}</span>
+                    </div>
+                    
+                    <p v-if="form.errors.image" class="mt-2 text-xs text-red-500">{{ form.errors.image }}</p>
+                </div>
+
                 <!-- Top Row: SKU, Barcode, Unit -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- SKU -->
@@ -21,7 +54,8 @@
                                 v-model="form.sku"
                                 type="text"
                                 dir="ltr"
-                                :class="['w-full pl-4 pr-3 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.sku ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
+                                @input="sanitizeInput($event, 'sku')"
+                                :class="['w-full pl-4 pr-3 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.sku ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
                                 :placeholder="$t('inventory.parts.sku_placeholder')"
                             />
                         </div>
@@ -38,7 +72,8 @@
                                 v-model="form.barcode"
                                 type="text"
                                 dir="ltr"
-                                :class="['w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.barcode ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
+                                @input="sanitizeInput($event, 'barcode')"
+                                :class="['w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.barcode ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
                                 placeholder="Scan..."
                             />
                             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
@@ -149,31 +184,31 @@
                                 <!-- Default Sale Price -->
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1">{{ $t('inventory.parts.default_sale_price') }}</label>
-                                    <input v-model.number="form.default_sale_price" type="number" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm" dir="ltr" />
+                                    <input v-model="form.default_sale_price" type="text" @input="sanitizeInput($event, 'default_sale_price')" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm font-mono" dir="ltr" />
                                 </div>
                                 
                                 <!-- Min Sale Price -->
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1">{{ $t('inventory.parts.min_sale_price') }}</label>
-                                    <input v-model.number="form.min_sale_price" type="number" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm" dir="ltr" />
+                                    <input v-model="form.min_sale_price" type="text" @input="sanitizeInput($event, 'min_sale_price')" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm font-mono" dir="ltr" />
                                 </div>
 
                                 <!-- Min Qty -->
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1">{{ $t('inventory.parts.min_qty') }}</label>
-                                    <input v-model.number="form.min_qty" type="number" step="1" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm" dir="ltr" />
+                                    <input v-model="form.min_qty" type="text" @input="sanitizeInput($event, 'min_qty')" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm font-mono" dir="ltr" />
                                 </div>
 
                                 <!-- Reorder Qty -->
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1">{{ $t('inventory.parts.reorder_qty') }}</label>
-                                    <input v-model.number="form.reorder_qty" type="number" step="1" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm" dir="ltr" />
+                                    <input v-model="form.reorder_qty" type="text" @input="sanitizeInput($event, 'reorder_qty')" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm font-mono" dir="ltr" />
                                 </div>
 
                                 <!-- Cost (Read Only / Placeholder for now as it comes from Stock) -->
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 mb-1">{{ $t('inventory.stock.wac') }} ({{ $t('common.read_only') }})</label>
-                                    <input disabled :value="0" type="text" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 text-sm cursor-not-allowed" dir="ltr" />
+                                    <input disabled :value="0" type="text" class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 text-sm cursor-not-allowed font-mono" dir="ltr" />
                                 </div>
 
                                 <!-- Active Toggle -->
@@ -182,11 +217,18 @@
                                     <button 
                                         type="button" 
                                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" 
-                                        :class="[form.is_active !== false ? 'bg-indigo-600' : 'bg-gray-200']" 
+                                        :class="[form.is_active ? 'bg-indigo-600' : 'bg-gray-200']" 
                                         role="switch" 
                                         @click="form.is_active = !form.is_active"
                                     >
-                                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" :class="[form.is_active !== false ? 'translate-x-5' : 'translate-x-0']"></span>
+                                        <span 
+                                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" 
+                                            :class="[
+                                                form.is_active 
+                                                    ? (isAr ? '-translate-x-5' : 'translate-x-5') 
+                                                    : 'translate-x-0'
+                                            ]"
+                                        ></span>
                                     </button>
                                 </div>
                             </div>
@@ -225,6 +267,7 @@ import { ref, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     show: Boolean,
@@ -243,8 +286,36 @@ const emit = defineEmits(['close']);
 const { t, locale } = useI18n();
 const { confirm } = useConfirm();
 const page = usePage();
+const { formatQuantity, formatCurrency, toEnglish, sanitizeInput: internalSanitize } = useNumberFormat();
 
 const isAr = computed(() => locale.value === 'ar');
+
+const imageInput = ref(null);
+const imagePreview = ref(null);
+
+const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    form.image = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        imagePreview.value = e.target.result;
+    };
+    reader.readAsDataURL(file);
+};
+
+const removeImage = () => {
+    form.image = null;
+    form.remove_image = true;
+    imagePreview.value = null;
+    if (imageInput.value) imageInput.value.value = '';
+};
+
+const sanitizeInput = (event, field) => {
+    const sanitized = internalSanitize(event);
+    form[field] = sanitized;
+};
 
 const unitOptions = computed(() => {
     return props.units.map(unit => ({
@@ -286,6 +357,9 @@ const form = useForm({
     default_sale_price: 0,
     min_sale_price: 0,
     is_active: true,
+    image: null,
+    remove_image: false,
+    _method: 'POST',
 });
 
 watch(() => props.part, (part) => {
@@ -298,16 +372,22 @@ watch(() => props.part, (part) => {
         form.unit_id = part.unit_id;
         form.category_id = part.category_id;
         form.description = part.description;
-        form.min_qty = Number(part.min_qty);
-        form.reorder_qty = Number(part.reorder_qty);
-        form.default_sale_price = Number(part.default_sale_price);
-        form.min_sale_price = Number(part.min_sale_price);
+        form.min_qty = parseFloat(part.min_qty || 0);
+        form.reorder_qty = parseFloat(part.reorder_qty || 0);
+        form.default_sale_price = parseFloat(part.default_sale_price || 0);
+        form.min_sale_price = parseFloat(part.min_sale_price || 0);
         form.is_active = part.is_active;
+        form.image = null;
+        form.remove_image = false;
+        imagePreview.value = part.image_url;
     } else {
         form.reset();
         form.id = null;
         form.is_active = true;
         form.unit_id = props.units.length > 0 ? props.units[0].id : '';
+        form.image = null;
+        form.remove_image = false;
+        imagePreview.value = null;
     }
 }, { immediate: true });
 
@@ -336,6 +416,7 @@ const close = () => {
     form.clearErrors();
     isDirty.value = false;
     initialFormData.value = null;
+    imagePreview.value = null;
 };
 
 async function handleClose() {
@@ -353,13 +434,19 @@ async function handleClose() {
 }
 
 const submit = () => {
+    // For file uploads, we use POST with _method spoofing if it's an update
     if (form.id) {
-        form.put(route('app.inventory.parts.update', form.id), {
+        form.transform((data) => ({
+            ...data,
+            _method: 'PUT',
+        })).post(route('app.inventory.parts.update', form.id), {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => close(),
         });
     } else {
         form.post(route('app.inventory.parts.store'), {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => close(),
         });

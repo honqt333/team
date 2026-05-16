@@ -66,7 +66,7 @@
                                             </td>
                                             <td class="px-6 py-4 text-center">
                                                 <span class="px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-mono font-bold">
-                                                    {{ item.qty_received }}
+                                                    {{ toEnglish(item.qty_received) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-end font-mono">{{ formatCurrency(item.unit_cost) }}</td>
@@ -86,7 +86,6 @@
                                 </table>
                             </div>
                         </div>
-
                         <!-- Notes -->
                         <div v-if="grn.notes" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
                             <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{{ $t('common.notes') }}</h4>
@@ -152,7 +151,7 @@ const props = defineProps({
     grn: Object,
 });
 
-const { formatCurrency } = useNumberFormat();
+const { formatCurrency, toEnglish } = useNumberFormat();
 
 const statusBadgeClass = computed(() => {
     const classes = {
@@ -169,12 +168,12 @@ const totalAmount = computed(() => {
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    return new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
 };
 
 const formatDateTime = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleString('ar-SA', {
+    return new Date(date).toLocaleString('en-US', {
         year: 'numeric', month: '2-digit', day: '2-digit',
         hour: '2-digit', minute: '2-digit'
     });

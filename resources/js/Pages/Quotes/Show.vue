@@ -597,9 +597,11 @@ const submitApproval = () => {
 };
 
 // Computed: Sort departments by sort_order
-const visibleDepartments = computed(() =>
-    [...(props.quoteDepartments || [])].sort((a, b) => a.sort_order - b.sort_order)
-);
+const visibleDepartments = computed(() => {
+    const depts = props.quoteDepartments || [];
+    return (Array.isArray(depts) ? depts : Object.values(depts))
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+});
 
 // Computed: Get active department's services for the modal dropdown
 const activeDepartmentServices = computed(() => {
@@ -708,14 +710,19 @@ const hasTax = computed(() => props.quote.tax_enabled_snapshot || totals.value.g
 
 // Status Badge
 const statusBadgeClass = computed(() => {
-    switch (props.quote.status) {
+    return getQuoteStatusClass(props.quote.status);
+});
+
+function getQuoteStatusClass(status) {
+    switch (status) {
         case 'draft': return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 px-3 py-1 rounded-full text-sm font-medium';
         case 'sent': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-full text-sm font-medium';
-        case 'approved': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 px-3 py-1 rounded-full text-sm font-medium';
+        case 'approved': return 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-3 py-1 rounded-full text-sm font-medium';
         case 'converted': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 px-3 py-1 rounded-full text-sm font-medium';
-        default: return 'bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm font-medium';
+        case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-3 py-1 rounded-full text-sm font-medium';
+        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 px-3 py-1 rounded-full text-sm font-medium';
     }
-});
+}
 
 // Actions
 function openAddDepartmentModal() {

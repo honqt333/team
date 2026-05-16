@@ -52,6 +52,9 @@ class InventoryBalanceController extends Controller
              $warehouse = Warehouse::find($warehouse->id);
         }
 
+        $sort = $request->input('sort', 'qty_on_hand');
+        $order = $request->input('order', 'desc');
+        
         $query = InventoryBalance::forWarehouse($warehouse->id)
             ->with(['part' => fn($q) => $q->select('id', 'sku', 'barcode', 'name_ar', 'name_en', 'unit_id', 'category_id', 'min_qty', 'description', 'default_sale_price', 'min_sale_price')->with(['category', 'unit'])])
             ->when($request->input('search'), function ($q, $search) {
@@ -67,8 +70,20 @@ class InventoryBalanceController extends Controller
             })
             ->when($request->input('stock_status') === 'in_stock', fn($q) => $q->withStock())
             ->when($request->input('stock_status') === 'low_stock', fn($q) => $q->lowStock())
-            ->when($request->input('stock_status') === 'out_of_stock', fn($q) => $q->where('qty_on_hand', '<=', 0))
-            ->orderBy('qty_on_hand', 'desc');
+            ->when($request->input('stock_status') === 'out_of_stock', fn($q) => $q->where('qty_on_hand', '<=', 0));
+
+        // Apply Sorting
+        if ($sort === 'sku') {
+            $query->join('parts', 'inventory_balances.part_id', '=', 'parts.id')
+                  ->orderBy('parts.sku', $order)
+                  ->select('inventory_balances.*');
+        } elseif ($sort === 'name') {
+            $query->join('parts', 'inventory_balances.part_id', '=', 'parts.id')
+                  ->orderBy(app()->getLocale() === 'ar' ? 'parts.name_ar' : 'parts.name_en', $order)
+                  ->select('inventory_balances.*');
+        } else {
+            $query->orderBy($sort, $order);
+        }
 
         $balances = $query->paginate(25)->withQueryString();
 

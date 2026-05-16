@@ -112,40 +112,40 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th
-                                    class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.orders.code') }}</th>
                                 <th
-                                    class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.orders.supplier') }}</th>
                                 <th
-                                    class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.orders.date') }}</th>
                                 <th
-                                    class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.orders.total') }}</th>
                                 <th
                                     class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('common.status') }}</th>
                                 <th
-                                    class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="order in orders.data" :key="order.id"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td class="px-4 py-3 text-sm font-mono text-blue-600 dark:text-blue-400">
+                                <td class="px-4 py-3 text-center text-sm font-mono text-blue-600 dark:text-blue-400" dir="ltr" lang="en">
                                     <Link :href="route('app.purchasing.orders.show', order.id)" class="hover:underline">
                                         {{ order.code }}
                                     </Link>
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-white">{{ order.supplier?.name }}
+                                <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white">{{ order.supplier?.name }}
                                 </td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" dir="ltr">
+                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300" dir="ltr" lang="en">
                                     {{ formatDate(order.order_date) }}
                                 </td>
-                                <td class="px-4 py-3 text-end text-sm font-medium text-gray-900 dark:text-white font-mono"
-                                    dir="ltr">
+                                <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white font-mono"
+                                    dir="ltr" lang="en">
                                     {{ formatCurrency(order.total) }}
                                 </td>
                                 <td class="px-4 py-3 text-center">
@@ -153,10 +153,10 @@
                                         {{ getStatusLabel(order.status) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-end">
+                                <td class="px-4 py-3 text-center">
                                     <Link :href="route('app.purchasing.orders.show', order.id)"
                                         class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -177,8 +177,41 @@
         </div>
 
         <!-- Create/Edit Modal -->
-        <PurchaseOrderFormModal :show="showCreateModal" :suppliers="suppliers" :warehouses="warehouses"
+        <PurchaseOrderFormModal :show="showCreateModal" :suppliers="suppliers" :warehouses="warehouses" :units="units"
             :default-warehouse="defaultWarehouse" @close="showCreateModal = false" @saved="onSaved" />
+
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <PrintHeader :title="$t('purchasing.orders.title')" />
+
+                <table class="w-full mt-6">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.code') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.supplier') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.date') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.total') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('common.status') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="order in orders.data" :key="order.id" class="border-b">
+                            <td class="px-4 py-3 text-center text-sm font-mono">{{ order.code }}</td>
+                            <td class="px-4 py-3 text-center text-sm">{{ order.supplier?.name }}</td>
+                            <td class="px-4 py-3 text-center text-sm font-mono">{{ formatDate(order.order_date) }}</td>
+                            <td class="px-4 py-3 text-center text-sm font-mono">{{ formatCurrency(order.total) }}</td>
+                            <td class="px-4 py-3 text-center text-sm font-bold">{{ getStatusLabel(order.status) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Footer -->
+                <div class="mt-8 text-center text-[10px] text-gray-400 border-t pt-4">
+                    {{ $t('common.printed_by') }}: {{ $page.props.auth.user.name }} | {{ new Date().toLocaleString('en-US') }}
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
@@ -191,6 +224,7 @@ import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import PurchaseOrderFormModal from '@/Components/Purchasing/PurchaseOrderFormModal.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const { t } = useI18n();
@@ -203,6 +237,7 @@ const props = defineProps({
     statuses: Array,
     filters: Object,
     warehouses: Array,
+    units: Array,
     defaultWarehouse: Object,
 });
 
@@ -234,9 +269,9 @@ const printOrders = () => {
     window.print();
 };
 
-const formatDate = (date) => new Date(date).toLocaleDateString('ar-SA');
+const formatDate = (date) => new Date(date).toLocaleDateString('en-US');
 
-const formatCurrency = (value) => new Intl.NumberFormat('ar-SA', {
+const formatCurrency = (value) => new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'SAR',
 }).format(value || 0);

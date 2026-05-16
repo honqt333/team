@@ -27,37 +27,30 @@ class WorkOrderController
         $this->authorize("viewAny", WorkOrder::class);
 
         $status = request("status");
-        $subFilter = request("sub_filter");
+        $subFilter = request("subFilter") ?: request("sub_filter");
 
-        $workOrders = WorkOrder::with(["customer", "vehicle.make", "items"])
+        $workOrders = WorkOrder::with(["customer", "vehicle.make"])
+            ->withCount('items')
             ->when($status === 'open', function ($query) use ($subFilter) {
                 if ($subFilter === 'overdue') {
-                    $query->whereIn('status', ['open', 'in_progress'])
-                        ->whereNotNull('expected_end_date')
+                    $query->whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
                         ->where('expected_end_date', '<', now()->startOfDay());
-                } elseif ($subFilter === 'pending_payment') {
-                    // TODO: Filter by pending payment when columns exist
-                    $query->whereIn('status', ['open', 'in_progress', 'done']);
                 } elseif ($subFilter === 'draft') {
                     $query->where('status', 'draft');
-                } elseif ($subFilter === 'in_progress') {
-                    $query->whereIn('status', ['open', 'in_progress']);
                 } else {
-                    // Default: all open statuses
-                    $query->whereIn('status', ['open', 'in_progress', 'draft']);
+                    $query->whereIn('status', ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc']);
                 }
             })
             ->when($status === 'closed', function ($query) use ($subFilter) {
                 if ($subFilter === 'credit_invoices') {
                     $query->where('status', 'done')
-                          ->whereRaw('total_incl_tax > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
+                          ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
                 } elseif ($subFilter === 'bad_debts') {
                     $query->where('id', 0);
                 } elseif ($subFilter === 'cancelled') {
                     $query->where('status', 'cancelled');
                 } else {
-                    // Default for closed: Completed (Done) as requested
-                    $query->where('status', 'done');
+                    $query->whereIn('status', ['done', 'cancelled']);
                 }
             })
             ->when(request("search"), function ($query, $search) {
@@ -75,6 +68,10 @@ class WorkOrderController
             ->orderByDesc("created_at")
             ->paginate(15)
             ->withQueryString();
+
+        if ($workOrders) {
+            $workOrders->getCollection()->each->append(['total', 'total_paid', 'balance']);
+        }
 
         return response()->json($workOrders);
     }
@@ -97,19 +94,52 @@ class WorkOrderController
             ->groupBy('make_id');
 
         // Main counts for Dashboard
+        $openStatuses = ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc'];
+        $closedStatuses = ['done', 'cancelled'];
+
+        $getStats = function ($statuses) {
+            $count = WorkOrder::whereIn('status', $statuses)->count();
+            if ($count === 0) return ['count' => 0, 'balance' => 0];
+
+            // 1. Get sum of already stored totals
+            $storedTotal = (float) WorkOrder::whereIn('status', $statuses)->where('total_incl_tax', '>', 0)->sum('total_incl_tax');
+            
+            // 2. Get IDs of orders without stored totals to calculate them
+            $unstoredIds = WorkOrder::whereIn('status', $statuses)->where('total_incl_tax', '<=', 0)->select('id');
+            
+            $unstoredItems = (float) \DB::table('work_order_items')->whereIn('work_order_id', $unstoredIds)->selectRaw('SUM((unit_price * qty) - discount_amount) as net')->value('net');
+            $unstoredParts = (float) \DB::table('work_order_item_parts')->whereIn('work_order_id', $unstoredIds)->selectRaw('SUM((unit_price * qty) - discount) as net')->value('net');
+            
+            // Apply standard 15% tax for unstored totals in the dashboard aggregate view
+            $unstoredTotal = ($unstoredItems + $unstoredParts) * 1.15;
+            
+            $totalRevenue = $storedTotal + $unstoredTotal;
+
+            // 3. Get total payments for all orders in these statuses
+            $allIds = WorkOrder::whereIn('status', $statuses)->select('id');
+            $totalPaid = (float) \DB::table('payments')
+                ->whereIn('work_order_id', $allIds)
+                ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')
+                ->value('paid');
+
+            return [
+                'count' => $count,
+                'balance' => round($totalRevenue - $totalPaid, 2)
+            ];
+        };
+
         $counts = [
-            'open' => WorkOrder::whereIn('status', ['open', 'in_progress', 'draft'])->count(),
-            'completed' => WorkOrder::where('status', 'done')->count(),
-            'closed' => WorkOrder::whereIn('status', ['closed', 'cancelled'])->count(),
+            'open' => $getStats($openStatuses),
+            'closed' => $getStats($closedStatuses),
         ];
 
         // Filter tabs counts
         $filterCounts = [];
         if ($status === 'open') {
             $filterCounts = [
-                'open' => WorkOrder::whereIn('status', ['open', 'in_progress'])->count(),
+                'open' => WorkOrder::whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])->count(),
                 'draft' => WorkOrder::where('status', 'draft')->count(),
-                'overdue' => WorkOrder::whereIn('status', ['open', 'in_progress'])
+                'overdue' => WorkOrder::whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
                     ->whereNotNull('expected_end_date')
                     ->where('expected_end_date', '<', now()->startOfDay())
                     ->count(),
@@ -117,42 +147,39 @@ class WorkOrderController
             ];
         } elseif ($status === 'closed') {
             $filterCounts = [
-                'closed' => WorkOrder::where('status', 'done')->count(),
+                'closed' => WorkOrder::whereIn('status', ['done', 'cancelled'])->count(),
                 'credit_invoices' => WorkOrder::where('status', 'done')
-                    ->whereRaw('total_incl_tax > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)')
+                    ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)')
                     ->count(),
                 'bad_debts' => 0,
                 'cancelled' => WorkOrder::where('status', 'cancelled')->count(),
             ];
         }
 
-        // If no status is provided, we default to Dashboard view in frontend
-        // But we still might want to return some initial data
-        $workOrders = null;
         if ($status) {
-            $workOrders = WorkOrder::with(["customer", "vehicle.make", "items"])
+            $workOrders = WorkOrder::with(["customer", "vehicle.make"])
+                ->withCount('items')
                 ->when($status === 'open', function ($query) use ($subFilter) {
                     if ($subFilter === 'overdue') {
-                        $query->whereIn('status', ['open', 'in_progress'])
+                        $query->whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
                             ->whereNotNull('expected_end_date')
                             ->where('expected_end_date', '<', now()->startOfDay());
                     } elseif ($subFilter === 'draft') {
                         $query->where('status', 'draft');
                     } else {
-                        $query->whereIn('status', ['open', 'in_progress', 'draft']);
+                        $query->whereIn('status', ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc']);
                     }
                 })
                 ->when($status === 'closed', function ($query) use ($subFilter) {
                     if ($subFilter === 'credit_invoices') {
                         $query->where('status', 'done')
-                              ->whereRaw('total_incl_tax > (SELECT IFNULL(SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
+                              ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
                     } elseif ($subFilter === 'bad_debts') {
                         $query->where('id', 0);
                     } elseif ($subFilter === 'cancelled') {
                         $query->where('status', 'cancelled');
                     } else {
-                        // Default for closed: Completed (Done) as requested
-                        $query->where('status', 'done');
+                        $query->whereIn('status', ['done', 'cancelled']);
                     }
                 })
                 ->when(request("search"), function ($query, $search) {
@@ -170,6 +197,12 @@ class WorkOrderController
                 ->orderByDesc("created_at")
                 ->paginate(15)
                 ->withQueryString();
+
+            if ($workOrders) {
+                $workOrders->getCollection()->each->append(['total', 'total_paid', 'balance']);
+            }
+        } else {
+            $workOrders = null;
         }
 
         return Inertia::render("WorkOrders/Index", [

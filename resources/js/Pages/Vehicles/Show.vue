@@ -127,7 +127,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                                                 </svg>
                                             </div>
-                                            <span class="font-mono">{{ vehicle.vin }}</span>
+                                            <span class="font-mono">{{ toEnglish(vehicle.vin) }}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -237,7 +237,7 @@
                             <Link v-for="order in filteredWorkOrders" :key="order.id" :href="route('work-orders.show', order.id)"
                                 class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg transition-all">
                                 <div class="flex items-center justify-between mb-3">
-                                    <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ order.code }}</span>
+                                    <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ toEnglish(order.code) }}</span>
                                     <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                 </div>
                                 <div class="text-lg font-black text-gray-900 dark:text-white mb-3">
@@ -262,7 +262,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="order in filteredWorkOrders" :key="order.id" @click="router.visit(route('work-orders.show', order.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{{ order.code }}</td>
+                                        <td class="px-4 py-3 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{{ toEnglish(order.code) }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap">
                                             <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                         </td>
@@ -315,7 +315,7 @@
                             <Link v-for="quote in filteredQuotes" :key="quote.id" :href="route('app.quotes.show', quote.id)"
                                 class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-500 hover:shadow-lg transition-all">
                                 <div class="flex items-center justify-between mb-3">
-                                    <span class="font-mono font-bold text-amber-600 dark:text-amber-400">{{ quote.code }}</span>
+                                    <span class="font-mono font-bold text-amber-600 dark:text-amber-400">{{ toEnglish(quote.code) }}</span>
                                     <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
                                 </div>
                                 <div class="text-lg font-black text-gray-900 dark:text-white mb-3">
@@ -340,7 +340,7 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="quote in filteredQuotes" :key="quote.id" @click="router.visit(route('app.quotes.show', quote.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ quote.code }}</td>
+                                        <td class="px-4 py-3 font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ toEnglish(quote.code) }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap">
                                             <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
                                         </td>
@@ -362,7 +362,7 @@
                             <Link v-for="invoice in invoices" :key="invoice.id" :href="route('invoices.show', invoice.id)"
                                 class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:shadow-lg transition-all">
                                 <div class="flex items-center justify-between mb-3">
-                                    <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">{{ invoice.invoice_number }}</span>
+                                    <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">{{ toEnglish(invoice.invoice_number) }}</span>
                                     <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{{ $t(`invoices.status.${invoice.status}`) }}</span>
                                 </div>
                                 <div class="text-lg font-black text-gray-900 dark:text-white mb-3">
@@ -408,7 +408,7 @@
                                             <span v-else class="text-xs text-gray-400 italic font-bold">-</span>
                                         </td>
                                         <td class="px-4 py-3 text-xs font-bold text-gray-500">
-                                            {{ log.reference_code || 'تحديث يدوي' }}
+                                            {{ toEnglish(log.reference_code) || 'تحديث يدوي' }}
                                         </td>
                                         <td class="px-4 py-3 text-xs font-bold text-gray-500">
                                             {{ log.creator?.name || 'النظام' }}
@@ -427,8 +427,8 @@
 
         <!-- Modals -->
         <VehicleFormModal v-if="showEditModal" :show="showEditModal" :vehicle="vehicle" :customers="[vehicle.customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" @close="showEditModal = false" @saved="handleVehicleSaved" />
-        <WorkOrderFormModal v-if="showWorkOrderModal" :show="showWorkOrderModal" :customers="[vehicle.customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" :departments="departments" :defaultVehicleId="vehicle.id" @close="showWorkOrderModal = false" @saved="handleWorkOrderSaved" />
-        <QuoteFormModal v-if="showQuoteModal" :show="showQuoteModal" :customers="[vehicle.customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" :departments="departments" :services="services" :defaultVehicleId="vehicle.id" @close="showQuoteModal = false" @saved="handleQuoteSaved" />
+        <WorkOrderFormModal v-if="showWorkOrderModal" :show="showWorkOrderModal" :customers="[vehicle.customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" :departments="departments" :vehicle="vehicle" @close="showWorkOrderModal = false" @saved="handleWorkOrderSaved" />
+        <QuoteFormModal v-if="showQuoteModal" :show="showQuoteModal" :customers="[vehicle.customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake" :departments="departments" :services="services" :vehicle="vehicle" @close="showQuoteModal = false" @saved="handleQuoteSaved" />
         <ConfirmModal />
     </AppLayout>
 </template>
@@ -517,14 +517,14 @@ function getModelName(vehicle) {
 }
 function getVehicleName(vehicle) {
     if (!vehicle) return '';
-    return [getMakeName(vehicle), getModelName(vehicle), vehicle.year].filter(Boolean).join(' ');
+    return [getMakeName(vehicle), getModelName(vehicle), toEnglish(vehicle.year?.toString())].filter(Boolean).join(' ');
 }
 function formatDate(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US');
+    return new Date(dateStr).toLocaleDateString('en-US');
 }
 function formatCurrency(amount) {
-    return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', { style: 'currency', currency: 'SAR' }).format(amount);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'SAR' }).format(amount);
 }
 function getStatusClass(status) {
     const classes = { open: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400', in_progress: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', closed: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300', cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' };

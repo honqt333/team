@@ -76,6 +76,13 @@ return [
     ],
     'items' => [
         'add' => 'Add Item',
+        'purchase_unit' => 'Purchase Unit',
+        'unit_factor' => 'Conversion Factor',
+        'inventory_qty' => 'Inventory Qty',
+        'amount' => 'Amount',
+        'vat' => 'VAT',
+        'total' => 'Total',
+        'contains' => 'Contains',
     ],
     'grn' => [
         'title' => 'Goods Received Notes',

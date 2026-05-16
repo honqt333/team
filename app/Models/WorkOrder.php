@@ -15,6 +15,51 @@ use Illuminate\Support\Facades\DB;
 class WorkOrder extends Model
 {
     use HasFactory, SoftDeletes, CenterScoped, HasTaxSnapshot;
+    
+    protected $appends = [];
+
+    protected static function booted()
+    {
+        static::saving(function ($workOrder) {
+            $workOrder->recalculateTotals();
+        });
+    }
+
+    /**
+     * Recalculate totals from items and parts.
+     */
+    public function recalculateTotals(): void
+    {
+        // Load relationships if not loaded to ensure all items are summed
+        if (!$this->relationLoaded('items')) $this->load('items');
+        if (!$this->relationLoaded('parts')) $this->load('parts');
+
+        // Services totals
+        $servicesPrice = $this->items->sum(fn($l) => (float)$l->unit_price * (float)$l->qty);
+        $servicesDiscount = $this->items->sum('discount_amount');
+        
+        // Parts totals
+        $partsPrice = $this->parts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
+        $partsDiscount = $this->parts->sum('discount');
+
+        $netTotal = ($servicesPrice - $servicesDiscount) + ($partsPrice - $partsDiscount);
+        $this->total_excl_tax = $netTotal;
+
+        if (!($this->tax_enabled_snapshot ?? false)) {
+            $this->total_tax = 0;
+            $this->total_incl_tax = $netTotal;
+        } else {
+            $taxRate = (float) ($this->tax_rate_snapshot ?: 15.00);
+            if (($this->pricing_mode_snapshot ?? 'exclusive') === 'inclusive') {
+                $this->total_incl_tax = $netTotal;
+                $this->total_excl_tax = round($netTotal / (1 + ($taxRate / 100)), 2);
+                $this->total_tax = round($this->total_incl_tax - $this->total_excl_tax, 2);
+            } else {
+                $this->total_tax = round($netTotal * ($taxRate / 100), 2);
+                $this->total_incl_tax = round($netTotal + $this->total_tax, 2);
+            }
+        }
+    }
 
     // Status constants
     public const STATUS_DRAFT = 'draft';
@@ -202,15 +247,13 @@ class WorkOrder extends Model
      */
     public function getTotalPaidAttribute(): float
     {
-        $payments = $this->payments()->where('type', Payment::TYPE_PAYMENT)->sum('amount');
-        $refunds = $this->payments()->where('type', Payment::TYPE_REFUND)->sum('amount');
-        
-        return (float) ($payments - $refunds);
+        // Use relationship sum to avoid loading all payment objects
+        if ($this->relationLoaded('payments')) {
+            return (float) $this->payments->sum(fn($p) => ($p->type === 'payment' || $p->type === 'Payment') ? $p->amount : -$p->amount);
+        }
+        return (float) $this->payments()->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')->value('paid');
     }
 
-    /**
-     * Get remaining balance.
-     */
     public function getBalanceAttribute(): float
     {
         return $this->total - $this->total_paid;
@@ -409,12 +452,34 @@ class WorkOrder extends Model
     }
 
     /**
-     * Calculate total amount of all items (Service + Parts).
+     * Get the total amount (calculated if stored value is 0).
      */
     public function getTotalAttribute(): float
     {
-        // Sum the grand_total accessor of each item
-        return $this->items->sum('grand_total');
+        // Use stored value if available and not zero
+        if ($this->total_incl_tax > 0) {
+            return (float) $this->total_incl_tax;
+        }
+
+        // Fast fallback calculation via direct DB queries
+        $servicesNet = (float) $this->items()->selectRaw('SUM((unit_price * qty) - discount_amount) as net')->value('net');
+        $partsNet = (float) $this->parts()->selectRaw('SUM((unit_price * qty) - discount) as net')->value('net');
+        
+        $netTotal = $servicesNet + $partsNet;
+
+        // If tax is disabled, return net total
+        if (!($this->tax_enabled_snapshot ?? false)) {
+            return (float) $netTotal;
+        }
+
+        // If pricing is inclusive, net total already includes tax
+        if (($this->pricing_mode_snapshot ?? 'exclusive') === 'inclusive') {
+            return (float) $netTotal;
+        }
+
+        // If exclusive, add tax
+        $taxRate = (float) ($this->tax_rate_snapshot ?: 15.00);
+        return round($netTotal * (1 + ($taxRate / 100)), 2);
     }
 
 

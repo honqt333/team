@@ -37,6 +37,8 @@ class PurchaseOrder extends Model
         'cancelled_at',
         'cancelled_by',
         'cancel_reason',
+        'create_credit_invoice',
+        'due_date',
     ];
 
     protected $casts = [
@@ -47,6 +49,8 @@ class PurchaseOrder extends Model
         'total' => 'decimal:2',
         'sent_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'create_credit_invoice' => 'boolean',
+        'due_date' => 'date',
     ];
 
     // ─────────────────────────────────────────────────────────────

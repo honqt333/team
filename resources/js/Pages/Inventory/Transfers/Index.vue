@@ -21,9 +21,9 @@
                 </template>
 
                 <template #actions>
-                    <Link
+                    <button
                         v-if="can('inventory.transfers.create') || isAnyAdmin()"
-                        :href="route('app.inventory.transfers.create')"
+                        @click="showCreateModal = true"
                         class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl font-black shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all group/add"
                     >
                         <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
@@ -32,7 +32,7 @@
                             </svg>
                         </div>
                         <span class="text-sm tracking-tight">{{ $t('inventory.transfers.add') }}</span>
-                    </Link>
+                    </button>
                 </template>
 
                 <template #filters>
@@ -153,6 +153,13 @@
                 </div>
                 </div>
             </div>
+
+            <!-- Create Modal -->
+            <CreateModal
+                :show="showCreateModal"
+                :warehouses="warehouses"
+                @close="showCreateModal = false"
+            />
     </AppLayout>
 </template>
 
@@ -163,6 +170,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { debounce } from 'lodash-es';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CreateModal from './CreateModal.vue';
 import { useI18n } from 'vue-i18n';
 
 const page = usePage();
@@ -172,7 +180,10 @@ const isAnyAdmin = () => page.props.auth?.roles?.some(role => ['super_admin', 'a
 const props = defineProps({
     transfers: Object,
     filters: Object,
+    warehouses: Array,
 });
+
+const showCreateModal = ref(false);
 
 const { t } = useI18n();
 const search = ref(props.filters?.search || '');

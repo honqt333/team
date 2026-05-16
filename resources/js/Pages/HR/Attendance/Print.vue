@@ -22,16 +22,34 @@
         </div>
 
         <!-- Report Header -->
-        <div class="mb-8 border-b-2 border-gray-900 pb-4">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h1 class="text-2xl font-bold mb-2">{{ tenant?.name }}</h1>
-                    <h2 class="text-xl font-semibold text-gray-600">{{ $t('hr.attendance.daily_report') }}</h2>
+        <div class="mb-8 border-b-2 border-gray-900 pb-6">
+            <div class="grid grid-cols-3 items-start">
+                <!-- Column 1: Center Info -->
+                <div class="text-right">
+                    <h1 class="text-xl font-bold">{{ tenant?.name }}</h1>
+                    <div class="mt-2 text-sm font-bold text-gray-900">
+                        {{ date }}
+                    </div>
                 </div>
+
+                <!-- Column 2: Logo Placeholder (Centers the layout) -->
+                <div class="flex justify-center">
+                    <div v-if="tenant?.logo_url" class="w-20 h-20">
+                        <img :src="tenant.logo_url" class="w-full h-full object-contain" />
+                    </div>
+                </div>
+
+                <!-- Column 3: Date & Time (Far Left in Arabic) -->
                 <div class="text-left">
-                    <div class="text-lg font-bold">{{ date }}</div>
-                    <div class="text-sm text-gray-500">{{ new Date().toLocaleTimeString('en-US') }}</div>
+                    <p class="text-xs text-gray-400 font-bold" dir="ltr">
+                        {{ new Date().toLocaleDateString('en-GB').split('/').reverse().join('/') }}
+                    </p>
+                    <div class="text-xs text-gray-500 mt-1" dir="ltr">{{ new Date().toLocaleTimeString('en-US') }}</div>
                 </div>
+            </div>
+
+            <div class="mt-6 text-center">
+                <h2 class="text-xl font-bold uppercase tracking-widest">{{ $t('hr.attendance.daily_report') }}</h2>
             </div>
         </div>
 

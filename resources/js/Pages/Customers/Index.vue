@@ -413,51 +413,7 @@
         <Teleport to="body">
             <div class="print-section hidden">
                 <!-- Header -->
-                <div class="print-header">
-                    <div class="grid grid-cols-3 items-start">
-                        <!-- Column 1: Info (Right in Arabic, Left in English) -->
-                        <div :class="isRtl ? 'text-right' : 'text-left'">
-                            <h1 class="text-xl font-bold">
-                                {{ isRtl ? ($page.props.tenant?.trade_name || $page.props.tenant?.name) : ($page.props.tenant?.name_en || $page.props.tenant?.name) }}
-                            </h1>
-                            <!-- Branch Logic -->
-                            <p v-if="$page.props.auth.available_centers?.length > 1" class="text-sm font-medium text-gray-600">
-                                {{ isRtl ? $page.props.center?.name : ($page.props.center?.name_en || $page.props.center?.name) }}
-                            </p>
-                            <div class="mt-2 text-[10px] space-y-0.5 text-gray-500">
-                                <p v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
-                                    {{ isRtl ? 'الهاتف' : 'Phone' }}: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
-                                </p>
-                                <p v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
-                                    {{ isRtl ? 'البريد' : 'Email' }}: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
-                                </p>
-                                <p v-if="$page.props.tenant?.cr_number">
-                                    {{ isRtl ? 'السجل التجاري' : 'CR' }}: {{ $page.props.tenant?.cr_number }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Column 2: Logo (Always Center) -->
-                        <div class="flex justify-center">
-                            <div v-if="$page.props.tenant?.logo_url" class="w-24 h-24 flex-shrink-0">
-                                <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
-                            </div>
-                        </div>
-
-                        <!-- Column 3: Empty (For Balance) -->
-                        <div></div>
-                    </div>
-
-                    <!-- Report Title -->
-                    <div class="mt-8 text-center">
-                        <h2 class="text-lg font-bold border-y-2 border-gray-100 py-2 uppercase tracking-wider">
-                            {{ $t('customers.title') }}
-                        </h2>
-                        <p class="text-[10px] text-gray-400 mt-1" dir="ltr">
-                            {{ new Date().toLocaleDateString('en-GB').split('/').reverse().join('/') }}
-                        </p>
-                    </div>
-                </div>
+                <PrintHeader :title="$t('customers.title')" />
 
                 <!-- Table -->
                 <table class="print-table">
@@ -472,16 +428,16 @@
                     </thead>
                     <tbody>
                         <tr v-for="(customer, index) in allCustomers" :key="customer.id">
-                            <td>{{ index + 1 }}</td>
+                            <td>{{ toEnglish(index + 1) }}</td>
                             <td class="font-bold">{{ customer.name }}</td>
-                            <td dir="ltr">{{ customer.phone }}</td>
+                            <td dir="ltr">{{ toEnglish(customer.phone) }}</td>
                             <td>
                                 <span class="print-badge">
                                     {{ customer.type ? $t(`customers.type.${customer.type}`) : '-' }}
                                 </span>
                             </td>
                             <td class="font-bold">
-                                {{ (customer.balance || 0).toLocaleString() }}
+                                {{ formatNumber(customer.balance || 0) }}
                             </td>
                         </tr>
                     </tbody>
@@ -489,7 +445,7 @@
 
                 <!-- Footer -->
                 <div class="mt-8 text-center text-[10px] text-gray-400">
-                    {{ $page.props.auth.user.name }} - <span dir="ltr">{{ new Date().toLocaleString('en-GB') }}</span>
+                    {{ $page.props.auth.user.name }}
                 </div>
             </div>
         </Teleport>
@@ -509,6 +465,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import CustomerImportModal from '@/Components/Customers/CustomerImportModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
 
 const props = defineProps({
     customers: {
@@ -525,7 +482,7 @@ const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { success, error, info } = useToast();
 const { can, isAnyAdmin } = usePermission();
-const { toEnglish } = useNumberFormat();
+const { toEnglish, formatNumber } = useNumberFormat();
 
 const typeOptions = computed(() => [
     { value: '', label: t('customers.filter.all_types') },

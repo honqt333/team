@@ -82,7 +82,12 @@ class PartsController extends Controller
             'default_sale_price' => 'nullable|numeric|min:0',
             'min_sale_price' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
+            'image' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('parts', 'public');
+        }
 
         $validated['tenant_id'] = $tenantId;
 
@@ -134,7 +139,21 @@ class PartsController extends Controller
             'default_sale_price' => 'nullable|numeric|min:0',
             'min_sale_price' => 'nullable|numeric|min:0',
             'is_active' => 'boolean',
+            'image' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('image')) {
+            // Delete old image
+            if ($part->image_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($part->image_path);
+            }
+            $validated['image_path'] = $request->file('image')->store('parts', 'public');
+        } elseif ($request->boolean('remove_image')) {
+            if ($part->image_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($part->image_path);
+            }
+            $validated['image_path'] = null;
+        }
 
         $part->update($validated);
 

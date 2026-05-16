@@ -18,6 +18,10 @@ class InventoryCategory extends Model
         'updated_by',
     ];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');

@@ -21,10 +21,10 @@
                 <p v-if="errors.part_id" class="mt-1 text-sm text-red-500">{{ errors.part_id }}</p>
             </div>
 
-            <!-- Quantity (can be positive or negative) -->
+            <!-- Adjustment Type Selection -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ $t('inventory.stock.qty') }} <span class="text-red-500">*</span>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ $t('inventory.moves.adjustment_type') }} <span class="text-red-500">*</span>
                 </label>
                 <div class="flex items-center gap-3">
                     <button 
@@ -33,11 +33,14 @@
                         :class="[
                             'flex-1 py-2.5 rounded-lg font-medium transition-colors',
                             adjustmentType === 'increase' 
-                                ? 'bg-green-600 text-white' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                ? 'bg-green-600 text-white shadow-md' 
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         ]"
                     >
-                        + زيادة
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                            {{ $t('inventory.moves.adjustment_in') || 'زيادة' }}
+                        </span>
                     </button>
                     <button 
                         type="button"
@@ -45,22 +48,33 @@
                         :class="[
                             'flex-1 py-2.5 rounded-lg font-medium transition-colors',
                             adjustmentType === 'decrease' 
-                                ? 'bg-red-600 text-white' 
-                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                ? 'bg-red-600 text-white shadow-md' 
+                                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                         ]"
                     >
-                        - نقص
+                        <span class="flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
+                            {{ $t('inventory.moves.adjustment_out') || 'نقص' }}
+                        </span>
                     </button>
                 </div>
+            </div>
+
+            <!-- Quantity Input -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ $t('inventory.stock.qty') }} <span class="text-red-500">*</span>
+                </label>
                 <input
-                    v-model.number="form.qty"
-                    type="number"
-                    step="0.001"
-                    min="0.001"
-                    class="w-full mt-3 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500"
-                    placeholder="أدخل الكمية"
+                    v-model="form.qty"
+                    type="text"
+                    inputmode="decimal"
+                    @input="handleInput($event, 'qty')"
+                    dir="ltr"
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 font-mono shadow-sm"
+                    placeholder="0.000"
                 />
-                <p v-if="errors.qty" class="mt-1 text-sm text-red-500">{{ errors.qty }}</p>
+                <p v-if="errors.qty" class="mt-1 text-sm text-red-500 font-medium">{{ errors.qty }}</p>
             </div>
 
             <!-- Notes (Required for adjustments) -->
@@ -117,7 +131,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 
 const { success, error: showError } = useToast();
-const { formatQuantity } = useNumberFormat();
+const { formatQuantity, toEnglish, sanitizeInput } = useNumberFormat();
 const processing = ref(false);
 const errors = reactive({});
 const parts = ref([]);
@@ -129,6 +143,19 @@ const form = reactive({
     qty: null,
     notes: '',
 });
+
+const handleInput = (event, field) => {
+    let value = sanitizeInput(event);
+    // Strip non-numeric characters (except dot)
+    value = value.replace(/[^0-9.]/g, '');
+    // Ensure only one dot
+    const parts = value.split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    form[field] = value;
+    event.target.value = value;
+};
 
 const selectedPart = computed(() => {
     return parts.value.find(p => p.id === form.part_id);

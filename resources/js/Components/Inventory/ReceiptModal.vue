@@ -24,11 +24,12 @@
                     {{ $t('inventory.stock.qty') }} <span class="text-red-500">*</span>
                 </label>
                 <input
-                    v-model.number="form.qty"
-                    type="number"
-                    step="0.001"
-                    min="0.001"
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+                    v-model="form.qty"
+                    type="text"
+                    @input="handleInput($event, 'qty')"
+                    dir="ltr"
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 font-mono"
+                    placeholder="0.000"
                 />
                 <p v-if="errors.qty" class="mt-1 text-sm text-red-500">{{ errors.qty }}</p>
             </div>
@@ -39,11 +40,12 @@
                     {{ $t('inventory.moves.cost') }} <span class="text-red-500">*</span>
                 </label>
                 <input
-                    v-model.number="form.unit_cost"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500"
+                    v-model="form.unit_cost"
+                    type="text"
+                    @input="handleInput($event, 'unit_cost')"
+                    dir="ltr"
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-green-500 font-mono"
+                    placeholder="0.00"
                 />
                 <p v-if="errors.unit_cost" class="mt-1 text-sm text-red-500">{{ errors.unit_cost }}</p>
             </div>
@@ -89,6 +91,7 @@ import { useToast } from '@/Composables/useToast';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import axios from 'axios';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     show: Boolean,
@@ -98,6 +101,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 
 const { success, error: showError } = useToast();
+const { formatQuantity, formatCurrency, toEnglish, sanitizeInput } = useNumberFormat();
 const processing = ref(false);
 const errors = reactive({});
 const parts = ref([]);
@@ -109,6 +113,19 @@ const form = reactive({
     unit_cost: null,
     notes: '',
 });
+
+const handleInput = (event, field) => {
+    let value = sanitizeInput(event);
+    // Strip non-numeric characters (except dot)
+    value = value.replace(/[^0-9.]/g, '');
+    // Ensure only one dot
+    const parts = value.split('.');
+    if (parts.length > 2) {
+        value = parts[0] + '.' + parts.slice(1).join('');
+    }
+    form[field] = value;
+    event.target.value = value;
+};
 
 watch(() => props.warehouseId, (val) => {
     form.warehouse_id = val;

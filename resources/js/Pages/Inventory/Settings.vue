@@ -205,7 +205,7 @@
                         </h3>
                         <form @submit.prevent="saveUnit" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.name') }} (عربي)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.name') }} (عربي) <span class="text-red-500">*</span></label>
                                 <input v-model="unitForm.name_ar" type="text" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"/>
                             </div>
                             <div>
@@ -244,7 +244,7 @@
                         </h3>
                         <form @submit.prevent="saveCategory" class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.name') }} (عربي)</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('common.name') }} (عربي) <span class="text-red-500">*</span></label>
                                 <input v-model="categoryForm.name_ar" type="text" required class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"/>
                             </div>
                             <div>
@@ -307,7 +307,7 @@ function editUnit(unit) {
     editingUnit.value = unit;
     unitForm.name_ar = unit.name_ar;
     unitForm.name_en = unit.name_en;
-    unitForm.is_active = unit.is_active ?? true;
+    unitForm.is_active = !!unit.is_active;
     showUnitModal.value = true;
 }
 
@@ -360,7 +360,7 @@ function editCategory(category) {
     editingCategory.value = category;
     categoryForm.name_ar = category.name_ar;
     categoryForm.name_en = category.name_en;
-    categoryForm.is_active = category.is_active ?? true;
+    categoryForm.is_active = !!category.is_active;
     showCategoryModal.value = true;
 }
 

@@ -350,7 +350,7 @@ const props = defineProps({
     supplier: Object,
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'saved']);
 const { locale, t } = useI18n();
 const { confirm } = useConfirm();
 
@@ -617,7 +617,10 @@ const submit = () => {
     } else {
         form.post(route('app.purchasing.suppliers.store'), {
             preserveScroll: true,
-            onSuccess: () => close(),
+            onSuccess: (page) => {
+                emit('saved', page.props.flash?.data || form.data());
+                close();
+            },
         });
     }
 };

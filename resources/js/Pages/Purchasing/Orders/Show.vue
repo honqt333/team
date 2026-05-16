@@ -2,259 +2,201 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Header Actions Bar -->
-            <div class="flex items-center justify-between">
-                <Link :href="route('app.purchasing.orders.index')"
-                    class="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
-                    <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                    </svg>
-                    {{ $t('common.back') }}
-                </Link>
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <!-- Action Buttons (Left) -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <BackButton :href="route('app.purchasing.orders.index')" />
 
-                <!-- Action Buttons -->
-                <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1.5 p-1.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                        <!-- Print -->
+                        <button @click="printOrder"
+                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
+                            :title="$t('common.print')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
+
+                        <!-- Cancel -->
+                        <button v-if="canCancel" @click="cancelOrder"
+                            class="p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                            :title="$t('common.cancel')">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
                     <!-- Send PO (if draft) -->
                     <button v-if="order.status === 'draft' && order.items?.length > 0" @click="sendOrder"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:-translate-y-0.5 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>
-                        <span class="hidden sm:inline">{{ $t('purchasing.orders.actions.send') }}</span>
+                        <span>{{ $t('purchasing.orders.actions.send') }}</span>
                     </button>
 
                     <!-- Receive Goods -->
                     <Link v-if="canReceive" :href="route('app.purchasing.grn.create', { purchaseOrder: order.id })"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-xl transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span class="hidden sm:inline">{{ $t('purchasing.orders.actions.receive') }}</span>
+                        <span>{{ $t('purchasing.orders.actions.receive') }}</span>
                     </Link>
+                </div>
 
-                    <!-- Print -->
-                    <button @click="printOrder"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                        </svg>
-                        <span class="hidden sm:inline">{{ $t('common.print') }}</span>
-                    </button>
-
-                    <!-- Cancel (if not received/cancelled) -->
-                    <button v-if="canCancel" @click="cancelOrder"
-                        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        <span class="hidden sm:inline">{{ $t('common.cancel') }}</span>
-                    </button>
+                <!-- Right side: Code and Status -->
+                <div class="flex items-center gap-4">
+                    <div class="text-end">
+                        <div class="flex items-center gap-3">
+                            <span :class="statusBadgeClass" class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest">{{ $t(`purchasing.orders.statuses.${order.status}`) }}</span>
+                            <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight font-mono">{{ order.code }}</h1>
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/30 flex items-center justify-center text-white shrink-0">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Top Section: Order Info & Supplier -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Top Section: Supplier Card -->
+            <div>
+                <!-- Supplier Info -->
+                <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-indigo-500/5 border border-gray-100 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex flex-col md:flex-row gap-6">
+                            <!-- Supplier Icon/Logo -->
+                            <div class="shrink-0">
+                                <div class="w-24 h-24 rounded-3xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 shadow-sm">
+                                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                    </svg>
+                                </div>
+                            </div>
 
-                <!-- 1. Supplier & Warehouse Info -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 relative overflow-hidden">
-                    <!-- Status Badge (Top End) -->
-                    <div class="absolute top-6 end-6">
-                        <div class="flex items-center gap-2">
-                            <span class="text-sm font-medium text-gray-500 font-mono">{{ order.code }}</span>
-                            <span :class="statusBadgeClass">{{ $t(`purchasing.orders.statuses.${order.status}`) }}</span>
+                            <!-- Supplier Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-4 mb-4">
+                                    <div>
+                                        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-1">
+                                            {{ order.supplier?.name }}
+                                        </h3>
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-2.5 py-0.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-bold font-mono">
+                                                {{ order.supplier?.code }}
+                                            </span>
+                                            <span v-if="order.warehouse" class="text-xs text-gray-400 flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                {{ order.warehouse.name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Logistics Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    <!-- Order Date -->
+                                    <div class="p-3 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700">
+                                        <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('purchasing.orders.date') }}</div>
+                                        <div class="text-sm font-bold text-gray-900 dark:text-white font-mono">{{ formatDate(order.order_date) }}</div>
+                                    </div>
+
+                                    <!-- Expected Date -->
+                                    <div v-if="order.expected_date" class="p-3 rounded-2xl bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-700">
+                                        <div class="text-[10px] font-black text-orange-500 uppercase tracking-widest mb-1">{{ $t('purchasing.orders.expected_date') }}</div>
+                                        <div class="text-sm font-bold text-gray-900 dark:text-white font-mono">{{ formatDate(order.expected_date) }}</div>
+                                    </div>
+
+                                    <!-- Credit Invoice Info -->
+                                    <div v-if="order.create_credit_invoice" class="p-3 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800">
+                                        <div class="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">{{ $t('purchasing.orders.create_credit_invoice') }}</div>
+                                        <div class="text-sm font-bold text-indigo-700 dark:text-indigo-300 font-mono">
+                                            {{ order.due_date ? formatDate(order.due_date) : $t('common.active') }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Sent By -->
+                                    <div v-if="order.sent_at" class="p-3 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+                                        <div class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">{{ $t('purchasing.orders.sent_at') }}</div>
+                                        <div class="text-sm font-bold text-blue-700 dark:text-blue-300 truncate" :title="order.sent_by_user?.name">
+                                            {{ formatDateTime(order.sent_at) }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="flex flex-col items-center text-center mt-2">
-                        <!-- Supplier Icon -->
-                        <div
-                            class="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-4">
-                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    <!-- Notes Section (Optional footer of the card) -->
+                    <div v-if="order.notes" class="px-6 py-4 bg-gray-50/50 dark:bg-gray-900/30 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                             </svg>
-                        </div>
-
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                            {{ order.supplier?.name }}
-                        </h3>
-                        <p v-if="order.supplier?.code" class="text-sm text-gray-500 dark:text-gray-400 font-mono mb-4">
-                            {{ order.supplier.code }}
-                        </p>
-
-                        <!-- Info Grid -->
-                        <div class="w-full space-y-3 mt-4">
-                            <!-- Warehouse -->
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                                        </svg>
-                                    </div>
-                                    <span class="text-sm text-gray-500">{{ $t('purchasing.orders.warehouse') }}</span>
-                                </div>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ order.warehouse?.name }}</span>
-                            </div>
-
-                            <!-- Order Date -->
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    <span class="text-sm text-gray-500">{{ $t('purchasing.orders.date') }}</span>
-                                </div>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ formatDate(order.order_date) }}</span>
-                            </div>
-
-                            <!-- Expected Date -->
-                            <div v-if="order.expected_date" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <span class="text-sm text-gray-500">{{ $t('purchasing.orders.expected_date') }}</span>
-                                </div>
-                                <span class="font-medium text-gray-900 dark:text-white">{{ formatDate(order.expected_date) }}</span>
-                            </div>
-
-                            <!-- Sent Info -->
-                            <div v-if="order.sent_at" class="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div
-                                        class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                        </svg>
-                                    </div>
-                                    <span class="text-sm text-gray-500">{{ $t('purchasing.orders.sent_at') }}</span>
-                                </div>
-                                <div class="text-end">
-                                    <span class="font-medium text-gray-900 dark:text-white block">{{ formatDateTime(order.sent_at) }}</span>
-                                    <span v-if="order.sent_by_user" class="text-xs text-gray-500">{{ order.sent_by_user.name }}</span>
-                                </div>
-                            </div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed italic">
+                                {{ order.notes }}
+                            </p>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- 2. Financial Summary -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                        {{ $t('purchasing.orders.financial_summary') }}
+            <!-- Financial Stats Row -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Grand Total -->
+                <div class="p-5 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-700 shadow-xl shadow-indigo-500/20 text-white relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+                    <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
+                    <div class="relative">
+                        <div class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-100 opacity-80 mb-1">{{ $t('common.total') }}</div>
+                        <div class="text-2xl font-black font-mono tracking-tight">{{ formatCurrency(order.total) }}</div>
+                    </div>
+                </div>
+
+                <!-- Tax -->
+                <div class="p-5 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm group hover:border-blue-200 dark:hover:border-blue-800 transition-all">
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('invoices.tax') }} (15%)</div>
+                    <div class="text-2xl font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(order.tax_amount) }}</div>
+                </div>
+
+                <!-- Subtotal -->
+                <div class="p-5 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm group hover:border-gray-200 dark:hover:border-gray-600 transition-all">
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('invoices.subtotal') }}</div>
+                    <div class="text-2xl font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(order.subtotal) }}</div>
+                </div>
+
+                <!-- Items Count -->
+                <div class="p-5 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm group hover:border-emerald-200 dark:hover:border-emerald-800 transition-all">
+                    <div class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('purchasing.orders.items_count') }}</div>
+                    <div class="text-2xl font-black text-gray-900 dark:text-white font-mono">{{ toEnglish(order.items?.length || 0) }}</div>
+                </div>
+            </div>
+
+            <!-- Terms (if any) -->
+            <div v-if="order.terms" class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 relative overflow-hidden">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                        {{ $t('purchasing.orders.terms') }}
                     </h3>
-
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
-                            <thead>
-                                <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                                    <th class="pb-3 text-start">{{ $t('common.description') }}</th>
-                                    <th class="pb-3 text-end">{{ $t('common.amount') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                                <!-- Subtotal -->
-                                <tr>
-                                    <td class="py-3 font-medium text-gray-700 dark:text-gray-300">
-                                        {{ $t('invoices.subtotal') }}
-                                    </td>
-                                    <td class="py-3 text-end text-gray-600 dark:text-gray-400 font-mono">
-                                        {{ formatCurrency(order.subtotal) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Tax -->
-                                <tr v-if="parseFloat(order.tax_amount) > 0">
-                                    <td class="py-3 font-medium text-gray-700 dark:text-gray-300">
-                                        {{ $t('invoices.tax') }} (15%)
-                                    </td>
-                                    <td class="py-3 text-end text-gray-600 dark:text-gray-400 font-mono">
-                                        {{ formatCurrency(order.tax_amount) }}
-                                    </td>
-                                </tr>
-
-                                <!-- Total -->
-                                <tr class="bg-gray-50 dark:bg-gray-900/50 font-bold border-t-2 border-gray-100 dark:border-gray-700">
-                                    <td class="py-4 text-gray-900 dark:text-white">
-                                        {{ $t('common.total') }}
-                                    </td>
-                                    <td class="py-4 text-end text-lg text-blue-600 dark:text-blue-400 font-mono">
-                                        {{ formatCurrency(order.total) }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Items Count -->
-                    <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <div class="flex items-center justify-between text-sm">
-                            <span class="text-gray-500">{{ $t('purchasing.orders.items_count') }}</span>
-                            <span class="font-bold text-gray-900 dark:text-white">{{ order.items?.length || 0 }}</span>
-                        </div>
-                    </div>
                 </div>
-            </div>
-
-            <!-- Notes Section -->
-            <div v-if="order.notes || order.terms" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Notes -->
-                <div v-if="order.notes"
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                            {{ $t('common.notes') }}
-                        </h3>
-                    </div>
-                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                        {{ order.notes }}
-                    </p>
-                </div>
-
-                <!-- Terms -->
-                <div v-if="order.terms"
-                    class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div
-                            class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                            {{ $t('purchasing.orders.terms') }}
-                        </h3>
-                    </div>
-                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                        {{ order.terms }}
-                    </p>
-                </div>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap pl-13">
+                    {{ order.terms }}
+                </p>
             </div>
 
             <!-- Items Table -->
@@ -350,7 +292,7 @@
                         </svg>
                         {{ $t('purchasing.grn.title') }}
                         <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 dark:bg-green-900/30 text-green-600">
-                            {{ order.goods_received_notes.length }}
+                            {{ order.goods_received_notes?.length || 0 }}
                         </span>
                     </h3>
                 </div>
@@ -375,6 +317,96 @@
         </div>
 
         <ConfirmModal />
+
+        <!-- Print Section -->
+        <Teleport to="body">
+            <div class="print-section hidden">
+                <PrintHeader :title="$t('purchasing.orders.title')" />
+
+                <!-- Document Info Header -->
+                <div class="grid grid-cols-2 gap-8 mb-8 border-b pb-8">
+                    <div>
+                        <h3 class="text-sm font-bold text-gray-500 uppercase mb-2">{{ $t('purchasing.orders.supplier') }}</h3>
+                        <div class="text-lg font-black text-gray-900">{{ order.supplier?.name }}</div>
+                        <div v-if="order.supplier?.code" class="text-sm font-mono text-gray-500">{{ order.supplier.code }}</div>
+                        <div v-if="order.supplier?.phone" class="text-sm text-gray-600 mt-1" dir="ltr">{{ order.supplier.phone }}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="inline-block bg-gray-50 p-4 rounded-xl border">
+                            <div class="text-xs text-gray-500 uppercase mb-1">{{ $t('purchasing.orders.code') }}</div>
+                            <div class="text-xl font-black font-mono text-gray-900">{{ order.code }}</div>
+                            <div class="text-sm font-bold text-blue-600 mt-1 uppercase">{{ $t(`purchasing.orders.statuses.${order.status}`) }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logistics Grid -->
+                <div class="grid grid-cols-3 gap-6 mb-8">
+                    <div class="p-4 bg-gray-50/50 rounded-xl border border-dashed">
+                        <div class="text-xs text-gray-500 uppercase mb-1">{{ $t('purchasing.orders.warehouse') }}</div>
+                        <div class="text-sm font-bold text-gray-900">{{ order.warehouse?.name }}</div>
+                    </div>
+                    <div class="p-4 bg-gray-50/50 rounded-xl border border-dashed">
+                        <div class="text-xs text-gray-500 uppercase mb-1">{{ $t('purchasing.orders.date') }}</div>
+                        <div class="text-sm font-bold text-gray-900 font-mono">{{ formatDate(order.order_date) }}</div>
+                    </div>
+                    <div class="p-4 bg-gray-50/50 rounded-xl border border-dashed" v-if="order.expected_date">
+                        <div class="text-xs text-gray-500 uppercase mb-1">{{ $t('purchasing.orders.expected_date') }}</div>
+                        <div class="text-sm font-bold text-gray-900 font-mono">{{ formatDate(order.expected_date) }}</div>
+                    </div>
+                    <div class="p-4 bg-indigo-50/50 rounded-xl border border-indigo-200 border-dashed" v-if="order.create_credit_invoice">
+                        <div class="text-xs text-indigo-500 uppercase mb-1">{{ $t('purchasing.orders.create_credit_invoice') }}</div>
+                        <div class="text-sm font-bold text-indigo-700 font-mono">{{ order.due_date ? formatDate(order.due_date) : $t('common.active') }}</div>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <table class="w-full mb-8">
+                    <thead>
+                        <tr class="border-b-2">
+                            <th class="px-4 py-3 text-start text-xs font-bold uppercase">{{ $t('inventory.parts.title') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase">{{ $t('common.quantity') }}</th>
+                            <th class="px-4 py-3 text-end text-xs font-bold uppercase">{{ $t('inventory.parts.unit_price') }}</th>
+                            <th class="px-4 py-3 text-end text-xs font-bold uppercase">{{ $t('common.total') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        <tr v-for="item in order.items" :key="item.id">
+                            <td class="px-4 py-4">
+                                <div class="font-bold text-gray-900">{{ item.part?.name_ar || item.part?.name_en }}</div>
+                                <div class="text-xs text-gray-500 font-mono">{{ item.part?.sku }}</div>
+                            </td>
+                            <td class="px-4 py-4 text-center font-mono font-bold">{{ toEnglish(item.qty_ordered) }}</td>
+                            <td class="px-4 py-4 text-end font-mono">{{ formatCurrency(item.unit_cost) }}</td>
+                            <td class="px-4 py-4 text-end font-mono font-bold">{{ formatCurrency(item.line_total) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Financial Summary -->
+                <div class="flex justify-end mb-12">
+                    <div class="w-64 space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">{{ $t('invoices.subtotal') }}</span>
+                            <span class="font-mono">{{ formatCurrency(order.subtotal) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm" v-if="parseFloat(order.tax_amount) > 0">
+                            <span class="text-gray-500">{{ $t('invoices.tax') }} (15%)</span>
+                            <span class="font-mono">{{ formatCurrency(order.tax_amount) }}</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-black border-t-2 pt-3">
+                            <span>{{ $t('common.total') }}</span>
+                            <span class="text-blue-600 font-mono">{{ formatCurrency(order.total) }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-12 text-center text-[10px] text-gray-400 border-t pt-6">
+                    {{ $t('common.printed_by') }}: {{ $page.props.auth.user.name }} | {{ new Date().toLocaleString('en-US') }}
+                </div>
+            </div>
+        </Teleport>
     </AppLayout>
 </template>
 
@@ -384,21 +416,23 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useConfirm } from '@/Composables/useConfirm';
+import BackButton from '@/Components/BackButton.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
 
 const props = defineProps({
     order: Object,
 });
 
 const { t } = useI18n();
-const { formatCurrency } = useNumberFormat();
+const { formatCurrency, toEnglish } = useNumberFormat();
 const { confirm } = useConfirm();
 
 // Date formatters
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA', {
+    return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
@@ -407,7 +441,7 @@ const formatDate = (date) => {
 
 const formatDateTime = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleString('ar-SA', {
+    return new Date(date).toLocaleString('en-US', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',

@@ -79,9 +79,11 @@ defineProps({
             </div>
 
             <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                <div class="flex items-center gap-5">
+                <div class="flex items-center gap-5 flex-1">
                     <!-- Back Slot -->
-                    <slot name="back" />
+                    <div v-if="$slots.back">
+                        <slot name="back" />
+                    </div>
 
                     <!-- Icon Slot -->
                     <div class="w-16 h-16 rounded-2xl bg-gradient-to-br shadow-xl flex items-center justify-center text-white shrink-0 ring-4 ring-gray-50 dark:ring-gray-900/20 transition-transform group-hover:scale-[1.03] duration-500"
@@ -90,9 +92,9 @@ defineProps({
                     </div>
 
                     <!-- Title and Info -->
-                    <div>
+                    <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-4 mb-2">
-                            <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
+                            <h1 class="text-3xl font-black text-gray-900 dark:text-white tracking-tight truncate">
                                 {{ title }}
                             </h1>
                             <!-- Count Badge -->
@@ -102,10 +104,20 @@ defineProps({
                                 {{ totalCount }} {{ countLabel }}
                             </div>
                         </div>
-                        <p v-if="subtitle" class="hidden sm:block text-gray-500 dark:text-gray-400 font-bold">
+                        
+                        <!-- Identity Slot (for tags, phone, etc) -->
+                        <div v-if="$slots.identity">
+                            <slot name="identity" />
+                        </div>
+                        <p v-else-if="subtitle" class="hidden sm:block text-gray-500 dark:text-gray-400 font-bold">
                             {{ subtitle }}
                         </p>
                     </div>
+                </div>
+
+                <!-- Extra Slot (for stats or secondary info) -->
+                <div v-if="$slots.extra" class="flex-shrink-0">
+                    <slot name="extra" />
                 </div>
 
                 <!-- Actions Slot -->
@@ -114,9 +126,10 @@ defineProps({
                 </div>
             </div>
 
-            <!-- Filters Slot -->
-            <div v-if="$slots.filters" class="relative z-10 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700/50">
+            <!-- Filters/Footer Slot -->
+            <div v-if="$slots.filters || $slots.footer" class="relative z-10 mt-8 pt-6 border-t border-gray-100 dark:border-gray-700/50">
                 <slot name="filters" />
+                <slot name="footer" />
             </div>
         </div>
     </div>

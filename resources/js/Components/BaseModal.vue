@@ -1,7 +1,7 @@
 <template>
     <Teleport to="body">
         <Transition name="modal">
-            <div v-if="show" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div v-if="show" class="fixed inset-0 flex items-center justify-center p-4" :class="zIndexClass">
                 <!-- Backdrop -->
                 <div 
                     class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 transition-opacity"
@@ -57,6 +57,10 @@ const props = defineProps({
     size: {
         type: String,
         default: 'md',
+    },
+    zIndexClass: {
+        type: String,
+        default: 'z-50',
     },
 });
 

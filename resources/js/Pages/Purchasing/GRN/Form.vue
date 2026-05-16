@@ -50,8 +50,7 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                         {{ $t('purchasing.grn.received_date') }} <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="date" v-model="form.received_date" required
-                                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-all" />
+                                    <CustomDatePicker v-model="form.received_date" :placeholder="$t('purchasing.grn.received_date')" />
                                     <div v-if="form.errors.received_date" class="text-red-500 text-xs mt-1">{{ form.errors.received_date }}</div>
                                 </div>
 
@@ -84,7 +83,7 @@
                             <table class="w-full text-sm">
                                 <thead class="bg-gray-50 dark:bg-gray-900/30 text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                                     <tr>
-                                        <th class="px-6 py-4 text-start font-semibold">{{ $t('inventory.parts.title') }}</th>
+                                        <th class="px-6 py-4 text-center font-semibold">{{ $t('inventory.parts.title') }}</th>
                                         <th class="px-6 py-4 text-center font-semibold">{{ $t('purchasing.items.qty_ordered') }}</th>
                                         <th class="px-6 py-4 text-center font-semibold text-blue-600 dark:text-blue-400">{{ $t('purchasing.items.qty_received') }}</th>
                                         <th class="px-6 py-4 text-center font-semibold text-amber-600 dark:text-amber-400">{{ $t('purchasing.items.qty_pending') }}</th>
@@ -94,19 +93,19 @@
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <tr v-for="(item, index) in form.items" :key="item.purchase_order_item_id"
                                         class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                        <td class="px-6 py-4">
+                                        <td class="px-6 py-4 text-center">
                                             <div class="font-bold text-gray-900 dark:text-white">{{ item.part?.name_ar || item.part?.name_en }}</div>
                                             <div class="text-xs text-gray-500 mt-0.5 font-mono">{{ item.part?.sku }}</div>
                                         </td>
-                                        <td class="px-6 py-4 text-center font-mono">{{ item.qty_ordered }}</td>
+                                        <td class="px-6 py-4 text-center font-mono">{{ toEnglish(item.qty_ordered) }}</td>
                                         <td class="px-6 py-4 text-center">
                                             <span class="px-2 py-1 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-mono text-xs">
-                                                {{ item.qty_received }}
+                                                {{ toEnglish(item.qty_received) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-center">
                                             <span class="px-2 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-mono text-xs">
-                                                {{ item.qty_pending }}
+                                                {{ toEnglish(item.qty_pending) }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-center bg-green-50/30 dark:bg-green-900/5">
@@ -153,6 +152,10 @@ import { computed } from 'vue';
 import { useForm, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     purchaseOrder: Object,

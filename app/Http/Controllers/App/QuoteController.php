@@ -759,7 +759,7 @@ class QuoteController extends Controller
             $part = Part::find($validated['part_id']);
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?: 1);
-                $unitDiscount = (float) ($validated['discount'] ?? 0) / $qty;
+                $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? 0) / $qty) : 0;
                 $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
                 
                 if ($finalPrice < (float) $part->min_sale_price) {
@@ -819,7 +819,7 @@ class QuoteController extends Controller
             $part = Part::find($partId);
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?? $quotePart->qty);
-                $unitDiscount = (float) ($validated['discount'] ?? $quotePart->discount) / $qty;
+                $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? $quotePart->discount) / $qty) : 0;
                 $unitPrice = (float) ($validated['unit_price'] ?? $quotePart->unit_price);
                 $finalPrice = $unitPrice - $unitDiscount;
                 

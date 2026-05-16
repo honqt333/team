@@ -42,9 +42,17 @@ class InventoryTransfersController extends Controller
 
         $transfers = $query->paginate(20)->withQueryString();
 
+        $warehouses = Warehouse::where('is_active', true)
+            ->whereHas('center', function ($query) {
+                $query->where('tenant_id', auth()->user()->tenant_id);
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'center_id']);
+
         return Inertia::render('Inventory/Transfers/Index', [
             'transfers' => $transfers,
             'filters' => $request->only(['status', 'search']),
+            'warehouses' => $warehouses,
         ]);
     }
 
@@ -56,6 +64,9 @@ class InventoryTransfersController extends Controller
         $this->authorize('create', InventoryTransfer::class);
 
         $warehouses = Warehouse::where('is_active', true)
+            ->whereHas('center', function ($query) {
+                $query->where('tenant_id', auth()->user()->tenant_id);
+            })
             ->orderBy('name')
             ->get(['id', 'name', 'center_id']);
 

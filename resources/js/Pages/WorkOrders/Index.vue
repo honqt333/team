@@ -203,8 +203,13 @@
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('work_orders.hub.open_cards_hint') }}
                         </p>
-                        <div v-if="counts?.open > 0" class="absolute top-4 end-4 px-3 py-1 bg-emerald-500 text-white text-sm font-bold rounded-full shadow-lg">
-                            {{ toEnglish(counts.open) }}
+                        <div v-if="counts?.open?.count > 0" class="absolute top-4 end-4 flex flex-col items-end gap-1">
+                            <span class="px-3 py-1 bg-emerald-500 text-white text-sm font-black rounded-full shadow-lg">
+                                {{ toEnglish(counts.open.count) }}
+                            </span>
+                            <span class="px-2 py-0.5 bg-white/90 text-emerald-700 text-[10px] font-black rounded-lg shadow-sm border border-emerald-100">
+                                {{ formatNumber(counts.open.balance || 0) }}
+                            </span>
                         </div>
                     </Link>
 
@@ -224,8 +229,13 @@
                         <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
                             {{ $t('work_orders.hub.closed_cards_hint') }}
                         </p>
-                        <div v-if="counts?.closed > 0" class="absolute top-4 end-4 px-3 py-1 bg-slate-500 text-white text-sm font-bold rounded-full shadow-lg">
-                            {{ toEnglish(counts.closed) }}
+                        <div v-if="counts?.closed?.count > 0" class="absolute top-4 end-4 flex flex-col items-end gap-1">
+                            <span class="px-3 py-1 bg-slate-500 text-white text-sm font-black rounded-full shadow-lg">
+                                {{ toEnglish(counts.closed.count) }}
+                            </span>
+                            <span class="px-2 py-0.5 bg-white/90 text-slate-700 text-[10px] font-black rounded-lg shadow-sm border border-slate-100">
+                                {{ formatNumber(counts.closed.balance || 0) }}
+                            </span>
                         </div>
                     </Link>
                 </div>
@@ -420,15 +430,15 @@
                                 <Tooltip :text="$t('work_orders.paid')" class="flex-1">
                                     <div class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-lg py-1 w-full h-full">
                                         <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.paid') }}</span>
-                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatNumber(order.paid_amount || 0) }}</span>
+                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatNumber(order.total_paid || 0) }}</span>
                                     </div>
                                 </Tooltip>
                                 <!-- Balance -->
                                 <Tooltip :text="$t('work_orders.remaining')" class="flex-1">
                                     <div class="group/stat flex flex-col items-center justify-center cursor-pointer transition-colors hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg py-1 w-full h-full">
                                         <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.remaining') }}</span>
-                                        <span class="text-[11px] font-black" :class="(order.total - (order.paid_amount || 0)) > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400'">
-                                            {{ formatNumber((order.total || 0) - (order.paid_amount || 0)) }}
+                                        <span class="text-[11px] font-black" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400'">
+                                            {{ formatNumber(order.balance || 0) }}
                                         </span>
                                     </div>
                                 </Tooltip>
@@ -595,20 +605,20 @@
                                 <!-- الخدمات -->
                                 <td class="px-4 py-3 text-center">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-bold">
-                                        {{ toEnglish(order.items?.length || 0) }}
+                                        {{ toEnglish(order.items_count || 0) }}
                                     </span>
                                 </td>
                                 <!-- مبلغ الفاتورة -->
                                 <td class="px-4 py-3 text-end font-semibold text-gray-900 dark:text-white">
-                                    {{ formatCurrency(order.total || 0) }}
+                                    {{ formatNumber(order.total || 0) }}
                                 </td>
                                 <!-- المدفوع -->
                                 <td class="px-4 py-3 text-end font-medium text-green-600 dark:text-green-400">
-                                    {{ formatCurrency(order.paid_amount || 0) }}
+                                    {{ formatNumber(order.total_paid || 0) }}
                                 </td>
                                 <!-- الباقي -->
                                 <td class="px-4 py-3 text-end font-bold" :class="getBalanceColor(order)">
-                                    {{ formatCurrency(getBalance(order)) }}
+                                    {{ formatNumber(order.balance || 0) }}
                                 </td>
                             </tr>
                         </tbody>
@@ -647,39 +657,7 @@
         <!-- Print Section (Teleported to body for printing) -->
         <Teleport to="body">
             <div class="print-section hidden">
-                <!-- Header -->
-                <div class="print-header">
-                    <!-- Arabic Layout: Logo right, info beside it -->
-                    <div class="flex items-start gap-4 mb-4" style="direction: rtl;">
-                        <!-- Logo -->
-                        <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
-                            <img 
-                                :src="$page.props.tenant.logo_url" 
-                                :alt="$page.props.tenant?.name"
-                                class="w-full h-full object-contain"
-                            />
-                        </div>
-                        <!-- Center Info -->
-                        <div class="flex-1 text-right">
-                            <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name || 'Carag' }}</h1>
-                            <p class="text-sm" v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
-                                هاتف: {{ $page.props.auth.center?.phone || $page.props.tenant?.phone }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
-                                البريد: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
-                            </p>
-                            <p class="text-sm" v-if="$page.props.tenant?.cr_number">
-                                السجل التجاري: {{ $page.props.tenant?.cr_number }}
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <!-- Title centered -->
-                    <div class="border-t pt-4 border-gray-300 text-center">
-                        <h2 class="text-lg font-bold">{{ $t('work_orders.title') }}</h2>
-                        <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString('ar-SA') }}</p>
-                    </div>
-                </div>
+                <PrintHeader :title="statusFilter ? $t('work_orders.list.' + statusFilter + '_title') : $t('work_orders.title')" />
 
                 <!-- Table -->
                 <table class="print-table">
@@ -687,34 +665,36 @@
                         <tr>
                             <th>#</th>
                             <th>{{ $t('work_orders.columns.code') }}</th>
-                            <th>{{ $t('work_orders.columns.customer') }}</th>
+                            <th>{{ $t('common.date') }}</th>
                             <th>{{ $t('work_orders.columns.vehicle') }}</th>
+                            <th>{{ $t('work_orders.columns.customer') }}</th>
                             <th>{{ $t('work_orders.columns.status') }}</th>
-                            <th>{{ $t('work_orders.columns.invoice_total') }}</th>
-                            <th>{{ $t('work_orders.columns.paid_amount') }}</th>
+                            <th>{{ $t('work_orders.columns.total') }}</th>
+                            <th>{{ $t('work_orders.columns.paid') }}</th>
                             <th>{{ $t('work_orders.columns.balance') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(order, index) in allWorkOrders" :key="order.id">
-                            <td>{{ index + 1 }}</td>
-                            <td>{{ order.code }}</td>
+                            <td>{{ toEnglish(index + 1) }}</td>
+                            <td>{{ toEnglish(order.code) }}</td>
+                            <td>{{ formatDate(order.entry_date) }}</td>
+                            <td dir="ltr" class="text-left font-sans">{{ toEnglish(order.vehicle?.plate_number) || '-' }}</td>
                             <td>{{ order.customer?.name || '-' }}</td>
-                            <td dir="ltr" class="text-left font-sans">{{ order.vehicle?.plate_number || '-' }}</td>
                             <td>
                                 <span class="print-badge">
                                     {{ $t(`work_orders.status.${order.status}`) }}
                                 </span>
                             </td>
-                            <td>{{ (order.total || 0).toLocaleString() }}</td>
-                            <td>{{ (order.paid_amount || 0).toLocaleString() }}</td>
-                            <td>{{ ((order.total || 0) - (order.paid_amount || 0)).toLocaleString() }}</td>
+                            <td>{{ formatNumber(order.total || 0) }}</td>
+                            <td>{{ formatNumber(order.paid_amount || 0) }}</td>
+                            <td>{{ formatNumber((order.total || 0) - (order.paid_amount || 0)) }}</td>
                         </tr>
                     </tbody>
                 </table>
                 
                 <div class="mt-8 text-center text-xs text-gray-400">
-                    {{ $page.props.auth.user.name }} - {{ new Date().toLocaleString('en-GB', { numberingSystem: 'latn' }) }}
+                    {{ $page.props.auth.user.name }}
                 </div>
             </div>
         </Teleport>
@@ -733,12 +713,13 @@ import SortIcon from '@/Components/Common/SortIcon.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
 const { success } = useToast();
-const { toEnglish } = useNumberFormat();
+const { toEnglish, formatNumber } = useNumberFormat();
 
 const props = defineProps({
     workOrders: {
@@ -1179,10 +1160,7 @@ function formatCurrencyValue(value) {
     return parseFloat(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function formatNumber(value) {
-    if (value === null || value === undefined) return '0';
-    return parseFloat(value).toLocaleString('en-US', { maximumFractionDigits: 2 });
-}
+
 
 function getColorHex(colorName) {
     if (!colorName) return '#e2e8f0';

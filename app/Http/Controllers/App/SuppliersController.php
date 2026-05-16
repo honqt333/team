@@ -77,7 +77,7 @@ class SuppliersController extends Controller
 
         Supplier::create($validated);
 
-        return redirect()->route('app.purchasing.suppliers.index')
+        return redirect()->back()
             ->with('success', __('purchasing.suppliers.created'));
     }
 

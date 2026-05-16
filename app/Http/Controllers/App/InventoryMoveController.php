@@ -28,6 +28,9 @@ class InventoryMoveController extends Controller
             $warehouse = Warehouse::getOrCreateDefault($centerId);
         }
 
+        $sort = $request->input('sort', 'posted_at');
+        $order = $request->input('order', 'desc');
+
         $query = InventoryMove::forWarehouse($warehouse->id)
             ->with([
                 'part:id,sku,name_ar,name_en',
@@ -43,8 +46,16 @@ class InventoryMoveController extends Controller
             ->when($request->input('type'), fn($q, $type) => $q->ofType($type))
             ->when($request->input('part_id'), fn($q, $partId) => $q->forPart($partId))
             ->when($request->input('date_from'), fn($q, $date) => $q->whereDate('posted_at', '>=', $date))
-            ->when($request->input('date_to'), fn($q, $date) => $q->whereDate('posted_at', '<=', $date))
-            ->orderBy('posted_at', 'desc');
+            ->when($request->input('date_to'), fn($q, $date) => $q->whereDate('posted_at', '<=', $date));
+
+        // Apply Sorting
+        if ($sort === 'sku') {
+            $query->join('parts', 'inventory_moves.part_id', '=', 'parts.id')
+                  ->orderBy('parts.sku', $order)
+                  ->select('inventory_moves.*');
+        } else {
+            $query->orderBy($sort, $order);
+        }
 
         $moves = $query->paginate(50)->withQueryString();
 
@@ -130,7 +141,13 @@ class InventoryMoveController extends Controller
     {
         $this->authorize('reverse', $inventoryMove);
 
-        if (!$inventoryMove->canBeReversed()) {
+        $restrictedTypes = [
+            InventoryMove::TYPE_ISSUE_TO_WORKORDER,
+            InventoryMove::TYPE_TRANSFER_IN,
+            InventoryMove::TYPE_TRANSFER_OUT,
+        ];
+
+        if (!$inventoryMove->canBeReversed() || in_array($inventoryMove->move_type, $restrictedTypes)) {
             return back()->with('error', __('inventory.moves.cannot_reverse'));
         }
 

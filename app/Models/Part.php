@@ -22,12 +22,25 @@ class Part extends Model
         'unit_id',
         'category_id',
         'description',
+        'image_path',
         'min_qty',
         'reorder_qty',
         'default_sale_price',
         'min_sale_price',
         'is_active',
     ];
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        // Safely check if the column exists in the attributes to avoid crashes if migration hasn't run
+        $imagePath = array_key_exists('image_path', $this->attributes) ? $this->attributes['image_path'] : null;
+        
+        return $imagePath 
+            ? asset('storage/' . $imagePath) 
+            : "https://ui-avatars.com/api/?name=" . urlencode($this->name_ar) . "&color=7F9CF5&background=EBF4FF";
+    }
 
     protected $casts = [
         'min_qty' => 'decimal:3',

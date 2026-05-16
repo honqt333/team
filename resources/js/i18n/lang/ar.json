@@ -59,6 +59,7 @@
         "confirm": "تأكيد",
         "deleted_success": "تم الحذف بنجاح",
         "saved_success": "تم الحفظ بنجاح",
+        "please_complete_required_fields": "يرجى إكمال الحقول الإجبارية وإضافة أصناف للحفظ",
         "vat_settings_updated": "تم تحديث إعدادات الضريبة بنجاح. يرجى تسجيل الدخول مرة أخرى.",
         "vat_included": "شامل الضريبة",
         "saving": "جاري الحفظ...",
@@ -1396,6 +1397,7 @@
             "discount_value": "قيمة الخصم",
             "total_cost": "تكلفة الخدمة"
         },
+
         "parts_display": {
             "view_grid": "عرض شبكي",
             "view_table": "عرض جدولي",
@@ -1790,7 +1792,11 @@
             "items": "الأصناف",
             "no_items": "لا توجد أصناف",
             "balance": "المتبقي",
+            "create_credit_invoice": "إنشاء فاتورة آجلة",
+            "credit_invoice_hint": "سيتم تسجيل المبلغ المتبقي كدين مستحق للمورد",
+            "due_date": "تاريخ الاستحقاق",
             "supplier_reference": "مرجع المورد",
+            "supplier_reference_placeholder": "أدخل رقم مرجع المورد (رقم الفاتورة الأصلية)",
             "select_supplier": "اختر المورد...",
             "payment_details": "تفاصيل الدفع",
             "payment_types": {
@@ -1830,7 +1836,13 @@
             "qty_ordered": "الكمية المطلوبة",
             "qty_received": "الكمية المستلمة",
             "qty_pending": "الكمية المتبقية",
-            "receive_now": "استلام الآن"
+            "receive_now": "استلام الآن",
+            "purchase_unit": "وحدة الشراء",
+            "contains": "تحتوي على",
+            "inventory_qty": "كمية المخزون",
+            "amount": "المبلغ",
+            "vat": "الضريبة",
+            "total": "الإجمالي"
         },
         "grn": {
             "title": "سندات الاستلام",

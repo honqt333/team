@@ -292,32 +292,32 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th
-                                    class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.suppliers.code') }}</th>
                                 <th
-                                    class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.suppliers.name') }}</th>
                                 <th
-                                    class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.suppliers.contact') }}</th>
                                 <th
-                                    class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.suppliers.phone') }}</th>
                                 <th
-                                    class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.suppliers.balance') }}</th>
                                 <th
                                     class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.suppliers.orders_count') }}</th>
                                 <th
-                                    class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('common.status') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="supplier in suppliers.data" :key="supplier.id"
                                 @click="router.visit(route('app.purchasing.suppliers.show', supplier.id))"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
+                                class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors text-center">
                                 <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ supplier.code
                                     || '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ supplier.name
@@ -326,7 +326,7 @@
                                     supplier.contact_person || '-' }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" dir="ltr">{{
                                     supplier.phone || '-' }}</td>
-                                <td class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400 text-end">{{
+                                <td class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">{{
                                     formatCurrency(supplier.balance) }}</td>
                                 <td class="px-4 py-3 text-center">
                                     <span
@@ -334,7 +334,7 @@
                                         {{ supplier.purchase_orders_count }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-end">
+                                <td class="px-4 py-3 text-center">
                                     <span :class="[
                                         'inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm transition-all',
                                         supplier.is_active
@@ -362,57 +362,45 @@
                 <div class="print-section hidden">
                     <!-- Header -->
                     <div class="print-header">
-                        <!-- Arabic Layout: Logo right, info beside it -->
-                        <div v-if="isRtl" class="flex items-start gap-4 mb-4" style="direction: rtl;">
-                            <!-- Logo -->
-                            <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
-                                <img :src="$page.props.tenant.logo_url" :alt="$page.props.tenant?.name"
-                                    class="w-full h-full object-contain" />
+                        <div class="grid grid-cols-3 items-start">
+                            <!-- Column 1: Info (Right in Arabic, Left in English) -->
+                            <div :class="isRtl ? 'text-right' : 'text-left'">
+                                <h1 class="text-xl font-bold">
+                                    {{ isRtl ? ($page.props.tenant?.trade_name || $page.props.tenant?.name) : ($page.props.tenant?.name_en || $page.props.tenant?.name) }}
+                                </h1>
+                                <div class="mt-2 text-[10px] space-y-0.5 text-gray-500">
+                                    <p v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
+                                        {{ isRtl ? 'الهاتف' : 'Phone' }}: {{ toEnglish($page.props.auth.center?.phone || $page.props.tenant?.phone) }}
+                                    </p>
+                                    <p v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
+                                        {{ isRtl ? 'البريد' : 'Email' }}: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
+                                    </p>
+                                    <p v-if="$page.props.tenant?.cr_number">
+                                        {{ isRtl ? 'السجل التجاري' : 'CR' }}: {{ toEnglish($page.props.tenant?.cr_number) }}
+                                    </p>
+                                </div>
                             </div>
-                            <!-- Center Info -->
-                            <div class="flex-1 text-right">
-                                <h1 class="text-xl font-bold">{{ $page.props.tenant?.trade_name ||
-                                    $page.props.tenant?.name || 'Carag' }}</h1>
-                                <p class="text-sm" v-if="$page.props.center?.phone || $page.props.tenant?.phone">
-                                    هاتف: {{ $page.props.center?.phone || $page.props.tenant?.phone }}
-                                </p>
-                                <p class="text-sm" v-if="$page.props.center?.email || $page.props.tenant?.email">
-                                    البريد: {{ $page.props.center?.email || $page.props.tenant?.email }}
-                                </p>
-                                <p class="text-sm" v-if="$page.props.tenant?.cr_number">
-                                    السجل التجاري: {{ $page.props.tenant?.cr_number }}
+
+                            <!-- Column 2: Logo (Always Center) -->
+                            <div class="flex justify-center">
+                                <div v-if="$page.props.tenant?.logo_url" class="w-24 h-24 flex-shrink-0">
+                                    <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
+                                </div>
+                            </div>
+
+                            <!-- Column 3: Date (Far Left in Arabic, Far Right in English) -->
+                            <div :class="isRtl ? 'text-left' : 'text-right'">
+                                <p class="text-[10px] text-gray-400 font-bold" dir="ltr">
+                                    {{ new Date().toLocaleDateString('en-US') }}
                                 </p>
                             </div>
                         </div>
 
-                        <!-- English Layout: Logo left with info beside it -->
-                        <div v-else class="flex items-start gap-4 mb-4">
-                            <!-- Logo -->
-                            <div v-if="$page.props.tenant?.logo_url" class="w-20 h-20 flex-shrink-0">
-                                <img :src="$page.props.tenant.logo_url" :alt="$page.props.tenant?.name"
-                                    class="w-full h-full object-contain" />
-                            </div>
-                            <!-- Center Info -->
-                            <div class="flex-1">
-                                <h1 class="text-lg font-bold">{{ $page.props.tenant?.trade_name ||
-                                    $page.props.tenant?.name || 'Carag' }}</h1>
-                                <p class="text-sm" v-if="$page.props.center?.phone || $page.props.tenant?.phone">
-                                    Phone: {{ $page.props.center?.phone || $page.props.tenant?.phone }}
-                                </p>
-                                <p class="text-sm" v-if="$page.props.center?.email || $page.props.tenant?.email">
-                                    Email: {{ $page.props.center?.email || $page.props.tenant?.email }}
-                                </p>
-                                <p class="text-sm" v-if="$page.props.tenant?.cr_number">
-                                    CR: {{ $page.props.tenant?.cr_number }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Title centered (both languages) -->
-                        <div class="border-t pt-4 border-gray-300 text-center">
-                            <h2 class="text-lg font-bold">{{ $t('purchasing.suppliers.title') }}</h2>
-                            <p class="text-xs text-gray-500 mt-1">{{ new Date().toLocaleDateString(isRtl ? 'ar-SA' :
-                                'en-US') }}</p>
+                        <!-- Report Title -->
+                        <div class="mt-8 text-center">
+                            <h2 class="text-lg font-bold border-y-2 border-gray-100 py-2 uppercase tracking-wider">
+                                {{ $t('purchasing.suppliers.title') }}
+                            </h2>
                         </div>
                     </div>
 
@@ -430,9 +418,9 @@
                         </thead>
                         <tbody>
                             <tr v-for="(supplier, index) in suppliers.data" :key="supplier.id">
-                                <td>{{ index + 1 }}</td>
+                                <td>{{ toEnglish(index + 1) }}</td>
                                 <td>{{ supplier.name }}</td>
-                                <td dir="ltr" class="text-left font-sans">{{ supplier.phone || '-' }}</td>
+                                <td dir="ltr" class="text-left font-sans">{{ toEnglish(supplier.phone) || '-' }}</td>
                                 <td dir="ltr" class="text-left">{{ supplier.email || '-' }}</td>
                                 <td>{{ supplier.type === 'parts' ? $t('purchasing.suppliers.type_parts') :
                                     $t('purchasing.suppliers.type_services') }}</td>
@@ -442,7 +430,7 @@
                     </table>
 
                     <div class="mt-8 text-center text-xs text-gray-400">
-                        {{ $page.props.auth?.user?.name }} - {{ new Date().toLocaleString(isRtl ? 'ar-SA' : 'en-US') }}
+                        {{ $page.props.auth?.user?.name }}
                     </div>
                 </div>
             </Teleport>
@@ -460,6 +448,9 @@ import { useI18n } from 'vue-i18n';
 import { usePermission } from '@/Composables/usePermission';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     suppliers: Object,
@@ -521,7 +512,7 @@ const resetFilters = () => {
 
 function formatCurrency(value) {
     if (!value && value !== 0) return '-';
-    return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'SAR',
         minimumFractionDigits: 0

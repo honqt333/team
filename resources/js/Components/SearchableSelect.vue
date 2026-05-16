@@ -44,6 +44,10 @@ const props = defineProps({
     asyncSearch: {
         type: Boolean,
         default: false,
+    },
+    disabled: {
+        type: Boolean,
+        default: false,
     }
 });
 
@@ -251,7 +255,8 @@ const scrollToHighlighted = () => {
                 v-model="inputValue"
                 type="text"
                 :placeholder="placeholder || t('common.select')"
-                class="w-full border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 transition-colors"
+                :disabled="disabled"
+                class="w-full border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 :class="[
                     compact ? 'px-2 py-1.5 text-xs' : 'px-4 py-2.5 text-sm',
                     error ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',

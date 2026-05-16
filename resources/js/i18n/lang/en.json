@@ -27,6 +27,7 @@
         "na": "N/A",
         "search": "Search...",
         "print": "Print",
+        "printed_by": "Printed by",
         "close": "Close",
         "link_copied": "Link copied to clipboard",
         "copy_from_phone": "Copy from phone",
@@ -106,6 +107,7 @@
         "created_by": "Created by",
         "updated_at": "Update date",
         "notes": "Notes",
+        "notes_placeholder": "Write your notes here...",
         "select": "Choose",
         "all": "All",
         "all_categories": "All categories",
@@ -150,7 +152,8 @@
         "manual_update": "Manual update",
         "alert": "Alert",
         "copied": "Copied",
-        "open_in_whatsapp": "Open in WhatsApp"
+        "open_in_whatsapp": "Open in WhatsApp",
+        "max_size": "Max size {size}"
     },
     "quotes": {
         "form_tabs": {
@@ -821,6 +824,7 @@
             "name_en": "Name (English)",
             "sku": "SKU",
             "barcode": "Barcode",
+            "photo": "Photo",
             "name_ar_placeholder": "Enter the name of the piece in Arabic",
             "name_en_placeholder": "Enter the name of the piece in English",
             "sku_placeholder": "01234",
@@ -838,9 +842,14 @@
             "description": "Description",
             "description_placeholder": "Enter a detailed description of the piece",
             "additional_info": "Additional information",
-            "inventory_pricing": "Inventory and pricing",
-            "make_model_placeholder": "Make and model",
-            "make_model_hint": "You did not specify the make and model",
+            "inventory_pricing": "Inventory & Pricing",
+            "make_model_placeholder": "Compatible Make/Model",
+            "make_model_hint": "Specify brands and models compatible with this part",
+            "add_image": "Add Part Image",
+            "sku_placeholder": "Enter SKU...",
+            "name_ar_placeholder": "Part name in Arabic...",
+            "name_en_placeholder": "Part name in English...",
+            "description_placeholder": "Additional details...",
             "min_qty": "Minimum stock",
             "min_qty_hint": "Alert when stock is low",
             "reorder_qty": "Reorder quantity",
@@ -910,7 +919,7 @@
             "qty": "Current stock",
             "current_stock": "Current quantity",
             "current": "Current stock",
-            "wac": "Cost price",
+            "wac": "Weighted Average Cost (WAC)",
             "min_qty": "Minimum",
             "value": "Total value",
             "total_items": "Total items",
@@ -1772,6 +1781,7 @@
         "suppliers": {
             "title": "Suppliers",
             "subtitle": "Supplier data management",
+            "details": "Supplier Details",
             "add": "Add a resource",
             "edit": "Edit resource",
             "search_placeholder": "Search by name or symbol...",
@@ -1880,9 +1890,19 @@
             "confirm_cancel": "Are you sure to cancel the purchase order?"
         },
         "items": {
-            "add": "Add a category",
-            "edit": "Edit category",
-            "select_part": "Choose the spare part"
+            "add": "Add Item",
+            "edit": "Edit Item",
+            "select_part": "Select Item",
+            "qty_ordered": "Qty Ordered",
+            "qty_received": "Qty Received",
+            "qty_pending": "Qty Pending",
+            "receive_now": "Receive Now",
+            "purchase_unit": "Purchase Unit",
+            "contains": "Contains",
+            "inventory_qty": "Inventory Qty",
+            "amount": "Amount",
+            "vat": "VAT",
+            "total": "Total"
         },
         "grn": {
             "title": "Receipt vouchers",

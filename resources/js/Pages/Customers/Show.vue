@@ -63,8 +63,8 @@
                         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
                             <div class="flex items-center gap-6 flex-1">
                                 <div class="relative">
-                                    <div class="w-24 h-24 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/35 flex items-center justify-center text-white ring-4 ring-indigo-50 dark:ring-indigo-900/20 transition-transform group-hover:scale-[1.03] duration-500">
-                                        <span class="text-5xl font-black">
+                                    <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/35 flex items-center justify-center text-white ring-4 ring-indigo-50 dark:ring-indigo-900/20 transition-transform group-hover:scale-[1.03] duration-500">
+                                        <span class="text-3xl lg:text-5xl font-black">
                                             {{ customer.name?.charAt(0)?.toUpperCase() || '?' }}
                                         </span>
                                     </div>
@@ -79,8 +79,8 @@
                                 </div>
 
                                 <div class="flex-1">
-                                    <div class="flex flex-wrap items-center gap-3 mb-1">
-                                        <h1 class="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
+                                    <div class="flex flex-wrap items-center gap-2 lg:gap-3 mb-1">
+                                        <h1 class="text-2xl lg:text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                             {{ customer.name }}
                                         </h1>
                                         <div class="px-3 py-1.5 rounded-xl text-[10px] font-black tracking-[0.2em] uppercase border shadow-sm"
@@ -145,26 +145,26 @@
                                 </div>
                             </div>
 
-                            <div class="flex flex-wrap items-center gap-3">
-                                <div class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-teal-50/50 dark:bg-teal-900/20 rounded-3xl border border-teal-100/50 dark:border-teal-800/30 hover:bg-white dark:hover:bg-teal-900/40 transition-all hover:shadow-lg hover:shadow-teal-500/10">
-                                    <span class="text-2xl font-black text-teal-600 dark:text-teal-400 group-hover/stat:scale-110 transition-transform">{{ counts.vehicles }}</span>
+                            <div class="grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-wrap items-center gap-2 lg:gap-3 w-full lg:w-auto">
+                                <div class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-teal-50/50 dark:bg-teal-900/20 rounded-3xl border border-teal-100/50 dark:border-teal-800/30 hover:bg-white dark:hover:bg-teal-900/40 transition-all hover:shadow-lg hover:shadow-teal-500/10">
+                                    <span class="text-2xl font-black text-teal-600 dark:text-teal-400 group-hover/stat:scale-110 transition-transform">{{ formatNumber(counts.vehicles, 0) }}</span>
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.vehicles') }}</span>
                                 </div>
-                                <div class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-amber-50/50 dark:bg-amber-900/20 rounded-3xl border border-amber-100/50 dark:border-amber-800/30 hover:bg-white dark:hover:bg-amber-900/40 transition-all hover:shadow-lg hover:shadow-amber-500/10">
-                                    <span class="text-2xl font-black text-amber-600 dark:text-amber-400 group-hover/stat:scale-110 transition-transform">{{ counts.quotes }}</span>
+                                <div class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-amber-50/50 dark:bg-amber-900/20 rounded-3xl border border-amber-100/50 dark:border-amber-800/30 hover:bg-white dark:hover:bg-amber-900/40 transition-all hover:shadow-lg hover:shadow-amber-500/10">
+                                    <span class="text-2xl font-black text-amber-600 dark:text-amber-400 group-hover/stat:scale-110 transition-transform">{{ formatNumber(counts.quotes, 0) }}</span>
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.quotes') }}</span>
                                 </div>
-                                <div class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-100/50 dark:border-indigo-800/30 hover:bg-white dark:hover:bg-indigo-900/40 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
-                                    <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400 group-hover/stat:scale-110 transition-transform">{{ counts.workOrders }}</span>
+                                <div class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-100/50 dark:border-indigo-800/30 hover:bg-white dark:hover:bg-indigo-900/40 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
+                                    <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400 group-hover/stat:scale-110 transition-transform">{{ formatNumber(counts.workOrders, 0) }}</span>
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.work_orders') }}</span>
                                 </div>
-                                <div class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-rose-50/50 dark:bg-rose-900/20 rounded-3xl border border-rose-100/50 dark:border-rose-800/30 hover:bg-white dark:hover:bg-rose-900/40 transition-all hover:shadow-lg hover:shadow-rose-500/10">
-                                    <span class="text-2xl font-black text-rose-600 dark:text-rose-400 group-hover/stat:scale-110 transition-transform">0</span>
-                                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">التقييمات</span>
+                                <div class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-rose-50/50 dark:bg-rose-900/20 rounded-3xl border border-rose-100/50 dark:border-rose-800/30 hover:bg-white dark:hover:bg-rose-900/40 transition-all hover:shadow-lg hover:shadow-rose-500/10">
+                                    <span class="text-2xl font-black text-rose-600 dark:text-rose-400 group-hover/stat:scale-110 transition-transform">{{ formatNumber(counts.invoices || 0, 0) }}</span>
+                                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.invoices') }}</span>
                                 </div>
-                                <div class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-3xl border border-emerald-100/50 dark:border-emerald-800/30 hover:bg-white dark:hover:bg-emerald-900/40 transition-all hover:shadow-lg hover:shadow-emerald-500/10">
-                                    <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400 group-hover/stat:scale-110 transition-transform">0</span>
-                                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">كروت العمل</span>
+                                <div class="group/stat flex flex-col items-center justify-center h-20 lg:w-24 lg:h-24 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-3xl border border-emerald-100/50 dark:border-emerald-800/30 hover:bg-white dark:hover:bg-emerald-900/40 transition-all hover:shadow-lg hover:shadow-emerald-500/10">
+                                    <span class="text-2xl font-black text-emerald-600 dark:text-emerald-400 group-hover/stat:scale-110 transition-transform">{{ formatNumber(counts.payments || 0, 0) }}</span>
+                                    <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.payments') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -204,7 +204,7 @@
                                     activeTab === tab.key ? 'text-white/70' : 'text-gray-400 dark:text-gray-500'
                                 ]">{{ tab.label }}</span>
                                 <div class="flex items-baseline gap-1.5">
-                                    <span class="text-base font-black leading-none">{{ toEnglish(tab.count) }}</span>
+                                    <span class="text-base font-black leading-none">{{ formatNumber(tab.count, 0) }}</span>
                                     <span v-if="activeTab === tab.key" class="w-1 h-1 rounded-full bg-white animate-pulse"></span>
                                 </div>
                             </div>
@@ -327,7 +327,7 @@
                                                         stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                                 </svg>
                                                 <span class="font-medium text-gray-700 dark:text-gray-300">{{
-                                                    vehicle.odometer?.toLocaleString() }}</span>
+                                                    vehicle.odometer?.toLocaleString('en-US') }}</span>
                                                 <span>{{ $t('common.km') }}</span>
                                             </div>
                                             <div v-if="vehicle.vin" class="flex items-center gap-1.5">
@@ -340,6 +340,26 @@
                                                 <span class="font-mono text-[9px] truncate max-w-[80px]"
                                                     :title="vehicle.vin">{{ vehicle.vin }}</span>
                                             </div>
+                                        </div>
+
+                                        <!-- Quick Actions Overlay/Footer -->
+                                        <div class="mt-3 flex items-center gap-1.5 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                                            <button v-if="can('crm.work_orders.create') || isAnyAdmin()" 
+                                                @click.stop="openWorkOrderModal(vehicle)"
+                                                :title="$t('work_orders.add')"
+                                                class="flex-1 p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all duration-200">
+                                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                </svg>
+                                            </button>
+                                            <button v-if="can('crm.quotes.create') || isAnyAdmin()" 
+                                                @click.stop="openQuoteModal(vehicle)"
+                                                :title="$t('quotes.add')"
+                                                class="flex-1 p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-600 hover:text-white transition-all duration-200">
+                                                <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                </svg>
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -364,6 +384,9 @@
                                         <th
                                             class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('vehicles.form.year') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ $t('common.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -379,6 +402,24 @@
                                             getModelName(vehicle) }}</td>
                                         <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{
                                             vehicle.year }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <button v-if="can('crm.work_orders.create') || isAnyAdmin()" 
+                                                    @click.stop="openWorkOrderModal(vehicle)"
+                                                    class="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                </button>
+                                                <button v-if="can('crm.quotes.create') || isAnyAdmin()" 
+                                                    @click.stop="openQuoteModal(vehicle)"
+                                                    class="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 hover:bg-amber-600 hover:text-white transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -777,11 +818,11 @@
             :customers="[customer]" :makes="makes" :colors="colors" :modelsByMake="modelsByMake"
             :defaultCustomerId="customer.id" @close="showVehicleModal = false" @saved="handleVehicleSaved" />
         <WorkOrderFormModal v-if="showWorkOrderModal" :show="showWorkOrderModal" :customers="[customer]" :makes="makes"
-            :colors="colors" :modelsByMake="modelsByMake" :departments="departments" @close="showWorkOrderModal = false"
+            :colors="colors" :modelsByMake="modelsByMake" :departments="departments" :vehicle="selectedVehicle" @close="showWorkOrderModal = false"
             @saved="handleWorkOrderSaved" />
         <QuoteFormModal v-if="showQuoteModal" :show="showQuoteModal" :customers="[customer]" :makes="makes"
             :colors="colors" :modelsByMake="modelsByMake" :departments="departments" :services="services"
-            @close="showQuoteModal = false" @saved="handleQuoteSaved" />
+            :vehicle="selectedVehicle" @close="showQuoteModal = false" @saved="handleQuoteSaved" />
         <CustomerMergeModal v-if="showMergeModal" :show="showMergeModal" :customer="customer" :counts="counts"
             @close="showMergeModal = false" />
         <ConfirmModal />
@@ -823,7 +864,7 @@ const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 const { confirm } = useConfirm();
 const { can, isAnyAdmin } = usePermission();
-const { toEnglish } = useNumberFormat();
+const { toEnglish, formatNumber } = useNumberFormat();
 
 const headerEmail = computed(() => (props.customer?.email || '').trim());
 const headerAddress = computed(() => {
@@ -941,7 +982,7 @@ function getVehicleName(vehicle) {
 
 function formatDate(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US');
+    return new Date(dateStr).toLocaleDateString('en-US');
 }
 
 function getWhatsAppNumber(customer) {
@@ -1005,7 +1046,7 @@ function getPaymentMethodClass(method) {
 }
 
 function formatPrice(amount) {
-    return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    return new Intl.NumberFormat('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount);
@@ -1021,11 +1062,13 @@ function openVehicleEditModal(vehicle) {
     showVehicleModal.value = true;
 }
 
-function openWorkOrderModal() {
+function openWorkOrderModal(vehicle = null) {
+    selectedVehicle.value = vehicle;
     showWorkOrderModal.value = true;
 }
 
-function openQuoteModal() {
+function openQuoteModal(vehicle = null) {
+    selectedVehicle.value = vehicle;
     showQuoteModal.value = true;
 }
 
