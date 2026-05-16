@@ -376,7 +376,6 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::delete('/orders/{purchaseOrder}/items/{item}', [\App\Http\Controllers\App\PurchaseOrdersController::class, 'removeItem'])->name('orders.items.destroy');
         
         // Goods Received Notes
-        Route::get('/orders/{purchaseOrder}/receive', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'create'])->name('grn.create');
         Route::post('/orders/{purchaseOrder}/receive', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'store'])->name('grn.store');
         Route::get('/grn/{goodsReceivedNote}', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'show'])->name('grn.show');
         Route::post('/grn/{goodsReceivedNote}/post', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'post'])->name('grn.post');
