@@ -380,6 +380,10 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::get('/grn/{goodsReceivedNote}', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'show'])->name('grn.show');
         Route::post('/grn/{goodsReceivedNote}/post', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'post'])->name('grn.post');
         Route::post('/grn/{goodsReceivedNote}/cancel', [\App\Http\Controllers\App\GoodsReceivedNotesController::class, 'cancel'])->name('grn.cancel');
+
+        // Purchase Invoices (separate from POs)
+        Route::get('/invoices', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/{purchaseInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'show'])->name('invoices.show');
     });
 
     // ───────────────────────────────────────────────────────────────
