@@ -40,14 +40,14 @@
                     </button>
 
                     <!-- Receive Goods -->
-                    <Link v-if="canReceive" :href="route('app.purchasing.grn.create', { purchaseOrder: order.id })"
+                    <button v-if="canReceive" @click="showGrnModal = true"
                         class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span>{{ $t('purchasing.orders.actions.receive') }}</span>
-                    </Link>
+                    </button>
                 </div>
 
                 <!-- Right side: Code and Status -->
@@ -317,6 +317,11 @@
         </div>
 
         <ConfirmModal />
+        <GrnModal 
+            :show="showGrnModal" 
+            :purchase-order="order" 
+            @close="showGrnModal = false" 
+        />
 
         <!-- Print Section -->
         <Teleport to="body">
@@ -411,7 +416,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -419,11 +424,14 @@ import { useConfirm } from '@/Composables/useConfirm';
 import BackButton from '@/Components/BackButton.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import GrnModal from '@/Components/Purchasing/GrnModal.vue';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
 
 const props = defineProps({
     order: Object,
 });
+
+const showGrnModal = ref(false);
 
 const { t } = useI18n();
 const { formatCurrency, toEnglish } = useNumberFormat();
