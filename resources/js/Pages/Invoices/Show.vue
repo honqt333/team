@@ -117,13 +117,14 @@
                                         <td class="px-8 py-6 text-end text-base font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(line.line_total_incl_tax) }}</td>
                                     </tr>
                                 </tbody>
+                                <tfoot>
                                     <tr>
-                                        <td colspan="4" class="px-4 py-3 text-end text-sm font-medium text-gray-600 dark:text-gray-300">{{ $t('invoices.tax') }} ({{ invoice.tax_rate_snapshot }}%)</td>
-                                        <td class="px-4 py-3 text-end text-sm font-medium text-gray-900 dark:text-white" dir="ltr">{{ formatCurrency(invoice.total_tax) }}</td>
+                                        <td colspan="3" class="px-8 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.tax') }} ({{ invoice.tax_rate_snapshot }}%)</td>
+                                        <td class="px-8 py-4 text-end text-sm font-black text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrency(invoice.total_tax) }}</td>
                                     </tr>
-                                    <tr class="bg-gray-100 dark:bg-gray-600">
-                                        <td colspan="4" class="px-4 py-3 text-end text-base font-bold text-gray-900 dark:text-white">{{ $t('invoices.grand_total') }}</td>
-                                        <td class="px-4 py-3 text-end text-base font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatCurrency(invoice.total_incl_tax) }}</td>
+                                    <tr class="bg-blue-50/50 dark:bg-blue-900/20">
+                                        <td colspan="3" class="px-8 py-5 text-end text-xs font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">{{ $t('invoices.grand_total') }}</td>
+                                        <td class="px-8 py-5 text-end text-lg font-black text-blue-600 dark:text-blue-400 font-mono" dir="ltr">{{ formatCurrency(invoice.total_incl_tax) }}</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -147,8 +148,8 @@
                             </div>
                             <div class="border-t border-gray-200 dark:border-gray-700 pt-3 flex justify-between">
                                 <span class="font-medium text-gray-900 dark:text-white">{{ $t('invoices.balance') }}</span>
-                                <span class="font-bold text-lg" :class="balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'" dir="ltr">
-                                    {{ formatCurrency(balance) }}
+                                <span class="font-bold text-lg" :class="invoice.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'" dir="ltr">
+                                    {{ formatCurrency(invoice.balance) }}
                                 </span>
                             </div>
                         </div>
@@ -249,9 +250,11 @@ import { Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useI18n } from 'vue-i18n';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { t } = useI18n();
 const { confirm } = useConfirm();
+const { toEnglish } = useNumberFormat();
 
 const props = defineProps({
     invoice: Object,
