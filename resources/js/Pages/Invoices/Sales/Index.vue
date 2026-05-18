@@ -227,39 +227,88 @@
                                 <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
                                     <thead>
                                         <tr class="bg-gray-50/50 dark:bg-gray-900/80">
-                                            <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.invoice_number') }}</th>
-                                            <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.issue_date') }}</th>
-                                            <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.customer') }}</th>
-                                            <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.total') }}</th>
-                                            <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.total_paid') }}</th>
-                                            <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.balance') }}</th>
-                                            <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.status') }}</th>
-                                            <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.actions') }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">#</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.invoice_number') || 'رقم الفاتورة' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.issue_date') || 'تاريخ الفاتورة' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.customer') || 'العميل' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.gross_total') || 'المجموع' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.discount') || 'الخصم' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.subtotal') || 'المجموع الفرعي' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">VAT</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.grand_total') || 'مبلغ الفاتورة' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.balance') || 'الباقي' }}</th>
+                                            <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.status') || 'الحالة' }}</th>
+                                            <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.actions') || 'الإجراءات' }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
                                         <tr
-                                            v-for="invoice in invoices.data"
+                                            v-for="(invoice, index) in invoices.data"
                                             :key="invoice.id"
                                             class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all duration-200"
                                         >
-                                            <td class="px-4 py-4">
+                                            <!-- # -->
+                                            <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono">
+                                                {{ toEnglish(index + 1) }}
+                                            </td>
+                                            
+                                            <!-- رقم الفاتورة -->
+                                            <td class="px-4 py-4 text-center">
                                                 <Link :href="route('app.invoices.show', invoice.id)" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
                                                     {{ invoice.invoice_number }}
                                                 </Link>
                                             </td>
-                                            <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{{ formatDate(invoice.issue_date) }}</td>
-                                            <td class="px-4 py-4">
-                                                <p class="font-medium text-gray-900 dark:text-white truncate max-w-[180px]">{{ invoice.customer?.name || '—' }}</p>
+                                            
+                                            <!-- تاريخ الفاتورة -->
+                                            <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                                {{ formatDate(invoice.issue_date) }}
                                             </td>
-                                            <td class="px-4 py-4 text-sm font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatCurrency(invoice.total_incl_tax) }}</td>
-                                            <td class="px-4 py-4 text-sm font-medium text-emerald-600 dark:text-emerald-400" dir="ltr">{{ formatCurrency(invoice.total_paid) }}</td>
-                                            <td class="px-4 py-4 text-sm font-bold" dir="ltr" :class="invoice.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'">{{ formatCurrency(invoice.balance) }}</td>
-                                            <td class="px-4 py-4">
+                                            
+                                            <!-- العميل -->
+                                            <td class="px-4 py-4 text-center">
+                                                <p class="font-medium text-gray-900 dark:text-white truncate max-w-[180px] mx-auto">
+                                                    {{ invoice.customer_name_snapshot || invoice.customer?.name || '—' }}
+                                                </p>
+                                            </td>
+                                            
+                                            <!-- المجموع -->
+                                            <td class="px-4 py-4 text-center text-sm font-bold text-gray-900 dark:text-white font-mono" dir="ltr">
+                                                {{ formatCurrency(getGrossTotal(invoice)) }}
+                                            </td>
+                                            
+                                            <!-- الخصم -->
+                                            <td class="px-4 py-4 text-center text-sm font-medium text-rose-600 dark:text-rose-400 font-mono" dir="ltr">
+                                                {{ formatCurrency(getDiscount(invoice)) }}
+                                            </td>
+                                            
+                                            <!-- المجموع الفرعي -->
+                                            <td class="px-4 py-4 text-center text-sm font-bold text-gray-900 dark:text-white font-mono" dir="ltr">
+                                                {{ formatCurrency(invoice.total_excl_tax) }}
+                                            </td>
+                                            
+                                            <!-- VAT -->
+                                            <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400 font-mono" dir="ltr">
+                                                {{ formatCurrency(invoice.total_tax) }}
+                                            </td>
+                                            
+                                            <!-- مبلغ الفاتورة -->
+                                            <td class="px-4 py-4 text-center text-sm font-black text-gray-900 dark:text-white font-mono" dir="ltr">
+                                                {{ formatCurrency(invoice.total_incl_tax) }}
+                                            </td>
+                                            
+                                            <!-- الباقي -->
+                                            <td class="px-4 py-4 text-center text-sm font-bold font-mono" dir="ltr" :class="invoice.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'">
+                                                {{ formatCurrency(invoice.balance) }}
+                                            </td>
+                                            
+                                            <!-- الحالة -->
+                                            <td class="px-4 py-4 text-center">
                                                 <span :class="statusClass(invoice.payment_status)" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold">
                                                     {{ $t(`invoices.status.${invoice.payment_status}`) }}
                                                 </span>
                                             </td>
+                                            
+                                            <!-- الإجراءات -->
                                             <td class="px-4 py-4 text-end">
                                                 <div class="flex items-center justify-end gap-1">
                                                     <Link :href="route('app.invoices.show', invoice.id)" class="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all">
@@ -391,6 +440,18 @@ const formatDate = (date) => {
 
 const formatCurrency = (amount) =>
     new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'SAR', numberingSystem: 'latn' }).format(amount || 0);
+
+const getDiscount = (invoice) => {
+    if (!invoice.work_order) return 0;
+    const itemsDiscount = invoice.work_order.items?.reduce((sum, item) => sum + Number(item.discount_amount || 0), 0) || 0;
+    const partsDiscount = invoice.work_order.parts?.reduce((sum, part) => sum + Number(part.discount || 0), 0) || 0;
+    return itemsDiscount + partsDiscount;
+};
+
+const getGrossTotal = (invoice) => {
+    const exclTax = Number(invoice.total_excl_tax || 0);
+    return exclTax + getDiscount(invoice);
+};
 
 const statusClass = (status) => {
     const map = {

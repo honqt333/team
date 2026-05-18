@@ -207,9 +207,11 @@ const onPartChange = (partId) => {
     const part = props.parts.find(p => p.id === partId);
     if (part) {
         form.value.name = part.name_ar || part.name_en;
+        form.value.unit_price = parseFloat(part.default_sale_price) || 0;
         checkStock();
     } else {
         form.value.name = '';
+        form.value.unit_price = 0;
         stockInfo.value = null;
     }
 };

@@ -232,22 +232,6 @@ const onPaymentSaved = () => {
     emit('refresh');
 };
 
-const deletePayment = async (payment) => {
-    const confirmed = await confirm({
-        title: t('common.confirm_delete_title'),
-        message: t('common.confirm_delete_message'),
-        confirmText: t('common.delete'),
-        cancelText: t('common.cancel'),
-        type: 'danger',
-    });
-    
-    if (confirmed) {
-        router.delete(route('app.payments.destroy', payment.id), {
-            onSuccess: () => {
-                emit('refresh');
-            }
-        });
-    }
-};
+
 
 </script>

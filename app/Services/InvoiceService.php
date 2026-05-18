@@ -23,6 +23,19 @@ class InvoiceService
     public function createFromWorkOrder(WorkOrder $workOrder, $user): Invoice
     {
         return DB::transaction(function () use ($workOrder, $user) {
+            $customer = $workOrder->customer;
+            $customerAddress = null;
+            if ($customer) {
+                $addressParts = array_filter([
+                    $customer->building_number ? __('common.building') . ' ' . $customer->building_number : null,
+                    $customer->address_line ?: null,
+                    $customer->district ? __('common.district') . ' ' . $customer->district : null,
+                    $customer->city ?: null,
+                    $customer->postal_code ? __('common.postal_code') . ' ' . $customer->postal_code : null,
+                ]);
+                $customerAddress = !empty($addressParts) ? implode('، ', $addressParts) : null;
+            }
+
             // 1. Create Invoice Draft (No Number yet)
             $invoice = Invoice::create([
                 'tenant_id' => $workOrder->tenant_id,
@@ -33,7 +46,10 @@ class InvoiceService
                 'issue_date' => now(),
                 'supply_date' => now(),
                 'status' => 'draft',
-                // Snapshots auto-filled by HasTaxSnapshot
+                // Snapshots
+                'customer_name_snapshot' => $customer?->name,
+                'customer_vat_snapshot' => $customer?->tax_number,
+                'customer_address_snapshot' => $customerAddress,
             ]);
 
             // 2. Convert WO Items to Invoice Lines (Simplified mapping for now)

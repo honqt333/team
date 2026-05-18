@@ -27,6 +27,7 @@ return [
     ],
     
     // Totals
+    'gross_total' => 'المجموع',
     'subtotal' => 'المجموع قبل الضريبة',
     'tax' => 'ضريبة القيمة المضافة',
     'tax_rate' => 'نسبة الضريبة',
@@ -39,4 +40,5 @@ return [
     'all_statuses' => 'جميع الحالات',
     'date_from' => 'من تاريخ',
     'date_to' => 'إلى تاريخ',
+    'payments_history' => 'سجل الدفعات',
 ];

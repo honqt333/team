@@ -778,8 +778,9 @@
                                             <span dir="ltr" class="inline-block">{{ formatDate(payment.payment_date)
                                                 }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">{{
-                                            payment.notes || '-' }}</td>
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes') || 'تسجيل دفعة تلقائية عند استلام الفاتورة') : payment.notes">
+                                            {{ payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes') || 'تسجيل دفعة تلقائية عند استلام الفاتورة') : (payment.notes || '-') }}
+                                        </td>
                                         <td class="px-4 py-3 font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                             <span dir="ltr" class="inline-block">{{ formatPrice(payment.amount)
                                                 }}</span>

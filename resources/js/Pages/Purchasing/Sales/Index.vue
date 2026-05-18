@@ -1,0 +1,515 @@
+<template>
+    <AppLayout :title="$t('nav.sales') + ' - ' + $t('purchasing.title')">
+        <div class="space-y-6">
+
+            <!-- Header Section -->
+            <PageHeader
+                :title="$t('nav.sales') + ' (' + $t('inventory.title') + ')'"
+                :subtitle="$t('invoices.sales.subtitle') + ' - ' + 'بيع قطع المخزون فقط بدون خدمات'"
+                :totalCount="invoices?.total ? toEnglish(invoices.total) : '0'"
+                :countLabel="$t('invoices.sales.tab_invoices')"
+                gradientFrom="from-blue-600"
+                gradientTo="to-indigo-600"
+                glowFrom="from-blue-500"
+                badgeBg="bg-blue-50/50 dark:bg-blue-900/30"
+                badgeText="text-blue-600 dark:text-blue-400"
+                badgeBorder="border-blue-100/50 dark:border-blue-800/30"
+                badgeDot="bg-blue-500"
+            >
+                <template #back>
+                    <Link
+                        :href="route('app.purchasing.purchases.index')"
+                        :title="$t('common.back')"
+                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600 group"
+                    >
+                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </Link>
+                </template>
+
+                <template #icon>
+                    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                </template>
+
+                <template #actions>
+                    <div class="flex items-center gap-4">
+                        <!-- Create Invoice Button -->
+                        <button
+                            v-if="can('crm.work_orders.create') || isAnyAdmin()"
+                            @click="showCreateModal = true"
+                            class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/35 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            {{ $t('invoices.sales.create_invoice') || 'إنشاء فاتورة بيع' }}
+                        </button>
+
+                        <!-- Actions Group -->
+                        <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
+                            <div class="flex gap-1.5">
+                                <button
+                                    @click="setView('grid')"
+                                    :title="$t('common.grid_view')"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'grid'
+                                            ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                    </svg>
+                                </button>
+                                <button
+                                    @click="setView('list')"
+                                    :title="$t('common.list_view')"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'list'
+                                            ? 'bg-blue-600 text-white shadow-blue-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template #filters>
+                    <div class="flex flex-wrap items-end gap-3">
+                        <!-- Search -->
+                        <div class="relative group lg:w-48">
+                            <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                v-model="localFilters.search"
+                                :placeholder="$t('common.search')"
+                                class="block w-full ps-11 pe-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none shadow-sm"
+                            />
+                        </div>
+
+                        <!-- Date From -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('work_orders.filters.date_from') }}</label>
+                            <CustomDatePicker
+                                v-model="localFilters.date_from"
+                                class="!rounded-2xl"
+                            />
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="lg:w-36">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('work_orders.filters.date_to') }}</label>
+                            <CustomDatePicker
+                                v-model="localFilters.date_to"
+                                class="!rounded-2xl"
+                            />
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="lg:w-40">
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('common.status') }}</label>
+                            <SearchableSelect
+                                v-model="localFilters.payment_status"
+                                :options="statusOptions"
+                                option-label="label"
+                                option-value="value"
+                                :placeholder="$t('invoices.all_statuses')"
+                                class="!rounded-2xl"
+                                compact
+                            />
+                        </div>
+                    </div>
+                </template>
+            </PageHeader>
+
+            <!-- Premium Tabs Section -->
+            <div class="flex flex-wrap gap-3">
+                <button
+                    v-for="tab in tabs"
+                    :key="tab.key"
+                    @click="activeTab = tab.key"
+                    :class="[
+                        'relative flex items-center gap-3 px-5 py-3 rounded-2xl transition-all duration-300 group',
+                        activeTab === tab.key
+                            ? 'bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25 scale-[1.02]'
+                            : 'bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/10 border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md'
+                    ]"
+                >
+                    <!-- Tab Icon Container -->
+                    <div :class="[
+                        'w-8 h-8 rounded-xl flex items-center justify-center transition-colors duration-300',
+                        activeTab === tab.key
+                            ? 'bg-white/20'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
+                    ]">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-html="tab.iconPath"/>
+                    </div>
+
+                    <span class="font-black tracking-tight text-sm uppercase">
+                        {{ tab.label }}
+                    </span>
+
+                    <!-- Tab Count Badge -->
+                    <span v-if="tab.count > 0" :class="[
+                        'px-2 py-0.5 rounded-lg text-[10px] font-black min-w-[24px] text-center',
+                        activeTab === tab.key
+                            ? 'bg-white/20 text-white'
+                            : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ]">
+                        {{ toEnglish(tab.count) }}
+                    </span>
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="p-0">
+
+                <!-- INVOICES TAB -->
+                <div v-show="activeTab === 'invoices'">
+
+                    <!-- Empty State -->
+                    <div v-if="!invoices.data?.length" class="py-20 text-center">
+                        <div class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                        <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ $t('common.no_data') }}</p>
+                    </div>
+
+                    <!-- Grid View -->
+                    <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+                        <Link
+                            v-for="invoice in invoices.data"
+                            :key="invoice.id"
+                            :href="route('app.invoices.show', invoice.id)"
+                            class="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-[0_20px_40px_-10px_rgba(59,130,246,0.2)] transition-all duration-300 cursor-pointer overflow-hidden"
+                        >
+                            <!-- Top gradient stripe -->
+                            <div class="h-1 w-full" :class="stripeClass(invoice.payment_status)"/>
+
+                            <div class="p-5">
+                                <!-- Number + Status -->
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <span class="text-xs font-black text-blue-600 dark:text-blue-400 tracking-wide">#{{ invoice.invoice_number }}</span>
+                                        <p class="mt-1 text-sm font-bold text-gray-900 dark:text-white truncate max-w-[140px]">{{ invoice.customer?.name || '—' }}</p>
+                                    </div>
+                                    <span :class="statusClass(invoice.payment_status)" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold">
+                                        {{ $t(`invoices.status.${invoice.payment_status}`) }}
+                                    </span>
+                                </div>
+
+                                <!-- Financials -->
+                                <div class="space-y-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.total') }}</span>
+                                        <span class="font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatCurrency(invoice.total_incl_tax) }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.balance') }}</span>
+                                        <span :class="invoice.balance > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'" class="font-bold" dir="ltr">{{ formatCurrency(invoice.balance) }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center text-xs">
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.issue_date') }}</span>
+                                        <span class="text-gray-600 dark:text-gray-300">{{ formatDate(invoice.issue_date) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+                    </div>
+
+                    <!-- List View -->
+                    <div v-else class="w-full bg-white dark:bg-gray-800 rounded-b-2xl overflow-hidden">
+                        <div class="w-full overflow-x-auto">
+                            <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
+                                <thead>
+                                    <tr class="bg-gray-50/50 dark:bg-gray-900/80">
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">#</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.invoice_number') || 'رقم الفاتورة' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.issue_date') || 'تاريخ الفاتورة' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.customer') || 'العميل' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.gross_total') || 'المجموع' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.discount') || 'الخصم' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.subtotal') || 'المجموع الفرعي' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">VAT</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.grand_total') || 'مبلغ الفاتورة' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.balance') || 'الباقي' }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.status') || 'الحالة' }}</th>
+                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.actions') || 'الإجراءات' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
+                                    <tr
+                                        v-for="(invoice, index) in invoices.data"
+                                        :key="invoice.id"
+                                        class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all duration-200"
+                                    >
+                                        <!-- # -->
+                                        <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono">
+                                            {{ toEnglish(index + 1) }}
+                                        </td>
+                                        
+                                        <!-- رقم الفاتورة -->
+                                        <td class="px-4 py-4 text-center">
+                                            <Link :href="route('app.invoices.show', invoice.id)" class="font-bold text-blue-600 dark:text-blue-400 hover:underline">
+                                                {{ invoice.invoice_number }}
+                                            </Link>
+                                        </td>
+                                        
+                                        <!-- تاريخ الفاتورة -->
+                                        <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                            {{ formatDate(invoice.issue_date) }}
+                                        </td>
+                                        
+                                        <!-- العميل -->
+                                        <td class="px-4 py-4 text-center">
+                                            <p class="font-medium text-gray-900 dark:text-white truncate max-w-[180px] mx-auto">
+                                                {{ invoice.customer_name_snapshot || invoice.customer?.name || '—' }}
+                                            </p>
+                                        </td>
+                                        
+                                        <!-- المجموع -->
+                                        <td class="px-4 py-4 text-center text-sm font-bold text-gray-900 dark:text-white font-mono" dir="ltr">
+                                            {{ formatCurrency(getGrossTotal(invoice)) }}
+                                        </td>
+                                        
+                                        <!-- الخصم -->
+                                        <td class="px-4 py-4 text-center text-sm font-medium text-rose-600 dark:text-rose-400 font-mono" dir="ltr">
+                                            {{ formatCurrency(getDiscount(invoice)) }}
+                                        </td>
+                                        
+                                        <!-- المجموع الفرعي -->
+                                        <td class="px-4 py-4 text-center text-sm font-bold text-gray-900 dark:text-white font-mono" dir="ltr">
+                                            {{ formatCurrency(invoice.total_excl_tax) }}
+                                        </td>
+                                        
+                                        <!-- VAT -->
+                                        <td class="px-4 py-4 text-center text-sm font-medium text-gray-500 dark:text-gray-400 font-mono" dir="ltr">
+                                            {{ formatCurrency(invoice.total_tax) }}
+                                        </td>
+                                        
+                                        <!-- مبلغ الفاتورة -->
+                                        <td class="px-4 py-4 text-center text-sm font-black text-gray-900 dark:text-white font-mono" dir="ltr">
+                                            {{ formatCurrency(invoice.total_incl_tax) }}
+                                        </td>
+                                        
+                                        <!-- الباقي -->
+                                        <td class="px-4 py-4 text-center text-sm font-bold font-mono" dir="ltr" :class="invoice.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'">
+                                            {{ formatCurrency(invoice.balance) }}
+                                        </td>
+                                        
+                                        <!-- الحالة -->
+                                        <td class="px-4 py-4 text-center">
+                                            <span :class="statusClass(invoice.payment_status)" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold">
+                                                {{ $t(`invoices.status.${invoice.payment_status}`) }}
+                                            </span>
+                                        </td>
+                                        
+                                        <!-- الإجراءات -->
+                                        <td class="px-4 py-4 text-end">
+                                            <div class="flex items-center justify-end gap-1">
+                                                <Link :href="route('app.invoices.show', invoice.id)" class="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                </Link>
+                                                <Link :href="route('app.invoices.print', invoice.id)" target="_blank" class="p-2 rounded-lg text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-all">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div v-if="invoices.links?.length > 3" class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between flex-wrap gap-3">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('common.showing') }} {{ toEnglish(invoices.from) }} - {{ toEnglish(invoices.to) }} {{ $t('common.of') }} {{ toEnglish(invoices.total) }}
+                        </span>
+                        <div class="flex gap-1">
+                            <Link
+                                v-for="link in invoices.links"
+                                :key="link.label"
+                                :href="link.url || '#'"
+                                :class="[
+                                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                                    link.active ? 'bg-blue-600 text-white shadow-sm' :
+                                    link.url ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600' :
+                                    'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700'
+                                ]"
+                                v-html="link.label"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RETURNS TAB -->
+                <div v-show="activeTab === 'returns'" class="py-20 text-center">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                        </svg>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('invoices.sales.no_returns') }}</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Create Modal -->
+        <SalesInvoiceFormModal
+            v-if="showCreateModal"
+            :show="showCreateModal"
+            :customers="customers"
+            :departments="departments"
+            :makes="makes"
+            :colors="colors"
+            :modelsByMake="modelsByMake"
+            :warehouses="warehouses"
+            @close="showCreateModal = false"
+            @saved="handleSaved"
+        />
+    </AppLayout>
+</template>
+
+<script setup>
+import { ref, computed, watch } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
+import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import SalesInvoiceFormModal from '@/Components/Purchasing/SalesInvoiceFormModal.vue';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { usePermission } from '@/Composables/usePermission';
+import { debounce } from 'lodash-es';
+
+const { t } = useI18n();
+const { toEnglish } = useNumberFormat();
+
+const statusOptions = [
+    { value: 'unpaid', label: t('invoices.status.unpaid') },
+    { value: 'partial', label: t('invoices.status.partial') },
+    { value: 'paid', label: t('invoices.status.paid') },
+];
+
+const props = defineProps({
+    invoices: { type: Object, default: () => ({}) },
+    filters: { type: Object, default: () => ({}) },
+    customers: { type: Array, default: () => [] },
+    makes: { type: Array, default: () => [] },
+    colors: { type: Array, default: () => [] },
+    modelsByMake: { type: Object, default: () => ({}) },
+    departments: { type: Array, default: () => [] },
+    warehouses: { type: Array, default: () => [] },
+});
+
+const { can, isAnyAdmin } = usePermission();
+
+const showCreateModal = ref(false);
+const activeTab = ref('invoices');
+const viewMode = ref(localStorage.getItem('salesInvoicesViewMode') || 'list');
+
+const handleSaved = () => {
+    showCreateModal.value = false;
+    router.reload({ only: ['invoices'] });
+};
+
+const tabs = computed(() => [
+    {
+        key: 'invoices',
+        label: t('invoices.sales.tab_invoices'),
+        count: props.invoices?.total || 0,
+        iconPath: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
+    },
+    {
+        key: 'returns',
+        label: t('invoices.sales.tab_returns'),
+        count: 0,
+        iconPath: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>',
+    },
+]);
+
+const localFilters = ref({
+    search: props.filters?.search || '',
+    payment_status: props.filters?.payment_status || '',
+    date_from: props.filters?.date_from || '',
+    date_to: props.filters?.date_to || '',
+});
+
+const applyFilters = () => {
+    router.get(route('app.purchasing.sales.index'), {
+        search: localFilters.value.search || undefined,
+        payment_status: localFilters.value.payment_status || undefined,
+        date_from: localFilters.value.date_from || undefined,
+        date_to: localFilters.value.date_to || undefined,
+    }, { preserveState: true, preserveScroll: true, replace: true });
+};
+
+const debouncedApplyFilters = debounce(applyFilters, 400);
+
+watch(localFilters, () => {
+    debouncedApplyFilters();
+}, { deep: true });
+
+// Persist view mode
+const setView = (mode) => {
+    viewMode.value = mode;
+    localStorage.setItem('salesInvoicesViewMode', mode);
+};
+
+const formatDate = (date) => {
+    if (!date) return '—';
+    return new Date(date).toLocaleDateString('en-GB', { numberingSystem: 'latn' });
+};
+
+const formatCurrency = (amount) =>
+    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'SAR', numberingSystem: 'latn' }).format(amount || 0);
+
+const getDiscount = (invoice) => {
+    if (!invoice.work_order) return 0;
+    const itemsDiscount = invoice.work_order.items?.reduce((sum, item) => sum + Number(item.discount_amount || 0), 0) || 0;
+    const partsDiscount = invoice.work_order.parts?.reduce((sum, part) => sum + Number(part.discount || 0), 0) || 0;
+    return itemsDiscount + partsDiscount;
+};
+
+const getGrossTotal = (invoice) => {
+    const exclTax = Number(invoice.total_excl_tax || 0);
+    return exclTax + getDiscount(invoice);
+};
+
+const statusClass = (status) => {
+    const map = {
+        paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+        partial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        unpaid: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    };
+    return map[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+};
+
+const stripeClass = (status) => {
+    const map = {
+        paid: 'bg-emerald-500',
+        partial: 'bg-amber-400',
+        unpaid: 'bg-red-500',
+    };
+    return map[status] || 'bg-gray-200 dark:bg-gray-700';
+};
+</script>

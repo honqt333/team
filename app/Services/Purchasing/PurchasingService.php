@@ -321,7 +321,7 @@ class PurchasingService
                 'issue_date' => $grn->received_date,
                 'due_date' => $po->due_date,
                 'status' => PurchaseInvoice::STATUS_OPEN,
-                'notes' => "Auto-generated from GRN: {$grn->code}",
+                'notes' => __('purchasing.invoices.auto_generated_from_grn', ['code' => $grn->code]) ?? "Auto-generated from GRN: {$grn->code}",
             ]);
 
             $grn->update(['purchase_invoice_id' => $invoice->id]);
@@ -333,9 +333,15 @@ class PurchasingService
                 $poItem = $item->purchaseOrderItem;
                 $taxRate = $poItem->tax_rate ?? 15.00;
                 
-                $lineSubtotal = $item->line_total; // calculated as qty_received * unit_cost
-                $lineTax = bcdiv(bcmul($lineSubtotal, $taxRate, 4), 100, 2);
-                $lineTotal = bcadd($lineSubtotal, $lineTax, 2);
+                $qty = (string)$item->qty_received;
+                $unitCost = (string)$item->unit_cost; // High-precision (4 decimals!)
+                
+                $rawSubtotal = bcmul($qty, $unitCost, 6);
+                $rawTax = bcmul($rawSubtotal, bcdiv((string)$taxRate, '100', 6), 6);
+                
+                $lineSubtotal = round((float)$rawSubtotal, 2);
+                $lineTax = round((float)$rawTax, 2);
+                $lineTotal = bcadd((string)$lineSubtotal, (string)$lineTax, 2);
 
                 PurchaseInvoiceLine::create([
                     'purchase_invoice_id' => $invoice->id,
@@ -347,8 +353,8 @@ class PurchasingService
                     'total' => $lineTotal,
                 ]);
 
-                $subtotal = bcadd($subtotal, $lineSubtotal, 2);
-                $taxAmount = bcadd($taxAmount, $lineTax, 2);
+                $subtotal = bcadd((string)$subtotal, (string)$lineSubtotal, 2);
+                $taxAmount = bcadd((string)$taxAmount, (string)$lineTax, 2);
             }
 
             $invoice->update([
@@ -358,6 +364,153 @@ class PurchasingService
             ]);
 
             return $invoice;
+        });
+    }
+
+    /**
+     * Create a direct purchase invoice.
+     */
+    public function createDirectPurchaseInvoice(array $data, int $userId): PurchaseInvoice
+    {
+        return DB::transaction(function () use ($data, $userId) {
+            // 1. Create a Purchase Order
+            $poCode = PurchaseOrder::generateCode($data['tenant_id']);
+            $po = PurchaseOrder::create([
+                'tenant_id' => $data['tenant_id'],
+                'center_id' => $data['center_id'],
+                'supplier_id' => $data['supplier_id'],
+                'warehouse_id' => $data['warehouse_id'],
+                'code' => $poCode,
+                'status' => PurchaseOrder::STATUS_SENT,
+                'order_date' => $data['issue_date'] ?? now(),
+                'expected_date' => $data['due_date'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'create_credit_invoice' => $data['create_credit_invoice'] ?? false,
+                'due_date' => $data['due_date'] ?? null,
+                'sent_at' => now(),
+                'sent_by' => $userId,
+            ]);
+
+            // 2. Add PO items and prepare GRN items array
+            $grnItems = [];
+            if (!empty($data['items'])) {
+                foreach ($data['items'] as $item) {
+                    $poItem = PurchaseOrderItem::create([
+                        'purchase_order_id' => $po->id,
+                        'part_id' => $item['part_id'],
+                        'qty_ordered' => $item['qty'],
+                        'unit_cost' => $item['unit_cost'],
+                        'tax_rate' => $item['tax_rate'] ?? 15.00,
+                        'notes' => $item['notes'] ?? null,
+                    ]);
+
+                    $grnItems[] = [
+                        'purchase_order_item_id' => $poItem->id,
+                        'part_id' => $item['part_id'],
+                        'qty_received' => $item['qty'],
+                        'unit_cost' => $item['unit_cost'],
+                        'notes' => $item['notes'] ?? null,
+                    ];
+                }
+            }
+
+            // 3. Create Goods Received Note (GRN)
+            $grnCode = GoodsReceivedNote::generateCode($data['tenant_id']);
+            $grn = GoodsReceivedNote::create([
+                'purchase_order_id' => $po->id,
+                'warehouse_id' => $data['warehouse_id'],
+                'code' => $grnCode,
+                'status' => GoodsReceivedNote::STATUS_DRAFT,
+                'received_date' => $data['issue_date'] ?? now(),
+                'delivery_note' => $data['invoice_number'] ?? null,
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            // 4. Create GRN items
+            foreach ($grnItems as $grnItem) {
+                GrnItem::create([
+                    'goods_received_note_id' => $grn->id,
+                    'purchase_order_item_id' => $grnItem['purchase_order_item_id'],
+                    'part_id' => $grnItem['part_id'],
+                    'qty_received' => $grnItem['qty_received'],
+                    'unit_cost' => $grnItem['unit_cost'],
+                    'notes' => $grnItem['notes'] ?? null,
+                ]);
+            }
+
+            // 5. Post GRN - this automatically adds goods to inventory, updates PO status, and creates the PurchaseInvoice
+            $this->postGoodsReceivedNote($grn, $userId);
+
+            // 6. Find the generated invoice
+            $invoice = PurchaseInvoice::where('purchase_order_id', $po->id)->first();
+            if ($invoice) {
+                $invoice->update([
+                    'notes' => $data['notes'] ?? null,
+                ]);
+            }
+
+            // 7. If payments were recorded in the direct purchase form, record them!
+            if ($invoice && !empty($data['payments'])) {
+                $totalPaid = 0;
+                foreach ($data['payments'] as $payment) {
+                    $amount = (float) $payment['amount'];
+                    $totalPaid += $amount;
+                    
+                    \App\Models\Payment::create([
+                        'tenant_id' => $invoice->tenant_id,
+                        'center_id' => $invoice->center_id,
+                        'purchase_invoice_id' => $invoice->id,
+                        'amount' => $amount,
+                        'payment_date' => now(),
+                        'payment_method' => $payment['payment_method'] ?? 'cash',
+                        'reference' => $payment['reference'] ?? null,
+                        'notes' => __('payments.auto_payment_notes') ?? 'تسجيل دفعة تلقائية عند استلام الفاتورة',
+                        'received_by' => $userId,
+                        'type' => \App\Models\Payment::TYPE_PAYMENT,
+                    ]);
+                }
+                
+                // If there are payments, let's update the balance and status
+                $newBalance = max(0, $invoice->total - $totalPaid);
+                $status = $newBalance <= 0.01 ? PurchaseInvoice::STATUS_PAID : PurchaseInvoice::STATUS_OPEN;
+                
+                $invoice->update([
+                    'invoice_number' => $data['invoice_number'] ?? $invoice->invoice_number,
+                    'balance' => $newBalance,
+                    'status' => $status,
+                ]);
+            } else if ($invoice) {
+                // If no payments but create_credit_invoice is false (meaning full cash purchase without payments, let's assume fully paid or unpaid based on checkbox)
+                if (!$data['create_credit_invoice']) {
+                    // Full payment direct cash, so balance = 0, status = paid
+                    \App\Models\Payment::create([
+                        'tenant_id' => $invoice->tenant_id,
+                        'center_id' => $invoice->center_id,
+                        'purchase_invoice_id' => $invoice->id,
+                        'amount' => $invoice->total,
+                        'payment_date' => now(),
+                        'payment_method' => 'cash',
+                        'reference' => null,
+                        'notes' => __('payments.auto_payment_notes') ?? 'تسجيل دفعة تلقائية عند استلام الفاتورة',
+                        'received_by' => $userId,
+                        'type' => \App\Models\Payment::TYPE_PAYMENT,
+                    ]);
+
+                    $invoice->update([
+                        'invoice_number' => $data['invoice_number'] ?? $invoice->invoice_number,
+                        'balance' => 0,
+                        'status' => PurchaseInvoice::STATUS_PAID,
+                    ]);
+                } else {
+                    $invoice->update([
+                        'invoice_number' => $data['invoice_number'] ?? $invoice->invoice_number,
+                        'balance' => $invoice->total,
+                        'status' => PurchaseInvoice::STATUS_OPEN,
+                    ]);
+                }
+            }
+
+            return $invoice->fresh(['supplier', 'purchaseOrder']);
         });
     }
 }

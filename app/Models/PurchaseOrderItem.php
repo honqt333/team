@@ -75,14 +75,15 @@ class PurchaseOrderItem extends Model
      */
     public function calculateTotals(): void
     {
-        $subtotal = bcmul($this->qty_ordered, $this->unit_cost, 2);
-        $tax = bcmul($subtotal, bcdiv($this->tax_rate, 100, 4), 2);
-        $total = bcadd($subtotal, $tax, 2);
+        $subtotal = bcmul((string)$this->qty_ordered, (string)$this->unit_cost, 6);
+        $taxRateDecimal = bcdiv((string)($this->tax_rate ?? 15.00), '100', 6);
+        $tax = bcmul($subtotal, $taxRateDecimal, 6);
+        $total = bcadd($subtotal, $tax, 6);
 
         $this->update([
-            'line_subtotal' => $subtotal,
-            'line_tax' => $tax,
-            'line_total' => $total,
+            'line_subtotal' => round((float)$subtotal, 2),
+            'line_tax' => round((float)$tax, 2),
+            'line_total' => round((float)$total, 2),
         ]);
     }
 
@@ -92,9 +93,14 @@ class PurchaseOrderItem extends Model
     protected static function booted(): void
     {
         static::saving(function (PurchaseOrderItem $item) {
-            $item->line_subtotal = bcmul($item->qty_ordered, $item->unit_cost, 2);
-            $item->line_tax = bcmul($item->line_subtotal, bcdiv($item->tax_rate, 100, 4), 2);
-            $item->line_total = bcadd($item->line_subtotal, $item->line_tax, 2);
+            $subtotal = bcmul((string)$item->qty_ordered, (string)$item->unit_cost, 6);
+            $taxRateDecimal = bcdiv((string)($item->tax_rate ?? 15.00), '100', 6);
+            $tax = bcmul($subtotal, $taxRateDecimal, 6);
+            $total = bcadd($subtotal, $tax, 6);
+
+            $item->line_subtotal = round((float)$subtotal, 2);
+            $item->line_tax = round((float)$tax, 2);
+            $item->line_total = round((float)$total, 2);
         });
 
         static::saved(function (PurchaseOrderItem $item) {

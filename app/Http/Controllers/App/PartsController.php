@@ -184,7 +184,7 @@ class PartsController extends Controller
             ->get();
 
         $moves = $part->inventoryMoves()
-            ->with(['warehouse.center', 'reference'])
+            ->with(['warehouse.center', 'reference.workOrder'])
             ->orderBy('posted_at', 'desc')
             ->paginate(20);
             

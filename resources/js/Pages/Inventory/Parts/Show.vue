@@ -373,11 +373,10 @@ const isSalesMove = (move) => {
 };
 
 // Safe extractors for reference data (Work Order Item mostly)
-// Assuming reference is loaded and is likely a WorkOrderItem
+// Assuming reference is loaded and is likely a WorkOrderItemPart
 const getSalesPrice = (move) => {
     if (!isSalesMove(move) || !move.reference) return 0;
-    // If it's a WorkOrderItem, it might have 'price' or 'unit_price'
-    return move.reference.price || 0;
+    return move.reference.unit_price || move.reference.price || 0;
 };
 
 const getSalesDiscount = (move) => {
@@ -387,7 +386,10 @@ const getSalesDiscount = (move) => {
 
 const getSalesSubtotal = (move) => {
     if (!isSalesMove(move) || !move.reference) return 0;
-    // Qty * Price - Discount
+    if (move.reference.total !== undefined) {
+        return move.reference.total;
+    }
+    // Fallback: Qty * Price - Discount
     const qty = Math.abs(Number(move.qty));
     const price = Number(getSalesPrice(move));
     const discount = Number(getSalesDiscount(move));
@@ -396,15 +398,14 @@ const getSalesSubtotal = (move) => {
 
 const getSalesTax = (move) => {
     if (!isSalesMove(move) || !move.reference) return 0;
-    // Assuming tax is calculated on the subtotal. 
-    // If the reference stores tax amount directly, use that.
-    // For now returning 0 or reference.tax_amount if available.
     return move.reference.tax_amount || 0;
 };
 
 const getSalesTotal = (move) => {
-    if (!isSalesMove(move)) return 0;
-    return getSalesSubtotal(move) + getSalesTax(move);
+    if (!isSalesMove(move) || !move.reference) return 0;
+    return move.reference.grand_total !== undefined 
+        ? move.reference.grand_total 
+        : (getSalesSubtotal(move) + getSalesTax(move));
 };
 
 </script>

@@ -87,4 +87,7 @@ return [
     'grn' => [
         'title' => 'Goods Received Notes',
     ],
+    'invoices' => [
+        'auto_generated_from_grn' => 'Auto-generated from GRN: :code',
+    ],
 ];

@@ -176,6 +176,7 @@ const props = defineProps({
     payment: { type: Object, default: null }, // For editing
     allowRefund: { type: Boolean, default: false },
     totalPaid: { type: Number, default: 0 },
+    pendingMode: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -297,16 +298,23 @@ function submitForm() {
     
     loading.value = true;
     
+    const data = {
+        ...form.value,
+        type: form.value.type,
+    };
+
+    if (props.pendingMode) {
+        emit('saved', { ...data, id: props.payment?.id || Date.now() });
+        loading.value = false;
+        emit('close');
+        return;
+    }
+
     const url = isEditing.value
         ? route('work-orders.payments.update', [props.workOrderId, props.payment.id])
         : route('work-orders.payments.store', props.workOrderId);
     
     const method = isEditing.value ? 'put' : 'post';
-    
-    const data = {
-        ...form.value,
-        type: form.value.type,
-    };
 
     router[method](url, data, {
         preserveScroll: true,

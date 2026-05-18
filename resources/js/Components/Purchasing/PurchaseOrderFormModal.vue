@@ -216,10 +216,9 @@
                             <span class="font-mono" dir="ltr" lang="en">{{ formatCurrency(itemsTotal) }}</span>
                         </div>
                         <div v-if="form.tax_included"
-                            class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-500 text-xs">
+                            class="flex justify-between items-center text-sm text-gray-500 dark:text-gray-550 text-xs">
                             <span>{{ $t('common.vat_included') }}</span>
-                            <span class="font-mono" dir="ltr" lang="en">{{ formatCurrency(itemsTotal * 0.15) }}</span>
-                            <!-- Simplified tax calc display -->
+                            <span class="font-mono" dir="ltr" lang="en">{{ formatCurrency(calculatedVatIncluded) }}</span>
                         </div>
                     </div>
                 </div>
@@ -382,8 +381,8 @@
     </BaseModal>
 
     <!-- Item Modal -->
-    <PurchaseOrderItemModal v-if="showItemModal" :show="showItemModal" :item="editingItem" :units="units" :tax-included="form.tax_included" :tenant-tax-settings="tenantTaxSettings" @close="closeItemModal"
-        @saved="onItemSaved" @update:taxIncluded="form.tax_included = $event" />
+    <PurchaseOrderItemModal v-if="showItemModal" :show="showItemModal" :item="editingItem" :units="units" v-model:tax-included="form.tax_included" :tenant-tax-settings="tenantTaxSettings" @close="closeItemModal"
+        @saved="onItemSaved" />
 
     <!-- Supplier Modal -->
     <SupplierCreateModal v-if="showSupplierModal" :show="showSupplierModal" @close="showSupplierModal = false" @saved="onSupplierSaved" />
@@ -547,6 +546,11 @@ const itemsTotal = computed(() => {
     return form.items.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
 });
 
+const calculatedVatIncluded = computed(() => {
+    const rate = tenantTaxSettings.value?.parts_vat_rate || 15;
+    return itemsTotal.value - (itemsTotal.value / (1 + (rate / 100)));
+});
+
 const paymentsTotal = computed(() => {
     return form.payments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
 });
@@ -558,6 +562,29 @@ const remainingBalance = computed(() => {
 const formatCurrency = (value) => {
     return formatCurrencyEn(value);
 };
+
+// Reactive Watcher to keep all items in sync when tax mode changes
+watch(() => form.tax_included, (newVal) => {
+    const rate = (tenantTaxSettings.value?.parts_vat_rate || 15) / 100;
+    form.items = form.items.map(item => {
+        const subtotal = (Number(item.qty) || 0) * (Number(item.unit_cost) || 0);
+        const amt = Math.max(0, subtotal - (Number(item.discount) || 0));
+        let tax = 0;
+        let tot = 0;
+        if (newVal) {
+            tax = amt - (amt / (1 + rate));
+            tot = amt;
+        } else {
+            tax = amt * rate;
+            tot = amt + tax;
+        }
+        return {
+            ...item,
+            tax_amount: tax,
+            total: tot
+        };
+    });
+});
 
 const isFormValid = computed(() => {
     const basicFields = form.warehouse_id && 
@@ -616,15 +643,22 @@ const submit = () => {
         }
     };
 
-    // Transform items for backend
-    const transformedItems = form.items.map(item => ({
-        part_id: item.part_id,
-        qty_ordered: item.qty,
-        unit_cost: item.unit_cost,
-        tax_rate: form.tax_included ? 15 : 0,
-        // discount is not supported by backend yet, so we ignore it or handle via notes?
-        // For now we just send required fields.
-    }));
+    // Transform items for backend: convert inclusive unit cost to tax-exclusive unit cost for the DB
+    const transformedItems = form.items.map(item => {
+        let unitCost = Number(item.unit_cost) || 0;
+        if (form.tax_included && tenantTaxSettings.value?.vat_enabled) {
+            const rate = (tenantTaxSettings.value?.parts_vat_rate || 15) / 100;
+            unitCost = unitCost / (1 + rate);
+        }
+        return {
+            part_id: item.part_id,
+            qty_ordered: item.qty,
+            unit_cost: unitCost,
+            tax_rate: form.tax_included ? (tenantTaxSettings.value?.parts_vat_rate || 15) : 0,
+            // discount is not supported by backend yet, so we ignore it or handle via notes?
+            // For now we just send required fields.
+        };
+    });
 
     if (props.order) {
         form.transform((data) => ({

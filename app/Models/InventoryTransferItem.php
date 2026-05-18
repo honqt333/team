@@ -53,6 +53,11 @@ class InventoryTransferItem extends Model
         return $this->belongsTo(InventoryMove::class, 'receive_move_id');
     }
 
+    public function workOrder(): BelongsTo
+    {
+        return $this->belongsTo(WorkOrder::class, 'id')->whereRaw('1 = 0');
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Accessors
     // ─────────────────────────────────────────────────────────────

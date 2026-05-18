@@ -87,4 +87,7 @@ return [
     'grn' => [
         'title' => 'سندات استلام البضاعة',
     ],
+    'invoices' => [
+        'auto_generated_from_grn' => 'تم إنشاؤها تلقائياً من سند استلام البضاعة: :code',
+    ],
 ];

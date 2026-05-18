@@ -22,8 +22,15 @@ return [
         'card' => 'بطاقة',
         'transfer' => 'تحويل بنكي',
         'credit' => 'آجل',
+        'mada' => 'مدى',
+        'visa' => 'فيزا',
+        'mastercard' => 'ماستركارد',
+        'apple_pay' => 'أبل باي',
+        'stc_pay' => 'إس تي سي باي',
+        'other' => 'أخرى',
     ],
     
     // Validation
-    'amount_exceeds_balance' => 'المبلغ يتجاوز المتبقي',
+    'amount_exceeds_balance' => 'المبلغ لا يمكن أن يتجاوز المتبقي',
+    'auto_payment_notes' => 'تسجيل دفعة تلقائية عند استلام الفاتورة',
 ];

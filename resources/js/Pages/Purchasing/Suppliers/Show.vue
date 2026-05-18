@@ -242,27 +242,100 @@
 
                     <!-- ========== INVOICES TAB ========== -->
                     <div v-if="activeTab === 'invoices'" class="space-y-4">
-                        <div class="text-center py-12">
+                        <div v-if="invoicesList.length > 0" class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
+                                        <th class="py-3 px-4 text-center font-bold">#</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') || 'رقم الفاتورة' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.date') || 'التاريخ' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('common.status') || 'الحالة' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.gross_total') || 'المجموع' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.suppliers.balance') || 'الرصيد' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
+                                    <tr v-for="(inv, index) in invoicesList" :key="inv.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                        <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono">{{ index + 1 }}</td>
+                                        <td class="py-4 px-4 text-center font-bold text-gray-700 dark:text-gray-300 font-mono">
+                                            <Link :href="route('app.invoices.purchases.show', inv.id)" class="text-blue-600 dark:text-blue-400 hover:underline">
+                                                {{ inv.code || inv.invoice_number }}
+                                            </Link>
+                                        </td>
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">{{ formatDate(inv.issue_date) }}</td>
+                                        <td class="py-4 px-4 text-center font-bold">
+                                            <span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                                                {{ $t('common.status_' + inv.status) || inv.status }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrency(inv.total) }}</td>
+                                        <td class="py-4 px-4 text-center font-black font-mono" :class="inv.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'" dir="ltr">{{ formatCurrency(inv.balance) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="text-center py-12">
                             <div class="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
                                 <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                                 </svg>
                             </div>
-                            <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ $t('purchasing.suppliers.invoices') }}</p>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.coming_soon') }}</p>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') || 'لا توجد بيانات' }}</p>
                         </div>
                     </div>
 
                     <!-- ========== PAYMENTS TAB ========== -->
                     <div v-if="activeTab === 'payments'" class="space-y-4">
-                        <div class="text-center py-12">
+                        <div v-if="paymentsList.length > 0" class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
+                                        <th class="py-3 px-4 text-center font-bold">#</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.method') || 'طريقة الدفع' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') || 'نوع العملية' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') || 'تاريخ الدفع' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') || 'رقم الفاتورة' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') || 'المبلغ' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.recorded_by') || 'قام بالتحديث' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
+                                    <tr v-for="(payment, index) in paymentsList" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                        <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono">{{ index + 1 }}</td>
+                                        <td class="py-4 px-4 text-center font-bold text-gray-700 dark:text-gray-300">
+                                            {{ $t(`payments.methods.${payment.payment_method}`) || payment.payment_method }}
+                                        </td>
+                                        <td class="py-4 px-4 text-center font-bold">
+                                            <span :class="payment.type === 'refund' ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs font-bold">
+                                                {{ payment.type === 'refund' ? ($t('payments.types.refund') || 'استرجاع') : ($t('payments.types.payment') || 'دفعة مالية') }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">
+                                            {{ formatDate(payment.payment_date) }}
+                                        </td>
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-400 font-mono">
+                                            <Link v-if="payment.purchase_invoice" :href="route('app.invoices.purchases.show', payment.purchase_invoice.id)" class="text-blue-600 dark:text-blue-400 hover:underline">
+                                                {{ payment.purchase_invoice.code || payment.purchase_invoice.invoice_number }}
+                                            </Link>
+                                            <span v-else>—</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">
+                                            {{ formatCurrency(payment.amount) }}
+                                        </td>
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-semibold">
+                                            {{ payment.received_by?.name || '—' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="text-center py-12">
                             <div class="w-16 h-16 mx-auto rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4">
                                 <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
                             </div>
-                            <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{ $t('purchasing.suppliers.payments') }}</p>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.coming_soon') }}</p>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') || 'لا توجد بيانات' }}</p>
                         </div>
                     </div>
                 </div>
@@ -294,6 +367,8 @@ import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
     supplier: Object,
+    purchaseInvoices: Array,
+    payments: Array,
     counts: Object,
     balance: Number,
 });
@@ -304,6 +379,9 @@ const { can } = usePermission();
 
 const showEditModal = ref(false);
 const activeTab = ref('overview');
+
+const invoicesList = computed(() => props.purchaseInvoices || []);
+const paymentsList = computed(() => props.payments || []);
 
 // Icons
 const HomeIcon = () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' })]);
@@ -323,6 +401,11 @@ function formatCurrency(value) {
         currency: 'SAR',
         minimumFractionDigits: 0
     }).format(value);
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleDateString('en-GB');
 }
 
 async function confirmDelete() {

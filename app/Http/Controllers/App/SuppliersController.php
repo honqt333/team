@@ -50,18 +50,28 @@ class SuppliersController extends Controller
         $this->authorize('view', $supplier);
         
         $supplier->loadCount('purchaseOrders');
+        $supplier->load([
+            'purchaseInvoices' => fn($q) => $q->latest(),
+            'payments' => fn($q) => $q->with(['receivedBy', 'purchaseInvoice'])->latest()
+        ]);
         
-        // Placeholders for future modules
         $counts = [
             'orders' => $supplier->purchase_orders_count,
-            'invoices' => 0,
-            'payments' => 0,
+            'invoices' => $supplier->purchaseInvoices->count(),
+            'payments' => $supplier->payments->count(),
         ];
+
+        // Calculate balance: sum of unpaid balances of non-draft, non-cancelled invoices
+        $balance = $supplier->purchaseInvoices
+            ->whereNotIn('status', ['draft', 'cancelled'])
+            ->sum('balance');
 
         return Inertia::render('Purchasing/Suppliers/Show', [
             'supplier' => $supplier,
+            'purchaseInvoices' => $supplier->purchaseInvoices,
+            'payments' => $supplier->payments,
             'counts' => $counts,
-            'balance' => 0, // Placeholder
+            'balance' => $balance,
         ]);
     }
 

@@ -22,8 +22,15 @@ return [
         'card' => 'Card',
         'transfer' => 'Bank Transfer',
         'credit' => 'Credit',
+        'mada' => 'Mada',
+        'visa' => 'Visa',
+        'mastercard' => 'Mastercard',
+        'apple_pay' => 'Apple Pay',
+        'stc_pay' => 'STC Pay',
+        'other' => 'Other',
     ],
     
     // Validation
-    'amount_exceeds_balance' => 'Amount exceeds balance',
+    'amount_exceeds_balance' => 'The amount cannot exceed the remaining balance',
+    'auto_payment_notes' => 'Automatic payment recorded upon receipt of invoice',
 ];

@@ -36,6 +36,8 @@ class PurchaseInvoice extends Model
     public function lines()         { return $this->hasMany(PurchaseInvoiceLine::class); }
     public function tenant()        { return $this->belongsTo(Tenant::class); }
     public function center()        { return $this->belongsTo(Center::class); }
+    public function payments()      { return $this->hasMany(Payment::class, 'purchase_invoice_id'); }
+    public function returnInvoices() { return $this->hasMany(PurchaseReturnInvoice::class); }
 
     // Status helpers
     public function isDraft()     { return $this->status === self::STATUS_DRAFT; }

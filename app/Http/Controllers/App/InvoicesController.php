@@ -11,6 +11,10 @@ use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
+use App\Models\Supplier;
+use App\Models\Warehouse;
+use App\Models\InventoryUnit;
+
 class InvoicesController extends Controller
 {
     protected InvoiceService $invoiceService;
@@ -30,6 +34,8 @@ class InvoicesController extends Controller
         $invoice->load([
             'customer',
             'workOrder.vehicle',
+            'workOrder.items',
+            'workOrder.parts',
             'lines',
             'payments.receivedBy',
             'center',
@@ -151,7 +157,7 @@ class InvoicesController extends Controller
 
         $query = Invoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
-            ->with(['customer', 'workOrder'])
+            ->with(['customer', 'workOrder.items', 'workOrder.parts'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('invoice_number', 'like', "%{$search}%")
@@ -192,12 +198,33 @@ class InvoicesController extends Controller
             ->when($request->input('status'), fn($q, $s) => $q->where('status', $s))
             ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('issue_date', '>=', $d))
             ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
-            ->orderBy('issue_date', 'desc');
+            ->orderBy('id', 'desc');
 
         $invoices = $query->paginate(25)->withQueryString();
 
+        $returns = \App\Models\PurchaseReturnInvoice::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->with(['purchaseInvoice.supplier'])
+            ->when($request->input('search'), function ($q, $search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('code', 'like', "%{$search}%")
+                          ->orWhereHas('purchaseInvoice.supplier', fn($s) => $s->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('return_date', '>=', $d))
+            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('return_date', '<=', $d))
+            ->orderBy('id', 'desc')
+            ->paginate(25, ['*'], 'returns_page')
+            ->withQueryString();
+
+        $suppliers = Supplier::forTenant($tenantId)->active()->get(['id', 'name']);
+        $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
+        $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
+        $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
+
         return Inertia::render('Invoices/Purchasing/Index', [
             'invoices' => $invoices,
+            'returns'  => $returns,
             'filters'  => $request->only(['search', 'status', 'date_from', 'date_to']),
             'statuses' => [
                 \App\Models\PurchaseInvoice::STATUS_DRAFT,
@@ -205,6 +232,10 @@ class InvoicesController extends Controller
                 \App\Models\PurchaseInvoice::STATUS_PAID,
                 \App\Models\PurchaseInvoice::STATUS_CANCELLED,
             ],
+            'suppliers' => $suppliers,
+            'defaultWarehouse' => $defaultWarehouse,
+            'warehouses' => $warehouses,
+            'units' => $units,
         ]);
     }
 }

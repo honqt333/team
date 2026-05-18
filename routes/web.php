@@ -386,6 +386,11 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::get('/invoices', function () {
             return redirect()->route('app.invoices.purchases.index');
         });
+
+        // Purchasing Module Additions (Inventory Sales & Purchases)
+        Route::get('/sales', [\App\Http\Controllers\App\PurchasingInvoicesController::class, 'salesIndex'])->name('sales.index');
+        Route::post('/sales', [\App\Http\Controllers\App\PurchasingInvoicesController::class, 'storeSalesInvoice'])->name('sales-invoices.store');
+        Route::get('/purchases', [\App\Http\Controllers\App\PurchasingInvoicesController::class, 'purchasesIndex'])->name('purchases.index');
     });
 
     // ───────────────────────────────────────────────────────────────
@@ -526,7 +531,15 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
 
         // Purchase Invoices
         Route::get('/purchases', [\App\Http\Controllers\App\InvoicesController::class, 'purchasesIndex'])->name('purchases.index');
+        Route::post('/purchases', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'store'])->name('purchases.store');
         Route::get('/purchases/{purchaseInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'show'])->name('purchases.show');
+        Route::post('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadAttachment'])->name('purchases.attachment.store');
+        Route::delete('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyAttachment'])->name('purchases.attachment.destroy');
+        Route::post('/purchases/{purchaseInvoice}/payments', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordPayment'])->name('purchases.payments.store');
+        Route::post('/purchases/{purchaseInvoice}/returns', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturn'])->name('purchases.returns.store');
+        Route::get('/purchases/returns/{purchaseReturnInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'showReturn'])->name('purchases.returns.show');
+        Route::post('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadReturnAttachment'])->name('purchases.returns.attachment.store');
+        Route::delete('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyReturnAttachment'])->name('purchases.returns.attachment.destroy');
 
         // Individual invoice show / print (existing)
         Route::get('/{invoice}', [\App\Http\Controllers\App\InvoicesController::class, 'show'])->name('show');

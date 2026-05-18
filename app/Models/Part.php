@@ -30,7 +30,7 @@ class Part extends Model
         'is_active',
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'name'];
 
     public function getImageUrlAttribute()
     {

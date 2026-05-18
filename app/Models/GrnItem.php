@@ -51,6 +51,11 @@ class GrnItem extends Model
         return $this->belongsTo(InventoryMove::class);
     }
 
+    public function workOrder(): BelongsTo
+    {
+        return $this->belongsTo(WorkOrder::class, 'id')->whereRaw('1 = 0');
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Boot
     // ─────────────────────────────────────────────────────────────
@@ -59,7 +64,8 @@ class GrnItem extends Model
     {
         static::saving(function (GrnItem $item) {
             if (is_numeric($item->qty_received) && is_numeric($item->unit_cost)) {
-                $item->line_total = bcmul((string)$item->qty_received, (string)$item->unit_cost, 2);
+                $total = bcmul((string)$item->qty_received, (string)$item->unit_cost, 6);
+                $item->line_total = round((float)$total, 2);
             }
         });
     }

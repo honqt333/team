@@ -15,6 +15,7 @@ class Payment extends Model
         'tenant_id',
         'center_id',
         'invoice_id',
+        'purchase_invoice_id',
         'work_order_id',
         'amount',
         'payment_date',
@@ -73,6 +74,11 @@ class Payment extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function purchaseInvoice(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseInvoice::class);
     }
 
     public function workOrder(): BelongsTo

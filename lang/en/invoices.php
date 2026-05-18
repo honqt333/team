@@ -27,6 +27,7 @@ return [
     ],
     
     // Totals
+    'gross_total' => 'Gross Total',
     'subtotal' => 'Subtotal',
     'tax' => 'VAT',
     'tax_rate' => 'Tax Rate',
@@ -39,4 +40,5 @@ return [
     'all_statuses' => 'All Statuses',
     'date_from' => 'From Date',
     'date_to' => 'To Date',
+    'payments_history' => 'Payments History',
 ];

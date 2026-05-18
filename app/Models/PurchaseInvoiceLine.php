@@ -21,4 +21,5 @@ class PurchaseInvoiceLine extends Model
 
     public function purchaseInvoice() { return $this->belongsTo(PurchaseInvoice::class); }
     public function part()            { return $this->belongsTo(Part::class); }
+    public function returnLines()     { return $this->hasMany(PurchaseReturnInvoiceLine::class); }
 }

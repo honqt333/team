@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('payments', function (Blueprint $table) {
+            // Make invoice_id nullable
+            $table->foreignId('invoice_id')->nullable()->change();
+            
+            // Add purchase_invoice_id
+            $table->foreignId('purchase_invoice_id')
+                ->nullable()
+                ->after('invoice_id')
+                ->constrained('purchase_invoices')
+                ->cascadeOnDelete();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('payments', function (Blueprint $table) {
+            $table->dropForeign(['purchase_invoice_id']);
+            $table->dropColumn('purchase_invoice_id');
+            $table->foreignId('invoice_id')->nullable(false)->change();
+        });
+    }
+};

@@ -62,6 +62,16 @@ class Supplier extends Model
         return $this->hasMany(PurchaseOrder::class);
     }
 
+    public function purchaseInvoices(): HasMany
+    {
+        return $this->hasMany(PurchaseInvoice::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasManyThrough(Payment::class, PurchaseInvoice::class);
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Scopes
     // ─────────────────────────────────────────────────────────────
