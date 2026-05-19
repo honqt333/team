@@ -293,9 +293,6 @@
                             <tr>
                                 <th
                                     class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                                    {{ $t('purchasing.suppliers.code') }}</th>
-                                <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
                                     {{ $t('purchasing.suppliers.name') }}</th>
                                 <th
                                     class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
@@ -318,8 +315,6 @@
                             <tr v-for="supplier in suppliers.data" :key="supplier.id"
                                 @click="router.visit(route('app.purchasing.suppliers.show', supplier.id))"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors text-center">
-                                <td class="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{{ supplier.code
-                                    || '-' }}</td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ supplier.name
                                     }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{
@@ -346,7 +341,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!suppliers.data.length">
-                                <td colspan="7" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
                                     {{ $t('purchasing.suppliers.empty') }}
                                 </td>
                             </tr>

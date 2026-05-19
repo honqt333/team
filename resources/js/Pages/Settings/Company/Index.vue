@@ -1255,13 +1255,51 @@ async function reverseGeocode(lat, lng) {
 
         if (data && data.address) {
             const addr = data.address;
-            form.value.address.city = addr.city || addr.town || addr.village || addr.municipality || '';
-            form.value.address.district = addr.suburb || addr.neighbourhood || addr.quarter || addr.district || '';
-            form.value.address.postal_code = addr.postcode || '';
-            form.value.address.building_number = addr.house_number || '';
+            form.value.address.city = addr.city || addr.town || addr.village || addr.municipality || form.value.address.city || '';
+            form.value.address.district = addr.suburb || addr.neighbourhood || addr.quarter || addr.district || form.value.address.district || '';
+            
+            // Extraction helpers for numeric fields
+            const toEnglishDigits = (str) => {
+                if (!str) return '';
+                return str.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                          .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+            };
+
+            const cleanDisplayName = toEnglishDigits(data.display_name || '');
+            const numbers = cleanDisplayName.match(/\d+/g) || [];
+
+            // 1. Building number
+            let bldNum = addr.house_number || '';
+            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
+            if (bldNum.length !== 4) {
+                bldNum = '';
+            }
+            if (!bldNum) {
+                // Find first 4-digit sequence
+                const fourDigit = numbers.find(n => n.length === 4);
+                if (fourDigit) {
+                    bldNum = fourDigit;
+                }
+            }
+            form.value.address.building_number = bldNum || form.value.address.building_number || '';
+
+            // 2. Postal code
+            let postCode = addr.postcode || '';
+            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
+            if (postCode.length !== 5) {
+                postCode = '';
+            }
+            if (!postCode) {
+                // Find first 5-digit sequence
+                const fiveDigit = numbers.find(n => n.length === 5);
+                if (fiveDigit) {
+                    postCode = fiveDigit;
+                }
+            }
+            form.value.address.postal_code = postCode || form.value.address.postal_code || '';
 
             // Map street name to street field
-            form.value.address.street = addr.road || addr.pedestrian || addr.street || addr.footway || '';
+            form.value.address.street = addr.road || addr.pedestrian || addr.street || addr.footway || form.value.address.street || '';
         }
 
     } catch (err) {

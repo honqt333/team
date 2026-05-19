@@ -1,5 +1,5 @@
 <template>
-    <BaseModal :show="show" @close="handleClose" size="xl">
+    <BaseModal :show="show" @close="handleClose" size="lg" scroll-entire>
         <template #title>
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-600 to-cyan-600 flex items-center justify-center">
@@ -12,8 +12,7 @@
             </div>
         </template>
 
-        <form @submit.prevent="submitForm" class="space-y-6">
-            
+        <form @submit.prevent="submitForm" class="space-y-5">
             <!-- License Plate Section -->
             <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
@@ -41,8 +40,8 @@
                         <SearchableSelect
                             v-model="form.make_id"
                             @change="onMakeChange"
-                            :options="[...makes, {id: '__other__', name: $t('common.other')}]"
-                            option-label="name"
+                            :options="[...makes, {id: '__other__', name_en: $t('common.other'), name_ar: $t('common.other')}]"
+                            :option-label="m => m.name_en || m.name_ar"
                             option-value="id"
                             :label="''"
                             :placeholder="$t('common.choose')"
@@ -56,8 +55,8 @@
                         <SearchableSelect
                             v-if="form.make_id && form.make_id !== '__other__'"
                             v-model="form.model_id"
-                            :options="[...availableModels, {id: '__other__', name: $t('common.other')}]"
-                            option-label="name"
+                            :options="[...availableModels, {id: '__other__', name_en: $t('common.other'), name_ar: $t('common.other')}]"
+                            :option-label="m => m.name_en || m.name_ar"
                             option-value="id"
                             :label="''"
                             :placeholder="$t('common.choose')"
@@ -165,7 +164,15 @@
                             option-value="name"
                             :placeholder="$t('common.choose')"
                             :label="''"
-                        />
+                        >
+                            <template #prefix="{ option }">
+                                <span 
+                                    v-if="option && option.hex_code"
+                                    class="w-3.5 h-3.5 rounded-full border border-gray-300 dark:border-gray-600 inline-block shrink-0"
+                                    :style="{ backgroundColor: option.hex_code }"
+                                ></span>
+                            </template>
+                        </SearchableSelect>
                     </div>
 
                     <!-- Odometer -->
@@ -302,6 +309,7 @@ const selectedCustomer = computed(() => {
 const pendingCustomerPhone = ref(null); // Store phone instead of ID
 const isDirty = ref(false);
 const initialFormData = ref(null);
+const isConfirming = ref(false);
 
 // Generate year options (last 40 years)
 const currentYear = new Date().getFullYear();
@@ -415,16 +423,23 @@ function resetForm() {
 }
 
 async function handleClose() {
+    if (isConfirming.value) return;
+
     if (isDirty.value) {
-        const confirmed = await confirm({
-            title: t('common.unsaved_changes'),
-            message: t('common.unsaved_changes_message'),
-            confirmText: t('common.yes_close'),
-            cancelText: t('common.cancel'),
-            type: 'warning',
-        });
-        
-        if (!confirmed) return;
+        isConfirming.value = true;
+        try {
+            const confirmed = await confirm({
+                title: t('common.unsaved_changes'),
+                message: t('common.unsaved_changes_message'),
+                confirmText: t('common.yes_close'),
+                cancelText: t('common.cancel'),
+                type: 'warning',
+            });
+            
+            if (!confirmed) return;
+        } finally {
+            isConfirming.value = false;
+        }
     }
     
     resetForm();

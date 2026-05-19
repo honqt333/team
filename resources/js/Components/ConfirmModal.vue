@@ -40,7 +40,7 @@
                 </h3>
 
                 <!-- Message -->
-                <p class="text-base font-medium text-gray-500 dark:text-gray-400 mb-8 leading-relaxed max-w-[280px] mx-auto">
+                <p class="text-base font-medium text-gray-500 dark:text-gray-400 mb-8 leading-relaxed max-w-sm mx-auto">
                     {{ options.message }}
                 </p>
 

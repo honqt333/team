@@ -66,12 +66,24 @@ class SuppliersController extends Controller
             ->whereNotIn('status', ['draft', 'cancelled'])
             ->sum('balance');
 
+        $tenantId = auth()->user()->tenant_id;
+        $centerId = auth()->user()->current_center_id;
+
+        $suppliers = Supplier::forTenant($tenantId)->active()->get(['id', 'name']);
+        $defaultWarehouse = \App\Models\Warehouse::forCenter($centerId)->default()->first();
+        $warehouses = \App\Models\Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
+        $units = \App\Models\InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
+
         return Inertia::render('Purchasing/Suppliers/Show', [
             'supplier' => $supplier,
             'purchaseInvoices' => $supplier->purchaseInvoices,
             'payments' => $supplier->payments,
             'counts' => $counts,
             'balance' => $balance,
+            'suppliers' => $suppliers,
+            'defaultWarehouse' => $defaultWarehouse,
+            'warehouses' => $warehouses,
+            'units' => $units,
         ]);
     }
 

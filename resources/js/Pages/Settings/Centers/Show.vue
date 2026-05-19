@@ -625,16 +625,62 @@ function handleMapClick(e) {
 async function reverseGeocode(lat, lng) {
     try {
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar`
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=ar`,
+            {
+                headers: {
+                    'User-Agent': 'Carag-App/1.0'
+                }
+            }
         );
         const data = await response.json();
         
-        if (data.address) {
-            form.value.address.city = data.address.city || data.address.town || data.address.village || '';
-            form.value.address.district = data.address.suburb || data.address.neighbourhood || '';
-            form.value.address.postal_code = data.address.postcode || '';
+        if (data && data.address) {
+            const addr = data.address;
+            form.value.address.city = addr.city || addr.town || addr.village || form.value.address.city || '';
+            form.value.address.district = addr.suburb || addr.neighbourhood || form.value.address.district || '';
+            
+            // Extraction helpers for numeric fields
+            const toEnglishDigits = (str) => {
+                if (!str) return '';
+                return str.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                          .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+            };
+
+            const cleanDisplayName = toEnglishDigits(data.display_name || '');
+            const numbers = cleanDisplayName.match(/\d+/g) || [];
+
+            // 1. Building number
+            let bldNum = addr.house_number || '';
+            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
+            if (bldNum.length !== 4) {
+                bldNum = '';
+            }
+            if (!bldNum) {
+                // Find first 4-digit sequence
+                const fourDigit = numbers.find(n => n.length === 4);
+                if (fourDigit) {
+                    bldNum = fourDigit;
+                }
+            }
+            form.value.address.building_number = bldNum || form.value.address.building_number || '';
+
+            // 2. Postal code
+            let postCode = addr.postcode || '';
+            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
+            if (postCode.length !== 5) {
+                postCode = '';
+            }
+            if (!postCode) {
+                // Find first 5-digit sequence
+                const fiveDigit = numbers.find(n => n.length === 5);
+                if (fiveDigit) {
+                    postCode = fiveDigit;
+                }
+            }
+            form.value.address.postal_code = postCode || form.value.address.postal_code || '';
+
             // Map street name to street field
-            form.value.address.street = data.address.road || data.address.pedestrian || data.address.street || '';
+            form.value.address.street = addr.road || addr.pedestrian || addr.street || form.value.address.street || '';
         }
     } catch (err) {
         console.error('Geocoding error:', err);

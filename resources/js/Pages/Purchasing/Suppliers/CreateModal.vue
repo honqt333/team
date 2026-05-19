@@ -1,5 +1,5 @@
 <template>
-    <DialogModal :show="show" @close="handleClose">
+    <DialogModal :show="show" @close="handleClose" max-width="2xl">
         <template #title>
             {{ form.id ? $t('purchasing.suppliers.edit') : $t('purchasing.suppliers.add') }}
         </template>
@@ -8,48 +8,17 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Type -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                        {{ $t('purchasing.suppliers.type') }}
-                    </label>
-                    <div class="flex gap-4">
-                        <label class="relative flex items-center p-4 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
-                            :class="form.type === 'parts' ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-500' : 'border-gray-200 dark:border-gray-700'"
-                        >
-                            <input type="radio" v-model="form.type" value="parts" class="sr-only" />
-                            <div class="flex items-center gap-3">
-                                <span class="flex items-center justify-center w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600"
-                                    :class="{'border-indigo-500 bg-indigo-500': form.type === 'parts'}"
-                                >
-                                    <span v-if="form.type === 'parts'" class="w-2 h-2 rounded-full bg-white"></span>
-                                </span>
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-900 dark:text-white">{{ $t('purchasing.suppliers.type_parts') }}</span>
-                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $t('purchasing.suppliers.type_parts_desc') }}</span>
-                                </div>
-                            </div>
-                        </label>
-
-                        <label class="relative flex items-center p-4 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
-                            :class="form.type === 'services' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 ring-1 ring-purple-500' : 'border-gray-200 dark:border-gray-700'"
-                        >
-                            <input type="radio" v-model="form.type" value="services" class="sr-only" />
-                            <div class="flex items-center gap-3">
-                                <span class="flex items-center justify-center w-5 h-5 rounded-full border border-gray-300 dark:border-gray-600"
-                                    :class="{'border-purple-500 bg-purple-500': form.type === 'services'}"
-                                >
-                                    <span v-if="form.type === 'services'" class="w-2 h-2 rounded-full bg-white"></span>
-                                </span>
-                                <div>
-                                    <span class="block text-sm font-medium text-gray-900 dark:text-white">{{ $t('purchasing.suppliers.type_services') }}</span>
-                                    <span class="block text-xs text-gray-500 dark:text-gray-400">{{ $t('purchasing.suppliers.type_services_desc') }}</span>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
+                    <SearchableSelect
+                        v-model="form.type"
+                        :options="supplierTypeOptions"
+                        :label="$t('purchasing.suppliers.type')"
+                        required
+                        :error="form.errors.type"
+                    />
                 </div>
 
                 <!-- Name -->
-                <div class="md:col-span-2">
+                <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.name') }} <span class="text-red-500">*</span>
                     </label>
@@ -61,30 +30,17 @@
                     <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-500">{{ form.errors.name }}</p>
                 </div>
 
-                <!-- Code -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('purchasing.suppliers.code') }}
-                    </label>
-                    <input
-                        v-model="form.code"
-                        type="text"
-                        dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
-                        :placeholder="$t('purchasing.suppliers.code_placeholder')"
-                    />
-                </div>
-
                 <!-- Contact Person -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('purchasing.suppliers.contact') }}
+                        {{ $t('purchasing.suppliers.contact') }} <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.contact_person"
                         type="text"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 shadow-sm transition-all', form.errors.contact_person ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-500']"
                     />
+                    <p v-if="form.errors.contact_person" class="mt-1.5 text-sm text-red-500">{{ form.errors.contact_person }}</p>
                 </div>
 
                 <!-- Phone -->
@@ -92,25 +48,41 @@
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('purchasing.suppliers.phone') }}
                     </label>
-                    <input
+                    <vue-tel-input
                         v-model="form.phone"
-                        type="tel"
-                        dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
-                    />
+                        @on-input="(value) => onPhoneInput('phone', value)"
+                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                        mode="international"
+                        :validCharactersOnly="false"
+                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                    ></vue-tel-input>
+                    <p v-if="form.errors.phone" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.phone }}</p>
                 </div>
 
-                <!-- Email -->
+                <!-- WhatsApp -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('purchasing.suppliers.email') }}
-                    </label>
-                    <input
-                        v-model="form.email"
-                        type="email"
-                        dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
-                    />
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ $t('customers.form.whatsapp') || 'WhatsApp' }}
+                        </label>
+                        <button
+                            v-if="form.phone && normalizePhone(form.phone) !== normalizePhone(form.whatsapp)"
+                            type="button"
+                            @click="form.whatsapp = form.phone"
+                            class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                        >
+                            {{ $t('customers.form.copy_from_phone') || 'Copy phone' }}
+                        </button>
+                    </div>
+                    <vue-tel-input
+                        v-model="form.whatsapp"
+                        @on-input="(value) => onPhoneInput('whatsapp', value)"
+                        :inputOptions="{ placeholder: '05xxxxxxxx' }"
+                        mode="international"
+                        :validCharactersOnly="false"
+                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                    ></vue-tel-input>
+                    <p v-if="form.errors.whatsapp" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.whatsapp }}</p>
                 </div>
 
                 <!-- Tax Number -->
@@ -124,6 +96,7 @@
                         dir="ltr"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
+                    <p v-if="form.errors.tax_number" class="mt-1.5 text-sm text-red-500">{{ form.errors.tax_number }}</p>
                 </div>
 
                 <!-- CR Number -->
@@ -137,9 +110,24 @@
                         dir="ltr"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
                     />
+                    <p v-if="form.errors.cr_number" class="mt-1.5 text-sm text-red-500">{{ form.errors.cr_number }}</p>
                 </div>
 
-                <!-- Address Section -->
+                <!-- Email -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ $t('purchasing.suppliers.email') }}
+                    </label>
+                    <input
+                        v-model="form.email"
+                        type="email"
+                        dir="ltr"
+                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                    />
+                    <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-500">{{ form.errors.email }}</p>
+                </div>
+
+                <!-- Address Details (md:col-span-2) -->
                 <div class="md:col-span-2 border-t border-gray-200 dark:border-gray-700 pt-5 mt-2">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
@@ -159,11 +147,11 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                         <!-- Map Container -->
+                        <!-- Map Container -->
                         <div class="order-1 lg:order-2">
                             <div 
                                 ref="mapContainer" 
-                                class="w-full h-[260px] rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden"
+                                class="w-full h-[220px] rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 overflow-hidden"
                             >
                                 <div v-if="!mapReady" class="h-full flex flex-col items-center justify-center text-center p-4">
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('common.loading_map') }}</p>
@@ -174,8 +162,8 @@
                             </p>
                         </div>
 
-                         <!-- Address Fields -->
-                         <div class="order-2 lg:order-1 space-y-3">
+                        <!-- Address Fields -->
+                        <div class="order-2 lg:order-1 space-y-3">
                             <!-- Address Line -->
                             <div>
                                 <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
@@ -184,7 +172,7 @@
                                 <textarea 
                                     v-model="form.address"
                                     rows="2"
-                                    class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
+                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
                                 ></textarea>
                             </div>
 
@@ -194,62 +182,50 @@
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.building_number') }}
                                     </label>
-                                    <input v-model="form.building_number" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
+                                    <input v-model="form.building_number" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.postal_code') }}
                                     </label>
-                                    <input v-model="form.postal_code" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
+                                    <input v-model="form.postal_code" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.district') }}
                                     </label>
-                                    <input v-model="form.district" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
+                                    <input v-model="form.district" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                             </div>
-                            
+
                             <!-- City + Region + Country -->
                             <div class="grid grid-cols-3 gap-2">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.city') }}
                                     </label>
-                                    <input v-model="form.city" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
+                                    <input v-model="form.city" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.region') }}
                                     </label>
-                                    <input v-model="form.region" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
+                                    <input v-model="form.region" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
                                         {{ $t('purchasing.suppliers.country') }}
                                     </label>
-                                    <input v-model="form.country" type="text" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
-                                </div>
-                            </div>
-                            
-                            <!-- Lat/Lng -->
-                             <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('purchasing.suppliers.form.lat') }}</label>
-                                    <input type="number" step="any" dir="ltr" v-model="form.lat" @change="updateMarkerFromInputs" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{{ $t('purchasing.suppliers.form.lng') }}</label>
-                                    <input type="number" step="any" dir="ltr" v-model="form.lng" @change="updateMarkerFromInputs" class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all" />
+                                    <input v-model="form.country" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-all" />
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Bank Section -->
+                <!-- Bank Section (md:col-span-2) -->
                 <div class="md:col-span-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ $t('purchasing.suppliers.bank_info') }}</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">{{ $t('purchasing.suppliers.bank_info') }}</h3>
                 </div>
 
                 <!-- Bank Name -->
@@ -278,19 +254,19 @@
                     />
                 </div>
 
-                <!-- Notes -->
+                <!-- Notes (md:col-span-2) -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('common.notes') }}
                     </label>
                     <textarea
                         v-model="form.notes"
-                        rows="3"
+                        rows="2"
                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all resize-none placeholder-gray-400 dark:placeholder-gray-600"
                     ></textarea>
                 </div>
                 
-                <!-- Active Status -->
+                <!-- Active Status (md:col-span-2) -->
                 <div class="md:col-span-2">
                     <label class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/30">
                          <div class="relative inline-block w-11 h-6 transition-colors duration-200 ease-in-out border-2 border-transparent rounded-full cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -312,7 +288,7 @@
 
         <template #footer>
             <button
-                @click="close"
+                @click="handleClose"
                 class="px-4 py-2.5 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 mr-3"
             >
                 {{ $t('common.cancel') }}
@@ -331,7 +307,8 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
-import { ref, watch, nextTick, onUnmounted } from 'vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+import { ref, watch, nextTick, onUnmounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import L from 'leaflet';
@@ -354,8 +331,14 @@ const emit = defineEmits(['close', 'saved']);
 const { locale, t } = useI18n();
 const { confirm } = useConfirm();
 
+const supplierTypeOptions = computed(() => [
+    { id: 'parts', name: t('purchasing.suppliers.type_parts') },
+    { id: 'services', name: t('purchasing.suppliers.type_services') },
+]);
+
 const isDirty = ref(false);
 const initialFormData = ref(null);
+const isConfirming = ref(false);
 
 const mapContainer = ref(null);
 const mapReady = ref(false);
@@ -373,6 +356,7 @@ const form = useForm({
     code: '',
     contact_person: '',
     phone: '',
+    whatsapp: '',
     email: '',
     address: '',
     city: '',
@@ -400,6 +384,7 @@ watch(() => props.supplier, (supplier) => {
         form.code = supplier.code;
         form.contact_person = supplier.contact_person;
         form.phone = supplier.phone;
+        form.whatsapp = supplier.whatsapp || '';
         form.email = supplier.email;
         form.address = supplier.address;
         form.city = supplier.city;
@@ -424,6 +409,15 @@ watch(() => props.supplier, (supplier) => {
         form.is_active = true;
     }
 }, { immediate: true });
+
+// Auto-copy phone to whatsapp
+watch(() => form.phone, (newPhone, oldPhone) => {
+    const cleanOldPhone = normalizePhone(oldPhone);
+    const cleanWhatsapp = normalizePhone(form.whatsapp);
+    if (!form.whatsapp || cleanWhatsapp === cleanOldPhone) {
+        form.whatsapp = newPhone || '';
+    }
+});
 
 // Map Methods
 watch(() => props.show, async (open) => {
@@ -568,12 +562,51 @@ async function reverseGeocode(lat, lng) {
         const data = await response.json();
         if (data && data.address) {
             const addr = data.address;
-            form.country = addr.country || '';
-            form.region = addr.state || addr.region || '';
-            form.city = addr.city || addr.town || addr.village || addr.municipality || '';
-            form.district = addr.suburb || addr.neighbourhood || addr.quarter || addr.district || '';
-            form.postal_code = addr.postcode || '';
-            form.building_number = addr.house_number || '';
+            form.country = addr.country || form.country || '';
+            form.region = addr.state || addr.region || form.region || '';
+            form.city = addr.city || addr.town || addr.village || addr.municipality || form.city || '';
+            form.district = addr.suburb || addr.neighbourhood || addr.quarter || addr.district || form.district || '';
+            
+            // Extraction helpers for numeric fields
+            const toEnglishDigits = (str) => {
+                if (!str) return '';
+                return str.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                          .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+            };
+
+            const cleanDisplayName = toEnglishDigits(data.display_name || '');
+            const numbers = cleanDisplayName.match(/\d+/g) || [];
+
+            // 1. Building number
+            let bldNum = addr.house_number || '';
+            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
+            if (bldNum.length !== 4) {
+                bldNum = '';
+            }
+            if (!bldNum) {
+                // Find first 4-digit sequence
+                const fourDigit = numbers.find(n => n.length === 4);
+                if (fourDigit) {
+                    bldNum = fourDigit;
+                }
+            }
+            form.building_number = bldNum || form.building_number || '';
+
+            // 2. Postal code
+            let postCode = addr.postcode || '';
+            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
+            if (postCode.length !== 5) {
+                postCode = '';
+            }
+            if (!postCode) {
+                // Find first 5-digit sequence
+                const fiveDigit = numbers.find(n => n.length === 5);
+                if (fiveDigit) {
+                    postCode = fiveDigit;
+                }
+            }
+            form.postal_code = postCode || form.postal_code || '';
+
             const addressParts = [];
             if (addr.road) addressParts.push(addr.road);
             if (addr.neighbourhood && addr.neighbourhood !== form.district) addressParts.push(addr.neighbourhood);
@@ -586,6 +619,28 @@ async function reverseGeocode(lat, lng) {
     }
 }
 
+// Helper to convert Arabic numerals to English
+function convertArabicToEnglish(value) {
+    if (!value) return value;
+    const arabic = '٠١٢٣٤٥٦٧٨٩';
+    return value.replace(/[٠-٩]/g, d => arabic.indexOf(d));
+}
+
+// Quick actions
+function normalizePhone(p) {
+    return convertArabicToEnglish(p || '').replace(/[^\d+]/g, '');
+}
+
+// Handle phone input to convert numerals real-time and remove spaces
+function onPhoneInput(type, value) {
+    const converted = convertArabicToEnglish(value);
+    const normalized = converted.replace(/\s/g, '');
+    
+    if (value !== normalized) {
+        form[type] = normalized;
+    }
+}
+
 const close = () => {
     emit('close');
     form.reset();
@@ -595,15 +650,22 @@ const close = () => {
 };
 
 async function handleClose() {
+    if (isConfirming.value) return;
+
     if (isDirty.value) {
-        const confirmed = await confirm({
-            title: t('common.unsaved_changes'),
-            message: t('common.unsaved_changes_message'),
-            confirmText: t('common.yes_close'),
-            cancelText: t('common.cancel'),
-            type: 'warning',
-        });
-        if (!confirmed) return;
+        isConfirming.value = true;
+        try {
+            const confirmed = await confirm({
+                title: t('common.unsaved_changes'),
+                message: t('common.unsaved_changes_message'),
+                confirmText: t('common.yes_close'),
+                cancelText: t('common.cancel'),
+                type: 'warning',
+            });
+            if (!confirmed) return;
+        } finally {
+            isConfirming.value = false;
+        }
     }
     close();
 }

@@ -18,6 +18,12 @@
     "type": "Type",
     "amount": "Amount",
     "status": "Status",
+    "status_draft": "Draft",
+    "status_open": "Open",
+    "status_paid": "Paid",
+    "status_cancelled": "Cancelled",
+    "status_unpaid": "Unpaid",
+    "status_partial": "Partially Paid",
     "notes": "Notes",
     "download": "Download Attachment",
     "no_attachments": "No attachments",
@@ -1850,8 +1856,10 @@
       }
     },
     "invoices": {
+      "title": "Purchase Invoices",
+      "auto_generated_from_grn": "Auto-generated from GRN: {code}",
       "code": "Invoice Number",
-      "date": "Date"
+      "date": "Invoice Date"
     },
     "orders": {
       "title": "Purchase orders",
@@ -1941,10 +1949,6 @@
       "posted": "The receipt voucher has been posted to the inventory",
       "cancelled": "The receipt document has been cancelled",
       "post": "Posting to inventory"
-    },
-    "invoices": {
-      "title": "Purchase Invoices",
-      "auto_generated_from_grn": "Auto-generated from GRN: {code}"
     }
   },
   "invoices": {

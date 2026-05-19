@@ -1,148 +1,151 @@
 <template>
-    <BaseModal :show="show" @close="$emit('close')" size="lg">
+    <BaseModal :show="show" @close="$emit('close')" size="2xl">
         <template #title>
             {{ $t('hr.employees.add') }}
         </template>
 
-        <form @submit.prevent="submit" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Name AR -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.name') }} (AR) <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="form.name_ar"
-                        type="text"
-                        :class="[
-                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                            form.errors.name_ar || (form.hasErrors && !form.name_ar) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
-                        ]"
-                    />
-                    <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">{{ form.errors.name_ar }}</p>
+        <form @submit.prevent="submit">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Column: Personal details -->
+                <div class="space-y-4">
+                    <!-- Name AR -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ $t('common.name') }} (AR) <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            v-model="form.name_ar"
+                            type="text"
+                            :class="[
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                form.errors.name_ar || (form.hasErrors && !form.name_ar) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                            ]"
+                        />
+                        <p v-if="form.errors.name_ar" class="mt-1 text-xs text-red-500">{{ form.errors.name_ar }}</p>
+                    </div>
+
+                    <!-- Name EN -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ $t('common.name') }} (EN) <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            v-model="form.name_en"
+                            type="text"
+                            :class="[
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                form.errors.name_en || (form.hasErrors && !form.name_en) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                            ]"
+                        />
+                        <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">{{ form.errors.name_en }}</p>
+                    </div>
+
+                    <!-- Phone -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ $t('common.phone') }} <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            v-model="form.phone"
+                            type="tel"
+                            dir="ltr"
+                            :class="[
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                form.errors.phone || (form.hasErrors && !form.phone) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                            ]"
+                        />
+                        <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">{{ form.errors.phone }}</p>
+                    </div>
+
+                    <!-- Gender -->
+                    <div>
+                        <SearchableSelect
+                            v-model="form.gender"
+                            :label="$t('hr.employees.gender')"
+                            :options="[{id: 'male', name: $t('common.male')}, {id: 'female', name: $t('common.female')}]"
+                            option-label="name"
+                            option-value="id"
+                            :error="form.errors.gender"
+                            required
+                        />
+                    </div>
                 </div>
 
-                <!-- Name EN -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.name') }} (EN) <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="form.name_en"
-                        type="text"
-                        :class="[
-                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                            form.errors.name_en || (form.hasErrors && !form.name_en) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
-                        ]"
-                    />
-                    <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">{{ form.errors.name_en }}</p>
+                <!-- Right Column: Career Details -->
+                <div class="space-y-4 lg:border-l lg:dark:border-gray-700 lg:pl-6 rtl:lg:border-l-0 rtl:lg:border-r rtl:lg:pr-6">
+                    <!-- Nationality -->
+                    <div>
+                         <SearchableSelect
+                            v-model="form.nationality_id"
+                            :label="$t('hr.employees.nationality')"
+                            :options="nationalities"
+                            :option-label="(opt) => locale === 'ar' ? opt.name_ar : opt.name_en || opt.name_ar"
+                            option-value="id"
+                            :error="form.errors.nationality_id"
+                            required
+                        />
+                    </div>
+
+                    <!-- Job Title -->
+                    <div>
+                        <SearchableSelect
+                            v-model="form.job_title_id"
+                            :label="$t('hr.employees.job_title')"
+                            :options="jobTitles"
+                            :option-label="(opt) => opt.name_ar"
+                            option-value="id"
+                            :error="form.errors.job_title_id"
+                            required
+                        />
+                    </div>
+
+                    <!-- Email (Mandatory) -->
+                    <div>
+                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ $t('common.email') }} <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            v-model="form.email"
+                            type="email"
+                            :class="[
+                                'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
+                                form.errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
+                            ]"
+                            required
+                        />
+                        <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
+                    </div>
+
+                    <!-- Branch -->
+                    <div v-if="filteredCenterOptions.length > 1">
+                         <SearchableSelect
+                            v-model="form.center_id"
+                            :label="$t('hr.employees.branch')"
+                            :options="filteredCenterOptions"
+                            option-label="name"
+                            option-value="id"
+                            :error="form.errors.center_id"
+                            required
+                        />
+                    </div>
+                    <input v-else type="hidden" :value="form.center_id" />
+
+                    <!-- Default Shift -->
+                    <div v-if="shifts?.length">
+                        <SearchableSelect
+                            v-model="form.default_shift_id"
+                            :label="$t('hr.settings.shifts.shift')"
+                            :options="shifts"
+                            :option-label="locale === 'ar' ? 'name_ar' : 'name_en'"
+                            option-value="id"
+                            :error="form.errors.default_shift_id"
+                            :placeholder="$t('common.choose')"
+                        />
+                    </div>
                 </div>
-
-                <!-- Phone -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.phone') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="form.phone"
-                        type="tel"
-                        dir="ltr"
-                        :class="[
-                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                            form.errors.phone || (form.hasErrors && !form.phone) ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
-                        ]"
-                    />
-                    <p v-if="form.errors.phone" class="mt-1 text-xs text-red-500">{{ form.errors.phone }}</p>
-                </div>
-
-                <!-- Gender -->
-                <div>
-                    <SearchableSelect
-                        v-model="form.gender"
-                        :label="$t('hr.employees.gender')"
-                        :options="[{id: 'male', name: $t('common.male')}, {id: 'female', name: $t('common.female')}]"
-                        option-label="name"
-                        option-value="id"
-                        :error="form.errors.gender"
-                        required
-                    />
-                </div>
-
-                <!-- Nationality -->
-                <div>
-                     <SearchableSelect
-                        v-model="form.nationality_id"
-                        :label="$t('hr.employees.nationality')"
-                        :options="nationalities"
-                        :option-label="(opt) => locale === 'ar' ? opt.name_ar : opt.name_en || opt.name_ar"
-                        option-value="id"
-                        :error="form.errors.nationality_id"
-                        required
-                    />
-                </div>
-
-                <!-- Job Title -->
-                <div>
-                    <SearchableSelect
-                        v-model="form.job_title_id"
-                        :label="$t('hr.employees.job_title')"
-                        :options="jobTitles"
-                        :option-label="(opt) => opt.name_ar"
-                        option-value="id"
-                        :error="form.errors.job_title_id"
-                        required
-                    />
-                </div>
-
-                <!-- Email (Mandatory) -->
-                <div class="md:col-span-2 animate-fadeIn">
-                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('common.email') }} <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        v-model="form.email"
-                        type="email"
-                        :class="[
-                            'w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500',
-                            form.errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500'
-                        ]"
-                        required
-                    />
-                    <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
-                </div>
-
-                <!-- Branch -->
-                <div class="md:col-span-2" v-if="filteredCenterOptions.length > 1">
-                     <SearchableSelect
-                        v-model="form.center_id"
-                        :label="$t('hr.employees.branch')"
-                        :options="filteredCenterOptions"
-                        option-label="name"
-                        option-value="id"
-                        :error="form.errors.center_id"
-                        required
-                    />
-                </div>
-                <!-- Hidden input for single branch -->
-                <input v-else type="hidden" :value="form.center_id" />
-
-                <!-- Default Shift -->
-                <div v-if="shifts?.length" class="md:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
-                    <SearchableSelect
-                        v-model="form.default_shift_id"
-                        :label="$t('hr.settings.shifts.shift')"
-                        :options="shifts"
-                        :option-label="locale === 'ar' ? 'name_ar' : 'name_en'"
-                        option-value="id"
-                        :error="form.errors.default_shift_id"
-                        :placeholder="$t('common.choose')"
-                    />
-                </div>
-
-
 
                 <!-- Auto System Access Info -->
-                <div class="md:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4 mt-2">
+                <div class="lg:col-span-2 border-t border-gray-100 dark:border-gray-700 pt-4">
                     <div class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
                         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

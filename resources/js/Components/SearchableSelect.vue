@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick, useSlots } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
@@ -55,6 +55,9 @@ const emit = defineEmits(['update:modelValue', 'change', 'search']);
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
 
+const slots = useSlots();
+const hasPrefix = computed(() => !!slots.prefix && selectedOption.value && !isOpen.value);
+
 const isOpen = ref(false);
 const searchQuery = ref('');
 const containerRef = ref(null);
@@ -92,6 +95,11 @@ const filteredOptions = computed(() => {
     if (!searchQuery.value) return props.options;
     const query = searchQuery.value.toLowerCase();
     return props.options.filter(option => {
+        if (typeof option === 'object' && option !== null) {
+            return Object.values(option).some(val => 
+                val !== null && val !== undefined && String(val).toLowerCase().includes(query)
+            );
+        }
         const label = String(getOptionLabel(option)).toLowerCase();
         return label.includes(query);
     });
@@ -250,6 +258,11 @@ const scrollToHighlighted = () => {
         </label>
         
         <div class="relative">
+            <!-- Selected Option Prefix -->
+            <div v-if="hasPrefix" class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                <slot name="prefix" :option="selectedOption"></slot>
+            </div>
+
             <input
                 ref="inputRef"
                 v-model="inputValue"
@@ -258,7 +271,9 @@ const scrollToHighlighted = () => {
                 :disabled="disabled"
                 class="w-full border rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 :class="[
-                    compact ? 'px-2 py-1.5 text-xs' : 'px-4 py-2.5 text-sm',
+                    compact 
+                        ? (hasPrefix ? 'ps-8 pe-2 py-1.5 text-xs' : 'px-2 py-1.5 text-xs') 
+                        : (hasPrefix ? 'ps-10 pe-4 py-2.5 text-sm' : 'px-4 py-2.5 text-sm'),
                     error ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600 focus:border-violet-500',
                     { 'pr-10': selectedOption && !isOpen && !compact }
                 ]"
@@ -306,7 +321,10 @@ const scrollToHighlighted = () => {
                     ]"
                 >
                     <slot name="option" :option="option">
-                        <span>{{ getOptionLabel(option) }}</span>
+                        <div class="flex items-center gap-2">
+                            <slot name="prefix" :option="option"></slot>
+                            <span>{{ getOptionLabel(option) }}</span>
+                        </div>
                     </slot>
                     <svg v-if="getOptionValue(option) === modelValue" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />

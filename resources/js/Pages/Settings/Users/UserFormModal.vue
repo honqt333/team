@@ -87,127 +87,132 @@ const submit = () => {
         :show="show"
         :title="isEditing ? t('users.edit_user', 'Edit User') : t('users.create_user', 'New User')"
         @close="emit('close')"
+        size="2xl"
     >
-        <form @submit.prevent="submit" class="space-y-6">
-            <div class="space-y-4">
-                <!-- Name -->
-                <div>
-                    <InputLabel :value="t('users.name', 'Name')">
-                        <span class="text-red-500">*</span>
-                    </InputLabel>
-                    <TextInput
-                        v-model="form.name"
-                        type="text"
-                        class="mt-1 block w-full"
-                        required
-                        autofocus
-                    />
-                    <InputError class="mt-2" :message="form.errors.name" />
-                </div>
-
-                <!-- Email -->
-                <div>
-                    <InputLabel :value="t('users.email', 'Email')">
-                        <span class="text-red-500">*</span>
-                    </InputLabel>
-                    <TextInput
-                        v-model="form.email"
-                        type="email"
-                        class="mt-1 block w-full"
-                        required
-                    />
-                    <InputError class="mt-2" :message="form.errors.email" />
-                </div>
-
-                <!-- Password -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form @submit.prevent="submit">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Column: User details & credentials -->
+                <div class="space-y-4">
+                    <!-- Name -->
                     <div>
-                        <InputLabel :value="isEditing ? t('users.new_password', 'New Password') : t('users.password', 'Password')">
-                            <span v-if="!isEditing" class="text-red-500">*</span>
+                        <InputLabel :value="t('users.name', 'Name')">
+                            <span class="text-red-500">*</span>
                         </InputLabel>
                         <TextInput
-                            v-model="form.password"
-                            type="password"
+                            v-model="form.name"
+                            type="text"
                             class="mt-1 block w-full"
-                            :required="!isEditing"
+                            required
+                            autofocus
                         />
-                        <InputError class="mt-2" :message="form.errors.password" />
+                        <InputError class="mt-2" :message="form.errors.name" />
                     </div>
-                    
+
+                    <!-- Email -->
                     <div>
-                        <InputLabel :value="t('users.confirm_password', 'Confirm Password')">
-                            <span v-if="!isEditing" class="text-red-500">*</span>
+                        <InputLabel :value="t('users.email', 'Email')">
+                            <span class="text-red-500">*</span>
                         </InputLabel>
                         <TextInput
-                            v-model="form.password_confirmation"
-                            type="password"
+                            v-model="form.email"
+                            type="email"
                             class="mt-1 block w-full"
-                            :required="!isEditing || !!form.password"
+                            required
                         />
+                        <InputError class="mt-2" :message="form.errors.email" />
                     </div>
-                </div>
 
-                <div>
-                    <InputLabel :value="t('users.role', 'Role')">
-                        <span class="text-red-500">*</span>
-                    </InputLabel>
-                    <SearchableSelect
-                        v-model="form.role_id"
-                        :options="roleOptions"
-                        option-label="label"
-                        option-value="value"
-                        :placeholder="t('users.select_role', 'Select Role')"
-                        required
-                        class="mt-1 block w-full"
-                    />
-                    <InputError class="mt-2" :message="form.errors.role_id" />
-                </div>
-
-                <!-- Note: Employee selection removed - linking is automatic via EmployeeObserver -->
-
-                <!-- Active Status -->
-                <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                    <Checkbox
-                        v-model:checked="form.is_active"
-                        id="is_active"
-                        class="text-violet-600 focus:ring-violet-500 rounded"
-                    />
-                    <InputLabel for="is_active" class="cursor-pointer mb-0">
-                        {{ t('users.is_active', 'Active Account') }}
-                        <div class="text-xs text-gray-500 font-normal mt-0.5">
-                            {{ t('users.is_active_hint', 'Allow user to login to the system') }}
-                        </div>
-                    </InputLabel>
-                </div>
-
-                <!-- Centers Selection -->
-                <div>
-                    <InputLabel :value="t('users.allowed_centers', 'Allowed Branches')">
-                        <span class="text-red-500">*</span>
-                    </InputLabel>
-                    
-                    <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto p-1 custom-scrollbar">
-                        <label 
-                            v-for="center in centers" 
-                            :key="center.id"
-                            class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
-                            :class="form.centers.includes(center.id) 
-                                ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20 ring-1 ring-violet-500' 
-                                : 'border-gray-200 dark:border-gray-700'"
-                        >
-                            <Checkbox 
-                                v-model:checked="form.centers"
-                                :value="center.id"
-                                class="text-violet-600 focus:ring-violet-500 rounded"
+                    <!-- Password -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <InputLabel :value="isEditing ? t('users.new_password', 'New Password') : t('users.password', 'Password')">
+                                <span v-if="!isEditing" class="text-red-500">*</span>
+                            </InputLabel>
+                            <TextInput
+                                v-model="form.password"
+                                type="password"
+                                class="mt-1 block w-full"
+                                :required="!isEditing"
                             />
-                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ center.name }}</span>
-                        </label>
+                            <InputError class="mt-2" :message="form.errors.password" />
+                        </div>
+                        
+                        <div>
+                            <InputLabel :value="t('users.confirm_password', 'Confirm Password')">
+                                <span v-if="!isEditing" class="text-red-500">*</span>
+                            </InputLabel>
+                            <TextInput
+                                v-model="form.password_confirmation"
+                                type="password"
+                                class="mt-1 block w-full"
+                                :required="!isEditing || !!form.password"
+                            />
+                        </div>
                     </div>
-                    <InputError class="mt-2" :message="form.errors.centers" />
+
+                    <!-- Active Status -->
+                    <div class="flex items-center gap-3 p-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <Checkbox
+                            v-model:checked="form.is_active"
+                            id="is_active"
+                            class="text-violet-600 focus:ring-violet-500 rounded"
+                        />
+                        <InputLabel for="is_active" class="cursor-pointer mb-0">
+                            {{ t('users.is_active', 'Active Account') }}
+                            <div class="text-xs text-gray-500 font-normal mt-0.5">
+                                {{ t('users.is_active_hint', 'Allow user to login to the system') }}
+                            </div>
+                        </InputLabel>
+                    </div>
+                </div>
+
+                <!-- Right Column: Roles & Allowed Branches -->
+                <div class="space-y-4 lg:border-l lg:dark:border-gray-700 lg:pl-6 rtl:lg:border-l-0 rtl:lg:border-r rtl:lg:pr-6 flex flex-col justify-between">
+                    <div>
+                        <InputLabel :value="t('users.role', 'Role')">
+                            <span class="text-red-500">*</span>
+                        </InputLabel>
+                        <SearchableSelect
+                            v-model="form.role_id"
+                            :options="roleOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="t('users.select_role', 'Select Role')"
+                            required
+                            class="mt-1 block w-full"
+                        />
+                        <InputError class="mt-2" :message="form.errors.role_id" />
+                    </div>
+
+                    <!-- Allowed Branches -->
+                    <div class="flex-1 flex flex-col">
+                        <InputLabel :value="t('users.allowed_centers', 'Allowed Branches')">
+                            <span class="text-red-500">*</span>
+                        </InputLabel>
+                        
+                        <div class="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto p-1 custom-scrollbar border border-gray-100 dark:border-gray-700 rounded-xl">
+                            <label 
+                                v-for="center in centers" 
+                                :key="center.id"
+                                class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200"
+                                :class="form.centers.includes(center.id) 
+                                    ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/20 ring-1 ring-violet-500' 
+                                    : 'border-gray-200 dark:border-gray-700'"
+                            >
+                                <Checkbox 
+                                    v-model:checked="form.centers"
+                                    :value="center.id"
+                                    class="text-violet-600 focus:ring-violet-500 rounded"
+                                />
+                                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ center.name }}</span>
+                            </label>
+                        </div>
+                        <InputError class="mt-2" :message="form.errors.centers" />
+                    </div>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-800">
+            <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-100 dark:border-gray-800">
                 <button
                     type="button"
                     class="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"

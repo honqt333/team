@@ -18,6 +18,12 @@
     "type": "النوع",
     "amount": "المبلغ",
     "status": "الحالة",
+    "status_draft": "مسودة",
+    "status_open": "مفتوح",
+    "status_paid": "مدفوع",
+    "status_cancelled": "ملغي",
+    "status_unpaid": "غير مدفوع",
+    "status_partial": "مدفوع جزئياً",
     "notes": "ملاحظات",
     "download": "تحميل المرفق",
     "no_attachments": "لا توجد مرفقات",
@@ -1780,8 +1786,10 @@
       }
     },
     "invoices": {
+      "title": "فواتير المشتريات",
+      "auto_generated_from_grn": "تم إنشاؤها تلقائياً من سند استلام البضاعة: {code}",
       "code": "رقم الفاتورة",
-      "date": "التاريخ"
+      "date": "تاريخ الفاتورة"
     },
     "orders": {
       "title": "أوامر الشراء",
@@ -1862,10 +1870,6 @@
       "amount": "المبلغ",
       "vat": "الضريبة",
       "total": "الإجمالي"
-    },
-    "invoices": {
-      "title": "فواتير المشتريات",
-      "auto_generated_from_grn": "تم إنشاؤها تلقائياً من سند استلام البضاعة: {code}"
     },
     "grn": {
       "title": "سندات الاستلام",

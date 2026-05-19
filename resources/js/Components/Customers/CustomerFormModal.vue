@@ -1,5 +1,5 @@
 <template>
-    <BaseModal :show="show" @close="handleClose" size="xl">
+    <BaseModal :show="show" @close="handleClose" size="2xl" scroll-entire>
         <template #title>
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
@@ -299,33 +299,6 @@
                             />
                         </div>
 
-                        <!-- Lat/Lng (Hidden but editable on demand) -->
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                    {{ $t('customers.form.lat') }}
-                                </label>
-                                <input 
-                                    type="number" 
-                                    step="any"
-                                    v-model="form.lat"
-                                    @change="updateMarkerFromInputs"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                />
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                    {{ $t('customers.form.lng') }}
-                                </label>
-                                <input 
-                                    type="number" 
-                                    step="any"
-                                    v-model="form.lng"
-                                    @change="updateMarkerFromInputs"
-                                    class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                />
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -401,6 +374,7 @@ const defaultLng = computed(() => {
 const { confirm } = useConfirm();
 const isDirty = ref(false);
 const initialFormData = ref(null);
+const isConfirming = ref(false);
 
 const form = useForm({
     type: null,
@@ -542,25 +516,32 @@ function resetForm() {
 }
 
 async function handleClose() {
+    if (isConfirming.value) return;
+
     console.log('[CustomerFormModal] handleClose called, isDirty:', isDirty.value);
     console.log('[CustomerFormModal] initialFormData:', initialFormData.value ? 'SET' : 'NULL');
     console.log('[CustomerFormModal] current form:', JSON.stringify(form.data()));
     
     if (isDirty.value) {
         console.log('[CustomerFormModal] Showing confirmation dialog...');
-        const confirmed = await confirm({
-            title: t('common.unsaved_changes'),
-            message: t('common.unsaved_changes_message'),
-            confirmText: t('common.yes_close'),
-            cancelText: t('common.cancel'),
-            type: 'warning',
-        });
-        
-        if (!confirmed) {
-            console.log('[CustomerFormModal] User cancelled close');
-            return;
+        isConfirming.value = true;
+        try {
+            const confirmed = await confirm({
+                title: t('common.unsaved_changes'),
+                message: t('common.unsaved_changes_message'),
+                confirmText: t('common.yes_close'),
+                cancelText: t('common.cancel'),
+                type: 'warning',
+            });
+            
+            if (!confirmed) {
+                console.log('[CustomerFormModal] User cancelled close');
+                return;
+            }
+            console.log('[CustomerFormModal] User confirmed close');
+        } finally {
+            isConfirming.value = false;
         }
-        console.log('[CustomerFormModal] User confirmed close');
     }
     
     resetForm();
@@ -631,14 +612,50 @@ async function reverseGeocode(lat, lng) {
             const addr = data.address;
             
             // Fill form fields from geocoding response
-            form.country = addr.country || '';
-            form.region = addr.state || addr.region || '';
-            form.city = addr.city || addr.town || addr.village || addr.municipality || '';
-            form.district = addr.suburb || addr.neighbourhood || addr.quarter || addr.district || '';
-            form.postal_code = addr.postcode || '';
+            form.country = addr.country || form.country || '';
+            form.region = addr.state || addr.region || form.region || '';
+            form.city = addr.city || addr.town || addr.village || addr.municipality || form.city || '';
+            form.district = addr.suburb || addr.neighbourhood || addr.quarter || addr.district || form.district || '';
             
-            // Building number
-            form.building_number = addr.house_number || '';
+            // Extraction helpers for numeric fields (e.g. building_number and postal_code)
+            const toEnglishDigits = (str) => {
+                if (!str) return '';
+                return str.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                          .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+            };
+
+            const cleanDisplayName = toEnglishDigits(data.display_name || '');
+            const numbers = cleanDisplayName.match(/\d+/g) || [];
+
+            // 1. Building number
+            let bldNum = addr.house_number || '';
+            bldNum = toEnglishDigits(bldNum).replace(/\D/g, ''); // Keep only digits
+            if (bldNum.length !== 4) {
+                bldNum = '';
+            }
+            if (!bldNum) {
+                // Find first 4-digit sequence
+                const fourDigit = numbers.find(n => n.length === 4);
+                if (fourDigit) {
+                    bldNum = fourDigit;
+                }
+            }
+            form.building_number = bldNum || form.building_number || '';
+
+            // 2. Postal code
+            let postCode = addr.postcode || '';
+            postCode = toEnglishDigits(postCode).replace(/\D/g, ''); // Keep only digits
+            if (postCode.length !== 5) {
+                postCode = '';
+            }
+            if (!postCode) {
+                // Find first 5-digit sequence
+                const fiveDigit = numbers.find(n => n.length === 5);
+                if (fiveDigit) {
+                    postCode = fiveDigit;
+                }
+            }
+            form.postal_code = postCode || form.postal_code || '';
             
             // Build address line from available info
             const addressParts = [];

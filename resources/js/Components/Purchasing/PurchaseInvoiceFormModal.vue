@@ -393,6 +393,7 @@ const props = defineProps({
     warehouses: Array,
     units: Array,
     defaultWarehouse: Object,
+    defaultSupplierId: [Number, String],
 });
 
 const tenantTaxSettings = computed(() => {
@@ -419,7 +420,7 @@ const allSuppliers = computed(() => {
 
 const form = useForm({
     warehouse_id: props.defaultWarehouse?.id || '',
-    supplier_id: '',
+    supplier_id: props.defaultSupplierId || '',
     invoice_number: '',
     issue_date: new Date().toISOString().split('T')[0],
     tax_included: false,
@@ -434,6 +435,7 @@ watch(() => props.show, (newVal) => {
     if (newVal) {
         form.reset();
         form.warehouse_id = props.defaultWarehouse?.id || (props.warehouses?.length > 0 ? props.warehouses[0].id : '');
+        form.supplier_id = props.defaultSupplierId || '';
         form.issue_date = new Date().toISOString().split('T')[0];
         form.items = [];
         form.payments = [];
