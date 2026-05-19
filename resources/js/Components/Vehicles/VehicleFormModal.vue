@@ -33,7 +33,7 @@
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('vehicles.form.make') }} / {{ $t('vehicles.form.model') }}</span>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <!-- Make -->
                     <div>
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.make') }} <span class="text-red-500">*</span></label>
@@ -74,7 +74,7 @@
 
                 <!-- Other Make/Model Inputs -->
                 <div v-if="form.make_id === '__other__' || form.model_id === '__other__'" class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div v-if="form.make_id === '__other__'">
                             <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.make_other') }} <span class="text-red-500">*</span></label>
                             <input 
@@ -103,17 +103,17 @@
                         {{ $t('vehicles.form.customer') }} <span class="text-red-500">*</span>
                     </span>
                     <!-- Only show add button if no default customer -->
-                    <button
-                        v-if="!defaultCustomerId"
-                        type="button"
-                        @click="showCustomerModal = true"
-                        class="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 flex items-center justify-center transition-colors"
-                        :title="$t('vehicles.quick_add_customer')"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </button>
+                    <Tooltip v-if="!defaultCustomerId" :text="$t('vehicles.quick_add_customer')">
+                        <button
+                            type="button"
+                            @click="showCustomerModal = true"
+                            class="w-7 h-7 rounded-lg bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-200 dark:hover:bg-teal-900/50 flex items-center justify-center transition-colors"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </button>
+                    </Tooltip>
                 </div>
                 <!-- Show read-only customer info when defaultCustomerId is set -->
                 <div v-if="defaultCustomerId && selectedCustomer" class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
@@ -142,7 +142,7 @@
             <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                 <span class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ $t('vehicles.form.details') }}</span>
                 
-                <div class="grid grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <!-- Year -->
                     <div>
                         <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('vehicles.form.year') }}</label>
@@ -250,6 +250,7 @@ import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import SaudiPlateInput from '@/Components/Vehicles/SaudiPlateInput.vue';
 

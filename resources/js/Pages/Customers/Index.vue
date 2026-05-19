@@ -302,25 +302,25 @@
                         <thead>
                             <tr class="bg-gray-50/50 dark:bg-gray-900/80">
                                 <th
-                                    class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] w-12">
+                                    class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] w-12">
                                     #</th>
                                 <th
-                                    class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
+                                    class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
                                     {{ $t('customers.columns.classification') }}</th>
                                 <th
-                                    class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
+                                    class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
                                     {{ $t('customers.columns.name') }}</th>
                                 <th
-                                    class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
+                                    class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
                                     {{ $t('customers.columns.contact_name') }}</th>
                                 <th
-                                    class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
+                                    class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
                                     {{ $t('customers.columns.email') }}</th>
                                 <th
-                                    class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
+                                    class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
                                     {{ $t('customers.columns.phone') }}</th>
                                 <th
-                                    class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
+                                    class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
                                     {{ $t('customers.columns.balance') }}</th>
                             </tr>
                         </thead>
@@ -329,11 +329,11 @@
                                 @click="goToCustomer(customer)"
                                 class="group hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 cursor-pointer transition-all duration-300">
                                 <!-- # -->
-                                <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400">
                                     {{ index + 1 }}
                                 </td>
                                 <!-- Classification (shows Type) -->
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
                                     <span v-if="customer.type"
                                         class="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-black rounded-lg border shadow-sm uppercase"
                                         :class="{
@@ -347,32 +347,32 @@
                                     <span v-else class="text-gray-400 text-sm">-</span>
                                 </td>
                                 <!-- Name -->
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
                                     <p
                                         class="font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                         {{ customer.name }}
                                     </p>
                                 </td>
                                 <!-- Contact Name -->
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
                                     <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
                                         {{ customer.contact_name || '-' }}
                                     </p>
                                 </td>
                                 <!-- Email -->
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
                                     <p class="text-sm text-gray-600 dark:text-gray-400 truncate">
                                         {{ customer.email || '-' }}
                                     </p>
                                 </td>
                                 <!-- Phone -->
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
                                     <p class="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wider">
                                         {{ customer.phone }}
                                     </p>
                                 </td>
                                 <!-- Balance -->
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
                                     <p class="text-sm font-bold"
                                         :class="(customer.balance || 0) > 0 ? 'text-red-600' : 'text-green-600'">
                                         {{ (customer.balance || 0).toLocaleString() }}

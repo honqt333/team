@@ -17,46 +17,53 @@
 
                 <template #actions>
                     <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
-                        <button v-if="can('crm.vehicles.export') || isAnyAdmin()" @click="exportVehicles"
-                            :disabled="exporting" :title="$t('common.export')"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </button>
-                        <button v-if="can('crm.vehicles.print') || isAnyAdmin()" @click="printVehicles"
-                            :title="$t('common.print')"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                        <Tooltip :text="$t('common.export')">
+                            <button v-if="can('crm.vehicles.export') || isAnyAdmin()" @click="exportVehicles"
+                                :disabled="exporting"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </button>
+                        </Tooltip>
+                        <Tooltip :text="$t('common.print')">
+                            <button v-if="can('crm.vehicles.print') || isAnyAdmin()" @click="printVehicles"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
-                        </button>
+                            </button>
+                        </Tooltip>
 
                         <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                         <div class="flex gap-1.5">
-                            <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'grid'
-                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </button>
-                            <button @click="viewMode = 'list'" :title="$t('common.list_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'list'
-                                        ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
+                            <Tooltip :text="$t('common.grid_view')">
+                                <button @click="viewMode = 'grid'"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'grid'
+                                            ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
+                            <Tooltip :text="$t('common.list_view')">
+                                <button @click="viewMode = 'list'"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'list'
+                                            ? 'bg-indigo-600 text-white shadow-indigo-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
                         </div>
                     </div>
 
@@ -100,13 +107,14 @@
                                 />
                             </div>
 
-                            <button @click="resetFilters"
-                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
-                                :title="$t('common.reset')">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                            </button>
+                            <Tooltip :text="$t('common.reset')">
+                                <button @click="resetFilters"
+                                    class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
                         </div>
                     </div>
                 </template>
@@ -158,9 +166,7 @@
 
                     <div class="relative z-10 p-5 flex flex-col h-full">
                         <div class="flex items-center justify-between mb-4">
-                            <span class="px-3 py-1 bg-gray-900 text-white rounded-lg font-mono font-bold tracking-widest text-sm shadow-md">
-                                {{ toEnglish(vehicle.plate_number) }}
-                            </span>
+                            <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
                             <div v-if="vehicle.color" class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-700 shadow-sm" :style="{ backgroundColor: getColorHex(vehicle.color) }"></div>
                         </div>
 
@@ -193,22 +199,22 @@
                     <table class="min-w-full">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('vehicles.form.plate') }}
                                 </th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('vehicles.form.make') }}
                                 </th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('vehicles.form.model') }}
                                 </th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('vehicles.form.year') }}
                                 </th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('vehicles.form.customer') }}
                                 </th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                     {{ $t('customers.form.phone') }}
                                 </th>
                             </tr>
@@ -220,24 +226,24 @@
                                 @click="visitShowPage(vehicle)"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
                             >
-                                <td class="px-5 py-4">
-                                    <span class="px-2.5 py-1 text-sm font-bold bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg" dir="ltr">
-                                        {{ toEnglish(vehicle.plate_number) }}
-                                    </span>
+                                <td class="px-5 py-4 text-center">
+                                    <div class="flex justify-center">
+                                        <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
+                                    </div>
                                 </td>
-                                <td class="px-5 py-4 text-gray-700 dark:text-gray-300">
+                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300">
                                     {{ vehicle.display_make || $t('common.na') }}
                                 </td>
-                                <td class="px-5 py-4 text-gray-700 dark:text-gray-300">
+                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300">
                                     {{ vehicle.display_model || $t('common.na') }}
                                 </td>
-                                <td class="px-5 py-4 text-gray-500 dark:text-gray-400">
+                                <td class="px-5 py-4 text-center text-gray-500 dark:text-gray-400">
                                     {{ toEnglish(vehicle.year) || $t('common.na') }}
                                 </td>
-                                <td class="px-5 py-4 text-gray-700 dark:text-gray-300">
+                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300">
                                     {{ vehicle.customer?.name }}
                                 </td>
-                                <td class="px-5 py-4 text-gray-500 dark:text-gray-400">
+                                <td class="px-5 py-4 text-center text-gray-500 dark:text-gray-400" dir="ltr">
                                     {{ toEnglish(vehicle.customer?.phone) }}
                                 </td>
                             </tr>
@@ -325,6 +331,8 @@ import PageHeader from "@/Components/PageHeader.vue";
 import VehicleFormModal from "@/Components/Vehicles/VehicleFormModal.vue";
 import SearchableSelect from "@/Components/SearchableSelect.vue";
 import CustomDatePicker from "@/Components/CustomDatePicker.vue";
+import Tooltip from "@/Components/Tooltip.vue";
+import SaudiPlateDisplay from "@/Components/Vehicles/SaudiPlateDisplay.vue";
 import PrintHeader from "@/Components/Print/PrintHeader.vue";
 import { usePermission } from "@/Composables/usePermission";
 

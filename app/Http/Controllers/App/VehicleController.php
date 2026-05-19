@@ -61,8 +61,18 @@ class VehicleController
             ->where('center_id', $user->current_center_id)
             ->with(['customer', 'make', 'model'])
             ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('plate_number', 'like', "%{$search}%")
+                $arabicToEnglish = [
+                    'أ' => 'A', 'ب' => 'B', 'ح' => 'J', 'د' => 'D', 'ر' => 'R', 'س' => 'S',
+                    'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G', 'ك' => 'K', 'ل' => 'L',
+                    'م' => 'Z', 'ن' => 'N', 'هـ' => 'H', 'ه' => 'H', 'و' => 'U', 'ي' => 'V',
+                    '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'
+                ];
+                $plateSearch = strtr(mb_strtoupper($search, 'UTF-8'), $arabicToEnglish);
+                $plateSearch = str_replace(' ', '%', $plateSearch);
+
+                $query->where(function ($q) use ($search, $plateSearch) {
+                    $q->where('plate_number', 'like', "%{$plateSearch}%")
                       ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
@@ -87,8 +97,18 @@ class VehicleController
             ->where('center_id', $user->current_center_id)
             ->with(['customer', 'make', 'model'])
             ->when($request->search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('plate_number', 'like', "%{$search}%")
+                $arabicToEnglish = [
+                    'أ' => 'A', 'ب' => 'B', 'ح' => 'J', 'د' => 'D', 'ر' => 'R', 'س' => 'S',
+                    'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G', 'ك' => 'K', 'ل' => 'L',
+                    'م' => 'Z', 'ن' => 'N', 'هـ' => 'H', 'ه' => 'H', 'و' => 'U', 'ي' => 'V',
+                    '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'
+                ];
+                $plateSearch = strtr(mb_strtoupper($search, 'UTF-8'), $arabicToEnglish);
+                $plateSearch = str_replace(' ', '%', $plateSearch);
+
+                $query->where(function ($q) use ($search, $plateSearch) {
+                    $q->where('plate_number', 'like', "%{$plateSearch}%")
                       ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })

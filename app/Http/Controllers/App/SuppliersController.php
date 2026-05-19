@@ -33,9 +33,11 @@ class SuppliersController extends Controller
 
         $suppliers = $query->paginate(25)->withQueryString();
 
-        // Add placeholder balance
+        // Calculate real balance from unpaid purchase invoices
         $suppliers->getCollection()->transform(function ($supplier) {
-            $supplier->balance = 0; // Placeholder
+            $supplier->balance = $supplier->purchaseInvoices()
+                ->whereNotIn('status', ['draft', 'cancelled'])
+                ->sum('balance');
             return $supplier;
         });
 
@@ -183,13 +185,21 @@ class SuppliersController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'code', 'phone', 'email', 'type', 'tax_number', 'is_active']);
 
+        // Attach real balance from unpaid invoices
+        $suppliers->transform(function ($supplier) {
+            $supplier->balance = $supplier->purchaseInvoices()
+                ->whereNotIn('status', ['draft', 'cancelled'])
+                ->sum('balance');
+            return $supplier;
+        });
+
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         
         // Set RTL for Arabic
         $sheet->setRightToLeft(app()->getLocale() === 'ar');
 
-        // Headers
+        // Headers (added balance column → I)
         $headers = [
             '#',
             __('purchasing.suppliers.name'),
@@ -198,14 +208,15 @@ class SuppliersController extends Controller
             __('purchasing.suppliers.email'),
             __('purchasing.suppliers.type'),
             __('purchasing.suppliers.tax_number'),
+            __('purchasing.suppliers.balance'),
             __('common.status'),
         ];
         
         $sheet->fromArray($headers, null, 'A1');
         
         // Style headers
-        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
-        $sheet->getStyle('A1:H1')->getFill()
+        $sheet->getStyle('A1:I1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:I1')->getFill()
             ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
             ->getStartColor()->setRGB('E5E7EB');
 
@@ -220,13 +231,14 @@ class SuppliersController extends Controller
                 $supplier->email,
                 $supplier->type === 'parts' ? __('purchasing.suppliers.type_parts') : __('purchasing.suppliers.type_services'),
                 $supplier->tax_number,
+                number_format($supplier->balance, 2),
                 $supplier->is_active ? __('common.active') : __('common.inactive'),
             ], null, 'A' . $row);
             $row++;
         }
 
         // Auto-size columns
-        foreach (range('A', 'H') as $col) {
+        foreach (range('A', 'I') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

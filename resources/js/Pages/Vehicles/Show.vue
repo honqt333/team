@@ -8,25 +8,27 @@
                 <div class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-indigo-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <!-- Navigation & Actions Bar -->
                     <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20" :dir="isRtl ? 'rtl' : 'ltr'">
-                        <Link :href="route('vehicles.index')"
-                            :title="$t('common.back')"
-                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                    d="M14 5l7 7-7 7M21 12H3" />
-                            </svg>
-                        </Link>
-
-                        <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                            <button v-if="can('crm.vehicles.update') || isAnyAdmin()" @click="showEditModal = true"
-                                :title="$t('common.edit')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-indigo-100/70 dark:border-indigo-800/30 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-white dark:hover:bg-indigo-900/30 hover:shadow-md transition-all">
+                        <Tooltip :text="$t('common.back')">
+                            <Link :href="route('vehicles.index')"
+                                class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        d="M14 5l7 7-7 7M21 12H3" />
                                 </svg>
-                                <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
-                            </button>
+                            </Link>
+                        </Tooltip>
+
+                        <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                            <Tooltip :text="$t('common.edit')">
+                                <button v-if="can('crm.vehicles.update') || isAnyAdmin()" @click="showEditModal = true"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-indigo-100/70 dark:border-indigo-800/30 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-white dark:hover:bg-indigo-900/30 hover:shadow-md transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
+                                </button>
+                            </Tooltip>
 
                             <button v-if="can('crm.work_orders.create') || isAnyAdmin()" @click="openWorkOrderModal"
                                 class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-indigo-100/70 dark:border-indigo-800/30 bg-indigo-50/70 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 hover:bg-white dark:hover:bg-indigo-900/30 hover:shadow-md transition-all">
@@ -44,20 +46,21 @@
                                 <span class="hidden sm:inline">{{ $t('common.btn_create_quote') }}</span>
                             </button>
 
-                            <button v-if="can('crm.vehicles.delete') || isAnyAdmin()" @click="confirmDelete" :disabled="!canDelete"
-                                :title="canDelete ? $t('common.delete') : $t('customers.cannot_delete_has_data')"
-                                :class="[
-                                    'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
-                                    canDelete
-                                        ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md'
-                                        : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70'
-                                ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
-                            </button>
+                            <Tooltip :text="canDelete ? $t('common.delete') : $t('customers.cannot_delete_has_data')">
+                                <button v-if="can('crm.vehicles.delete') || isAnyAdmin()" @click="confirmDelete" :disabled="!canDelete"
+                                    :class="[
+                                        'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
+                                        canDelete
+                                            ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md'
+                                            : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
+                                </button>
+                            </Tooltip>
                         </div>
                     </div>
 
@@ -93,9 +96,7 @@
                                         <h1 class="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                             {{ getVehicleName(vehicle) }}
                                         </h1>
-                                        <div class="px-4 py-2 bg-gray-900 text-white rounded-xl border border-gray-800 shadow-lg flex items-center gap-2">
-                                            <span class="text-xl font-black tracking-widest font-mono">{{ toEnglish(vehicle.plate_number) }}</span>
-                                        </div>
+                                        <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="md" class="ms-2 shadow-lg" />
                                     </div>
                                     <p class="text-sm font-bold text-indigo-500/80 dark:text-indigo-400/80 mb-4">{{ $t('vehicles.subtitle') }}</p>
                                     
@@ -254,20 +255,20 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="order in filteredWorkOrders" :key="order.id" @click="router.visit(route('work-orders.show', order.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{{ toEnglish(order.code) }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
+                                        <td class="px-4 py-3 text-center font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{{ toEnglish(order.code) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
                                             <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ formatCurrency(order.total_incl_tax || 0) }}</td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(order.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ formatCurrency(order.total_incl_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(order.created_at) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -332,20 +333,20 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="quote in filteredQuotes" :key="quote.id" @click="router.visit(route('app.quotes.show', quote.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ toEnglish(quote.code) }}</td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
+                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ toEnglish(quote.code) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
                                             <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ formatCurrency(quote.total_incl_tax || 0) }}</td>
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(quote.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ formatCurrency(quote.total_incl_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(quote.created_at) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -387,18 +388,18 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.value') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.difference') }}</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المصدر</th>
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المستخدم</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.value') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.difference') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المصدر</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المستخدم</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="(log, idx) in vehicle.mileage_logs" :key="log.id">
-                                        <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-sm font-bold">{{ formatDate(log.recorded_at || log.created_at) }}</td>
-                                        <td class="px-4 py-3 font-black text-gray-900 dark:text-white">{{ toEnglish(log.mileage?.toLocaleString()) }} {{ $t('common.km') }}</td>
-                                        <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-400 text-sm font-bold">{{ formatDate(log.recorded_at || log.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-black text-gray-900 dark:text-white">{{ toEnglish(log.mileage?.toLocaleString()) }} {{ $t('common.km') }}</td>
+                                        <td class="px-4 py-3 text-center">
                                             <span v-if="log.difference > 0" class="text-sm font-black text-emerald-600">
                                                 +{{ toEnglish(log.difference.toLocaleString()) }}
                                             </span>
@@ -407,10 +408,10 @@
                                             </span>
                                             <span v-else class="text-xs text-gray-400 italic font-bold">-</span>
                                         </td>
-                                        <td class="px-4 py-3 text-xs font-bold text-gray-500">
+                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500">
                                             {{ toEnglish(log.reference_code) || 'تحديث يدوي' }}
                                         </td>
-                                        <td class="px-4 py-3 text-xs font-bold text-gray-500">
+                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500">
                                             {{ log.creator?.name || 'النظام' }}
                                         </td>
                                     </tr>
@@ -442,6 +443,8 @@ import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
+import Tooltip from '@/Components/Tooltip.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
 import { useNumberFormat } from '@/Composables/useNumberFormat';

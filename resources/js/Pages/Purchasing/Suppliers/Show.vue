@@ -9,39 +9,42 @@
                     <!-- Absolute Top Bar (Nav & Actions) -->
                     <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20">
                         <!-- Back Button -->
-                        <Link :href="route('app.purchasing.suppliers.index')"
-                            :title="$t('common.back')"
-                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 text-orange-600">
-                            <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                        </Link>
+                        <Tooltip :text="$t('common.back')">
+                            <Link :href="route('app.purchasing.suppliers.index')"
+                                class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 text-orange-600">
+                                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                </svg>
+                            </Link>
+                        </Tooltip>
 
                         <!-- Actions Group -->
                         <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
-                            <button v-if="can('purchasing.suppliers.update')" @click="showEditModal = true"
-                                :title="$t('common.edit')"
-                                class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-orange-100/70 dark:border-orange-800/30 bg-orange-50/70 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-white dark:hover:bg-orange-900/30 hover:shadow-md transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                                <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
-                            </button>
+                            <Tooltip :text="$t('common.edit')">
+                                <button v-if="can('purchasing.suppliers.update')" @click="showEditModal = true"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border border-orange-100/70 dark:border-orange-800/30 bg-orange-50/70 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 hover:bg-white dark:hover:bg-orange-900/30 hover:shadow-md transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    <span class="hidden sm:inline">{{ $t('common.edit') }}</span>
+                                </button>
+                            </Tooltip>
 
-                            <button v-if="can('purchasing.suppliers.destroy')" @click="confirmDelete" 
-                                :disabled="counts.orders > 0 || counts.invoices > 0 || counts.payments > 0"
-                                :title="(counts.orders > 0 || counts.invoices > 0 || counts.payments > 0) ? $t('common.cannot_delete_has_data') : $t('common.delete')"
-                                :class="[
-                                    'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
-                                    (counts.orders === 0 && counts.invoices === 0 && counts.payments === 0)
-                                        ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md'
-                                        : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70'
-                                ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                                <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
-                            </button>
+                            <Tooltip :text="(counts.orders > 0 || counts.invoices > 0 || counts.payments > 0) ? $t('common.cannot_delete_has_data') : $t('common.delete')">
+                                <button v-if="can('purchasing.suppliers.destroy')" @click="confirmDelete" 
+                                    :disabled="counts.orders > 0 || counts.invoices > 0 || counts.payments > 0"
+                                    :class="[
+                                        'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
+                                        (counts.orders === 0 && counts.invoices === 0 && counts.payments === 0)
+                                            ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md'
+                                            : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span class="hidden sm:inline">{{ $t('common.delete') }}</span>
+                                </button>
+                            </Tooltip>
                         </div>
                     </div>
 
@@ -266,20 +269,22 @@
                                     {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء' }}
                                 </button>
                                 <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
-                                    <button @click="invoiceViewMode = 'grid'"
-                                        :title="$t('common.grid_view')"
-                                        :class="['p-2 rounded-lg transition-all', invoiceViewMode === 'grid' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300']">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                                        </svg>
-                                    </button>
-                                    <button @click="invoiceViewMode = 'list'"
-                                        :title="$t('common.list_view')"
-                                        :class="['p-2 rounded-lg transition-all', invoiceViewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300']">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                                        </svg>
-                                    </button>
+                                    <Tooltip :text="$t('common.grid_view')">
+                                        <button @click="invoiceViewMode = 'grid'"
+                                            :class="['p-2 rounded-lg transition-all', invoiceViewMode === 'grid' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300']">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                            </svg>
+                                        </button>
+                                    </Tooltip>
+                                    <Tooltip :text="$t('common.list_view')">
+                                        <button @click="invoiceViewMode = 'list'"
+                                            :class="['p-2 rounded-lg transition-all', invoiceViewMode === 'list' ? 'bg-white dark:bg-gray-800 shadow-sm text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300']">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                            </svg>
+                                        </button>
+                                    </Tooltip>
                                 </div>
                             </div>
                         </div>
@@ -307,7 +312,7 @@
                                             </div>
                                             <div class="flex items-center justify-end gap-1 mt-1">
                                                 <p class="text-[9px] font-black text-slate-500 font-mono truncate max-w-[80px]">{{ invoice.invoice_number || '—' }}</p>
-                                                <span class="text-[8px] font-black text-gray-400 uppercase tracking-tighter">مرجع المورد</span>
+                                                <span class="text-[8px] font-black text-gray-400 uppercase tracking-tighter">{{ $t('invoices.purchases.supplier_ref') }}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -315,7 +320,7 @@
                                     <div class="p-6 ps-8 flex-1 flex flex-col">
                                         <!-- Body Content -->
                                         <div class="text-center mb-5">
-                                            <h4 class="text-[11px] font-black text-slate-800 dark:text-white mb-5 line-clamp-1 opacity-90">{{ $page.props.center?.name || 'مركز فريق الخدمة' }}</h4>
+                                            <h4 class="text-[11px] font-black text-slate-800 dark:text-white mb-5 line-clamp-1 opacity-90">{{ $page.props.center?.name || $page.props.auth?.center?.name }}</h4>
                                             <div class="flex items-center gap-2 justify-end mb-4 group-hover:translate-x-[-4px] transition-transform">
                                                 <p class="text-[11px] font-black text-slate-600 dark:text-slate-300">{{ props.supplier?.name || '—' }}</p>
                                                 <div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
@@ -349,7 +354,7 @@
                                                     </div>
                                                     <div class="flex justify-between items-center p-2">
                                                         <span class="text-[10px] font-bold text-slate-700 dark:text-slate-300 font-mono" dir="ltr">{{ formatDate(invoice.due_date || invoice.issue_date) }}</span>
-                                                        <span class="text-[10px] font-black text-slate-400 uppercase">موعد الدفع</span>
+                                                        <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.purchases.due_date_label') }}</span>
                                                     </div>
                                                 </template>
                                             </div>
@@ -366,12 +371,12 @@
                                             <th class="py-3 px-4 text-center font-bold">#</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.date') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">المجموع</th>
-                                            <th class="py-3 px-4 text-center font-bold">الخصم</th>
-                                            <th class="py-3 px-4 text-center font-bold">المجموع الفرعي</th>
+                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.discount') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal_after') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">VAT</th>
-                                            <th class="py-3 px-4 text-center font-bold">مبلغ الفاتورة</th>
-                                            <th class="py-3 px-4 text-center font-bold">الباقي</th>
+                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.total') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.remaining') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
@@ -408,7 +413,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                                 </svg>
                             </div>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') || 'لا توجد بيانات' }}</p>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') }}</p>
                         </div>
                     </div>
 
@@ -463,7 +468,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                                 </svg>
                             </div>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') || 'لا توجد بيانات' }}</p>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') }}</p>
                         </div>
                     </div>
                 </div>
@@ -499,11 +504,11 @@
 import { ref, computed, watch, h } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
-import BackButton from '@/Components/BackButton.vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import CreateModal from './CreateModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
 
@@ -570,9 +575,9 @@ const getOverdueLabel = (dueDate) => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays > 0) {
-        return diffDays + ' ايام تجاوز تاريخ الاستحقاق';
+        return t('invoices.purchases.overdue_days', { days: diffDays });
     }
-    return 'المبالغ المستحقة للدفع';
+    return t('invoices.purchases.amount_due');
 };
 
 // Icons

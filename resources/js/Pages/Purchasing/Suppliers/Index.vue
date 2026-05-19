@@ -25,20 +25,22 @@
                     <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
                         <!-- Export/Print Group -->
                         <div class="flex items-center gap-1">
-                            <button @click="exportSuppliers" :disabled="exporting"
-                                class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50"
-                                :title="$t('common.export')">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </button>
-                            <button @click="printSuppliers"
-                                class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md"
-                                :title="$t('common.print')">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                </svg>
-                            </button>
+                            <Tooltip :text="$t('common.export')">
+                                <button @click="exportSuppliers" :disabled="exporting"
+                                    class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-50">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
+                            <Tooltip :text="$t('common.print')">
+                                <button @click="printSuppliers"
+                                    class="p-2.5 text-gray-500 hover:text-orange-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
                         </div>
 
                         <!-- Divider -->
@@ -46,34 +48,36 @@
 
                         <!-- View Toggle Group -->
                         <div class="flex items-center gap-1">
-                            <button 
-                                @click="viewMode = 'grid'"
-                                :title="$t('common.grid_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'grid'
-                                        ? 'bg-orange-600 text-white shadow-orange-500/20'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
-                                </svg>
-                            </button>
-                            <button 
-                                @click="viewMode = 'list'"
-                                :title="$t('common.list_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'list'
-                                        ? 'bg-orange-600 text-white shadow-orange-500/20'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
-                                </svg>
-                            </button>
+                            <Tooltip :text="$t('common.grid_view')">
+                                <button 
+                                    @click="viewMode = 'grid'"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'grid'
+                                            ? 'bg-orange-600 text-white shadow-orange-500/20'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z"/>
+                                    </svg>
+                                </button>
+                            </Tooltip>
+                            <Tooltip :text="$t('common.list_view')">
+                                <button 
+                                    @click="viewMode = 'list'"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'list'
+                                            ? 'bg-orange-600 text-white shadow-orange-500/20'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                                    </svg>
+                                </button>
+                            </Tooltip>
                         </div>
                     </div>
 
@@ -125,15 +129,16 @@
                             </div>
 
                             <!-- Reset Button -->
-                            <button 
-                                @click="resetFilters"
-                                class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
-                                :title="$t('common.reset')"
-                            >
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                </svg>
-                            </button>
+                            <Tooltip :text="$t('common.reset')">
+                                <button 
+                                    @click="resetFilters"
+                                    class="p-3.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all shadow-sm"
+                                >
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
                         </div>
                     </div>
                 </template>
@@ -315,14 +320,10 @@
                             <tr v-for="supplier in suppliers.data" :key="supplier.id"
                                 @click="router.visit(route('app.purchasing.suppliers.show', supplier.id))"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors text-center">
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white">{{ supplier.name
-                                    }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300">{{
-                                    supplier.contact_person || '-' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-300" dir="ltr">{{
-                                    supplier.phone || '-' }}</td>
-                                <td class="px-4 py-3 text-sm font-bold text-blue-600 dark:text-blue-400">{{
-                                    formatCurrency(supplier.balance) }}</td>
+                                <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white">{{ supplier.name }}</td>
+                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300">{{ supplier.contact_person || '-' }}</td>
+                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300" dir="ltr">{{ supplier.phone || '-' }}</td>
+                                <td class="px-4 py-3 text-center text-sm font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(supplier.balance) }}</td>
                                 <td class="px-4 py-3 text-center">
                                     <span
                                         class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300">
@@ -355,49 +356,7 @@
             <!-- Print Section -->
             <Teleport to="body">
                 <div class="print-section hidden">
-                    <!-- Header -->
-                    <div class="print-header">
-                        <div class="grid grid-cols-3 items-start">
-                            <!-- Column 1: Info (Right in Arabic, Left in English) -->
-                            <div :class="isRtl ? 'text-right' : 'text-left'">
-                                <h1 class="text-xl font-bold">
-                                    {{ isRtl ? ($page.props.tenant?.trade_name || $page.props.tenant?.name) : ($page.props.tenant?.name_en || $page.props.tenant?.name) }}
-                                </h1>
-                                <div class="mt-2 text-[10px] space-y-0.5 text-gray-500">
-                                    <p v-if="$page.props.auth.center?.phone || $page.props.tenant?.phone">
-                                        {{ isRtl ? 'الهاتف' : 'Phone' }}: {{ toEnglish($page.props.auth.center?.phone || $page.props.tenant?.phone) }}
-                                    </p>
-                                    <p v-if="$page.props.auth.center?.email || $page.props.tenant?.email">
-                                        {{ isRtl ? 'البريد' : 'Email' }}: {{ $page.props.auth.center?.email || $page.props.tenant?.email }}
-                                    </p>
-                                    <p v-if="$page.props.tenant?.cr_number">
-                                        {{ isRtl ? 'السجل التجاري' : 'CR' }}: {{ toEnglish($page.props.tenant?.cr_number) }}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <!-- Column 2: Logo (Always Center) -->
-                            <div class="flex justify-center">
-                                <div v-if="$page.props.tenant?.logo_url" class="w-24 h-24 flex-shrink-0">
-                                    <img :src="$page.props.tenant.logo_url" class="w-full h-full object-contain" />
-                                </div>
-                            </div>
-
-                            <!-- Column 3: Date (Far Left in Arabic, Far Right in English) -->
-                            <div :class="isRtl ? 'text-left' : 'text-right'">
-                                <p class="text-[10px] text-gray-400 font-bold" dir="ltr">
-                                    {{ new Date().toLocaleDateString('en-US') }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Report Title -->
-                        <div class="mt-8 text-center">
-                            <h2 class="text-lg font-bold border-y-2 border-gray-100 py-2 uppercase tracking-wider">
-                                {{ $t('purchasing.suppliers.title') }}
-                            </h2>
-                        </div>
-                    </div>
+                    <PrintHeader :title="$t('purchasing.suppliers.title')" />
 
                     <!-- Table -->
                     <table class="print-table">
@@ -408,6 +367,7 @@
                                 <th>{{ $t('purchasing.suppliers.phone') }}</th>
                                 <th>{{ $t('purchasing.suppliers.email') }}</th>
                                 <th>{{ $t('purchasing.suppliers.type') }}</th>
+                                <th>{{ $t('purchasing.suppliers.balance') }}</th>
                                 <th>{{ $t('common.status') }}</th>
                             </tr>
                         </thead>
@@ -419,6 +379,7 @@
                                 <td dir="ltr" class="text-left">{{ supplier.email || '-' }}</td>
                                 <td>{{ supplier.type === 'parts' ? $t('purchasing.suppliers.type_parts') :
                                     $t('purchasing.suppliers.type_services') }}</td>
+                                <td dir="ltr" class="text-left font-bold">{{ formatCurrency(supplier.balance) }}</td>
                                 <td>{{ supplier.is_active ? $t('common.active') : $t('common.inactive') }}</td>
                             </tr>
                         </tbody>
@@ -443,6 +404,8 @@ import { useI18n } from 'vue-i18n';
 import { usePermission } from '@/Composables/usePermission';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import Tooltip from '@/Components/Tooltip.vue';
+import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const { toEnglish } = useNumberFormat();

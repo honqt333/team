@@ -102,9 +102,9 @@
             <!-- Step 2: Confirm Merge -->
             <div v-else class="space-y-6">
                 <!-- Merge Preview -->
-                <div class="flex items-center gap-4">
+                <div class="flex flex-col md:flex-row items-center gap-4 w-full">
                     <!-- Source (Right - From) -->
-                    <div class="flex-1 bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <div class="flex-1 w-full bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 text-center">{{ $t('customers.merge.from') }}</p>
                         <div class="text-center">
                             <div class="w-12 h-12 mx-auto rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center mb-2">
@@ -122,13 +122,13 @@
 
                     <!-- Arrow -->
                     <div class="flex-shrink-0">
-                        <svg class="w-8 h-8 text-amber-500 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-8 h-8 text-amber-500 transform rotate-90 md:rotate-0 rtl:md:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                         </svg>
                     </div>
 
                     <!-- Target (Left - To) -->
-                    <div class="flex-1 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border-2 border-emerald-300 dark:border-emerald-700">
+                    <div class="flex-1 w-full bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border-2 border-emerald-300 dark:border-emerald-700">
                         <p class="text-sm font-medium text-emerald-600 dark:text-emerald-400 mb-2 text-center">{{ $t('customers.merge.to') }}</p>
                         <div class="text-center">
                             <div class="w-12 h-12 mx-auto rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mb-2">
