@@ -492,6 +492,7 @@ const getMoveTypeLabel = (type) => {
         'transfer_in': t('inventory.moves.types.transfer_in'),
         'transfer_out': t('inventory.moves.types.transfer_out'),
         'reversal': t('inventory.moves.types.reversal'),
+        'purchase_return': t('inventory.moves.types.purchase_return'),
     };
     return labels[type] || type;
 };
@@ -514,6 +515,7 @@ const getMoveTypeBadgeClass = (type) => {
         'transfer_in': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border border-purple-200/50 dark:border-purple-800/30',
         'transfer_out': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/30',
         'reversal': 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/30',
+        'purchase_return': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400 border border-rose-200/50 dark:border-rose-800/30',
     };
     return `inline-flex px-2.5 py-1 rounded-full text-xs font-bold shadow-sm ${classes[type] || 'bg-gray-100 text-gray-700'}`;
 };
@@ -535,7 +537,7 @@ const canReverse = (move) => {
     if (move.reversed_at) return false;
     
     // Restricted types that should be reversed from their own modules
-    const restrictedTypes = ['issue_to_workorder', 'transfer_in', 'transfer_out'];
+    const restrictedTypes = ['issue_to_workorder', 'transfer_in', 'transfer_out', 'purchase_return'];
     if (restrictedTypes.includes(move.move_type)) return false;
 
     if (move.move_type === 'receipt') return can('inventory.receipts.cancel');

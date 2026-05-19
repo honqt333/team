@@ -11,7 +11,7 @@ class PurchaseReturnInvoice extends Model
 
     protected $fillable = [
         'tenant_id', 'center_id', 'purchase_invoice_id', 'code', 'return_date',
-        'subtotal', 'tax_amount', 'total', 'notes', 'attachment_path'
+        'subtotal', 'tax_amount', 'total', 'create_debit_note', 'debit_note_date', 'notes', 'attachment_path'
     ];
 
     protected $casts = [
@@ -19,6 +19,8 @@ class PurchaseReturnInvoice extends Model
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total' => 'decimal:2',
+        'create_debit_note' => 'boolean',
+        'debit_note_date' => 'date',
     ];
 
     // Relationships

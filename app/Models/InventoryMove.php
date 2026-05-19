@@ -18,6 +18,7 @@ class InventoryMove extends Model
     public const TYPE_TRANSFER_OUT = 'transfer_out';
     public const TYPE_TRANSFER_IN = 'transfer_in';
     public const TYPE_REVERSAL = 'reversal';
+    public const TYPE_PURCHASE_RETURN = 'purchase_return';
 
     protected $fillable = [
         'warehouse_id',
@@ -154,6 +155,7 @@ class InventoryMove extends Model
             self::TYPE_ISSUE_TO_WORKORDER,
             self::TYPE_ADJUSTMENT_OUT,
             self::TYPE_TRANSFER_OUT,
+            self::TYPE_PURCHASE_RETURN,
         ]);
     }
 
@@ -171,6 +173,7 @@ class InventoryMove extends Model
             self::TYPE_TRANSFER_OUT => 'تحويل صادر',
             self::TYPE_TRANSFER_IN => 'تحويل وارد',
             self::TYPE_REVERSAL => 'عكس حركة',
+            self::TYPE_PURCHASE_RETURN => 'مرتجع شراء',
             default => $type,
         };
     }

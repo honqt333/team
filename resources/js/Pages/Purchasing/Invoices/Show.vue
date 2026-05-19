@@ -914,6 +914,41 @@
                                 <svg class="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 {{ $t('payments.no_payments') }}
                             </div>
+
+                            <!-- Debit Note Option -->
+                            <div v-if="calculatedRefundAmount > 0.001 && refundPaymentsTotal < calculatedRefundAmount" class="mt-4 pt-4 border-t border-red-200/40 dark:border-red-900/30">
+                                <div class="flex items-center justify-between bg-red-50/50 dark:bg-red-950/10 p-4 rounded-xl border border-red-100 dark:border-red-900/30">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-950/40 flex items-center justify-center text-red-650 dark:text-red-400">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h5 class="text-xs font-bold text-gray-900 dark:text-white">{{ $t('invoices.create_debit_note') }}</h5>
+                                            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">{{ $t('invoices.debit_note_hint') }}</p>
+                                        </div>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" v-model="returnForm.create_debit_note" class="sr-only peer">
+                                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                                    </label>
+                                </div>
+
+                                <!-- Debit Note Date -->
+                                <div v-if="returnForm.create_debit_note" class="grid grid-cols-1 gap-4 mt-3 bg-white dark:bg-gray-800 p-4 rounded-xl border border-red-150 dark:border-red-900/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">
+                                            {{ $t('invoices.debit_note_date') }} <span class="text-red-500">*</span>
+                                        </label>
+                                        <CustomDatePicker
+                                            v-model="returnForm.debit_note_date"
+                                            class="w-full"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -931,7 +966,7 @@
                         <button
                             type="button"
                             @click="submitReturn"
-                            :disabled="returnForm.items.length === 0 || returnForm.processing || (calculatedRefundAmount > 0.001 && refundPaymentsTotal < (calculatedRefundAmount - 0.01))"
+                            :disabled="!isReturnFormValid"
                             class="px-6 py-2.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-500/20 active:scale-95 disabled:opacity-50"
                         >
                             <svg v-if="returnForm.processing" class="animate-spin w-4 h-4 text-white inline-block mr-1.5" fill="none" viewBox="0 0 24 24">
@@ -1126,6 +1161,8 @@ const returnForm = useForm({
     notes: '',
     items: [],
     refund_payments: [],
+    create_debit_note: false,
+    debit_note_date: new Date().toISOString().substring(0, 10),
 });
 
 const availableReturnLines = computed(() => {
@@ -1266,6 +1303,28 @@ const showRefundPaymentModal = ref(false);
 const refundPaymentsTotal = computed(() => {
     const raw = returnForm.refund_payments.reduce((sum, rp) => sum + (Number(rp.amount) || 0), 0);
     return Math.round(raw * 100) / 100;
+});
+
+const isReturnFormValid = computed(() => {
+    if (returnForm.items.length === 0) return false;
+    if (returnForm.processing) return false;
+    const refundAmt = calculatedRefundAmount.value;
+    if (refundAmt > 0.001) {
+        if (refundPaymentsTotal.value >= refundAmt - 0.01) {
+            return true;
+        }
+        return !!returnForm.create_debit_note;
+    }
+    return true;
+});
+
+watch(showReturnModal, (val) => {
+    if (val) {
+        returnForm.reset();
+        returnForm.return_date = new Date().toISOString().substring(0, 10);
+        returnForm.create_debit_note = false;
+        returnForm.debit_note_date = new Date().toISOString().substring(0, 10);
+    }
 });
 
 const openRefundPaymentModal = () => {

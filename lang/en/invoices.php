@@ -35,6 +35,9 @@ return [
     'grand_total' => 'Grand Total (incl. VAT)',
     'total_paid' => 'Total Paid',
     'balance' => 'Balance',
+    'create_debit_note' => 'Create Debit Note',
+    'debit_note_date' => 'Debit Note Date',
+    'debit_note_hint' => 'The remaining refund amount will be registered as a debit note (credit in our favor with the supplier)',
     
     // Filters
     'all_statuses' => 'All Statuses',

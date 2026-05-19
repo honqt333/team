@@ -192,6 +192,8 @@ class PurchaseInvoicesController extends Controller
             'refund_payments.*.payment_date'       => 'nullable|date',
             'refund_payments.*.reference'          => 'nullable|string|max:100',
             'refund_payments.*.notes'              => 'nullable|string|max:500',
+            'create_debit_note'                    => 'nullable|boolean',
+            'debit_note_date'                      => 'nullable|required_if:create_debit_note,true|date',
         ]);
 
         $returnInvoice = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $purchaseInvoice, $user) {
@@ -255,6 +257,8 @@ class PurchaseInvoicesController extends Controller
                 'subtotal' => $subtotal,
                 'tax_amount' => $taxAmount,
                 'total' => $total,
+                'create_debit_note' => $validated['create_debit_note'] ?? false,
+                'debit_note_date' => $validated['debit_note_date'] ?? null,
                 'notes' => $validated['notes'] ?? null,
             ]);
             
@@ -289,6 +293,11 @@ class PurchaseInvoicesController extends Controller
             }
             
             // Record refund payments (multi-entry array)
+            $refundPaymentsTotal = 0;
+            foreach ($validated['refund_payments'] ?? [] as $refundEntry) {
+                $refundPaymentsTotal += (float) ($refundEntry['amount'] ?? 0);
+            }
+
             foreach ($validated['refund_payments'] ?? [] as $refundEntry) {
                 $refundAmt = (float) $refundEntry['amount'];
                 if ($refundAmt <= 0) continue;
@@ -302,6 +311,29 @@ class PurchaseInvoicesController extends Controller
                     'payment_method'      => $refundEntry['payment_method'] ?? 'cash',
                     'reference'           => $refundEntry['reference'] ?? null,
                     'notes'               => $refundEntry['notes'] ?? ('Refund for return invoice: ' . $code),
+                    'received_by'         => $user->id,
+                    'type'                => \App\Models\Payment::TYPE_REFUND,
+                ]);
+            }
+
+            // Calculate remaining amount for debit note
+            $invoiceBalance = (float) ($purchaseInvoice->balance ?? 0);
+            $debitNoteAmount = 0;
+            if ($total > $invoiceBalance) {
+                $debitNoteAmount = $total - $invoiceBalance - $refundPaymentsTotal;
+            }
+
+            // If create_debit_note is true and there is a remaining refund amount, record it as a debit_note payment!
+            if (($validated['create_debit_note'] ?? false) && $debitNoteAmount > 0.01) {
+                \App\Models\Payment::create([
+                    'tenant_id'           => $user->tenant_id,
+                    'center_id'           => $user->current_center_id,
+                    'purchase_invoice_id' => $purchaseInvoice->id,
+                    'amount'              => $debitNoteAmount,
+                    'payment_date'        => $validated['debit_note_date'] ?? $validated['return_date'] ?? now(),
+                    'payment_method'      => 'debit_note',
+                    'reference'           => $returnInvoice->code,
+                    'notes'               => 'Debit note registered for remaining refund of return: ' . $code,
                     'received_by'         => $user->id,
                     'type'                => \App\Models\Payment::TYPE_REFUND,
                 ]);

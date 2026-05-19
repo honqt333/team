@@ -92,7 +92,8 @@ class InventoryService
         ?string $referenceType = null,
         ?int $referenceId = null,
         ?string $notes = null,
-        bool $allowNegative = false
+        bool $allowNegative = false,
+        ?string $moveType = null
     ): InventoryMove {
         if ($qty <= 0) {
             throw ValidationException::withMessages([
@@ -100,7 +101,7 @@ class InventoryService
             ]);
         }
 
-        return DB::transaction(function () use ($warehouseId, $partId, $qty, $userId, $referenceType, $referenceId, $notes, $allowNegative) {
+        return DB::transaction(function () use ($warehouseId, $partId, $qty, $userId, $referenceType, $referenceId, $notes, $allowNegative, $moveType) {
             // Lock balance row
             $balance = InventoryBalance::where('warehouse_id', $warehouseId)
                 ->where('part_id', $partId)
@@ -138,7 +139,7 @@ class InventoryService
             return InventoryMove::create([
                 'warehouse_id' => $warehouseId,
                 'part_id' => $partId,
-                'move_type' => InventoryMove::TYPE_ISSUE_TO_WORKORDER,
+                'move_type' => $moveType ?? InventoryMove::TYPE_ISSUE_TO_WORKORDER,
                 'qty' => -$qty, // Negative for outgoing
                 'unit_cost' => $wac,
                 'total_cost' => $qty * $wac,

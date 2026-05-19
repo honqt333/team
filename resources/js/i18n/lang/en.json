@@ -993,7 +993,8 @@
         "adjustment_out": "Deficit settlement",
         "transfer_in": "Incoming transfer",
         "transfer_out": "Outgoing transfer",
-        "reversal": "Reverse movement"
+        "reversal": "Reverse movement",
+        "purchase_return": "Purchase Return"
       },
       "columns": {
         "row_number": "#",

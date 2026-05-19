@@ -27,6 +27,7 @@ return [
         'mastercard' => 'Mastercard',
         'apple_pay' => 'Apple Pay',
         'stc_pay' => 'STC Pay',
+        'debit_note' => 'Debit Note (Credit Balance)',
         'other' => 'Other',
     ],
     

@@ -1686,7 +1686,8 @@
         "adjustment_out": "تسوية نقص",
         "transfer_in": "تحويل وارد",
         "transfer_out": "تحويل صادر",
-        "reversal": "عكس حركة"
+        "reversal": "عكس حركة",
+        "purchase_return": "مرتجع شراء"
       },
       "columns": {
         "row_number": "#",

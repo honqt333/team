@@ -248,6 +248,21 @@ class PurchasingInvoicesController extends Controller
 
         $invoices = $query->paginate(25)->withQueryString();
 
+        $returns = \App\Models\PurchaseReturnInvoice::where('tenant_id', $tenantId)
+            ->where('center_id', $centerId)
+            ->with(['purchaseInvoice.supplier'])
+            ->when($request->input('search'), function ($q, $search) {
+                $q->where(function ($query) use ($search) {
+                    $query->where('code', 'like', "%{$search}%")
+                          ->orWhereHas('purchaseInvoice.supplier', fn($s) => $s->where('name', 'like', "%{$search}%"));
+                });
+            })
+            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('return_date', '>=', $d))
+            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('return_date', '<=', $d))
+            ->orderBy('id', 'desc')
+            ->paginate(25, ['*'], 'returns_page')
+            ->withQueryString();
+
         $suppliers = Supplier::forTenant($tenantId)->active()->get(['id', 'name']);
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
         $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
@@ -255,6 +270,7 @@ class PurchasingInvoicesController extends Controller
 
         return Inertia::render('Purchasing/Invoices/Index', [
             'invoices' => $invoices,
+            'returns'  => $returns,
             'filters'  => $request->only(['search', 'status', 'date_from', 'date_to']),
             'statuses' => [
                 PurchaseInvoice::STATUS_DRAFT,

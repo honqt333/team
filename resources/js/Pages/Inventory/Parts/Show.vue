@@ -347,6 +347,7 @@ const getMoveTypeLabel = (type) => {
         'transfer_in': t('inventory.moves.types.transfer_in'),
         'transfer_out': t('inventory.moves.types.transfer_out'),
         'reversal': t('inventory.moves.types.reversal'),
+        'purchase_return': t('inventory.moves.types.purchase_return'),
     };
     return labels[type] || type;
 };
@@ -360,6 +361,7 @@ const getAllMoveTypeBadgeClass = (type) => {
         'transfer_in': 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
         'transfer_out': 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
         'reversal': 'bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300',
+        'purchase_return': 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
     };
     return `inline-flex px-2 py-1 rounded-full text-xs font-medium ${classes[type] || 'bg-gray-100 text-gray-700'}`;
 };

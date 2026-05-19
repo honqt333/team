@@ -35,6 +35,9 @@ return [
     'grand_total' => 'الإجمالي شامل الضريبة',
     'total_paid' => 'المدفوع',
     'balance' => 'المتبقي',
+    'create_debit_note' => 'إنشاء فاتورة مدينة',
+    'debit_note_date' => 'تاريخ الفاتورة المدينة',
+    'debit_note_hint' => 'سيتم تسجيل المبلغ المتبقي كدين لصالحنا لدى المورد',
     
     // Filters
     'all_statuses' => 'جميع الحالات',

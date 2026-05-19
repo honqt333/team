@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseReturnInvoiceLine extends Model
 {
@@ -23,4 +24,9 @@ class PurchaseReturnInvoiceLine extends Model
     public function purchaseReturnInvoice() { return $this->belongsTo(PurchaseReturnInvoice::class); }
     public function purchaseInvoiceLine() { return $this->belongsTo(PurchaseInvoiceLine::class); }
     public function part() { return $this->belongsTo(Part::class); }
+
+    public function workOrder(): BelongsTo
+    {
+        return $this->belongsTo(WorkOrder::class, 'id')->whereRaw('1 = 0');
+    }
 }

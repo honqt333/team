@@ -30,6 +30,7 @@ Route::get('/', function () {
     ]);
 });
 
+
 Route::get('/landing-preview', [\App\Http\Controllers\Public\PublicLandingController::class, 'preview'])->name('public.landing.preview');
 Route::post('/landing-preview/contact', [\App\Http\Controllers\Public\PublicLandingController::class, 'submitContact'])->name('public.landing.contact');
 

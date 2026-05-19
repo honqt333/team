@@ -67,6 +67,7 @@ class InventoryMoveController extends Controller
             InventoryMove::TYPE_TRANSFER_IN,
             InventoryMove::TYPE_TRANSFER_OUT,
             InventoryMove::TYPE_REVERSAL,
+            InventoryMove::TYPE_PURCHASE_RETURN,
         ];
 
         return Inertia::render('Inventory/Moves/Index', [
@@ -145,6 +146,7 @@ class InventoryMoveController extends Controller
             InventoryMove::TYPE_ISSUE_TO_WORKORDER,
             InventoryMove::TYPE_TRANSFER_IN,
             InventoryMove::TYPE_TRANSFER_OUT,
+            InventoryMove::TYPE_PURCHASE_RETURN,
         ];
 
         if (!$inventoryMove->canBeReversed() || in_array($inventoryMove->move_type, $restrictedTypes)) {

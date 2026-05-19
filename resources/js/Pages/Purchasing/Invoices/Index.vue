@@ -46,7 +46,7 @@
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                             </svg>
-                            {{ $t('invoices.purchases.add') }}
+                            {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء مباشر' }}
                         </button>
 
                         <!-- Actions Group -->
@@ -57,7 +57,7 @@
                                         @click="setView('grid')"
                                         :class="[
                                             'p-2.5 rounded-xl transition-all shadow-sm',
-                                            viewMode === 'grid'
+                                            currentViewMode === 'grid'
                                                 ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
                                                 : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
                                         ]"
@@ -72,7 +72,7 @@
                                         @click="setView('list')"
                                         :class="[
                                             'p-2.5 rounded-xl transition-all shadow-sm',
-                                            viewMode === 'list'
+                                            currentViewMode === 'list'
                                                 ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
                                                 : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
                                         ]"
@@ -198,7 +198,7 @@
                     </div>
 
                     <!-- Grid View -->
-                    <div v-else-if="viewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 p-5">
+                    <div v-else-if="invoicesViewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 p-5">
                         <Link
                             v-for="invoice in invoices?.data || []"
                             :key="invoice.id"
@@ -270,7 +270,7 @@
                     </div>
 
                     <!-- List View -->
-                    <div v-else class="w-full bg-white dark:bg-gray-800 rounded-b-2xl overflow-hidden">
+                    <div v-else class="w-full bg-white dark:bg-gray-800 rounded-b-2xl overflow-hidden shadow-sm">
                         <div class="w-full overflow-x-auto">
                             <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
                                 <thead>
@@ -300,7 +300,7 @@
                                                 <Link :href="route().has('app.invoices.purchases.show') ? route('app.invoices.purchases.show', invoice.id) : '#'" class="font-bold text-amber-600 dark:text-amber-400 hover:underline">
                                                     #{{ invoice.code }}
                                                 </Link>
-                                                <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref')">
+                                                <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref') || 'مرجع المورد'">
                                                     REF: {{ invoice.invoice_number }}
                                                 </span>
                                             </div>
@@ -353,13 +353,159 @@
                 </div>
 
                 <!-- RETURNS TAB -->
-                <div v-show="activeTab === 'returns'" class="py-20 text-center">
-                    <div class="w-16 h-16 mx-auto rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-4">
-                        <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
-                        </svg>
+                <div v-show="activeTab === 'returns'">
+                    <!-- Empty State -->
+                    <div v-if="!returns.data?.length" class="py-20 text-center">
+                        <div class="w-16 h-16 mx-auto rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('invoices.purchases.no_returns') || 'لا توجد فواتير مرتجع مشتريات' }}</p>
                     </div>
-                    <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('invoices.purchases.no_returns') }}</p>
+
+                    <!-- Grid View -->
+                    <div v-else-if="returnsViewMode === 'grid'" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 p-5">
+                        <div
+                            v-for="ret in returns?.data || []"
+                            :key="ret.id"
+                            @click="navigateToReturn(ret.id)"
+                            class="group relative flex flex-col bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.12)] hover:-translate-y-1 transition-all duration-500 cursor-pointer overflow-hidden shadow-sm"
+                        >
+                            <!-- Status Indicator Bar (Vertical) -->
+                            <div class="absolute inset-y-0 start-0 w-1.5 bg-rose-500"></div>
+
+                            <!-- Header -->
+                            <div class="bg-slate-50/50 dark:bg-slate-900/40 p-4 pe-6 flex justify-between items-start">
+                                <span class="text-[10px] font-black text-sky-600 dark:text-sky-400 font-mono bg-sky-50 dark:bg-sky-900/20 px-2 py-0.5 rounded-full">{{ formatDate(ret.return_date) }}</span>
+                                <div class="text-end">
+                                    <div class="flex items-center justify-end gap-1.5 text-slate-800 dark:text-white">
+                                        <span class="text-base font-black font-mono tracking-tighter">{{ ret.code }}</span>
+                                        <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                        </svg>
+                                    </div>
+                                    <div class="flex items-center justify-end gap-1 mt-1">
+                                        <Link
+                                            :href="route('app.invoices.purchases.show', ret.purchase_invoice_id)"
+                                            @click.stop
+                                            class="text-[9px] font-black text-amber-600 dark:text-amber-400 font-mono truncate hover:underline hover:text-amber-700 dark:hover:text-amber-300"
+                                        >
+                                            #{{ ret.purchase_invoice?.code || '—' }}
+                                        </Link>
+                                        <span class="text-[8px] font-black text-gray-400 uppercase tracking-tighter">{{ $t('invoices.original_invoice') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="p-6 ps-8 flex-1 flex flex-col">
+                                <!-- Body Content -->
+                                <div class="text-center mb-5">
+                                    <h4 class="text-[11px] font-black text-slate-800 dark:text-white mb-5 line-clamp-1 opacity-90">{{ $page.props.center?.name || 'مركز فريق الخدمة' }}</h4>
+                                    <div class="flex items-center gap-2 justify-end mb-4 group-hover:translate-x-[-4px] transition-transform">
+                                        <p class="text-[11px] font-black text-slate-600 dark:text-slate-300">{{ ret.purchase_invoice?.supplier?.name || '—' }}</p>
+                                        <div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
+                                    </div>
+                                    <div class="w-full h-[1.5px] bg-gradient-to-r from-transparent via-gray-100 dark:via-gray-700 to-transparent my-5"></div>
+                                </div>
+
+                                <!-- Bottom Info -->
+                                <div class="mt-auto space-y-4">
+                                    <div class="flex flex-col gap-3">
+                                        <div class="flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/30 p-2 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
+                                            <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.subtotal) }}</span>
+                                            <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.subtotal') }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/30 p-2 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
+                                            <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.tax_amount) }}</span>
+                                            <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.tax') }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-rose-50/10 dark:bg-rose-900/10 p-2 rounded-xl">
+                                            <span class="text-sm font-black text-rose-600 dark:text-rose-400 font-mono" dir="ltr">{{ formatCurrency(ret.total) }}</span>
+                                            <span class="text-[10px] font-black text-rose-400 uppercase">{{ $t('invoices.total') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Returns Table -->
+                    <div v-else class="w-full bg-white dark:bg-gray-800 rounded-b-2xl overflow-hidden shadow-sm">
+                        <div class="w-full overflow-x-auto">
+                            <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
+                                <thead>
+                                    <tr class="bg-gray-50/50 dark:bg-gray-900/80">
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">#</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.return_code') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.original_invoice') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.return_date') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.supplier') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.subtotal') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.tax') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.actions') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
+                                    <tr
+                                        v-for="(ret, index) in returns?.data || []"
+                                        :key="ret.id"
+                                        class="group hover:bg-red-50/10 dark:hover:bg-red-900/5 transition-all duration-200"
+                                    >
+                                        <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono">{{ toEnglish(index + 1) }}</td>
+                                        <td class="px-4 py-4 text-center">
+                                            <Link :href="route('app.invoices.purchases.returns.show', ret.id)" class="font-bold text-red-600 dark:text-red-400 hover:underline font-mono">
+                                                #{{ ret.code }}
+                                            </Link>
+                                        </td>
+                                        <td class="px-4 py-4 text-center">
+                                            <Link :href="route('app.invoices.purchases.show', ret.purchase_invoice_id)" class="text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
+                                                #{{ ret.purchase_invoice?.code }}
+                                            </Link>
+                                        </td>
+                                        <td class="px-4 py-4 text-center text-xs text-gray-600 dark:text-gray-300 font-mono">{{ formatDate(ret.return_date) }}</td>
+                                        <td class="px-4 py-4 text-center">
+                                            <p class="font-medium text-gray-900 dark:text-white truncate max-w-[150px] mx-auto">{{ ret.purchase_invoice?.supplier?.name || '—' }}</p>
+                                        </td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(ret.subtotal) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-500 dark:text-gray-500">{{ formatCurrency(ret.tax_amount) }}</td>
+                                        <td class="px-4 py-4 text-center text-sm font-black text-rose-600 dark:text-rose-400 font-mono">{{ formatCurrency(ret.total) }}</td>
+                                        <td class="px-4 py-4 text-end">
+                                            <div class="flex items-center justify-end gap-1">
+                                                <Tooltip :content="$t('common.view')">
+                                                    <Link :href="route('app.invoices.purchases.returns.show', ret.id)" class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    </Link>
+                                                </Tooltip>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pagination for Returns -->
+                    <div v-if="returns?.links?.length > 3" class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between flex-wrap gap-3">
+                        <span class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('common.showing') }} {{ toEnglish(returns.from || 0) }} - {{ toEnglish(returns.to || 0) }} {{ $t('common.of') }} {{ toEnglish(returns.total || 0) }}
+                        </span>
+                        <div class="flex gap-1">
+                            <Link
+                                v-for="link in returns.links"
+                                :key="link.label"
+                                :href="link.url || '#'"
+                                :class="[
+                                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-all',
+                                    link.active ? 'bg-red-600 text-white shadow-sm' :
+                                    link.url ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600' :
+                                    'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700'
+                                ]"
+                                v-html="link.label"
+                            />
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -388,10 +534,11 @@ import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
-import Tooltip from '@/Components/Tooltip.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { usePermission } from '@/Composables/usePermission';
 import { debounce } from 'lodash-es';
+
+import Tooltip from '@/Components/Tooltip.vue';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
@@ -408,6 +555,7 @@ const statusOptions = [
 
 const props = defineProps({
     invoices: { type: Object, default: () => ({}) },
+    returns: { type: Object, default: () => ({}) },
     filters: { type: Object, default: () => ({}) },
     statuses: { type: Array, default: () => [] },
     suppliers: { type: Array, default: () => [] },
@@ -422,7 +570,12 @@ const onInvoiceSaved = () => {
 };
 
 const activeTab = ref('invoices');
-const viewMode = ref(localStorage.getItem('purchaseInvoicesViewMode') || 'list');
+const invoicesViewMode = ref(localStorage.getItem('purchaseInvoicesViewMode') || 'grid');
+const returnsViewMode = ref(localStorage.getItem('purchaseReturnsViewMode') || 'list');
+
+const currentViewMode = computed(() => {
+    return activeTab.value === 'invoices' ? invoicesViewMode.value : returnsViewMode.value;
+});
 
 const tabs = computed(() => [
     {
@@ -433,7 +586,7 @@ const tabs = computed(() => [
     {
         key: 'returns',
         label: t('invoices.purchases.tab_returns'),
-        count: 0,
+        count: props.returns?.total || 0,
     },
 ]);
 
@@ -461,8 +614,17 @@ watch(localFilters, () => {
 
 // Persist view mode
 const setView = (mode) => {
-    viewMode.value = mode;
-    localStorage.setItem('purchaseInvoicesViewMode', mode);
+    if (activeTab.value === 'invoices') {
+        invoicesViewMode.value = mode;
+        localStorage.setItem('purchaseInvoicesViewMode', mode);
+    } else {
+        returnsViewMode.value = mode;
+        localStorage.setItem('purchaseReturnsViewMode', mode);
+    }
+};
+
+const navigateToReturn = (id) => {
+    router.visit(route('app.invoices.purchases.returns.show', id));
 };
 
 const formatDate = (date) => {
