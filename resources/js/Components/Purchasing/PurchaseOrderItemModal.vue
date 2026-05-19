@@ -86,8 +86,7 @@
                     </label>
                     <input type="text" v-model="form.unit_cost" inputmode="decimal" dir="ltr" lang="en"
                         @input="e => form.unit_cost = toEnglish(e.target.value)"
-                        style="font-family: sans-serif !important;"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm" />
+                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm font-mono" />
                 </div>
 
                 <!-- Discount -->
@@ -97,8 +96,7 @@
                     </label>
                     <input type="text" v-model="form.discount" inputmode="decimal" dir="ltr" lang="en"
                         @input="e => form.discount = toEnglish(e.target.value)"
-                        style="font-family: sans-serif !important;"
-                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center text-lg shadow-sm" />
+                        class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center text-lg shadow-sm font-mono" />
                 </div>
 
                 <!-- Quantity -->
@@ -109,8 +107,7 @@
                     <div class="relative">
                         <input type="text" v-model="form.qty" inputmode="decimal" dir="ltr" lang="en"
                             @input="e => form.qty = toEnglish(e.target.value)"
-                            style="font-family: sans-serif !important;"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm" />
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm font-mono" />
                     </div>
                 </div>
 
@@ -146,7 +143,7 @@
                             <svg v-else class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                             </svg>
-                            {{ isUnitLocked ? 'تغيير' : 'إلغاء' }}
+                            {{ isUnitLocked ? $t('common.change') : $t('common.cancel') }}
                         </button>
                     </div>
                     <SearchableSelect
@@ -162,14 +159,13 @@
 
                 <!-- Unit Factor -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" dir="ltr" lang="en" style="font-family: 'Inter', system-ui, sans-serif !important;">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" dir="ltr" lang="en">
                         <span class="text-xs text-gray-500 font-normal">1 {{ toEnglish(selectedPurchaseUnitName) }} {{ $t('purchasing.items.contains') }}</span>
                     </label>
                     <div class="relative flex items-center">
                         <input type="text" v-model="form.conversion_factor" inputmode="decimal" dir="ltr" lang="en"
                             @input="e => form.conversion_factor = toEnglish(e.target.value)"
-                            style="font-family: sans-serif !important;"
-                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm" />
+                            class="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 text-center font-bold text-lg shadow-sm font-mono" />
                         <span class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-gray-400 text-xs font-bold" dir="ltr" lang="en">
                             {{ toEnglish(selectedPart?.unit?.name_ar || selectedPart?.unit?.name_en || '-') }}
                         </span>
@@ -340,9 +336,9 @@ watch(() => props.show, (newVal) => {
 
 
 const selectedPurchaseUnitName = computed(() => {
-    if (!form.value.purchase_unit_id) return 'وحدة';
+    if (!form.value.purchase_unit_id) return t('common.unit');
     const unit = props.units.find(u => u.id === form.value.purchase_unit_id);
-    return unit ? (unit.name_ar || unit.name_en) : 'وحدة';
+    return unit ? (unit.name_ar || unit.name_en) : t('common.unit');
 });
 
 const calculatedInventoryQty = computed(() => {

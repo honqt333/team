@@ -117,7 +117,7 @@
                         <!-- Date From -->
                         <div class="lg:w-36">
                             <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
-                                {{ $t('work_orders.filters.date_from') }}
+                                {{ $t('common.date_from') }}
                             </label>
                             <CustomDatePicker
                                 v-model="dateFrom"
@@ -129,7 +129,7 @@
                         <!-- Date To -->
                         <div class="lg:w-36">
                             <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">
-                                {{ $t('work_orders.filters.date_to') }}
+                                {{ $t('common.date_to') }}
                             </label>
                             <CustomDatePicker
                                 v-model="dateTo"

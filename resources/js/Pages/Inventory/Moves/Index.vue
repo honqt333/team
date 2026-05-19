@@ -99,7 +99,7 @@
                             <div class="w-full md:w-44">
                                 <CustomDatePicker
                                     v-model="localFilters.date_from"
-                                    :placeholder="$t('work_orders.filters.date_from')"
+                                    :placeholder="$t('common.date_from')"
                                     @change="applyFilters"
                                 />
                             </div>
@@ -108,7 +108,7 @@
                             <div class="w-full md:w-44">
                                 <CustomDatePicker
                                     v-model="localFilters.date_to"
-                                    :placeholder="$t('work_orders.filters.date_to')"
+                                    :placeholder="$t('common.date_to')"
                                     @change="applyFilters"
                                 />
                             </div>

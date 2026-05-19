@@ -2,39 +2,32 @@
     <BaseModal :show="show" @close="$emit('close')" size="4xl">
         <template #title>
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                 </div>
-                {{ $t('invoices.sales.create_invoice') || 'أضف فاتورة' }}
+                {{ $t('invoices.create') }}
             </div>
         </template>
 
         <form @submit.prevent="submitForm" class="space-y-6">
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 space-y-6">
-                <!-- Top Row: Customer & Date -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {{ $t('common.customer') || 'العميل' }} <span class="text-red-500">*</span>
-                            </label>
-                            <button type="button" @click="showCustomerModal = true" class="w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                            </button>
-                        </div>
-                        <SearchableSelect
-                            v-model="form.customer_id"
-                            :options="customerOptions"
-                            option-label="label"
-                            option-value="value"
-                            :placeholder="$t('common.select')"
-                        />
+                    <!-- Customer Selection -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            {{ $t('common.customer') }} <span class="text-red-500">*</span>
+                        </label>
+                        <SearchableSelect v-model="form.customer_id" :options="customerOptions"
+                            option-label="label" option-value="value"
+                            :placeholder="$t('common.select_customer')" class="w-full" />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {{ $t('invoices.issue_date') || 'تاريخ الفاتورة' }} <span class="text-red-500">*</span>
+                            {{ $t('invoices.issue_date') }} <span class="text-red-500">*</span>
                         </label>
                         <CustomDatePicker v-model="form.issue_date" :placeholder="$t('invoices.issue_date')" />
                     </div>
@@ -44,7 +37,7 @@
                 <div class="border-t border-gray-100 dark:border-gray-700 pt-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <span>📦</span> {{ $t('inventory.parts.title') || 'قطع الغيار' }}
+                            <span>📦</span> {{ $t('inventory.parts.title') }}
                         </h3>
                         <button type="button" @click="showPartModal = true" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -53,17 +46,17 @@
                     </div>
                     
                     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <table class="w-full min-w-[900px] text-sm text-center text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th class="px-4 py-3">#</th>
-                                    <th class="px-4 py-3">{{ $t('inventory.parts.part_number') || 'رقم القطعة / باركود' }}</th>
-                                    <th class="px-4 py-3">{{ $t('inventory.parts.unit_price') || 'السعر/الوحدة' }}</th>
-                                    <th class="px-4 py-3">{{ $t('quotes.service_modal.discount') || 'الخصم' }}</th>
-                                    <th class="px-4 py-3">{{ $t('work_orders.item.qty') || 'الكمية' }}</th>
-                                    <th class="px-4 py-3">{{ $t('quotes.service_modal.total_cost') || 'المبلغ' }}</th>
+                                    <th class="px-4 py-3">{{ $t('inventory.parts.part_number') }}</th>
+                                    <th class="px-4 py-3">{{ $t('inventory.parts.unit_price') }}</th>
+                                    <th class="px-4 py-3">{{ $t('quotes.service_modal.discount') }}</th>
+                                    <th class="px-4 py-3">{{ $t('work_orders.item.qty') }}</th>
+                                    <th class="px-4 py-3">{{ $t('quotes.service_modal.total_cost') }}</th>
                                     <th class="px-4 py-3">VAT</th>
-                                    <th class="px-4 py-3 w-16">{{ $t('common.actions') || 'الإجراء' }}</th>
+                                    <th class="px-4 py-3 w-16">{{ $t('common.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -79,14 +72,16 @@
                                     <td class="px-4 py-3 font-mono font-bold">{{ formatCurrency(item.total) }}</td>
                                     <td class="px-4 py-3 font-mono">{{ formatCurrency(item.tax_amount) }}</td>
                                     <td class="px-4 py-3">
-                                        <button type="button" @click="removeItem(index)" class="text-red-500 hover:text-red-700 p-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                        </button>
+                                        <Tooltip :content="$t('common.delete')">
+                                            <button type="button" @click="removeItem(index)" class="text-red-500 hover:text-red-700 p-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </Tooltip>
                                     </td>
                                 </tr>
                                 <tr v-if="form.items.length === 0">
                                     <td colspan="8" class="px-4 py-8 text-center text-gray-500">
-                                        {{ $t('common.no_data') || 'لا توجد بيانات' }}
+                                        {{ $t('common.no_data') }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -98,7 +93,7 @@
                 <div class="border-t border-gray-100 dark:border-gray-700 pt-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                            <span>💳</span> {{ $t('payments.title') || 'مدفوعات' }}
+                            <span>💳</span> {{ $t('payments.title') }}
                         </h3>
                         <button type="button" @click="showPaymentModal = true" :disabled="remainingBalance <= 0" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -107,15 +102,15 @@
                     </div>
                     
                     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                        <table class="w-full min-w-[800px] text-sm text-center text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
                                     <th class="px-4 py-3">#</th>
-                                    <th class="px-4 py-3">{{ $t('payments.form.type') || 'نوع العملية' }}</th>
-                                    <th class="px-4 py-3">{{ $t('payments.form.date') || 'تاريخ الدفع' }}</th>
-                                    <th class="px-4 py-3">{{ $t('payments.form.notes') || 'التفاصيل' }}</th>
-                                    <th class="px-4 py-3">{{ $t('payments.form.amount') || 'المبلغ' }}</th>
-                                    <th class="px-4 py-3 w-16">{{ $t('common.actions') || 'الإجراء' }}</th>
+                                    <th class="px-4 py-3">{{ $t('payments.form.type') }}</th>
+                                    <th class="px-4 py-3">{{ $t('payments.form.date') }}</th>
+                                    <th class="px-4 py-3">{{ $t('payments.form.notes') }}</th>
+                                    <th class="px-4 py-3">{{ $t('payments.form.amount') }}</th>
+                                    <th class="px-4 py-3 w-16">{{ $t('common.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -128,14 +123,16 @@
                                         {{ payment.type === 'refund' ? '-' : '' }}{{ formatCurrency(payment.amount) }}
                                     </td>
                                     <td class="px-4 py-3">
-                                        <button type="button" @click="removePayment(index)" class="text-red-500 hover:text-red-700 p-1">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                        </button>
+                                        <Tooltip :content="$t('common.delete')">
+                                            <button type="button" @click="removePayment(index)" class="text-red-500 hover:text-red-700 p-1">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </Tooltip>
                                     </td>
                                 </tr>
                                 <tr v-if="form.payments.length === 0">
                                     <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-                                        {{ $t('common.no_data') || 'لا توجد بيانات' }}
+                                        {{ $t('common.no_data') }}
                                     </td>
                                 </tr>
                             </tbody>
@@ -148,29 +145,29 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                {{ $t('common.notes') || 'مذكرات' }}
+                                {{ $t('common.notes') }}
                             </label>
                             <textarea v-model="form.notes" rows="4" class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
                         </div>
                         <div class="bg-gray-50 dark:bg-gray-900 rounded-xl p-6 space-y-3">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.subtotal') || 'المجموع قبل الضريبة' }}</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.subtotal') }}</span>
                                 <span class="font-mono font-bold dark:text-white">{{ formatCurrency(totals.subtotal) }}</span>
                             </div>
                             <div v-if="totals.tax > 0" class="flex justify-between text-sm">
-                                <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.tax') || 'ضريبة القيمة المضافة' }} ({{ $page.props.settings?.tax_rate || 15 }}%)</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.tax') }} ({{ $page.props.settings?.tax_rate || 15 }}%)</span>
                                 <span class="font-mono font-bold text-red-500">{{ formatCurrency(totals.tax) }}</span>
                             </div>
                             <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between">
-                                <span class="font-bold text-gray-900 dark:text-white">{{ $t('invoices.grand_total') || 'الإجمالي شامل الضريبة' }}</span>
+                                <span class="font-bold text-gray-900 dark:text-white">{{ $t('invoices.grand_total') }}</span>
                                 <span class="font-mono font-black text-lg text-emerald-600 dark:text-emerald-400">{{ formatCurrency(totals.grandTotal) }}</span>
                             </div>
                             <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
-                                <span>{{ $t('invoices.total_paid') || 'المدفوع' }}</span>
+                                <span>{{ $t('invoices.total_paid') }}</span>
                                 <span class="font-mono">{{ formatCurrency(totals.paid) }}</span>
                             </div>
                             <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center text-lg">
-                                <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ $t('invoices.balance') || 'المتبقي' }}</span>
+                                <span class="font-bold text-indigo-600 dark:text-indigo-400">{{ $t('invoices.balance') }}</span>
                                 <span class="font-mono font-black" :class="remainingBalance > 0 ? 'text-red-500' : 'text-emerald-600'">
                                     {{ formatCurrency(remainingBalance) }}
                                 </span>
@@ -233,6 +230,7 @@ import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import WorkOrderPartModal from '@/Components/WorkOrders/WorkOrderPartModal.vue';
 import PaymentFormModal from '@/Components/WorkOrders/PaymentFormModal.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({

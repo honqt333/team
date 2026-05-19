@@ -1,14 +1,14 @@
 <template>
-    <AppLayout :title="`${$t('invoices.return_invoice') || 'فاتورة مرتجع شراء'} #${returnInvoice.code}`">
+    <AppLayout :title="`${$t('invoices.purchases.return_invoice')} #${returnInvoice.code}`">
         <div class="space-y-6 pb-20">
-            <!-- Glassmorphic Header -->
+            <!-- Premium Glassmorphic Header -->
             <PageHeader
-                :title="`${$t('invoices.return_invoice') || 'فاتورة مرتجع شراء'} #${returnInvoice.code}`"
+                :title="`${$t('invoices.purchases.return_invoice')} #${returnInvoice.code}`"
                 :subtitle="returnInvoice.purchase_invoice?.supplier?.name"
                 :totalCount="formatCurrency(returnInvoice.total)"
-                :countLabel="$t('invoices.grand_total') || 'الإجمالي الكلي'"
+                :countLabel="$t('invoices.grand_total')"
                 gradientFrom="from-rose-600"
-                gradientTo="to-red-600"
+                gradientTo="to-pink-600"
                 glowFrom="from-rose-500"
                 badgeBg="bg-rose-50/50 dark:bg-rose-900/30"
                 badgeText="text-rose-600 dark:text-rose-400"
@@ -16,15 +16,16 @@
                 badgeDot="bg-rose-500"
             >
                 <template #back>
-                    <Link
-                        :href="route('app.invoices.purchases.show', returnInvoice.purchase_invoice_id)"
-                        :title="$t('invoices.back_to_original') || 'الرجوع للفاتورة الأصلية'"
-                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-rose-200 transition-all duration-300 text-rose-600 group"
-                    >
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+                    <Tooltip :content="$t('common.back')">
+                        <Link
+                            :href="route('app.invoices.purchases.index')"
+                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-rose-200 transition-all duration-300 text-rose-600 group"
+                        >
+                            <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </Link>
+                    </Tooltip>
                 </template>
 
                 <template #icon>
@@ -35,27 +36,25 @@
 
                 <template #actions>
                     <div class="flex items-center gap-3">
-                        <!-- Link to Original Invoice -->
-                        <Link
-                            :href="route('app.invoices.purchases.show', returnInvoice.purchase_invoice_id)"
-                            class="flex items-center gap-2 px-4 py-2 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/40 rounded-xl border border-rose-150 dark:border-rose-900 transition-all font-bold text-xs shadow-sm"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                            <span>{{ $t('invoices.original_invoice') || 'الفاتورة الأصلية' }} #{{ returnInvoice.purchase_invoice?.code }}</span>
-                        </Link>
-
                         <!-- Print Button -->
-                        <button
-                            @click="printInvoice"
-                            class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                            <span>{{ $t('common.print') || 'طباعة' }}</span>
-                        </button>
+                        <Tooltip :content="$t('common.print')">
+                            <button
+                                @click="printInvoice"
+                                class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                <span>{{ $t('common.print') }}</span>
+                            </button>
+                        </Tooltip>
+
+                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+                        <!-- Status Badge -->
+                        <span class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800">
+                            {{ $t('invoices.return_invoice') }}
+                        </span>
                     </div>
                 </template>
             </PageHeader>
@@ -147,20 +146,18 @@
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2">
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.type') || 'النوع' }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('work_orders.price') || 'السعر' }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') || 'الخصم' }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') || 'المبلغ' }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.description') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-rose-500 italic">{{ $t('common.amount') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider italic">VAT (15%)</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('common.total') || 'الإجمالي' }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
                                 <!-- Returned elements row -->
                                 <tr class="group">
-                                    <td class="py-2.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('invoices.returned_items_singular') || 'القطع المرتجعة' }}</td>
+                                    <td class="py-2.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('invoices.purchases.tab_invoices') }}</td>
                                     <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.subtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-red-500 italic">0.00</td>
                                     <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.subtotal) }}</td>
                                     <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.tax_amount) }}</td>
                                     <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(returnInvoice.total) }}</td>
@@ -168,9 +165,8 @@
 
                                 <!-- Grand Total Row -->
                                 <tr class="bg-rose-50 dark:bg-rose-900/10 font-black border-t-2 border-rose-200 dark:border-rose-800">
-                                    <td class="py-2.5 text-center text-rose-900 dark:text-rose-450 font-black uppercase">{{ $t('invoices.refund_grand_total') || 'إجمالي الاسترجاع الكلي' }}</td>
+                                    <td class="py-2.5 text-center text-rose-900 dark:text-rose-450 font-black uppercase">{{ $t('invoices.grand_total') }}</td>
                                     <td class="py-2.5 text-center font-mono text-rose-700 dark:text-rose-300">{{ formatCurrency(returnInvoice.subtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-red-650 italic">0.00</td>
                                     <td class="py-2.5 text-center font-mono text-rose-700 dark:text-rose-300">{{ formatCurrency(returnInvoice.subtotal) }}</td>
                                     <td class="py-2.5 text-center font-mono text-rose-700 dark:text-rose-300">{{ formatCurrency(returnInvoice.tax_amount) }}</td>
                                     <td class="py-2.5 text-center font-black text-rose-600 dark:text-rose-400 font-mono text-xl">{{ formatCurrency(returnInvoice.total) }}</td>
@@ -523,6 +519,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({

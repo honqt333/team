@@ -9,53 +9,63 @@
 
                     <div class="flex items-center gap-1.5 p-1.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
                         <!-- Share -->
-                        <button v-if="quote.status !== 'rejected'" @click="shareQuote"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                            </svg>
-                        </button>
+                        <Tooltip :text="$t('common.share')">
+                            <button v-if="quote.status !== 'rejected'" @click="shareQuote"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                </svg>
+                            </button>
+                        </Tooltip>
 
                         <!-- Print -->
-                        <button @click="printQuote"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                        </button>
+                        <Tooltip :text="$t('common.print')">
+                            <button @click="printQuote"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                            </button>
+                        </Tooltip>
 
                         <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                         <!-- Edit Quote -->
-                        <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="openEditModal"
-                            class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                        </button>
+                        <Tooltip :text="$t('common.edit')">
+                            <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="openEditModal"
+                                class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                        </Tooltip>
                     </div>
 
                     <!-- Approve -->
-                    <button v-if="(quote.status === 'draft' || quote.status === 'sent') && (quote.lines?.length > 0 || quote.parts?.length > 0)"
-                        @click="approveQuote"
-                        class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>{{ $t('quotes.actions.approve') }}</span>
-                    </button>
+                    <Tooltip :text="$t('quotes.actions.approve')">
+                        <button v-if="(quote.status === 'draft' || quote.status === 'sent') && (quote.lines?.length > 0 || quote.parts?.length > 0)"
+                            @click="approveQuote"
+                            class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>{{ $t('quotes.actions.approve') }}</span>
+                        </button>
+                    </Tooltip>
                     
                     <!-- Delete (Conditional) -->
-                    <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="deleteQuote"
-                        class="p-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
+                    <Tooltip :text="$t('common.delete')">
+                        <button v-if="quote.status === 'draft' || quote.status === 'sent'" @click="deleteQuote"
+                            class="p-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
+                    </Tooltip>
                 </div>
 
                 <!-- Right side: Code and Status -->
@@ -92,10 +102,8 @@
                         <!-- Spacer -->
                         <div class="w-8"></div>
                         <!-- Center: Plate + Model -->
-                        <div class="text-center">
-                            <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" dir="ltr">
-                                {{ quote.vehicle?.plate_number }}
-                            </h3>
+                        <div class="text-center flex flex-col items-center gap-1">
+                            <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="md" />
                             <p class="text-xs font-semibold text-blue-500 dark:text-blue-400 mt-0.5">
                                 {{ getName(quote.vehicle?.make) }} {{ getName(quote.vehicle?.model) }} {{ quote.vehicle?.year }}
                             </p>
@@ -103,17 +111,12 @@
                         <!-- Right: Color -->
                         <div class="w-8 flex items-center justify-end">
                             <div v-if="quote.vehicle?.color" class="relative group/color">
-                                <div
-                                    class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-300 dark:ring-gray-600"
-                                    :style="{ backgroundColor: getColorHex(quote.vehicle.color) }">
-                                </div>
-                                <!-- Custom Tooltip -->
-                                <div class="absolute bottom-full right-0 mb-2 hidden group-hover/color:block z-50 pointer-events-none">
-                                    <div class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                                        {{ quote.vehicle.color }}
+                                <Tooltip :text="quote.vehicle.color">
+                                    <div
+                                        class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-700 shadow-md ring-1 ring-gray-300 dark:ring-gray-600"
+                                        :style="{ backgroundColor: getColorHex(quote.vehicle.color) }">
                                     </div>
-                                    <div class="absolute top-full right-2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1"></div>
-                                </div>
+                                </Tooltip>
                             </div>
                         </div>
                     </Link>
@@ -199,43 +202,43 @@
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50">
-                                    <th class="pb-2 text-start font-bold uppercase tracking-wider">{{ $t('common.type') }}</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('work_orders.price') }}</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') }}</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
-                                    <th v-if="hasTax" class="pb-2 text-end font-bold uppercase tracking-wider italic">VAT (15%)</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.type') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('work_orders.price') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
+                                    <th v-if="hasTax" class="pb-2 text-center font-bold uppercase tracking-wider italic">VAT (15%)</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
                                 <!-- Services Row -->
                                 <tr class="group">
-                                    <td class="py-1.5 font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.services') }}</td>
-                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.services.price) }}</td>
-                                    <td class="py-1.5 text-end font-mono text-red-500 italic">{{ totals.services.discount > 0 ? '-' + formatCurrency(totals.services.discount) : '0.00' }}</td>
-                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.services.amount) }}</td>
-                                    <td v-if="hasTax" class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.services.tax) }}</td>
-                                    <td class="py-1.5 text-end font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.services.total) }}</td>
+                                    <td class="py-1.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.services') }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.services.price) }}</td>
+                                    <td class="py-1.5 text-center font-mono text-red-500 italic">{{ totals.services.discount > 0 ? '-' + formatCurrency(totals.services.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.services.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.services.tax) }}</td>
+                                    <td class="py-1.5 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.services.total) }}</td>
                                 </tr>
 
                                 <!-- Parts Row -->
                                 <tr class="group">
-                                    <td class="py-1.5 font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.spare_parts') }}</td>
-                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.parts.price) }}</td>
-                                    <td class="py-1.5 text-end font-mono text-red-500 italic">{{ totals.parts.discount > 0 ? '-' + formatCurrency(totals.parts.discount) : '0.00' }}</td>
-                                    <td class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.parts.amount) }}</td>
-                                    <td v-if="hasTax" class="py-1.5 text-end font-mono text-gray-500">{{ formatCurrency(totals.parts.tax) }}</td>
-                                    <td class="py-1.5 text-end font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.parts.total) }}</td>
+                                    <td class="py-1.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.spare_parts') }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.parts.price) }}</td>
+                                    <td class="py-1.5 text-center font-mono text-red-500 italic">{{ totals.parts.discount > 0 ? '-' + formatCurrency(totals.parts.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.parts.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.parts.tax) }}</td>
+                                    <td class="py-1.5 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.parts.total) }}</td>
                                 </tr>
 
                                 <!-- Grand Total Row -->
                                 <tr class="bg-amber-50 dark:bg-amber-900/10 font-black border-t-2 border-amber-200 dark:border-amber-800">
-                                    <td class="py-1.5 text-amber-900 dark:text-amber-400 font-black uppercase">{{ $t('common.total') }}</td>
-                                    <td class="py-1.5 text-end font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.price) }}</td>
-                                    <td class="py-1.5 text-end font-mono text-red-600 italic">{{ totals.grand.discount > 0 ? '-' + formatCurrency(totals.grand.discount) : '0.00' }}</td>
-                                    <td class="py-1.5 text-end font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.amount) }}</td>
-                                    <td v-if="hasTax" class="py-1.5 text-end font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.tax) }}</td>
-                                    <td class="py-1.5 text-end font-black text-amber-600 dark:text-amber-400 font-mono text-xl">{{ formatCurrency(totals.grand.total) }}</td>
+                                    <td class="py-1.5 text-center text-amber-900 dark:text-amber-400 font-black uppercase">{{ $t('common.total') }}</td>
+                                    <td class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.price) }}</td>
+                                    <td class="py-1.5 text-center font-mono text-red-600 italic">{{ totals.grand.discount > 0 ? '-' + formatCurrency(totals.grand.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.tax) }}</td>
+                                    <td class="py-1.5 text-center font-black text-amber-600 dark:text-amber-400 font-mono text-xl">{{ formatCurrency(totals.grand.total) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -513,6 +516,8 @@ import QuoteShareModal from '@/Components/Quotes/QuoteShareModal.vue';
 import QuoteApprovalModal from '@/Components/Quotes/QuoteApprovalModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
+import Tooltip from '@/Components/Tooltip.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({
     quote: Object,

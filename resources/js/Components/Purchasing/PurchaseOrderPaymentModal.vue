@@ -13,10 +13,10 @@
             <!-- Transaction Type (Readonly) -->
             <div v-if="localPayment.type === 'refund'" class="mb-2">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('payments.form.type') || 'نوع العملية' }}
+                    {{ $t('payments.form.type') }}
                 </label>
                 <div class="w-full px-4 py-2.5 rounded-xl border bg-red-50 text-red-700 border-red-200 dark:bg-red-950/30 dark:border-red-900/40 dark:text-red-400 font-bold flex items-center justify-between">
-                    <span>{{ $t('payments.types.refund') || 'استرجاع دفعة' }}</span>
+                    <span>{{ $t('payments.types.refund') }}</span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg>
                 </div>
             </div>

@@ -25,65 +25,94 @@
 
                 <template #actions>
                     <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
-                        <button @click="printQuotes" :title="$t('common.print')"
-                            class="p-2.5 text-gray-500 hover:text-amber-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                        </button>
+                        <Tooltip :text="$t('common.print')">
+                            <button @click="printQuotes"
+                                class="p-2.5 text-gray-500 hover:text-amber-600 hover:bg-white dark:hover:bg-gray-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                            </button>
+                        </Tooltip>
 
                         <div class="w-px h-8 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                         <div class="flex gap-1.5">
-                            <button @click="viewMode = 'grid'" :title="$t('common.grid_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'grid'
-                                        ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                                </svg>
-                            </button>
-                            <button @click="viewMode = 'list'" :title="$t('common.list_view')"
-                                :class="[
-                                    'p-2.5 rounded-xl transition-all shadow-sm',
-                                    viewMode === 'list'
-                                        ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
-                                        : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                ]">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                                </svg>
-                            </button>
+                            <Tooltip :text="$t('common.grid_view')">
+                                <button @click="viewMode = 'grid'"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'grid'
+                                            ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
+                            <Tooltip :text="$t('common.list_view')">
+                                <button @click="viewMode = 'list'"
+                                    :class="[
+                                        'p-2.5 rounded-xl transition-all shadow-sm',
+                                        viewMode === 'list'
+                                            ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
+                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                    ]">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
                         </div>
                     </div>
 
-                    <button v-if="can('quotes.create')" @click="openCreateModal"
-                        class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all group/add">
-                        <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
-                            </svg>
-                        </div>
-                        <span class="text-sm tracking-tight">{{ $t('quotes.add') }}</span>
-                    </button>
+                    <Tooltip :text="$t('quotes.add')">
+                        <button v-if="can('quotes.create')" @click="openCreateModal"
+                            class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-2xl font-black shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all group/add">
+                            <div class="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center group-hover/add:rotate-90 transition-transform duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </div>
+                            <span class="text-sm tracking-tight">{{ $t('quotes.add') }}</span>
+                        </button>
+                    </Tooltip>
                 </template>
 
                 <template #filters>
                     <div class="flex flex-col gap-6">
-                        <!-- Search Bar -->
-                        <div class="relative group">
-                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-amber-500 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
+                        <!-- Search & Date Filter Row -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                            <!-- Search Bar -->
+                            <div class="lg:col-span-6 relative group">
+                                <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none group-focus-within:text-amber-500 transition-colors">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input type="text" v-model="searchQuery"
+                                    class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all outline-none shadow-sm"
+                                    :placeholder="$t('quotes.search')" />
                             </div>
-                            <input type="text" v-model="searchQuery"
-                                class="block w-full ps-11 pe-4 py-3.5 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all outline-none shadow-sm"
-                                :placeholder="$t('quotes.search')" />
+
+                            <!-- Date Range Filters -->
+                            <div class="lg:col-span-6 grid grid-cols-2 gap-3">
+                                <div class="relative group">
+                                    <CustomDatePicker 
+                                        v-model="dateFrom" 
+                                        :placeholder="$t('common.date_from')"
+                                        class="w-full"
+                                    />
+                                </div>
+                                <div class="relative group">
+                                    <CustomDatePicker 
+                                        v-model="dateTo" 
+                                        :placeholder="$t('common.date_to')"
+                                        class="w-full"
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Filter Tabs -->
@@ -333,54 +362,72 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">#</th>
-                                <th @click="toggleSort('code')" class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div class="flex items-center gap-1.5">
-                                        {{ $t('quotes.columns.code') }}
-                                        <SortIcon :active="sortColumn === 'code'" :direction="sortDirection" />
-                                    </div>
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                                    <Tooltip :text="$t('common.id')">#</Tooltip>
                                 </th>
-                                <th @click="toggleSort('vehicle')" class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div class="flex items-center gap-1.5">
-                                        {{ $t('quotes.columns.vehicle') }}
-                                        <SortIcon :active="sortColumn === 'vehicle'" :direction="sortDirection" />
-                                    </div>
+                                <th @click="toggleSort('code')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <Tooltip :text="$t('quotes.columns.code')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('quotes.columns.code') }}
+                                            <SortIcon :active="sortColumn === 'code'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
                                 </th>
-                                <th @click="toggleSort('customer')" class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div class="flex items-center gap-1.5">
-                                        {{ $t('quotes.columns.customer') }}
-                                        <SortIcon :active="sortColumn === 'customer'" :direction="sortDirection" />
-                                    </div>
+                                <th @click="toggleSort('vehicle')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <Tooltip :text="$t('quotes.columns.vehicle')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('quotes.columns.vehicle') }}
+                                            <SortIcon :active="sortColumn === 'vehicle'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
+                                </th>
+                                <th @click="toggleSort('customer')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <Tooltip :text="$t('quotes.columns.customer')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('quotes.columns.customer') }}
+                                            <SortIcon :active="sortColumn === 'customer'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
                                 </th>
                                 <th @click="toggleSort('services')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        {{ $t('quotes.card.services') }}
-                                        <SortIcon :active="sortColumn === 'services'" :direction="sortDirection" />
-                                    </div>
+                                    <Tooltip :text="$t('quotes.card.services')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('quotes.card.services') }}
+                                            <SortIcon :active="sortColumn === 'services'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
                                 </th>
-                                <th @click="toggleSort('subtotal')" class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        {{ $t('quotes.form.subtotal') }}
-                                        <SortIcon :active="sortColumn === 'subtotal'" :direction="sortDirection" />
-                                    </div>
+                                <th @click="toggleSort('subtotal')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <Tooltip :text="$t('quotes.form.subtotal')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('quotes.form.subtotal') }}
+                                            <SortIcon :active="sortColumn === 'subtotal'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
                                 </th>
-                                <th @click="toggleSort('discount')" class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        {{ $t('quotes.form.discount') }}
-                                        <SortIcon :active="sortColumn === 'discount'" :direction="sortDirection" />
-                                    </div>
+                                <th @click="toggleSort('discount')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <Tooltip :text="$t('quotes.form.discount')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('quotes.form.discount') }}
+                                            <SortIcon :active="sortColumn === 'discount'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
                                 </th>
-                                <th @click="toggleSort('total')" class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        {{ $t('quotes.columns.total') }}
-                                        <SortIcon :active="sortColumn === 'total'" :direction="sortDirection" />
-                                    </div>
+                                <th @click="toggleSort('total')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                    <Tooltip :text="$t('quotes.columns.total')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('quotes.columns.total') }}
+                                            <SortIcon :active="sortColumn === 'total'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
                                 </th>
                                 <th @click="toggleSort('date')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-24">
-                                    <div class="flex items-center justify-center gap-1.5">
-                                        {{ $t('common.created_at') }}
-                                        <SortIcon :active="sortColumn === 'date'" :direction="sortDirection" />
-                                    </div>
+                                    <Tooltip :text="$t('common.created_at')">
+                                        <div class="flex items-center justify-center gap-1.5">
+                                            {{ $t('common.created_at') }}
+                                            <SortIcon :active="sortColumn === 'date'" :direction="sortDirection" />
+                                        </div>
+                                    </Tooltip>
                                 </th>
                             </tr>
                         </thead>
@@ -390,22 +437,20 @@
                                 <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400 font-medium">
                                     {{ toEnglish(index + 1) }}
                                 </td>
-                                <td class="px-4 py-4 whitespace-nowrap">
+                                <td class="px-4 py-4 text-center whitespace-nowrap">
                                     <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
                                         #{{ toEnglish(quote.code) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4">
-                                    <div class="flex items-center gap-2">
-                                        <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-sm font-bold text-gray-800 dark:text-gray-200 font-mono" dir="ltr">
-                                            {{ toEnglish(quote.vehicle?.plate_number) || '-' }}
-                                        </span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
+                                <td class="px-4 py-4 text-center">
+                                    <div class="flex flex-col items-center gap-1">
+                                        <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
+                                        <span class="text-[10px] text-gray-500 dark:text-gray-400 font-bold truncate max-w-[120px]">
                                             {{ getVehicleName(quote.vehicle) }}
                                         </span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-4">
+                                <td class="px-4 py-4 text-center">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                         {{ quote.customer?.name || '-' }}
                                     </div>
@@ -415,17 +460,17 @@
                                         {{ toEnglish(quote.lines_count || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-end">
+                                <td class="px-4 py-4 text-center">
                                     <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
                                         {{ formatNumber(quote.subtotal || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-end">
+                                <td class="px-4 py-4 text-center">
                                     <span class="text-sm font-medium text-red-600 dark:text-red-400">
                                         {{ formatNumber(quote.total_discount || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-end">
+                                <td class="px-4 py-4 text-center">
                                     <span class="text-sm font-black text-amber-600 dark:text-amber-400">
                                         {{ formatNumber(quote.total || 0) }}
                                     </span>
@@ -518,6 +563,8 @@ import PageHeader from '@/Components/PageHeader.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import SortIcon from '@/Components/Common/SortIcon.vue';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const props = defineProps({
@@ -696,11 +743,15 @@ const filterTabs = computed(() => [
 const currentStatus = computed(() => props.filters.status || 'pending');
 
 const searchQuery = ref(props.filters.search || '');
+const dateFrom = ref(props.filters.date_from || '');
+const dateTo = ref(props.filters.date_to || '');
 
 function setStatusFilter(status) {
     router.get(route('app.quotes.index'), {
         status: status,
         search: searchQuery.value,
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
     }, {
         preserveState: true,
         preserveScroll: true,
@@ -711,7 +762,8 @@ function setStatusFilter(status) {
 const filters = ref({
     search: props.filters.search || '',
     status: '',
-    dateRange: 'all',
+    date_from: props.filters.date_from || '',
+    date_to: props.filters.date_to || '',
 });
 
 const debounce = (fn, delay) => {
@@ -722,16 +774,22 @@ const debounce = (fn, delay) => {
     };
 };
 
-watch(searchQuery, debounce((value) => {
+const updateFilters = debounce(() => {
     router.get(route('app.quotes.index'), {
-        search: value,
+        search: searchQuery.value,
         status: currentStatus.value,
+        date_from: dateFrom.value,
+        date_to: dateTo.value,
     }, {
         preserveState: true,
         preserveScroll: true,
         replace: true,
     });
-}, 300));
+}, 300);
+
+watch([searchQuery, dateFrom, dateTo], () => {
+    updateFilters();
+});
 
 watch(viewMode, (newMode) => {
     localStorage.setItem('quotesViewMode', newMode);

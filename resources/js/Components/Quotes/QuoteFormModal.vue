@@ -38,14 +38,16 @@
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                                 {{ $t('quotes.form_tabs.search_placeholder') }}
                             </label>
-                            <button type="button" @click="showVehicleModal = true"
-                                class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('quotes.form_tabs.add_vehicle') }}
-                            </button>
+                            <Tooltip :text="$t('quotes.form_tabs.add_vehicle')">
+                                <button type="button" @click="showVehicleModal = true"
+                                    class="text-xs text-amber-600 hover:text-amber-700 dark:text-amber-400 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    {{ $t('quotes.form_tabs.add_vehicle') }}
+                                </button>
+                            </Tooltip>
                         </div>
 
                         <!-- Search Input -->
@@ -138,12 +140,14 @@
                                     </h4>
                                 </div>
                             </div>
-                            <button type="button" @click="clearSelection"
-                                class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                            <Tooltip :text="$t('common.clear')">
+                                <button type="button" @click="clearSelection"
+                                    class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </Tooltip>
                         </div>
 
                         <!-- Info Grid -->
@@ -352,6 +356,7 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import axios from 'axios';
 
 const props = defineProps({

@@ -90,7 +90,7 @@
                         <div class="lg:w-36">
                             <label
                                 class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{
-                                    $t('work_orders.filters.date_from') }}</label>
+                                    $t('common.date_from') }}</label>
                             <CustomDatePicker v-model="localFilters.date_from" class="!rounded-2xl" />
                         </div>
 
@@ -98,7 +98,7 @@
                         <div class="lg:w-36">
                             <label
                                 class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{
-                                    $t('work_orders.filters.date_to') }}</label>
+                                    $t('common.date_to') }}</label>
                             <CustomDatePicker v-model="localFilters.date_to" class="!rounded-2xl" />
                         </div>
 

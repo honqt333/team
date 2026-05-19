@@ -64,6 +64,12 @@ class QuoteController extends Controller
                     $query->where('created_at', '>=', $date);
                 }
             })
+            ->when($request->date_from, function ($query, $date) {
+                $query->whereDate('created_at', '>=', $date);
+            })
+            ->when($request->date_to, function ($query, $date) {
+                $query->whereDate('created_at', '<=', $date);
+            })
             ->orderByDesc("created_at")
             ->paginate(20)
             ->withQueryString();
@@ -121,6 +127,12 @@ class QuoteController extends Controller
                     $query->where('created_at', '>=', $date);
                 }
             })
+            ->when($request->date_from, function ($query, $date) {
+                $query->whereDate('created_at', '>=', $date);
+            })
+            ->when($request->date_to, function ($query, $date) {
+                $query->whereDate('created_at', '<=', $date);
+            })
             ->orderByDesc("created_at")
             ->paginate(20)
             ->withQueryString();
@@ -157,7 +169,7 @@ class QuoteController extends Controller
             'makes' => $makes,
             'colors' => $colors,
             'modelsByMake' => $modelsByMake,
-            'filters' => array_merge($request->only(['search', 'date_range']), ['status' => $status]),
+            'filters' => array_merge($request->only(['search', 'date_range', 'date_from', 'date_to']), ['status' => $status]),
             'filterCounts' => $filterCounts,
         ]);
     }

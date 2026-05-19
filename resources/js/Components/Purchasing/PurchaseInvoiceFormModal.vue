@@ -9,7 +9,7 @@
                             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                 </div>
-                {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء مباشر' }}
+                {{ $t('invoices.purchases.add') }}
             </div>
         </template>
 
@@ -27,7 +27,7 @@
                     </div>
                     <div class="ml-3">
                         <h3 class="text-sm font-medium text-red-800 dark:text-red-200">
-                            {{ $t('common.error_alert_title') || 'There were errors with your submission' }}
+                            {{ $t('common.error_alert_title') }}
                         </h3>
                         <div class="mt-2 text-sm text-red-700 dark:text-red-300">
                             <ul role="list" class="list-disc pl-5 space-y-1">
@@ -98,10 +98,10 @@
                     <!-- Supplier Invoice Number (Span 6) -->
                     <div class="md:col-span-6">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            {{ $t('invoices.purchases.invoice_number') || 'رقم فاتورة المورد' }} <span class="text-red-500">*</span>
+                            {{ $t('invoices.purchases.invoice_number') }} <span class="text-red-500">*</span>
                         </label>
                         <input type="text" v-model="form.invoice_number" required
-                            :placeholder="$t('invoices.purchases.invoice_number_placeholder') || 'أدخل رقم فاتورة المورد المباشر'"
+                            :placeholder="$t('invoices.purchases.invoice_number_placeholder')"
                             class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                     </div>
                 </div>
@@ -126,7 +126,7 @@
                 </div>
 
                 <!-- Items Table -->
-                <div class="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
+                <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                             <tr>
@@ -163,20 +163,24 @@
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button type="button" @click="openItemModal(item, index)"
-                                            class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </button>
-                                        <button type="button" @click="removeItem(index)"
-                                            class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
+                                        <Tooltip :content="$t('common.edit')">
+                                            <button type="button" @click="openItemModal(item, index)"
+                                                class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                            </button>
+                                        </Tooltip>
+                                        <Tooltip :content="$t('common.delete')">
+                                            <button type="button" @click="removeItem(index)"
+                                                class="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </Tooltip>
                                     </div>
                                 </td>
                             </tr>
@@ -230,7 +234,7 @@
                 </div>
 
                 <div v-if="form.payments.length > 0"
-                    class="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    class="overflow-x-auto rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-900/50 text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                             <tr>
@@ -382,6 +386,7 @@ import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import PurchaseOrderItemModal from './PurchaseOrderItemModal.vue';
 import SupplierCreateModal from '@/Pages/Purchasing/Suppliers/CreateModal.vue';
 import PurchaseOrderPaymentModal from './PurchaseOrderPaymentModal.vue';

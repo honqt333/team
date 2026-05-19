@@ -17,15 +17,16 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <Link
-                        href="/dashboard"
-                        :title="$t('common.back')"
-                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 text-amber-600 group"
-                    >
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+                    <Tooltip :content="$t('common.back')">
+                        <Link
+                            href="/dashboard"
+                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 text-amber-600 group"
+                        >
+                            <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </Link>
+                    </Tooltip>
                 </template>
 
                 <template #icon>
@@ -45,40 +46,42 @@
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                             </svg>
-                            {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء مباشر' }}
+                            {{ $t('invoices.purchases.add') }}
                         </button>
 
                         <!-- Actions Group -->
                         <div class="flex items-center gap-1.5 p-1.5 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-inner">
                             <div class="flex gap-1.5">
-                                <button
-                                    @click="setView('grid')"
-                                    :title="$t('common.grid_view')"
-                                    :class="[
-                                        'p-2.5 rounded-xl transition-all shadow-sm',
-                                        viewMode === 'grid'
-                                            ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                    ]"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    @click="setView('list')"
-                                    :title="$t('common.list_view')"
-                                    :class="[
-                                        'p-2.5 rounded-xl transition-all shadow-sm',
-                                        viewMode === 'list'
-                                            ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
-                                            : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
-                                    ]"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
-                                    </svg>
-                                </button>
+                                <Tooltip :content="$t('common.grid_view')">
+                                    <button
+                                        @click="setView('grid')"
+                                        :class="[
+                                            'p-2.5 rounded-xl transition-all shadow-sm',
+                                            viewMode === 'grid'
+                                                ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
+                                                : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                        ]"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z" />
+                                        </svg>
+                                    </button>
+                                </Tooltip>
+                                <Tooltip :content="$t('common.list_view')">
+                                    <button
+                                        @click="setView('list')"
+                                        :class="[
+                                            'p-2.5 rounded-xl transition-all shadow-sm',
+                                            viewMode === 'list'
+                                                ? 'bg-amber-600 text-white shadow-amber-200 dark:shadow-none'
+                                                : 'text-gray-400 hover:text-gray-600 hover:bg-white dark:hover:bg-gray-800'
+                                        ]"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                                        </svg>
+                                    </button>
+                                </Tooltip>
                             </div>
                         </div>
                     </div>
@@ -103,7 +106,7 @@
 
                         <!-- Date From -->
                         <div class="lg:w-36">
-                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('work_orders.filters.date_from') }}</label>
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('common.date_from') }}</label>
                             <CustomDatePicker
                                 v-model="localFilters.date_from"
                                 class="!rounded-2xl"
@@ -112,7 +115,7 @@
 
                         <!-- Date To -->
                         <div class="lg:w-36">
-                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('work_orders.filters.date_to') }}</label>
+                            <label class="block text-[10px] font-bold text-gray-500 dark:text-gray-400 mb-1 px-1 uppercase tracking-wider">{{ $t('common.date_to') }}</label>
                             <CustomDatePicker
                                 v-model="localFilters.date_to"
                                 class="!rounded-2xl"
@@ -272,16 +275,16 @@
                             <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
                                 <thead>
                                     <tr class="bg-gray-50/50 dark:bg-gray-900/80">
-                                        <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">#</th>
-                                        <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.invoice_number') }}</th>
-                                        <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.issue_date') }}</th>
-                                        <th class="px-4 py-4 text-start text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.supplier') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.discount') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.subtotal') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.tax') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.amount') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.balance') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">#</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.invoice_number') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.issue_date') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.supplier') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.discount') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.subtotal') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.tax') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.amount') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.balance') }}</th>
                                         <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.actions') }}</th>
                                     </tr>
                                 </thead>
@@ -291,32 +294,34 @@
                                         :key="invoice.id"
                                         class="group hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-all duration-200"
                                     >
-                                        <td class="px-4 py-4 text-xs text-gray-400 font-mono">{{ toEnglish(index + 1) }}</td>
-                                        <td class="px-4 py-4">
-                                            <div class="flex flex-col">
+                                        <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono">{{ toEnglish(index + 1) }}</td>
+                                        <td class="px-4 py-4 text-center">
+                                            <div class="flex flex-col items-center">
                                                 <Link :href="route().has('app.invoices.purchases.show') ? route('app.invoices.purchases.show', invoice.id) : '#'" class="font-bold text-amber-600 dark:text-amber-400 hover:underline">
                                                     #{{ invoice.code }}
                                                 </Link>
-                                                <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref') || 'مرجع المورد'">
+                                                <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref')">
                                                     REF: {{ invoice.invoice_number }}
                                                 </span>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-4 text-xs text-gray-600 dark:text-gray-300 font-mono">{{ formatDate(invoice.issue_date) }}</td>
-                                        <td class="px-4 py-4">
-                                            <p class="font-medium text-gray-900 dark:text-white truncate max-w-[150px]">{{ invoice.supplier?.name || '—' }}</p>
+                                        <td class="px-4 py-4 text-center text-xs text-gray-600 dark:text-gray-300 font-mono">{{ formatDate(invoice.issue_date) }}</td>
+                                        <td class="px-4 py-4 text-center">
+                                            <p class="font-medium text-gray-900 dark:text-white truncate max-w-[150px] mx-auto">{{ invoice.supplier?.name || '—' }}</p>
                                         </td>
-                                        <td class="px-4 py-4 text-end text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(invoice.total) }}</td>
-                                        <td class="px-4 py-4 text-end text-xs font-mono text-red-600 dark:text-red-400">{{ formatCurrency(invoice.discount_amount || 0) }}</td>
-                                        <td class="px-4 py-4 text-end text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(invoice.subtotal) }}</td>
-                                        <td class="px-4 py-4 text-end text-xs font-mono text-gray-500 dark:text-gray-500">{{ formatCurrency(invoice.tax_amount) }}</td>
-                                        <td class="px-4 py-4 text-end text-sm font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(invoice.total) }}</td>
-                                        <td class="px-4 py-4 text-end text-sm font-black text-amber-600 dark:text-amber-400 font-mono">{{ formatCurrency(invoice.balance || 0) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(invoice.total) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-red-600 dark:text-red-400">{{ formatCurrency(invoice.discount_amount || 0) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(invoice.subtotal) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-500 dark:text-gray-500">{{ formatCurrency(invoice.tax_amount) }}</td>
+                                        <td class="px-4 py-4 text-center text-sm font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(invoice.total) }}</td>
+                                        <td class="px-4 py-4 text-center text-sm font-black text-amber-600 dark:text-amber-400 font-mono">{{ formatCurrency(invoice.balance || 0) }}</td>
                                         <td class="px-4 py-4 text-end">
                                             <div class="flex items-center justify-end gap-1">
-                                                <Link :href="route('app.invoices.purchases.show', invoice.id)" class="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                </Link>
+                                                <Tooltip :content="$t('common.view')">
+                                                    <Link :href="route('app.invoices.purchases.show', invoice.id)" class="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    </Link>
+                                                </Tooltip>
                                             </div>
                                         </td>
                                     </tr>
@@ -383,6 +388,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { usePermission } from '@/Composables/usePermission';
 import { debounce } from 'lodash-es';

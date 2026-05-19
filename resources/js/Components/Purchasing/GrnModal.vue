@@ -72,7 +72,7 @@
                                             <input type="number" v-model.number="item.qty_to_receive" step="0.001" min="0" :max="item.qty_pending"
                                                 class="w-24 px-3 py-1.5 border border-emerald-200 dark:border-emerald-800 rounded-lg bg-white dark:bg-gray-800 text-center font-black text-emerald-600 dark:text-emerald-400 focus:ring-2 focus:ring-emerald-500 transition-all shadow-sm" />
                                             <span v-if="item.qty_to_receive > item.qty_pending" class="text-[9px] text-red-500 font-black uppercase mt-1">
-                                                {{ $t('purchasing.grn.over_reception') || 'Limit Exceeded' }}
+                                                {{ $t('purchasing.grn.over_reception') }}
                                             </span>
                                         </div>
                                     </td>

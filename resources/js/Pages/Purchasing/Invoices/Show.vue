@@ -1,12 +1,12 @@
 <template>
-    <AppLayout :title="`${$t('invoices.invoice') || 'فاتورة'} #${invoice.code}`">
+    <AppLayout :title="`${$t('invoices.purchases.invoice')} #${invoice.code}`">
         <div class="space-y-6 pb-20">
-            <!-- Original Glassmorphic Header -->
+            <!-- Premium Glassmorphic Header -->
             <PageHeader
-                :title="`${$t('invoices.invoice') || 'فاتورة'} #${invoice.code}`"
+                :title="`${$t('invoices.purchases.invoice')} #${invoice.code}`"
                 :subtitle="invoice.supplier?.name"
                 :totalCount="formatCurrency(invoice.total)"
-                :countLabel="$t('invoices.grand_total') || 'الإجمالي الكلي'"
+                :countLabel="$t('invoices.grand_total')"
                 gradientFrom="from-amber-600"
                 gradientTo="to-orange-600"
                 glowFrom="from-amber-500"
@@ -16,15 +16,16 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <Link
-                        :href="route('app.invoices.purchases.index')"
-                        :title="$t('common.back') || 'رجوع'"
-                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 text-amber-600 group"
-                    >
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+                    <Tooltip :content="$t('common.back')">
+                        <Link
+                            :href="route('app.invoices.purchases.index')"
+                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 text-amber-600 group"
+                        >
+                            <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                            </svg>
+                        </Link>
+                    </Tooltip>
                 </template>
 
                 <template #icon>
@@ -34,49 +35,53 @@
                 </template>
 
                 <template #actions>
-                    <div class="flex items-center gap-3">
-                        <!-- Return Invoice Button -->
-                        <button
-                            v-if="hasReturnableItems"
-                            @click="showReturnModal = true"
-                            class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-750 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16m16 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                            <span>{{ $t('invoices.return') || 'فاتورة إرجاع' }}</span>
-                        </button>
+                    <div class="flex flex-wrap items-center justify-end gap-2">
+                        <!-- Return Button (Only if has returnable items) -->
+                        <Tooltip v-if="hasReturnableItems" :content="$t('invoices.return_invoice')">
+                            <button
+                                @click="showReturnModal = true"
+                                class="flex items-center gap-2 px-4 py-2 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/40 rounded-xl border border-rose-150 dark:border-rose-900 transition-all font-bold text-xs shadow-sm"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3" />
+                                </svg>
+                                <span>{{ $t('invoices.return_invoice') }}</span>
+                            </button>
+                        </Tooltip>
 
                         <!-- Print Button -->
-                        <button
-                            @click="printInvoice"
-                            class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                            </svg>
-                            <span>{{ $t('common.print') || 'طباعة' }}</span>
-                        </button>
+                        <Tooltip :content="$t('common.print')">
+                            <button
+                                @click="printInvoice"
+                                class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                </svg>
+                                <span>{{ $t('common.print') }}</span>
+                            </button>
+                        </Tooltip>
 
                         <!-- Add Payment Button -->
-                        <button
-                            v-if="Number(invoice.balance) > 0.01"
-                            @click="showPaymentModal = true"
-                            class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
-                        >
-                            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>{{ $t('payments.add_payment') || 'إضافة دفعة' }}</span>
-                        </button>
+                        <Tooltip v-if="Number(invoice.balance) > 0.01" :content="$t('payments.add_payment')">
+                            <button
+                                @click="showPaymentModal = true"
+                                class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl transition-all font-bold text-xs shadow-sm hover:shadow"
+                            >
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{{ $t('payments.add_payment') }}</span>
+                            </button>
+                        </Tooltip>
 
                         <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                         <!-- Status Badge -->
                         <span :class="statusClass(invoice.status)" class="px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
-                            {{ $t(`invoices.purchases.statuses.${invoice.status}`) || invoice.status }}
+                            {{ $t(`invoices.purchases.statuses.${invoice.status}`) }}
                         </span>
-                        
+
                         <!-- Reference Number Badge -->
                         <div v-if="invoice.invoice_number" class="px-4 py-1.5 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-700 text-[10px] font-black text-gray-400 uppercase tracking-widest">
                             REF: {{ invoice.invoice_number }}
@@ -86,7 +91,7 @@
             </PageHeader>
 
             <!-- Top Cards Section: Center/Supplier Info & Financial Cost Card -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 <!-- 1. Right Card: Center & Supplier Info -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full relative group">
                     <!-- Card Decoration -->
@@ -100,7 +105,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                             </div>
-                            <h3 class="text-xs font-black uppercase tracking-[0.15em]">{{ $t('centers.title_singular') || 'المركز' }}</h3>
+                            <h3 class="text-xs font-black uppercase tracking-[0.15em]">{{ $t('common.center') }}</h3>
                         </div>
                         <span class="text-lg font-black text-gray-900 dark:text-white" dir="auto">
                             {{ invoice.center?.name_ar || invoice.center?.name }}
@@ -111,14 +116,14 @@
                     <div class="p-5 flex-1 flex flex-col justify-between gap-6 relative z-10">
                         <!-- Center Address -->
                         <div>
-                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('common.address') || 'العنوان' }}</p>
+                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('common.address') }}</p>
                             <div class="flex items-start gap-2.5 text-gray-600 dark:text-gray-300">
                                 <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 <span class="text-sm font-semibold leading-relaxed" dir="auto">
-                                    {{ getCenterAddress(invoice.center) || $t('centers.no_address') || 'العنوان غير متوفر' }}
+                                    {{ getCenterAddress(invoice.center) || $t('common.na') }}
                                 </span>
                             </div>
                         </div>
@@ -128,7 +133,7 @@
 
                         <!-- Supplier Info -->
                         <div>
-                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('purchasing.orders.supplier') || 'المورد' }}</p>
+                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('common.supplier') }}</p>
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/20 text-orange-600 flex items-center justify-center shrink-0">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,7 +157,7 @@
                                             <span>📞</span> <span dir="ltr">{{ invoice.supplier.phone }}</span>
                                         </span>
                                         <span v-if="invoice.supplier?.tax_number" class="font-mono flex items-center gap-1">
-                                            <span>📋</span> <span>{{ $t('suppliers.tax_number') || 'الرقم الضريبي' }}: {{ invoice.supplier.tax_number }}</span>
+                                            <span>📋</span> <span>{{ $t('suppliers.tax_number') }}: {{ invoice.supplier.tax_number }}</span>
                                         </span>
                                     </div>
                                 </div>
@@ -165,54 +170,54 @@
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <div class="w-2 h-5 bg-amber-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') || 'التكلفة و الدفع' }}
+                        {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
-                    <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-sm">
+                    <div class="overflow-x-auto md:overflow-x-visible flex-1">
+                        <table class="w-full min-w-[820px] md:min-w-0 text-sm">
                             <thead>
                                 <tr class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2">
-                                    <th class="pb-2 text-start font-bold uppercase tracking-wider">{{ $t('common.type') || 'النوع' }}</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('work_orders.price') || 'السعر' }}</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') || 'الخصم' }}</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('common.amount') || 'المبلغ' }}</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider italic">VAT (15%)</th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('common.total') || 'الإجمالي' }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.description') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('common.discount') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic">VAT (15%)</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
                                 <!-- Spare Parts row -->
                                 <tr class="group">
-                                    <td class="py-2.5 font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.spare_parts') || 'قطع الغيار' }}</td>
-                                    <td class="py-2.5 text-end font-mono text-gray-500">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
-                                    <td class="py-2.5 text-end font-mono text-red-500 italic">{{ invoice.discount_amount > 0 ? '-' + formatCurrency(invoice.discount_amount) : '0.00' }}</td>
-                                    <td class="py-2.5 text-end font-mono text-gray-500">{{ formatCurrency(calculatedInvoiceSubtotal - invoice.discount_amount) }}</td>
-                                    <td class="py-2.5 text-end font-mono text-gray-500">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
-                                    <td class="py-2.5 text-end font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
+                                    <td class="py-2.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.spare_parts') }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-red-500 italic">{{ invoice.discount_amount > 0 ? '-' + formatCurrency(invoice.discount_amount) : '0.00' }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(calculatedInvoiceSubtotal - invoice.discount_amount) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
+                                    <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
                                 </tr>
 
                                 <!-- Paid Row -->
                                 <tr class="group text-emerald-600 dark:text-emerald-400">
-                                    <td class="py-2.5 font-bold">{{ $t('invoices.paid') || 'المدفوع' }}</td>
+                                    <td class="py-2.5 text-center font-bold">{{ $t('invoices.paid') }}</td>
                                     <td colspan="4" class="py-2.5"></td>
-                                    <td class="py-2.5 text-end font-black font-mono text-base">{{ formatCurrency(invoice.total - invoice.balance) }}</td>
+                                    <td class="py-2.5 text-center font-black font-mono text-base">{{ formatCurrency(invoice.total - invoice.balance) }}</td>
                                 </tr>
 
                                 <!-- Balance Row -->
                                 <tr class="group text-red-600 dark:text-red-400">
-                                    <td class="py-2.5 font-bold">{{ $t('invoices.balance') || 'المتبقي' }}</td>
+                                    <td class="py-2.5 text-center font-bold">{{ $t('invoices.balance') }}</td>
                                     <td colspan="4" class="py-2.5"></td>
-                                    <td class="py-2.5 text-end font-black font-mono text-base">{{ formatCurrency(invoice.balance) }}</td>
+                                    <td class="py-2.5 text-center font-black font-mono text-base">{{ formatCurrency(invoice.balance) }}</td>
                                 </tr>
 
                                 <!-- Grand Total Row -->
                                 <tr class="bg-amber-50 dark:bg-amber-900/10 font-black border-t-2 border-amber-200 dark:border-amber-800">
-                                    <td class="py-2.5 text-amber-900 dark:text-amber-400 font-black uppercase">{{ $t('common.total') || 'الإجمالي الكلي' }}</td>
-                                    <td class="py-2.5 text-end font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
-                                    <td class="py-2.5 text-end font-mono text-red-600 italic">{{ invoice.discount_amount > 0 ? '-' + formatCurrency(invoice.discount_amount) : '0.00' }}</td>
-                                    <td class="py-2.5 text-end font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(calculatedInvoiceSubtotal - invoice.discount_amount) }}</td>
-                                    <td class="py-2.5 text-end font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
-                                    <td class="py-2.5 text-end font-black text-amber-600 dark:text-amber-400 font-mono text-xl">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
+                                    <td class="py-2.5 text-center text-amber-900 dark:text-amber-400 font-black uppercase">{{ $t('common.total') }}</td>
+                                    <td class="py-2.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-red-600 italic">{{ invoice.discount_amount > 0 ? '-' + formatCurrency(invoice.discount_amount) : '0.00' }}</td>
+                                    <td class="py-2.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(calculatedInvoiceSubtotal - invoice.discount_amount) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
+                                    <td class="py-2.5 text-center font-black text-amber-600 dark:text-amber-400 font-mono text-xl">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -226,7 +231,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                     </svg>
-                    <h3 class="text-xs font-black uppercase tracking-[0.15em]">{{ $t('common.notes') || 'ملاحظات' }}</h3>
+                    <h3 class="text-xs font-black uppercase tracking-[0.15em]">{{ $t('common.notes') }}</h3>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed font-semibold italic">
                     {{ 
@@ -238,11 +243,11 @@
             </div>
 
             <!-- Tabs Section Selector -->
-            <div class="flex items-center bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm gap-1 w-fit">
+            <div class="flex items-center bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm gap-1 max-w-full overflow-x-auto whitespace-nowrap">
                 <button
                     @click="activeTab = 'received_items'"
                     :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
+                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
                         activeTab === 'received_items'
                             ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
@@ -251,7 +256,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    <span>{{ $t('invoices.received_items') || 'العناصر المستلمة' }}</span>
+                    <span>{{ $t('invoices.received_items') }}</span>
                     <span
                         :class="[
                             'px-2 py-0.5 text-xs rounded-full font-bold',
@@ -265,7 +270,7 @@
                 <button
                     @click="activeTab = 'payments'"
                     :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
+                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
                         activeTab === 'payments'
                             ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
@@ -274,13 +279,13 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>{{ $t('invoices.payments_history') || 'سجل الدفعات' }}</span>
+                    <span>{{ $t('invoices.payments_history') }}</span>
                 </button>
 
                 <button
                     @click="activeTab = 'attachments'"
                     :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
+                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
                         activeTab === 'attachments'
                             ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
@@ -289,7 +294,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
                     </svg>
-                    <span>{{ $t('invoices.attachments') || 'مرفقات' }}</span>
+                    <span>{{ $t('invoices.attachments') }}</span>
                     <span
                         v-if="invoice.attachment_path"
                         class="w-2 h-2 rounded-full bg-red-500"
@@ -300,7 +305,7 @@
                     v-if="invoice.return_invoices && invoice.return_invoices.length > 0"
                     @click="activeTab = 'returns'"
                     :class="[
-                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
+                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2 shrink-0',
                         activeTab === 'returns'
                             ? 'bg-red-600 text-white shadow-md shadow-red-500/20'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
@@ -309,7 +314,7 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3" />
                     </svg>
-                    <span>{{ $t('invoices.return_history') || 'سجل المرتجعات' }}</span>
+                    <span>{{ $t('invoices.return_history') }}</span>
                     <span
                         :class="[
                             'px-2 py-0.5 text-xs rounded-full font-bold',
@@ -324,17 +329,17 @@
             <!-- Elements Received Tab -->
             <div v-show="activeTab === 'received_items'" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full">
+                    <table class="w-full min-w-[980px]">
                         <thead>
                             <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50">
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('inventory.parts.title_singular') || 'القطعة' }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('work_orders.price') || 'السعر' }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-red-500 italic">{{ $t('work_orders.discount') || 'الخصم' }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.net_unit_price') || 'صافي السعر/الوحدة' }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.received_qty') || 'الكمية المستلمة' }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.subtotal') || 'المجموع الفرعي' }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('inventory.parts.title_singular') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('common.unit_price') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-red-500 italic">{{ $t('common.discount') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.net_unit_price') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.received_qty') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.subtotal') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic">VAT</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') || 'الإجمالي' }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -403,7 +408,7 @@
                 <div class="flex items-center justify-between mb-4 pb-2 border-b border-gray-100 dark:border-gray-700/50">
                     <h3 class="text-sm font-bold text-gray-900 dark:text-white flex items-center gap-2">
                         <div class="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
-                        {{ $t('invoices.payments_history') || 'سجل الدفعات' }}
+                        {{ $t('invoices.payments_history') }}
                     </h3>
                     <div class="flex items-center gap-2">
                         <button
@@ -414,21 +419,21 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            <span>{{ $t('payments.add_payment') || 'إضافة دفعة' }}</span>
+                            <span>{{ $t('payments.add_payment') }}</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="w-full min-w-[820px] text-sm">
                         <thead>
                             <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
                                 <th class="py-3 px-4 text-center font-bold">#</th>
-                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') || 'نوع العملية' }}</th>
-                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') || 'تاريخ الدفع' }}</th>
-                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.notes') || 'التفاصيل' }}</th>
-                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') || 'المبلغ' }}</th>
-                                <th class="py-3 px-4 text-center font-bold">{{ $t('common.actions') || 'الإجراء' }}</th>
+                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') }}</th>
+                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') }}</th>
+                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.notes') }}</th>
+                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') }}</th>
+                                <th class="py-3 px-4 text-center font-bold">{{ $t('payments.recorded_by') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
@@ -438,25 +443,23 @@
                                     <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono">{{ toEnglish(index + 1) }}</td>
                                     <td class="py-4 px-4 text-center font-bold">
                                         <span :class="payment.type === 'refund' ? 'text-red-600 dark:text-red-450 bg-red-50 dark:bg-red-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs">
-                                            {{ payment.type === 'refund' ? ($t('payments.types.refund') || 'استرجاع') : ($t('payments.types.payment') || 'دفعة') }}
+                                            {{ payment.type === 'refund' ? $t('payments.types.refund') : $t('payments.types.payment') }}
                                         </span>
                                     </td>
                                     <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">
                                         {{ formatDate(payment.payment_date) }}
                                     </td>
-                                    <td class="py-4 px-4 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes') || 'تسجيل دفعة تلقائية عند استلام الفاتورة') : (payment.notes || payment.reference)">
+                                    <td class="py-4 px-4 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="payment.notes === 'payments.auto_payment_notes' ? $t('payments.auto_payment_notes') : (payment.notes || payment.reference)">
                                         <div class="flex flex-col items-center gap-0.5">
                                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t(`payments.methods.${payment.payment_method}`) || payment.payment_method }}</span>
-                                            <span class="text-[10px]">{{ payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes') || 'تسجيل دفعة تلقائية عند استلام الفاتورة') : (payment.notes || payment.reference || '—') }}</span>
+                                            <span class="text-[10px]">{{ payment.notes === 'payments.auto_payment_notes' ? $t('payments.auto_payment_notes') : (payment.notes || payment.reference || '—') }}</span>
                                         </div>
                                     </td>
                                     <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">
                                         {{ formatCurrencyEnglish(payment.amount) }}
                                     </td>
-                                    <td class="py-4 px-4 text-center">
-                                        <button class="p-1.5 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-950/30 transition-all">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                        </button>
+                                    <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-semibold">
+                                        {{ payment.received_by?.name || '—' }}
                                     </td>
                                 </tr>
                             </template>
@@ -470,8 +473,8 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
-                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ $t('payments.no_payments') || 'لا توجد دفعات مسجلة' }}</h3>
-                                        <p class="text-xs text-gray-400 mt-1 max-w-sm mb-4">{{ $t('payments.no_payments_desc') || 'لم يتم تسجيل أي دفعات مالية لهذه الفاتورة بعد.' }}</p>
+                                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ $t('payments.no_payments') }}</h3>
+                                        <p class="text-xs text-gray-400 mt-1 max-w-sm mb-4">{{ $t('payments.no_payments_desc') }}</p>
                                         <button
                                             v-if="Number(invoice.balance) > 0.01"
                                             @click="showPaymentModal = true"
@@ -480,7 +483,7 @@
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                                             </svg>
-                                            <span>{{ $t('payments.add_payment') || 'إضافة دفعة' }}</span>
+                                            <span>{{ $t('payments.add_payment') }}</span>
                                         </button>
                                     </div>
                                 </td>
@@ -501,7 +504,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ $t('common.invoice_attachment') || 'مرفق الفاتورة' }}</h4>
+                            <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ $t('common.invoice_attachment') }}</h4>
                             <p class="text-xs text-gray-400 mt-0.5 font-mono select-all">{{ invoice.attachment_path.split('/').pop() }}</p>
                         </div>
                     </div>
@@ -515,7 +518,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
-                            <span>{{ $t('common.download') || 'تحميل المرفق' }}</span>
+                            <span>{{ $t('common.download') }}</span>
                         </a>
                         <button
                             @click="deleteAttachment"
@@ -525,7 +528,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            <span>{{ deleteForm.processing ? ($t('common.deleting') || 'جاري الحذف...') : ($t('common.delete') || 'حذف') }}</span>
+                            <span>{{ deleteForm.processing ? $t('common.deleting') : $t('common.delete') }}</span>
                         </button>
                     </div>
                 </div>
@@ -537,8 +540,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V4a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                         </svg>
                     </div>
-                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ $t('common.no_attachments') || 'لا توجد مرفقات' }}</h3>
-                    <p class="text-xs text-gray-400 mt-1 max-w-sm mb-4">{{ $t('common.no_attachments_desc') || 'لا توجد مستندات أو مرفقات مسجلة لهذه الفاتورة.' }}</p>
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white">{{ $t('common.no_attachments') }}</h3>
+                    <p class="text-xs text-gray-400 mt-1 max-w-sm mb-4">{{ $t('common.no_attachments_desc') }}</p>
                     
                     <!-- Hidden File Input -->
                     <input
@@ -562,12 +565,12 @@
                         <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                         </svg>
-                        <span>{{ uploadForm.processing ? ($t('common.uploading') || 'جاري الرفع...') : ($t('common.upload_attachment') || 'رفع مرفق') }}</span>
+                        <span>{{ uploadForm.processing ? $t('common.uploading') : $t('common.upload_attachment') }}</span>
                     </button>
                     
                     <!-- Hints -->
                     <p class="text-[10px] text-gray-400 mt-2">
-                        {{ $t('common.attachment_limits_hint') || 'يُسمح برفع ملفات PDF, JPG, PNG بحجم أقصى 1 ميجابايت.' }}
+                        {{ $t('common.attachment_limits_hint') }}
                     </p>
 
                     <!-- Errors display -->
@@ -580,15 +583,15 @@
             <!-- Return History Tab Content -->
             <div v-show="activeTab === 'returns'" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-start">
+                    <table class="w-full min-w-[900px] text-sm text-start">
                         <thead>
                             <tr class="bg-gray-50/50 dark:bg-gray-900/50 text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 text-xs font-bold uppercase tracking-wider">
-                                <th class="py-4 px-6 text-center font-bold">{{ $t('common.index') || '#' }}</th>
-                                <th class="py-4 px-6 text-center font-bold">{{ $t('invoices.return_code') || 'رقم المرتجع' }}</th>
-                                <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.date') || 'التاريخ' }}</th>
-                                <th class="py-4 px-6 text-center font-bold">{{ $t('invoices.returned_items') || 'القطع المرتجعة' }}</th>
-                                <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.notes') || 'الملاحظات' }}</th>
-                                <th class="py-4 px-6 text-center font-bold text-gray-900 dark:text-white">{{ $t('common.total') || 'الإجمالي' }}</th>
+                                <th class="py-4 px-6 text-center font-bold">{{ $t('common.index') }}</th>
+                                <th class="py-4 px-6 text-center font-bold">{{ $t('invoices.return_code') }}</th>
+                                <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.date') }}</th>
+                                <th class="py-4 px-6 text-center font-bold">{{ $t('invoices.returned_items') }}</th>
+                                <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.notes') }}</th>
+                                <th class="py-4 px-6 text-center font-bold text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
@@ -605,7 +608,7 @@
                                 <td class="py-4 px-6 text-center">
                                     <div class="space-y-1.5 flex flex-col items-center justify-center">
                                         <div v-for="line in ret.lines" :key="line.id" class="text-xs text-gray-600 dark:text-gray-300 flex items-center justify-center gap-1.5">
-                                            <span class="font-black text-red-650 bg-red-50 dark:bg-red-950/20 px-1.5 py-0.5 rounded text-[10px]">{{ line.qty }}x</span>
+                                            <span class="font-black text-red-650 bg-red-50 dark:bg-red-950/20 px-1.5 py-0.5 rounded text-[10px]">{{ toEnglish(line.qty) }}x</span>
                                             <span class="font-bold">{{ line.part?.name_ar || line.part?.name }}</span>
                                             <span class="text-gray-400 font-mono">({{ formatCurrency(line.unit_cost) }})</span>
                                         </div>
@@ -640,8 +643,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="text-lg font-black">{{ $t('invoices.new_return') || 'تسجيل فاتورة إرجاع جديدة' }}</h3>
-                                <p class="text-xs text-white/80 mt-0.5">{{ $t('invoices.return_desc') || 'إرجاع سلع وضبط مستويات المخازن تلقائياً' }}</p>
+                                <h3 class="text-lg font-black">{{ $t('invoices.new_return') }}</h3>
+                                <p class="text-xs text-white/80 mt-0.5">{{ $t('invoices.return_desc') }}</p>
                             </div>
                         </div>
                         <button @click="showReturnModal = false" class="p-2 hover:bg-white/10 rounded-xl transition-all text-white relative z-10">
@@ -657,54 +660,54 @@
                         <div>
                             <h4 class="text-sm font-black text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                                 <div class="w-1.5 h-4 bg-red-500 rounded-full"></div>
-                                {{ $t('invoices.available_items') || 'العناصر المتاحة للاسترجاع' }}
+                                {{ $t('invoices.available_items') }}
                             </h4>
-                            <div class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-hidden bg-gray-50/30 dark:bg-gray-900/20">
-                                <table class="w-full text-sm">
+                            <div class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto md:overflow-x-visible bg-gray-50/30 dark:bg-gray-900/20">
+                                <table class="w-full min-w-[980px] md:min-w-0 text-sm md:table-fixed">
                                     <thead>
                                         <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 border-b border-gray-100 dark:border-gray-700/60 text-[10px] font-black uppercase tracking-wider">
-                                            <th class="py-3 px-4 text-start">{{ $t('inventory.parts.title_singular') || 'القطعة' }}</th>
-                                            <th class="py-3 px-4 text-center">{{ $t('invoices.ordered_qty') || 'الكمية الأصلية' }}</th>
-                                            <th class="py-3 px-4 text-center text-red-550">{{ $t('invoices.returned_previously') || 'المرتجع سابقاً' }}</th>
-                                            <th class="py-3 px-4 text-center text-emerald-600">{{ $t('invoices.available_qty') || 'المتاح' }}</th>
-                                            <th class="py-3 px-4 text-center">{{ $t('invoices.original_cost') || 'سعر الوحدة' }}</th>
-                                            <th class="py-3 px-4 text-center">{{ $t('invoices.tax') || 'ض.ق.م' }}</th>
-                                            <th class="py-3 px-4 text-center">{{ $t('common.total') || 'الإجمالي' }}</th>
-                                            <th class="py-3 px-4 text-center w-20">{{ $t('common.actions') || 'إجراء' }}</th>
+                                            <th class="py-3 px-3 lg:px-4 text-start w-72">{{ $t('inventory.parts.title_singular') }}</th>
+                                            <th class="py-3 px-2 lg:px-4 text-center w-16">{{ $t('invoices.ordered_qty') }}</th>
+                                            <th class="py-3 px-2 lg:px-4 text-center text-red-550 w-16">{{ $t('invoices.returned_previously') }}</th>
+                                            <th class="py-3 px-2 lg:px-4 text-center text-emerald-600 w-16">{{ $t('invoices.available_qty') }}</th>
+                                            <th class="py-3 px-2 lg:px-4 text-center w-24">{{ $t('invoices.original_cost') }}</th>
+                                            <th class="py-3 px-2 lg:px-4 text-center w-14">{{ $t('invoices.tax') }}</th>
+                                            <th class="py-3 px-2 lg:px-4 text-center w-24">{{ $t('common.total') }}</th>
+                                            <th class="py-3 px-2 lg:px-4 text-center w-12">{{ $t('common.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
                                         <tr v-for="line in availableReturnLines" :key="line.id" class="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
-                                            <td class="py-3.5 px-4 font-bold text-gray-900 dark:text-white">
+                                            <td class="py-3.5 px-3 lg:px-4 font-bold text-gray-900 dark:text-white">
                                                 <div>{{ line.part?.name_ar || line.part?.name }}</div>
                                                 <div class="text-[10px] text-gray-400 font-mono mt-0.5">{{ line.part?.sku || 'NO-SKU' }}</div>
                                             </td>
-                                            <td class="py-3.5 px-4 text-center font-bold text-gray-600 dark:text-gray-300 font-mono">{{ toEnglish(line.qty) }}</td>
-                                            <td class="py-3.5 px-4 text-center font-bold text-red-500 font-mono">
+                                            <td class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-600 dark:text-gray-300 font-mono">{{ toEnglish(line.qty) }}</td>
+                                            <td class="py-3.5 px-2 lg:px-4 text-center font-bold text-red-500 font-mono">
                                                 {{ toEnglish(line.return_lines?.reduce((sum, r) => sum + Number(r.qty), 0) || 0) }}
                                             </td>
-                                            <td class="py-3.5 px-4 text-center font-black text-emerald-600 font-mono">
+                                            <td class="py-3.5 px-2 lg:px-4 text-center font-black text-emerald-600 font-mono">
                                                 {{ toEnglish(getAvailableQty(line)) }}
                                             </td>
-                                            <td class="py-3.5 px-4 text-center font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrencyEnglish(line.unit_cost) }}</td>
-                                            <td class="py-3.5 px-4 text-center text-xs font-mono">
+                                            <td class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrencyEnglish(line.unit_cost) }}</td>
+                                            <td class="py-3.5 px-2 lg:px-4 text-center text-xs font-mono">
                                                 <span v-if="Number(line.tax_rate) > 0" class="px-1.5 py-0.5 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded font-bold">{{ toEnglish(line.tax_rate) }}%</span>
                                                 <span v-else class="text-gray-400">—</span>
                                             </td>
-                                            <td class="py-3.5 px-4 text-center font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrencyEnglish(line.total) }}</td>
-                                            <td class="py-3.5 px-4 text-center">
+                                            <td class="py-3.5 px-2 lg:px-4 text-center font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrencyEnglish(line.total) }}</td>
+                                            <td class="py-3.5 px-2 lg:px-4 text-center">
                                                 <button
                                                     v-if="getAvailableQty(line) > 0.001"
                                                     type="button"
                                                     @click="openItemReturnModal(line)"
                                                     class="p-1.5 bg-red-50 hover:bg-red-600 text-red-650 hover:text-white dark:bg-red-950/20 dark:hover:bg-red-900 rounded-lg transition-all"
-                                                    :title="$t('invoices.return_this') || 'إرجاع هذا العنصر'"
+                                                    :title="$t('invoices.return_this')"
                                                 >
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3" />
                                                     </svg>
                                                 </button>
-                                                <span v-else class="text-xs text-gray-400 dark:text-gray-500 font-bold italic">{{ $t('invoices.fully_returned') || 'مكتمل' }}</span>
+                                                <span v-else class="text-xs text-gray-400 dark:text-gray-500 font-bold italic">{{ $t('invoices.fully_returned') }}</span>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -716,30 +719,30 @@
                         <div>
                             <h4 class="text-sm font-black text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                                 <div class="w-1.5 h-4 bg-orange-500 rounded-full"></div>
-                                {{ $t('invoices.items_to_return') || 'العناصر المرجعة في هذه الفاتورة' }}
+                                {{ $t('invoices.items_to_return') }}
                             </h4>
-                            <div class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-hidden bg-gray-50/30 dark:bg-gray-900/20">
-                                <table class="w-full text-sm">
+                            <div class="border border-gray-100 dark:border-gray-700/60 rounded-2xl overflow-x-auto bg-gray-50/30 dark:bg-gray-900/20">
+                                <table class="w-full min-w-[760px] text-sm">
                                     <thead>
                                         <tr class="bg-gray-50 dark:bg-gray-900/60 text-gray-400 border-b border-gray-100 dark:border-gray-700/60 text-[10px] font-black uppercase tracking-wider">
-                                            <th class="py-3 px-4 text-start">{{ $t('inventory.parts.title_singular') || 'القطعة' }}</th>
-                                            <th class="py-3 px-4 text-center w-28">{{ $t('invoices.returned_qty') || 'الكمية' }}</th>
-                                            <th class="py-3 px-4 text-center">{{ $t('invoices.return_unit_price') || 'سعر الوحدة' }}</th>
-                                            <th class="py-3 px-4 text-center">{{ $t('invoices.tax') || 'ض.ق.م' }}</th>
-                                            <th class="py-3 px-4 text-center">{{ $t('common.total') || 'الإجمالي' }}</th>
+                                            <th class="py-3 px-4 text-start">{{ $t('inventory.parts.title_singular') }}</th>
+                                            <th class="py-3 px-4 text-center w-28">{{ $t('invoices.returned_qty') }}</th>
+                                            <th class="py-3 px-4 text-center">{{ $t('invoices.return_unit_price') }}</th>
+                                            <th class="py-3 px-4 text-center">{{ $t('invoices.tax') }}</th>
+                                            <th class="py-3 px-4 text-center">{{ $t('common.total') }}</th>
                                             <th class="py-3 px-4 text-center w-12"></th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-150 dark:divide-gray-700/40">
                                         <tr v-if="returnForm.items.length === 0">
                                             <td colspan="6" class="py-8 text-center text-gray-400 dark:text-gray-500 font-bold italic">
-                                                {{ $t('invoices.no_items_selected_return') || 'لم يتم إضافة قطع للإرجاع بعد. اضغط على أيقونة الإرجاع في الجدول أعلاه.' }}
+                                                {{ $t('invoices.no_items_selected_return') }}
                                             </td>
                                         </tr>
                                         <tr v-for="(item, idx) in returnForm.items" :key="item.purchase_invoice_line_id" class="bg-white dark:bg-gray-800/40 hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors">
                                             <td class="py-3 px-4">
                                                 <div class="font-bold text-gray-900 dark:text-white">{{ item.part_name }}</div>
-                                                <div v-if="item.is_inclusive" class="text-[10px] text-blue-500 font-bold mt-0.5">{{ $t('common.vat_included') || 'شامل الضريبة' }}</div>
+                                                <div v-if="item.is_inclusive" class="text-[10px] text-blue-500 font-bold mt-0.5">{{ $t('common.vat_included') }}</div>
                                             </td>
                                             <td class="py-3 px-4 text-center font-bold text-gray-900 dark:text-white font-mono" dir="ltr">
                                                 {{ toEnglish(Number(item.qty).toFixed(2)) }}
@@ -774,11 +777,11 @@
                         <!-- Date, Notes and Summary Column Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-150 dark:border-gray-700/60">
                             <!-- Left: Date and Notes -->
-                            <div class="flex flex-col gap-4 w-full border-r border-gray-100 dark:border-gray-700/60 pr-5">
+                            <div class="flex flex-col gap-4 w-full md:border-r border-gray-100 dark:border-gray-700/60 md:pr-5">
                                 <!-- Return Date -->
                                 <div>
                                     <label class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">
-                                        {{ $t('invoices.return_date') || 'تاريخ الإرجاع' }} <span class="text-red-500">*</span>
+                                        {{ $t('invoices.return_date') }} <span class="text-red-500">*</span>
                                     </label>
                                     <CustomDatePicker
                                         v-model="returnForm.return_date"
@@ -788,11 +791,11 @@
                                 </div>
                                 <!-- Notes -->
                                 <div>
-                                    <label class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">{{ $t('payments.form.notes') || 'ملاحظات (سبب الإرجاع)' }}</label>
+                                    <label class="block text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">{{ $t('payments.form.notes') }}</label>
                                     <textarea
                                         v-model="returnForm.notes"
                                         rows="3"
-                                        :placeholder="$t('invoices.return_notes_placeholder') || 'اكتب هنا سبب الإرجاع أو أي ملاحظات أخرى...'"
+                                        :placeholder="$t('invoices.return_notes_placeholder')"
                                         class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl font-semibold text-sm"
                                     ></textarea>
                                 </div>
@@ -800,19 +803,19 @@
 
                             <!-- Right: Summary Card -->
                             <div class="bg-gray-50 dark:bg-gray-900/40 border border-gray-150 dark:border-gray-700/60 rounded-2xl p-5 flex flex-col justify-between">
-                                <h4 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">{{ $t('invoices.return_totals_summary') || 'ملخص الإرجاع والائتمان الكلي' }}</h4>
+                                <h4 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">{{ $t('invoices.return_totals_summary') }}</h4>
                                 <div class="space-y-2">
                                     <div class="flex items-center justify-between text-sm">
-                                        <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.subtotal') || 'الإجمالي قبل الضريبة' }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.subtotal') }}</span>
                                         <span class="font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrencyEnglish(returnSubtotal) }}</span>
                                     </div>
                                     <div v-if="returnTaxAmount > 0" class="flex items-center justify-between text-sm">
-                                        <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.tax') || 'ضريبة القيمة المضافة' }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.tax') }}</span>
                                         <span class="font-bold text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrencyEnglish(returnTaxAmount) }}</span>
                                     </div>
                                     <div class="h-px bg-gray-200 dark:bg-gray-700 my-2"></div>
                                     <div class="flex items-center justify-between">
-                                        <span class="font-black text-red-650 dark:text-red-400">{{ $t('invoices.grand_total_returned') || 'الإجمالي الكلي المسترجع' }}</span>
+                                        <span class="font-black text-red-650 dark:text-red-400">{{ $t('invoices.grand_total_returned') }}</span>
                                         <span class="text-xl font-black text-red-650 dark:text-red-400 font-mono" dir="ltr">{{ formatCurrencyEnglish(returnTotal) }}</span>
                                     </div>
                                 </div>
@@ -831,10 +834,10 @@
                                     </div>
                                     <div>
                                         <h4 class="text-xs font-black text-red-650 dark:text-red-400 uppercase tracking-widest">
-                                            {{ $t('invoices.refund_details') || 'استرداد الأموال للمورد' }}
+                                            {{ $t('invoices.refund_details') }}
                                         </h4>
                                         <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-bold">
-                                            {{ $t('invoices.refund_desc') || 'أضف دفعات الاسترداد لموازنة القيود والحسابات الائتمانية' }}
+                                            {{ $t('invoices.refund_desc') }}
                                         </p>
                                     </div>
                                 </div>
@@ -846,32 +849,32 @@
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                                     </svg>
-                                    {{ $t('payments.add_payment') || 'إضافة دفعة استرداد' }}
+                                    {{ $t('payments.add_payment') }}
                                 </button>
                             </div>
 
                             <!-- High-tier Metrics Box -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
                                 <div class="bg-white/80 dark:bg-gray-800/80 rounded-xl p-3 border border-red-100 dark:border-red-900/20 flex items-center justify-between shadow-xs">
-                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest">{{ $t('invoices.refund_amount') || 'المطلوب استرداده' }}</span>
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest">{{ $t('invoices.refund_amount') }}</span>
                                     <span class="text-sm font-black text-red-650 dark:text-red-400 font-mono" dir="ltr">{{ formatCurrencyEnglish(calculatedRefundAmount) }}</span>
                                 </div>
                                 <div class="bg-white/80 dark:bg-gray-800/80 rounded-xl p-3 border border-red-100 dark:border-red-900/20 flex items-center justify-between shadow-xs">
-                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest">{{ $t('invoices.refunded_so_far') || 'المسجّل حتى الآن' }}</span>
+                                    <span class="text-[10px] text-gray-500 dark:text-gray-400 font-black uppercase tracking-widest">{{ $t('invoices.refunded_so_far') }}</span>
                                     <span :class="refundPaymentsTotal >= calculatedRefundAmount ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'" class="text-sm font-black font-mono" dir="ltr">{{ formatCurrencyEnglish(refundPaymentsTotal) }}</span>
                                 </div>
                             </div>
 
                             <!-- Payments Summary Table -->
-                            <div v-if="returnForm.refund_payments.length > 0" class="overflow-hidden rounded-xl border border-red-200/60 dark:border-red-900/40 shadow-sm">
-                                <table class="w-full text-xs">
+                            <div v-if="returnForm.refund_payments.length > 0" class="overflow-x-auto rounded-xl border border-red-200/60 dark:border-red-900/40 shadow-sm">
+                                <table class="w-full min-w-[720px] text-xs">
                                     <thead class="bg-red-100/60 dark:bg-red-950/30 text-red-700 dark:text-red-400">
                                         <tr>
                                             <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest w-8">#</th>
-                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.type') || 'نوع العملية' }}</th>
-                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.date') || 'تاريخ الدفع' }}</th>
-                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.reference') || 'التفاصيل' }}</th>
-                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.amount') || 'المبلغ' }}</th>
+                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.type') }}</th>
+                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.date') }}</th>
+                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.reference') }}</th>
+                                            <th class="px-3 py-2.5 text-center font-black uppercase tracking-widest">{{ $t('payments.form.amount') }}</th>
                                             <th class="px-3 py-2.5 w-10"></th>
                                         </tr>
                                     </thead>
@@ -898,7 +901,7 @@
                                     </tbody>
                                     <tfoot class="bg-red-50 dark:bg-red-950/20 border-t border-red-200/60 dark:border-red-900/40">
                                         <tr>
-                                            <td colspan="4" class="px-3 py-2.5 text-center text-xs font-black text-red-650 dark:text-red-400 uppercase tracking-widest">{{ $t('common.total') || 'إجمالي الاسترداد' }}</td>
+                                            <td colspan="4" class="px-3 py-2.5 text-center text-xs font-black text-red-650 dark:text-red-400 uppercase tracking-widest">{{ $t('common.total') }}</td>
                                             <td class="px-3 py-2.5 text-center font-black text-red-650 dark:text-red-400 font-mono text-sm" dir="ltr">{{ formatCurrencyEnglish(refundPaymentsTotal) }}</td>
                                             <td></td>
                                         </tr>
@@ -909,7 +912,7 @@
                             <!-- Empty State -->
                             <div v-else class="text-center py-5 text-xs text-gray-400 dark:text-gray-500 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl">
                                 <svg class="w-8 h-8 mx-auto mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                {{ $t('payments.no_payments') || 'لم تُضَف دفعات استرداد بعد. اضغط «إضافة دفعة استرداد» أعلاه.' }}
+                                {{ $t('payments.no_payments') }}
                             </div>
                         </div>
                     </div>
@@ -923,7 +926,7 @@
                             @click="showReturnModal = false"
                             class="px-5 py-2.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold transition-all"
                         >
-                            {{ $t('common.cancel') || 'إلغاء' }}
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="button"
@@ -935,7 +938,7 @@
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <span>{{ returnForm.processing ? ($t('common.saving') || 'جاري الحفظ...') : ($t('invoices.confirm_return') || 'تأكيد وحفظ فاتورة الإرجاع') }}</span>
+                            <span>{{ returnForm.processing ? $t('common.saving') : $t('invoices.confirm_return') }}</span>
                         </button>
                         </div>
                     </div>
@@ -960,7 +963,7 @@
                     <div class="flex items-center justify-between px-5 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-150 dark:border-gray-750">
                         <h4 class="text-sm font-black text-gray-900 dark:text-white flex items-center gap-2">
                             <div class="w-1.5 h-4 bg-red-600 rounded-full"></div>
-                            {{ $t('invoices.set_return_details') || 'تحديد تفاصيل إرجاع الصنف' }}
+                            {{ $t('invoices.set_return_details') }}
                         </h4>
                         <button @click="showItemReturnModal = false" class="p-1 text-gray-400 hover:text-gray-600 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -979,8 +982,8 @@
                         <!-- Qty Input -->
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.qty_to_return') || 'الكمية المراد إرجاعها' }}</label>
-                                <span class="text-[10px] font-bold text-emerald-600">({{ $t('invoices.available') || 'المتاح' }}: {{ toEnglish(Number(getAvailableQty(selectedReturnLine)).toFixed(2)) }})</span>
+                                <label class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.qty_to_return') }}</label>
+                                <span class="text-[10px] font-bold text-emerald-600">({{ $t('invoices.available') }}: {{ toEnglish(Number(getAvailableQty(selectedReturnLine)).toFixed(2)) }})</span>
                             </div>
                             <div class="relative flex flex-col items-center">
                                 <input
@@ -993,7 +996,7 @@
                                     dir="ltr"
                                 />
                                 <span v-if="itemReturnQty > getAvailableQty(selectedReturnLine)" class="text-[10px] font-bold text-red-500 mt-1.5">
-                                    {{ $t('invoices.errors.qty_exceeds_available') || 'الكمية المدخلة تتجاوز الكمية المتاحة للإرجاع' }}
+                                    {{ $t('invoices.errors.qty_exceeds_available') }}
                                 </span>
                             </div>
                         </div>
@@ -1001,8 +1004,8 @@
                         <!-- Cost Input (Editable!) -->
                         <div>
                             <div class="flex items-center justify-between mb-1">
-                                <label class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.return_unit_price') || 'سعر الإرجاع للوحدة' }}</label>
-                                <span class="text-[9px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded">{{ $t('invoices.editable_price') || 'قابل للتغيير' }}</span>
+                                <label class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.return_unit_price') }}</label>
+                                <span class="text-[9px] font-semibold text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-1.5 py-0.5 rounded">{{ $t('invoices.editable_price') }}</span>
                             </div>
                             <input
                                 type="number"
@@ -1017,16 +1020,16 @@
                         <!-- Live Line Total Summary Box -->
                         <div class="p-3.5 bg-gray-50 dark:bg-gray-900/60 rounded-xl border border-gray-150 dark:border-gray-700/60 space-y-1.5 text-xs">
                             <div class="flex justify-between">
-                                <span class="text-gray-400">{{ $t('invoices.subtotal') || 'الإجمالي قبل الضريبة' }}</span>
+                                <span class="text-gray-400">{{ $t('invoices.subtotal') }}</span>
                                 <span class="font-bold text-gray-750 dark:text-gray-300 font-mono" dir="ltr">{{ formatCurrencyEnglish(isLineInclusive(selectedReturnLine) ? ((itemReturnQty * itemReturnPrice) / (1 + ((selectedReturnLine?.tax_rate || 0)/100))) : (itemReturnQty * itemReturnPrice)) }}</span>
                             </div>
                             <div v-if="(selectedReturnLine?.tax_rate || 0) > 0" class="flex justify-between">
-                                <span class="text-gray-400">VAT ({{ selectedReturnLine?.tax_rate || 0 }}%) <span v-if="isLineInclusive(selectedReturnLine)" class="text-[10px] text-gray-500">({{ $t('common.vat_included') || 'شامل' }})</span></span>
+                                <span class="text-gray-400">VAT ({{ selectedReturnLine?.tax_rate || 0 }}%) <span v-if="isLineInclusive(selectedReturnLine)" class="text-[10px] text-gray-500">({{ $t('common.vat_included') }})</span></span>
                                 <span class="font-bold text-gray-750 dark:text-gray-300 font-mono" dir="ltr">{{ formatCurrencyEnglish(isLineInclusive(selectedReturnLine) ? ((itemReturnQty * itemReturnPrice) - ((itemReturnQty * itemReturnPrice) / (1 + ((selectedReturnLine?.tax_rate || 0)/100)))) : ((itemReturnQty * itemReturnPrice) * ((selectedReturnLine?.tax_rate || 0) / 100))) }}</span>
                             </div>
                             <div class="h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
                             <div class="flex justify-between text-sm">
-                                <span class="font-black text-red-650">{{ $t('common.total') || 'الإجمالي' }}</span>
+                                <span class="font-black text-red-650">{{ $t('common.total') }}</span>
                                 <span class="font-black text-red-650 font-mono" dir="ltr">{{ formatCurrencyEnglish(isLineInclusive(selectedReturnLine) ? (itemReturnQty * itemReturnPrice) : ((itemReturnQty * itemReturnPrice) * (1 + (selectedReturnLine?.tax_rate || 0) / 100))) }}</span>
                             </div>
                         </div>
@@ -1039,7 +1042,7 @@
                             @click="showItemReturnModal = false"
                             class="px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold transition-all"
                         >
-                            {{ $t('common.cancel') || 'إلغاء' }}
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="button"
@@ -1047,7 +1050,7 @@
                             :disabled="itemReturnQty <= 0 || itemReturnQty > getAvailableQty(selectedReturnLine)"
                             class="px-5 py-2 bg-gradient-to-r from-red-600 to-orange-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-red-500/10 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {{ $t('common.add') || 'إضافة للفاتورة' }}
+                            {{ $t('common.add') }}
                         </button>
                     </div>
                 </div>
@@ -1075,6 +1078,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+import Tooltip from '@/Components/Tooltip.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
