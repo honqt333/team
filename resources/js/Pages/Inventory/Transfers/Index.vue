@@ -14,6 +14,9 @@
                 badgeBorder="border-indigo-100/50 dark:border-indigo-800/30"
                 badgeDot="bg-indigo-500"
             >
+                <template #back>
+                    <BackButton :href="route('app.inventory.hub')" />
+                </template>
                 <template #icon>
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
@@ -168,6 +171,7 @@ import { ref, computed } from 'vue';
 import { router, Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import { debounce } from 'lodash-es';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CreateModal from './CreateModal.vue';
@@ -223,6 +227,11 @@ const statusClass = (status) => {
 };
 
 const formatDate = (date) => {
-    return new Date(date).toLocaleDateString();
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
 };
 </script>

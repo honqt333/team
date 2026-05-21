@@ -6,14 +6,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between flex-wrap gap-4">
                     <div class="flex items-center gap-4">
-                        <Link :href="route('app.hr.employees.index')"
-                            class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300 rtl:rotate-180" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 19l-7-7 7-7" />
-                            </svg>
-                        </Link>
+                        <BackButton :href="route('app.hr.employees.index')" />
                         <div
                             class="w-14 h-14 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden shadow-sm border border-gray-200 dark:border-gray-600">
                             <img v-if="employee.photo_path" :src="`/storage/${employee.photo_path}`"
@@ -133,6 +126,7 @@ import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import BackButton from '@/Components/BackButton.vue';
 import EmployeeInfoTab from '@/Components/HR/Tabs/EmployeeInfoTab.vue';
 
 import EmployeeFinancialTab from '@/Components/HR/Tabs/EmployeeFinancialTab.vue';

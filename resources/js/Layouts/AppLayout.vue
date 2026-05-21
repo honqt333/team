@@ -137,6 +137,20 @@
                         {{ $t('nav.invoices') }}
                     </Link>
 
+                    <!-- Suppliers Link (under Invoices) -->
+                    <a v-if="can('purchasing.suppliers.view')" href="/app/purchasing/suppliers" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/purchasing/suppliers')
+                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        {{ $t('purchasing.suppliers.title') }}
+                    </a>
+
                     <!-- Divider -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
 
@@ -253,83 +267,19 @@
                         </div>
                     </div>
 
-                    <!-- Purchasing Collapsible Section -->
-                    <div v-if="can('purchasing.suppliers.view')" class="mt-2">
-                        <a href="/app/purchasing/suppliers" @click="purchasingExpanded = !purchasingExpanded; inventoryExpanded = false" :class="[
-                            'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
-                            isActive('/app/purchasing')
-                                ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                {{ $t('purchasing.title') }}
-                            </div>
-                            <svg @click.stop.prevent="purchasingExpanded = !purchasingExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', purchasingExpanded ? 'rotate-180' : '']"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </a>
-
-                        <div v-show="purchasingExpanded" class="ps-4 mt-1 space-y-1">
-                            <a href="/app/purchasing/suppliers" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/suppliers')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                                {{ $t('purchasing.suppliers.title') }}
-                            </a>
-                            <a href="/app/purchasing/orders" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/orders')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                                {{ $t('purchasing.orders.title') }}
-                            </a>
-                            <a href="/app/purchasing/sales" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/sales')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {{ $t('nav.sales') }}
-                            </a>
-                            <a href="/app/purchasing/purchases" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/purchases')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-                                </svg>
-                                {{ $t('nav.purchases') }}
-                            </a>
-                        </div>
-                    </div>
+                    <!-- Purchasing Direct Link -->
+                    <a v-if="can('purchasing.suppliers.view')" href="/app/purchasing" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/purchasing') && !isActive('/app/purchasing/suppliers')
+                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {{ $t('purchasing.title') }}
+                    </a>
 
                     <!-- HR Section -->
                     <div v-if="can('hr.view')" class="mt-2">
@@ -761,6 +711,20 @@
                         {{ $t('nav.invoices') }}
                     </Link>
 
+                    <!-- Suppliers Link (Mobile - under Invoices) -->
+                    <a v-if="can('purchasing.suppliers.view')" href="/app/purchasing/suppliers" @click="mobileMenuOpen = false" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/purchasing/suppliers')
+                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        {{ $t('purchasing.suppliers.title') }}
+                    </a>
+
                     <!-- Divider -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
 
@@ -881,83 +845,19 @@
                         </div>
                     </div>
 
-                    <!-- Purchasing Section (Mobile) -->
-                    <div class="mt-2">
-                        <a href="/app/purchasing/suppliers" @click="purchasingExpanded = !purchasingExpanded" :class="[
-                            'w-full flex items-center justify-between gap-2 px-3 py-2 text-xs font-semibold uppercase tracking-wider rounded-lg transition-colors',
-                            isActive('/app/purchasing')
-                                ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        ]">
-                            <div class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                {{ $t('purchasing.title') }}
-                            </div>
-                            <svg @click.stop.prevent="purchasingExpanded = !purchasingExpanded" :class="['w-4 h-4 transition-transform p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded', purchasingExpanded ? 'rotate-180' : '']"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </a>
-
-                        <div v-show="purchasingExpanded" class="ps-4 mt-1 space-y-1">
-                            <a href="/app/purchasing/suppliers" @click="mobileMenuOpen = false" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/suppliers')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                                {{ $t('purchasing.suppliers.title') }}
-                            </a>
-                            <a href="/app/purchasing/orders" @click="mobileMenuOpen = false" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/orders')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                                {{ $t('purchasing.orders.title') }}
-                            </a>
-                            <a href="/app/purchasing/sales" @click="mobileMenuOpen = false" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/sales')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                {{ $t('nav.sales') }}
-                            </a>
-                            <a href="/app/purchasing/purchases" @click="mobileMenuOpen = false" :class="[
-                                'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                                isActive('/app/purchasing/purchases')
-                                    ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            ]">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
-                                </svg>
-                                {{ $t('nav.purchases') }}
-                            </a>
-                        </div>
-                    </div>
+                    <!-- Purchasing Direct Link (Mobile) -->
+                    <a v-if="can('purchasing.suppliers.view')" href="/app/purchasing" @click="mobileMenuOpen = false" :class="[
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/app/purchasing') && !isActive('/app/purchasing/suppliers')
+                            ? 'bg-violet-50 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300'
+                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ]">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {{ $t('purchasing.title') }}
+                    </a>
 
                     <!-- Divider -->
                     <div class="my-3 border-t border-gray-200 dark:border-gray-700"></div>
