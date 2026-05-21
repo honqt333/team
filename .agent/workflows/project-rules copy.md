@@ -4,6 +4,8 @@ description: Project standards and development guidelines for Carag
 
 # Carag Project Rules & Guidelines
 
+
+
 ## Technology Stack
 - **Backend**: Laravel 12, PHP 8.4
 - **Frontend**: Vue 3 + Inertia.js + Tailwind CSS
