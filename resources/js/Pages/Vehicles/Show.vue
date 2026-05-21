@@ -8,15 +8,7 @@
                 <div class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-indigo-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <!-- Navigation & Actions Bar -->
                     <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20" :dir="isRtl ? 'rtl' : 'ltr'">
-                        <Tooltip :text="$t('common.back')">
-                            <Link :href="route('vehicles.index')"
-                                class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M14 5l7 7-7 7M21 12H3" />
-                                </svg>
-                            </Link>
-                        </Tooltip>
+                        <BackButton :href="route('vehicles.index')" />
 
                         <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                             <Tooltip :text="$t('common.edit')">
@@ -444,6 +436,7 @@ import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';

@@ -879,6 +879,7 @@
       "inventory_pricing": "Inventory & Pricing",
       "make_model_placeholder": "Compatible Make/Model",
       "make_model_hint": "Specify brands and models compatible with this part",
+      "image": "Image",
       "add_image": "Add Part Image",
       "min_qty": "Minimum stock",
       "min_qty_hint": "Alert when stock is low",
@@ -1814,7 +1815,7 @@
     "empty": "No services have been added to this package yet."
   },
   "purchasing": {
-    "title": "Purchases",
+    "title": "Store",
     "suppliers": {
       "title": "Suppliers",
       "subtitle": "Supplier data management",

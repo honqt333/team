@@ -16,11 +16,7 @@
                 badgeDot="bg-emerald-500"
             >
                 <template #back>
-                    <Link :href="route('app.inventory.hub')" class="p-2 -ml-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-full transition-all">
-                        <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.inventory.hub')" />
                 </template>
 
                 <template #icon>
@@ -389,6 +385,7 @@ import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { debounce } from 'lodash-es';

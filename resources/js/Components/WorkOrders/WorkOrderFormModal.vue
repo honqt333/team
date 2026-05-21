@@ -96,9 +96,9 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="font-medium text-gray-900 dark:text-white" dir="ltr">{{
-                                        toEnglish(vehicle.plate_number) }}
-                                    </p>
+                                    <div class="mb-1">
+                                        <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
+                                    </div>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ toEnglish(vehicle.customer?.name) }} -
                                         {{
                                             toEnglish(vehicle.customer?.phone) }}</p>
@@ -130,11 +130,7 @@
                         <!-- Header / Plate Section -->
                         <div class="bg-gray-50 dark:bg-gray-900/50 p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="bg-white dark:bg-gray-800 border-2 border-gray-700 dark:border-gray-500 rounded-md px-3 py-1 flex flex-col items-center justify-center min-w-[100px] shadow-sm">
-                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight" dir="ltr">{{ toEnglish(selectedVehicle.plate_number) }}</span>
-                                    <div class="w-full h-px bg-gray-200 dark:bg-gray-600 my-0.5"></div>
-                                    <span class="text-[8px] font-bold text-gray-400 tracking-widest uppercase">KSA</span>
-                                </div>
+                                <SaudiPlateDisplay :plate-number="selectedVehicle.plate_number" size="sm" />
                                 <div class="flex flex-col">
                                     <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{{ $t('common.selected') }}</span>
                                     <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">{{ getVehicleDisplay(selectedVehicle) }}</h4>
@@ -368,6 +364,7 @@ import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';

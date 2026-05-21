@@ -102,12 +102,9 @@
                         <!-- Spacer -->
                         <div class="w-8"></div>
                         <!-- Center: Plate + Model -->
-                        <div class="text-center">
-                            <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
-                                dir="ltr">
-                                {{ workOrder.vehicle?.plate_number }}
-                            </h3>
-                            <p class="text-xs font-semibold text-blue-500 dark:text-blue-400 mt-0.5">
+                        <div class="text-center flex flex-col items-center">
+                            <SaudiPlateDisplay :plate-number="workOrder.vehicle?.plate_number" size="md" />
+                            <p class="text-xs font-semibold text-blue-500 dark:text-blue-400 mt-1.5">
                                 {{ getName(workOrder.vehicle?.make) }} {{ getName(workOrder.vehicle?.model) }} {{
                                     workOrder.vehicle?.year }}
                             </p>
@@ -1070,6 +1067,7 @@ import InspectionChecklist from '@/Components/WorkOrders/InspectionChecklist.vue
 import WorkOrderSignatures from '@/Components/WorkOrders/WorkOrderSignatures.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import { usePermission } from '@/Composables/usePermission';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const { can } = usePermission();
 

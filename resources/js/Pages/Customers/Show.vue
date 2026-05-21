@@ -6,14 +6,7 @@
                 
                 <div class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-indigo-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20" :dir="isRtl ? 'rtl' : 'ltr'">
-                        <Link :href="route('customers.index')"
-                            :title="$t('common.back')"
-                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                    d="M14 5l7 7-7 7M21 12H3" />
-                            </svg>
-                        </Link>
+                        <BackButton :href="route('customers.index')" />
 
                         <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                             <button v-if="can('crm.customers.update') || isAnyAdmin()" @click="showEditModal = true"
@@ -284,13 +277,7 @@
                                         class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-900/50">
                                         <!-- Plate Number Badge -->
                                         <div class="flex items-center gap-2">
-                                            <div
-                                                class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-0.5 shadow-sm">
-                                                <span
-                                                    class="text-base font-bold text-gray-900 dark:text-gray-100 tracking-wider font-mono">
-                                                    {{ vehicle.plate_number }}
-                                                </span>
-                                            </div>
+                                            <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
                                         </div>
                                         <!-- Color Dot -->
                                         <span v-if="vehicle.color"
@@ -395,7 +382,7 @@
                                         class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
                                         <td
                                             class="px-4 py-3 font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
-                                            <span dir="ltr" class="inline-block">{{ vehicle.plate_number }}</span></td>
+                                            <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" /></td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
                                             getMakeName(vehicle) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
@@ -495,12 +482,7 @@
                                             $t(`work_orders.status.${order.status}`) }}</span>
                                 </div>
                                 <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 mb-3">
-                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    <span dir="ltr" class="truncate">{{ order.vehicle?.plate_number }}</span>
+                                    <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
                                     <span class="text-gray-400 mx-0.5">•</span>
                                     <span class="truncate">{{ getVehicleName(order.vehicle) }}</span>
                                 </div>
@@ -539,10 +521,8 @@
                                             class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                             {{ order.code }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                            <div class="flex flex-col">
-                                                <span dir="ltr"
-                                                    class="text-sm font-bold w-fit text-start inline-block">{{
-                                                    order.vehicle?.plate_number }}</span>
+                                            <div class="flex flex-col items-center gap-1">
+                                                <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
                                                 <span class="text-xs text-gray-500">{{ getVehicleName(order.vehicle)
                                                     }}</span>
                                             </div>
@@ -619,8 +599,9 @@
                                         class="px-2 py-0.5 text-xs font-medium rounded-full">{{
                                             $t(`quotes.status.${quote.status}`) }}</span>
                                 </div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400" dir="ltr">{{
-                                    quote.vehicle?.plate_number }}</div>
+                                <div class="mt-1">
+                                    <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
+                                </div>
                                 <div class="mt-2 text-xs text-gray-400">{{ formatDate(quote.created_at) }}</div>
                             </Link>
                         </div>
@@ -653,10 +634,8 @@
                                             class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                             {{ quote.code }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                            <div class="flex flex-col">
-                                                <span dir="ltr"
-                                                    class="text-sm font-bold w-fit text-start inline-block">{{
-                                                    quote.vehicle?.plate_number }}</span>
+                                            <div class="flex flex-col items-center">
+                                                <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap">
@@ -845,6 +824,7 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
 import CustomerMergeModal from '@/Components/Customers/CustomerMergeModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({
     customer: Object,

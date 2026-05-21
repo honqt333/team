@@ -17,13 +17,7 @@
                 backUrl="app.hr.index"
             >
                 <template #back>
-                    <Link :href="route('app.hr.index')"
-                        class="w-10 h-10 rounded-xl bg-gray-50/50 dark:bg-gray-900/50 flex items-center justify-center hover:bg-white dark:hover:bg-gray-800 text-gray-400 hover:text-violet-600 shadow-sm transition-all border border-gray-100/50 dark:border-gray-700/50 group/back"
-                        :title="$t('common.back')">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.hr.index')" />
                 </template>
                 <template #icon>
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,6 +325,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import EmployeeFormModal from '@/Components/HR/EmployeeFormModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import { usePermission } from '@/Composables/usePermission';
 
 const { can, isAnyAdmin } = usePermission();

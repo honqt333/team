@@ -65,7 +65,7 @@
                     </div>
                     <div v-if="quote.vehicle?.plate_number">
                         <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">{{ t('vehicles.columns.plate_number') }}</p>
-                        <p class="font-black text-gray-900 dark:text-white text-sm font-mono tracking-widest">{{ quote.vehicle.plate_number }}</p>
+                        <SaudiPlateDisplay :plate-number="quote.vehicle.plate_number" size="sm" />
                     </div>
                     <div v-if="quote.customer">
                         <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">{{ t('common.customer') }}</p>
@@ -252,6 +252,7 @@
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({
     quote: Object,

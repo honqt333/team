@@ -16,16 +16,7 @@
                 badgeDot="bg-blue-500"
             >
                 <template #back>
-                    <Tooltip :content="$t('common.back')">
-                        <Link
-                            :href="route('app.invoices.sales.index')"
-                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600 group"
-                        >
-                            <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                        </Link>
-                    </Tooltip>
+                    <BackButton :href="route('app.invoices.sales.index')" />
                 </template>
 
                 <template #icon>
@@ -209,9 +200,10 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                     </svg>
                                 </Link>
-                                <span v-if="invoice.work_order?.vehicle" class="text-xs text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1">
+                                <span v-if="invoice.work_order?.vehicle" class="text-xs text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1.5">
                                     <span>🚗</span>
-                                    <span>{{ invoice.work_order.vehicle.make }} {{ invoice.work_order.vehicle.model }} ({{ invoice.work_order.vehicle.plate_number }})</span>
+                                    <span>{{ invoice.work_order.vehicle.make }} {{ invoice.work_order.vehicle.model }}</span>
+                                    <SaudiPlateDisplay :plate-number="invoice.work_order.vehicle.plate_number" size="sm" />
                                 </span>
                             </div>
                         </div>
@@ -508,10 +500,12 @@ import { Link, router, useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import Tooltip from '@/Components/Tooltip.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({
     invoice: Object,

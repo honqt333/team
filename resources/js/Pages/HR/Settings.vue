@@ -14,13 +14,7 @@
                 badgeDot="bg-slate-500"
             >
                 <template #back>
-                    <Link :href="route('app.hr.index')"
-                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-slate-900/20 text-slate-600 dark:text-slate-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
-                        :title="$t('common.back')">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.hr.index')" />
                 </template>
 
                 <template #icon>
@@ -645,6 +639,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SettingsTable from '@/Components/HR/SettingsTable.vue';
 import HRSettingModal from '@/Components/HR/HRSettingModal.vue';
 import RegulationModal from '@/Components/HR/RegulationModal.vue';

@@ -11,14 +11,7 @@
                 badgeText="text-blue-600 dark:text-blue-400" badgeBorder="border-blue-100/50 dark:border-blue-800/30"
                 badgeDot="bg-blue-500">
                 <template #back>
-                    <Link :href="route('app.purchasing.purchases.index')" :title="$t('common.back')"
-                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600 group">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.purchasing.purchases.index')" />
                 </template>
 
                 <template #icon>
@@ -415,6 +408,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SalesInvoiceFormModal from '@/Components/Purchasing/SalesInvoiceFormModal.vue';

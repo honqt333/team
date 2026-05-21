@@ -1591,6 +1591,8 @@
       "inventory_pricing": "المخزون والتسعير",
       "make_model_placeholder": " ",
       "make_model_hint": " ",
+      "image": "الصورة",
+      "add_image": "إضافة صورة",
       "min_qty": "الحد الأدنى للمخزون",
       "min_qty_hint": "تنبيه عند انخفاض المخزون",
       "reorder_qty": "كمية إعادة الطلب",
@@ -1745,7 +1747,7 @@
     }
   },
   "purchasing": {
-    "title": "المشتريات",
+    "title": "المتجر",
     "suppliers": {
       "title": "الموردين",
       "subtitle": "إدارة بيانات الموردين",

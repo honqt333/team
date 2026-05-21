@@ -360,24 +360,8 @@
                                 </div>
                             </Tooltip>
                             
-                            <!-- Saudi Plate (Realistic Style) -->
-                            <Tooltip :text="$t('vehicles.plate_number')">
-                                <div class="relative w-40 h-10 bg-white border-2 border-gray-900 rounded-lg flex overflow-hidden shadow-sm group-hover:shadow-md transition-all cursor-pointer">
-                                    <div class="w-1/4 border-r-2 border-gray-900 bg-gray-50 flex flex-col items-center justify-between py-0.5">
-                                        <span class="text-[7px] font-black leading-none text-gray-500">KSA</span>
-                                        <div class="w-2 h-2 rounded-full bg-green-600 shadow-sm shadow-green-500/50"></div>
-                                        <span class="text-[7px] font-black leading-none text-gray-500">{{ $t('vehicles.plate.countries.sa') }}</span>
-                                    </div>
-                                    <div class="flex-1 flex items-center justify-center gap-3 px-1.5">
-                                        <span class="text-lg font-black text-gray-900 tracking-widest font-mono">
-                                            {{ toEnglish(order.vehicle?.plate_number?.split(' ')?.[0] || '1234') }}
-                                        </span>
-                                        <span class="text-lg font-black text-gray-900 tracking-[0.4em] font-mono">
-                                            {{ toEnglish(order.vehicle?.plate_number?.split(' ')?.[1] || 'ABC') }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </Tooltip>
+                            <!-- Saudi Plate -->
+                            <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
                         </div>
 
                         <!-- Vehicle Name & Customer -->
@@ -583,9 +567,7 @@
                                 <!-- المركبة -->
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-2">
-                                        <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-sm font-bold text-gray-800 dark:text-gray-200 font-mono" dir="ltr">
-                                            {{ toEnglish(order.vehicle?.plate_number) || '-' }}
-                                        </span>
+                                        <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
                                         <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
                                             {{ getVehicleName(order.vehicle) }}
                                         </span>
@@ -708,6 +690,7 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { useToast } from '@/Composables/useToast';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 

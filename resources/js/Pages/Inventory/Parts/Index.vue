@@ -16,11 +16,7 @@
                 badgeDot="bg-blue-500"
             >
                 <template #back>
-                    <Link :href="route('app.inventory.hub')" class="p-2 -ml-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-all">
-                        <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.inventory.hub')" />
                 </template>
 
                 <template #icon>
@@ -515,6 +511,7 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import { debounce } from 'lodash-es';
 import CreateModal from './CreateModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';

@@ -247,24 +247,8 @@
                                 </div>
                             </Tooltip>
                             
-                            <!-- Saudi Plate (Realistic Style) -->
-                            <Tooltip :text="$t('vehicles.plate_number')">
-                                <div class="relative w-40 h-10 bg-white border-2 border-gray-900 rounded-lg flex overflow-hidden shadow-sm group-hover:shadow-md transition-all cursor-pointer">
-                                    <div class="w-1/4 border-r-2 border-gray-900 bg-gray-50 flex flex-col items-center justify-between py-0.5">
-                                        <span class="text-[7px] font-black leading-none text-gray-500">KSA</span>
-                                        <div class="w-2 h-2 rounded-full bg-green-600 shadow-sm shadow-green-500/50"></div>
-                                        <span class="text-[7px] font-black leading-none text-gray-500">{{ $t('vehicles.plate.countries.sa') }}</span>
-                                    </div>
-                                    <div class="flex-1 flex items-center justify-center gap-3 px-1.5">
-                                        <span class="text-lg font-black text-gray-900 tracking-widest font-mono">
-                                            {{ toEnglish(quote.vehicle?.plate_number?.split(' ')?.[0] || '1234') }}
-                                        </span>
-                                        <span class="text-lg font-black text-gray-900 tracking-[0.4em] font-mono">
-                                            {{ toEnglish(quote.vehicle?.plate_number?.split(' ')?.[1] || 'ABC') }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </Tooltip>
+                            <!-- Saudi Plate -->
+                            <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
                         </div>
 
                         <!-- Vehicle Name & Customer -->
