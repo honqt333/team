@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('purchase_return_invoices', function (Blueprint $table) {
-            $table->string('attachment_path')->nullable()->after('notes');
-        });
+        if (!Schema::hasColumn('purchase_return_invoices', 'attachment_path')) {
+            Schema::table('purchase_return_invoices', function (Blueprint $table) {
+                $table->string('attachment_path')->nullable()->after('notes');
+            });
+        }
     }
 
     /**
@@ -21,8 +23,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('purchase_return_invoices', function (Blueprint $table) {
-            $table->dropColumn('attachment_path');
-        });
+        if (Schema::hasColumn('purchase_return_invoices', 'attachment_path')) {
+            Schema::table('purchase_return_invoices', function (Blueprint $table) {
+                $table->dropColumn('attachment_path');
+            });
+        }
     }
 };

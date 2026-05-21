@@ -67,7 +67,7 @@ import SystemLayout from '@/Layouts/SystemLayout.vue';
 
 const props = defineProps({ logs: Object, stats: Object, filters: Object });
 
-const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA') : '-';
+const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-';
 const getStatusLabel = (s) => ({ sent: 'مرسل', delivered: 'تم التسليم', read: 'مقروء', failed: 'فشل', pending: 'قيد الإرسال' }[s] || s);
 const getStatusClass = (s) => ({ sent: 'bg-blue-100 text-blue-700', delivered: 'bg-emerald-100 text-emerald-700', read: 'bg-indigo-100 text-indigo-700', failed: 'bg-red-100 text-red-700', pending: 'bg-amber-100 text-amber-700' }[s] || 'bg-gray-100 text-gray-700');
 </script>

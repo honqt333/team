@@ -104,7 +104,7 @@
                     <div class="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500">
                         <div class="flex justify-between">
                             <span>{{ $t('hr.financial.payroll.created_by') }}: {{ payrollItem?.created_by?.name || '-' }}</span>
-                            <span>{{ $t('common.date') }}: {{ payrollItem?.created_at ? new Date(payrollItem.created_at).toLocaleDateString('ar-SA') : '-' }}</span>
+                            <span>{{ $t('common.date') }}: {{ payrollItem?.created_at ? new Date(payrollItem.created_at).toLocaleDateString('ar-SA-u-nu-latn') : '-' }}</span>
                         </div>
                     </div>
                 </div>
@@ -139,7 +139,7 @@ const deductionsBreakdown = computed(() => {
 });
 
 function formatMoney(value) {
-    return parseFloat(value || 0).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return parseFloat(value || 0).toLocaleString('ar-SA-u-nu-latn', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function printSlip() {

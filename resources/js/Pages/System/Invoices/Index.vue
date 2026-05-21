@@ -142,12 +142,12 @@ const applyFilters = () => {
 };
 
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(amount || 0);
 };
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA');
+    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
 const isOverdue = (invoice) => {

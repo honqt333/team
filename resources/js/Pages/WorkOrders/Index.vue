@@ -13,14 +13,7 @@
             >
                 <template #back v-if="statusFilter">
                     <!-- Standard Back Button -->
-                    <Link :href="route('work-orders.index')"
-                        :title="$t('common.back')"
-                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600 group">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('work-orders.index')" />
                 </template>
 
                 <template #icon>
@@ -702,6 +695,7 @@
 </template>
 
 <script setup>
+import BackButton from '@/Components/BackButton.vue';
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';

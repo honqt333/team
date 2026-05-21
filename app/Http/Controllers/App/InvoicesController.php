@@ -204,7 +204,7 @@ class InvoicesController extends Controller
 
         $returns = \App\Models\PurchaseReturnInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
-            ->with(['purchaseInvoice.supplier'])
+            ->with(['purchaseInvoice.supplier', 'purchaseInvoice.payments'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('code', 'like', "%{$search}%")

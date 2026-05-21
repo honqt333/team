@@ -86,7 +86,7 @@ const applyFilters = () => {
     router.get('/system/announcements', { status: status.value || undefined }, { preserveState: true });
 };
 
-const formatDate = (date) => date ? new Date(date).toLocaleDateString('ar-SA') : '-';
+const formatDate = (date) => date ? new Date(date).toLocaleDateString('ar-SA-u-nu-latn') : '-';
 
 const getTypeLabel = (type) => ({ info: 'معلومات', warning: 'تحذير', important: 'هام', maintenance: 'صيانة' }[type] || type);
 const getTypeClass = (type) => ({

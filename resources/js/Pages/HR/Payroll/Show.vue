@@ -180,11 +180,11 @@ function markAsPaid() {
 
 function formatPeriod(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('ar-SA-u-nu-latn', { month: 'long', year: 'numeric' });
 }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(amount || 0);
 }
 
 function getStatusClass(status) {

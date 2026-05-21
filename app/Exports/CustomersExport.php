@@ -28,14 +28,21 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, Shoul
             $query->where('type', request('type'));
         }
 
-        return $query->orderBy('name')->get()->map(function ($customer) {
+        $typeNames = [
+            'individual' => 'فرد',
+            'company' => 'شركة',
+            'government' => 'جهة حكومية',
+            'vip' => 'VIP',
+        ];
+
+        return $query->withCount('vehicles')->orderBy('name')->get()->map(function ($customer) use ($typeNames) {
             return [
                 'name' => $customer->name,
-                'type' => $customer->type,
+                'type' => $typeNames[$customer->type] ?? $customer->type,
                 'phone' => $customer->phone,
                 'email' => $customer->email,
-                'balance' => $customer->balance,
-                'vehicles_count' => $customer->vehicles_count,
+                'balance' => $customer->balance ?? 0,
+                'vehicles_count' => $customer->vehicles_count ?? 0,
             ];
         });
     }

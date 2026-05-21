@@ -254,5 +254,5 @@ const fetchBalance = async () => {
     }
 };
 
-const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA') : '-';
+const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-';
 </script>

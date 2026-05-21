@@ -32,8 +32,8 @@
 
                 <template #actions>
                     <button
+                        @click="showCreateModal = true"
                         class="group relative inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-blue-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                        disabled
                     >
                         <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,19 +172,25 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Add Branch Form Modal -->
+            <BranchFormModal :show="showCreateModal" @close="showCreateModal = false" />
         </div>
     </AppLayout>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import { Link } from '@inertiajs/vue3';
+import BranchFormModal from './BranchFormModal.vue';
 
 const props = defineProps({
     branches: Array,
 });
+
+const showCreateModal = ref(false);
 
 // Theme detection
 const isDark = computed(() => {

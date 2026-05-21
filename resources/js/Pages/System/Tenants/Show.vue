@@ -434,7 +434,7 @@ const securityForm = useForm({
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA');
+    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
 const getEnforcementLabel = (value) => {

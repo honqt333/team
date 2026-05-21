@@ -160,12 +160,12 @@ function changeMonth() {
 }
 
 function formatDate(date) {
-    return new Date(date).toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short' });
+    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
 function formatMonthName(month) {
     if (!month) return '';
-    return new Date(month + '-01').toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' });
+    return new Date(month + '-01').toLocaleDateString('ar-SA-u-nu-latn', { year: 'numeric', month: 'long' });
 }
 
 function getStatusClass(status) {

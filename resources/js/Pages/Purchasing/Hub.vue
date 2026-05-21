@@ -1,0 +1,120 @@
+<template>
+    <AppLayout :title="$t('purchasing.title')">
+        <div class="space-y-8">
+            <!-- Header Section -->
+            <PageHeader
+                :title="$t('purchasing.title')"
+                :subtitle="$t('purchasing.subtitle')"
+                gradientFrom="from-violet-600"
+                gradientTo="to-purple-700"
+                glowFrom="from-violet-500"
+                badgeBg="bg-violet-50/50 dark:bg-violet-900/30"
+                badgeText="text-violet-600 dark:text-violet-400"
+                badgeBorder="border-violet-100/50 dark:border-violet-800/30"
+                badgeDot="bg-violet-500"
+            >
+                <template #icon>
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                </template>
+            </PageHeader>
+
+            <!-- Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl">
+                
+                <!-- Purchase Orders -->
+                <Link :href="route('app.purchasing.orders.index')"
+                    class="group relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-8 border border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
+                >
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:shadow-xl group-hover:shadow-blue-500/40 group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                        </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {{ $t('purchasing.orders.title') }}
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('purchasing.orders.subtitle') }}
+                    </p>
+                    <!-- Count Badge -->
+                    <div v-if="ordersCount > 0" class="absolute top-4 end-4 px-3 py-1 bg-blue-500 text-white text-sm font-bold rounded-full shadow-lg">
+                        {{ toEnglish(ordersCount) }}
+                    </div>
+                </Link>
+
+                <!-- Sales Invoices -->
+                <Link :href="route('app.purchasing.sales.index')"
+                    class="group relative bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8 border border-amber-200 dark:border-amber-800 hover:border-amber-400 dark:hover:border-amber-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
+                >
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:shadow-xl group-hover:shadow-amber-500/40 group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                        {{ $t('nav.sales') }}
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('invoices.hub.sales_invoices_hint') }}
+                    </p>
+                    <!-- Count Badge -->
+                    <div v-if="salesCount > 0" class="absolute top-4 end-4 px-3 py-1 bg-amber-500 text-white text-sm font-bold rounded-full shadow-lg">
+                        {{ toEnglish(salesCount) }}
+                    </div>
+                </Link>
+
+                <!-- Purchase Invoices -->
+                <Link :href="route('app.purchasing.purchases.index')"
+                    class="group relative bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20 rounded-2xl p-8 border border-violet-200 dark:border-violet-800 hover:border-violet-400 dark:hover:border-violet-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
+                >
+                    <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/30 group-hover:shadow-xl group-hover:shadow-violet-500/40 group-hover:scale-110 transition-all duration-300">
+                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="mt-6 text-xl font-bold text-gray-900 dark:text-white group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                        {{ $t('nav.purchases') }}
+                    </h3>
+                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('invoices.hub.purchase_invoices_hint') }}
+                    </p>
+                    <!-- Count Badge -->
+                    <div v-if="purchasesCount > 0" class="absolute top-4 end-4 px-3 py-1 bg-violet-500 text-white text-sm font-bold rounded-full shadow-lg">
+                        {{ toEnglish(purchasesCount) }}
+                    </div>
+                </Link>
+                
+            </div>
+        </div>
+    </AppLayout>
+</template>
+
+<script setup>
+import { Link } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/PageHeader.vue';
+import { useI18n } from 'vue-i18n';
+import { usePermission } from '@/Composables/usePermission';
+import { useNumberFormat } from '@/Composables/useNumberFormat';
+
+const { t } = useI18n();
+const { can } = usePermission();
+const { toEnglish } = useNumberFormat();
+
+defineProps({
+    ordersCount: {
+        type: Number,
+        default: 0,
+    },
+    salesCount: {
+        type: Number,
+        default: 0,
+    },
+    purchasesCount: {
+        type: Number,
+        default: 0,
+    },
+});
+</script>

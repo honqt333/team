@@ -239,7 +239,7 @@ const forceEnglishNumbers = (event) => {
 };
 
 const formatPrice = (amount) => {
-    return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    return new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount || 0);

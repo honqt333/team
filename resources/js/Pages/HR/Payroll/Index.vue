@@ -289,7 +289,7 @@ function generatePayroll() {
 
 function formatPeriod(start, end) {
     const startDate = new Date(start);
-    return startDate.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
+    return startDate.toLocaleDateString('ar-SA-u-nu-latn', { month: 'long', year: 'numeric' });
 }
 
 function formatDate(dateStr) {
@@ -298,7 +298,7 @@ function formatDate(dateStr) {
 }
 
 function formatCurrency(amount) {
-    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount);
+    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(amount);
 }
 
 function getStatusClass(status) {

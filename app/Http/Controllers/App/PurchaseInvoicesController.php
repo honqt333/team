@@ -403,4 +403,54 @@ class PurchaseInvoicesController extends Controller
 
         return back()->with('success', __('messages.attachment_deleted') ?? 'تم حذف المرفق بنجاح');
     }
+
+    public function recordReturnRefund(Request $request, \App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
+    {
+        $purchaseInvoice = $purchaseReturnInvoice->purchaseInvoice;
+
+        // Calculate current remaining balance on this return invoice
+        $allRefunds = $purchaseInvoice->payments()
+            ->where('type', \App\Models\Payment::TYPE_REFUND)
+            ->where('payment_method', '!=', 'debit_note')
+            ->get();
+        
+        $code = $purchaseReturnInvoice->code;
+        $matchedRefunds = $allRefunds->filter(function($p) use ($code) {
+            return str_contains($p->notes ?? '', $code);
+        });
+
+        $refunds = $matchedRefunds->count() > 0 ? $matchedRefunds : $allRefunds;
+        $refundPaymentsTotal = $refunds->sum('amount');
+        $remainingBalance = max(0.00, (float)$purchaseReturnInvoice->total - (float)$refundPaymentsTotal);
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0.01|max:' . $remainingBalance,
+            'payment_method' => 'required|string',
+            'payment_date' => 'nullable|date',
+            'reference' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        // Automatically append return invoice code to the payment notes
+        $paymentNotes = '[' . $purchaseReturnInvoice->code . ']';
+        if (!empty($validated['notes'])) {
+            $paymentNotes .= ' - ' . $validated['notes'];
+        }
+
+        // Create the individual refund payment record
+        \App\Models\Payment::create([
+            'tenant_id' => $purchaseReturnInvoice->tenant_id,
+            'center_id' => $purchaseReturnInvoice->center_id,
+            'purchase_invoice_id' => $purchaseInvoice->id,
+            'amount' => $validated['amount'],
+            'payment_date' => $validated['payment_date'] ?? now(),
+            'payment_method' => $validated['payment_method'],
+            'reference' => $validated['reference'] ?? null,
+            'notes' => $paymentNotes,
+            'received_by' => auth()->id(),
+            'type' => \App\Models\Payment::TYPE_REFUND,
+        ]);
+
+        return back()->with('success', __('payments.recorded') ?? 'تم تسجيل الدفعة بنجاح');
+    }
 }

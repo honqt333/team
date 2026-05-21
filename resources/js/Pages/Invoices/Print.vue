@@ -190,7 +190,7 @@ const paymentStatusLabel = computed(() => {
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA', { numberingSystem: 'latn' });
+    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn', { numberingSystem: 'latn' });
 };
 
 const toEnglish = (val) => {

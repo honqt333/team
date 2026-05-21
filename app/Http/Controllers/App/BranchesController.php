@@ -5,6 +5,7 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\Center;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -15,6 +16,7 @@ class BranchesController extends Controller
      */
     public function index(): Response
     {
+        $this->authorize('viewAny', Center::class);
         $tenant = auth()->user()->tenant;
         $branches = $tenant->centers()
             ->select('id', 'name', 'center_type', 'manager_name', 'phone', 'email', 'slug', 'is_active', 'created_at', 'logo_light_path', 'logo_dark_path')
@@ -27,5 +29,31 @@ class BranchesController extends Controller
         return Inertia::render('Settings/Branches/Index', [
             'branches' => $branches,
         ]);
+    }
+
+    /**
+     * Store a newly created branch.
+     */
+    public function store(Request $request)
+    {
+        $this->authorize('create', Center::class);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'name_ar' => 'nullable|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'center_type' => 'required|string|max:50',
+            'manager_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'is_active' => 'boolean',
+        ]);
+
+        $validated['slug'] = Str::slug($validated['name']) . '-' . uniqid();
+        $validated['is_active'] = $request->input('is_active', true);
+
+        $tenant = auth()->user()->tenant;
+        $tenant->centers()->create($validated);
+
+        return redirect()->back()->with('success', __('company_profile.branches.created_successfully'));
     }
 }

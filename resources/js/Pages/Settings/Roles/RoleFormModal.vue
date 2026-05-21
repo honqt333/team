@@ -113,7 +113,7 @@ const submit = () => {
 
 <template>
     <Modal :show="show" @close="$emit('close')" maxWidth="4xl">
-        <div class="p-6">
+        <div class="p-4 sm:p-6">
             <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-6">
                 {{ title }}
             </h2>
@@ -216,7 +216,7 @@ const submit = () => {
                                         class="mt-1"
                                     />
                                     <div>
-                                        <span class="block text-sm font-medium text-gray-900 dark:text-gray-100 break-all">
+                                        <span class="block text-sm font-medium text-gray-900 dark:text-gray-100 break-words">
                                             {{ permissionDescriptions && permissionDescriptions[permission] ? permissionDescriptions[permission] : t('permissions.' + permission.replace(/\./g, '_')) }}
                                         </span>
                                         <span class="text-xs text-gray-500 dark:text-gray-400">
@@ -229,17 +229,17 @@ const submit = () => {
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 mt-6">
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
                     <button
                         type="button"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                        class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
                         @click="$emit('close')"
                     >
                         {{ t('common.cancel') }}
                     </button>
                     <button
                         type="submit"
-                        class="px-4 py-2 text-sm font-medium text-white bg-violet-600 border border-transparent rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        class="w-full sm:w-auto px-4 py-2 text-sm font-medium text-white bg-violet-600 border border-transparent rounded-lg hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         :disabled="form.processing"
                     >
                         {{ form.processing ? t('common.saving') : t('common.save') }}

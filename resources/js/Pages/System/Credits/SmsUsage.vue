@@ -103,7 +103,7 @@ const applyFilters = () => {
     router.get('/system/sms/usage', { status: status.value || undefined }, { preserveState: true });
 };
 
-const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA') : '-';
+const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-';
 
 const getTypeLabel = (type) => ({
     reminder: 'تذكير',

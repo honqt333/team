@@ -87,8 +87,8 @@ const props = defineProps({
 
 const getTypeLabel = (type) => ({ info: 'معلومات', warning: 'تحذير', important: 'هام', maintenance: 'صيانة' }[type] || type);
 const getTargetLabel = (target) => ({ all: 'الكل', active: 'النشطين', trial: 'التجريبي', expired: 'المنتهية', specific: 'محدد' }[target] || target);
-const formatDate = (date) => date ? new Date(date).toLocaleDateString('ar-SA') : '-';
-const formatDateTime = (date) => date ? new Date(date).toLocaleString('ar-SA') : '-';
+const formatDate = (date) => date ? new Date(date).toLocaleDateString('ar-SA-u-nu-latn') : '-';
+const formatDateTime = (date) => date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-';
 
 const publish = () => router.post(`/system/announcements/${props.announcement.id}/publish`);
 const unpublish = () => router.post(`/system/announcements/${props.announcement.id}/unpublish`);

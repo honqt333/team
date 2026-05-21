@@ -116,11 +116,11 @@ const vehicleName = computed(() => {
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA' : 'en-US');
+    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US');
 };
 
 const formatPrice = (amount) => {
-    return new Intl.NumberFormat(isRtl.value ? 'ar-SA' : 'en-US', {
+    return new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     }).format(amount || 0);

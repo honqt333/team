@@ -329,7 +329,7 @@
                     </button>
 
                     <div class="hidden md:block text-sm text-gray-500 dark:text-gray-400">
-                        {{ new Date().toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
+                        {{ new Date().toLocaleDateString('ar-SA-u-nu-latn', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}
                     </div>
 
                     <div class="flex items-center gap-3">

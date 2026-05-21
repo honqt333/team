@@ -16,8 +16,8 @@ defineProps({
 </script>
 
 <template>
-    <div class="border-b border-gray-200 dark:border-gray-700 mb-6">
-        <nav class="-mb-px flex space-x-8 rtl:space-x-reverse" aria-label="Tabs">
+    <div class="border-b border-gray-200 dark:border-gray-700 mb-6 overflow-x-auto scrollbar-none">
+        <nav class="-mb-px flex space-x-8 rtl:space-x-reverse min-w-max" aria-label="Tabs">
             <Link 
                 v-if="can('users.view')"
                 :href="route('settings.users.index')"

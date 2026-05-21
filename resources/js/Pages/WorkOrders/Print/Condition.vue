@@ -124,10 +124,10 @@ const vehicleName = computed(() => {
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA' : 'en-US');
+    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US');
 };
 
-const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA' : 'en-US').format(num || 0);
+const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
 
 const getColorValue = (color) => ({ red: '#ef4444', blue: '#3b82f6', gray: '#6b7280' }[color] || '#ef4444');
 

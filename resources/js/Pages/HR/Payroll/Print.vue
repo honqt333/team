@@ -139,11 +139,11 @@ function close() {
 
 function formatPeriod(dateStr) {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('ar-SA-u-nu-latn', { month: 'long', year: 'numeric' });
 }
 
 function formatAmount(amount) {
-    return new Intl.NumberFormat('ar-SA').format(amount || 0);
+    return new Intl.NumberFormat('ar-SA-u-nu-latn').format(amount || 0);
 }
 </script>
 

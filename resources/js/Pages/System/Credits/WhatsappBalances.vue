@@ -100,7 +100,7 @@ const showAddModal = ref(false);
 const selectedTenant = ref(null);
 const form = useForm({ tenant_id: '', credits: 100, reason: '' });
 
-const formatCurrency = (v) => new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(v || 0);
+const formatCurrency = (v) => new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(v || 0);
 
 const openAddModal = (item) => {
     selectedTenant.value = item;

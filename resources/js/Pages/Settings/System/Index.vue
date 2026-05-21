@@ -164,7 +164,7 @@
                                     <div v-else class="flex flex-col">
                                         <span>{{ make.updated_by ? make.updated_by.name : '—' }}</span>
                                         <span v-if="make.updated_at" class="text-xs text-gray-400">{{ new
-                                            Date(make.updated_at).toLocaleDateString('ar-SA') }}</span>
+                                            Date(make.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-center">
@@ -264,7 +264,7 @@
                                     <div v-else class="flex flex-col">
                                         <span>{{ model.updated_by ? model.updated_by.name : '—' }}</span>
                                         <span v-if="model.updated_at" class="text-xs text-gray-400">{{ new
-                                            Date(model.updated_at).toLocaleDateString('ar-SA') }}</span>
+                                            Date(model.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-center">
@@ -370,7 +370,7 @@
                                     <div v-else class="flex flex-col">
                                         <span>{{ color.updated_by ? color.updated_by.name : '—' }}</span>
                                         <span v-if="color.updated_at" class="text-xs text-gray-400">{{ new
-                                            Date(color.updated_at).toLocaleDateString('ar-SA') }}</span>
+                                            Date(color.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-center">
@@ -466,7 +466,7 @@
                                     <div v-else class="flex flex-col">
                                         <span>{{ item.updated_by ? item.updated_by.name : '—' }}</span>
                                         <span v-if="item.updated_at" class="text-xs text-gray-400">{{ new
-                                            Date(item.updated_at).toLocaleDateString('ar-SA') }}</span>
+                                            Date(item.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-center">

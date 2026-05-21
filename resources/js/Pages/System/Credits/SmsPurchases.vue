@@ -80,8 +80,8 @@ const applyFilters = () => {
     router.get('/system/sms/purchases', { status: status.value || undefined }, { preserveState: true });
 };
 
-const formatCurrency = (amount) => new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
-const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA') : '-';
+const formatCurrency = (amount) => new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-';
 
 const getStatusLabel = (status) => ({ pending: 'معلق', paid: 'مدفوع', failed: 'فشل', refunded: 'مسترد' }[status] || status);
 

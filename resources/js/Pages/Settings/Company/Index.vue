@@ -725,7 +725,7 @@
                         </div>
                     </div>
 
-                    <!-- Numbering Tab -->
+                    <!-- Numbering Tab (Hidden)
                     <div v-if="activeTab === 'numbering'" class="space-y-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
@@ -757,6 +757,7 @@
                             </button>
                         </div>
                     </div>
+                    -->
 
                     <!-- Admin User Tab -->
                     <div v-if="activeTab === 'admin_user'" class="space-y-6">
@@ -936,7 +937,7 @@ const tabs = computed(() => [
     { id: 'contact', label: t('company_profile.tabs.contact') },
     { id: 'vat', label: t('company_profile.tabs.vat') },
     { id: 'zatca', label: t('company_profile.tabs.zatca') },
-    { id: 'numbering', label: t('company_profile.tabs.numbering') },
+    // numbering tab hidden by design decision
     { id: 'admin_user', label: t('company_profile.tabs.admin_user') },
     { id: 'subscription', label: t('company_profile.tabs.subscription') },
     { id: 'subscription_history', label: t('company_profile.tabs.subscription_history') },

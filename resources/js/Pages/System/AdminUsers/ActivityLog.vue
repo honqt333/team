@@ -76,7 +76,7 @@ const applyFilters = () => {
     }, { preserveState: true });
 };
 
-const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA') : '-';
+const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-';
 
 const getActionClass = (action) => ({
     login: 'bg-blue-100 text-blue-700',

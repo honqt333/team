@@ -114,8 +114,9 @@ const deleteRole = () => {
             </PageHeader>
 
             <div class="bg-white dark:bg-gray-800 shadow-sm rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900/50">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
                             <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ t('roles.name') }}
@@ -167,6 +168,7 @@ const deleteRole = () => {
                         </tr>
                     </tbody>
                 </table>
+            </div>
             </div>
 
             <RoleFormModal

@@ -253,7 +253,7 @@ const applyFilters = () => {
     }, { preserveState: true });
 };
 
-const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA') : '-';
+const formatDate = (date) => date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-';
 
 const getRoleLabel = (role) => ({ super_admin: 'مدير النظام', admin: 'مسؤول', support: 'دعم فني' }[role] || role);
 const getRoleClass = (role) => ({

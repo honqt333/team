@@ -141,8 +141,8 @@ const selectedInstallment = ref(null);
 const markingPaid = ref(false);
 const markPaidForm = ref({ reference: '', gateway: 'manual' });
 
-const formatCurrency = (amount) => new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
-const formatDate = (date) => date ? new Date(date).toLocaleDateString('ar-SA') : '-';
+const formatCurrency = (amount) => new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+const formatDate = (date) => date ? new Date(date).toLocaleDateString('ar-SA-u-nu-latn') : '-';
 
 const getInvoiceStatusClass = (status) => status === 'paid' 
     ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'

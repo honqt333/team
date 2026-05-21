@@ -73,7 +73,7 @@
                     </div>
                     <div v-if="quote.odometer">
                         <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">{{ t('work_orders.form.odometer') }}</p>
-                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ Number(quote.odometer).toLocaleString('ar-SA') }} كم</p>
+                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ Number(quote.odometer).toLocaleString('ar-SA-u-nu-latn') }} كم</p>
                     </div>
                 </div>
             </div>
@@ -274,7 +274,7 @@ const centerName = computed(() => {
 function formatAmount(value) {
     const num = parseFloat(value || 0);
     const currency = props.quote?.currency_code || 'SAR';
-    return new Intl.NumberFormat('ar-SA', {
+    return new Intl.NumberFormat('ar-SA-u-nu-latn', {
         style: 'currency',
         currency,
         minimumFractionDigits: 2,

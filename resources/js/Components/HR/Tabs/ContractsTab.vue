@@ -253,7 +253,7 @@ function deleteContract(id) {
 }
 
 function generateDraft() {
-    const today = new Date().toLocaleDateString('ar-SA');
+    const today = new Date().toLocaleDateString('ar-SA-u-nu-latn');
     form.content = `عقد عمل
 
 إنه في يوم ${today}، تم الاتفاق بين:

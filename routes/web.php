@@ -48,9 +48,9 @@ Route::middleware('guest')->group(function () {
     Route::post('invitations/accept/{user}', [\App\Http\Controllers\Auth\SetPasswordController::class, 'store']);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\App\DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified', 'tenant.active', 'center.context'])
+    ->name('dashboard');
 
 // 2FA Challenge (during login)
 Route::get('/app/2fa/challenge', [\App\Http\Controllers\App\TwoFactorAuthenticatedSessionController::class, 'challenge'])->name('app.2fa.challenge');
@@ -216,6 +216,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     
     // Branches Settings
     Route::get('/settings/branches', [\App\Http\Controllers\App\BranchesController::class, 'index'])->name('settings.branches');
+    Route::post('/settings/branches', [\App\Http\Controllers\App\BranchesController::class, 'store'])->name('settings.branches.store');
     
     // Center Settings
     Route::get('/settings/centers/{center}', [\App\Http\Controllers\App\CenterSettingsController::class, 'index'])->name('settings.centers.show');
@@ -353,6 +354,9 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     // Purchasing Module
     // ───────────────────────────────────────────────────────────────
     Route::prefix('purchasing')->name('app.purchasing.')->group(function () {
+        // Hub
+        Route::get('/', [\App\Http\Controllers\App\PurchasingHubController::class, 'index'])->name('hub');
+
         // Suppliers
         Route::get('/suppliers', [\App\Http\Controllers\App\SuppliersController::class, 'index'])->name('suppliers.index');
         Route::get('/suppliers/export', [\App\Http\Controllers\App\SuppliersController::class, 'export'])->name('suppliers.export');
@@ -539,6 +543,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::post('/purchases/{purchaseInvoice}/payments', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordPayment'])->name('purchases.payments.store');
         Route::post('/purchases/{purchaseInvoice}/returns', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturn'])->name('purchases.returns.store');
         Route::get('/purchases/returns/{purchaseReturnInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'showReturn'])->name('purchases.returns.show');
+        Route::post('/purchases/returns/{purchaseReturnInvoice}/refunds', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturnRefund'])->name('purchases.returns.refunds.store');
         Route::post('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadReturnAttachment'])->name('purchases.returns.attachment.store');
         Route::delete('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyReturnAttachment'])->name('purchases.returns.attachment.destroy');
 

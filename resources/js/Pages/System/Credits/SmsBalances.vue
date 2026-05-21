@@ -155,7 +155,7 @@ const form = useForm({
     reason: '',
 });
 
-const formatCurrency = (amount) => new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+const formatCurrency = (amount) => new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(amount || 0);
 
 const applySearch = () => {
     router.get('/system/sms/balances', { search: search.value || undefined }, { preserveState: true });

@@ -71,7 +71,7 @@ const getPaymentMethodLabel = (method) => {
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA', {
+    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
