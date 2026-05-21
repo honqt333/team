@@ -280,7 +280,7 @@ class WorkOrderController
             'damageMarks', 
             'photos', 
             'departments',
-            'payments.receivedBy',
+            'payments' => fn($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
             'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
             'attachments.user',
             'activities.user',
@@ -1048,7 +1048,7 @@ class WorkOrderController
         ]);
 
         // Get payments related to this work order
-        $payments = $workOrder->payments()->with('receivedBy')->get();
+        $payments = $workOrder->payments()->with('receivedBy')->orderByDesc('payment_date')->get();
 
         // Calculate totals
         $servicesTotal = $workOrder->items->sum(function ($item) {

@@ -191,7 +191,7 @@ class WorkOrder extends Model
      */
     public function payments(): HasMany
     {
-        return $this->hasMany(Payment::class)->orderByDesc('payment_date');
+        return $this->hasMany(Payment::class);
     }
 
     /**
