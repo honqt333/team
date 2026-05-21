@@ -2787,6 +2787,11 @@
     "new_quote": "New Quote",
     "reports": "Reports",
     "settings": "Settings",
-    "no_data": "No data available"
+    "no_data": "No data available",
+    "customize": "Customize",
+    "customize_hint": "Drag & drop to reorder or hide dashboard widgets",
+    "drag_to_reorder": "Drag to Reorder",
+    "reset": "Reset",
+    "save_layout": "Save Layout"
   }
 }
