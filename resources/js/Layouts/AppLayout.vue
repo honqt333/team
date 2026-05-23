@@ -612,8 +612,9 @@
                             <p class="text-sm font-bold text-gray-900 dark:text-white truncate">
                                 {{ page.props.tenant?.trade_name || page.props.tenant?.name || $t('nav.brand') }}
                             </p>
-                            <p v-if="page.props.center?.id" class="text-xs text-gray-500 dark:text-gray-400">
-                                #{{ page.props.center.id }}
+                            <!-- Show current center name in mobile header -->
+                            <p v-if="page.props.center" class="text-xs text-indigo-600 dark:text-indigo-400 font-medium truncate">
+                                {{ isRtl ? page.props.center.name_ar : page.props.center.name_en }}
                             </p>
                             <p v-else-if="page.props.tenant?.id" class="text-xs text-gray-500 dark:text-gray-400">
                                 #{{ page.props.tenant.id }}
@@ -629,7 +630,39 @@
                     </button>
                 </div>
 
+                <!-- Branch Switcher (Mobile) - shown when multiple centers available -->
+                <div v-if="page.props.auth.available_centers?.length > 1"
+                    class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
+                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                        {{ $t('common.switch_center') || 'Switch Center' }}
+                    </p>
+                    <div class="space-y-1">
+                        <button v-for="c in page.props.auth.available_centers" :key="c.id"
+                            @click="switchCenter(c.id); mobileMenuOpen = false"
+                            :class="[
+                                'w-full text-start flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors',
+                                c.id === page.props.center?.id
+                                    ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-semibold'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            ]">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <div :class="[
+                                    'w-2 h-2 rounded-full flex-shrink-0',
+                                    c.id === page.props.center?.id ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-gray-600'
+                                ]"></div>
+                                <span class="truncate">{{ isRtl ? c.name_ar : c.name_en }}</span>
+                            </div>
+                            <svg v-if="c.id === page.props.center?.id" class="w-4 h-4 text-indigo-500 flex-shrink-0"
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
                 <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+
                     <a href="/dashboard" @click="mobileMenuOpen = false" :class="[
                         'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                         isActive('/dashboard')

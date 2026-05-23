@@ -51,8 +51,15 @@ class BranchesController extends Controller
         $validated['slug'] = Str::slug($validated['name']) . '-' . uniqid();
         $validated['is_active'] = $request->input('is_active', true);
 
-        $tenant = auth()->user()->tenant;
-        $tenant->centers()->create($validated);
+        $user = auth()->user();
+        $tenant = $user->tenant;
+        $center = $tenant->centers()->create($validated);
+
+        // Attach the current user (company manager) to the new center
+        // so they can immediately switch to and access it
+        $user->centers()->syncWithoutDetaching([
+            $center->id => ['tenant_id' => $tenant->id],
+        ]);
 
         return redirect()->back()->with('success', __('company_profile.branches.created_successfully'));
     }
