@@ -29,22 +29,24 @@
                 <div class="px-8 py-8 space-y-5">
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">
-                            {{ $t('print_settings.name_ar') }}
+                            {{ $t('print_settings.name_ar') }} <span class="text-red-500">*</span>
                         </label>
                         <input 
                             v-model="localSignature.name_ar" 
                             type="text" 
+                            required
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-end"
                         />
                     </div>
 
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">
-                            {{ $t('print_settings.name_en') }}
+                            {{ $t('print_settings.name_en') }} <span class="text-red-500">*</span>
                         </label>
                         <input 
                             v-model="localSignature.name_en" 
                             type="text" 
+                            required
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
                         />
                     </div>

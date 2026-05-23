@@ -67,8 +67,9 @@ class PricingHelper
         $discountAmount = self::computeDiscountAmount($unitPrice, $discountType, $discountValue);
         $finalUnitPrice = max(0, $unitPrice - $discountAmount);
 
-        // Note: min_price validation is handled by frontend
-        // Backend accepts values as-is since validation happens before saving
+        if ($minPrice > 0 && $finalUnitPrice < $minPrice) {
+            throw new InvalidArgumentException("Final unit price ({$finalUnitPrice}) cannot be below the minimum price ({$minPrice}).");
+        }
 
         $lineTotal = $finalUnitPrice * $qty;
 

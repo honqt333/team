@@ -42,7 +42,7 @@ class VehicleColorController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'hex_code' => 'nullable|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/',
             'is_active' => 'boolean',
         ]);
@@ -68,7 +68,7 @@ class VehicleColorController extends Controller
 
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'hex_code' => 'nullable|string|max:7|regex:/^#[0-9A-Fa-f]{6}$/',
             'is_active' => 'boolean',
         ]);

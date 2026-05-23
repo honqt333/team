@@ -105,6 +105,7 @@ class CreateWorkOrderAction
 
             $workOrder->logActivity('created', __('work_orders.activities.actions.created'));
 
+            $workOrder->refresh();
             return $workOrder;
         });
     }

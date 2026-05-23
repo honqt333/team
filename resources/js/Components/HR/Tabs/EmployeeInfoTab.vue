@@ -42,8 +42,12 @@
 
                 <!-- Name EN -->
                 <div>
-                    <label :class="labelClass">{{ $t('common.name') }} (EN)</label>
-                    <input v-model="form.name_en" type="text" :class="inputClass" />
+                    <label :class="labelClass">{{ $t('common.name') }} (EN) <span class="text-red-500">*</span></label>
+                    <input v-model="form.name_en" type="text" required :class="[
+                        inputClass,
+                        form.errors.name_en ? 'border-red-500 focus:border-red-500' : ''
+                    ]" />
+                    <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">{{ form.errors.name_en }}</p>
                 </div>
 
                 <!-- Phone -->

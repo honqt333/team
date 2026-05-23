@@ -77,7 +77,8 @@
                                 v-model="form.name_en"
                                 type="text"
                                 dir="ltr"
-                                :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.name_en ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
+                                required
+                                :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.name_en ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
                                 :placeholder="$t('inventory.parts.name_en_placeholder')"
                             />
                             <p v-if="form.errors.name_en" class="mt-1 text-xs text-red-500">{{ form.errors.name_en }}</p>

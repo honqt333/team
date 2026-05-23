@@ -13,7 +13,7 @@ class ShiftController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i',
             'color' => 'nullable|string|max:7',
@@ -38,7 +38,7 @@ class ShiftController extends Controller
 
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i',
             'color' => 'nullable|string|max:7',

@@ -602,7 +602,15 @@ function exportCustomers() {
     const params = new URLSearchParams();
     if (searchQuery.value) params.set('search', searchQuery.value);
     if (typeFilter.value) params.set('type', typeFilter.value);
-    window.location.href = route('customers.export') + '?' + params.toString();
+    
+    const url = route('customers.export') + '?' + params.toString();
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
     setTimeout(() => {
         exporting.value = false;
     }, 2000);

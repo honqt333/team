@@ -36,7 +36,7 @@ class PurchaseInvoicesController extends Controller
             ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
             ->orderBy('id', 'desc');
 
-        $suppliers = Supplier::forTenant($tenantId)->active()->get(['id', 'name']);
+        $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
         $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
         $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);

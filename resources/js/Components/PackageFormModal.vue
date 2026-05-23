@@ -48,8 +48,11 @@
                         {{ $t('services_management.form.name_en') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="text" v-model="form.name_en" dir="ltr"
+                        required
                         :placeholder="$t('services_management.form.name_en_placeholder')"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
+                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        :class="{ 'border-red-500': form.errors.name_en }" />
+                    <p v-if="form.errors.name_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_en }}</p>
                 </div>
             </div>
 

@@ -563,9 +563,9 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('common.name') }} (English)
+                            {{ $t('common.name') }} (English) <span class="text-red-500">*</span>
                         </label>
-                        <input v-model="shiftForm.name_en" type="text" placeholder="Morning, Evening..."
+                        <input v-model="shiftForm.name_en" type="text" required placeholder="Morning, Evening..."
                             class="w-full px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500" />
                     </div>
                 </div>

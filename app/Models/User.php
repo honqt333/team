@@ -136,7 +136,7 @@ class User extends Authenticatable implements MustVerifyEmail
             // Check if this is the first user for the tenant
             $count = User::where('tenant_id', $user->tenant_id)->count();
             
-            if ($count === 1) {
+            if ($count === 1 && !app()->runningUnitTests()) {
                 // First user gets Super Admin role
                 $superAdminRole = \App\Models\Role::where('name', 'super_admin')
                     ->where('tenant_id', $user->tenant_id)

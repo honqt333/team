@@ -457,8 +457,18 @@ onUnmounted(() => {
 
 function exportVehicles() {
     exporting.value = true;
-    const params = new URLSearchParams(window.location.search);
-    window.location.href = route('vehicles.export', params.toString());
+    const params = new URLSearchParams();
+    if (searchQuery.value) params.set('search', searchQuery.value);
+    if (filterMakeId.value) params.set('make_id', filterMakeId.value);
+    
+    const url = route('vehicles.export') + '?' + params.toString();
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
     setTimeout(() => {
         exporting.value = false;
     }, 2000);

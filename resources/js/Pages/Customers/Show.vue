@@ -54,7 +54,7 @@
 
                     <div class="relative z-10 p-6 pt-16">
                         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                            <div class="flex items-center gap-6 flex-1">
+                            <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-6 flex-1">
                                 <div class="relative">
                                     <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/35 flex items-center justify-center text-white ring-4 ring-indigo-50 dark:ring-indigo-900/20 transition-transform group-hover:scale-[1.03] duration-500">
                                         <span class="text-3xl lg:text-5xl font-black">
@@ -72,7 +72,7 @@
                                 </div>
 
                                 <div class="flex-1">
-                                    <div class="flex flex-wrap items-center gap-2 lg:gap-3 mb-1">
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 lg:gap-3 mb-1">
                                         <h1 class="text-2xl lg:text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                             {{ customer.name }}
                                         </h1>
@@ -85,7 +85,7 @@
                                     </div>
                                     <p class="text-sm font-bold text-indigo-500/80 dark:text-indigo-400/80 mb-4">{{ $t('customers.subtitle') }}</p>
                                     
-                                    <div class="flex flex-wrap items-center gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
                                         <span v-if="(customer.type === 'company' || customer.type === 'government') && customer.contact_name"
                                             class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100/50">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,6 +160,29 @@
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.payments') }}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div v-if="customer.notes" class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-600 rounded-[2rem] blur opacity-[0.04] group-hover:opacity-[0.08] transition duration-700"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-[1.75rem] shadow-xl border border-amber-100/50 dark:border-amber-900/20 p-6 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-[0.02] pointer-events-none select-none">
+                        <svg class="w-24 h-24 text-amber-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-inner flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 space-y-1 text-start">
+                            <h3 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{{ $t('customers.form.notes') }}</h3>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ customer.notes }}</p>
                         </div>
                     </div>
                 </div>

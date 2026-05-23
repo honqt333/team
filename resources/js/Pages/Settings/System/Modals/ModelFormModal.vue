@@ -40,11 +40,12 @@
                 <!-- Name EN -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {{ $t('system_settings.form.name_en') }}
+                        {{ $t('system_settings.form.name_en') }} <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.name_en"
                         type="text"
+                        required
                         class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         :placeholder="$t('system_settings.form.name_en_placeholder')"
                     />

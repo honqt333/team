@@ -37,7 +37,7 @@ class PurchaseOrdersController extends Controller
 
         $orders = $query->paginate(25)->withQueryString();
 
-        $suppliers = Supplier::forTenant($user->tenant_id)->active()->get(['id', 'name']);
+        $suppliers = Supplier::forTenant($user->tenant_id)->forCenter($centerId)->active()->get(['id', 'name']);
 
         return Inertia::render('Purchasing/Orders/Index', [
             'orders' => $orders,
@@ -62,7 +62,7 @@ class PurchaseOrdersController extends Controller
 
         $user = auth()->user();
 
-        $suppliers = Supplier::forTenant($user->tenant_id)->active()->get(['id', 'name', 'code']);
+        $suppliers = Supplier::forTenant($user->tenant_id)->forCenter($user->current_center_id)->active()->get(['id', 'name', 'code']);
         $warehouse = Warehouse::forCenter($user->current_center_id)->default()->first();
 
         return Inertia::render('Purchasing/Orders/Form', [

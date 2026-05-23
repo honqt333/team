@@ -71,7 +71,7 @@ class SuppliersController extends Controller
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
-        $suppliers = Supplier::forTenant($tenantId)->active()->get(['id', 'name']);
+        $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
         $defaultWarehouse = \App\Models\Warehouse::forCenter($centerId)->default()->first();
         $warehouses = \App\Models\Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
         $units = \App\Models\InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
