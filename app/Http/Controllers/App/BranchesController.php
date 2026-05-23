@@ -38,14 +38,14 @@ class BranchesController extends Controller
     {
         $this->authorize('create', Center::class);
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'name_ar' => 'nullable|string|max:255',
-            'name_en' => 'nullable|string|max:255',
-            'center_type' => 'required|string|max:50',
+            'name'         => 'required|string|max:255',
+            'name_ar'      => 'required|string|max:255',
+            'name_en'      => 'required|string|max:255',
+            'center_type'  => 'required|string|max:50',
             'manager_name' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:50',
-            'email' => 'nullable|email|max:255',
-            'is_active' => 'boolean',
+            'phone'        => 'nullable|string|max:50',
+            'email'        => 'nullable|email|max:255',
+            'is_active'    => 'boolean',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']) . '-' . uniqid();
