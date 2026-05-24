@@ -449,6 +449,23 @@
     "payments_receipt_desc": "جميع المدفوعات المسجلة على هذا الكرت"
   },
   "work_orders": {
+    "service_modal": {
+      "duration_value": "مدة الخدمة",
+      "duration_unit": "الفترة",
+      "warranty_value": "ضمان الخدمة",
+      "warranty_unit": "الفترة",
+      "timeline": "الجدول الزمني",
+      "started_at": "تاريخ البداية",
+      "due_date": "تاريخ الاستحقاق",
+      "work_order_expected_end_date": "تاريخ إغلاق كرت الصيانة المتوقع",
+      "pricing": "سعر الخدمة والخصومات",
+      "minutes": "دقائق",
+      "hours": "ساعات",
+      "days": "أيام",
+      "weeks": "أسابيع",
+      "months": "أشهر",
+      "years": "سنوات"
+    },
     "activities": {
       "title": "سجل الأنشطة",
       "no_activities": "لا يوجد أنشطة مسجلة بعد",
@@ -595,13 +612,15 @@
       "in_progress": "قيد التنفيذ",
       "ready_for_qc": "جاهز للفحص (QC)",
       "done": "مكتمل",
-      "cancelled": "ملغي"
+      "cancelled": "ملغي",
+      "general_note": "ملاحظة عامة"
     },
     "show": {
       "no_services": "لا توجد خدمات",
       "no_parts": "لا توجد قطع غيار",
       "tabs": {
         "services": "الخدمات",
+        "notes": "المذكرات",
         "parts": "قطع الغيار",
         "technicians": "الفنيون",
         "payments": "المدفوعات",
@@ -727,7 +746,8 @@
       "assigned_at": "تاريخ التعيين",
       "add_note": "إضافة ملاحظة",
       "note_placeholder": "اكتب ملاحظتك هنا...",
-      "no_notes": "لا توجد ملاحظات"
+      "no_notes": "لا توجد ملاحظات",
+      "add_service_first_to_write_notes": "يرجى إضافة خدمة أولاً لتتمكن من كتابة مذكرات."
     },
     "print_view": {
       "customer": "العميل",

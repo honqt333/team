@@ -11,6 +11,7 @@ class WorkOrderItemNote extends Model
 
     protected $fillable = [
         'work_order_item_id',
+        'work_order_id',
         'user_id',
         'content',
     ];
@@ -18,6 +19,11 @@ class WorkOrderItemNote extends Model
     public function workOrderItem(): BelongsTo
     {
         return $this->belongsTo(WorkOrderItem::class);
+    }
+
+    public function workOrder(): BelongsTo
+    {
+        return $this->belongsTo(WorkOrder::class);
     }
 
     public function user(): BelongsTo

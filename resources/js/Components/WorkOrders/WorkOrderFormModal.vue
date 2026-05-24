@@ -264,8 +264,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 {{ $t('work_orders.form.entry_date') }}
                             </label>
-                            <input v-model="form.entry_date" type="date"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
+                            <CustomDatePicker v-model="form.entry_date" />
                         </div>
 
                         <!-- Expected End Date -->
@@ -273,8 +272,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 {{ $t('work_orders.form.expected_end_date') }}
                             </label>
-                            <input v-model="form.expected_end_date" type="date" :min="form.entry_date"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
+                            <CustomDatePicker v-model="form.expected_end_date" />
                         </div>
                     </div>
                 </div>
@@ -370,6 +368,7 @@ import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
 import VehiclePhotoUploader from '@/Components/WorkOrders/VehiclePhotoUploader.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import axios from 'axios';
 
 const props = defineProps({

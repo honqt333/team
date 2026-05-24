@@ -544,6 +544,23 @@
     "with_intelligence": "With Real Intelligence"
   },
   "work_orders": {
+    "service_modal": {
+      "duration_value": "Service Duration",
+      "duration_unit": "Period",
+      "warranty_value": "Service Warranty",
+      "warranty_unit": "Period",
+      "timeline": "Timeline",
+      "started_at": "Start Date",
+      "due_date": "Due Date",
+      "work_order_expected_end_date": "Expected Card End Date",
+      "pricing": "Pricing and Discounts",
+      "minutes": "Minutes",
+      "hours": "Hours",
+      "days": "Days",
+      "weeks": "Weeks",
+      "months": "Months",
+      "years": "Years"
+    },
     "edit": "Edit Work Order",
     "add": "Create Work Order",
     "has_open_work_order": "Has Open Work Order",
@@ -656,13 +673,15 @@
       "pending": "Pending",
       "in_progress": "Under implementation",
       "done": "Complete",
-      "cancelled": "Canceled"
+      "cancelled": "Canceled",
+      "general_note": "General Note"
     },
     "show": {
       "no_services": "There are no services",
       "no_parts": "There are no spare parts",
       "tabs": {
         "services": "Services",
+        "notes": "Notes",
         "parts": "Spare Parts",
         "technicians": "Technicians",
         "payments": "Payments",
@@ -794,7 +813,8 @@
       "assigned_at": "Appointment date",
       "add_note": "Add a note",
       "note_placeholder": "Write your comment here...",
-      "no_notes": "There are no notes"
+      "no_notes": "There are no notes",
+      "add_service_first_to_write_notes": "Please add a service first to be able to write notes."
     },
     "print_view": {
       "customer": "Customer",

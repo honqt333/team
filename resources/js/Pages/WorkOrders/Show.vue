@@ -750,6 +750,167 @@
                         </div>
                     </div>
 
+                    <!-- Notes Tab -->
+                    <div v-if="activeTab === 'notes'" key="tab-notes" class="space-y-6">
+                        <!-- Top Bar (Toggle, Search, Add Button) -->
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <div class="flex items-center gap-3 w-full sm:w-auto">
+                                <!-- View Mode Toggler -->
+                                <div class="flex items-center bg-gray-100 dark:bg-gray-900 p-1 rounded-xl">
+                                    <button type="button" @click="viewMode = 'list'" :class="['p-1.5 rounded-lg transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300']">
+                                        <!-- List Icon -->
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" @click="viewMode = 'grid'" :class="['p-1.5 rounded-lg transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300']">
+                                        <!-- Grid Icon -->
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <!-- Search Input -->
+                                <div class="relative w-full sm:w-64">
+                                    <input v-model="searchQuery" type="text" :placeholder="$t('work_orders.search') + '...'"
+                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-600">
+                                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Add Button in Header -->
+                            <div v-if="!isReadOnly" class="flex items-center gap-3">
+                                <button type="button" @click="showAddNoteModal = true"
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0f2c28] hover:bg-teal-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                                    <span>+</span>
+                                    <span>{{ $t('work_orders.show.tabs.notes') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Notes List (Grid / List Toggleable) -->
+                        <div v-if="filteredNotes.length > 0" :class="[viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3']">
+                            <div v-for="note in filteredNotes" :key="note.id"
+                                :class="[
+                                    'bg-[#fffbeb] dark:bg-amber-950/10 border border-amber-200/60 dark:border-amber-900/30 p-4 sm:p-5 rounded-2xl shadow-sm relative group hover:shadow-md transition-all duration-200',
+                                    viewMode === 'list' ? 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' : 'flex flex-col justify-between h-full min-h-[160px]'
+                                ]">
+                                
+                                <!-- LIST VIEW LAYOUT -->
+                                <template v-if="viewMode === 'list'">
+                                    <!-- Right side: User, Service and Note Content -->
+                                    <div class="flex items-start gap-4 flex-1">
+                                        <div class="flex-shrink-0">
+                                            <img v-if="note.user?.photo_url" :src="note.user.photo_url" class="w-10 h-10 rounded-full object-cover">
+                                            <div v-else class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                                                {{ note.user?.name?.charAt(0) || 'U' }}
+                                            </div>
+                                        </div>
+                                        <div class="space-y-1 min-w-0">
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                    {{ note.user?.name || $t('common.system') }}
+                                                </h4>
+                                                <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
+                                                    {{ getUserRoleName(note.user) }}
+                                                </span>
+                                            </div>
+                                            <button v-if="note.item_id" type="button" @click="openServiceNotesModal(note.item_id)" class="text-xs font-semibold text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 hover:underline text-right block">
+                                                {{ note.service_title_formatted }}
+                                            </button>
+                                            <p v-else class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                {{ note.service_title_formatted }}
+                                            </p>
+                                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mt-2 leading-relaxed">
+                                                {{ note.content }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Left side: Date & Time + Actions -->
+                                    <div class="flex items-center justify-between sm:flex-col sm:items-end gap-2 text-right sm:border-l border-amber-200/30 sm:pl-4">
+                                        <div class="text-[11px] text-gray-400 dark:text-gray-500 font-mono leading-tight font-bold">
+                                            <div>{{ getNoteDate(note.created_at) }}</div>
+                                            <div class="text-gray-300 dark:text-gray-600">{{ getNoteTime(note.created_at) }}</div>
+                                        </div>
+                                        <button v-if="!isReadOnly" type="button" @click="handleDeleteNote(note.item_id, note.id)"
+                                            class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+                                            :title="$t('common.delete')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- GRID VIEW LAYOUT -->
+                                <template v-else>
+                                    <div class="flex flex-col h-full justify-between">
+                                        <div>
+                                            <!-- Card Header (Avatar + Name & Role + Date) -->
+                                            <div class="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-amber-200/30 dark:border-amber-900/10">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="flex-shrink-0">
+                                                        <img v-if="note.user?.photo_url" :src="note.user.photo_url" class="w-9 h-9 rounded-full object-cover">
+                                                        <div v-else class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+                                                            {{ note.user?.name?.charAt(0) || 'U' }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">
+                                                            {{ note.user?.name || $t('common.system') }}
+                                                        </h4>
+                                                        <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider block">
+                                                            {{ getUserRoleName(note.user) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-[10px] text-gray-400 dark:text-gray-500 font-mono text-right font-bold leading-tight">
+                                                    <div>{{ getNoteDate(note.created_at) }}</div>
+                                                    <div class="text-gray-300 dark:text-gray-600">{{ getNoteTime(note.created_at) }}</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Service / Department green text -->
+                                            <button v-if="note.item_id" type="button" @click="openServiceNotesModal(note.item_id)" class="text-xs font-semibold text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 hover:underline text-right block mb-2">
+                                                {{ note.service_title_formatted }}
+                                            </button>
+                                            <p v-else class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                                                {{ note.service_title_formatted }}
+                                            </p>
+
+                                            <!-- Note Content -->
+                                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                                                {{ note.content }}
+                                            </p>
+                                        </div>
+
+                                        <!-- Card Footer Actions -->
+                                        <div v-if="!isReadOnly" class="flex justify-end mt-4 pt-3 border-t border-amber-200/20 dark:border-amber-900/10">
+                                            <button type="button" @click="handleDeleteNote(note.item_id, note.id)"
+                                                class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                                                :title="$t('common.delete')">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-else class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                                <span class="text-2xl">📝</span>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.no_notes') }}</p>
+                        </div>
+                    </div>
+
                     <!-- Spare Parts Tab -->
                     <div v-if="activeTab === 'parts'" key="tab-parts" class="space-y-4">
                         <!-- Add Part Button -->
@@ -1019,7 +1180,7 @@
         <WorkOrderServiceModal v-if="showItemModal || showServiceModal" :show="showItemModal || showServiceModal"
             :work-order="workOrder" :item="selectedItem" :department-id="selectedDepartmentId" :services="services"
             :technicians="technicians" :inventory-units="inventoryUnits" :warehouses="warehouses"
-            :read-only="isReadOnly" @close="showItemModal ? closeItemModal() : closeServiceModal()"
+            :read-only="isReadOnly" :initial-tab="serviceModalInitialTab" @close="showItemModal ? closeItemModal() : closeServiceModal()"
             @saved="showItemModal ? handleItemSaved() : handleServiceSaved()" />
 
         <!-- Add Part Modal -->
@@ -1040,6 +1201,49 @@
 
         <WorkOrderAttachmentModal v-if="showAttachmentModal" :show="showAttachmentModal" :work-order="workOrder"
             @close="showAttachmentModal = false" @saved="refreshWorkOrder" />
+
+        <!-- Floating Add Note Button -->
+        <button v-if="activeTab === 'notes' && !isReadOnly" @click="showAddNoteModal = true"
+            class="fixed bottom-6 left-6 z-40 w-14 h-14 bg-[#0f2c28] hover:bg-teal-800 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 scale-100 hover:scale-105 active:scale-95"
+            :title="$t('work_orders.item.add_note')">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+
+        <!-- Add Note Modal -->
+        <BaseModal :show="showAddNoteModal" @close="showAddNoteModal = false" size="md">
+            <template #title>
+                {{ $t('work_orders.item.add_note') }}
+            </template>
+
+            <form @submit.prevent="handleAddNote" class="space-y-4 text-right">
+                <div class="space-y-1">
+                    <!-- Note Content -->
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        {{ $t('work_orders.item.tab_notes') }}
+                    </label>
+                    <textarea v-model="newNoteContent" required rows="5"
+                        :placeholder="$t('work_orders.item.note_placeholder')"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"></textarea>
+                </div>
+            </form>
+
+            <template #footer>
+                <button type="button" @click="showAddNoteModal = false"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                    {{ $t('common.cancel') || 'إلغاء' }}
+                </button>
+                <button type="submit" @click="handleAddNote" :disabled="isSubmittingNote || !newNoteContent.trim()"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2">
+                    <svg v-if="isSubmittingNote" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ $t('common.save') || 'حفظ' }}</span>
+                </button>
+            </template>
+        </BaseModal>
     </AppLayout>
 </template>
 
@@ -1068,6 +1272,7 @@ import WorkOrderSignatures from '@/Components/WorkOrders/WorkOrderSignatures.vue
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import { usePermission } from '@/Composables/usePermission';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const { can } = usePermission();
 
@@ -1544,8 +1749,13 @@ function addDepartment(deptId) {
 
 // Service modal state
 const showServiceModal = ref(false);
-const selectedItem = ref(null);
+const selectedItemId = ref(null);
 const selectedDepartmentId = ref(null);
+
+const selectedItem = computed(() => {
+    if (!selectedItemId.value) return null;
+    return props.workOrder?.items?.find(i => i.id === selectedItemId.value) || null;
+});
 
 // Services filtered by department
 const departmentServices = computed(() => {
@@ -1556,21 +1766,34 @@ const departmentServices = computed(() => {
 // Open add service modal
 function openAddServiceModal(deptId) {
     selectedDepartmentId.value = deptId;
-    selectedItem.value = null;
+    selectedItemId.value = null;
     showServiceModal.value = true;
 }
 
 // Open edit service modal (advanced modal with tabs)
 function openEditServiceModal(item) {
-    selectedItem.value = item;
+    selectedItemId.value = item.id;
+    serviceModalInitialTab.value = 'service';
     showItemModal.value = true;
+}
+
+const serviceModalInitialTab = ref('service');
+
+function openServiceNotesModal(itemId) {
+    const item = props.workOrder.items.find(i => i.id === itemId);
+    if (item) {
+        selectedItemId.value = itemId;
+        serviceModalInitialTab.value = 'notes';
+        showItemModal.value = true;
+    }
 }
 
 // Close service modal
 function closeServiceModal() {
     showServiceModal.value = false;
-    selectedItem.value = null;
+    selectedItemId.value = null;
     selectedDepartmentId.value = null;
+    serviceModalInitialTab.value = 'service';
 }
 
 // Handle service saved
@@ -1586,7 +1809,8 @@ const showItemModal = ref(false);
 // Close item modal
 function closeItemModal() {
     showItemModal.value = false;
-    selectedItem.value = null;
+    selectedItemId.value = null;
+    serviceModalInitialTab.value = 'service';
 }
 
 // Handle item saved
@@ -1611,6 +1835,137 @@ async function deleteServiceItem(item) {
     }
 }
 
+// State for the dedicated Notes Tab
+const viewMode = ref(localStorage.getItem('work_orders_notes_view_mode') || 'list');
+watch(viewMode, (newVal) => {
+    localStorage.setItem('work_orders_notes_view_mode', newVal);
+});
+const searchQuery = ref('');
+const showAddNoteModal = ref(false);
+const newNoteContent = ref('');
+const isSubmittingNote = ref(false);
+
+// Collect only general notes from work order general_notes relation (notes from services are not shown here)
+const allNotes = computed(() => {
+    const notes = props.workOrder?.general_notes || props.workOrder?.generalNotes || [];
+    return notes
+        .map(note => {
+            const serviceTitle = note.work_order_item
+                ? (getName(note.work_order_item.service) || note.work_order_item.title)
+                : '';
+            return {
+                id: note.id,
+                content: note.content,
+                created_at: note.created_at,
+                user: note.user,
+                item_id: note.work_order_item_id || null,
+                service_title_formatted: serviceTitle || (t('work_orders.general_note') || 'ملاحظة عامة'),
+            };
+        })
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+});
+
+// Filter notes by search query
+const filteredNotes = computed(() => {
+    let list = allNotes.value;
+    if (searchQuery.value.trim()) {
+        const q = searchQuery.value.toLowerCase();
+        list = list.filter(note => 
+            note.content.toLowerCase().includes(q) ||
+            note.service_title_formatted.toLowerCase().includes(q) ||
+            (note.user?.name && note.user.name.toLowerCase().includes(q))
+        );
+    }
+    return list;
+});
+
+// Get user role name helper
+const getUserRoleName = (user) => {
+    if (!user) return '';
+    if (user.is_system_admin) return 'System Admin';
+    if (user.roles && user.roles.length > 0) {
+        const roleName = user.roles[0].name;
+        const rolesMap = {
+            'super_admin': 'Super Admin',
+            'business_owner': 'Business Owner',
+            'admin': 'Admin',
+            'manager': 'Manager',
+            'technician': 'Technician',
+            'receptionist': 'Receptionist'
+        };
+        return rolesMap[roleName] || roleName;
+    }
+    return 'Staff';
+};
+
+// Date & Time formatting helpers for notes list
+const getNoteDate = (createdAt) => {
+    if (!createdAt) return '';
+    const d = new Date(createdAt);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
+};
+
+const getNoteTime = (createdAt) => {
+    if (!createdAt) return '';
+    const d = new Date(createdAt);
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+};
+
+// Add a note (General Note)
+function handleAddNote() {
+    if (!newNoteContent.value.trim()) return;
+    
+    isSubmittingNote.value = true;
+    router.post(route('work-orders.notes.store', { 
+        work_order: props.workOrder.id
+    }), {
+        content: newNoteContent.value
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+            newNoteContent.value = '';
+            showAddNoteModal.value = false;
+            success(t('common.saved_success'));
+        },
+        onFinish: () => {
+            isSubmittingNote.value = false;
+        }
+    });
+}
+
+// Delete a note
+async function handleDeleteNote(itemId, noteId) {
+    const confirmed = await confirm({
+        title: t('common.confirm_delete_title'),
+        message: t('common.confirm_delete_message'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+
+    if (confirmed) {
+        const deleteRoute = itemId 
+            ? route('work-orders.items.notes.destroy', { work_order: props.workOrder.id, item: itemId, note: noteId })
+            : route('work-orders.notes.destroy', { work_order: props.workOrder.id, note: noteId });
+
+        router.delete(deleteRoute, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                success(t('common.deleted_success'));
+            }
+        });
+    }
+}
+
+
 const tabs = computed(() => {
     const allTabs = [
         { key: 'services', label: t('work_orders.show.tabs.services'), icon: '🔧' },
@@ -1619,6 +1974,7 @@ const tabs = computed(() => {
         { key: 'payments', label: t('work_orders.show.tabs.payments'), icon: '💰' },
         { key: 'condition', label: t('work_orders.show.tabs.condition'), icon: '🚗' },
         { key: 'photos', label: t('work_orders.show.tabs.photos'), icon: '📸' },
+        { key: 'notes', label: t('work_orders.show.tabs.notes'), icon: '📝' },
         { key: 'attachments', label: t('work_orders.show.tabs.attachments'), icon: '📎' },
         { key: 'inspections', label: t('work_orders.show.tabs.inspections'), icon: '🔍' },
         { key: 'signatures', label: t('work_orders.show.tabs.signatures'), icon: '✍️' },

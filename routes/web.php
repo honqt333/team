@@ -170,6 +170,10 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::post('/work-orders/{work_order}/items/{item}/notes', [WorkOrderController::class, 'addNote'])->name('work-orders.items.notes.store');
     Route::delete('/work-orders/{work_order}/items/{item}/notes/{note}', [WorkOrderController::class, 'deleteNote'])->name('work-orders.items.notes.destroy');
     
+    // Work Order General Notes
+    Route::post('/work-orders/{work_order}/notes', [WorkOrderController::class, 'addGeneralNote'])->name('work-orders.notes.store');
+    Route::delete('/work-orders/{work_order}/notes/{note}', [WorkOrderController::class, 'deleteGeneralNote'])->name('work-orders.notes.destroy');
+    
     // Work Order Photos
     Route::post('/work-orders/{workOrder}/photos', [WorkOrderController::class, 'uploadPhotos'])->name('work-orders.photos.store');
     Route::delete('/work-orders/{workOrder}/photos/{photo}', [WorkOrderController::class, 'deletePhoto'])->name('work-orders.photos.destroy');

@@ -276,7 +276,9 @@ class WorkOrderController
             'items.service.department',
             'items.technicians',
             'items.parts',
-            'items.itemNotes.user',
+            'items.itemNotes.user.roles',
+            'generalNotes.user.roles',
+            'generalNotes.workOrderItem.service.department',
             'damageMarks', 
             'photos', 
             'departments',
@@ -446,6 +448,13 @@ class WorkOrderController
             'unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
             'discount_value' => 'nullable|numeric|min:0',
+            'duration_value' => 'nullable|integer|min:0',
+            'duration_unit' => 'nullable|string|max:50',
+            'warranty_value_snapshot' => 'nullable|integer|min:0',
+            'warranty_unit_snapshot' => 'nullable|string|max:50',
+            'started_at' => 'nullable|date',
+            'completed_at' => 'nullable|date',
+            'due_date' => 'nullable|date',
             // Pending parts validation
             'pending_parts' => ['nullable', 'array'],
             'pending_parts.*.source' => ['required_with:pending_parts', 'in:warehouse,external,customer'],
@@ -477,7 +486,32 @@ class WorkOrderController
             'min_price_snapshot' => $service ? ($service->min_price ?? 0) : 0,
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
+            'duration_value' => $validated['duration_value'] ?? null,
+            'duration_unit' => $validated['duration_unit'] ?? null,
+            'warranty_value_snapshot' => $validated['warranty_value_snapshot'] ?? null,
+            'warranty_unit_snapshot' => $validated['warranty_unit_snapshot'] ?? null,
+            'started_at' => $validated['started_at'] ?? null,
+            'completed_at' => $validated['completed_at'] ?? null,
+            'due_date' => $validated['due_date'] ?? null,
         ]);
+
+        // Auto-extend expected_end_date of the work order if the item's dates exceed it
+        $maxItemDate = null;
+        if ($line->due_date) {
+            $maxItemDate = $line->due_date;
+        } elseif ($line->started_at) {
+            $maxItemDate = $line->started_at;
+        }
+        
+        if ($maxItemDate) {
+            $expectedEndDate = $work_order->expected_end_date ? \Carbon\Carbon::parse($work_order->expected_end_date) : null;
+            if (!$expectedEndDate || \Carbon\Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
+                $work_order->update([
+                    'expected_end_date' => $maxItemDate
+                ]);
+                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى ' . \Carbon\Carbon::parse($maxItemDate)->format('Y-m-d') . ' تلقائياً لتجاوزه بمدة الخدمة');
+            }
+        }
 
         // Save pending parts linked to the new service item
         if (!empty($request->pending_parts)) {
@@ -518,8 +552,7 @@ class WorkOrderController
         if (!empty($request->pending_notes)) {
             foreach ($request->pending_notes as $note) {
                 $line->itemNotes()->create([
-                    'tenant_id' => $work_order->tenant_id,
-                    'center_id' => $work_order->center_id,
+                    'work_order_id' => $work_order->id,
                     'content' => $note['content'],
                     'user_id' => $request->user()->id,
                 ]);
@@ -542,9 +575,34 @@ class WorkOrderController
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
             'discount_value' => 'nullable|numeric|min:0',
             'status' => 'nullable|in:' . implode(',', \App\Models\WorkOrderItem::STATUSES),
+            'duration_value' => 'nullable|integer|min:0',
+            'duration_unit' => 'nullable|string|max:50',
+            'warranty_value_snapshot' => 'nullable|integer|min:0',
+            'warranty_unit_snapshot' => 'nullable|string|max:50',
+            'started_at' => 'nullable|date',
+            'completed_at' => 'nullable|date',
+            'due_date' => 'nullable|date',
         ]);
 
         $item->update($validated);
+
+        // Auto-extend expected_end_date of the work order if the item's dates exceed it
+        $maxItemDate = null;
+        if ($item->due_date) {
+            $maxItemDate = $item->due_date;
+        } elseif ($item->started_at) {
+            $maxItemDate = $item->started_at;
+        }
+        
+        if ($maxItemDate) {
+            $expectedEndDate = $work_order->expected_end_date ? \Carbon\Carbon::parse($work_order->expected_end_date) : null;
+            if (!$expectedEndDate || \Carbon\Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
+                $work_order->update([
+                    'expected_end_date' => $maxItemDate
+                ]);
+                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى ' . \Carbon\Carbon::parse($maxItemDate)->format('Y-m-d') . ' تلقائياً لتجاوزه بمدة الخدمة');
+            }
+        }
 
         $work_order->logActivity('item_updated', __('work_orders.activities.actions.item_updated', ['title' => $item->title]));
 
@@ -894,13 +952,17 @@ class WorkOrderController
         $note = $item->itemNotes()->create([
             'user_id' => $request->user()->id,
             'content' => $validated['content'],
+            'work_order_id' => $work_order->id,
         ]);
 
         $note->load('user');
 
         $message = __('messages.note_added');
-        return $request->expectsJson()
-            ? response()->json(['success' => $message, 'note' => $note])
+        
+        $notes = $item->itemNotes()->with('user.roles')->latest()->get();
+        
+        return $request->wantsJson() && !$request->hasHeader('X-Inertia')
+            ? response()->json(['success' => $message, 'notes' => $notes])
             : redirect()->back()->with('success', $message);
     }
 
@@ -914,7 +976,50 @@ class WorkOrderController
         $note->delete();
 
         $message = __('messages.note_deleted');
-        return request()->expectsJson()
+        
+        $notes = $item->itemNotes()->with('user.roles')->latest()->get();
+        
+        return request()->wantsJson() && !request()->hasHeader('X-Inertia')
+            ? response()->json(['success' => $message, 'notes' => $notes])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Add general note to work order.
+     */
+    public function addGeneralNote(Request $request, WorkOrder $work_order): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'content' => 'required|string|max:2000',
+        ]);
+
+        $note = $work_order->generalNotes()->create([
+            'user_id' => $request->user()->id,
+            'content' => $validated['content'],
+            'work_order_item_id' => null,
+        ]);
+
+        $note->load('user');
+
+        $message = __('messages.note_added');
+        return $request->wantsJson() && !$request->hasHeader('X-Inertia')
+            ? response()->json(['success' => $message, 'note' => $note])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Delete general note.
+     */
+    public function deleteGeneralNote(WorkOrder $work_order, \App\Models\WorkOrderItemNote $note): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $note->delete();
+
+        $message = __('messages.note_deleted');
+        return request()->wantsJson() && !request()->hasHeader('X-Inertia')
             ? response()->json(['success' => $message])
             : redirect()->back()->with('success', $message);
     }

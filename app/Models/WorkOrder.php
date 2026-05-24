@@ -227,6 +227,14 @@ class WorkOrder extends Model
     }
 
     /**
+     * Get all notes for this work order (both general and item-linked).
+     */
+    public function generalNotes(): HasMany
+    {
+        return $this->hasMany(WorkOrderItemNote::class, 'work_order_id');
+    }
+
+    /**
      * Log an activity for this work order.
      */
     public function logActivity(string $action, ?string $description = null, ?array $changes = null): void

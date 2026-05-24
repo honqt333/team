@@ -54,6 +54,9 @@ class WorkOrderItem extends Model
         'notes',
         'started_at',
         'completed_at',
+        'duration_value',
+        'duration_unit',
+        'due_date',
         // New Tax Fields
         'is_taxable',
         'tax_category_code',
@@ -85,6 +88,7 @@ class WorkOrderItem extends Model
         'price_locked' => 'boolean',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
+        'due_date' => 'date',
         'tax_rate_snapshot' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'line_total_excl_tax' => 'decimal:2',
