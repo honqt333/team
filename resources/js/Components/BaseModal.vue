@@ -72,6 +72,10 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    overflowVisible: {
+        type: Boolean,
+        default: false,
+    },
 });
 
 const sizeClass = computed(() => {

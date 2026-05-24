@@ -292,7 +292,7 @@ class WorkOrderController
             if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
                 return 'packages';
             }
-            return $item->service?->department_id ?? 0;
+            return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
         $customers = \App\Models\Customer::select('id', 'name', 'phone')->get();
@@ -439,8 +439,9 @@ class WorkOrderController
         $this->authorize('update', $work_order);
 
         $validated = $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'title' => 'nullable|string|max:255',
+            'service_id' => 'nullable|exists:services,id',
+            'department_id' => 'nullable|exists:departments,id',
+            'title' => 'required_without:service_id|nullable|string|max:255',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
@@ -462,17 +463,18 @@ class WorkOrderController
             'pending_notes.*.content' => ['required_with:pending_notes', 'string'],
         ]);
 
-        $service = \App\Models\Service::find($validated['service_id']);
+        $service = $validated['service_id'] ? \App\Models\Service::find($validated['service_id']) : null;
 
         $line = $work_order->items()->create([
             'tenant_id' => $work_order->tenant_id,
             'center_id' => $work_order->center_id,
             'service_id' => $validated['service_id'],
-            'title' => $validated['title'] ?? $service->name_ar,
+            'department_id' => $validated['department_id'] ?? null,
+            'title' => $validated['title'] ?? ($service ? $service->name_ar : 'أخرى'),
             'qty' => $validated['qty'],
             'unit_price' => $validated['unit_price'],
-            'base_price_snapshot' => $service->base_price ?? 0,
-            'min_price_snapshot' => $service->min_price ?? 0,
+            'base_price_snapshot' => $service ? ($service->base_price ?? 0) : 0,
+            'min_price_snapshot' => $service ? ($service->min_price ?? 0) : 0,
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
         ]);
@@ -965,7 +967,7 @@ class WorkOrderController
             if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
                 return 'packages';
             }
-            return $item->service?->department_id ?? 0;
+            return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
         $departments = \App\Models\Department::active()->ordered()->get()->keyBy('id');
@@ -1014,7 +1016,7 @@ class WorkOrderController
             if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
                 return 'packages';
             }
-            return $item->service?->department_id ?? 0;
+            return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
         // Collect all parts

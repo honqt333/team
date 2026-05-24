@@ -661,10 +661,34 @@
                                         class="px-2 py-0.5 text-xs font-medium rounded-full">{{
                                             $t(`quotes.status.${quote.status}`) }}</span>
                                 </div>
-                                <div class="mt-1">
+                                <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 mb-3">
                                     <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
+                                    <span class="text-gray-400 mx-0.5">•</span>
+                                    <span class="truncate">{{ getVehicleName(quote.vehicle) }}</span>
                                 </div>
-                                <div class="mt-2 text-xs text-gray-400">{{ formatDate(quote.created_at) }}</div>
+                                <!-- Financial Metrics Grid -->
+                                <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
+                                    <!-- Price -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ isRtl ? 'السعر' : 'Price' }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatPrice(quote.total_excl_tax || 0) }}</span>
+                                    </div>
+                                    <!-- VAT -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ isRtl ? 'الضريبة' : 'VAT' }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatPrice(quote.total_tax || 0) }}</span>
+                                    </div>
+                                    <!-- Total -->
+                                    <div class="flex flex-col items-center justify-center py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ isRtl ? 'الإجمالي' : 'Total' }}</span>
+                                        <span class="text-[11px] font-black text-amber-600 dark:text-amber-400">
+                                            {{ formatPrice(quote.total || 0) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <span class="text-xs text-gray-400">{{ formatDate(quote.created_at) }}</span>
+                                </div>
                             </Link>
                         </div>
 
@@ -686,6 +710,15 @@
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('quotes.columns.created_at') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ isRtl ? 'السعر' : 'Price' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ isRtl ? 'الضريبة' : 'VAT' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ isRtl ? 'الإجمالي' : 'Total' }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -696,8 +729,9 @@
                                             class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                             {{ quote.code }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                            <div class="flex flex-col items-center">
+                                            <div class="flex flex-col items-center gap-1">
                                                 <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
+                                                <span class="text-xs text-gray-500">{{ getVehicleName(quote.vehicle) }}</span>
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap">
@@ -707,6 +741,15 @@
                                         </td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{
                                             formatDate(quote.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                                            {{ formatPrice(quote.total_excl_tax || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                            {{ formatPrice(quote.total_tax || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                                            {{ formatPrice(quote.total || 0) }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

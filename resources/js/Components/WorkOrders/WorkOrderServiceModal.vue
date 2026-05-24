@@ -465,7 +465,7 @@ const editingLinkedPart = ref(null);
 
 // Form
 const form = useForm({
-    service_id: props.item?.service_id || '',
+    service_id: props.item ? (props.item.service_id || 'other') : '',
     title: props.item?.title || '',
     qty: props.item?.qty || 1,
     unit_price: props.item?.unit_price || 0,
@@ -522,7 +522,7 @@ const selectedService = computed(() => {
         return props.item.service;
     }
     // In add mode, find from services list
-    if (!form.service_id) return null;
+    if (!form.service_id || form.service_id === 'other') return null;
     const serviceId = parseInt(form.service_id);
     return props.services?.find(s => s.id === serviceId) || null;
 });
@@ -590,10 +590,15 @@ const serviceOptions = computed(() => {
     } else {
         filteredServices = filteredServices.filter(s => s.type !== 'package');
     }
-    return filteredServices.map(s => ({
+    const list = filteredServices.map(s => ({
         value: s.id,
         label: getName(s)
     }));
+    list.push({
+        value: 'other',
+        label: t('common.other') || 'أخرى'
+    });
+    return list;
 });
 
 // Methods
@@ -739,8 +744,16 @@ function submitForm() {
         return;
     }
 
+    if (form.service_id === 'other' && !form.title?.trim()) {
+        form.setError('title', t('validation.required') || 'هذا الحقل مطلوب');
+        saving.value = false;
+        return;
+    }
+
     const formData = {
         ...form.data(),
+        service_id: form.service_id === 'other' ? null : form.service_id,
+        department_id: props.departmentId,
         pending_parts: pendingParts.value,
         pending_technicians: pendingTechnicians.value,
         pending_notes: pendingNotes.value
@@ -774,7 +787,12 @@ function submitForm() {
 // Watch for service selection to auto-fill price
 watch(() => form.service_id, (serviceId) => {
     if (serviceId && !props.item) {
-        const service = props.services.find(s => s.id === serviceId);
+        if (serviceId === 'other') {
+            form.unit_price = 0;
+            form.title = '';
+            return;
+        }
+        const service = props.services.find(s => s.id == serviceId);
         if (service) {
             form.unit_price = service.base_price || 0;
             form.title = getName(service);
@@ -785,7 +803,7 @@ watch(() => form.service_id, (serviceId) => {
 // Watch for item changes to sync local data
 watch(() => props.item, (newItem) => {
     if (newItem) {
-        form.service_id = newItem.service_id;
+        form.service_id = newItem.service_id || 'other';
         form.title = newItem.title;
         form.qty = newItem.qty;
         form.unit_price = newItem.unit_price;
@@ -804,7 +822,7 @@ watch(() => props.show, (isOpen) => {
     if (isOpen) {
         activeTab.value = 'service';
         if (props.item) {
-            form.service_id = props.item.service_id;
+            form.service_id = props.item.service_id || 'other';
             form.title = props.item.title;
             form.qty = props.item.qty;
             form.unit_price = props.item.unit_price;

@@ -769,6 +769,7 @@
       "price": "Service price",
       "discount": "Discount",
       "qty": "Quantity",
+      "amount": "Amount",
       "total_cost": "Total cost",
       "service_cost": "Service cost",
       "parts_cost": "Cutting cost",

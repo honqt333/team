@@ -32,7 +32,7 @@
                 <!-- Tab 1: Main Info -->
                 <div v-show="activeTab === 'main_info'" class="space-y-4">
                     <!-- Search Section (Hide if pre-selected vehicle exists and not editing) -->
-                    <div v-if="!vehicle && !quote"
+                    <div v-if="!vehicle && (!quote || !selectedVehicle)"
                         class="relative bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -136,7 +136,7 @@
                                     </h4>
                                 </div>
                             </div>
-                            <Tooltip :text="$t('common.clear')">
+                            <Tooltip v-if="!vehicle && !quote" :text="$t('common.clear')">
                                 <button type="button" @click="clearSelection"
                                     class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

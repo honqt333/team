@@ -34,6 +34,7 @@ class WorkOrderItem extends Model
     protected $fillable = [
         'work_order_id',
         'service_id',
+        'department_id',
         'tenant_id',
         'center_id',
         'title',
@@ -71,6 +72,7 @@ class WorkOrderItem extends Model
     ];
 
     protected $casts = [
+        'department_id' => 'integer',
         'qty' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'base_price_snapshot' => 'decimal:2',
@@ -94,6 +96,10 @@ class WorkOrderItem extends Model
     {
         // Auto-calculate totals on creating/updating using PricingHelper
         static::saving(function (WorkOrderItem $item) {
+            if ($item->service_id && $item->service) {
+                $item->department_id = $item->service->department_id;
+            }
+
             // Use PricingHelper to compute all values
             $computed = PricingHelper::computeLineTotal(
                 (float) $item->unit_price,
@@ -143,6 +149,11 @@ class WorkOrderItem extends Model
     public function service(): BelongsTo
     {
         return $this->belongsTo(Service::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
     }
 
     /**

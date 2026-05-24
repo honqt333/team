@@ -249,7 +249,7 @@
                             </svg>
                             <span class="text-sm font-bold text-teal-600 dark:text-teal-400 font-mono cursor-default"
                                 dir="ltr">
-                                {{ workOrder.odometer ? Number(workOrder.odometer).toLocaleString() + ' km' : '—' }}
+                                {{ workOrder.mileage ? Number(workOrder.mileage).toLocaleString() + ' km' : '—' }}
                             </span>
                             <div
                                 class="absolute bottom-full right-0 mb-2 hidden group-hover/odo:block z-50 pointer-events-none">

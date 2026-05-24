@@ -82,6 +82,11 @@ class WorkOrderItemPart extends Model
     protected static function booted(): void
     {
         static::saving(function (WorkOrderItemPart $part) {
+            if ($part->source === self::SOURCE_CUSTOMER) {
+                $part->unit_price = 0;
+                $part->discount = 0;
+            }
+
             // total = (qty * unit_price) - discount
             $subtotal = bcmul($part->qty, $part->unit_price, 2);
             $part->total = bcsub($subtotal, $part->discount ?? 0, 2);

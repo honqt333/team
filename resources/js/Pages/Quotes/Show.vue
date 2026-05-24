@@ -80,7 +80,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div v-if="quote.status === 'converted' && quote.converted_work_order" class="mt-1 flex justify-end">
+                        <div v-if="['converted', 'approved'].includes(quote.status) && quote.converted_work_order" class="mt-1 flex justify-end">
                              <Link :href="route('work-orders.show', quote.converted_work_order.id)" 
                                 class="text-xs font-black text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-3 py-1.5 rounded-xl flex items-center gap-2 hover:bg-purple-100 transition-all border border-purple-100 dark:border-purple-800 shadow-sm">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -389,8 +389,11 @@
                                                     <span class="text-gray-400 font-medium font-mono text-sm leading-none">{{ index + 1 }}.</span>
                                                     <button @click="editLine(line)" type="button"
                                                         class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-tight">
-                                                        {{ line.description || getName(line.service) }}
+                                                        {{ line.title }}
                                                     </button>
+                                                    <p v-if="line.description && line.description !== line.title" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        {{ line.description }}
+                                                    </p>
                                                 </div>
 
                                                 <!-- Meta Row: Price badge -->

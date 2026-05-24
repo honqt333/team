@@ -61,6 +61,11 @@ class QuotePart extends Model
     protected static function booted(): void
     {
         static::saving(function (QuotePart $part) {
+            if ($part->source === self::SOURCE_CUSTOMER) {
+                $part->unit_price = 0;
+                $part->discount = 0;
+            }
+
             // Auto-calculate base total: (qty * unit_price) - discount
             $subtotal = bcmul($part->qty, $part->unit_price, 2);
             $netAmount = bcsub($subtotal, $part->discount, 2);

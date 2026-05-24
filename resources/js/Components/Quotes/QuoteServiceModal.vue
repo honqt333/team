@@ -298,7 +298,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
-const { getName } = useLocalized();
+const { getName, getDescription } = useLocalized();
 const { formatCurrency, toEnglish } = useNumberFormat();
 
 const { confirm } = useConfirm();
@@ -312,7 +312,7 @@ const editingPendingPartIndex = ref(null); // Track which pending part is being 
 
 // Form
 const form = useForm({
-    service_id: props.line?.service_id || '',
+    service_id: props.line ? (props.line.service_id || 'other') : '',
     description: props.line?.description || '',
     qty: 1, // Fixed to 1 as per requirements
     unit_price: props.line?.unit_price || 0,
@@ -341,10 +341,15 @@ const calculatedTotal = computed(() => {
 
 // Map services to SearchableSelect options
 const serviceOptions = computed(() => {
-    return (props.services || []).map(s => ({
+    const list = (props.services || []).map(s => ({
         value: s.id,
         label: toEnglish(getName(s))
     }));
+    list.push({
+        value: 'other',
+        label: t('common.other') || 'أخرى'
+    });
+    return list;
 });
 
 // Get the currently selected service
@@ -434,9 +439,15 @@ function formatPrice(value) {
 }
 
 function submitForm() {
-    // Include pending parts in form data
+    if (form.service_id === 'other' && !form.description?.trim()) {
+        form.setError('description', t('validation.required') || 'هذا الحقل مطلوب');
+        return;
+    }
+
     const formData = {
         ...form.data(),
+        service_id: form.service_id === 'other' ? null : form.service_id,
+        department_id: props.departmentId,
         pending_parts: pendingParts.value
     };
 
@@ -572,10 +583,15 @@ async function handlePartDelete(part) {
 watch(() => form.service_id, (serviceId) => {
     if (isPopulating.value) return; // Skip if we are just loading data
     if (serviceId && !props.line) {
-        const service = props.services.find(s => s.id === serviceId);
+        if (serviceId === 'other') {
+            form.unit_price = 0;
+            form.description = '';
+            return;
+        }
+        const service = props.services.find(s => s.id == serviceId);
         if (service) {
             form.unit_price = service.base_price || 0;
-            form.description = getName(service);
+            form.description = getDescription(service) || getName(service);
         }
     }
 });
@@ -589,7 +605,7 @@ watch([() => props.show, () => props.line], ([isOpen, line]) => {
         pendingParts.value = []; // Reset pending parts
         
         if (line) {
-            form.service_id = line.service_id;
+            form.service_id = line.service_id || 'other';
             form.description = line.description || '';
             form.qty = line.qty || 1;
             form.unit_price = line.unit_price || 0;

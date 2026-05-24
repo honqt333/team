@@ -463,7 +463,7 @@ class QuoteController extends Controller
             if ($line->service?->type === \App\Models\Service::TYPE_PACKAGE) {
                 return 'packages';
             }
-            return $line->service?->department_id ?? 0;
+            return $line->department_id ?? $line->service?->department_id ?? 0;
         });
 
         $departments = Department::where('is_active', true)
@@ -520,8 +520,9 @@ class QuoteController extends Controller
         }
 
         $validated = $request->validate([
-            'service_id' => ['required', 'exists:services,id'],
-            'description' => ['nullable', 'string', 'max:500'],
+            'service_id' => ['nullable', 'exists:services,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'description' => ['required_without:service_id', 'nullable', 'string', 'max:500'],
             'qty' => ['required', 'numeric', 'min:0.01'],
             'unit_price' => ['required', 'numeric', 'min:0'],
             'discount_type' => ['nullable', 'in:none,percentage,fixed'],
@@ -535,7 +536,7 @@ class QuoteController extends Controller
             'pending_parts.*.discount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $service = Service::find($validated['service_id']);
+        $service = $validated['service_id'] ? Service::find($validated['service_id']) : null;
 
         // Validate price constraints based on service settings
         $unitPrice = (float) $validated['unit_price'];
@@ -543,12 +544,12 @@ class QuoteController extends Controller
         $discountValue = (float) ($validated['discount_value'] ?? 0);
         
         // If price override not allowed, force base_price (but allow discount with min_price check)
-        if (!$service->allow_price_override) {
+        if ($service && !$service->allow_price_override) {
             $unitPrice = (float) $service->base_price;
         }
         
         // Always check min_price constraint on FINAL price (after discount)
-        $minPrice = (float) ($service->min_price ?? 0);
+        $minPrice = $service ? (float) ($service->min_price ?? 0) : 0;
         if ($minPrice > 0) {
             // Calculate final price using same logic as frontend
             $discountAmount = PricingHelper::computeDiscountAmount($unitPrice, $discountType, $discountValue);
@@ -567,11 +568,12 @@ class QuoteController extends Controller
         $line = QuoteLine::create([
             'quote_id' => $quote->id,
             'service_id' => $validated['service_id'],
-            'description' => $validated['description'] ?? $service->name,
+            'department_id' => $validated['department_id'],
+            'description' => $validated['description'] ?? ($service ? $service->name : 'أخرى'),
             'qty' => $validated['qty'],
             'unit_price' => $unitPrice,
-            'base_price_snapshot' => $service->base_price ?? $unitPrice,
-            'min_price_snapshot' => $service->min_price ?? 0,
+            'base_price_snapshot' => $service?->base_price ?? $unitPrice,
+            'min_price_snapshot' => $service ? ($service->min_price ?? 0) : 0,
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
         ]);
@@ -769,8 +771,8 @@ class QuoteController extends Controller
             'hide_on_print' => ['boolean'],
         ]);
 
-        // Validate min price if warehouse part
-        if ($validated['source'] === 'warehouse' && !empty($validated['part_id'])) {
+        // Validate min price if warehouse part and not included in package
+        if ($validated['source'] === 'warehouse' && !empty($validated['part_id']) && !($validated['include_in_package'] ?? false)) {
             $part = Part::find($validated['part_id']);
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?: 1);
@@ -827,10 +829,11 @@ class QuoteController extends Controller
             'hide_on_print' => ['boolean'],
         ]);
 
-        // Validate min price if warehouse part
+        // Validate min price if warehouse part and not included in package
         $source = $validated['source'] ?? $quotePart->source;
         $partId = $validated['part_id'] ?? $quotePart->part_id;
-        if ($source === 'warehouse' && !empty($partId)) {
+        $includeInPackage = $validated['include_in_package'] ?? $quotePart->include_in_package;
+        if ($source === 'warehouse' && !empty($partId) && !$includeInPackage) {
             $part = Part::find($partId);
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?? $quotePart->qty);

@@ -87,7 +87,7 @@
                     <div v-for="line in quote.lines" :key="line.id" class="px-5 py-4 flex items-start justify-between gap-4">
                         <div class="flex-1 min-w-0">
                             <p class="font-bold text-gray-900 dark:text-white text-sm">{{ line.title }}</p>
-                            <p v-if="line.description" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ line.description }}</p>
+                            <p v-if="line.description && line.description !== line.title" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ line.description }}</p>
                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ t('quotes.public.qty') }}: {{ line.qty }} × {{ formatAmount(line.unit_price) }}</p>
                         </div>
                         <div class="text-right flex-shrink-0">

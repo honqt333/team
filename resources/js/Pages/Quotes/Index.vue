@@ -219,8 +219,11 @@
                                 <div class="flex items-center gap-2">
                                     <span class="text-[10px] font-black text-gray-400 dark:text-gray-500 tracking-widest uppercase">#{{ toEnglish(quote.code) }}</span>
                                 </div>
+                                <div v-if="quote.created_at" class="text-[9px] font-bold text-slate-400">
+                                    {{ formatDate(quote.created_at) }}
+                                </div>
                                 <!-- Converted WO Link (Under ID) -->
-                                <div v-if="quote.status === 'converted' && (quote.converted_work_order?.id || quote.converted_work_order_id)" 
+                                <div v-if="['converted', 'approved'].includes(quote.status) && (quote.converted_work_order?.id || quote.converted_work_order_id)" 
                                     class="flex items-center gap-1 group/link"
                                     @click.stop>
                                             <Link :href="route('work-orders.show', quote.converted_work_order?.id || quote.converted_work_order_id)" 
