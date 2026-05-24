@@ -404,6 +404,130 @@
                         </div>
                     </div>
 
+                    <!-- ========== SERVICES TAB ========== -->
+                    <div v-if="activeTab === 'services'" class="space-y-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ isRtl ? 'الخدمات المنفذة' : 'Executed Services' }}</h3>
+                        </div>
+                        <div v-if="services.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800">
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'الخدمة' : 'Service' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'رقم الكرت' : 'Card Number' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'التاريخ' : 'Date' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'الكمية' : 'Qty' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'سعر الوحدة' : 'Unit Price' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'الإجمالي' : 'Total' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'الحالة' : 'Status' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="item in services" :key="item.id" @click="router.visit(route('work-orders.show', item.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white">{{ isRtl ? item.name_ar : item.name_en }}</td>
+                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold">{{ toEnglish(item.work_order_code) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">{{ formatDate(item.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ toEnglish(item.qty) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ formatCurrency(item.price) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black">{{ formatCurrency(item.total) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                            <span :class="getStatusClass(item.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">
+                                                {{ $t(`work_orders.status.${item.status}`) || item.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="text-center py-12">
+                            <p class="text-gray-500 dark:text-gray-400 font-bold">{{ isRtl ? 'لا توجد خدمات مسجلة لهذه المركبة' : 'No services recorded for this vehicle' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- ========== PARTS TAB ========== -->
+                    <div v-if="activeTab === 'parts'" class="space-y-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ isRtl ? 'قطع الغيار المستخدمة' : 'Used Spare Parts' }}</h3>
+                        </div>
+                        <div v-if="parts.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800">
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'القطعة' : 'Part Name' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'رقم القطعة' : 'Part Number' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'رقم الكرت' : 'Card Number' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'التاريخ' : 'Date' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'المصدر' : 'Source' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'الكمية' : 'Qty' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'سعر الوحدة' : 'Unit Price' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'الإجمالي' : 'Total' }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ isRtl ? 'الحالة' : 'Status' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="part in parts" :key="part.id" @click="router.visit(route('work-orders.show', part.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white">{{ part.name }}</td>
+                                        <td class="px-4 py-3 text-center font-mono text-xs text-gray-600 dark:text-gray-400 font-semibold">{{ toEnglish(part.part_number) || '-' }}</td>
+                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold">{{ toEnglish(part.work_order_code) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">{{ formatDate(part.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center text-xs font-bold">
+                                            <span class="px-2 py-0.5 rounded-full" :class="part.source === 'warehouse' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30' : part.source === 'external' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30'">
+                                                {{ part.source === 'warehouse' ? (isRtl ? 'المستودع' : 'Warehouse') : part.source === 'external' ? (isRtl ? 'خارجي' : 'External') : (isRtl ? 'من العميل' : 'Customer') }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ toEnglish(part.qty) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ formatCurrency(part.price) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black">{{ formatCurrency(part.total) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full" :class="part.status === 'issued' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : part.status === 'reversed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' : 'bg-gray-100 text-gray-700 dark:bg-gray-700'">
+                                                {{ part.status === 'issued' ? (isRtl ? 'منصرف' : 'Issued') : part.status === 'reversed' ? (isRtl ? 'مرتجع' : 'Reversed') : part.status === 'cancelled' ? (isRtl ? 'ملغي' : 'Cancelled') : (isRtl ? 'قيد الانتظار' : 'Pending') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="text-center py-12">
+                            <p class="text-gray-500 dark:text-gray-400 font-bold">{{ isRtl ? 'لا توجد قطع غيار مسجلة لهذه المركبة' : 'No spare parts recorded for this vehicle' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- ========== NOTES TAB ========== -->
+                    <div v-if="activeTab === 'notes'" class="space-y-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ isRtl ? 'مذكرات وملاحظات كروت العمل' : 'Work Order Memos & Notes' }}</h3>
+                        </div>
+                        <div v-if="workOrderNotes.length > 0" class="space-y-4">
+                            <div v-for="note in workOrderNotes" :key="note.id" @click="router.visit(route('work-orders.show', note.id))"
+                                class="group relative bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-150 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md cursor-pointer transition-all">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                                    <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center">#{{ toEnglish(note.code) }}</span>
+                                    <span class="text-xs font-medium text-gray-400">{{ formatDate(note.created_at) }}</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-start">
+                                    <!-- Customer Complaint -->
+                                    <div v-if="note.customer_complaint" class="space-y-1">
+                                        <h4 class="text-xs font-black text-rose-500 uppercase tracking-wider">{{ isRtl ? 'شكوى العميل' : 'Customer Complaint' }}</h4>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.customer_complaint }}</p>
+                                    </div>
+                                    <!-- Initial Assessment -->
+                                    <div v-if="note.initial_assessment" class="space-y-1">
+                                        <h4 class="text-xs font-black text-amber-500 uppercase tracking-wider">{{ isRtl ? 'التشخيص المبدئي' : 'Initial Diagnosis' }}</h4>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.initial_assessment }}</p>
+                                    </div>
+                                    <!-- General Notes -->
+                                    <div v-if="note.notes" class="space-y-1">
+                                        <h4 class="text-xs font-black text-indigo-500 uppercase tracking-wider">{{ isRtl ? 'الملاحظات العامة' : 'General Notes' }}</h4>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.notes }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-center py-12">
+                            <p class="text-gray-500 dark:text-gray-400 font-bold">{{ isRtl ? 'لا توجد ملاحظات أو مذكرات مسجلة' : 'No memos or notes recorded' }}</p>
+                        </div>
+                    </div>
+
                     <!-- ========== MILEAGE TAB ========== -->
                     <div v-if="activeTab === 'mileage'" class="space-y-4">
                          <div class="flex items-center justify-between mb-4">
@@ -418,6 +542,7 @@
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.difference') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المصدر</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المستخدم</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -438,6 +563,13 @@
                                         </td>
                                         <td class="px-4 py-3 text-center text-xs font-bold text-gray-500">
                                             {{ log.creator?.name || 'النظام' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500 w-12">
+                                            <button @click.stop="deleteMileageLog(log)" class="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -463,6 +595,7 @@
 import { ref, computed, h, onMounted, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
@@ -513,13 +646,101 @@ const ClipboardIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', strok
 const StarIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' })]);
 const ReceiptIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' })]);
 const MapIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l5-2.5 5.553 2.776a1 1 0 01.447.894v10.764a1 1 0 01-1.447.894L14 17l-5 3z' })]);
+const WrenchIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z' })]);
+const CogIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }), h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })]);
+const DocumentTextIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })]);
+
+const services = computed(() => {
+    const list = [];
+    props.workOrders.forEach(order => {
+        if (order.items) {
+            order.items.forEach(item => {
+                list.push({
+                    id: item.id,
+                    work_order_code: order.code,
+                    work_order_id: order.id,
+                    name_ar: item.service?.name_ar || item.title,
+                    name_en: item.service?.name_en || item.title,
+                    qty: item.qty,
+                    price: item.unit_price,
+                    total: item.qty * item.unit_price,
+                    status: item.status,
+                    created_at: order.created_at,
+                });
+            });
+        }
+    });
+    return list;
+});
+
+const parts = computed(() => {
+    const list = [];
+    props.workOrders.forEach(order => {
+        if (order.parts) {
+            order.parts.forEach(part => {
+                list.push({
+                    id: part.id,
+                    work_order_code: order.code,
+                    work_order_id: order.id,
+                    name: part.name,
+                    part_number: part.part_number,
+                    qty: part.qty,
+                    price: part.unit_price,
+                    total: part.total,
+                    source: part.source,
+                    status: part.status,
+                    created_at: order.created_at,
+                });
+            });
+        }
+    });
+    return list;
+});
+
+const workOrderNotes = computed(() => {
+    const list = [];
+    props.workOrders.forEach(order => {
+        if (order.notes || order.customer_complaint || order.initial_assessment) {
+            list.push({
+                id: order.id,
+                code: order.code,
+                created_at: order.created_at,
+                customer_complaint: order.customer_complaint,
+                initial_assessment: order.initial_assessment,
+                notes: order.notes,
+            });
+        }
+    });
+    return list;
+});
 
 const tabs = computed(() => [
     { key: 'workOrders', label: t('customers.work_orders'), count: props.counts.workOrders, icon: ClipboardIcon },
     { key: 'ratings', label: t('quotes.title'), count: props.counts.quotes, icon: StarIcon },
     { key: 'invoices', label: t('invoices.title'), count: props.counts.invoices, icon: ReceiptIcon },
+    { key: 'services', label: isRtl.value ? 'الخدمات' : 'Services', count: services.value.length, icon: WrenchIcon },
+    { key: 'parts', label: isRtl.value ? 'قطع الغيار' : 'Spare Parts', count: parts.value.length, icon: CogIcon },
+    { key: 'notes', label: isRtl.value ? 'المذكرات' : 'Memos', count: workOrderNotes.value.length, icon: DocumentTextIcon },
     { key: 'mileage', label: t('vehicles.mileage.history'), count: props.vehicle.mileage_logs?.length || 0, icon: MapIcon },
 ]);
+
+async function deleteMileageLog(log) {
+    const result = await confirm({
+        title: t('common.delete_confirm') || 'تأكيد الحذف',
+        message: t('vehicles.mileage.confirm_delete_log', { mileage: log.mileage }) || `هل أنت متأكد من حذف قراءة العداد (${log.mileage} كم)؟`,
+        confirmText: t('common.delete') || 'حذف',
+        type: 'danger'
+    });
+
+    if (result) {
+        try {
+            await axios.delete(route('vehicles.mileage-logs.destroy', [props.vehicle.id, log.id]));
+            router.reload({ only: ['vehicle'] });
+        } catch (error) {
+            console.error('Failed to delete mileage log:', error);
+        }
+    }
+}
 
 const filteredWorkOrders = computed(() => {
     if (!props.workOrders) return [];

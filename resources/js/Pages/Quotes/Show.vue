@@ -356,7 +356,7 @@
                             <div class="flex items-center gap-2">
                                 <!-- Delete Dept Button (Conditional) -->
                                 <button
-                                    v-if="(quote.status === 'draft' || quote.status === 'sent') && getLinesForDept(dept.id).length === 0"
+                                    v-if="(quote.status === 'draft' || quote.status === 'sent') && !dept.is_virtual && getLinesForDept(dept.id).length === 0"
                                     @click.stop="removeDepartment(dept.id)"
                                     class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
                                     :title="$t('quotes.confirm_remove_department')">
@@ -604,14 +604,33 @@ const submitApproval = () => {
 // Computed: Sort departments by sort_order
 const visibleDepartments = computed(() => {
     const depts = props.quoteDepartments || [];
-    return (Array.isArray(depts) ? depts : Object.values(depts))
+    const list = (Array.isArray(depts) ? depts : Object.values(depts))
         .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+    // Virtual packages section
+    const hasPackageLines = props.linesByDepartment['packages'] && props.linesByDepartment['packages'].length > 0;
+    const canEdit = props.quote.status === 'draft' || props.quote.status === 'sent';
+    const hasAvailablePackages = props.services?.some(s => s.type === 'package');
+
+    if (hasPackageLines || (canEdit && hasAvailablePackages)) {
+        list.push({
+            id: 'packages',
+            name_ar: 'باقات الخدمات',
+            name_en: 'Service Packages',
+            is_virtual: true
+        });
+    }
+
+    return list;
 });
 
 // Computed: Get active department's services for the modal dropdown
 const activeDepartmentServices = computed(() => {
     if (!activeDepartmentId.value) return [];
-    return (props.services || []).filter(s => s.department_id === activeDepartmentId.value);
+    if (activeDepartmentId.value === 'packages') {
+        return (props.services || []).filter(s => s.type === 'package');
+    }
+    return (props.services || []).filter(s => s.department_id === activeDepartmentId.value && s.type !== 'package');
 });
 
 // Helper: Get lines for a specific department
@@ -784,7 +803,11 @@ function openServiceModal(deptId) {
 function editLine(line) {
     // Find dept for this line
     const service = props.services.find(s => s.id === line.service_id);
-    activeDepartmentId.value = service?.department_id;
+    if (service?.type === 'package') {
+        activeDepartmentId.value = 'packages';
+    } else {
+        activeDepartmentId.value = service?.department_id;
+    }
 
     editingLine.value = line;
     showServiceModal.value = true;

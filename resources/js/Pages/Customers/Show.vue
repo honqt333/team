@@ -509,6 +509,26 @@
                                     <span class="text-gray-400 mx-0.5">•</span>
                                     <span class="truncate">{{ getVehicleName(order.vehicle) }}</span>
                                 </div>
+                                <!-- Financial Metrics Grid -->
+                                <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
+                                    <!-- Total -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ isRtl ? 'مبلغ الفاتورة' : 'Invoice Amount' }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatPrice(order.total || 0) }}</span>
+                                    </div>
+                                    <!-- Paid -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ isRtl ? 'المدفوع' : 'Paid' }}</span>
+                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatPrice(order.total_paid || 0) }}</span>
+                                    </div>
+                                    <!-- Balance -->
+                                    <div class="flex flex-col items-center justify-center py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ isRtl ? 'الباقي' : 'Remaining' }}</span>
+                                        <span class="text-[11px] font-black" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400'">
+                                            {{ formatPrice(order.balance || 0) }}
+                                        </span>
+                                    </div>
+                                </div>
                                 <div
                                     class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
                                     <span class="text-xs text-gray-400">{{ formatDate(order.created_at) }}</span>
@@ -534,6 +554,15 @@
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('work_orders.columns.created_at') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ isRtl ? 'مبلغ الفاتورة' : 'Invoice Amount' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ isRtl ? 'المدفوع' : 'Paid' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ isRtl ? 'الباقي' : 'Remaining' }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -557,6 +586,16 @@
                                         </td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{
                                             formatDate(order.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                                            {{ formatPrice(order.total || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                                            {{ formatPrice(order.total_paid || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold whitespace-nowrap"
+                                            :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">
+                                            {{ formatPrice(order.balance || 0) }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>

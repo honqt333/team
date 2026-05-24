@@ -541,7 +541,7 @@
 
                                     <div class="flex items-center gap-2">
                                         <!-- Remove Department Button -->
-                                        <button v-if="!isReadOnly && getDepartmentItems(dept.id).length === 0"
+                                        <button v-if="!isReadOnly && !dept.is_virtual && getDepartmentItems(dept.id).length === 0"
                                             @click.stop="removeDepartment(dept.id)"
                                             class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
                                             :title="$t('common.delete')">
@@ -1480,13 +1480,30 @@ const displayDepartments = computed(() => {
 
     // Add departments with items
     Object.keys(props.itemsByDepartment).forEach(id => {
-        if (id !== '0') deptIds.add(parseInt(id));
+        if (id !== '0' && id !== 'packages') deptIds.add(parseInt(id));
     });
 
     // Add work order's linked departments
     props.workOrder.departments?.forEach(dept => deptIds.add(dept.id));
 
-    return props.departments.filter(d => deptIds.has(d.id));
+    // Get database departments matching active list
+    const list = props.departments.filter(d => deptIds.has(d.id));
+
+    // Virtual packages section
+    const hasPackageItems = props.itemsByDepartment['packages'] && props.itemsByDepartment['packages'].length > 0;
+    const canEdit = !isReadOnly.value;
+    const hasAvailablePackages = props.services?.some(s => s.type === 'package');
+
+    if (hasPackageItems || (canEdit && hasAvailablePackages)) {
+        list.push({
+            id: 'packages',
+            name_ar: 'باقات الخدمات',
+            name_en: 'Service Packages',
+            is_virtual: true
+        });
+    }
+
+    return list;
 });
 
 // Departments that can still be added

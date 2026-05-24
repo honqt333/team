@@ -460,6 +460,9 @@ class QuoteController extends Controller
 
         // Group lines by department
         $linesByDepartment = $quote->lines->groupBy(function ($line) {
+            if ($line->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
             return $line->service?->department_id ?? 0;
         });
 

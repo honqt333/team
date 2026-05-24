@@ -15,7 +15,10 @@
             </div>
             <div :class="isRtl ? 'text-left' : 'text-right'">
                 <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.vehicle') }}:</span> <span class="font-bold mr-2">{{ vehicleName }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.plate') }}:</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.plate_number }}</span></p>
+                <div class="flex items-center gap-2 mb-1 justify-end">
+                    <span class="text-gray-500">{{ $t('work_orders.print_view.plate') }}:</span>
+                    <SaudiPlateDisplay :plate-number="workOrder.vehicle?.plate_number" size="sm" />
+                </div>
                 <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.color') }}:</span> <span class="font-bold mr-2">{{ workOrder.vehicle?.color || $t('work_orders.print_view.na') }}</span></p>
             </div>
         </div>
@@ -108,6 +111,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({ workOrder: Object });
 

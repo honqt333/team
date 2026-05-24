@@ -168,6 +168,7 @@
         <DepartmentFormModal
             :show="showModal"
             :department="selectedDepartment"
+            :existing-departments="departments?.data || []"
             @close="closeModal"
             @saved="handleSaved"
         />

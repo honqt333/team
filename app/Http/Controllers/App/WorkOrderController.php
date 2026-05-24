@@ -289,6 +289,9 @@ class WorkOrderController
 
         // Group items by department_id for accordion display
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
+            if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
             return $item->service?->department_id ?? 0;
         });
 
@@ -959,6 +962,9 @@ class WorkOrderController
 
         // Group items by department
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
+            if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
             return $item->service?->department_id ?? 0;
         });
 
@@ -1005,6 +1011,9 @@ class WorkOrderController
 
         // Group items by department
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
+            if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
             return $item->service?->department_id ?? 0;
         });
 

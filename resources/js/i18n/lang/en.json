@@ -653,6 +653,7 @@
     "status": {
       "draft": "Draft",
       "open": "Open",
+      "pending": "Pending",
       "in_progress": "Under implementation",
       "done": "Complete",
       "cancelled": "Canceled"
@@ -1395,6 +1396,7 @@
   "departments": {
     "title": "Department management",
     "add": "Add section",
+    "choose_default": "Choose from available default departments to auto-fill:",
     "edit": "Edit section",
     "search": "Search in sections...",
     "total_count": "Oath",
@@ -1420,6 +1422,7 @@
   },
   "services_management": {
     "title": "Services Management",
+    "add_department_first": "Please add a department first to be able to add services.",
     "inspections": "Systematic Inspections",
     "inspections_empty": "No inspections found",
     "add_inspection": "Add Inspection",

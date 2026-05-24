@@ -51,10 +51,10 @@
                     <span class="text-gray-500">{{ isRtl ? 'اللون:' : 'Color:' }}</span>
                     <span class="font-bold mr-2">{{ workOrder.vehicle?.color || (isRtl ? 'غير محدد' : 'N/A') }}</span>
                 </p>
-                <p class="mb-1">
+                <div class="flex items-center gap-2 mb-1 justify-end">
                     <span class="text-gray-500">{{ isRtl ? 'رقم اللوحة:' : 'Plate:' }}</span>
-                    <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.plate_number }}</span>
-                </p>
+                    <SaudiPlateDisplay :plate-number="workOrder.vehicle?.plate_number" size="sm" />
+                </div>
                 <p v-if="workOrder.vehicle?.vin" class="mb-1">
                     <span class="text-gray-500">{{ isRtl ? 'رقم الهيكل:' : 'VIN:' }}</span>
                     <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.vin }}</span>
@@ -208,6 +208,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const page = usePage();
 

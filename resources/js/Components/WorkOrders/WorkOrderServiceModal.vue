@@ -431,7 +431,7 @@ const props = defineProps({
     show: Boolean,
     workOrder: Object,
     item: Object,
-    departmentId: Number,
+    departmentId: [Number, String],
     services: Array,
     technicians: { type: Array, default: () => [] },
     inventoryUnits: { type: Array, default: () => [] },
@@ -582,9 +582,13 @@ const isPriceBelowMinimum = computed(() => {
 });
 
 const serviceOptions = computed(() => {
-    let filteredServices = props.services;
-    if (props.departmentId) {
-        filteredServices = props.services.filter(s => s.department_id === props.departmentId);
+    let filteredServices = props.services || [];
+    if (props.departmentId === 'packages') {
+        filteredServices = filteredServices.filter(s => s.type === 'package');
+    } else if (props.departmentId) {
+        filteredServices = filteredServices.filter(s => s.department_id === props.departmentId && s.type !== 'package');
+    } else {
+        filteredServices = filteredServices.filter(s => s.type !== 'package');
     }
     return filteredServices.map(s => ({
         value: s.id,

@@ -157,37 +157,86 @@
                     v-for="vehicle in allVehicles"
                     :key="vehicle.id"
                     @click="visitShowPage(vehicle)"
-                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-teal-500 transition-all duration-300 shadow-lg shadow-gray-200/50 dark:shadow-black/20 hover:shadow-teal-500/10 cursor-pointer overflow-hidden"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
                 >
-                    <!-- Logo Watermark -->
-                    <div v-if="vehicle.make?.logo_path" class="absolute inset-0 flex items-center justify-center opacity-[0.05] dark:opacity-[0.15] pointer-events-none select-none z-0">
-                        <img :src="`/storage/${vehicle.make.logo_path}`" class="w-2/3 h-2/3 object-contain grayscale" alt="" />
+                    <!-- Background Logo Watermark -->
+                    <div v-if="vehicle.make?.logo_path"
+                        class="absolute inset-0 flex items-center justify-center opacity-[0.10] dark:opacity-[0.15] pointer-events-none select-none z-0 overflow-hidden">
+                        <img :src="`/storage/${vehicle.make.logo_path}`"
+                            class="w-3/5 h-3/5 object-contain grayscale dark:brightness-150 transform -rotate-12 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-700"
+                            alt="" />
                     </div>
 
-                    <div class="relative z-10 p-5 flex flex-col h-full">
-                        <div class="flex items-center justify-between mb-4">
-                            <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
-                            <div v-if="vehicle.color" class="w-4 h-4 rounded-full border-2 border-white dark:border-gray-700 shadow-sm" :style="{ backgroundColor: getColorHex(vehicle.color) }"></div>
-                        </div>
-
-                        <div class="mb-4">
-                            <h3 class="text-lg font-black text-gray-900 dark:text-white group-hover:text-teal-600 transition-colors truncate">
-                                {{ vehicle.display_make || $t('common.na') }}
-                            </h3>
-                            <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider truncate">
-                                {{ vehicle.display_model || '' }}
-                            </p>
-                        </div>
-
-                        <div class="mt-auto pt-4 border-t border-gray-50 dark:border-gray-700/50 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-indigo-600 dark:text-indigo-400">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                </svg>
+                    <!-- Card Content -->
+                    <div class="relative z-10 flex flex-col h-full">
+                        <!-- Header: Plate & Color Dot -->
+                        <div
+                            class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-900/50">
+                            <!-- Plate Number Badge -->
+                            <div class="flex items-center gap-2">
+                                <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
                             </div>
-                            <span class="text-sm font-bold text-gray-700 dark:text-gray-300 truncate">
-                                {{ vehicle.customer?.name || $t('common.unknown') }}
-                            </span>
+                            <!-- Color Dot -->
+                            <span v-if="vehicle.color"
+                                class="w-3 h-3 rounded-full border border-white dark:border-gray-700 shadow-sm"
+                                :style="{ backgroundColor: getColorHex(vehicle.color) }"
+                                :title="vehicle.color"></span>
+                        </div>
+
+                        <!-- Body: Vehicle Info -->
+                        <div class="p-4 flex-1 flex flex-col h-full justify-between">
+                            <div class="mb-3">
+                                <div class="flex items-baseline justify-between mb-1 gap-1">
+                                    <h3
+                                        class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                                        {{ getMakeName(vehicle) || $t('common.na') }}
+                                    </h3>
+                                    <span v-if="vehicle.year"
+                                        class="px-1.5 py-0.5 text-[10px] font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md">
+                                        {{ vehicle.year }}
+                                    </span>
+                                </div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                                    {{ getModelName(vehicle) }}
+                                </p>
+                            </div>
+
+                            <!-- Customer Name Section -->
+                            <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-indigo-600 dark:text-indigo-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <span class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate">
+                                    {{ vehicle.customer?.name || $t('common.unknown') }}
+                                </span>
+                            </div>
+
+                            <!-- Odometer & VIN Footer -->
+                            <div
+                                class="text-[10px] text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex flex-col gap-1.5 mt-3">
+                                <div v-if="vehicle.odometer" class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-teal-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">{{
+                                        vehicle.odometer?.toLocaleString('en-US') }}</span>
+                                    <span>{{ $t('common.km') }}</span>
+                                </div>
+                                <div v-if="vehicle.vin" class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    <span class="font-mono text-[9px] truncate max-w-[120px]"
+                                        :title="vehicle.vin">{{ vehicle.vin }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -294,17 +343,23 @@
                             <th>{{ $t('vehicles.form.model') }}</th>
                             <th>{{ $t('vehicles.form.year') }}</th>
                             <th>{{ $t('vehicles.form.customer') }}</th>
+                            <th>{{ $t('customers.columns.contact_name') }}</th>
                             <th>{{ $t('customers.form.phone') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(vehicle, index) in allVehicles" :key="vehicle.id">
                             <td>{{ index + 1 }}</td>
-                            <td class="font-bold">{{ toEnglish(vehicle.plate_number) }}</td>
+                            <td>
+                                <div class="flex justify-center">
+                                    <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
+                                </div>
+                            </td>
                             <td>{{ vehicle.display_make || '-' }}</td>
                             <td>{{ vehicle.display_model || '-' }}</td>
                             <td>{{ toEnglish(vehicle.year) || '-' }}</td>
                             <td>{{ vehicle.customer?.name || '-' }}</td>
+                            <td>{{ vehicle.customer?.contact_name || '-' }}</td>
                             <td dir="ltr">{{ toEnglish(vehicle.customer?.phone) || '-' }}</td>
                         </tr>
                     </tbody>
@@ -607,6 +662,22 @@ function getColorHex(colorName) {
         "beige": "#d4c4a8",
     };
     return colorMap[colorName.toLowerCase()] || colorMap[colorName] || "#9ca3af";
+}
+
+// Name translation helpers
+function getName(item) {
+    if (!item) return '';
+    return locale.value === 'ar' ? (item.name_ar || item.name_en) : (item.name_en || item.name_ar);
+}
+
+function getMakeName(vehicle) {
+    if (!vehicle) return '';
+    return getName(vehicle.make) || vehicle.make_other || '';
+}
+
+function getModelName(vehicle) {
+    if (!vehicle) return '';
+    return getName(vehicle.model) || vehicle.model_other || '';
 }
 </script>
 

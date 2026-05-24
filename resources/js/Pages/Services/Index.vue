@@ -41,14 +41,6 @@
                                 <span>{{ $t('departments.add') }}</span>
                             </button>
 
-                            <!-- Add Service Button -->
-                            <button v-if="can('services.create') || isAnyAdmin()" @click="openCreateModal"
-                                class="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-black shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 hover:-translate-y-0.5 transition-all">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                                </svg>
-                                <span>{{ $t('services_management.add') }}</span>
-                            </button>
                         </template>
 
                         <template v-else-if="activeTab === 'packages'">
@@ -155,22 +147,20 @@
                         class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
                         <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                     </div>
                     <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{
-                        $t('services_management.empty') }}
+                        $t('departments.empty') }}
                     </p>
-                    <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('services_management.empty_hint') }}
+                    <p class="text-gray-500 dark:text-gray-400 mb-6">{{ $t('services_management.add_department_first') }}
                     </p>
-                    <button v-if="can('services.create')" @click="openCreateModal"
-                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg shadow-teal-500/30 hover:shadow-xl transition-all">
+                    <button v-if="can('services.departments.manage') || isAnyAdmin()" @click="openCreateDepartmentModal"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-medium shadow-lg shadow-orange-500/30 hover:shadow-xl hover:-translate-y-0.5 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        {{ $t('services_management.add') }}
+                        {{ $t('departments.add') }}
                     </button>
                 </div>
 
@@ -203,6 +193,14 @@
 
                             <!-- Department Actions -->
                             <div class="flex items-center gap-2 me-3">
+                                <!-- Add Service Button -->
+                                <button v-if="can('services.create') || isAnyAdmin()" @click.stop="openCreateModalForDepartment(dept)"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gradient-to-r from-teal-600 to-emerald-600 text-white rounded-lg font-bold shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all me-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span>{{ $t('services_management.add') }}</span>
+                                </button>
                                 <button @click.stop="openEditDepartmentModal(dept)"
                                     class="p-1.5 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                                     :title="$t('departments.edit')">
@@ -223,7 +221,7 @@
 
                             <!-- Expand Icon -->
                             <button @click="toggleDepartment(dept.id)">
-                                <svg :class="['w-5 h-5 text-gray-400 transition-transform', expandedDepts.has(dept.id) ? 'rotate-180' : '']"
+                                <svg :class="['w-5 h-5 text-gray-400 transition-transform', !collapsedDepts.has(dept.id) ? 'rotate-180' : '']"
                                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M19 9l-7 7-7-7" />
@@ -232,7 +230,7 @@
                         </div>
 
                         <!-- Services Table -->
-                        <div v-if="expandedDepts.has(dept.id)" class="border-t border-gray-200 dark:border-gray-700">
+                        <div v-if="!collapsedDepts.has(dept.id)" class="border-t border-gray-200 dark:border-gray-700">
                             <div v-if="dept.services?.length === 0"
                                 class="px-5 py-8 text-center text-gray-500 dark:text-gray-400">
                                 {{ $t('services_management.no_services') }}
@@ -417,14 +415,14 @@
                                             $t('services_management.services') }}</p>
                                 </div>
                             </div>
-                            <svg :class="['w-5 h-5 text-gray-400 transition-transform', expandedDepts.has('unassigned') ? 'rotate-180' : '']"
+                            <svg :class="['w-5 h-5 text-gray-400 transition-transform', !collapsedDepts.has('unassigned') ? 'rotate-180' : '']"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
-                        <div v-if="expandedDepts.has('unassigned')"
+                        <div v-if="!collapsedDepts.has('unassigned')"
                             class="border-t border-gray-200 dark:border-gray-700">
                             <div class="overflow-x-auto">
                                 <table class="w-full text-sm">
@@ -890,8 +888,9 @@
             @saved="handleSaved" />
 
         <!-- Department Form Modal -->
-        <DepartmentFormModal :show="showDepartmentModal" :department="selectedDepartment" @close="closeDepartmentModal"
-            @saved="handleDepartmentSaved" />
+        <DepartmentFormModal :show="showDepartmentModal" :department="selectedDepartment"
+            :existing-departments="departments"
+            @close="closeDepartmentModal" @saved="handleDepartmentSaved" />
 
         <!-- Service Quick Edit Modal -->
         <ServiceQuickEditModal :show="showQuickEditModal" :service="selectedServiceForQuickEdit"
@@ -977,7 +976,7 @@ watch(activeTab, (newTab) => {
 const showModal = ref(false);
 const selectedService = ref(null);
 const searchQuery = ref('');
-const expandedDepts = ref(new Set());
+const collapsedDepts = ref(new Set());
 
 // Department modal state
 const showDepartmentModal = ref(false);
@@ -998,14 +997,15 @@ const selectedCategory = ref(null);
 
 const showCategoryModal = ref(false);
 
-// Open all departments by default on mount
+// Load collapsed departments from localStorage on mount
 onMounted(() => {
-    props.departments.forEach(dept => {
-        expandedDepts.value.add(dept.id);
-    });
-    // Also expand unassigned if there are any
-    if (props.unassignedServices.length > 0) {
-        expandedDepts.value.add('unassigned');
+    const savedState = localStorage.getItem('collapsed_departments');
+    if (savedState) {
+        try {
+            collapsedDepts.value = new Set(JSON.parse(savedState));
+        } catch (e) {
+            console.error('Error parsing collapsed departments state', e);
+        }
     }
 });
 
@@ -1154,15 +1154,31 @@ const availableServices = computed(() => {
 });
 
 function toggleDepartment(id) {
-    if (expandedDepts.value.has(id)) {
-        expandedDepts.value.delete(id);
+    if (collapsedDepts.value.has(id)) {
+        collapsedDepts.value.delete(id);
     } else {
-        expandedDepts.value.add(id);
+        collapsedDepts.value.add(id);
     }
+    localStorage.setItem('collapsed_departments', JSON.stringify(Array.from(collapsedDepts.value)));
 }
 
 function openCreateModal() {
+    if (props.departments.length === 0) {
+        error(t('services_management.add_department_first'));
+        return;
+    }
     selectedService.value = null;
+    showModal.value = true;
+}
+
+function openCreateModalForDepartment(dept) {
+    if (props.departments.length === 0) {
+        error(t('services_management.add_department_first'));
+        return;
+    }
+    selectedService.value = {
+        department_id: dept.id
+    };
     showModal.value = true;
 }
 

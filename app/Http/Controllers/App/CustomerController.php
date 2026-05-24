@@ -129,6 +129,7 @@ class CustomerController
         // Get all related data
         $vehicles = $customer->vehicles()->with(['make', 'model'])->get();
         $workOrders = $customer->workOrders()->with(['vehicle.make', 'vehicle.model', 'payments.receivedBy'])->latest()->get();
+        $workOrders->each->append(['total', 'total_paid', 'balance']);
         $quotes = $customer->quotes()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
 
         // Get all payments from customer's work orders

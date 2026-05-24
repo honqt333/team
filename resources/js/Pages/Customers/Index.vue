@@ -414,14 +414,15 @@
             <div class="print-section hidden">
                 <!-- Header -->
                 <PrintHeader :title="$t('customers.title')" />
-
                 <!-- Table -->
                 <table class="print-table">
                     <thead>
                         <tr>
                             <th style="width: 40px;">#</th>
                             <th>{{ $t('customers.columns.name') }}</th>
+                            <th>{{ $t('customers.columns.contact_name') }}</th>
                             <th>{{ $t('customers.columns.phone') }}</th>
+                            <th>{{ $t('customers.columns.email') }}</th>
                             <th>{{ $t('customers.columns.type') }}</th>
                             <th>{{ $t('customers.columns.balance') }}</th>
                         </tr>
@@ -430,10 +431,12 @@
                         <tr v-for="(customer, index) in allCustomers" :key="customer.id">
                             <td>{{ toEnglish(index + 1) }}</td>
                             <td class="font-bold">{{ customer.name }}</td>
+                            <td>{{ customer.contact_name || '-' }}</td>
                             <td dir="ltr">{{ toEnglish(customer.phone) }}</td>
+                            <td>{{ customer.email || '-' }}</td>
                             <td>
                                 <span class="print-badge">
-                                    {{ customer.type ? $t(`customers.type.${customer.type}`) : '-' }}
+                                     {{ customer.type ? $t(`customers.type.${customer.type}`) : '-' }}
                                 </span>
                             </td>
                             <td class="font-bold">

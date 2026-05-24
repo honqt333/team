@@ -291,7 +291,7 @@ const props = defineProps({
     show: Boolean,
     quote: Object,
     line: Object,
-    departmentId: Number,
+    departmentId: [Number, String],
     services: Array,
     inventoryUnits: { type: Array, default: () => [] },
 });

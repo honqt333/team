@@ -54,6 +54,10 @@ class VehicleMileageController extends Controller
 
         $log->delete();
 
+        // Recalculate latest odometer for vehicle
+        $latestLog = $vehicle->mileageLogs()->orderByDesc('recorded_at')->orderByDesc('id')->first();
+        $vehicle->update(['odometer' => $latestLog ? $latestLog->mileage : null]);
+
         return response()->json([
             'message' => 'Mileage log deleted successfully',
             'odometer' => $vehicle->odometer

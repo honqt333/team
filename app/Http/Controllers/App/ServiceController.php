@@ -87,7 +87,7 @@ class ServiceController
         $centerId = auth()->user()->current_center_id;
 
         $validated = $request->validate([
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => 'required_unless:type,package|nullable|exists:departments,id',
             'name_ar' => [
                 'required',
                 'string',
@@ -118,6 +118,7 @@ class ServiceController
 
         $validated['tenant_id'] = auth()->user()->tenant_id;
         $validated['center_id'] = $centerId;
+        $validated['updated_by'] = auth()->id();
         
         \Illuminate\Support\Facades\Log::info('Creating service/package', $validated);
 
@@ -141,7 +142,7 @@ class ServiceController
         $this->authorize('update', $service);
 
         $validated = $request->validate([
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => 'required_unless:type,package|nullable|exists:departments,id',
             'name_ar' => [
                 'sometimes',
                 'required',
@@ -244,7 +245,10 @@ class ServiceController
     {
         $this->authorize('update', $service);
 
-        $service->update(['is_active' => !$service->is_active]);
+        $service->update([
+            'is_active' => !$service->is_active,
+            'updated_by' => auth()->id(),
+        ]);
 
         return back();
     }
