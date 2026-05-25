@@ -210,7 +210,7 @@
         </div>
 
         <!-- Financial Summary -->
-        <div v-if="showPricingColumns && documentType !== 'receipt'" class="py-2 border-t border-dashed border-gray-300 space-y-1 text-[10px]">
+        <div v-if="showPricingColumns && documentType !== 'receipt' && documentType !== 'payments'" class="py-2 border-t border-dashed border-gray-300 space-y-1 text-[10px]">
             <div v-if="documentType !== 'payments'" class="flex justify-between text-gray-500">
                 <span>{{ $t('quotes.form.subtotal') }}:</span>
                 <span dir="ltr">{{ formatCurrency(totals.subtotal) }}</span>

@@ -268,6 +268,10 @@
                                 <td class="p-2 border border-gray-200 text-gray-600">{{ payment.notes || '-' }}</td>
                                 <td class="p-2 border border-gray-200 text-center font-bold font-mono">{{ formatCurrency(payment.amount) }}</td>
                             </tr>
+                            <tr v-if="data.payments && data.payments.length > 0" class="font-bold bg-gray-50 border-t border-gray-300">
+                                <td colspan="5" class="p-2 border border-gray-200 text-center">{{ isRtl ? 'إجمالي المدفوعات:' : 'Total Payments:' }}</td>
+                                <td class="p-2 border border-gray-200 text-center font-mono text-gray-900">{{ formatCurrency(totals.paid) }}</td>
+                            </tr>
                             <tr v-if="!data.payments || data.payments.length === 0">
                                 <td colspan="6" class="p-4 border border-gray-200 text-center text-gray-400">
                                     {{ $t('work_orders.print_view.no_payments') }}
@@ -458,7 +462,7 @@
         </div>
 
         <!-- Totals Block & Summary (For pricing documents) -->
-        <div v-if="showPricingColumns && documentType !== 'receipt'" class="flex justify-between items-start mb-12">
+        <div v-if="showPricingColumns && documentType !== 'receipt' && documentType !== 'payments'" class="flex justify-between items-start mb-12">
             <div class="w-1/2 pr-4 text-sm text-gray-500">
                 <div v-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || dummyTerms.length > 0)">
                     <h4 class="text-xs font-bold text-gray-700 mb-1">{{ $t('work_orders.print_view.terms_conditions') }}:</h4>
