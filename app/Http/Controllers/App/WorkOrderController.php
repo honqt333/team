@@ -1073,6 +1073,10 @@ class WorkOrderController
             'tenant',
         ]);
 
+        if ($workOrder->center) {
+            $workOrder->center->append(['logo_light_url', 'logo_dark_url', 'logo_invoice_url', 'stamp_url']);
+        }
+
         return Inertia::render('WorkOrders/Print/Condition', [
             'workOrder' => $workOrder,
         ]);

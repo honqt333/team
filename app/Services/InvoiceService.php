@@ -46,24 +46,58 @@ class InvoiceService
                 'issue_date' => now(),
                 'supply_date' => now(),
                 'status' => 'draft',
+                'payment_status' => 'unpaid',
                 // Snapshots
                 'customer_name_snapshot' => $customer?->name,
                 'customer_vat_snapshot' => $customer?->tax_number,
                 'customer_address_snapshot' => $customerAddress,
+                
+                // Tax settings
+                'tax_enabled_snapshot' => $workOrder->tax_enabled_snapshot,
+                'pricing_mode_snapshot' => $workOrder->pricing_mode_snapshot,
+                'tax_rate_snapshot' => $workOrder->tax_rate_snapshot,
+                'currency_code' => $workOrder->currency_code,
+
+                // Totals
+                'total_excl_tax' => $workOrder->total_excl_tax,
+                'total_tax' => $workOrder->total_tax,
+                'total_incl_tax' => $workOrder->total_incl_tax,
+                'total_taxable_amount' => $workOrder->total_excl_tax,
+                'total_paid' => 0,
             ]);
 
-            // 2. Convert WO Items to Invoice Lines (Simplified mapping for now)
-            $lines = [];
+            // 2. Convert WO Items (Services) to Invoice Lines
             foreach ($workOrder->items as $item) {
-                $lines[] = [
-                    'invoice_id' => $invoice->id,
-                    'description' => $item->service->name ?? $item->title,
+                $invoice->lines()->create([
+                    'is_part' => false,
+                    'part_id' => null,
+                    'description' => $item->title ?? $item->service->name,
                     'qty' => $item->qty,
-                    'unit_price' => $item->unit_price, // Assuming net price after discount? Or base?
-                    // Logic would go here to map item details
-                ];
-                // For brevity in this task, we skip full line mapping implementation unless requested
-                // focusing on the numbering logic instead.
+                    'unit_price' => $item->unit_price,
+                    'is_taxable' => $item->is_taxable,
+                    'tax_category_code' => $item->tax_category_code,
+                    'tax_rate_snapshot' => $item->tax_rate_snapshot,
+                    'tax_amount' => $item->tax_amount,
+                    'line_total_excl_tax' => $item->line_total_excl_tax ?? $item->line_total,
+                    'line_total_incl_tax' => $item->line_total_incl_tax ?? $item->line_total,
+                ]);
+            }
+
+            // 3. Convert WO Parts to Invoice Lines
+            foreach ($workOrder->parts as $part) {
+                $invoice->lines()->create([
+                    'is_part' => true,
+                    'part_id' => $part->part_id,
+                    'description' => $part->name,
+                    'qty' => $part->qty,
+                    'unit_price' => $part->unit_price,
+                    'is_taxable' => $workOrder->tax_enabled_snapshot,
+                    'tax_category_code' => null,
+                    'tax_rate_snapshot' => $workOrder->tax_rate_snapshot ?? 15.00,
+                    'tax_amount' => $part->tax_amount,
+                    'line_total_excl_tax' => $part->total,
+                    'line_total_incl_tax' => $part->grand_total,
+                ]);
             }
             
             return $invoice;

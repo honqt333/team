@@ -12,6 +12,8 @@ class InvoiceLine extends Model
 
     protected $fillable = [
         'invoice_id',
+        'is_part',
+        'part_id',
         'description',
         'qty',
         'unit_price',
@@ -24,6 +26,7 @@ class InvoiceLine extends Model
     ];
 
     protected $casts = [
+        'is_part' => 'boolean',
         'qty' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'is_taxable' => 'boolean',
@@ -36,5 +39,10 @@ class InvoiceLine extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function part(): BelongsTo
+    {
+        return $this->belongsTo(Part::class);
     }
 }

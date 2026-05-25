@@ -1,18 +1,18 @@
 <template>
-    <div class="print-page bg-white min-h-screen font-sans text-gray-900" dir="rtl">
+    <div class="print-page bg-white min-h-screen font-sans text-gray-900" :dir="isRtl ? 'rtl' : 'ltr'">
         <!-- Watermark/Draft overlay could go here -->
 
         <!-- Header Section -->
         <div class="flex justify-between items-start mb-10 border-b-4 border-slate-900 pb-6">
             <!-- Company/Tenant Logo & Info -->
             <div class="flex gap-6 items-center">
-                <div v-if="invoice.tenant?.logo_url" class="w-24 h-24 bg-gray-50 rounded-2xl p-2 flex items-center justify-center border border-gray-100">
-                    <img :src="invoice.tenant.logo_url" alt="Logo" class="max-w-full max-h-full object-contain" />
+                <div v-if="invoice.center?.logo_invoice_url || invoice.center?.logo_light_url || invoice.tenant?.logo_url" class="w-24 h-24 bg-gray-50 rounded-2xl p-2 flex items-center justify-center border border-gray-100">
+                    <img :src="invoice.center?.logo_invoice_url || invoice.center?.logo_light_url || invoice.tenant?.logo_url" alt="Logo" class="max-w-full max-h-full object-contain" />
                 </div>
                 <div class="space-y-1">
-                    <h1 class="text-2xl font-black tracking-tight text-slate-900">{{ invoice.tenant?.name }}</h1>
+                    <h1 class="text-2xl font-black tracking-tight text-slate-900">{{ invoice.center?.name_ar || invoice.center?.name || invoice.tenant?.name }}</h1>
                     <div class="text-sm text-slate-500 font-bold space-y-0.5">
-                        <p v-if="invoice.tenant?.vat_number">{{ labels.vat_number }}: <span class="font-mono">{{ invoice.tenant?.vat_number }}</span></p>
+                        <p v-if="invoice.center?.vat_number || invoice.tenant?.vat_number">{{ labels.vat_number }}: <span class="font-mono">{{ invoice.center?.vat_number || invoice.tenant?.vat_number }}</span></p>
                         <p v-if="invoice.center?.phone">{{ labels.phone || 'الهاتف' }}: <span class="font-mono">{{ invoice.center?.phone }}</span></p>
                         <p v-if="invoice.center?.email">{{ invoice.center?.email }}</p>
                     </div>
@@ -22,7 +22,7 @@
             <!-- Invoice Title & QR -->
             <div class="text-start space-y-4">
                 <div class="bg-slate-900 text-white px-6 py-2 rounded-xl text-center">
-                    <h2 class="text-xl font-black uppercase tracking-widest">{{ labels.document_title || 'فاتورة ضريبية' }}</h2>
+                    <h2 class="text-xl font-black uppercase tracking-widest">{{ labels.document_title || (isRtl ? 'فاتورة ضريبية' : 'Tax Invoice') }}</h2>
                     <p class="text-sm font-mono opacity-80">{{ invoice.invoice_number }}</p>
                 </div>
                 <div v-if="invoice.zatca_qr_tlv" class="flex justify-start">
@@ -39,21 +39,28 @@
                 <div class="space-y-1">
                     <p class="text-lg font-black text-slate-900">{{ invoice.customer_name_snapshot || invoice.customer?.name }}</p>
                     <p v-if="invoice.customer?.phone" class="text-sm text-slate-500 font-mono">{{ invoice.customer?.phone }}</p>
-                    <p v-if="invoice.customer_vat_snapshot" class="text-xs text-slate-400 font-bold mt-2 uppercase">VAT: <span class="font-mono text-slate-600">{{ invoice.customer_vat_snapshot }}</span></p>
+                    <!-- Customer Address -->
+                    <p v-if="customerAddress" class="text-sm text-slate-600 mt-2">
+                        <span class="text-slate-400 font-bold">{{ isRtl ? 'العنوان:' : 'Address:' }}</span> {{ customerAddress }}
+                    </p>
+                    <!-- Customer Tax ID / VAT Number -->
+                    <p v-if="customerTaxNumber" class="text-sm text-slate-600 mt-1">
+                        <span class="text-slate-400 font-bold">{{ isRtl ? 'الرقم الضريبي:' : 'Tax ID:' }}</span> <span class="font-mono">{{ customerTaxNumber }}</span>
+                    </p>
                 </div>
             </div>
 
             <!-- Invoice Meta Section -->
             <div class="space-y-4 p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">تفاصيل الفاتورة</h3>
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">{{ isRtl ? 'تفاصيل الفاتورة' : 'Invoice Details' }}</h3>
                 <div class="grid grid-cols-2 gap-y-3 text-sm font-bold">
                     <span class="text-slate-400">{{ labels.date }}:</span>
                     <span class="text-slate-900 text-end font-mono">{{ formatDate(invoice.issue_date) }}</span>
                     
-                    <span class="text-slate-400">{{ labels.supply_date || 'تاريخ التوريد' }}:</span>
+                    <span class="text-slate-400">{{ labels.supply_date || (isRtl ? 'تاريخ التوريد' : 'Supply Date') }}:</span>
                     <span class="text-slate-900 text-end font-mono">{{ formatDate(invoice.supply_date) }}</span>
                     
-                    <span class="text-slate-400">حالة الدفع:</span>
+                    <span class="text-slate-400">{{ isRtl ? 'حالة الدفع:' : 'Payment Status:' }}</span>
                     <span class="text-end" :class="invoice.payment_status === 'paid' ? 'text-emerald-600' : 'text-red-600'">{{ paymentStatusLabel }}</span>
                 </div>
             </div>
@@ -76,29 +83,58 @@
             </div>
         </div>
 
-        <!-- Table Section -->
-        <div class="mb-10">
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-slate-900 text-white">
-                        <th class="px-6 py-4 text-start text-xs font-black uppercase tracking-widest rounded-s-2xl">{{ labels.description }}</th>
-                        <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest w-24">{{ labels.qty }}</th>
-                        <th class="px-6 py-4 text-end text-xs font-black uppercase tracking-widest w-32">{{ labels.unit_price }}</th>
-                        <th class="px-6 py-4 text-end text-xs font-black uppercase tracking-widest w-32 rounded-e-2xl">{{ labels.total }}</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    <tr v-for="line in invoice.lines" :key="line.id" class="text-slate-700">
-                        <td class="px-6 py-5">
-                            <p class="font-bold text-slate-900">{{ line.description }}</p>
-                            <p v-if="line.part?.sku" class="text-[10px] text-slate-400 font-mono mt-0.5">SKU: {{ line.part.sku }}</p>
-                        </td>
-                        <td class="px-6 py-5 text-center font-black font-mono">{{ toEnglish(line.qty) }}</td>
-                        <td class="px-6 py-5 text-end font-black font-mono">{{ formatCurrency(line.unit_price) }}</td>
-                        <td class="px-6 py-5 text-end font-black font-mono text-slate-900">{{ formatCurrency(line.line_total_incl_tax) }}</td>
-                    </tr>
-                </tbody>
-            </table>
+        <!-- Tables Section -->
+        <div class="mb-10 space-y-8">
+            <!-- Services Table -->
+            <div v-if="services.length > 0">
+                <h3 class="text-base font-black text-slate-900 mb-3 border-s-4 border-slate-900 ps-3">{{ isRtl ? 'أجور الخدمات واليد' : 'Labor & Services' }}</h3>
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 text-white">
+                            <th class="px-6 py-4 text-start text-xs font-black uppercase tracking-widest rounded-s-2xl">{{ labels.description }}</th>
+                            <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest w-24">{{ labels.qty }}</th>
+                            <th class="px-6 py-4 text-end text-xs font-black uppercase tracking-widest w-32">{{ labels.unit_price }}</th>
+                            <th class="px-6 py-4 text-end text-xs font-black uppercase tracking-widest w-32 rounded-e-2xl">{{ labels.total }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr v-for="line in services" :key="line.id" class="text-slate-700">
+                            <td class="px-6 py-5">
+                                <p class="font-bold text-slate-900">{{ line.description }}</p>
+                            </td>
+                            <td class="px-6 py-5 text-center font-black font-mono">{{ toEnglish(line.qty) }}</td>
+                            <td class="px-6 py-5 text-end font-black font-mono">{{ formatCurrency(line.unit_price) }}</td>
+                            <td class="px-6 py-5 text-end font-black font-mono text-slate-900">{{ formatCurrency(line.line_total_incl_tax) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Parts Table -->
+            <div v-if="parts.length > 0">
+                <h3 class="text-base font-black text-slate-900 mb-3 border-s-4 border-slate-900 ps-3">{{ isRtl ? 'قطع الغيار المستبدلة' : 'Replaced Parts' }}</h3>
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 text-white">
+                            <th class="px-6 py-4 text-start text-xs font-black uppercase tracking-widest rounded-s-2xl">{{ labels.description }}</th>
+                            <th class="px-6 py-4 text-center text-xs font-black uppercase tracking-widest w-24">{{ labels.qty }}</th>
+                            <th class="px-6 py-4 text-end text-xs font-black uppercase tracking-widest w-32">{{ labels.unit_price }}</th>
+                            <th class="px-6 py-4 text-end text-xs font-black uppercase tracking-widest w-32 rounded-e-2xl">{{ labels.total }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr v-for="line in parts" :key="line.id" class="text-slate-700">
+                            <td class="px-6 py-5">
+                                <p class="font-bold text-slate-900">{{ line.description }}</p>
+                                <p v-if="line.part?.sku" class="text-[10px] text-slate-400 font-mono mt-0.5">SKU: {{ line.part.sku }}</p>
+                            </td>
+                            <td class="px-6 py-5 text-center font-black font-mono">{{ toEnglish(line.qty) }}</td>
+                            <td class="px-6 py-5 text-end font-black font-mono">{{ formatCurrency(line.unit_price) }}</td>
+                            <td class="px-6 py-5 text-end font-black font-mono text-slate-900">{{ formatCurrency(line.line_total_incl_tax) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Totals & Payment Breakdown -->
@@ -110,7 +146,7 @@
                     <p class="text-sm text-slate-600 leading-relaxed italic">{{ invoice.notes }}</p>
                 </div>
                 <div v-if="page.props.tenant?.invoice_terms" class="p-6 border border-slate-100 rounded-3xl">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">الشروط والأحكام</h3>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{{ isRtl ? 'الشروط والأحكام' : 'Terms & Conditions' }}</h3>
                     <p class="text-[10px] text-slate-500 leading-tight whitespace-pre-wrap">{{ page.props.tenant.invoice_terms }}</p>
                 </div>
             </div>
@@ -151,10 +187,10 @@
         </div>
 
         <!-- Print UI Overlay (Hidden during print) -->
-        <div class="fixed bottom-8 left-8 flex items-center gap-4 print:hidden">
+        <div class="fixed bottom-8 start-8 flex items-center gap-4 print:hidden">
             <button @click="window.history.back()" class="px-6 py-3 bg-white text-slate-900 rounded-2xl shadow-xl font-black text-sm border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2">
                 <svg class="w-4 h-4 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                رجوع
+                {{ isRtl ? 'رجوع' : 'Back' }}
             </button>
             <button @click="printPage" class="px-8 py-4 bg-slate-900 text-white rounded-2xl shadow-2xl font-black text-sm hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,8 +204,11 @@
 <script setup>
 import { computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 const page = usePage();
+const { locale } = useI18n();
+const isRtl = computed(() => locale.value === 'ar');
 
 const props = defineProps({
     invoice: Object,
@@ -177,20 +216,44 @@ const props = defineProps({
     labels: Object,
 });
 
+const customerAddress = computed(() => props.invoice.customer_address_snapshot || props.invoice.customer?.address_line || '');
+const customerTaxNumber = computed(() => props.invoice.customer_vat_snapshot || props.invoice.customer?.tax_number || '');
+
+const services = computed(() => {
+    return (props.invoice?.lines || []).filter(line => !line.is_part);
+});
+
+const parts = computed(() => {
+    return (props.invoice?.lines || []).filter(line => line.is_part);
+});
+
 const balance = computed(() => (props.invoice.total_incl_tax || 0) - (props.invoice.total_paid || 0));
 
 const paymentStatusLabel = computed(() => {
-    switch (props.invoice.payment_status) {
-        case 'paid': return 'مدفوعة بالكامل';
-        case 'partial': return 'مدفوعة جزئياً';
-        case 'unpaid': return 'غير مدفوعة';
-        default: return props.invoice.payment_status;
+    if (isRtl.value) {
+        switch (props.invoice.payment_status) {
+            case 'paid': return 'مدفوعة بالكامل';
+            case 'partial': return 'مدفوعة جزئياً';
+            case 'unpaid': return 'غير مدفوعة';
+            default: return props.invoice.payment_status;
+        }
+    } else {
+        switch (props.invoice.payment_status) {
+            case 'paid': return 'Fully Paid';
+            case 'partial': return 'Partially Paid';
+            case 'unpaid': return 'Unpaid';
+            default: return props.invoice.payment_status;
+        }
     }
 });
 
 const formatDate = (date) => {
     if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn', { numberingSystem: 'latn' });
+    if (isRtl.value) {
+        return new Date(date).toLocaleDateString('ar-SA-u-nu-latn', { numberingSystem: 'latn' });
+    }
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
 const toEnglish = (val) => {

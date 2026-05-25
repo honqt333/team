@@ -29,7 +29,7 @@ class VehicleMake extends Model
         'sort_order' => 'integer',
     ];
 
-    protected $appends = ['name'];
+    protected $appends = ['name', 'logo_url'];
 
     /**
      * Get localized name based on current locale
@@ -38,6 +38,14 @@ class VehicleMake extends Model
     {
         $locale = app()->getLocale();
         return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
+    }
+
+    /**
+     * Get make logo URL from storage
+     */
+    public function getLogoUrlAttribute(): ?string
+    {
+        return $this->logo_path ? \Illuminate\Support\Facades\Storage::url($this->logo_path) : null;
     }
 
     public function tenant(): BelongsTo
