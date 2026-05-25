@@ -8,6 +8,7 @@ use App\Models\TenantAddress;
 use App\Models\TenantTaxSetting;
 use App\Models\TenantZatcaSetting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
@@ -345,7 +346,7 @@ class CompanyProfileController extends Controller
 
         // Update password if provided
         if ($request->filled('new_password')) {
-            $user->password = bcrypt($request->new_password);
+            $user->password = Hash::make($request->new_password);
         }
 
         $user->save();

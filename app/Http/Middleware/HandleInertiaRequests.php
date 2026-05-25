@@ -49,7 +49,9 @@ class HandleInertiaRequests extends Middleware
                     ? InternalNotification::where('user_id', $user->id)->where('tenant_id', $user->tenant_id)->whereNull('read_at')->count()
                     + ($tenant ? SystemAnnouncement::forTenant($tenant->id)->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $tenant->id))->count() : 0)
                     : 0,
-                'unread_contact_messages_count' => \App\Models\ContactMessage::where('is_read', false)->count(),
+                'unread_contact_messages_count' => (!$isTenantUser && $user)
+                    ? \App\Models\ContactMessage::where('is_read', false)->count()
+                    : 0,
             ],
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),

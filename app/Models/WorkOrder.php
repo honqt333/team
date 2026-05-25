@@ -533,4 +533,22 @@ class WorkOrder extends Model
     {
         return $this->status === self::STATUS_CANCELLED;
     }
+
+    /**
+     * Scope to filter work orders with outstanding balance (credit invoices).
+     * Total charges (items + parts) > total payments.
+     */
+    public function scopeHasOutstandingBalance($query): void
+    {
+        $query->whereRaw('(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))');
+    }
+
+    /**
+     * Get the raw SQL snippet for the outstanding balance condition.
+     * Useful when combining with other whereRaw calls.
+     */
+    public static function outstandingBalanceSql(): string
+    {
+        return '(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))';
+    }
 }

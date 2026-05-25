@@ -36,7 +36,7 @@ class EnsureTwoFactorEnabled
             }
 
             return redirect()->route('app.security.2fa.setup')
-                ->with('warning', 'المصادقة الثنائية إلزامية في هذا الحساب. يرجى تفعيلها للمتابعة.');
+                ->with('warning', __('auth.2fa.required'));
         }
 
         return $next($request);

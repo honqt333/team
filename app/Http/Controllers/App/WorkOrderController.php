@@ -43,8 +43,7 @@ class WorkOrderController
             })
             ->when($status === 'closed', function ($query) use ($subFilter) {
                 if ($subFilter === 'credit_invoices') {
-                    $query->where('status', 'done')
-                          ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
+                    $query->where('status', 'done')->hasOutstandingBalance();
                 } elseif ($subFilter === 'bad_debts') {
                     $query->where('id', 0);
                 } elseif ($subFilter === 'cancelled') {
@@ -149,7 +148,7 @@ class WorkOrderController
             $filterCounts = [
                 'closed' => WorkOrder::whereIn('status', ['done', 'cancelled'])->count(),
                 'credit_invoices' => WorkOrder::where('status', 'done')
-                    ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)')
+                    ->hasOutstandingBalance()
                     ->count(),
                 'bad_debts' => 0,
                 'cancelled' => WorkOrder::where('status', 'cancelled')->count(),
@@ -172,8 +171,7 @@ class WorkOrderController
                 })
                 ->when($status === 'closed', function ($query) use ($subFilter) {
                     if ($subFilter === 'credit_invoices') {
-                        $query->where('status', 'done')
-                              ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
+                        $query->where('status', 'done')->hasOutstandingBalance();
                     } elseif ($subFilter === 'bad_debts') {
                         $query->where('id', 0);
                     } elseif ($subFilter === 'cancelled') {
