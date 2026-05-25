@@ -253,7 +253,15 @@ class QuoteController extends Controller
 
         // Sync departments
         if ($request->has('departments') && is_array($request->departments)) {
-            $quote->departments()->sync($request->departments);
+            $departments = $request->departments;
+            $showPackages = false;
+            if (($key = array_search('packages', $departments)) !== false) {
+                $showPackages = true;
+                unset($departments[$key]);
+                $departments = array_values($departments);
+            }
+            $quote->show_packages_section = $showPackages;
+            $quote->departments()->sync($departments);
         }
 
         // Create lines
@@ -379,7 +387,15 @@ class QuoteController extends Controller
 
         // Sync departments if provided
         if ($request->has('departments')) {
-            $quote->departments()->sync($request->departments);
+            $departments = $request->departments ?? [];
+            $showPackages = false;
+            if (($key = array_search('packages', $departments)) !== false) {
+                $showPackages = true;
+                unset($departments[$key]);
+                $departments = array_values($departments);
+            }
+            $quote->update(['show_packages_section' => $showPackages]);
+            $quote->departments()->sync($departments);
         }
 
         // Only update lines if provided in request to prevent accidental deletion
@@ -706,7 +722,16 @@ class QuoteController extends Controller
         }
 
         $validated = $request->validate([
-            'department_id' => ['required', 'exists:departments,id'],
+            'department_id' => ['required'],
+        ]);
+
+        if ($validated['department_id'] === 'packages') {
+            $quote->update(['show_packages_section' => true]);
+            return redirect()->back();
+        }
+
+        $request->validate([
+            'department_id' => ['exists:departments,id'],
         ]);
 
         // Add department to pivot table
@@ -718,13 +743,34 @@ class QuoteController extends Controller
     /**
      * Remove a department from the quote.
      */
-    public function removeDepartment(Quote $quote, int $department): RedirectResponse
+    public function removeDepartment(Quote $quote, string $department_id): RedirectResponse
     {
         $this->authorize('update', $quote);
 
         if (!$quote->canBeEdited()) {
             abort(403, 'Cannot modify departments of a converted quote.');
         }
+
+        if ($department_id === 'packages') {
+            $hasPackages = $quote->lines()
+                ->whereHas('service', fn($q) => $q->where('type', \App\Models\Service::TYPE_PACKAGE))
+                ->exists();
+
+            if ($hasPackages) {
+                return redirect()->back()->withErrors([
+                    'error' => __('quotes.cannot_remove_package_department_with_items')
+                ]);
+            }
+
+            $quote->update(['show_packages_section' => false]);
+
+            return redirect()->back();
+        }
+
+        if (!is_numeric($department_id)) {
+            abort(404);
+        }
+        $department = (int) $department_id;
 
         // Check if department has any services in this quote
         $hasServices = $quote->lines()

@@ -117,7 +117,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     
     // Work Order Departments
     Route::post('/work-orders/{work_order}/departments', [WorkOrderController::class, 'addDepartment'])->name('work-orders.departments.store');
-    Route::delete('/work-orders/{work_order}/departments/{department}', [WorkOrderController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
+    Route::delete('/work-orders/{work_order}/departments/{department_id}', [WorkOrderController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
     
     // Work Order Parts (Inventory Integration)
     Route::post('/work-orders/{workOrder}/parts', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'store'])->name('work-orders.parts.store');
@@ -194,7 +194,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::put('/quotes/{quote}/services/{line}', [QuoteController::class, 'updateService'])->name('app.quotes.services.update');
     Route::delete('/quotes/{quote}/services/{line}', [QuoteController::class, 'deleteService'])->name('app.quotes.services.destroy');
     Route::post('/quotes/{quote}/departments', [QuoteController::class, 'addDepartment'])->name('app.quotes.departments.store');
-    Route::delete('/quotes/{quote}/departments/{department}', [QuoteController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
+    Route::delete('/quotes/{quote}/departments/{department_id}', [QuoteController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
     
     // Quote Parts
     Route::post('/quotes/{quote}/parts', [QuoteController::class, 'addPart'])->name('app.quotes.parts.store');

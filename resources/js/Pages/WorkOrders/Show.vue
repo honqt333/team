@@ -539,9 +539,9 @@
                                         </span>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+   <div class="flex items-center gap-2">
                                         <!-- Remove Department Button -->
-                                        <button v-if="!isReadOnly && !dept.is_virtual && getDepartmentItems(dept.id).length === 0"
+                                        <button v-if="!isReadOnly && (!dept.is_virtual || dept.id === 'packages') && getDepartmentItems(dept.id).length === 0"
                                             @click.stop="removeDepartment(dept.id)"
                                             class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
                                             :title="$t('common.delete')">
@@ -558,154 +558,150 @@
                                     <!-- Services List -->
                                     <div class="flex flex-col gap-3">
                                         <div v-for="(item, index) in getDepartmentItems(dept.id)" :key="item.id"
-                                            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 transition-all hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 group relative">
-                                            <div class="flex items-center justify-between">
-                                                <!-- Right Side: Status + Title + Meta -->
-                                                <div class="flex items-start gap-4 flex-1">
-                                                    <!-- Status Icon (Large) -->
-                                                    <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                                                        :class="{
-                                                            'bg-gray-50 text-gray-400 dark:bg-gray-700 dark:text-gray-500': item.status === 'pending',
-                                                            'bg-blue-50 text-blue-500 dark:bg-blue-900/20 dark:text-blue-400': item.status === 'in_progress',
-                                                            'bg-teal-50 text-teal-500 dark:bg-teal-900/20 dark:text-teal-400': item.status === 'ready_for_qc',
-                                                            'bg-green-50 text-green-500 dark:bg-green-900/20 dark:text-green-400': item.status === 'completed',
-                                                            'bg-yellow-50 text-yellow-500 dark:bg-yellow-900/20 dark:text-yellow-400': item.status === 'on_hold',
-                                                            'bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400': item.status === 'cancelled'
-                                                        }">
-                                                        <svg v-if="item.status === 'completed'" class="w-6 h-6"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                        <svg v-else-if="item.status === 'in_progress'" class="w-6 h-6"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        </svg>
-                                                        <svg v-else-if="item.status === 'cancelled'" class="w-6 h-6"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
+                                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 p-4 transition-all hover:shadow-lg hover:shadow-indigo-500/5 hover:border-gray-200 dark:hover:border-gray-600 group relative"
+                                            :class="{
+                                                'border-s-gray-300 dark:border-s-gray-600': item.status === 'pending',
+                                                'border-s-blue-500': item.status === 'in_progress',
+                                                'border-s-teal-500': item.status === 'ready_for_qc',
+                                                'border-s-emerald-500': item.status === 'completed',
+                                                'border-s-amber-500': item.status === 'on_hold',
+                                                'border-s-rose-500': item.status === 'cancelled'
+                                            }">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <!-- Right Side: Content -->
+                                                <div class="flex-1 min-w-0">
+                                                    <!-- Title Row with Status Badge -->
+                                                    <div class="flex items-start gap-2.5">
+                                                        <span class="text-gray-400 font-semibold font-mono text-sm mt-0.5 select-none">{{ index + 1 }}.</span>
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                                                <button v-if="!isReadOnly"
+                                                                    @click.stop="openEditServiceModal(item)" type="button"
+                                                                    class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-snug">
+                                                                    {{ item.service ? getName(item.service) : item.title }}
+                                                                </button>
+                                                                <span v-else
+                                                                    class="font-bold text-gray-900 dark:text-white text-base text-start leading-snug">
+                                                                    {{ item.service ? getName(item.service) : item.title }}
+                                                                </span>
+
+                                                                <!-- Status Badge -->
+                                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none shrink-0"
+                                                                    :class="{
+                                                                        'bg-gray-50 text-gray-500 border border-gray-200/60 dark:bg-gray-700/30 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
+                                                                        'bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
+                                                                        'bg-teal-50 text-teal-600 border border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
+                                                                        'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
+                                                                        'bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
+                                                                        'bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
+                                                                    }">
+                                                                    <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                                        :class="{
+                                                                            'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
+                                                                            'bg-blue-500': item.status === 'in_progress',
+                                                                            'bg-teal-500': item.status === 'ready_for_qc',
+                                                                            'bg-emerald-500': item.status === 'completed',
+                                                                            'bg-amber-500': item.status === 'on_hold',
+                                                                            'bg-rose-500': item.status === 'cancelled'
+                                                                        }"></span>
+                                                                    <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
+                                                                </span>
+                                                            </div>
+
+                                                            <!-- Description Block -->
+                                                            <div v-if="item.service && item.title && item.title !== getName(item.service)" 
+                                                                class="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50/50 dark:bg-gray-900/40 p-2.5 rounded-lg border border-gray-100/50 dark:border-gray-850 leading-relaxed">
+                                                                {{ item.title }}
+                                                            </div>
+                                                        </div>
                                                     </div>
 
-                                                    <div class="flex-1 min-w-0">
-                                                        <!-- Title Row - CLICKABLE -->
-                                                        <div class="flex items-baseline gap-2 mb-1">
-                                                            <span
-                                                                class="text-gray-400 font-medium font-mono text-sm leading-none">{{
-                                                                    index + 1 }}.</span>
-                                                            <button v-if="!isReadOnly"
-                                                                @click.stop="openEditServiceModal(item)" type="button"
-                                                                class="font-bold text-gray-900 dark:text-white text-lg hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-tight">
-                                                                {{ item.title || getName(item.service) }}
-                                                            </button>
-                                                            <span v-else
-                                                                class="font-bold text-gray-900 dark:text-white text-lg text-start leading-tight">
-                                                                {{ item.title || getName(item.service) }}
-                                                            </span>
+                                                    <!-- Divider Line -->
+                                                    <div class="border-t border-gray-100/75 dark:border-gray-800/80 my-3"></div>
+
+                                                    <!-- Meta Row: Price | Technician | Warranty | Date -->
+                                                    <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                                        <!-- Labor Price Badge -->
+                                                        <div class="inline-flex items-center gap-1.5 bg-indigo-50/80 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100/80 dark:border-indigo-900/40 px-3 py-1 rounded-full text-xs font-semibold"
+                                                            :title="$t('work_orders.item.service_cost')">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            </svg>
+                                                            <span>{{ $t('work_orders.item.service_cost') }}:</span>
+                                                            <span class="font-bold font-mono text-gray-900 dark:text-gray-100">{{ formatPrice(item.line_total || item.total) }}</span>
                                                         </div>
 
-                                                        <!-- Meta Row: Price | Technician -->
-                                                        <div
-                                                            class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                                            <!-- Prices Group -->
-                                                            <div
-                                                                class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-md">
-                                                                <!-- Labor -->
-                                                                <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium"
-                                                                    :title="$t('work_orders.item.service_cost')">
-                                                                    <span class="text-indigo-500">🔧</span>
-                                                                    <span>{{ formatPrice(item.line_total || item.total)
-                                                                        }}</span>
-                                                                </div>
-                                                                <!-- Parts (if any) -->
-                                                                <div v-if="item.parts_total > 0"
-                                                                    class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium border-s border-gray-200 dark:border-gray-600 ps-3"
-                                                                    :title="$t('work_orders.item.parts_cost')">
-                                                                    <span class="text-amber-500">🔩</span>
-                                                                    <span>{{ formatPrice(item.parts_total) }}</span>
-                                                                </div>
-                                                            </div>
+                                                        <!-- Parts Cost Badge (if any) -->
+                                                        <div v-if="item.parts_total > 0"
+                                                            class="inline-flex items-center gap-1.5 bg-amber-50/80 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-100/80 dark:border-amber-900/40 px-3 py-1 rounded-full text-xs font-semibold"
+                                                            :title="$t('work_orders.item.parts_cost')">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 00-2 2zM9 9h6v6H9V9z"/>
+                                                            </svg>
+                                                            <span>{{ $t('work_orders.item.parts_cost') }}:</span>
+                                                            <span class="font-bold font-mono text-gray-900 dark:text-gray-100">{{ formatPrice(item.parts_total) }}</span>
+                                                        </div>
 
-                                                            <div v-if="item.technicians && item.technicians.length"
-                                                                class="flex items-center gap-1.5">
-                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                                <div class="flex items-center gap-1">
-                                                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                                    </svg>
-                                                                    <span>{{ item.technicians[0].name }}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div v-else
-                                                                class="flex items-center gap-1.5 text-amber-500">
-                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                                <span>{{ $t('work_orders.item.assign_technician')
-                                                                    }}</span>
-                                                            </div>
+                                                        <!-- Technician Badge -->
+                                                        <div v-if="item.technicians && item.technicians.length"
+                                                            class="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                            </svg>
+                                                            <span>{{ item.technicians[0].name }}</span>
+                                                        </div>
+                                                        <!-- Not Assigned Prompt Badge -->
+                                                        <div v-else
+                                                            class="inline-flex items-center gap-1.5 bg-rose-50/50 dark:bg-rose-950/10 text-rose-600 dark:text-rose-400 border border-dashed border-rose-200 dark:border-rose-900/40 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">
+                                                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                            </svg>
+                                                            <span>{{ $t('work_orders.item.assign_technician') }}</span>
+                                                        </div>
 
-                                                            <!-- Warranty Info -->
-                                                            <div v-if="item.warranty_expires_at"
-                                                                class="flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                                <svg class="w-3.5 h-3.5" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                                                </svg>
-                                                                <span class="text-xs font-bold">{{
-                                                                    $t('services_management.warranty') }}: {{
-                                                                        formatDate(item.warranty_expires_at) }}</span>
-                                                            </div>
+                                                        <!-- Warranty Info Badge -->
+                                                        <div v-if="item.warranty_expires_at"
+                                                            class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-100/80 dark:border-emerald-900/40 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                                            </svg>
+                                                            <span>{{ $t('services_management.warranty') }}: {{ formatDate(item.warranty_expires_at) }}</span>
+                                                        </div>
+
+                                                        <!-- Date Created Badge -->
+                                                        <div class="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                            </svg>
+                                                            <span>{{ formatDate(item.created_at) }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <!-- Left Side: Actions + Date -->
-                                                <div class="flex items-center gap-4 pl-2">
-                                                    <!-- Date Badge (Red Style) -->
-                                                    <span
-                                                        class="hidden sm:inline-flex bg-red-500 text-white text-xs px-2.5 py-1 rounded-md font-bold shadow-sm">
-                                                        {{ formatDate(item.created_at) }}
-                                                    </span>
-
-                                                    <div v-if="!isReadOnly"
-                                                        class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700 ps-3">
-                                                        <button @click.stop="openEditServiceModal(item)"
-                                                            class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                                            :title="$t('common.edit')">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                            </svg>
-                                                        </button>
-                                                        <button @click.stop="deleteServiceItem(item)"
-                                                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                                            :title="$t('common.delete')">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                                <!-- Left Side: Actions -->
+                                                <div v-if="!isReadOnly"
+                                                    class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700/70 ps-3 shrink-0 mt-0.5">
+                                                    <button @click.stop="openEditServiceModal(item)"
+                                                        class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                        :title="$t('common.edit')">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button @click.stop="deleteServiceItem(item)"
+                                                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                        :title="$t('common.delete')">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -1694,12 +1690,11 @@ const displayDepartments = computed(() => {
     // Get database departments matching active list
     const list = props.departments.filter(d => deptIds.has(d.id));
 
-    // Virtual packages section
+    // Virtual packages section - only show if it has package items or show_packages_section is active
     const hasPackageItems = props.itemsByDepartment['packages'] && props.itemsByDepartment['packages'].length > 0;
-    const canEdit = !isReadOnly.value;
-    const hasAvailablePackages = props.services?.some(s => s.type === 'package');
+    const showPackagesSection = props.workOrder.show_packages_section;
 
-    if (hasPackageItems || (canEdit && hasAvailablePackages)) {
+    if (hasPackageItems || showPackagesSection) {
         list.push({
             id: 'packages',
             name_ar: 'باقات الخدمات',
@@ -1714,7 +1709,21 @@ const displayDepartments = computed(() => {
 // Departments that can still be added
 const availableDepartments = computed(() => {
     const usedIds = displayDepartments.value.map(d => d.id);
-    return props.departments.filter(d => !usedIds.includes(d.id));
+    const list = props.departments.filter(d => !usedIds.includes(d.id));
+
+    // Append virtual packages department if not added and available
+    const canEdit = !isReadOnly.value;
+    const hasAvailablePackages = props.services?.some(s => s.type === 'package');
+    if (canEdit && hasAvailablePackages && !usedIds.includes('packages')) {
+        list.push({
+            id: 'packages',
+            name_ar: 'باقات الخدمات',
+            name_en: 'Service Packages',
+            name: 'Service Packages'
+        });
+    }
+
+    return list;
 });
 
 // Get items for a specific department
@@ -1760,7 +1769,10 @@ const selectedItem = computed(() => {
 // Services filtered by department
 const departmentServices = computed(() => {
     if (!selectedDepartmentId.value) return [];
-    return props.services.filter(s => s.department_id === selectedDepartmentId.value);
+    if (selectedDepartmentId.value === 'packages') {
+        return props.services.filter(s => s.type === 'package');
+    }
+    return props.services.filter(s => s.department_id === selectedDepartmentId.value && s.type !== 'package');
 });
 
 // Open add service modal
@@ -2062,7 +2074,7 @@ async function removeDepartment(deptId) {
     });
 
     if (confirmed) {
-        router.delete(route('work-orders.departments.destroy', { work_order: props.workOrder.id, department: deptId }), {
+        router.delete(route('work-orders.departments.destroy', { work_order: props.workOrder.id, department_id: deptId }), {
             onSuccess: () => {
                 success(t('common.deleted_success'));
             },

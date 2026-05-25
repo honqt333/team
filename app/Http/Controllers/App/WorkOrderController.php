@@ -635,7 +635,16 @@ class WorkOrderController
         $this->authorize('update', $work_order);
 
         $validated = $request->validate([
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => 'required',
+        ]);
+
+        if ($validated['department_id'] === 'packages') {
+            $work_order->update(['show_packages_section' => true]);
+            return redirect()->back()->with('success', __('messages.department_added'));
+        }
+
+        $request->validate([
+            'department_id' => 'exists:departments,id',
         ]);
 
         // Sync without detaching
@@ -644,20 +653,39 @@ class WorkOrderController
         return redirect()->back()->with('success', __('messages.department_added'));
     }
 
-    public function removeDepartment(WorkOrder $work_order, \App\Models\Department $department): \Illuminate\Http\RedirectResponse
+    public function removeDepartment(WorkOrder $work_order, string $department_id): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $work_order);
 
+        if ($department_id === 'packages') {
+            $hasPackages = $work_order->items()
+                ->whereHas('service', fn($q) => $q->where('type', \App\Models\Service::TYPE_PACKAGE))
+                ->exists();
+
+            if ($hasPackages) {
+                return redirect()->back()->with('error', __('messages.cannot_remove_department_has_items'));
+            }
+
+            $work_order->update(['show_packages_section' => false]);
+
+            return redirect()->back()->with('success', __('messages.department_removed'));
+        }
+
+        if (!is_numeric($department_id)) {
+            abort(404);
+        }
+        $departmentId = (int) $department_id;
+
         // Rule R11: Can only remove department if no items belong to it
         $hasItems = $work_order->items()
-            ->whereHas('service', fn($q) => $q->where('department_id', $department->id))
+            ->whereHas('service', fn($q) => $q->where('department_id', $departmentId))
             ->exists();
 
         if ($hasItems) {
             return redirect()->back()->with('error', __('messages.cannot_remove_department_has_items'));
         }
 
-        $work_order->departments()->detach($department->id);
+        $work_order->departments()->detach($departmentId);
 
         return redirect()->back()->with('success', __('messages.department_removed'));
     }

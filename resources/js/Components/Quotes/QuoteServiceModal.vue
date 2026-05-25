@@ -299,6 +299,16 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName, getDescription } = useLocalized();
+
+function getPreferredTitle(service) {
+    if (!service) return '';
+    const name = getName(service) || '';
+    const normalized = name.trim().toLowerCase();
+    if (normalized === 'أخرى' || normalized === 'other') {
+        return '';
+    }
+    return getDescription(service) || name;
+}
 const { formatCurrency, toEnglish } = useNumberFormat();
 
 const { confirm } = useConfirm();
@@ -591,7 +601,7 @@ watch(() => form.service_id, (serviceId) => {
         const service = props.services.find(s => s.id == serviceId);
         if (service) {
             form.unit_price = service.base_price || 0;
-            form.description = getDescription(service) || getName(service);
+            form.description = getPreferredTitle(service);
         }
     }
 });

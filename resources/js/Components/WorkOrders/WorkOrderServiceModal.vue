@@ -490,6 +490,16 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { getName, getDescription } = useLocalized();
+
+function getPreferredTitle(service) {
+    if (!service) return '';
+    const name = getName(service) || '';
+    const normalized = name.trim().toLowerCase();
+    if (normalized === 'أخرى' || normalized === 'other') {
+        return '';
+    }
+    return getDescription(service) || name;
+}
 const { formatCurrency, toEnglish } = useNumberFormat();
 
 // State
@@ -539,7 +549,7 @@ const warrantyUnitOptions = computed(() => [
 // Form
 const form = useForm({
     service_id: props.item ? (props.item.service_id || 'other') : '',
-    title: props.item ? (props.item.title || (props.item.service ? (getDescription(props.item.service) || getName(props.item.service)) : '')) : '',
+    title: props.item ? (props.item.title || getPreferredTitle(props.item.service)) : '',
     qty: props.item?.qty || 1,
     unit_price: props.item ? (props.item.unit_price !== undefined && props.item.unit_price !== null ? props.item.unit_price : (props.item.service?.base_price || 0)) : 0,
     discount_type: props.item ? (props.item.discount_type || props.item.service?.default_discount_type || 'none') : 'none',
@@ -1011,7 +1021,7 @@ watch(() => form.service_id, (serviceId) => {
         const service = props.services.find(s => s.id == serviceId);
         if (service) {
             form.unit_price = service.base_price || 0;
-            form.title = getDescription(service) || getName(service) || '';
+            form.title = getPreferredTitle(service);
             form.duration_value = service.duration_value !== undefined && service.duration_value !== null ? service.duration_value : '';
             form.duration_unit = service.duration_unit || 'minutes';
             form.warranty_value_snapshot = service.warranty_value !== undefined && service.warranty_value !== null ? service.warranty_value : '';
@@ -1030,7 +1040,7 @@ watch(() => props.item, (newItem) => {
     if (newItem) {
         const itemService = newItem.service;
         form.service_id = newItem.service_id || 'other';
-        form.title = newItem.title || (itemService ? (getDescription(itemService) || getName(itemService)) : '');
+        form.title = newItem.title || getPreferredTitle(itemService);
         form.qty = newItem.qty;
         form.unit_price = newItem.unit_price !== undefined && newItem.unit_price !== null ? newItem.unit_price : (itemService ? (itemService.base_price || 0) : 0);
         form.discount_type = newItem.discount_type || itemService?.default_discount_type || 'none';
@@ -1057,7 +1067,7 @@ watch(() => props.show, (isOpen) => {
         if (props.item) {
             const itemService = props.item.service;
             form.service_id = props.item.service_id || 'other';
-            form.title = props.item.title || (itemService ? (getDescription(itemService) || getName(itemService)) : '');
+            form.title = props.item.title || getPreferredTitle(itemService);
             form.qty = props.item.qty;
             form.unit_price = props.item.unit_price !== undefined && props.item.unit_price !== null ? props.item.unit_price : (itemService ? (itemService.base_price || 0) : 0);
             form.discount_type = props.item.discount_type || itemService?.default_discount_type || 'none';

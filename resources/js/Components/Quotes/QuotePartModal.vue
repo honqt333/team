@@ -116,7 +116,7 @@
                     <!-- Row 2: Part Name -->
                     <div class="space-y-1">
                         <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.name') || 'اسم القطعة' }} <span class="text-red-500">*</span></label>
-                        <input type="text" v-model="form.name" required :disabled="isReadOnly"
+                        <input type="text" v-model="form.name" required :disabled="isReadOnly || form.source === 'warehouse'"
                             class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-bold disabled:opacity-60" />
                     </div>
                 </div>

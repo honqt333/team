@@ -115,6 +115,7 @@ class WorkOrder extends Model
         'delivery_signature',
         'reception_signed_at',
         'delivery_signed_at',
+        'show_packages_section',
     ];
 
     protected $casts = [
@@ -127,6 +128,7 @@ class WorkOrder extends Model
         'tax_breakdown' => 'array',
         'reception_signed_at' => 'datetime',
         'delivery_signed_at' => 'datetime',
+        'show_packages_section' => 'boolean',
     ];
 
     // ==================== Relationships ====================
