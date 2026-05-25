@@ -505,6 +505,8 @@
     "days_remaining": "متبقي {days} يوم",
     "due_today": "اليوم موعد التسليم",
     "completed_in_days": "اكتمل في {days} يوم",
+    "general_note": "ملاحظة عامة",
+    "vat_header": "VAT ({rate}%)",
     "add": "إنشاء أمر عمل",
     "edit": "تعديل كرت عمل",
     "details": "تفاصيل كرت العمل",
@@ -701,6 +703,7 @@
       "formats": "PNG, JPG, JPEG حتى 5MB",
       "add_caption": "أضف وصف...",
       "no_photos": "لا توجد صور",
+      "delete_confirm": "هل أنت متأكد من حذف هذه الصورة؟",
       "error_size": "حجم الملف {file} يتجاوز الحد المسموح {size} ميجابايت",
       "error_max_files": "لقد وصلت للحد الأقصى لعدد الملفات وهو {max}",
       "types": {

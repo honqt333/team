@@ -287,7 +287,7 @@
                                     <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('common.amount')
                                         }}</th>
                                     <th v-if="hasTax" class="pb-2 text-end font-bold uppercase tracking-wider italic">
-                                        VAT (15%)</th>
+                                        {{ $t('work_orders.vat_header', { rate: workOrder.tax_rate_snapshot || 15 }) }}</th>
                                     <th
                                         class="pb-2 text-end font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">
                                         {{ $t('common.total') }}</th>
@@ -1871,7 +1871,7 @@ const allNotes = computed(() => {
                 created_at: note.created_at,
                 user: note.user,
                 item_id: note.work_order_item_id || null,
-                service_title_formatted: serviceTitle || (t('work_orders.general_note') || 'ملاحظة عامة'),
+                service_title_formatted: serviceTitle || t('work_orders.general_note'),
             };
         })
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));

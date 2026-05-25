@@ -612,6 +612,8 @@
     "days_remaining": "{days} days left",
     "due_today": "Today is the delivery date",
     "completed_in_days": "Completed in {days} days",
+    "general_note": "General Note",
+    "vat_header": "VAT ({rate}%)",
     "details": "Business card details",
     "created_at": "Creation date",
     "search": "Search...",
@@ -769,6 +771,7 @@
       "formats": "PNG, JPG, JPEG up to 5MB",
       "add_caption": "Add description...",
       "no_photos": "There are no pictures",
+      "delete_confirm": "Are you sure you want to delete this photo?",
       "error_size": "The file size {file} exceeds the limit {size} MB",
       "error_max_files": "You have reached the maximum number of files {max}",
       "types": {
