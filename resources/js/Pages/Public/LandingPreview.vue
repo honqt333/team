@@ -17,6 +17,7 @@ const canvasRef = ref(null);
 const cursorX = ref(0);
 const cursorY = ref(0);
 const cursorVisible = ref(false);
+let particles = [];
 const statsVisible = ref(false);
 const statsCounters = ref({});
 
@@ -132,8 +133,68 @@ function animateCounter(target, duration = 2000) {
   });
 }
 
-// ── Particle Canvas ───────────────────────────────────────────────────────────
+// ── Particle Canvas with Idle Freeze ──────────────────────────────────────────
 let animFrameId = null;
+let particlePaused = false;
+let idleTimer = null;
+
+function pauseParticles() {
+  particlePaused = true;
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  animFrameId = null;
+}
+
+function resumeParticles() {
+  if (!particlePaused) return;
+  particlePaused = false;
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  // Re-draw a single frozen frame if available, then resume loop
+  animFrameId = requestAnimationFrame(draw);
+}
+
+function resetIdleTimer() {
+  clearTimeout(idleTimer);
+  if (particlePaused) resumeParticles();
+  idleTimer = setTimeout(pauseParticles, 30000);
+}
+
+function draw() {
+  if (particlePaused) return;
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const color = isDark.value ? '150,120,255' : '79,70,229';
+  particles.forEach(p => {
+    p.x += p.dx; p.y += p.dy;
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${color},${p.opacity})`;
+    ctx.fill();
+  });
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${color},${0.15 * (1 - dist / 120)})`;
+        ctx.lineWidth = 0.5;
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  animFrameId = requestAnimationFrame(draw);
+}
+
 function initParticles(canvas) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -142,7 +203,7 @@ function initParticles(canvas) {
   window.addEventListener('resize', resize);
 
   const count = Math.min(60, Math.floor(window.innerWidth / 20));
-  const particles = Array.from({ length: count }, () => ({
+  particles = Array.from({ length: count }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
     r: Math.random() * 1.5 + 0.5,
@@ -151,41 +212,15 @@ function initParticles(canvas) {
     opacity: Math.random() * 0.5 + 0.1,
   }));
 
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const color = isDark.value ? '150,120,255' : '79,70,229';
-    particles.forEach(p => {
-      p.x += p.dx; p.y += p.dy;
-      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${color},${p.opacity})`;
-      ctx.fill();
-    });
-    // Draw connections
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 120) {
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(${color},${0.15 * (1 - dist / 120)})`;
-          ctx.lineWidth = 0.5;
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-    animFrameId = requestAnimationFrame(draw);
-  }
   draw();
 }
 
-// ── Cursor Glow ───────────────────────────────────────────────────────────────
+// ── Cursor Glow (throttled) ───────────────────────────────────────────────────
+let lastCursorUpdate = 0;
 function handleMouseMove(e) {
+  const now = performance.now();
+  if (now - lastCursorUpdate < 50) return;
+  lastCursorUpdate = now;
   cursorX.value = e.clientX;
   cursorY.value = e.clientY;
   cursorVisible.value = true;
@@ -245,6 +280,13 @@ onMounted(async () => {
 
   window.addEventListener('scroll', () => { isScrolled.value = window.scrollY > 60; });
   window.addEventListener('mousemove', handleMouseMove);
+  // Idle freeze for particles
+  const activityEvents = ['mousemove', 'scroll', 'click', 'keydown', 'touchstart'];
+  activityEvents.forEach(ev => window.addEventListener(ev, resetIdleTimer));
+  document.addEventListener('visibilitychange', () => {
+    document.hidden ? pauseParticles() : resetIdleTimer();
+  });
+  resetIdleTimer();
   await nextTick();
   initParticles(canvasRef.value);
   // Init stat counters with '0'
@@ -266,6 +308,7 @@ onUnmounted(() => {
   if (animFrameId) cancelAnimationFrame(animFrameId);
   if (revealObserver) revealObserver.disconnect();
   clearTimeout(typedTimer);
+  clearTimeout(idleTimer);
   window.removeEventListener('mousemove', handleMouseMove);
 });
 
@@ -333,9 +376,11 @@ const getSocialIcon = (platform) => {
     <meta name="description" :content="t('description_ar', 'description_en')">
     <meta v-if="settings.keywords" name="keywords" :content="settings.keywords">
     <link v-if="settings.favicon" rel="icon" :href="settings.favicon" type="image/x-icon">
-      <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet">
   </Head>
 
   <div :class="['lp-root min-h-screen overflow-x-hidden']" :data-theme="isDark ? 'dark' : 'light'"
@@ -480,7 +525,7 @@ const getSocialIcon = (platform) => {
                     class="dot g"></span><span class="url-bar">carag.pro/dashboard</span></div>
                 <div class="mockup-screen">
                   <img v-if="settings.banners_list && settings.banners_list[0]" :src="settings.banners_list[0].image"
-                    alt="Dashboard" class="w-full">
+                    alt="Dashboard" class="w-full" loading="lazy">
                   <div v-else class="ph-screen">
                     <div class="ph-row">
                       <div class="ph-b b1"></div>
@@ -619,7 +664,7 @@ const getSocialIcon = (platform) => {
               style="filter: grayscale(1); opacity: 0.6; transition: all 0.3s;"
               onmouseover="this.style.filter='grayscale(0)'; this.style.opacity='1';"
               onmouseout="this.style.filter='grayscale(1)'; this.style.opacity='0.6';">
-              <img :src="client.logo_url" :alt="client.name"
+              <img :src="client.logo_url" :alt="client.name" loading="lazy"
                 style="height: 60px; object-fit: contain; max-width: 150px;" />
             </div>
           </div>
@@ -1626,7 +1671,8 @@ html {
   border-color: rgba(var(--primary-rgb), .4);
   background: rgba(var(--primary-rgb), .05);
   transform: translateY(-8px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, .15)
+  box-shadow: 0 30px 60px rgba(0, 0, 0, .15);
+  will-change: transform
 }
 
 .feat-icon {
@@ -2170,7 +2216,8 @@ html {
   opacity: 0;
   transform: translateY(32px);
   transition: opacity .8s cubic-bezier(.2, .8, .2, 1), transform .8s cubic-bezier(.2, .8, .2, 1);
-  transition-delay: var(--d, 0ms)
+  transition-delay: var(--d, 0ms);
+  will-change: transform, opacity
 }
 
 .sr.is-visible {
