@@ -49,7 +49,7 @@
         </div>
 
         <!-- Client & Vehicle Details Box -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <div :class="documentType === 'parts_invoice' ? 'block mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
             <div 
                 class="border p-3 relative pt-4 transition-all duration-300"
                 :class="isModern ? 'border-0 bg-slate-50/50 rounded-2xl' : 'border-gray-200 rounded-lg'"
@@ -77,6 +77,7 @@
             </div>
             
             <div 
+                v-if="documentType !== 'parts_invoice'"
                 class="border p-3 relative pt-4 transition-all duration-300"
                 :class="isModern ? 'border-0 bg-slate-50/50 rounded-2xl' : 'border-gray-200 rounded-lg'"
             >
@@ -129,7 +130,9 @@
 
                 <!-- ── Services Table ── -->
                 <div v-if="services.length > 0">
-                    <h3 class="font-bold text-gray-800 mb-2">{{ $t('work_orders.print_view.labor_services') }}</h3>
+                    <h3 class="font-bold text-gray-800 mb-2">
+                        {{ documentType === 'parts_invoice' ? (isRtl ? 'قطع الغيار' : 'Spare Parts') : $t('work_orders.print_view.labor_services') }}
+                    </h3>
                     <table class="w-full text-xs border-collapse" :class="isRtl ? 'text-right' : 'text-left'">
                         <thead>
                             <tr class="text-white" :style="{ backgroundColor: isModern ? primaryColor : '#1f2937' }">
@@ -173,7 +176,9 @@
                         </tbody>
                         <tfoot>
                             <tr class="font-bold bg-gray-50 text-gray-700 border-t-2 border-gray-300">
-                                <td :colspan="hasServicesVat ? 6 : 5" class="p-2 border border-gray-200 text-center">{{ $t('work_orders.services_total') }}</td>
+                                <td :colspan="hasServicesVat ? 6 : 5" class="p-2 border border-gray-200 text-center">
+                                    {{ documentType === 'parts_invoice' ? (isRtl ? 'إجمالي قطع الغيار' : 'Parts Total') : $t('work_orders.services_total') }}
+                                </td>
                                 <td class="p-2 border border-gray-200 text-center font-mono font-bold">
                                     {{ formatRawPrice(services.reduce((s, i) => s + srvLineTotal(i), 0)) }}
                                 </td>
@@ -350,7 +355,7 @@
                 <!-- ── Services Table (with inline status + dates for work_order) ── -->
                 <div>
                     <h3 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        {{ documentType === 'work_order' ? $t('work_orders.print_view.required_services') : $t('work_orders.print_view.labor_services') }}
+                        {{ documentType === 'work_order' ? $t('work_orders.print_view.required_services') : (documentType === 'parts_invoice' ? (isRtl ? 'قطع الغيار' : 'Spare Parts') : $t('work_orders.print_view.labor_services')) }}
                     </h3>
                     <table class="w-full text-sm border-collapse" :class="isRtl ? 'text-right' : 'text-left'">
                         <thead>

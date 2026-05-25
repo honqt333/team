@@ -46,30 +46,32 @@
                 <span>{{ $t('company_profile.profile.vat_number') }}:</span>
                 <span class="text-gray-900 font-mono">{{ data.customer.tax_number }}</span>
             </div>
-            <div class="flex justify-between items-center">
-                <span>{{ $t('work_orders.print_view.vehicle') }}:</span>
-                <span class="text-gray-800 flex items-center gap-1.5">
-                    <img v-if="data.vehicle?.make_logo" :src="data.vehicle.make_logo" alt="Make Logo" class="w-3.5 h-3.5 object-contain" />
-                    {{ data.vehicle?.make || (isRtl ? 'تويوتا' : 'Toyota') }}
-                </span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span>{{ $t('work_orders.print_view.plate') }}:</span>
-                <SaudiPlateDisplay v-if="data.vehicle?.plate" :plate-number="data.vehicle.plate" size="sm" />
-                <span v-else class="font-bold text-gray-900">-</span>
-            </div>
-            <div v-if="data.vehicle?.color" class="flex justify-between">
-                <span>{{ $t('work_orders.print_view.color') }}:</span>
-                <span class="text-gray-900 font-medium">{{ getLocalizedColor(data.vehicle.color, isRtl) }}</span>
-            </div>
-            <div class="flex justify-between">
-                <span>{{ $t('work_orders.print_view.odometer') }}:</span>
-                <span>{{ data.odometer || '45,210' }}{{ ' ' + $t('common.km') }}</span>
-            </div>
-            <div v-if="data.fuel_level" class="flex justify-between">
-                <span>{{ $t('work_orders.print_view.fuel_level') }}:</span>
-                <span>{{ data.fuel_level }}%</span>
-            </div>
+            <template v-if="documentType !== 'parts_invoice'">
+                <div class="flex justify-between items-center">
+                    <span>{{ $t('work_orders.print_view.vehicle') }}:</span>
+                    <span class="text-gray-800 flex items-center gap-1.5">
+                        <img v-if="data.vehicle?.make_logo" :src="data.vehicle.make_logo" alt="Make Logo" class="w-3.5 h-3.5 object-contain" />
+                        {{ data.vehicle?.make || (isRtl ? 'تويوتا' : 'Toyota') }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span>{{ $t('work_orders.print_view.plate') }}:</span>
+                    <SaudiPlateDisplay v-if="data.vehicle?.plate" :plate-number="data.vehicle.plate" size="sm" />
+                    <span v-else class="font-bold text-gray-900">-</span>
+                </div>
+                <div v-if="data.vehicle?.color" class="flex justify-between">
+                    <span>{{ $t('work_orders.print_view.color') }}:</span>
+                    <span class="text-gray-900 font-medium">{{ getLocalizedColor(data.vehicle.color, isRtl) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>{{ $t('work_orders.print_view.odometer') }}:</span>
+                    <span>{{ data.odometer || '45,210' }}{{ ' ' + $t('common.km') }}</span>
+                </div>
+                <div v-if="data.fuel_level" class="flex justify-between">
+                    <span>{{ $t('work_orders.print_view.fuel_level') }}:</span>
+                    <span>{{ data.fuel_level }}%</span>
+                </div>
+            </template>
         </div>
 
         <!-- Content Body -->
@@ -86,11 +88,11 @@
             </div>
 
             <!-- Scenario 2: Invoice (Separated Services and Parts) -->
-            <div v-else-if="documentType === 'invoice'" class="space-y-4">
+            <div v-else-if="['invoice', 'proforma_invoice', 'quotation', 'parts_invoice'].includes(documentType)" class="space-y-4">
                 <!-- Services -->
                 <div v-if="services.length > 0" class="space-y-2">
                     <span class="block font-bold text-[9px] text-gray-500 border-b border-gray-100 pb-0.5">
-                        {{ $t('work_orders.print_view.labor_services') }}:
+                        {{ documentType === 'parts_invoice' ? (isRtl ? 'قطع الغيار' : 'Spare Parts') : $t('work_orders.print_view.labor_services') }}:
                     </span>
                     <div 
                         v-for="(item, index) in services" 
