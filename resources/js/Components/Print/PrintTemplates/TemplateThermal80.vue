@@ -283,6 +283,11 @@
             </div>
         </div>
 
+        <!-- ZATCA / Standard QR code for Thermal print -->
+        <div v-if="visualSettings.show_qr_code && data.qr_code_url" class="flex flex-col items-center justify-center mt-3 pt-3 border-t border-dashed border-gray-200">
+            <img :src="data.qr_code_url" alt="QR" class="w-24 h-24 p-1 bg-white border border-gray-200 rounded" />
+        </div>
+
         <!-- Footer Text -->
         <div v-if="visualSettings.footer_text" class="text-center text-[8px] text-gray-400 mt-2 border-t border-dashed border-gray-200 pt-2 leading-tight">
             {{ visualSettings.footer_text }}
