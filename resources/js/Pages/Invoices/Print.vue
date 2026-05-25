@@ -27,7 +27,7 @@
         </div>
 
         <PrintEngine 
-            documentType="invoice"
+            :documentType="invoice.work_order_id ? 'invoice' : 'parts_invoice'"
             :data="mappedData"
             :centerData="mappedCenterData"
             :documentSettings="documentSettings"
