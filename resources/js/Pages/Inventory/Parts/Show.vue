@@ -126,7 +126,7 @@
                 <!-- Stock by Warehouse -->
                 <div class="lg:col-span-1 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 h-fit">
                     <div class="p-4 border-b border-gray-100 dark:border-gray-700">
-                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('inventory.stock.warehouses_stock') || 'رصيد المستودعات' }}</h2>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('inventory.stock.warehouses_stock') }}</h2>
                     </div>
                     <div class="divide-y divide-gray-100 dark:divide-gray-700">
                         <div v-for="balance in balances" :key="balance.id" class="p-4 flex items-center justify-between">
@@ -157,21 +157,21 @@
                                     <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">#</th>
                                     <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.moves.type') }}</th>
                                     <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('common.details') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.stock.previous_stock') || 'السابق' }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.stock.previous_stock') }}</th>
                                     <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.stock.qty') }}</th>
                                     <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.moves.balance_after') }}</th>
                                     
                                     <!-- Cost Section -->
                                     <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30">{{ $t('inventory.parts.cost_price') }}</th>
                                     <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30">{{ $t('inventory.stock.wac') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30">{{ $t('inventory.parts.cost_total') || 'إجمالي التكلفة' }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30">{{ $t('inventory.parts.cost_total') }}</th>
  
                                     <!-- Price Section (Sales) -->
                                     <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.sale_price') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.discount') || 'الخصم' }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.subtotal') || 'المجموع الفرعي' }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.vat') || 'الضريبة' }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.total') || 'الإجمالي' }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.discount') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.subtotal') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.vat') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.total') }}</th>
                                     
                                     <th class="px-4 py-4 text-end font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.moves.date') }}</th>
                                 </tr>

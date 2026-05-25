@@ -87,14 +87,14 @@
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ $t('work_orders.service_modal.duration_value') || 'مدة الخدمة' }}
+                                    {{ $t('work_orders.service_modal.duration_value') }}
                                 </label>
                                 <input type="number" v-model="form.duration_value" :disabled="isDurationDisabled || props.readOnly" class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900" />
                                 <p v-if="form.errors.duration_value" class="mt-1 text-xs text-red-500">{{ form.errors.duration_value }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ $t('work_orders.service_modal.duration_unit') || 'الفترة' }}
+                                    {{ $t('work_orders.service_modal.duration_unit') }}
                                 </label>
                                 <SearchableSelect
                                     v-model="form.duration_unit"
@@ -111,14 +111,14 @@
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ $t('work_orders.service_modal.warranty_value') || 'ضمان الخدمة' }}
+                                    {{ $t('work_orders.service_modal.warranty_value') }}
                                 </label>
                                 <input type="number" v-model="form.warranty_value_snapshot" :disabled="isWarrantyDisabled || props.readOnly" class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900" />
                                 <p v-if="form.errors.warranty_value_snapshot" class="mt-1 text-xs text-red-500">{{ form.errors.warranty_value_snapshot }}</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ $t('work_orders.service_modal.warranty_unit') || 'الفترة' }}
+                                    {{ $t('work_orders.service_modal.warranty_unit') }}
                                 </label>
                                 <SearchableSelect
                                     v-model="form.warranty_unit_snapshot"
@@ -138,13 +138,13 @@
                         <div class="space-y-4">
                             <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
                                 <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                {{ $t('work_orders.service_modal.timeline') || 'الجدول الزمني' }}
+                                {{ $t('work_orders.service_modal.timeline') }}
                             </h4>
 
                             <!-- Start Date -->
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                                    {{ $t('work_orders.service_modal.started_at') || 'تاريخ البداية' }}
+                                    {{ $t('work_orders.service_modal.started_at') }}
                                 </label>
                                 <CustomDatePicker v-model="form.started_at" />
                                 <p v-if="form.errors.started_at" class="mt-1 text-xs text-red-500">{{ form.errors.started_at }}</p>
@@ -153,7 +153,7 @@
                             <!-- Due Date -->
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                                    {{ $t('work_orders.service_modal.due_date') || 'تاريخ الاستحقاق' }}
+                                    {{ $t('work_orders.service_modal.due_date') }}
                                 </label>
                                 <CustomDatePicker v-model="form.due_date" />
                                 <p v-if="form.errors.due_date" class="mt-1 text-xs text-red-500">{{ form.errors.due_date }}</p>
@@ -162,7 +162,7 @@
                             <!-- Expected closing date of maintenance card -->
                             <div>
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
-                                    {{ $t('work_orders.service_modal.work_order_expected_end_date') || 'تاريخ إغلاق كرت الصيانة المتوقع' }}
+                                    {{ $t('work_orders.service_modal.work_order_expected_end_date') }}
                                 </label>
                                 <div class="px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-700 dark:text-gray-300 font-mono">
                                     {{ displayedExpectedEndDate ? formatDate(displayedExpectedEndDate) : '—' }}
@@ -174,7 +174,7 @@
                         <div class="space-y-4">
                             <h4 class="text-sm font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center gap-2">
                                 <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                {{ $t('work_orders.service_modal.pricing') || 'سعر الخدمة والخصومات' }}
+                                {{ $t('work_orders.service_modal.pricing') }}
                             </h4>
 
                             <!-- Price -->
@@ -443,7 +443,7 @@
             <template #footer>
                 <button type="button" @click="showAddNoteModal = false"
                     class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
-                    {{ $t('common.cancel') || 'إلغاء' }}
+                    {{ $t('common.cancel') }}
                 </button>
                 <button type="submit" @click="addNote" :disabled="notesLoading || !noteForm.content.trim()"
                     class="px-5 py-2 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2">
@@ -451,7 +451,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>{{ $t('common.save') || 'حفظ' }}</span>
+                    <span>{{ $t('common.save') }}</span>
                 </button>
             </template>
         </BaseModal>

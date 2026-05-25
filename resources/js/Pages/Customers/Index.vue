@@ -399,7 +399,7 @@
                 </div>
                 <div v-else-if="!nextPageUrl && allCustomers.length > 0"
                     class="text-sm text-gray-400 dark:text-gray-500">
-                    {{ $t('customers.all_loaded') || 'تم تحميل جميع العملاء' }}
+                    {{ $t('customers.all_loaded') }}
                 </div>
             </div>
         </div>

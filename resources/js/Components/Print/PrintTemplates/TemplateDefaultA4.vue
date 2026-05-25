@@ -8,10 +8,10 @@
             <div class="w-1/3">
                 <h1 class="text-2xl font-bold text-gray-900 mb-1">{{ centerData.name || 'مركز اور كارز' }}</h1>
                 <p v-if="centerData.tax_number" class="text-sm text-gray-600">
-                    {{ isRtl ? 'الرقم الضريبي:' : 'Tax Number:' }} {{ centerData.tax_number }}
+                    {{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}
                 </p>
                 <p v-if="centerData.cr_number" class="text-sm text-gray-600">
-                    {{ isRtl ? 'س.ت:' : 'C.R:' }} {{ centerData.cr_number }}
+                    {{ $t('company_profile.profile.cr_number') }}: {{ centerData.cr_number }}
                 </p>
                 <p v-if="centerData.phone" class="text-sm text-gray-600 mt-2">{{ centerData.phone }}</p>
             </div>
@@ -39,10 +39,10 @@
                 </div>
                 <div class="text-sm font-medium" :class="isRtl ? 'text-left' : 'text-right'">
                     <p class="text-gray-800 font-bold" :class="isRtl ? 'text-right' : 'text-left'">
-                        {{ isRtl ? 'الرقم:' : 'Number:' }} <span class="font-mono">{{ data.code || 'T202620001' }}</span>
+                        {{ $t('common.code') }}: <span class="font-mono">{{ data.code || 'T202620001' }}</span>
                     </p>
                     <p class="text-gray-600 mt-0.5" :class="isRtl ? 'text-right' : 'text-left'">
-                        {{ isRtl ? 'التاريخ:' : 'Date:' }} {{ formatDate(data.created_at || new Date()) }}
+                        {{ $t('work_orders.print_view.date') }}: {{ formatDate(data.created_at || new Date()) }}
                     </p>
                 </div>
             </div>
@@ -66,13 +66,13 @@
                     ]"
                     :style="isModern ? { backgroundColor: primaryColor } : {}"
                 >
-                    {{ isRtl ? 'بيانات العميل' : 'Customer Details' }}
+                    {{ $t('work_orders.print_view.customer') }}
                 </h3>
                 <div class="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2">
-                    <p><span class="text-gray-500">{{ isRtl ? 'الاسم:' : 'Name:' }}</span> {{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}</p>
-                    <p><span class="text-gray-500">{{ isRtl ? 'الجوال:' : 'Phone:' }}</span> <span dir="ltr">{{ data.customer?.phone || '+966 555 785 658' }}</span></p>
-                    <p v-if="documentSettings.show_customer_address !== false && data.customer?.address" class="col-span-2"><span class="text-gray-500">{{ isRtl ? 'العنوان:' : 'Address:' }}</span> {{ data.customer.address }}</p>
-                    <p v-if="data.customer?.tax_number" class="col-span-2"><span class="text-gray-500">{{ isRtl ? 'الرقم الضريبي:' : 'Tax ID:' }}</span> {{ data.customer.tax_number }}</p>
+                    <p><span class="text-gray-500">{{ $t('common.name') }}:</span> {{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}</p>
+                    <p><span class="text-gray-500">{{ $t('common.phone') }}:</span> <span dir="ltr">{{ data.customer?.phone || '+966 555 785 658' }}</span></p>
+                    <p v-if="documentSettings.show_customer_address !== false && data.customer?.address" class="col-span-2"><span class="text-gray-500">{{ $t('common.address') }}:</span> {{ data.customer.address }}</p>
+                    <p v-if="data.customer?.tax_number" class="col-span-2"><span class="text-gray-500">{{ $t('company_profile.profile.vat_number') }}:</span> {{ data.customer.tax_number }}</p>
                 </div>
             </div>
             
@@ -92,22 +92,22 @@
                     ]"
                     :style="isModern ? { backgroundColor: primaryColor } : {}"
                 >
-                    {{ isRtl ? 'بيانات المركبة' : 'Vehicle Details' }}
+                    {{ $t('work_orders.print_view.vehicle') }}
                 </h3>
                 <div class="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2 items-center">
                     <div class="flex items-center gap-2">
-                        <span class="text-gray-500">{{ isRtl ? 'الماركة:' : 'Make:' }}</span>
+                        <span class="text-gray-500">{{ $t('vehicles.form.make') }}:</span>
                         <span class="font-bold flex items-center gap-1.5">
                             <img v-if="data.vehicle?.make_logo" :src="data.vehicle.make_logo" alt="Make Logo" class="w-5 h-5 object-contain" />
                             {{ data.vehicle?.make || (isRtl ? 'مرسيدس' : 'Mercedes') }}
                         </span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-gray-500">{{ isRtl ? 'اللوحة:' : 'Plate:' }}</span>
+                        <span class="text-gray-500">{{ $t('work_orders.print_view.plate') }}:</span>
                         <SaudiPlateDisplay v-if="data.vehicle?.plate" :plate-number="data.vehicle.plate" size="sm" />
                         <span v-else class="font-bold">-</span>
                     </div>
-                    <p v-if="data.vehicle?.color"><span class="text-gray-500">{{ isRtl ? 'اللون:' : 'Color:' }}</span> {{ getLocalizedColor(data.vehicle.color, isRtl) }}</p>
+                    <p v-if="data.vehicle?.color"><span class="text-gray-500">{{ $t('work_orders.print_view.color') }}:</span> {{ getLocalizedColor(data.vehicle.color, isRtl) }}</p>
                 </div>
             </div>
         </div>
@@ -116,10 +116,10 @@
         <div class="mb-6">
             <!-- Scenario 1: Receipt -->
             <div v-if="documentType === 'receipt'" class="bg-gray-50/50 p-6 rounded-lg border border-gray-200 leading-loose text-base text-gray-800">
-                <p>{{ isRtl ? 'استلمنا من السيد/ة:' : 'Received from Mr./Ms.:' }} <strong class="underline underline-offset-4">{{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}</strong></p>
-                <p class="mt-2">{{ isRtl ? 'مبلغاً وقدره:' : 'An amount of:' }} <strong class="font-mono">{{ formatCurrency(data.amount || 250) }}</strong></p>
+                <p>{{ $t('work_orders.print_view.received_from') }}: <strong class="underline underline-offset-4">{{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}</strong></p>
+                <p class="mt-2">{{ $t('work_orders.print_view.amount_of') }}: <strong class="font-mono">{{ formatCurrency(data.amount || 250) }}</strong></p>
                 <p class="mt-2 text-gray-600">
-                    {{ isRtl ? 'وذلك لقاء:' : 'For:' }} 
+                    {{ $t('work_orders.print_view.for_label') }}: 
                     <span>{{ data.notes || (isRtl ? 'دفعة مقدمة لصيانة السيارة المذكورة أعلاه وبدء أعمال الفحص والبرمجة.' : 'Down payment for maintenance of the above-mentioned vehicle and starting inspection and programming.') }}</span>
                 </p>
             </div>
@@ -129,17 +129,17 @@
 
                 <!-- ── Services Table ── -->
                 <div v-if="services.length > 0">
-                    <h3 class="font-bold text-gray-800 mb-2">{{ isRtl ? 'أجور الخدمات واليد العاملة' : 'Labor & Services' }}</h3>
+                    <h3 class="font-bold text-gray-800 mb-2">{{ $t('work_orders.print_view.labor_services') }}</h3>
                     <table class="w-full text-xs border-collapse" :class="isRtl ? 'text-right' : 'text-left'">
                         <thead>
                             <tr class="text-white" :style="{ backgroundColor: isModern ? primaryColor : '#1f2937' }">
                                 <th class="p-2 border border-gray-700 w-7 text-center">#</th>
-                                <th class="p-2 border border-gray-700">{{ isRtl ? 'الوصف' : 'Description' }}</th>
-                                <th class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'السعر' : 'Price' }}</th>
-                                <th class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'الخصم' : 'Discount' }}</th>
-                                <th class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'المبلغ' : 'Amount' }}</th>
-                                <th v-if="hasServicesVat" class="p-2 border border-gray-700 w-20 text-center">VAT</th>
-                                <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المجموع' : 'Total' }}</th>
+                                <th class="p-2 border border-gray-700">{{ $t('common.description') }}</th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">{{ $t('work_orders.price') }}</th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">{{ $t('common.discount') }}</th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">{{ $t('common.amount') }}</th>
+                                <th v-if="hasServicesVat" class="p-2 border border-gray-700 w-20 text-center">{{ $t('common.vat') }}</th>
+                                <th class="p-2 border border-gray-700 w-22 text-center">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-800">
@@ -173,7 +173,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="font-bold bg-gray-50 text-gray-700 border-t-2 border-gray-300">
-                                <td :colspan="hasServicesVat ? 6 : 5" class="p-2 border border-gray-200 text-center">{{ isRtl ? 'إجمالي الخدمات' : 'Services Total' }}</td>
+                                <td :colspan="hasServicesVat ? 6 : 5" class="p-2 border border-gray-200 text-center">{{ $t('work_orders.services_total') }}</td>
                                 <td class="p-2 border border-gray-200 text-center font-mono font-bold">
                                     {{ formatRawPrice(services.reduce((s, i) => s + srvLineTotal(i), 0)) }}
                                 </td>
@@ -184,18 +184,18 @@
 
                 <!-- ── Parts Table ── -->
                 <div v-if="parts.length > 0">
-                    <h3 class="font-bold text-gray-800 mb-2">{{ isRtl ? 'قطع الغيار المستبدلة' : 'Replaced Spare Parts' }}</h3>
+                    <h3 class="font-bold text-gray-800 mb-2">{{ $t('work_orders.parts_total') }}</h3>
                     <table class="w-full text-xs border-collapse" :class="isRtl ? 'text-right' : 'text-left'">
                         <thead>
                             <tr class="text-white" :style="{ backgroundColor: isModern ? primaryColor : '#1f2937' }">
                                 <th class="p-2 border border-gray-700 w-7 text-center">#</th>
-                                <th class="p-2 border border-gray-700">{{ isRtl ? 'الوصف' : 'Description' }}</th>
-                                <th class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'السعر' : 'Price' }}</th>
-                                <th class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'الخصم' : 'Discount' }}</th>
-                                <th class="p-2 border border-gray-700 w-14 text-center">{{ isRtl ? 'الكمية' : 'Qty' }}</th>
-                                <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المجموع الفرعي' : 'Subtotal' }}</th>
-                                <th v-if="hasPartsVat" class="p-2 border border-gray-700 w-20 text-center">VAT</th>
-                                <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المجموع' : 'Total' }}</th>
+                                <th class="p-2 border border-gray-700">{{ $t('common.description') }}</th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">{{ $t('work_orders.price') }}</th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">{{ $t('common.discount') }}</th>
+                                <th class="p-2 border border-gray-700 w-14 text-center">{{ $t('common.qty') }}</th>
+                                <th class="p-2 border border-gray-700 w-22 text-center">{{ $t('quotes.form.subtotal') }}</th>
+                                <th v-if="hasPartsVat" class="p-2 border border-gray-700 w-20 text-center">{{ $t('common.vat') }}</th>
+                                <th class="p-2 border border-gray-700 w-22 text-center">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-800">
@@ -233,7 +233,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="font-bold bg-gray-50 text-gray-700 border-t-2 border-gray-300">
-                                <td :colspan="hasPartsVat ? 7 : 6" class="p-2 border border-gray-200 text-center">{{ isRtl ? 'إجمالي قطع الغيار' : 'Parts Total' }}</td>
+                                <td :colspan="hasPartsVat ? 7 : 6" class="p-2 border border-gray-200 text-center">{{ $t('work_orders.parts_total') }}</td>
                                 <td class="p-2 border border-gray-200 text-center font-mono font-bold">
                                     {{ formatRawPrice(parts.reduce((s, i) => s + partLineTotal(i), 0)) }}
                                 </td>
@@ -249,15 +249,15 @@
                 <!-- Entry Info (Odometer, Fuel, Date) -->
                 <div class="grid grid-cols-3 gap-4 text-sm">
                     <div class="bg-gray-50/50 p-3 rounded-xl border border-gray-100 flex flex-col">
-                        <span class="text-xs text-gray-500 mb-0.5">{{ isRtl ? 'تاريخ الدخول' : 'Entry Date' }}</span>
+                        <span class="text-xs text-gray-500 mb-0.5">{{ $t('work_orders.print_view.entry_date') }}</span>
                         <span class="font-bold text-gray-800 text-sm">{{ formatDate(data.entry_date || data.created_at) }}</span>
                     </div>
                     <div class="bg-gray-50/50 p-3 rounded-xl border border-gray-100 flex flex-col">
-                        <span class="text-xs text-gray-500 mb-0.5">{{ isRtl ? 'قراءة العداد' : 'Odometer' }}</span>
+                        <span class="text-xs text-gray-500 mb-0.5">{{ $t('work_orders.print_view.odometer') }}</span>
                         <span class="font-bold text-gray-800 text-sm" dir="ltr">{{ data.mileage ? Number(data.mileage).toLocaleString() + (isRtl ? ' كم' : ' km') : '-' }}</span>
                     </div>
                     <div class="bg-gray-50/50 p-3 rounded-xl border border-gray-100 flex flex-col">
-                        <span class="text-xs text-gray-500 mb-0.5">{{ isRtl ? 'مستوى الوقود' : 'Fuel Level' }}</span>
+                        <span class="text-xs text-gray-500 mb-0.5">{{ $t('work_orders.print_view.fuel_level') }}</span>
                         <span class="font-bold text-gray-800 text-sm">{{ data.fuel_level ? data.fuel_level + '%' : '-' }}</span>
                     </div>
                 </div>
@@ -277,15 +277,15 @@
                         <div class="flex items-center justify-center gap-6 mt-4 text-sm border-t pt-4">
                             <div class="flex items-center gap-2">
                                 <span class="w-4 h-4 rounded-full bg-red-500"></span>
-                                <span class="text-gray-600">{{ isRtl ? 'تلفيات / صدمات' : 'Damages / Dents' }}</span>
+                                <span class="text-gray-600">{{ $t('work_orders.print_view.damage') }}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="w-4 h-4 rounded-full bg-blue-500"></span>
-                                <span class="text-gray-600">{{ isRtl ? 'خدوش / حكات' : 'Scratches / Scuffs' }}</span>
+                                <span class="text-gray-600">{{ $t('work_orders.print_view.scratch') }}</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="w-4 h-4 rounded-full bg-gray-500"></span>
-                                <span class="text-gray-600">{{ isRtl ? 'ملاحظات عامة' : 'General Notes' }}</span>
+                                <span class="text-gray-600">{{ $t('work_orders.print_view.note') }}</span>
                             </div>
                         </div>
                     </div>
@@ -293,14 +293,14 @@
 
                 <!-- Damage Marks List -->
                 <div v-if="damageMarks.length > 0" class="mb-6">
-                    <h4 class="font-bold text-gray-855 mb-2">{{ isRtl ? 'تفاصيل حالة المركبة:' : 'Vehicle Condition Details:' }}</h4>
+                    <h4 class="font-bold text-gray-855 mb-2">{{ $t('work_orders.print_view.vehicle_condition') }}:</h4>
                     <div class="grid grid-cols-2 gap-2 text-sm">
                         <div v-for="(mark, index) in damageMarks" :key="index" class="flex items-center gap-3 p-2 bg-gray-50 rounded-xl">
                             <span 
                                 class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
                                 :style="{ backgroundColor: getColorValue(mark.color) }"
                             >{{ index + 1 }}</span>
-                            <span class="text-gray-700 font-medium">{{ mark.description || (isRtl ? 'بدون تفاصيل' : 'No details') }}</span>
+                            <span class="text-gray-700 font-medium">{{ mark.description || $t('work_orders.print_view.na') }}</span>
                         </div>
                     </div>
                 </div>
@@ -312,20 +312,20 @@
                 <!-- ── Services Table (with inline status + dates for work_order) ── -->
                 <div>
                     <h3 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
-                        {{ documentType === 'work_order' ? (isRtl ? 'الخدمات المطلوبة' : 'Requested Services') : (isRtl ? 'أجور الخدمات' : 'Labor & Services') }}
+                        {{ documentType === 'work_order' ? $t('work_orders.print_view.required_services') : $t('work_orders.print_view.labor_services') }}
                     </h3>
                     <table class="w-full text-sm border-collapse" :class="isRtl ? 'text-right' : 'text-left'">
                         <thead>
                             <tr class="text-white" :class="isModern ? '' : 'bg-gray-800'" :style="{ backgroundColor: isModern ? primaryColor : '#1f2937' }">
                                 <th class="p-2 border border-gray-700 w-8 text-center">#</th>
-                                <th class="p-2 border border-gray-700">{{ isRtl ? 'وصف الخدمة' : 'Service Description' }}</th>
+                                <th class="p-2 border border-gray-700">{{ $t('work_orders.print_view.service') }}</th>
                                 <!-- Status / Dates columns — work_order only -->
                                 <template v-if="documentType === 'work_order'">
-                                    <th class="p-2 border border-gray-700 w-24 text-center">{{ isRtl ? 'الحالة' : 'Status' }}</th>
-                                    <th class="p-2 border border-gray-700 w-24 text-center">{{ isRtl ? 'البداية' : 'Start' }}</th>
-                                    <th class="p-2 border border-gray-700 w-24 text-center">{{ isRtl ? 'الاستحقاق' : 'Due' }}</th>
+                                    <th class="p-2 border border-gray-700 w-24 text-center">{{ $t('work_orders.print_view.status') }}</th>
+                                    <th class="p-2 border border-gray-700 w-24 text-center">{{ $t('work_orders.service_modal.started_at') }}</th>
+                                    <th class="p-2 border border-gray-700 w-24 text-center">{{ $t('work_orders.due_date') }}</th>
                                 </template>
-                                <th v-if="showPricingColumns" class="p-2 border border-gray-700 w-28 text-center">{{ isRtl ? 'المجموع' : 'Total' }}</th>
+                                <th v-if="showPricingColumns" class="p-2 border border-gray-700 w-28 text-center">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-800">
@@ -406,7 +406,7 @@
                     <div v-if="data.customer_complaint" class="rounded-xl border border-amber-200 bg-amber-50/60 p-3">
                         <p class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-                            {{ isRtl ? 'شكوى العميل' : 'Customer Complaint' }}
+                            {{ $t('work_orders.print_view.customer_complaint') }}
                         </p>
                         <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap">{{ data.customer_complaint }}</p>
                     </div>
@@ -414,7 +414,7 @@
                     <div v-if="data.initial_assessment" class="rounded-xl border border-blue-200 bg-blue-50/60 p-3">
                         <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1.5 flex items-center gap-1">
                             <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 000-2h-3z" clip-rule="evenodd"/></svg>
-                            {{ isRtl ? 'التقييم الأولي' : 'Initial Assessment' }}
+                            {{ $t('quotes.show.initial_assessment') }}
                         </p>
                         <p class="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap">{{ data.initial_assessment }}</p>
                     </div>
@@ -427,7 +427,7 @@
         <div v-if="showPricingColumns && documentType !== 'receipt'" class="flex justify-between items-start mb-12">
             <div class="w-1/2 pr-4 text-sm text-gray-500">
                 <div v-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || dummyTerms.length > 0)">
-                    <h4 class="text-xs font-bold text-gray-700 mb-1">{{ isRtl ? 'الشروط والأحكام:' : 'Terms & Conditions:' }}</h4>
+                    <h4 class="text-xs font-bold text-gray-700 mb-1">{{ $t('work_orders.print_view.terms_conditions') }}:</h4>
                     <ol class="list-decimal list-inside text-[10px] text-gray-500 space-y-1 leading-normal pr-2">
                         <li v-for="(term, idx) in documentSettings.terms?.length > 0 ? documentSettings.terms : dummyTerms" :key="idx">
                             {{ isRtl ? (term.text_ar || term) : (term.text_en || term.text_ar || term) }}
@@ -439,15 +439,15 @@
             <div class="w-1/2 lg:w-1/3">
                 <table class="w-full text-sm">
                     <tr class="text-gray-500 border-b border-gray-200">
-                        <td class="py-1 px-2">{{ isRtl ? 'المجموع الفرعي:' : 'Subtotal:' }}</td>
+                        <td class="py-1 px-2">{{ $t('quotes.form.subtotal') }}:</td>
                         <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.subtotal) }}</td>
                     </tr>
                     <tr v-if="totals.discount > 0" class="text-red-500 border-b border-gray-200">
-                        <td class="py-1 px-2">{{ isRtl ? 'الخصم الإجمالي:' : 'Total Discount:' }}</td>
+                        <td class="py-1 px-2">{{ $t('quotes.form.total_discount') }}:</td>
                         <td class="py-1 px-2 text-left font-mono">-{{ formatCurrency(totals.discount) }}</td>
                     </tr>
                     <tr v-if="totals.vat > 0" class="text-gray-500 border-b border-gray-200">
-                        <td class="py-1 px-2">{{ isRtl ? 'الضريبة (VAT):' : 'VAT:' }}</td>
+                        <td class="py-1 px-2">{{ $t('common.vat') }}:</td>
                         <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.vat) }}</td>
                     </tr>
                     <tr 
@@ -455,12 +455,12 @@
                         :class="isModern ? 'bg-slate-50 border-slate-900' : 'bg-gray-100 border-gray-800'"
                         :style="isModern ? { borderBottomColor: primaryColor } : {}"
                     >
-                        <td class="py-2 px-2 text-gray-900">{{ isRtl ? 'المبلغ الإجمالي:' : 'Total Amount:' }}</td>
+                        <td class="py-2 px-2 text-gray-900">{{ $t('quotes.form.grand_total') }}:</td>
                         <td class="py-2 px-2 text-left text-gray-900 font-mono">{{ formatCurrency(totals.total) }}</td>
                     </tr>
                 </table>
                 <div v-if="centerData.iban && documentSettings.show_iban" class="bg-gray-50 p-2 rounded border border-gray-200 mt-2 text-[9px] text-gray-500 leading-normal font-mono">
-                    <span class="block font-bold text-gray-600">{{ isRtl ? 'IBAN للسداد:' : 'IBAN for Payment:' }}</span>
+                    <span class="block font-bold text-gray-600">{{ $t('company_profile.profile.iban') }}:</span>
                     {{ centerData.iban }}
                 </div>
             </div>
@@ -468,7 +468,7 @@
         
         <!-- For non-pricing documents, print terms in full width -->
         <div v-else-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || dummyTerms.length > 0)" class="mb-12">
-            <h4 class="text-xs font-bold text-gray-700 mb-2">{{ isRtl ? 'الشروط والأحكام:' : 'Terms & Conditions:' }}</h4>
+            <h4 class="text-xs font-bold text-gray-700 mb-2">{{ $t('work_orders.print_view.terms_conditions') }}:</h4>
             <ol class="list-decimal list-inside text-xs text-gray-500 space-y-1.5 leading-relaxed pr-2">
                 <li v-for="(term, idx) in documentSettings.terms?.length > 0 ? documentSettings.terms : dummyTerms" :key="idx">
                     {{ isRtl ? (term.text_ar || term) : (term.text_en || term.text_ar || term) }}

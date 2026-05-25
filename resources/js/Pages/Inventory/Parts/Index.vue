@@ -156,11 +156,11 @@
                             <tr>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-12">#</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-16">
-                                    {{ $t('inventory.parts.photo') || 'Photo' }}
+                                    {{ $t('inventory.parts.photo') }}
                                 </th>
                                 <th @click="toggleSort('sku')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        {{ $t('inventory.parts.sku') }} / {{ $t('inventory.parts.barcode') || 'Barcode' }}
+                                        {{ $t('inventory.parts.sku') }} / {{ $t('inventory.parts.barcode') }}
                                         <SortIcon :active="sortColumn === 'sku'" :direction="sortDirection" />
                                     </div>
                                 </th>
@@ -172,7 +172,7 @@
                                 </th>
                                 <th @click="toggleSort('description')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        {{ $t('inventory.parts.description') || 'Description' }}
+                                        {{ $t('inventory.parts.description') }}
                                         <SortIcon :active="sortColumn === 'description'" :direction="sortDirection" />
                                     </div>
                                 </th>

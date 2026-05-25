@@ -102,20 +102,20 @@
                     <div class="grid grid-cols-2 gap-4">
                         <!-- Part Number -->
                         <div class="space-y-1">
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.part_number') || 'رقم القطعة / باركود' }}</label>
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.part_number') }}</label>
                             <input type="text" v-model="form.part_number" dir="ltr" :disabled="isReadOnly"
                                 class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 font-mono transition-all text-sm disabled:opacity-60" />
                         </div>
                         <!-- Inventory Unit -->
                         <div class="space-y-1">
-                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.unit') || 'وحدة المخزون' }}</label>
-                            <SearchableSelect v-model="form.unit_id" :options="unitOptions" option-label="label" :disabled="isReadOnly" option-value="value" :placeholder="$t('common.unit') || 'حبة'" class="w-full" />
+                            <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.unit') }}</label>
+                            <SearchableSelect v-model="form.unit_id" :options="unitOptions" option-label="label" :disabled="isReadOnly" option-value="value" :placeholder="$t('common.unit')" class="w-full" />
                         </div>
                     </div>
 
                     <!-- Row 2: Part Name -->
                     <div class="space-y-1">
-                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.name') || 'اسم القطعة' }} <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.name') }} <span class="text-red-500">*</span></label>
                         <input type="text" v-model="form.name" required :disabled="isReadOnly || form.source === 'warehouse'"
                             class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-bold disabled:opacity-60" />
                     </div>
@@ -123,7 +123,7 @@
 
                 <!-- Description / Notes -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.description') || 'الوصف' }}</label>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.description') }}</label>
                     <textarea v-model="form.description" rows="3" :disabled="isReadOnly"
                         class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 resize-none transition-all text-sm disabled:opacity-60"
                         :placeholder="$t('inventory.parts.description_placeholder')"></textarea>
@@ -137,7 +137,7 @@
                         <div class="grid grid-cols-3 gap-4">
                             <!-- Price -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.price') || 'السعر' }} <span class="text-red-500">*</span></label>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.price') }} <span class="text-red-500">*</span></label>
                                 <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
                                     @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
                                     :readonly="form.source === 'customer' || form.include_in_package || isReadOnly"
@@ -155,7 +155,7 @@
                             <!-- Discount -->
                             <div class="space-y-1">
                                 <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.discount') || 'الخصم' }}</label>
+                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.discount') }}</label>
                                     <div class="flex bg-gray-100 dark:bg-gray-700 p-0.5 rounded-lg">
                                         <button type="button" @click="form.discount_type = 'fixed'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'fixed' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">{{ $t('common.currency') }}</button>
                                         <button type="button" @click="form.discount_type = 'percentage'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'percentage' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">%</button>
@@ -171,7 +171,7 @@
 
                             <!-- Qty -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.qty') || 'الكمية' }} <span class="text-red-500">*</span></label>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span></label>
                                 <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr" :disabled="isReadOnly"
                                     @input="form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
                                     class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold disabled:opacity-60" />
@@ -182,14 +182,14 @@
                         <div class="grid grid-cols-2 gap-4">
                             <!-- VAT (15%) -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">VAT ({{ props.quote.tax_rate_snapshot || 15 }}%)</label>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('common.vat_with_rate', { rate: props.quote.tax_rate_snapshot || 15 }) }}</label>
                                 <input type="text" readonly :value="formatCurrency(vatAmount)" dir="ltr"
                                     class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed" />
                             </div>
 
                             <!-- Amount -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.amount') || 'المبلغ' }}</label>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.amount') }}</label>
                                 <input type="text" readonly :value="formatCurrency(grandTotalValue)" dir="ltr"
                                     class="w-full px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 text-center font-mono text-sm font-bold cursor-not-allowed" />
                             </div>
@@ -202,7 +202,7 @@
                         <div class="grid grid-cols-4 gap-3">
                             <!-- Price -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.price') || 'السعر' }} <span class="text-red-500">*</span></label>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.price') }} <span class="text-red-500">*</span></label>
                                 <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
                                     @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
                                     :readonly="form.source === 'customer' || form.include_in_package || isReadOnly"
@@ -220,7 +220,7 @@
                             <!-- Discount -->
                             <div class="space-y-1">
                                 <div class="flex items-center justify-between mb-1">
-                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.discount') || 'الخصم' }}</label>
+                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.discount') }}</label>
                                     <div class="flex bg-gray-100 dark:bg-gray-700 p-0.5 rounded-lg">
                                         <button type="button" @click="form.discount_type = 'fixed'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'fixed' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">{{ $t('common.currency') }}</button>
                                         <button type="button" @click="form.discount_type = 'percentage'" :class="['px-1.5 py-0.5 text-[9px] rounded font-bold transition-all', form.discount_type === 'percentage' ? 'bg-white dark:bg-gray-600 shadow-sm text-emerald-600' : 'text-gray-400']">%</button>
@@ -236,7 +236,7 @@
 
                             <!-- Qty -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.qty') || 'الكمية' }} <span class="text-red-500">*</span></label>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.qty') }} <span class="text-red-500">*</span></label>
                                 <input type="text" inputmode="decimal" v-model="form.qty" dir="ltr" :disabled="isReadOnly"
                                     @input="form.qty = toEnglish($event.target.value).replace(/[^0-9.]/g, '')"
                                     class="w-full px-3 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-sm font-extrabold disabled:opacity-60" />
@@ -244,7 +244,7 @@
 
                             <!-- Amount -->
                             <div class="space-y-1">
-                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.amount') || 'المبلغ' }}</label>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.amount') }}</label>
                                 <input type="text" readonly :value="formatCurrency(calculatedTotal)" dir="ltr"
                                     class="w-full px-3 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono text-sm font-bold cursor-not-allowed" />
                             </div>
@@ -255,7 +255,7 @@
                             <!-- Toggle switches -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.include_in_package') || 'ضمن السعر في الباقة' }}</span>
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.include_in_package') }}</span>
                                     <button 
                                         dir="ltr"
                                         type="button" 
@@ -274,7 +274,7 @@
                                     </button>
                                 </div>
                                 <div v-if="form.quote_line_id || showToggles" class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.hide_on_print') || 'إخفاء في الطباعة' }}</span>
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.hide_on_print') }}</span>
                                     <button 
                                         dir="ltr"
                                         type="button" 
@@ -296,7 +296,7 @@
 
                             <!-- Total -->
                             <div class="flex items-center gap-3 justify-between sm:justify-end pt-2 border-t border-gray-100 dark:border-gray-800">
-                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $t('quotes.show.total') || 'المجموع' }}</span>
+                                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $t('quotes.show.total') }}</span>
                                 <input type="text" readonly :value="formatCurrency(grandTotalValue)" dir="ltr"
                                     class="w-28 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono text-sm font-bold cursor-not-allowed" />
                             </div>
@@ -306,14 +306,14 @@
 
                 <!-- Service Selector -->
                 <div v-if="showServiceSelect" class="space-y-1">
-                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.service') || 'الخدمة' }}</label>
-                    <SearchableSelect v-model="form.quote_line_id" :options="serviceOptions" option-label="label" :disabled="isReadOnly" option-value="value" :placeholder="$t('common.none') || 'بدون الخدمة'" />
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400">{{ $t('quotes.service_modal.service') }}</label>
+                    <SearchableSelect v-model="form.quote_line_id" :options="serviceOptions" option-label="label" :disabled="isReadOnly" option-value="value" :placeholder="$t('common.none')" />
                 </div>
 
                 <!-- Case 1 (VAT enabled) bottom toggles -->
                 <div v-if="(form.quote_line_id || showToggles) && props.quote.tax_enabled_snapshot" class="grid grid-cols-1 sm:grid-cols-2 gap-4 px-2">
                     <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.include_in_package') || 'ضمن السعر في الباقة' }}</span>
+                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.include_in_package') }}</span>
                         <button 
                             dir="ltr"
                             type="button" 
@@ -333,7 +333,7 @@
                     </div>
 
                     <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/50 p-3 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.hide_on_print') || 'إخفاء في الطباعة' }}</span>
+                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.hide_on_print') }}</span>
                         <button 
                             dir="ltr"
                             type="button" 
@@ -365,7 +365,7 @@
                 <button v-if="!isReadOnly" type="button" @click="submitForm"
                     :disabled="form.processing || !form.name || !form.qty || (form.unit_price === '' || form.unit_price === null) || (form.source !== 'warehouse' && !form.unit_id) || isPriceBelowMinimum"
                     class="px-10 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50">
-                    {{ form.processing ? $t('common.loading') : (part ? $t('common.save') : ($t('common.add') || 'إضافة')) }}
+                    {{ form.processing ? $t('common.loading') : (part ? $t('common.save') : ($t('common.add'))) }}
                 </button>
             </div>
         </template>

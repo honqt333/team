@@ -488,7 +488,7 @@
                 </div>
                 <div v-else-if="allQuotes.length >= (quotes?.total || 0) && (quotes?.total || 0) > 0"
                     class="text-sm text-gray-400 dark:text-gray-600">
-                    {{ $t('quotes.all_loaded') || 'All quotes loaded' }}
+                    {{ $t('quotes.all_loaded') }}
                 </div>
             </div>
         </div>

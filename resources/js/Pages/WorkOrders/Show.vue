@@ -166,7 +166,7 @@
                                     class="absolute bottom-full right-0 mb-2 hidden group-hover/customer:block z-50 pointer-events-none">
                                     <div
                                         class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                                        {{ $t('customers.view_profile') || 'عرض ملف العميل' }}
+                                        {{ $t('customers.view_profile') }}
                                     </div>
                                     <div
                                         class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1">
@@ -186,7 +186,7 @@
                                     class="absolute bottom-full right-0 mb-2 hidden group-hover/contact:block z-50 pointer-events-none">
                                     <div
                                         class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                                        {{ $t('work_orders.form.contact_name') || 'اسم جهة الاتصال' }}
+                                        {{ $t('work_orders.form.contact_name') }}
                                     </div>
                                     <div
                                         class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1">
@@ -211,7 +211,7 @@
                                     class="absolute bottom-full right-0 mb-2 hidden group-hover/whatsapp:block z-50 pointer-events-none">
                                     <div
                                         class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                                        {{ $t('common.open_in_whatsapp') || 'فتح باستخدام الواتساب' }}
+                                        {{ $t('common.open_in_whatsapp') }}
                                     </div>
                                     <div
                                         class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1">
@@ -270,7 +270,7 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                         <div class="w-2 h-5 bg-amber-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') || 'التكلفة و الدفع' }}
+                        {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
                     <div class="overflow-x-auto flex-1">
@@ -1228,7 +1228,7 @@
             <template #footer>
                 <button type="button" @click="showAddNoteModal = false"
                     class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
-                    {{ $t('common.cancel') || 'إلغاء' }}
+                    {{ $t('common.cancel') }}
                 </button>
                 <button type="submit" @click="handleAddNote" :disabled="isSubmittingNote || !newNoteContent.trim()"
                     class="px-5 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2">
@@ -1236,7 +1236,7 @@
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>{{ $t('common.save') || 'حفظ' }}</span>
+                    <span>{{ $t('common.save') }}</span>
                 </button>
             </template>
         </BaseModal>

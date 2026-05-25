@@ -195,7 +195,7 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                         <div class="w-2 h-5 bg-amber-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') || 'التكلفة و الدفع' }}
+                        {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
                     <div class="overflow-x-auto flex-1">
@@ -206,7 +206,7 @@
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('work_orders.price') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
-                                    <th v-if="hasTax" class="pb-2 text-center font-bold uppercase tracking-wider italic">VAT (15%)</th>
+                                    <th v-if="hasTax" class="pb-2 text-center font-bold uppercase tracking-wider italic">{{ $t('common.vat_with_rate', { rate: quote.tax_rate_snapshot || 15 }) }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>

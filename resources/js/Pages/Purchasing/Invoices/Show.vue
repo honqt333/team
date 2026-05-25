@@ -172,7 +172,7 @@
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('common.discount') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic">VAT (15%)</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic">{{ $t('common.vat') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
@@ -329,7 +329,7 @@
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.net_unit_price') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.received_qty') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.subtotal') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic">VAT</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic">{{ $t('common.vat') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
@@ -1050,7 +1050,7 @@
                                 <span class="font-bold text-gray-750 dark:text-gray-300 font-mono" dir="ltr">{{ formatCurrencyEnglish(isLineInclusive(selectedReturnLine) ? ((itemReturnQty * itemReturnPrice) / (1 + ((selectedReturnLine?.tax_rate || 0)/100))) : (itemReturnQty * itemReturnPrice)) }}</span>
                             </div>
                             <div v-if="(selectedReturnLine?.tax_rate || 0) > 0" class="flex justify-between">
-                                <span class="text-gray-400">VAT ({{ selectedReturnLine?.tax_rate || 0 }}%) <span v-if="isLineInclusive(selectedReturnLine)" class="text-[10px] text-gray-500">({{ $t('common.vat_included') }})</span></span>
+                                <span class="text-gray-400">{{ $t('common.vat_with_rate', { rate: selectedReturnLine?.tax_rate || 0 }) }} <span v-if="isLineInclusive(selectedReturnLine)" class="text-[10px] text-gray-500">({{ $t('common.vat_included') }})</span></span>
                                 <span class="font-bold text-gray-750 dark:text-gray-300 font-mono" dir="ltr">{{ formatCurrencyEnglish(isLineInclusive(selectedReturnLine) ? ((itemReturnQty * itemReturnPrice) - ((itemReturnQty * itemReturnPrice) / (1 + ((selectedReturnLine?.tax_rate || 0)/100)))) : ((itemReturnQty * itemReturnPrice) * ((selectedReturnLine?.tax_rate || 0) / 100))) }}</span>
                             </div>
                             <div class="h-px bg-gray-200 dark:bg-gray-700 my-1"></div>

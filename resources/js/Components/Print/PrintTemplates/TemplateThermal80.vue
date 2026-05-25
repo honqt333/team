@@ -10,7 +10,7 @@
                 <img :src="centerData.logo" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <h2 class="text-sm font-bold text-gray-900 transition-all duration-300" :style="{ color: isSleek ? primaryColor : '#111827' }">{{ centerData.name || 'مركز خدمة برو' }}</h2>
-            <p v-if="centerData.tax_number" class="text-[10px] text-gray-500 mt-0.5">{{ isRtl ? 'الرقم الضريبي:' : 'Tax Number:' }} {{ centerData.tax_number }}</p>
+            <p v-if="centerData.tax_number" class="text-[10px] text-gray-500 mt-0.5">{{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}</p>
             <p class="text-[9px] text-gray-400 mt-0.5">{{ centerData.address }}</p>
         </div>
 
@@ -23,11 +23,11 @@
                 <span class="font-bold" :style="{ color: primaryColor }">#{{ data.code || 'WO-100293' }}</span>
             </div>
             <div class="flex justify-between">
-                <span>{{ isRtl ? 'التاريخ:' : 'Date:' }}</span>
+                <span>{{ $t('work_orders.print_view.date') }}:</span>
                 <span>{{ formatDate(data.created_at || new Date()) }}</span>
             </div>
             <div v-if="data.expected_end_date" class="flex justify-between text-amber-600 font-bold">
-                <span>{{ isRtl ? 'التسليم المتوقع:' : 'Expected Delivery:' }}</span>
+                <span>{{ $t('work_orders.form.expected_end_date') }}:</span>
                 <span>{{ formatDate(data.expected_end_date) }}</span>
             </div>
         </div>
@@ -35,39 +35,39 @@
         <!-- Customer & Vehicle Info -->
         <div class="py-2 border-b border-dashed border-gray-300 text-[10px] text-gray-600 space-y-0.5">
             <div class="flex justify-between">
-                <span>{{ isRtl ? 'العميل:' : 'Client:' }}</span>
+                <span>{{ $t('work_orders.print_view.customer') }}:</span>
                 <span class="font-bold text-gray-900">{{ data.customer?.name || (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') }}</span>
             </div>
             <div v-if="documentSettings.show_customer_address !== false && data.customer?.address" class="flex justify-between">
-                <span>{{ isRtl ? 'العنوان:' : 'Address:' }}</span>
+                <span>{{ $t('common.address') }}:</span>
                 <span class="text-gray-800 text-right">{{ data.customer.address }}</span>
             </div>
             <div v-if="data.customer?.tax_number" class="flex justify-between">
-                <span>{{ isRtl ? 'الرقم الضريبي:' : 'Tax ID:' }}</span>
+                <span>{{ $t('company_profile.profile.vat_number') }}:</span>
                 <span class="text-gray-900 font-mono">{{ data.customer.tax_number }}</span>
             </div>
             <div class="flex justify-between items-center">
-                <span>{{ isRtl ? 'المركبة:' : 'Vehicle:' }}</span>
+                <span>{{ $t('work_orders.print_view.vehicle') }}:</span>
                 <span class="text-gray-800 flex items-center gap-1.5">
                     <img v-if="data.vehicle?.make_logo" :src="data.vehicle.make_logo" alt="Make Logo" class="w-3.5 h-3.5 object-contain" />
                     {{ data.vehicle?.make || (isRtl ? 'تويوتا' : 'Toyota') }}
                 </span>
             </div>
             <div class="flex justify-between items-center">
-                <span>{{ isRtl ? 'اللوحة:' : 'Plate:' }}</span>
+                <span>{{ $t('work_orders.print_view.plate') }}:</span>
                 <SaudiPlateDisplay v-if="data.vehicle?.plate" :plate-number="data.vehicle.plate" size="sm" />
                 <span v-else class="font-bold text-gray-900">-</span>
             </div>
             <div v-if="data.vehicle?.color" class="flex justify-between">
-                <span>{{ isRtl ? 'اللون:' : 'Color:' }}</span>
+                <span>{{ $t('work_orders.print_view.color') }}:</span>
                 <span class="text-gray-900 font-medium">{{ getLocalizedColor(data.vehicle.color, isRtl) }}</span>
             </div>
             <div class="flex justify-between">
-                <span>{{ isRtl ? 'العداد:' : 'Odometer:' }}</span>
-                <span>{{ data.odometer || '45,210' }}{{ isRtl ? ' كم' : ' km' }}</span>
+                <span>{{ $t('work_orders.print_view.odometer') }}:</span>
+                <span>{{ data.odometer || '45,210' }}{{ ' ' + $t('common.km') }}</span>
             </div>
             <div v-if="data.fuel_level" class="flex justify-between">
-                <span>{{ isRtl ? 'مستوى الوقود:' : 'Fuel Level:' }}</span>
+                <span>{{ $t('work_orders.print_view.fuel_level') }}:</span>
                 <span>{{ data.fuel_level }}%</span>
             </div>
         </div>
@@ -77,12 +77,12 @@
             <!-- Scenario 1: Receipt -->
             <div v-if="documentType === 'receipt'" class="bg-gray-50/70 p-3 rounded-lg border border-dashed border-gray-200 leading-relaxed text-[10px] text-gray-700">
                 <div class="flex justify-between items-center mb-2 pb-1.5 border-b border-dashed border-gray-200">
-                    <span class="font-bold text-gray-600">{{ isRtl ? 'سند قبض' : 'Receipt' }}</span>
+                    <span class="font-bold text-gray-600">{{ $t('work_orders.print_view.receipt') }}</span>
                     <span class="font-bold text-emerald-600 text-sm" dir="ltr">{{ formatCurrency(data.amount || 250) }}</span>
                 </div>
-                <p>{{ isRtl ? 'مستلم من:' : 'Received from:' }} <strong>{{ data.customer?.name || (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') }}</strong></p>
-                <p class="mt-1">{{ isRtl ? 'مبلغ:' : 'Amount:' }} <strong>{{ formatCurrency(data.amount || 250) }}</strong></p>
-                <p class="mt-1 text-gray-500 italic">{{ isRtl ? 'البيان:' : 'Notes:' }} {{ data.notes || (isRtl ? 'دفعة مقدمة لصيانة السيارة المذكورة أعلاه.' : 'Down payment for maintenance of the above-mentioned vehicle.') }}</p>
+                <p>{{ $t('work_orders.print_view.received_from') }}: <strong>{{ data.customer?.name || (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') }}</strong></p>
+                <p class="mt-1">{{ $t('common.amount') }}: <strong>{{ formatCurrency(data.amount || 250) }}</strong></p>
+                <p class="mt-1 text-gray-500 italic">{{ $t('common.notes') }}: {{ data.notes || (isRtl ? 'دفعة مقدمة لصيانة السيارة المذكورة أعلاه.' : 'Down payment for maintenance of the above-mentioned vehicle.') }}</p>
             </div>
 
             <!-- Scenario 2: Invoice (Separated Services and Parts) -->
@@ -90,7 +90,7 @@
                 <!-- Services -->
                 <div v-if="services.length > 0" class="space-y-2">
                     <span class="block font-bold text-[9px] text-gray-500 border-b border-gray-100 pb-0.5">
-                        {{ isRtl ? 'أجور الخدمات واليد:' : 'Labor & Services:' }}
+                        {{ $t('work_orders.print_view.labor_services') }}:
                     </span>
                     <div 
                         v-for="(item, index) in services" 
@@ -105,8 +105,8 @@
                              {{ item.description }}
                         </div>
                         <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
-                            <span>{{ isRtl ? 'الحساب:' : 'Calculation:' }} {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
-                            <span v-if="item.discount > 0" class="text-red-500">{{ isRtl ? 'خصم:' : 'Discount:' }} -{{ formatCurrency(item.discount) }}</span>
+                            <span>{{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
+                            <span v-if="item.discount > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(item.discount) }}</span>
                         </div>
                     </div>
                 </div>
@@ -114,7 +114,7 @@
                 <!-- Parts -->
                 <div v-if="parts.length > 0" class="space-y-2">
                     <span class="block font-bold text-[9px] text-gray-500 border-b border-gray-100 pb-0.5 mt-2">
-                        {{ isRtl ? 'قطع الغيار المستبدلة:' : 'Replaced Spare Parts:' }}
+                        {{ $t('work_orders.parts_total') }}:
                     </span>
                     <div 
                         v-for="(item, index) in parts" 
@@ -129,8 +129,8 @@
                              {{ item.description }}
                         </div>
                         <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
-                            <span>{{ isRtl ? 'الحساب:' : 'Calculation:' }} {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
-                            <span v-if="item.discount > 0" class="text-red-500">{{ isRtl ? 'خصم:' : 'Discount:' }} -{{ formatCurrency(item.discount) }}</span>
+                            <span>{{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
+                            <span v-if="item.discount > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(item.discount) }}</span>
                         </div>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
                 <!-- Simple list of damage marks for thermal print -->
                 <div v-if="damageMarks.length > 0" class="space-y-2">
                     <span class="block font-bold text-[9px] text-gray-500 border-b border-gray-100 pb-0.5">
-                        {{ isRtl ? 'تفاصيل حالة المركبة:' : 'Vehicle Condition Details:' }}
+                        {{ $t('work_orders.print_view.vehicle_condition') }}:
                     </span>
                     <div 
                         v-for="(mark, index) in damageMarks" 
@@ -152,7 +152,7 @@
                             class="w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white flex-shrink-0"
                             :style="{ backgroundColor: getColorValue(mark.color) }"
                         >{{ index + 1 }}</span>
-                        <span class="text-gray-800 font-medium">{{ mark.description || (isRtl ? 'بدون تفاصيل' : 'No details') }}</span>
+                        <span class="text-gray-800 font-medium">{{ mark.description || $t('work_orders.print_view.na') }}</span>
                     </div>
                 </div>
             </div>
@@ -172,11 +172,11 @@
                          {{ item.description }}
                     </div>
                     <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
-                        <span>{{ isRtl ? 'الحساب:' : 'Calculation:' }} {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
-                        <span v-if="item.discount > 0" class="text-red-500">{{ isRtl ? 'خصم:' : 'Discount:' }} -{{ formatCurrency(item.discount) }}</span>
+                            <span>{{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
+                            <span v-if="item.discount > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(item.discount) }}</span>
                     </div>
                     <div v-if="item.technician" class="text-[8px] text-indigo-600 font-semibold mt-0.5">
-                        {{ isRtl ? 'الفني:' : 'Technician:' }} {{ item.technician }}
+                        {{ $t('work_orders.print_view.technician') }}: {{ item.technician }}
                     </div>
                 </div>
             </div>
@@ -185,30 +185,30 @@
         <!-- Financial Summary -->
         <div v-if="showPricingColumns && documentType !== 'receipt'" class="py-2 border-t border-dashed border-gray-300 space-y-1 text-[10px]">
             <div class="flex justify-between text-gray-500">
-                <span>{{ isRtl ? 'المجموع الفرعي:' : 'Subtotal:' }}</span>
+                <span>{{ $t('quotes.form.subtotal') }}:</span>
                 <span dir="ltr">{{ formatCurrency(totals.subtotal) }}</span>
             </div>
             <div v-if="totals.discount > 0" class="flex justify-between text-red-500">
-                <span>{{ isRtl ? 'الخصم الإجمالي:' : 'Total Discount:' }}</span>
+                <span>{{ $t('quotes.form.total_discount') }}:</span>
                 <span dir="ltr">-{{ formatCurrency(totals.discount) }}</span>
             </div>
             <div v-if="totals.vat > 0" class="flex justify-between text-gray-500">
-                <span>{{ isRtl ? 'الضريبة (VAT):' : 'VAT:' }}</span>
+                <span>{{ $t('common.vat') }}:</span>
                 <span dir="ltr">{{ formatCurrency(totals.vat) }}</span>
             </div>
             <div class="flex justify-between font-bold text-sm text-gray-900 border-t border-dashed border-gray-200 pt-1.5">
-                <span>{{ isRtl ? 'الإجمالي النهائي:' : 'Total Amount:' }}</span>
+                <span>{{ $t('quotes.form.grand_total') }}:</span>
                 <span :style="{ color: primaryColor }" dir="ltr">{{ formatCurrency(totals.total) }}</span>
             </div>
             <div v-if="centerData.iban && documentSettings.show_iban" class="bg-gray-50/70 p-2 rounded border border-dashed border-gray-200 mt-2 text-[8px] text-gray-500 leading-normal">
-                <span class="block font-bold text-gray-600">{{ isRtl ? 'آيبان البنك (IBAN):' : 'Bank IBAN:' }}</span>
+                <span class="block font-bold text-gray-600">{{ $t('company_profile.profile.iban') }}:</span>
                 {{ centerData.iban }}
             </div>
         </div>
 
         <!-- Terms and Conditions -->
         <div v-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || dummyTerms.length > 0)" class="py-2 border-t border-dashed border-gray-300">
-            <span class="block font-bold text-[9px] text-gray-500 mb-1">{{ isRtl ? 'الشروط والأحكام:' : 'Terms & Conditions:' }}</span>
+            <span class="block font-bold text-[9px] text-gray-500 mb-1">{{ $t('work_orders.print_view.terms_conditions') }}:</span>
             <ul class="text-[8px] text-gray-400 space-y-0.5 list-disc list-inside leading-tight">
                 <li v-for="(term, idx) in documentSettings.terms?.length > 0 ? documentSettings.terms : dummyTerms" :key="idx">
                     {{ isRtl ? (term.text_ar || term) : (term.text_en || term.text_ar || term) }}
@@ -260,7 +260,7 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
 const props = defineProps({
@@ -317,7 +317,7 @@ const getColorValue = (color) => ({ red: '#ef4444', blue: '#3b82f6', gray: '#6b7
 
 // Format Currency
 function formatCurrency(value) {
-    const suffix = isRtl.value ? ' ر.س' : ' SAR';
+    const suffix = ' ' + t('common.currency');
     if (value === undefined || value === null) return '0.00' + suffix;
     return Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + suffix;
 }

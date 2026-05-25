@@ -141,7 +141,7 @@ const saveSignature = () => {
             
             <div class="absolute bottom-2 right-2">
                 <SecondaryButton type="button" @click="clear" size="xs">
-                    {{ $t('common.clear') || 'تفريغ' }}
+                    {{ $t('common.clear') }}
                 </SecondaryButton>
             </div>
         </div>

@@ -258,7 +258,7 @@
                                     <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                                     </svg>
-                                    {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء' }}
+                                    {{ $t('invoices.purchases.add') }}
                                 </button>
                                 <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
                                     <Tooltip :text="$t('common.grid_view')">
@@ -366,7 +366,7 @@
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.discount') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal_after') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">VAT</th>
+                                            <th class="py-3 px-4 text-center font-bold">{{ $t('common.vat') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.total') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.remaining') }}</th>
                                         </tr>
@@ -416,12 +416,12 @@
                                 <thead>
                                     <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
                                         <th class="py-3 px-4 text-center font-bold">#</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.method') || 'طريقة الدفع' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') || 'نوع العملية' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') || 'تاريخ الدفع' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') || 'رقم الفاتورة' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') || 'المبلغ' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.recorded_by') || 'قام بالتحديث' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.method') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.recorded_by') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
@@ -432,7 +432,7 @@
                                         </td>
                                         <td class="py-4 px-4 text-center font-bold">
                                             <span :class="payment.type === 'refund' ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs font-bold">
-                                                {{ payment.type === 'refund' ? ($t('payments.types.refund') || 'استرجاع') : ($t('payments.types.payment') || 'دفعة مالية') }}
+                                                {{ payment.type === 'refund' ? ($t('payments.types.refund')) : ($t('payments.types.payment')) }}
                                             </span>
                                         </td>
                                         <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">

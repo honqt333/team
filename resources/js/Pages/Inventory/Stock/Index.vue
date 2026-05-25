@@ -93,7 +93,7 @@
                                     :options="warehouses"
                                     option-label="name"
                                     option-value="id"
-                                    :placeholder="$t('inventory.stock.select_warehouse') || 'اختر المستودع'"
+                                    :placeholder="$t('inventory.stock.select_warehouse')"
                                     :label="''"
                                     @change="applyFilters"
                                 />

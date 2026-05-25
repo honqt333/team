@@ -37,7 +37,7 @@
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                             </svg>
-                            {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء مباشر' }}
+                            {{ $t('invoices.purchases.add') }}
                         </button>
 
                         <!-- Actions Group -->
@@ -291,7 +291,7 @@
                                                 <Link :href="route().has('app.invoices.purchases.show') ? route('app.invoices.purchases.show', invoice.id) : '#'" class="font-bold text-amber-600 dark:text-amber-400 hover:underline">
                                                     #{{ invoice.code }}
                                                 </Link>
-                                                <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref') || 'مرجع المورد'">
+                                                <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref')">
                                                     REF: {{ invoice.invoice_number }}
                                                 </span>
                                             </div>
@@ -352,7 +352,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                             </svg>
                         </div>
-                        <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('invoices.purchases.no_returns') || 'لا توجد فواتير مرتجع مشتريات' }}</p>
+                        <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('invoices.purchases.no_returns') }}</p>
                     </div>
 
                     <!-- Grid View -->

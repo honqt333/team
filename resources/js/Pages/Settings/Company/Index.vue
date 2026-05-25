@@ -425,7 +425,7 @@
                     <div v-if="activeTab === 'vat'" class="space-y-6">
                         <!-- VAT Toggle (Top Right) -->
                         <div class="flex items-center justify-end gap-3">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">VAT</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('common.vat') }}</span>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" v-model="form.vat.vat_enabled" class="sr-only peer">
                                 <div
@@ -577,7 +577,7 @@
                                                             <th
                                                                 class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
                                                                 {{ $t('company_profile.vat.table_vat') }}
-                                                                <div class="text-xs font-normal text-gray-500">VAT</div>
+                                                                <div class="text-xs font-normal text-gray-500">{{ $t('common.vat') }}</div>
                                                                 <div class="text-xs font-normal text-gray-400">({{
                                                                     $t('company_profile.vat.inclusive') }})</div>
                                                             </th>

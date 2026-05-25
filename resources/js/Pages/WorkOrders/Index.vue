@@ -611,7 +611,7 @@
                         <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
                     </div>
                     <div v-else-if="allWorkOrders.length >= (workOrders?.total || 0) && (workOrders?.total || 0) > 0" class="text-sm text-gray-400 dark:text-gray-600">
-                        {{ $t('work_orders.all_loaded') || 'All work orders loaded' }}
+                        {{ $t('work_orders.all_loaded') }}
                     </div>
                 </div>
             </div>

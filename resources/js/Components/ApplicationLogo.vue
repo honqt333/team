@@ -6,7 +6,7 @@
                 {{ $t('common.app_name') }}
             </span>
             <span class="text-[0.65rem] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-medium">
-                {{ $i18n.locale === 'ar' ? 'حلول الخدمات' : 'Service Solutions' }}
+                {{ $t('common.app_tagline') }}
             </span>
         </div>
     </div>

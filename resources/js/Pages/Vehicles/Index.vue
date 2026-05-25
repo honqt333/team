@@ -311,7 +311,7 @@
                     <span class="text-sm font-medium">{{ $t('common.loading') }}</span>
                 </div>
                 <div v-else-if="allVehicles.length >= vehicles.total && vehicles.total > 0" class="text-sm text-gray-400 dark:text-gray-600">
-                    {{ $t('vehicles.all_loaded') || 'All vehicles loaded' }}
+                    {{ $t('vehicles.all_loaded') }}
                 </div>
             </div>
         </div>

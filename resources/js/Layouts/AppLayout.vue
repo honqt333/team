@@ -475,7 +475,7 @@
                                 ]">
                                     <div
                                         class="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 dark:bg-gray-700/50">
-                                        {{ $t('common.switch_center') || 'Switch Center' }}
+                                        {{ $t('common.switch_center') }}
                                     </div>
                                     <button v-for="c in page.props.auth.available_centers" :key="c.id"
                                         @click="switchCenter(c.id)" :class="[
@@ -560,7 +560,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         </svg>
-                                        لوحة النظام
+                                        {{ $t('common.system') }}
                                     </a>
                                     <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                                     <button @click="logout"
@@ -634,7 +634,7 @@
                 <div v-if="page.props.auth.available_centers?.length > 1"
                     class="px-3 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80">
                     <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-                        {{ $t('common.switch_center') || 'Switch Center' }}
+                        {{ $t('common.switch_center') }}
                     </p>
                     <div class="space-y-1">
                         <button v-for="c in page.props.auth.available_centers" :key="c.id"

@@ -109,7 +109,7 @@ const props = defineProps({
     balance: Number,
 });
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
 const vehicleName = computed(() => {
@@ -131,13 +131,9 @@ const formatPrice = (amount) => {
 };
 
 const getMethodLabel = (method) => {
-    const labels = {
-        cash: isRtl.value ? 'نقداً' : 'Cash',
-        card: isRtl.value ? 'بطاقة' : 'Card',
-        transfer: isRtl.value ? 'تحويل بنكي' : 'Bank Transfer',
-        credit: isRtl.value ? 'آجل' : 'Credit'
-    };
-    return labels[method] || method;
+    const key = `payments.methods.${method}`;
+    const translated = t(key);
+    return translated !== key ? translated : method;
 };
 
 const printPage = () => window.print();

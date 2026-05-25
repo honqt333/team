@@ -30,7 +30,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                     d="M12 4v16m8-8H4" />
                             </svg>
-                            {{ $t('invoices.sales.create_invoice') || 'إنشاء فاتورة بيع' }}
+                            {{ $t('invoices.sales.create_invoice') }}
                         </button>
 
                         <!-- Actions Group -->
@@ -224,37 +224,37 @@
                                             #</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.invoice_number') || 'رقم الفاتورة' }}</th>
+                                            {{ $t('invoices.invoice_number') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.issue_date') || 'تاريخ الفاتورة' }}</th>
+                                            {{ $t('invoices.issue_date') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('common.customer') || 'العميل' }}</th>
+                                            {{ $t('common.customer') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.gross_total') || 'المجموع' }}</th>
+                                            {{ $t('invoices.gross_total') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.discount') || 'الخصم' }}</th>
+                                            {{ $t('invoices.discount') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.subtotal') || 'المجموع الفرعي' }}</th>
+                                            {{ $t('invoices.subtotal') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            VAT</th>
+                                            {{ $t('common.vat') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.grand_total') || 'مبلغ الفاتورة' }}</th>
+                                            {{ $t('invoices.grand_total') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.balance') || 'الباقي' }}</th>
+                                            {{ $t('invoices.balance') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('common.status') || 'الحالة' }}</th>
+                                            {{ $t('common.status') }}</th>
                                         <th
                                             class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('common.actions') || 'الإجراءات' }}</th>
+                                            {{ $t('common.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
