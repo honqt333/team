@@ -278,7 +278,7 @@ onMounted(async () => {
   }
   applyTheme();
 
-  window.addEventListener('scroll', () => { isScrolled.value = window.scrollY > 60; });
+  window.addEventListener('scroll', () => { isScrolled.value = window.scrollY > 60; }, { passive: true });
   window.addEventListener('mousemove', handleMouseMove);
   // Idle freeze for particles
   const activityEvents = ['mousemove', 'scroll', 'click', 'keydown', 'touchstart'];
@@ -375,7 +375,13 @@ const getSocialIcon = (platform) => {
     <title>{{ t('title_ar', 'title_en') }}</title>
     <meta name="description" :content="t('description_ar', 'description_en')">
     <meta v-if="settings.keywords" name="keywords" :content="settings.keywords">
+    <meta property="og:title" :content="t('title_ar', 'title_en')">
+    <meta property="og:description" :content="t('description_ar', 'description_en')">
+    <meta v-if="settings.banners_list && settings.banners_list[0]" property="og:image" :content="settings.banners_list[0].image">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" :content="isRtl ? 'ar_SA' : 'en_US'">
     <link v-if="settings.favicon" rel="icon" :href="settings.favicon" type="image/x-icon">
+    <link v-if="settings.banners_list && settings.banners_list[0]" rel="preload" as="image" :href="settings.banners_list[0].image" fetchpriority="high">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -439,7 +445,7 @@ const getSocialIcon = (platform) => {
         <nav class="lp-nav">
           <a href="#" class="lp-logo">
             <div class="logo-mark">
-              <img v-if="settings.logo" :src="settings.logo" alt="logo">
+              <img v-if="settings.logo" :src="settings.logo" alt="logo" width="44" height="44">
               <span v-else>C</span>
             </div>
             <span class="logo-name">{{ t('title_ar', 'title_en') }}</span>
@@ -525,7 +531,7 @@ const getSocialIcon = (platform) => {
                     class="dot g"></span><span class="url-bar">carag.pro/dashboard</span></div>
                 <div class="mockup-screen">
                   <img v-if="settings.banners_list && settings.banners_list[0]" :src="settings.banners_list[0].image"
-                    alt="Dashboard" class="w-full" loading="lazy">
+                    alt="Dashboard" class="w-full" fetchpriority="high" width="1600" height="1000">
                   <div v-else class="ph-screen">
                     <div class="ph-row">
                       <div class="ph-b b1"></div>
