@@ -238,7 +238,9 @@
                         </tbody>
                         <tfoot>
                             <tr class="font-bold bg-gray-50 text-gray-700 border-t-2 border-gray-300">
-                                <td :colspan="hasPartsVat ? 7 : 6" class="p-2 border border-gray-200 text-center">{{ $t('work_orders.parts_total') }}</td>
+                                <td :colspan="hasPartsVat ? 7 : 6" class="p-2 border border-gray-200 text-center">
+                                    {{ documentType === 'parts_invoice' ? (isRtl ? 'إجمالي قطع الغيار' : 'Parts Total') : $t('work_orders.parts_total') }}
+                                </td>
                                 <td class="p-2 border border-gray-200 text-center font-mono font-bold">
                                     {{ formatRawPrice(parts.reduce((s, i) => s + partLineTotal(i), 0)) }}
                                 </td>
@@ -770,12 +772,14 @@ function partLineExclTax(item) {
 
 // Services and Parts computeds for Invoice separation
 const services = computed(() => {
+    if (props.documentType === 'parts_invoice') return [];
     const items = props.data.items || dummyItems;
     return items.filter(item => !item.is_part);
 });
 
 const parts = computed(() => {
     const items = props.data.items || dummyItems;
+    if (props.documentType === 'parts_invoice') return items;
     return items.filter(item => item.is_part);
 });
 

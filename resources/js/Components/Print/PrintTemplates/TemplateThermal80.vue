@@ -343,12 +343,14 @@ const showPricingColumns = computed(() => {
 
 // Services and Parts computeds for Invoice separation
 const services = computed(() => {
+    if (props.documentType === 'parts_invoice') return [];
     const items = props.data.items || dummyItems;
     return items.filter(item => !item.is_part);
 });
 
 const parts = computed(() => {
     const items = props.data.items || dummyItems;
+    if (props.documentType === 'parts_invoice') return items;
     return items.filter(item => item.is_part);
 });
 
