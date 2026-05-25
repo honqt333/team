@@ -24,10 +24,7 @@ class LocaleController extends Controller
         // Set for current request
         App::setLocale($locale);
         
-        return response()->json([
-            'success' => true,
-            'locale' => $locale,
-        ]);
+        return redirect()->back();
     }
 
     /**

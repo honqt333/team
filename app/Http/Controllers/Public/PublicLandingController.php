@@ -100,6 +100,15 @@ class PublicLandingController extends Controller
             'hero_subtitle_en' => Setting::get('landing.hero.subtitle.en', 'The certified #1 system for car workshop management. Digital inspections, e-invoices, inventory, and POS in one integrated platform.'),
             'hero_cta_text_ar' => Setting::get('landing.hero.cta.text.ar', 'اشترك الآن مجاناً'),
             'hero_cta_text_en' => Setting::get('landing.hero.cta.text.en', 'Start Your Free Trial Now'),
+
+            // Hero Typed Animation
+            'hero_typed_enabled' => Setting::get('landing.hero.typed.enabled', '1') === '1',
+            'hero_typed_prefix_ar' => Setting::get('landing.hero.typed.prefix.ar', 'أدر'),
+            'hero_typed_prefix_en' => Setting::get('landing.hero.typed.prefix.en', 'Elevate'),
+            'hero_typed_suffix_ar' => Setting::get('landing.hero.typed.suffix.ar', 'بذكاء حقيقي'),
+            'hero_typed_suffix_en' => Setting::get('landing.hero.typed.suffix.en', 'With Real Intelligence'),
+            'hero_typed_phrases_ar' => Setting::get('landing.hero.typed.phrases.ar', 'مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا'),
+            'hero_typed_phrases_en' => Setting::get('landing.hero.typed.phrases.en', 'Your Workshop|Your Revenue|Your Team|Your Future'),
             
             'features_title_ar' => Setting::get('landing.features.title.ar', 'لماذا نظام Carag هو خيارك الأفضل؟'),
             'features_title_en' => Setting::get('landing.features.title.en', 'Why Carag is Your Best Choice?'),

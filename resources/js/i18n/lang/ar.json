@@ -2934,5 +2934,25 @@
     "drag_to_reorder": "اسحب لإعادة الترتيب",
     "reset": "إعادة تعيين",
     "save_layout": "حفظ التخطيط"
+  },
+  "landing": {
+    "learn_more": "المزيد",
+    "explore_features": "استكشف المميزات",
+    "no_contracts": "بدون عقود",
+    "free_trial": "نسخة تجريبية مجانية",
+    "support_24_7": "دعم فني 24/7",
+    "uptime": "استقرار",
+    "active_shops": "ورشة نشطة",
+    "exclusive_tools": "أدواتنا الحصرية",
+    "pricing_plans": "الخطط والأسعار",
+    "monthly": "شهري",
+    "yearly": "سنوي",
+    "most_popular": "الأكثر طلباً",
+    "price_unit": "ريال/شهر",
+    "start_now": "ابدأ الآن",
+    "login": "دخول",
+    "version_2_coming_soon": "الإصدار 2.0 — قريباً",
+    "elevate": "أدر",
+    "with_intelligence": "بذكاء حقيقي"
   }
 }

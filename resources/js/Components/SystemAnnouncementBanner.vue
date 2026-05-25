@@ -16,6 +16,7 @@
                 <span class="font-semibold">{{ announcement.title }}</span>
                 <span v-if="announcement.content" class="mx-1.5 opacity-70">—</span>
                 <span v-if="announcement.content" class="opacity-90" v-html="truncate(announcement.content, 120)"></span>
+
             </div>
 
             <!-- Dismiss Button -->
@@ -33,6 +34,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import DOMPurify from 'dompurify';
 
 const page = usePage();
 const dismissedIds = ref([]);
@@ -73,9 +75,11 @@ async function dismiss(announcement) {
     }
 }
 
-function truncate(text, maxLength) {
-    const stripped = text.replace(/<[^>]+>/g, '');
-    return stripped.length > maxLength ? stripped.substring(0, maxLength) + '...' : stripped;
+function truncate(html, maxLength) {
+    const div = document.createElement('div');
+    div.innerHTML = DOMPurify.sanitize(html);
+    const text = div.textContent || div.innerText || '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 </script>
 
