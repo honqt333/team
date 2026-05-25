@@ -1,105 +1,47 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8" :dir="isRtl ? 'rtl' : 'ltr'">
-        <!-- Reusable Print Header -->
-        <PrintHeader 
-            :title="$t('work_orders.print_view.payments')"
-            :subtitle="workOrder.code"
-            :work-order="workOrder"
-        />
-
-        <!-- Customer & Vehicle Info -->
-        <div class="grid grid-cols-2 gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
-            <div>
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.customer') }}:</span> <span class="font-bold mr-2">{{ workOrder.customer?.name }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.phone') }}:</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.customer?.phone }}</span></p>
-            </div>
-            <div :class="isRtl ? 'text-left' : 'text-right'">
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.vehicle') }}:</span> <span class="font-bold mr-2">{{ vehicleName }}</span></p>
-                <div class="flex items-center gap-2 mb-1 justify-end">
-                    <span class="text-gray-500">{{ $t('work_orders.print_view.plate') }}:</span>
-                    <SaudiPlateDisplay :plate-number="workOrder.vehicle?.plate_number" size="sm" />
-                </div>
-            </div>
-        </div>
-
-        <!-- Payments Table -->
-        <div class="mb-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">{{ $t('work_orders.print_view.payments') }}</h3>
-            
-            <div v-if="payments.length > 0">
-                <table class="w-full text-sm">
-                    <thead>
-                        <tr class="border-b-2 border-gray-300">
-                            <th class="py-2 text-right">#</th>
-                            <th class="py-2 text-right">{{ $t('work_orders.print_view.date') }}</th>
-                            <th class="py-2 text-right">{{ $t('work_orders.print_view.method') }}</th>
-                            <th class="py-2 text-right">{{ $t('work_orders.print_view.reference') }}</th>
-                            <th class="py-2 text-left">{{ $t('work_orders.print_view.amount') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(payment, idx) in payments" :key="payment.id" class="border-b border-gray-200">
-                            <td class="py-2 text-right text-gray-500">{{ idx + 1 }}</td>
-                            <td class="py-2 text-right">{{ formatDate(payment.payment_date) }}</td>
-                            <td class="py-2 text-right">{{ getMethodLabel(payment.payment_method) }}</td>
-                            <td class="py-2 text-right" dir="ltr">{{ payment.reference || '-' }}</td>
-                            <td class="py-2 text-left font-medium" dir="ltr">{{ formatPrice(payment.amount) }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div v-else class="text-center py-8 text-gray-400">
-                {{ $t('work_orders.print_view.no_payments') }}
-            </div>
-        </div>
-
-        <!-- Summary -->
-        <div class="mb-6 flex justify-end">
-            <table class="w-64 text-sm">
-                <tbody>
-                    <tr class="border-b">
-                        <td class="py-2 text-gray-600">{{ $t('work_orders.print_view.invoice_total') }}</td>
-                        <td class="py-2 text-left font-medium" dir="ltr">{{ formatPrice(grandTotal) }}</td>
-                    </tr>
-                    <tr class="border-b bg-green-50">
-                        <td class="py-2 font-bold text-green-600">{{ $t('work_orders.print_view.total_paid') }}</td>
-                        <td class="py-2 text-left font-bold text-green-600" dir="ltr">{{ formatPrice(totalPaid) }}</td>
-                    </tr>
-                    <tr class="bg-gray-100">
-                        <td class="py-2 font-bold" :class="balance > 0 ? 'text-red-600' : 'text-green-600'">{{ $t('work_orders.print_view.balance') }}</td>
-                        <td class="py-2 text-left font-bold" :class="balance > 0 ? 'text-red-600' : 'text-green-600'" dir="ltr">{{ formatPrice(balance) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Signatures -->
-        <div class="mt-8 pt-4 border-t flex justify-between text-sm text-gray-600">
-            <div>
-                <p>{{ $t('work_orders.print_view.accountant_signature') }}: _________________</p>
-            </div>
-            <div>
-                <p>{{ $t('work_orders.print_view.customer_signature') }}: _________________</p>
-            </div>
-        </div>
-
-        <!-- Print Button -->
-        <div class="fixed bottom-4 left-4 print:hidden">
-            <button @click="printPage" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+        <!-- Print / Back Controls (hidden during print) -->
+        <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
+            <!-- Back Button -->
+            <button 
+                @click="goBack" 
+                class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                {{ $t('work_orders.print_view.print_btn') }}
+                {{ $t('common.back') }}
+            </button>
+
+            <!-- Print Button -->
+            <button 
+                @click="printPage" 
+                class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
+                :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                {{ $t('common.print') }}
             </button>
         </div>
+
+        <PrintEngine 
+            documentType="payments"
+            :data="mappedData"
+            :centerData="mappedCenterData"
+            :documentSettings="documentSettings"
+            :visualSettings="visualSettings"
+            :previewMode="false"
+        />
     </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import PrintHeader from '@/Components/Print/PrintHeader.vue';
-import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import { usePage } from '@inertiajs/vue3';
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const props = defineProps({
     workOrder: Object,
@@ -109,40 +51,102 @@ const props = defineProps({
     balance: Number,
 });
 
-const { locale, t } = useI18n();
+const page = usePage();
+const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
-const vehicleName = computed(() => {
+const goBack = () => window.history.back();
+const printPage = () => window.print();
+
+const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
+
+const mappedData = computed(() => {
     const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
     const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
-    return `${make} ${model}`.trim() || '-';
+    const vehicleStr = `${make} ${model}`.trim() || '-';
+
+    return {
+        code: props.workOrder.code,
+        created_at: new Date().toISOString(),
+        entry_date: props.workOrder.entry_date,
+        mileage: props.workOrder.mileage,
+        odometer: props.workOrder.mileage ? formatNumber(props.workOrder.mileage) : '-',
+        fuel_level: props.workOrder.fuel_level,
+        customer: {
+            name: props.workOrder.customer?.name,
+            phone: props.workOrder.customer?.phone,
+            address: props.workOrder.customer?.address_line,
+            tax_number: props.workOrder.customer?.tax_number,
+        },
+        vehicle: {
+            make: vehicleStr,
+            plate: props.workOrder.vehicle?.plate_number,
+            color: props.workOrder.vehicle?.color,
+        },
+        total_incl_tax: props.grandTotal,
+        total_tax: 0,
+        total_excl_tax: props.grandTotal,
+        total_paid: props.totalPaid,
+        balance: props.balance,
+        payments: props.payments || []
+    };
 });
 
-const formatDate = (date) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US');
-};
+const mappedCenterData = computed(() => {
+    const center = props.workOrder.center || {};
+    const tenant = props.workOrder.tenant || page.props.tenant || {};
+    return {
+        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
+        tax_number: center.vat_number || tenant.vat_number,
+        cr_number: tenant.cr_number,
+        phone: center.phone || tenant.phone,
+        logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
+        iban: tenant.iban || '',
+        address: center.address || tenant.address || '',
+        stamp_url: center.stamp_url || '',
+    };
+});
 
-const formatPrice = (amount) => {
-    return new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(amount || 0);
-};
+const documentSettings = computed(() => {
+    const tenantSettings = page.props.tenant?.print_settings;
+    const docSettings = tenantSettings?.documents?.['payments'] || {};
+    return {
+        title_ar: docSettings.title_ar || 'سندات الدفع والمدفوعات',
+        title_en: docSettings.title_en || 'Payments Receipt',
+        terms: docSettings.terms || [],
+        print_terms: docSettings.print_terms !== false,
+        show_stamp: docSettings.show_stamp !== false,
+        show_customer_address: docSettings.show_customer_address !== false,
+        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
+            { name_ar: 'توقيع المحاسب', name_en: 'Accountant Signature' },
+            { name_ar: 'توقيع العميل', name_en: 'Customer Signature' }
+        ]
+    };
+});
 
-const getMethodLabel = (method) => {
-    const key = `payments.methods.${method}`;
-    const translated = t(key);
-    return translated !== key ? translated : method;
-};
-
-const printPage = () => window.print();
+const visualSettings = computed(() => {
+    const vis = page.props.tenant?.print_settings?.visual || {};
+    return {
+        active_template: vis.active_template || 'TemplateDefaultA4',
+        show_logo: vis.show_logo !== false,
+        show_stamp: vis.show_stamp !== false,
+        show_qr_code: vis.show_qr_code !== false,
+        primary_color: vis.primary_color || '#3b82f6',
+        footer_text: page.props.tenant?.print_settings?.footer_text || '',
+    };
+});
 </script>
 
 <style>
 @media print {
-    @page { size: A4; margin: 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .print-container { padding: 0; }
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: white;
+    }
 }
 </style>

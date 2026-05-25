@@ -120,6 +120,12 @@ const mappedData = computed(() => {
             plate: props.workOrder.vehicle?.plate_number,
             color: props.workOrder.vehicle?.color,
         },
+        tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot,
+        total_excl_tax: props.workOrder.total_excl_tax,
+        total_tax: props.workOrder.total_tax,
+        total_incl_tax: props.workOrder.total_incl_tax,
+        total_paid: props.workOrder.total_paid !== undefined ? props.workOrder.total_paid : 0,
+        balance: props.workOrder.balance !== undefined ? props.workOrder.balance : 0,
         items: [...services, ...parts]
     };
 });

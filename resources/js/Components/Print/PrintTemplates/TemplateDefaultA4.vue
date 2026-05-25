@@ -151,11 +151,11 @@
                                 </td>
                                 <!-- Unit Price -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
-                                    {{ formatRawPrice(item.unit_price || 0) }}
+                                    {{ formatRawPrice(lineUnitPriceExclTax(item)) }}
                                 </td>
                                 <!-- Discount -->
                                 <td class="p-2 border border-gray-200 text-center font-mono text-red-600">
-                                    {{ (item.discount || 0) > 0 ? '- ' + formatRawPrice(item.discount) : '-' }}
+                                    {{ lineDiscountExclTax(item) > 0 ? '- ' + formatRawPrice(lineDiscountExclTax(item)) : '-' }}
                                 </td>
                                 <!-- Amount (before VAT) -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
@@ -207,11 +207,11 @@
                                 </td>
                                 <!-- Unit Price -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
-                                    {{ formatRawPrice(item.unit_price || 0) }}
+                                    {{ formatRawPrice(lineUnitPriceExclTax(item)) }}
                                 </td>
                                 <!-- Discount -->
                                 <td class="p-2 border border-gray-200 text-center font-mono text-red-600">
-                                    {{ (item.discount || 0) > 0 ? '- ' + formatRawPrice(item.discount) : '-' }}
+                                    {{ lineDiscountExclTax(item) > 0 ? '- ' + formatRawPrice(lineDiscountExclTax(item)) : '-' }}
                                 </td>
                                 <!-- Qty -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
@@ -243,6 +243,38 @@
                 </div>
             </div>
 
+
+            <!-- Scenario 5: Payments Receipt List -->
+            <div v-else-if="documentType === 'payments'" class="space-y-6">
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-2">{{ $t('work_orders.print_view.payments') }}</h3>
+                    <table class="w-full text-xs border-collapse" :class="isRtl ? 'text-right' : 'text-left'">
+                        <thead>
+                            <tr class="text-white" :style="{ backgroundColor: isModern ? primaryColor : '#1f2937' }">
+                                <th class="p-2 border border-gray-700 w-7 text-center">#</th>
+                                <th class="p-2 border border-gray-700">{{ $t('work_orders.print_view.date') }}</th>
+                                <th class="p-2 border border-gray-700">{{ $t('work_orders.print_view.method') }}</th>
+                                <th class="p-2 border border-gray-700">{{ $t('work_orders.print_view.reference') }}</th>
+                                <th class="p-2 border border-gray-700 w-32 text-center">{{ $t('work_orders.print_view.amount') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-800">
+                            <tr v-for="(payment, index) in data.payments" :key="payment.id" class="border-b border-gray-100 hover:bg-gray-50/50">
+                                <td class="p-2 border border-gray-200 text-center text-gray-500">{{ index + 1 }}</td>
+                                <td class="p-2 border border-gray-200 font-mono">{{ formatDate(payment.payment_date) }}</td>
+                                <td class="p-2 border border-gray-200 font-bold">{{ getMethodLabel(payment.payment_method) }}</td>
+                                <td class="p-2 border border-gray-200 font-mono" dir="ltr">{{ payment.reference || '-' }}</td>
+                                <td class="p-2 border border-gray-200 text-center font-bold font-mono">{{ formatCurrency(payment.amount) }}</td>
+                            </tr>
+                            <tr v-if="!data.payments || data.payments.length === 0">
+                                <td colspan="5" class="p-4 border border-gray-200 text-center text-gray-400">
+                                    {{ $t('work_orders.print_view.no_payments') }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- Scenario 3: Vehicle Condition Report -->
             <div v-else-if="documentType === 'condition_report'" class="space-y-6">
@@ -438,15 +470,15 @@
             
             <div class="w-1/2 lg:w-1/3">
                 <table class="w-full text-sm">
-                    <tr class="text-gray-500 border-b border-gray-200">
+                    <tr v-if="documentType !== 'payments'" class="text-gray-500 border-b border-gray-200">
                         <td class="py-1 px-2">{{ $t('quotes.form.subtotal') }}:</td>
                         <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.subtotal) }}</td>
                     </tr>
-                    <tr v-if="totals.discount > 0" class="text-red-500 border-b border-gray-200">
+                    <tr v-if="documentType !== 'payments' && totals.discount > 0" class="text-red-500 border-b border-gray-200">
                         <td class="py-1 px-2">{{ $t('quotes.form.total_discount') }}:</td>
                         <td class="py-1 px-2 text-left font-mono">-{{ formatCurrency(totals.discount) }}</td>
                     </tr>
-                    <tr v-if="totals.vat > 0" class="text-gray-500 border-b border-gray-200">
+                    <tr v-if="documentType !== 'payments' && totals.vat > 0" class="text-gray-500 border-b border-gray-200">
                         <td class="py-1 px-2">{{ $t('common.vat') }}:</td>
                         <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.vat) }}</td>
                     </tr>
@@ -455,8 +487,16 @@
                         :class="isModern ? 'bg-slate-50 border-slate-900' : 'bg-gray-100 border-gray-800'"
                         :style="isModern ? { borderBottomColor: primaryColor } : {}"
                     >
-                        <td class="py-2 px-2 text-gray-900">{{ $t('quotes.form.grand_total') }}:</td>
+                        <td class="py-2 px-2 text-gray-900">{{ documentType === 'payments' ? (isRtl ? 'إجمالي الفاتورة:' : 'Invoice Total:') : (isRtl ? 'المبلغ الإجمالي:' : 'Total Amount:') }}</td>
                         <td class="py-2 px-2 text-left text-gray-900 font-mono">{{ formatCurrency(totals.total) }}</td>
+                    </tr>
+                    <tr class="text-gray-500 border-b border-gray-200">
+                        <td class="py-1 px-2 font-bold">{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</td>
+                        <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(totals.paid) }}</td>
+                    </tr>
+                    <tr class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
+                        <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
+                        <td class="py-1.5 px-2 text-left font-mono">{{ formatCurrency(totals.balance) }}</td>
                     </tr>
                 </table>
                 <div v-if="centerData.iban && documentSettings.show_iban" class="bg-gray-50 p-2 rounded border border-gray-200 mt-2 text-[9px] text-gray-500 leading-normal font-mono">
@@ -588,34 +628,133 @@ const isDueDatePast = computed(() => {
 });
 
 // ── Invoice line helpers ──────────────────────────────────────────
+function isTaxEnabled() {
+    const val = props.data.tax_enabled_snapshot;
+    if (val === true || val === 1 || val === '1') return true;
+    if (val === false || val === 0 || val === '0') return false;
+    if (props.data.total_tax !== undefined && props.data.total_tax !== null) {
+        return Number(props.data.total_tax) > 0;
+    }
+    return true; // Default fallback for dummy/preview data
+}
+
+function getMethodLabel(method) {
+    if (!method) return '-';
+    const methodsAr = {
+        cash: 'نقداً',
+        card: 'بطاقة مدى / ائتمانية',
+        bank_transfer: 'تحويل بنكي',
+        check: 'شيك',
+        online: 'دفع إلكتروني',
+        other: 'آخر'
+    };
+    const methodsEn = {
+        cash: 'Cash',
+        card: 'Card',
+        bank_transfer: 'Bank Transfer',
+        check: 'Cheque',
+        online: 'Online',
+        other: 'Other'
+    };
+    const methodKey = method.toLowerCase();
+    if (isRtl.value) {
+        return methodsAr[methodKey] || method;
+    } else {
+        return methodsEn[methodKey] || method;
+    }
+}
+
+function lineUnitPriceExclTax(item) {
+    const price = item.unit_price || 0;
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        const rate = isTaxEnabled() && item.is_taxable !== false ? (item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15) : 0;
+        return price / (1 + rate);
+    }
+    return price;
+}
+
+function lineDiscountExclTax(item) {
+    const discount = item.discount || 0;
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        const rate = isTaxEnabled() && item.is_taxable !== false ? (item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15) : 0;
+        return discount / (1 + rate);
+    }
+    return discount;
+}
+
 // Services (qty is always 1 for labor lines)
-function srvLineExclTax(item) {
-    const base = (item.unit_price || 0) * 1;
-    const disc = item.discount || 0;
-    return Math.max(base - disc, 0);
-}
-function srvLineVat(item) {
-    if (props.data.tax_enabled_snapshot === false || item.is_taxable === false) return 0;
-    const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
-    return srvLineExclTax(item) * rate;
-}
 function srvLineTotal(item) {
-    return srvLineExclTax(item) + srvLineVat(item);
+    const qty = 1;
+    const price = item.unit_price || 0;
+    const discount = item.discount || 0;
+    
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        return Math.max(price * qty - discount, 0);
+    } else {
+        const excl = Math.max(price * qty - discount, 0);
+        const vat = excl * (isTaxEnabled() && item.is_taxable !== false ? (item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15) : 0);
+        return excl + vat;
+    }
+}
+
+function srvLineVat(item) {
+    if (!isTaxEnabled() || item.is_taxable === false) return 0;
+    const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
+    
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        const total = srvLineTotal(item);
+        return total - (total / (1 + rate));
+    } else {
+        return srvLineExclTax(item) * rate;
+    }
+}
+
+function srvLineExclTax(item) {
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        return srvLineTotal(item) - srvLineVat(item);
+    } else {
+        const price = item.unit_price || 0;
+        const discount = item.discount || 0;
+        return Math.max(price * 1 - discount, 0);
+    }
 }
 
 // Parts (qty can be > 1)
-function partLineExclTax(item) {
-    const base = (item.unit_price || 0) * (item.qty || 1);
-    const disc = item.discount || 0;
-    return Math.max(base - disc, 0);
-}
-function partLineVat(item) {
-    if (props.data.tax_enabled_snapshot === false || item.is_taxable === false) return 0;
-    const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
-    return partLineExclTax(item) * rate;
-}
 function partLineTotal(item) {
-    return partLineExclTax(item) + partLineVat(item);
+    const qty = item.qty || 1;
+    const price = item.unit_price || 0;
+    const discount = item.discount || 0;
+    
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        return Math.max(price * qty - discount, 0);
+    } else {
+        const excl = Math.max(price * qty - discount, 0);
+        const vat = excl * (isTaxEnabled() && item.is_taxable !== false ? (item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15) : 0);
+        return excl + vat;
+    }
+}
+
+function partLineVat(item) {
+    if (!isTaxEnabled() || item.is_taxable === false) return 0;
+    const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
+    
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        const total = partLineTotal(item);
+        return total - (total / (1 + rate));
+    } else {
+        return partLineExclTax(item) * rate;
+    }
+}
+
+function partLineExclTax(item) {
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        return partLineTotal(item) - partLineVat(item);
+    } else {
+        const qty = item.qty || 1;
+        const price = item.unit_price || 0;
+        const discount = item.discount || 0;
+        return Math.max(price * qty - discount, 0);
+    }
 }
 
 // Services and Parts computeds for Invoice separation
@@ -682,7 +821,8 @@ function getDocTypeTitle(type) {
         receipt: 'سند قبض مالي',
         checklist: 'تقرير فحص',
         delivery_note: 'سند تسليم',
-        condition_report: 'تقرير حالة المركبة'
+        condition_report: 'تقرير حالة المركبة',
+        payments: 'سندات الدفع والمدفوعات'
     };
     const titlesEn = {
         invoice: 'Tax Invoice',
@@ -693,7 +833,8 @@ function getDocTypeTitle(type) {
         receipt: 'Receipt',
         checklist: 'Checklist',
         delivery_note: 'Delivery Note',
-        condition_report: 'Vehicle Condition Report'
+        condition_report: 'Vehicle Condition Report',
+        payments: 'Payments Receipt'
     };
     if (isRtl.value) {
         return titlesAr[type] || 'وثيقة رسمية';
@@ -719,12 +860,39 @@ const defaultSignatures = [
 
 // Computed Totals
 const totals = computed(() => {
+    // Prioritize database-stored totals (from work order or invoice) to avoid line-item calculation mismatches
+    if (props.data.total_incl_tax !== undefined && props.data.total_incl_tax !== null) {
+        const total = Number(props.data.total_incl_tax || 0);
+        const vat = Number(props.data.total_tax || 0);
+        const subtotalAfterDiscount = Number(props.data.total_excl_tax || 0);
+        
+        // Sum discount from items to show in the discount row if present
+        const items = props.data.items || [];
+        let discount = 0;
+        items.forEach(item => {
+            discount += Number(item.discount || 0);
+        });
+
+        const subtotal = subtotalAfterDiscount + discount;
+        const paid = Number(props.data.total_paid !== undefined ? props.data.total_paid : 0);
+        const balance = Number(props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0));
+
+        return {
+            subtotal,
+            discount,
+            vat,
+            total,
+            paid,
+            balance
+        };
+    }
+
     const items = props.data.items || dummyItems;
     let subtotal = 0;
     let discount = 0;
     let vat = 0;
     
-    const taxEnabled = props.data.tax_enabled_snapshot !== false;
+    const taxEnabled = isTaxEnabled();
 
     items.forEach(item => {
         const itemQty = item.qty || 1;
@@ -744,11 +912,16 @@ const totals = computed(() => {
     const subtotalAfterDiscount = Math.max(subtotal - discount, 0);
     const total = subtotalAfterDiscount + vat;
 
+    const paid = props.data.total_paid !== undefined ? props.data.total_paid : 0;
+    const balance = props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0);
+
     return {
         subtotal,
         discount,
         vat,
-        total
+        total,
+        paid,
+        balance
     };
 });
 

@@ -158,13 +158,21 @@
                         <span class="text-slate-400">{{ labels.subtotal }}:</span>
                         <span class="text-slate-900 font-mono">{{ formatCurrency(invoice.total_excl_tax) }}</span>
                     </div>
-                    <div class="flex justify-between items-center text-sm font-bold">
+                    <div v-if="Number(invoice.total_tax) > 0" class="flex justify-between items-center text-sm font-bold">
                         <span class="text-slate-400">{{ labels.tax }} ({{ invoice.tax_rate_snapshot }}%):</span>
                         <span class="text-slate-900 font-mono">{{ formatCurrency(invoice.total_tax) }}</span>
                     </div>
                     <div class="pt-3 border-t border-slate-200 flex justify-between items-center">
                         <span class="text-base font-black text-slate-900">{{ labels.grand_total }}:</span>
                         <span class="text-2xl font-black text-slate-900 font-mono">{{ formatCurrency(invoice.total_incl_tax) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm font-bold text-slate-500 pt-1.5 border-t border-slate-100">
+                        <span>{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</span>
+                        <span class="font-mono text-slate-700">{{ formatCurrency(invoice.total_paid) }}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm font-bold text-slate-750">
+                        <span>{{ isRtl ? 'الباقي:' : 'Remaining:' }}</span>
+                        <span class="font-mono text-slate-900">{{ formatCurrency(balance) }}</span>
                     </div>
                 </div>
 

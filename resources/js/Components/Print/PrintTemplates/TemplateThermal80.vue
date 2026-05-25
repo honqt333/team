@@ -136,6 +136,30 @@
                 </div>
             </div>
 
+            <!-- Scenario 6: Payments Receipt List -->
+            <div v-else-if="documentType === 'payments'" class="space-y-2">
+                <span class="block font-bold text-[9px] text-gray-500 border-b border-gray-100 pb-0.5 mt-2">
+                    {{ $t('work_orders.print_view.payments') }}:
+                </span>
+                <div 
+                    v-for="(payment, index) in data.payments" 
+                    :key="payment.id" 
+                    class="flex flex-col text-[10px] pb-2 border-b border-gray-50 last:border-0"
+                >
+                    <div class="flex justify-between font-bold text-gray-900">
+                        <span>{{ index + 1 }}. {{ getMethodLabel(payment.payment_method) }}</span>
+                        <span dir="ltr">{{ formatCurrency(payment.amount) }}</span>
+                    </div>
+                    <div class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
+                        <span>{{ formatDate(payment.payment_date) }}</span>
+                        <span v-if="payment.reference">{{ $t('work_orders.print_view.reference') }}: {{ payment.reference }}</span>
+                    </div>
+                </div>
+                <div v-if="!data.payments || data.payments.length === 0" class="text-center py-4 text-gray-400 text-[10px]">
+                    {{ $t('work_orders.print_view.no_payments') }}
+                </div>
+            </div>
+
             <!-- Scenario 3: Vehicle Condition Report -->
             <div v-else-if="documentType === 'condition_report'" class="space-y-4">
                 <!-- Simple list of damage marks for thermal print -->
@@ -184,21 +208,29 @@
 
         <!-- Financial Summary -->
         <div v-if="showPricingColumns && documentType !== 'receipt'" class="py-2 border-t border-dashed border-gray-300 space-y-1 text-[10px]">
-            <div class="flex justify-between text-gray-500">
+            <div v-if="documentType !== 'payments'" class="flex justify-between text-gray-500">
                 <span>{{ $t('quotes.form.subtotal') }}:</span>
                 <span dir="ltr">{{ formatCurrency(totals.subtotal) }}</span>
             </div>
-            <div v-if="totals.discount > 0" class="flex justify-between text-red-500">
+            <div v-if="documentType !== 'payments' && totals.discount > 0" class="flex justify-between text-red-500">
                 <span>{{ $t('quotes.form.total_discount') }}:</span>
                 <span dir="ltr">-{{ formatCurrency(totals.discount) }}</span>
             </div>
-            <div v-if="totals.vat > 0" class="flex justify-between text-gray-500">
+            <div v-if="documentType !== 'payments' && totals.vat > 0" class="flex justify-between text-gray-500">
                 <span>{{ $t('common.vat') }}:</span>
                 <span dir="ltr">{{ formatCurrency(totals.vat) }}</span>
             </div>
             <div class="flex justify-between font-bold text-sm text-gray-900 border-t border-dashed border-gray-200 pt-1.5">
-                <span>{{ $t('quotes.form.grand_total') }}:</span>
+                <span>{{ documentType === 'payments' ? (isRtl ? 'إجمالي الفاتورة:' : 'Invoice Total:') : (isRtl ? 'الإجمالي النهائي:' : 'Total Amount:') }}</span>
                 <span :style="{ color: primaryColor }" dir="ltr">{{ formatCurrency(totals.total) }}</span>
+            </div>
+            <div class="flex justify-between text-gray-500 text-[10px]">
+                <span>{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</span>
+                <span dir="ltr">{{ formatCurrency(totals.paid) }}</span>
+            </div>
+            <div class="flex justify-between font-bold text-gray-800 text-[10px] bg-gray-50/50 p-1 rounded">
+                <span>{{ isRtl ? 'الباقي:' : 'Remaining:' }}</span>
+                <span dir="ltr">{{ formatCurrency(totals.balance) }}</span>
             </div>
             <div v-if="centerData.iban && documentSettings.show_iban" class="bg-gray-50/70 p-2 rounded border border-dashed border-gray-200 mt-2 text-[8px] text-gray-500 leading-normal">
                 <span class="block font-bold text-gray-600">{{ $t('company_profile.profile.iban') }}:</span>
@@ -348,7 +380,8 @@ function getDocTypeTitle(type) {
         receipt: 'سند قبض مالي',
         checklist: 'الفحص المنهجي',
         delivery_note: 'سند تسليم مركبة',
-        condition_report: 'تقرير حالة المركبة'
+        condition_report: 'تقرير حالة المركبة',
+        payments: 'سندات الدفع والمدفوعات المبسطة'
     };
     const titlesEn = {
         invoice: 'Simplified Invoice',
@@ -359,7 +392,8 @@ function getDocTypeTitle(type) {
         receipt: 'Receipt',
         checklist: 'Systematic Checklist',
         delivery_note: 'Vehicle Delivery Note',
-        condition_report: 'Vehicle Condition Report'
+        condition_report: 'Vehicle Condition Report',
+        payments: 'Payments Receipt'
     };
     if (isRtl.value) {
         return titlesAr[type] || 'وثيقة رسمية';
@@ -385,14 +419,70 @@ const defaultSignatures = [
     { name_ar: 'العميل', name_en: 'Customer' }
 ];
 
+function isTaxEnabled() {
+    const val = props.data.tax_enabled_snapshot;
+    if (val === true || val === 1 || val === '1') return true;
+    if (val === false || val === 0 || val === '0') return false;
+    if (props.data.total_tax !== undefined && props.data.total_tax !== null) {
+        return Number(props.data.total_tax) > 0;
+    }
+    return true; // Default fallback for dummy/preview data
+}
+
+function getMethodLabel(method) {
+    if (!method) return '-';
+    const methodsAr = {
+        cash: 'نقداً',
+        card: 'بطاقة مدى / ائتمانية',
+        bank_transfer: 'تحويل بنكي',
+        check: 'شيك',
+        online: 'دفع إلكتروني',
+        other: 'آخر'
+    };
+    const methodsEn = {
+        cash: 'Cash',
+        card: 'Card',
+        bank_transfer: 'Bank Transfer',
+        check: 'Cheque',
+        online: 'Online',
+        other: 'Other'
+    };
+    const methodKey = method.toLowerCase();
+    if (isRtl.value) {
+        return methodsAr[methodKey] || method;
+    } else {
+        return methodsEn[methodKey] || method;
+    }
+}
+
 // Computed Totals
 const totals = computed(() => {
+    // Prioritize database-stored totals (from work order or invoice) to avoid line-item calculation mismatches
+    if (props.data.total_incl_tax !== undefined && props.data.total_incl_tax !== null) {
+        const total = Number(props.data.total_incl_tax || 0);
+        const vat = Number(props.data.total_tax || 0);
+        const subtotalAfterDiscount = Number(props.data.total_excl_tax || 0);
+        
+        // Sum discount from items to show in the discount row if present
+        const items = props.data.items || [];
+        let discount = 0;
+        items.forEach(item => {
+            discount += Number(item.discount || 0);
+        });
+
+        const subtotal = subtotalAfterDiscount + discount;
+        const paid = Number(props.data.total_paid !== undefined ? props.data.total_paid : 0);
+        const balance = Number(props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0));
+
+        return { subtotal, discount, vat, total, paid, balance };
+    }
+
     const items = props.data.items || dummyItems;
     let subtotal = 0;
     let discount = 0;
     let vat = 0;
     
-    const taxEnabled = props.data.tax_enabled_snapshot !== false;
+    const taxEnabled = isTaxEnabled();
 
     items.forEach(item => {
         const itemQty = item.qty || 1;
@@ -412,7 +502,10 @@ const totals = computed(() => {
     const subtotalAfterDiscount = Math.max(subtotal - discount, 0);
     const total = subtotalAfterDiscount + vat;
 
-    return { subtotal, discount, vat, total };
+    const paid = props.data.total_paid !== undefined ? props.data.total_paid : 0;
+    const balance = props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0);
+
+    return { subtotal, discount, vat, total, paid, balance };
 });
 
 function isClientSignature(name) {
