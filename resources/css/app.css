@@ -53,10 +53,6 @@
    Print Styles
    ============================================ */
 @media print {
-    @page {
-        size: landscape;
-        margin: 0.5cm;
-    }
 
     /* 1. HIDE EVERYTHING by default */
     body * {
@@ -85,9 +81,16 @@
         visibility: visible !important;
     }
 
-    /* 4. SHOW ONLY the Print Section (Teleported to Body) */
+    /* 4. Make #app visible again (display:none kills all Vue content) */
+    #app {
+        display: block !important;
+    }
+
+    /* 5. SHOW ONLY the Print Section (Teleported to Body) */
     .print-section,
-    .print-section * {
+    .print-section *,
+    .print-container,
+    .print-container * {
         visibility: visible !important;
     }
 

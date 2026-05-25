@@ -1,6 +1,6 @@
 <template>
     <div 
-        class="bg-white w-[210mm] min-h-[297mm] p-[10mm] shadow-lg print:shadow-none print:m-0 print:p-0 relative flex flex-col"
+        class="bg-white w-[210mm] min-h-[297mm] p-[10mm] shadow-lg print:shadow-none print:m-0 print:p-0 print:w-full print:min-h-0 relative flex flex-col"
         :dir="isRtl ? 'rtl' : 'ltr'"
     >
         <!-- Header: Logo & Center Info -->
@@ -514,11 +514,11 @@
                         <td class="py-2 px-2 text-gray-900">{{ documentType === 'payments' ? (isRtl ? 'إجمالي الفاتورة:' : 'Invoice Total:') : (isRtl ? 'المبلغ الإجمالي:' : 'Total Amount:') }}</td>
                         <td class="py-2 px-2 text-left text-gray-900 font-mono">{{ formatCurrency(totals.total) }}</td>
                     </tr>
-                    <tr v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="text-gray-500 border-b border-gray-200">
+                    <tr v-if="!['quotation'].includes(documentType)" class="text-gray-500 border-b border-gray-200">
                         <td class="py-1 px-2 font-bold">{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</td>
                         <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(totals.paid) }}</td>
                     </tr>
-                    <tr v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
+                    <tr v-if="!['quotation'].includes(documentType)" class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
                         <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
                         <td class="py-1.5 px-2 text-left font-mono">{{ formatCurrency(totals.balance) }}</td>
                     </tr>

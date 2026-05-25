@@ -154,5 +154,9 @@ const visualSettings = computed(() => {
     @page { size: A4; margin: 1cm; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
     .print-container { padding: 0; }
+    .print-container,
+    .print-container * {
+        visibility: visible !important;
+    }
 }
 </style>

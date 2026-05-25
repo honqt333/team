@@ -121,11 +121,12 @@ const mappedData = computed(() => {
             color: props.workOrder.vehicle?.color,
         },
         tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot,
-        total_excl_tax: props.workOrder.total_excl_tax,
-        total_tax: props.workOrder.total_tax,
-        total_incl_tax: props.workOrder.total_incl_tax,
-        total_paid: props.workOrder.total_paid !== undefined ? props.workOrder.total_paid : 0,
-        balance: props.workOrder.balance !== undefined ? props.workOrder.balance : 0,
+        total_excl_tax: props.grandTotal ?? 0,
+        total_tax: 0,
+        total_incl_tax: props.grandTotal ?? 0,
+        discount_amount: 0,
+        total_paid: props.totalPaid ?? 0,
+        balance: props.balance ?? 0,
         items: [...services, ...parts]
     };
 });
@@ -180,8 +181,12 @@ const visualSettings = computed(() => {
 
 <style>
 @media print {
-    @page { size: A4; margin: 1cm; }
+    @page { size: A4; margin: 0 1cm; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
     .print-container { padding: 0; }
+    .print-container,
+    .print-container * {
+        visibility: visible !important;
+    }
 }
 </style>

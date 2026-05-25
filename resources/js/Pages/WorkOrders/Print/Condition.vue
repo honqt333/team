@@ -1,5 +1,5 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center print:pt-8" :dir="isRtl ? 'rtl' : 'ltr'">
         <!-- Print / Back Controls (hidden during print) -->
         <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
             <!-- Back Button -->
@@ -137,5 +137,9 @@ const visualSettings = computed(() => {
     @page { size: A4; margin: 1cm; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
     .print-container { padding: 0; }
+    .print-container,
+    .print-container * {
+        visibility: visible !important;
+    }
 }
 </style>

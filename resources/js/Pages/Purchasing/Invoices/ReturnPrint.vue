@@ -172,7 +172,7 @@ const visualSettings = computed(() => {
 
 <style>
 @media print {
-    @page { size: A4; margin: 0; }
+    @page { size: A4; margin: 0 1cm; }
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
 }
 </style>

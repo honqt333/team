@@ -141,12 +141,16 @@ const visualSettings = computed(() => {
 @media print {
     @page {
         size: A4;
-        margin: 0;
+        margin: 0 1cm;
     }
     body {
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
         background: white;
+    }
+    .print-container,
+    .print-container * {
+        visibility: visible !important;
     }
 }
 </style>
