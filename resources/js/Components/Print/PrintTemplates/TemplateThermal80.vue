@@ -35,7 +35,7 @@
         <!-- Customer & Vehicle Info -->
         <div class="py-2 border-b border-dashed border-gray-300 text-[10px] text-gray-600 space-y-0.5">
             <div class="flex justify-between">
-                <span>{{ $t('work_orders.print_view.customer') }}:</span>
+                <span>{{ ['purchase_invoice', 'purchase_return'].includes(documentType) ? (isRtl ? 'المورد' : 'Supplier') : $t('work_orders.print_view.customer') }}:</span>
                 <span class="font-bold text-gray-900">{{ data.customer?.name || (isRtl ? 'أحمد عبد الله' : 'Ahmed Abdullah') }}</span>
             </div>
             <div v-if="documentSettings.show_customer_address !== false && data.customer?.address" class="flex justify-between">
@@ -46,7 +46,7 @@
                 <span>{{ $t('company_profile.profile.vat_number') }}:</span>
                 <span class="text-gray-900 font-mono">{{ data.customer.tax_number }}</span>
             </div>
-            <template v-if="documentType !== 'parts_invoice'">
+            <template v-if="!['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)">
                 <div class="flex justify-between items-center">
                     <span>{{ $t('work_orders.print_view.vehicle') }}:</span>
                     <span class="text-gray-800 flex items-center gap-1.5">
@@ -88,11 +88,11 @@
             </div>
 
             <!-- Scenario 2: Invoice (Separated Services and Parts) -->
-            <div v-else-if="['invoice', 'proforma_invoice', 'quotation', 'parts_invoice'].includes(documentType)" class="space-y-4">
+            <div v-else-if="['invoice', 'proforma_invoice', 'quotation', 'parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)" class="space-y-4">
                 <!-- Services -->
                 <div v-if="services.length > 0" class="space-y-2">
                     <span class="block font-bold text-[9px] text-gray-500 border-b border-gray-100 pb-0.5">
-                        {{ documentType === 'parts_invoice' ? (isRtl ? 'قطع الغيار' : 'Spare Parts') : $t('work_orders.print_view.labor_services') }}:
+                        {{ ['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType) ? (isRtl ? 'قطع الغيار' : 'Spare Parts') : $t('work_orders.print_view.labor_services') }}:
                     </span>
                     <div 
                         v-for="(item, index) in services" 
@@ -116,7 +116,7 @@
                 <!-- Parts -->
                 <div v-if="parts.length > 0" class="space-y-2">
                     <span class="block font-bold text-[9px] text-gray-500 border-b border-gray-100 pb-0.5 mt-2">
-                        {{ $t('work_orders.parts_total') }}:
+                        {{ ['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType) ? (isRtl ? 'قطع الغيار' : 'Spare Parts') : $t('work_orders.parts_total') }}:
                     </span>
                     <div 
                         v-for="(item, index) in parts" 
@@ -229,11 +229,11 @@
                 <span>{{ documentType === 'payments' ? (isRtl ? 'إجمالي الفاتورة:' : 'Invoice Total:') : (isRtl ? 'الإجمالي النهائي:' : 'Total Amount:') }}</span>
                 <span :style="{ color: primaryColor }" dir="ltr">{{ formatCurrency(totals.total) }}</span>
             </div>
-            <div class="flex justify-between text-gray-500 text-[10px]">
+            <div v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="flex justify-between text-gray-500 text-[10px]">
                 <span>{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</span>
                 <span dir="ltr">{{ formatCurrency(totals.paid) }}</span>
             </div>
-            <div class="flex justify-between font-bold text-gray-800 text-[10px] bg-gray-50/50 p-1 rounded">
+            <div v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="flex justify-between font-bold text-gray-800 text-[10px] bg-gray-50/50 p-1 rounded">
                 <span>{{ isRtl ? 'الباقي:' : 'Remaining:' }}</span>
                 <span dir="ltr">{{ formatCurrency(totals.balance) }}</span>
             </div>
@@ -343,14 +343,14 @@ const showPricingColumns = computed(() => {
 
 // Services and Parts computeds for Invoice separation
 const services = computed(() => {
-    if (props.documentType === 'parts_invoice') return [];
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return [];
     const items = props.data.items || dummyItems;
     return items.filter(item => !item.is_part);
 });
 
 const parts = computed(() => {
     const items = props.data.items || dummyItems;
-    if (props.documentType === 'parts_invoice') return items;
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return items;
     return items.filter(item => item.is_part);
 });
 
@@ -393,7 +393,9 @@ function getDocTypeTitle(type) {
         checklist: 'الفحص المنهجي',
         delivery_note: 'سند تسليم مركبة',
         condition_report: 'تقرير حالة المركبة',
-        payments: 'سندات الدفع والمدفوعات المبسطة'
+        payments: 'سندات الدفع والمدفوعات المبسطة',
+        purchase_invoice: 'فاتورة مشتريات مبسطة',
+        purchase_return: 'فاتورة مرتجع مشتريات مبسطة'
     };
     const titlesEn = {
         invoice: 'Simplified Invoice',
@@ -405,7 +407,9 @@ function getDocTypeTitle(type) {
         checklist: 'Systematic Checklist',
         delivery_note: 'Vehicle Delivery Note',
         condition_report: 'Vehicle Condition Report',
-        payments: 'Payments Receipt'
+        payments: 'Payments Receipt',
+        purchase_invoice: 'Simplified Purchase Invoice',
+        purchase_return: 'Simplified Purchase Return Invoice'
     };
     if (isRtl.value) {
         return titlesAr[type] || 'وثيقة رسمية';
@@ -475,12 +479,14 @@ const totals = computed(() => {
         const vat = Number(props.data.total_tax || 0);
         const subtotalAfterDiscount = Number(props.data.total_excl_tax || 0);
         
-        // Sum discount from items to show in the discount row if present
-        const items = props.data.items || [];
-        let discount = 0;
-        items.forEach(item => {
-            discount += Number(item.discount || 0);
-        });
+        // Sum discount from items to show in the discount row if present, or use global discount if provided
+        let discount = Number(props.data.discount_amount || props.data.discount || 0);
+        if (discount === 0) {
+            const items = props.data.items || [];
+            items.forEach(item => {
+                discount += Number(item.discount || 0);
+            });
+        }
 
         const subtotal = subtotalAfterDiscount + discount;
         const paid = Number(props.data.total_paid !== undefined ? props.data.total_paid : 0);

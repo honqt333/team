@@ -42,15 +42,16 @@
 
                         <!-- Print Button -->
                         <Tooltip :content="$t('common.print')">
-                            <button
-                                @click="printInvoice"
+                            <a
+                                :href="route('app.invoices.purchases.print', invoice.id)"
+                                target="_blank"
                                 class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                                 <span>{{ $t('common.print') }}</span>
-                            </button>
+                            </a>
                         </Tooltip>
 
                         <!-- Add Payment Button -->
@@ -1098,7 +1099,7 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Link, useForm, router } from '@inertiajs/vue3';
+import { Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -1112,7 +1113,9 @@ const props = defineProps({
     invoice: Object,
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const page = usePage();
+const isRtl = computed(() => locale.value === 'ar');
 const { toEnglish, formatCurrency } = useNumberFormat();
 
 const formatCurrencyEnglish = (amount) => {
@@ -1421,10 +1424,6 @@ const getCenterAddress = (center) => {
         addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
     ].filter(Boolean);
     return parts.join('، ');
-};
-
-const printInvoice = () => {
-    window.print();
 };
 
 const statusClass = (status) => {

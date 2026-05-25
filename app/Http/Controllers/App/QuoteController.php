@@ -929,5 +929,30 @@ class QuoteController extends Controller
 
         return redirect()->back();
     }
+
+    /**
+     * Print the specified quote.
+     */
+    public function print(Quote $quote): Response
+    {
+        $this->authorize('view', $quote);
+
+        $quote->load([
+            'center.address',
+            'customer',
+            'vehicle.make',
+            'vehicle.customer',
+            'vehicle.model',
+            'lines.service.department',
+            'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
+            'parts.quoteLine',
+            'departments',
+            'createdByUser',
+        ]);
+
+        return Inertia::render('Quotes/Print', [
+            'quote' => $quote,
+        ]);
+    }
 }
 

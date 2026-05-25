@@ -855,7 +855,7 @@ function shareQuote() {
 
 // Print quote
 function printQuote() {
-    window.print();
+    window.open(route('app.quotes.print', props.quote.id), '_blank');
 }
 
 // Delete quote

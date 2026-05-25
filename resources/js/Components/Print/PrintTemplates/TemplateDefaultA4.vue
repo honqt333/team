@@ -49,7 +49,7 @@
         </div>
 
         <!-- Client & Vehicle Details Box -->
-        <div :class="documentType === 'parts_invoice' ? 'block mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
+        <div :class="['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType) ? 'block mb-6' : 'grid grid-cols-2 gap-4 mb-6'">
             <div 
                 class="border p-3 relative pt-4 transition-all duration-300"
                 :class="isModern ? 'border-0 bg-slate-50/50 rounded-2xl' : 'border-gray-200 rounded-lg'"
@@ -66,7 +66,7 @@
                     ]"
                     :style="isModern ? { backgroundColor: primaryColor } : {}"
                 >
-                    {{ $t('work_orders.print_view.customer') }}
+                    {{ ['purchase_invoice', 'purchase_return'].includes(documentType) ? (isRtl ? 'المورد' : 'Supplier') : $t('work_orders.print_view.customer') }}
                 </h3>
                 <div class="grid grid-cols-2 gap-2 text-sm text-gray-700 mt-2">
                     <p><span class="text-gray-500">{{ $t('common.name') }}:</span> {{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}</p>
@@ -77,7 +77,7 @@
             </div>
             
             <div 
-                v-if="documentType !== 'parts_invoice'"
+                v-if="!['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)"
                 class="border p-3 relative pt-4 transition-all duration-300"
                 :class="isModern ? 'border-0 bg-slate-50/50 rounded-2xl' : 'border-gray-200 rounded-lg'"
             >
@@ -126,7 +126,7 @@
             </div>
 
             <!-- Scenario 2: Invoice (Separated Services and Parts) -->
-            <div v-else-if="['invoice', 'proforma_invoice', 'quotation', 'parts_invoice'].includes(documentType)" class="space-y-6">
+            <div v-else-if="['invoice', 'proforma_invoice', 'quotation', 'parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)" class="space-y-6">
 
                 <!-- ── Services Table ── -->
                 <div v-if="services.length > 0">
@@ -189,18 +189,25 @@
 
                 <!-- ── Parts Table ── -->
                 <div v-if="parts.length > 0">
-                    <h3 class="font-bold text-gray-800 mb-2">{{ $t('work_orders.parts_total') }}</h3>
+                    <h3 class="font-bold text-gray-800 mb-2">
+                        {{ ['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType) ? (isRtl ? 'قطع الغيار' : 'Spare Parts') : $t('work_orders.parts_total') }}
+                    </h3>
                     <table class="w-full text-xs border-collapse" :class="isRtl ? 'text-right' : 'text-left'">
                         <thead>
                             <tr class="text-white" :style="{ backgroundColor: isModern ? primaryColor : '#1f2937' }">
                                 <th class="p-2 border border-gray-700 w-7 text-center">#</th>
-                                <th class="p-2 border border-gray-700">{{ $t('common.description') }}</th>
-                                <th class="p-2 border border-gray-700 w-20 text-center">{{ $t('work_orders.price') }}</th>
-                                <th class="p-2 border border-gray-700 w-20 text-center">{{ $t('common.discount') }}</th>
-                                <th class="p-2 border border-gray-700 w-14 text-center">{{ $t('common.qty') }}</th>
-                                <th class="p-2 border border-gray-700 w-22 text-center">{{ $t('quotes.form.subtotal') }}</th>
-                                <th v-if="hasPartsVat" class="p-2 border border-gray-700 w-20 text-center">{{ $t('common.vat') }}</th>
-                                <th class="p-2 border border-gray-700 w-22 text-center">{{ $t('common.total') }}</th>
+                                <th class="p-2 border border-gray-700">{{ isRtl ? 'الوصف' : 'Description' }}</th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'السعر' : 'Price' }}</th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'الخصم' : 'Discount' }}</th>
+                                <th v-if="['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)" class="p-2 border border-gray-700 w-24 text-center">
+                                    {{ isRtl ? 'صافي السعر/الوحدة' : 'Net Unit Price' }}
+                                </th>
+                                <th class="p-2 border border-gray-700 w-20 text-center">
+                                    {{ isRtl ? (['purchase_invoice', 'purchase_return'].includes(documentType) ? 'الكمية المستلمة' : 'الكمية') : (['purchase_invoice', 'purchase_return'].includes(documentType) ? 'Received Qty' : 'Qty') }}
+                                </th>
+                                <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المجموع الفرعي' : 'Subtotal' }}</th>
+                                <th v-if="hasPartsVat" class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'ضريبة (VAT)' : 'VAT' }}</th>
+                                <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المجموع' : 'Total' }}</th>
                             </tr>
                         </thead>
                         <tbody class="text-gray-800">
@@ -217,6 +224,10 @@
                                 <!-- Discount -->
                                 <td class="p-2 border border-gray-200 text-center font-mono text-red-600">
                                     {{ lineDiscountExclTax(item) > 0 ? '- ' + formatRawPrice(lineDiscountExclTax(item)) : '-' }}
+                                </td>
+                                <!-- Net Unit Price (Optional Column) -->
+                                <td v-if="['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)" class="p-2 border border-gray-200 text-center font-mono">
+                                    {{ formatRawPrice(lineUnitPriceExclTax(item) - (lineDiscountExclTax(item) / (item.qty || 1))) }}
                                 </td>
                                 <!-- Qty -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
@@ -238,8 +249,8 @@
                         </tbody>
                         <tfoot>
                             <tr class="font-bold bg-gray-50 text-gray-700 border-t-2 border-gray-300">
-                                <td :colspan="hasPartsVat ? 7 : 6" class="p-2 border border-gray-200 text-center">
-                                    {{ documentType === 'parts_invoice' ? (isRtl ? 'إجمالي قطع الغيار' : 'Parts Total') : $t('work_orders.parts_total') }}
+                                <td :colspan="getPartsFooterColspan" class="p-2 border border-gray-200 text-center">
+                                    {{ ['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType) ? (isRtl ? 'إجمالي قطع الغيار' : 'Parts Total') : $t('work_orders.parts_total') }}
                                 </td>
                                 <td class="p-2 border border-gray-200 text-center font-mono font-bold">
                                     {{ formatRawPrice(parts.reduce((s, i) => s + partLineTotal(i), 0)) }}
@@ -503,11 +514,11 @@
                         <td class="py-2 px-2 text-gray-900">{{ documentType === 'payments' ? (isRtl ? 'إجمالي الفاتورة:' : 'Invoice Total:') : (isRtl ? 'المبلغ الإجمالي:' : 'Total Amount:') }}</td>
                         <td class="py-2 px-2 text-left text-gray-900 font-mono">{{ formatCurrency(totals.total) }}</td>
                     </tr>
-                    <tr class="text-gray-500 border-b border-gray-200">
+                    <tr v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="text-gray-500 border-b border-gray-200">
                         <td class="py-1 px-2 font-bold">{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</td>
                         <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(totals.paid) }}</td>
                     </tr>
-                    <tr class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
+                    <tr v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
                         <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
                         <td class="py-1.5 px-2 text-left font-mono">{{ formatCurrency(totals.balance) }}</td>
                     </tr>
@@ -772,14 +783,14 @@ function partLineExclTax(item) {
 
 // Services and Parts computeds for Invoice separation
 const services = computed(() => {
-    if (props.documentType === 'parts_invoice') return [];
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return [];
     const items = props.data.items || dummyItems;
     return items.filter(item => !item.is_part);
 });
 
 const parts = computed(() => {
     const items = props.data.items || dummyItems;
-    if (props.documentType === 'parts_invoice') return items;
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return items;
     return items.filter(item => item.is_part);
 });
 
@@ -790,6 +801,13 @@ const hasServicesVat = computed(() =>
 const hasPartsVat = computed(() =>
     parts.value.some(i => partLineVat(i) > 0)
 );
+
+const getPartsFooterColspan = computed(() => {
+    let base = 6;
+    if (hasPartsVat.value) base += 1;
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) base += 1;
+    return base;
+});
 
 const primaryColor = computed(() => props.visualSettings.primary_color || '#1e293b');
 const isModern = computed(() => props.visualSettings.active_template === 'TemplateModernA4');
@@ -837,7 +855,9 @@ function getDocTypeTitle(type) {
         checklist: 'تقرير فحص',
         delivery_note: 'سند تسليم',
         condition_report: 'تقرير حالة المركبة',
-        payments: 'سندات الدفع والمدفوعات'
+        payments: 'سندات الدفع والمدفوعات',
+        purchase_invoice: 'فاتورة مشتريات',
+        purchase_return: 'فاتورة مرتجع مشتريات'
     };
     const titlesEn = {
         invoice: 'Tax Invoice',
@@ -849,7 +869,9 @@ function getDocTypeTitle(type) {
         checklist: 'Checklist',
         delivery_note: 'Delivery Note',
         condition_report: 'Vehicle Condition Report',
-        payments: 'Payments Receipt'
+        payments: 'Payments Receipt',
+        purchase_invoice: 'Purchase Invoice',
+        purchase_return: 'Purchase Return Invoice'
     };
     if (isRtl.value) {
         return titlesAr[type] || 'وثيقة رسمية';
@@ -881,12 +903,14 @@ const totals = computed(() => {
         const vat = Number(props.data.total_tax || 0);
         const subtotalAfterDiscount = Number(props.data.total_excl_tax || 0);
         
-        // Sum discount from items to show in the discount row if present
-        const items = props.data.items || [];
-        let discount = 0;
-        items.forEach(item => {
-            discount += Number(item.discount || 0);
-        });
+        // Sum discount from items to show in the discount row if present, or use global discount if provided
+        let discount = Number(props.data.discount_amount || props.data.discount || 0);
+        if (discount === 0) {
+            const items = props.data.items || [];
+            items.forEach(item => {
+                discount += Number(item.discount || 0);
+            });
+        }
 
         const subtotal = subtotalAfterDiscount + discount;
         const paid = Number(props.data.total_paid !== undefined ? props.data.total_paid : 0);

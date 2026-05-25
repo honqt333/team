@@ -453,4 +453,39 @@ class PurchaseInvoicesController extends Controller
 
         return back()->with('success', __('payments.recorded') ?? 'تم تسجيل الدفعة بنجاح');
     }
+
+    /**
+     * Print purchase invoice view
+     */
+    public function print(PurchaseInvoice $purchaseInvoice)
+    {
+        $purchaseInvoice->load([
+            'supplier', 
+            'purchaseOrder', 
+            'lines.part', 
+            'center.address', 
+            'payments.receivedBy'
+        ]);
+
+        return Inertia::render('Purchasing/Invoices/Print', [
+            'invoice' => $purchaseInvoice,
+        ]);
+    }
+
+    /**
+     * Print purchase return invoice view
+     */
+    public function printReturn(\App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
+    {
+        $purchaseReturnInvoice->load([
+            'purchaseInvoice.supplier',
+            'purchaseInvoice.payments.receivedBy',
+            'lines.part',
+            'center.address',
+        ]);
+
+        return Inertia::render('Purchasing/Invoices/ReturnPrint', [
+            'returnInvoice' => $purchaseReturnInvoice,
+        ]);
+    }
 }

@@ -190,6 +190,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::post('/quotes/{quote}/reject', [QuoteApprovalController::class, 'reject'])->name('app.quotes.reject');
     Route::get('/quotes/search', [QuoteController::class, 'search'])->name('app.quotes.search');
     Route::get('/quotes/{quote}', [QuoteController::class, 'show'])->name('app.quotes.show');
+    Route::get('/quotes/{quote}/print', [QuoteController::class, 'print'])->name('app.quotes.print');
     Route::post('/quotes/{quote}/services', [QuoteController::class, 'addService'])->name('app.quotes.services.store');
     Route::put('/quotes/{quote}/services/{line}', [QuoteController::class, 'updateService'])->name('app.quotes.services.update');
     Route::delete('/quotes/{quote}/services/{line}', [QuoteController::class, 'deleteService'])->name('app.quotes.services.destroy');
@@ -542,11 +543,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::get('/purchases', [\App\Http\Controllers\App\InvoicesController::class, 'purchasesIndex'])->name('purchases.index');
         Route::post('/purchases', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'store'])->name('purchases.store');
         Route::get('/purchases/{purchaseInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'show'])->name('purchases.show');
+        Route::get('/purchases/{purchaseInvoice}/print', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'print'])->name('purchases.print');
         Route::post('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadAttachment'])->name('purchases.attachment.store');
         Route::delete('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyAttachment'])->name('purchases.attachment.destroy');
         Route::post('/purchases/{purchaseInvoice}/payments', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordPayment'])->name('purchases.payments.store');
         Route::post('/purchases/{purchaseInvoice}/returns', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturn'])->name('purchases.returns.store');
         Route::get('/purchases/returns/{purchaseReturnInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'showReturn'])->name('purchases.returns.show');
+        Route::get('/purchases/returns/{purchaseReturnInvoice}/print', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'printReturn'])->name('purchases.returns.print');
         Route::post('/purchases/returns/{purchaseReturnInvoice}/refunds', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturnRefund'])->name('purchases.returns.refunds.store');
         Route::post('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadReturnAttachment'])->name('purchases.returns.attachment.store');
         Route::delete('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyReturnAttachment'])->name('purchases.returns.attachment.destroy');

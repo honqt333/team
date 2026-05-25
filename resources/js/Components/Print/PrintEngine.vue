@@ -3,6 +3,7 @@
         <component 
             :is="activeTemplate" 
             v-bind="props" 
+            :documentType="normalizedDocType"
         />
     </div>
 </template>
@@ -44,6 +45,10 @@ const props = defineProps({
         type: Boolean,
         default: false
     }
+});
+
+const normalizedDocType = computed(() => {
+    return props.documentType === 'quote' ? 'quotation' : props.documentType;
 });
 
 // Map active template name to imported template component
