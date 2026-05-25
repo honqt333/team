@@ -255,6 +255,7 @@
                                 <th class="p-2 border border-gray-700">{{ $t('work_orders.print_view.date') }}</th>
                                 <th class="p-2 border border-gray-700">{{ $t('work_orders.print_view.method') }}</th>
                                 <th class="p-2 border border-gray-700">{{ $t('work_orders.print_view.reference') }}</th>
+                                <th class="p-2 border border-gray-700">{{ $t('common.details') }}</th>
                                 <th class="p-2 border border-gray-700 w-32 text-center">{{ $t('work_orders.print_view.amount') }}</th>
                             </tr>
                         </thead>
@@ -264,10 +265,11 @@
                                 <td class="p-2 border border-gray-200 font-mono">{{ formatDate(payment.payment_date) }}</td>
                                 <td class="p-2 border border-gray-200 font-bold">{{ getMethodLabel(payment.payment_method) }}</td>
                                 <td class="p-2 border border-gray-200 font-mono" dir="ltr">{{ payment.reference || '-' }}</td>
+                                <td class="p-2 border border-gray-200 text-gray-600">{{ payment.notes || '-' }}</td>
                                 <td class="p-2 border border-gray-200 text-center font-bold font-mono">{{ formatCurrency(payment.amount) }}</td>
                             </tr>
                             <tr v-if="!data.payments || data.payments.length === 0">
-                                <td colspan="5" class="p-4 border border-gray-200 text-center text-gray-400">
+                                <td colspan="6" class="p-4 border border-gray-200 text-center text-gray-400">
                                     {{ $t('work_orders.print_view.no_payments') }}
                                 </td>
                             </tr>

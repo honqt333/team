@@ -154,6 +154,9 @@
                         <span>{{ formatDate(payment.payment_date) }}</span>
                         <span v-if="payment.reference">{{ $t('work_orders.print_view.reference') }}: {{ payment.reference }}</span>
                     </div>
+                    <div v-if="payment.notes" class="text-[8px] text-gray-500 mt-0.5 font-medium">
+                        {{ $t('common.details') }}: {{ payment.notes }}
+                    </div>
                 </div>
                 <div v-if="!data.payments || data.payments.length === 0" class="text-center py-4 text-gray-400 text-[10px]">
                     {{ $t('work_orders.print_view.no_payments') }}
