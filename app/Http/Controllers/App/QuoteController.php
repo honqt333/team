@@ -819,17 +819,25 @@ class QuoteController extends Controller
 
         // Validate min price if warehouse part and not included in package
         if ($validated['source'] === 'warehouse' && !empty($validated['part_id']) && !($validated['include_in_package'] ?? false)) {
-            $part = Part::find($validated['part_id']);
-            if ($part && $part->min_sale_price > 0) {
-                $qty = (float) ($validated['qty'] ?: 1);
-                $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? 0) / $qty) : 0;
-                $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
+            $partId = (int) $validated['part_id'];
+            $qty = (float) ($validated['qty'] ?: 1);
+            $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? 0) / $qty) : 0;
+            $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
+            
+            // Get min_sale_price from InventoryBalance for current warehouse
+            $user = auth()->user();
+            $warehouse = \App\Models\Warehouse::forCenter($user->current_center_id)->default()->first();
+            
+            if ($warehouse) {
+                $balance = \App\Models\InventoryBalance::where('part_id', $partId)
+                    ->where('warehouse_id', $warehouse->id)
+                    ->first();
                 
-                if ($finalPrice < (float) $part->min_sale_price) {
+                if ($balance && $balance->min_sale_price > 0 && $finalPrice < (float) $balance->min_sale_price) {
                     return redirect()->back()->withErrors([
                         'unit_price' => __('pricing.final_price_below_minimum', [
                             'final' => number_format($finalPrice, 2),
-                            'min' => number_format((float) $part->min_sale_price, 2),
+                            'min' => number_format((float) $balance->min_sale_price, 2),
                         ])
                     ]);
                 }
@@ -880,18 +888,25 @@ class QuoteController extends Controller
         $partId = $validated['part_id'] ?? $quotePart->part_id;
         $includeInPackage = $validated['include_in_package'] ?? $quotePart->include_in_package;
         if ($source === 'warehouse' && !empty($partId) && !$includeInPackage) {
-            $part = Part::find($partId);
-            if ($part && $part->min_sale_price > 0) {
-                $qty = (float) ($validated['qty'] ?? $quotePart->qty);
-                $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? $quotePart->discount) / $qty) : 0;
-                $unitPrice = (float) ($validated['unit_price'] ?? $quotePart->unit_price);
-                $finalPrice = $unitPrice - $unitDiscount;
+            $qty = (float) ($validated['qty'] ?? $quotePart->qty);
+            $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? $quotePart->discount) / $qty) : 0;
+            $unitPrice = (float) ($validated['unit_price'] ?? $quotePart->unit_price);
+            $finalPrice = $unitPrice - $unitDiscount;
+            
+            // Get min_sale_price from InventoryBalance for current warehouse
+            $user = auth()->user();
+            $warehouse = \App\Models\Warehouse::forCenter($user->current_center_id)->default()->first();
+            
+            if ($warehouse) {
+                $balance = \App\Models\InventoryBalance::where('part_id', $partId)
+                    ->where('warehouse_id', $warehouse->id)
+                    ->first();
                 
-                if ($finalPrice < (float) $part->min_sale_price) {
+                if ($balance && $balance->min_sale_price > 0 && $finalPrice < (float) $balance->min_sale_price) {
                     return redirect()->back()->withErrors([
                         'unit_price' => __('pricing.final_price_below_minimum', [
                             'final' => number_format($finalPrice, 2),
-                            'min' => number_format((float) $part->min_sale_price, 2),
+                            'min' => number_format((float) $balance->min_sale_price, 2),
                         ])
                     ]);
                 }

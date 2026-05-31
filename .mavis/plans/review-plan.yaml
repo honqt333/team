@@ -1,0 +1,233 @@
+version: 1
+
+plan:
+  name: 'مراجعة شاملة لمشروع Carag V2'
+  description: 'مراجعة كل شيء - جودة الكود، الأداء، الاختبارات، التوثيق، إدارة المشروع'
+  max_concurrency: 3
+  max_consecutive_failures: 2
+  max_cycles: 10
+  auto_reject_retries: 1
+  verifier_config:
+    default_verifiers: [verifier]
+    audit_sample_rate: 0.0
+
+tasks:
+
+  # ═══════════════════════════════════════════
+  # المسار 1: مراجعة جودة الكود والبنية
+  # ═══════════════════════════════════════════
+
+  - id: code-architecture-review
+    title: 'مراجعة البنية وجودة الكود'
+    prompt: |
+      أنت مراجع كود خبير في Laravel. راجع مشروع Carag V2 في /Users/ahmad/Herd/carag-v2
+
+      المطلوب:
+      1. تحليل بنية المشروع - هل صحيح تقسيم Controllers/Models/Services؟
+      2. مراجعة 5 controllers عشوائية من app/Http/Controllers/App/
+      3. مراجعة 5 models عشوائية من app/Models/
+      4. فحص مبدأ SOLID - هل الكود يتبعه؟
+      5. فحص أنماط التصميم المستخدمة
+      6. تحديد technical debt
+      7. مراجعة استخدام Traits و Services و Form Requests
+
+      اكتب تقرير مفصل في deliverable.md يتضمن:
+      - نقاط القوة
+      - نقاط الضعف
+      - توصيات التحسين
+      - أمثلة على الكود السيئ والجيد
+      - الأولوية لكل توصية (عالية/متوسطة/منخفضة)
+    assigned_to: general
+    verified_by: verifier
+    verify_prompt: |
+      Verify the code quality report by:
+      1. Checking actual files referenced exist and match the report's findings
+      2. Verifying the SOLID principle violations are accurate
+      3. Confirming the recommendations are feasible and relevant to Laravel 12
+      4. Ranking the findings by priority
+    timeout_ms: 1800000
+
+  - id: security-audit
+    title: 'فحص الأمان'
+    prompt: |
+      أنت خبير أمان. راجع مشروع Carag V2 في /Users/ahmad/Herd/carag-v2
+
+      المطلوب:
+      1. فحص Middleware (auth, tenant, center context, 2FA)
+      2. مراجعة authorization (Spatie permissions)
+      3. فحص SQL injection / XSS / CSRF protections
+      4. مراجعة التعامل مع البيانات الحساسة
+      5. فحص API routes - هل محمية بشكل صحيح؟
+      6. مراجعة password hashing و session management
+      7. فحص file upload handling
+
+      اكتب تقرير أمان في deliverable.md يتضمن:
+      - الثغرات المكتشفة (إن وجدت)
+      - مستوى الخطورة (Critical/High/Medium/Low)
+      - خطوات الإصلاح
+      - أفضل الممارسات المقترحة
+    assigned_to: general
+    depends_on: [code-architecture-review]
+    verified_by: verifier
+    verify_prompt: |
+      Verify the security audit by:
+      1. Checking the referenced middleware files and routes
+      2. Verifying the vulnerability findings are accurate
+      3. Confirming the fix recommendations are correct Laravel patterns
+      4. Cross-checking with actual code for false positives
+    timeout_ms: 1800000
+
+  # ═══════════════════════════════════════════
+  # المسار 2: مراجعة الأداء والاختبارات
+  # ═══════════════════════════════════════════
+
+  - id: performance-review
+    title: 'مراجعة الأداء'
+    prompt: |
+      أنت خبير أداء Laravel. راجع مشروع Carag V2 في /Users/ahmad/Herd/carag-v2
+
+      المطلوب:
+      1. فحص Database queries - هل تستخدم Eager Loading بشكل صحيح؟
+      2. مراجعة النماذج (Models) للعلاقات - هل هناك N+1 problems؟
+      3. فحص indexing في migrations
+      4. مراجعة cache usage
+      5. فحص queue jobs (إن وجدت)
+      6. مراجعة pagination في controllers
+      7. فحص API rate limiting
+
+      اكتب تقرير أداء في deliverable.md يتضمن:
+      - المشاكل المكتشفة مع أمثلة
+      - حلول كل مشكلة
+      - ترتيب الأولوية
+      - أدوات مقترحة للـ profiling
+    assigned_to: general
+    verified_by: verifier
+    verify_prompt: |
+      Verify the performance report by:
+      1. Checking actual query patterns in controllers
+      2. Verifying the N+1 issues exist in the code
+      3. Confirming the suggested fixes are practical
+      4. Validating against Laravel best practices
+    timeout_ms: 1800000
+
+  - id: testing-review
+    title: 'مراجعة الاختبارات'
+    prompt: |
+      راجع نظام الاختبارات في مشروع Carag V2 في /Users/ahmad/Herd/carag-v2
+
+      المطلوب:
+      1. فحص وجود tests/ directory ومحتواه
+      2. تحليل phpunit.xml configuration
+      3. مراجعة أنواع الاختبارات (Unit/Feature/Integration)
+      4. فحص test coverage الحالي
+      5. مراجعة test patterns المستخدمة
+      6. تحديد ما هو مفقود
+
+      اكتب تقرير في deliverable.md يتضمن:
+      - حالة الاختبارات الحالية
+      - الفجوات في التغطية
+      - خطة لإنشاء اختبارات جديدة
+      - أولويات الاختبار (اختبارات mission-critical أولاً)
+    assigned_to: general
+    depends_on: [code-architecture-review]
+    verified_by: verifier
+    verify_prompt: |
+      Verify the testing review by:
+      1. Checking actual test files exist
+      2. Verifying coverage claims match reality
+      3. Confirming the missing tests are actually critical
+      4. Validating the test plan is practical
+    timeout_ms: 1800000
+
+  # ═══════════════════════════════════════════
+  # المسار 3: التوثيق وإدارة المشروع
+  # ═══════════════════════════════════════════
+
+  - id: documentation-review
+    title: 'مراجعة التوثيق'
+    prompt: |
+      راجع التوثيق في مشروع Carag V2 في /Users/ahmad/Herd/carag-v2
+
+      المطلوب:
+      1. مراجعة README.md
+      2. مراجعة DEPLOYMENT.md
+      3. فحص docs/ directory
+      4. مراجعة MODALS.md
+      5. تحليل git history لفهم سياق المشروع
+      6. فحص audit_reports/ إن وجدت
+      7. تحديد ما ينقص من توثيق
+
+      اكتب تقرير توثيق في deliverable.md يتضمن:
+      - حالة التوثيق الحالي
+      - الفجوات الحرجة
+      - خطة لإنشاء التوثيق المطلوب
+      - مستندات API (إن لم تكن موجودة)
+      - CHANGELOG requirements
+    assigned_to: general
+    verified_by: verifier
+    verify_prompt: |
+      Verify the documentation review by:
+      1. Checking actual doc files exist and are readable
+      2. Verifying the gaps identified are actually missing
+      3. Confirming the documentation plan is practical
+      4. Validating API docs needs are accurate
+    timeout_ms: 1800000
+
+  - id: project-management-setup
+    title: 'إعداد إدارة المشروع'
+    prompt: |
+      أنشئ نظام إدارة مشروع لمشروع Carag V2 في /Users/ahmad/Herd/carag-v2
+
+      المطلوب:
+      1. تحليل git history لتحديد:
+         - آخر 20 commit مع الوصف
+         - المسارات الرئيسية (features/bugfixes/refactoring)
+         - النشاط الأسبوعي
+      2. إنشاء AGENTS.md يشرح:
+         - هيكل المشروع
+         - الوحدات الرئيسية
+         - قواعد المساهمة
+         - workflow التطوير
+      3. إنشاء CHANGELOG.md إذا لم يكن موجوداً
+      4. اقتراح نظام tags/milestones
+
+      اكتب النتيجة في deliverable.md
+    assigned_to: general
+    depends_on: [documentation-review]
+    verified_by: verifier
+    verify_prompt: |
+      Verify the project management setup by:
+      1. Checking git history analysis is accurate
+      2. Verifying AGENTS.md follows the Mavis standard
+      3. Confirming CHANGELOG format is correct
+      4. Validating the milestone proposal is practical
+    timeout_ms: 1800000
+
+  # ═══════════════════════════════════════════
+  # المهمة النهائية: ملخص شامل
+  # ═══════════════════════════════════════════
+
+  - id: final-summary
+    title: 'التقرير النهائي الشامل'
+    prompt: |
+      اجمع كل التقارير من المهام السابقة وأنشئ ملخصاً شاملاً في deliverable.md
+
+      التقرير يجب يتضمن:
+      1. Executive Summary (صفحة واحدة)
+      2. Top 10 Priority Actions (مرتبة بالأهمية)
+      3.工作量估算 (تكلفة التطوير لكل توصية)
+      4. Roadmap مقترح (3-6-12 شهر)
+      5. مؤشرات النجاح
+      6. قائمة الملفات التي تحتاج تغيير
+
+      هذا التقرير يستخدمه صاحب المشروع لاتخاذ القرارات.
+    assigned_to: general
+    depends_on: [code-architecture-review, security-audit, performance-review, testing-review, documentation-review, project-management-setup]
+    verified_by: verifier
+    verify_prompt: |
+      Verify the final summary by:
+      1. Checking all prerequisite reports are included
+      2. Verifying priorities are logical
+      3. Confirming the roadmap is realistic
+      4. Validating effort estimates are reasonable
+    timeout_ms: 1800000

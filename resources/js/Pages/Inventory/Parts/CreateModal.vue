@@ -102,6 +102,23 @@
                             :placeholder="$t('inventory.parts.sku_placeholder')"
                         />
                         <p v-if="form.errors.sku" class="mt-1 text-xs text-red-500">{{ form.errors.sku }}</p>
+
+                        <!-- Live Barcode Preview -->
+                        <div v-if="form.sku" class="mt-3 flex items-center gap-3">
+                            <div class="flex-1 flex justify-center">
+                                <canvas ref="barcodeRef" class="max-w-full"></canvas>
+                            </div>
+                            <button
+                                type="button"
+                                @click="showBarcodePreview = true"
+                                class="flex-shrink-0 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 p-1"
+                                :title="$t('common.expand')"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Barcode -->
@@ -303,6 +320,36 @@
             </div>
         </template>
     </DialogModal>
+
+    <!-- Barcode Fullscreen Modal -->
+    <DialogModal :show="showBarcodePreview" @close="showBarcodePreview = false" max-width="sm">
+        <template #title>
+            <span class="text-xl font-bold">{{ $t('inventory.parts.barcode_preview') }}</span>
+        </template>
+        <template #content>
+            <div class="flex flex-col items-center gap-6 py-8">
+                <div class="bg-white rounded-xl border-2 border-gray-200 p-8 w-full">
+                    <div class="flex flex-col items-center gap-3">
+                        <canvas ref="barcodeFullRef" class="max-w-full"></canvas>
+                        <span class="font-mono text-2xl font-bold text-gray-900 tracking-widest">{{ form.sku }}</span>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.sku') }}</span>
+                </div>
+            </div>
+        </template>
+        <template #footer>
+            <div class="flex justify-center">
+                <button
+                    @click="showBarcodePreview = false"
+                    class="px-6 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors"
+                >
+                    {{ $t('common.close') }}
+                </button>
+            </div>
+        </template>
+    </DialogModal>
 </template>
 
 <script setup>
@@ -337,6 +384,9 @@ const isAr = computed(() => locale.value === 'ar');
 
 const imageInput = ref(null);
 const imagePreview = ref(null);
+const showBarcodePreview = ref(false);
+const barcodeRef = ref(null);
+const barcodeFullRef = ref(null);
 
 const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -438,8 +488,49 @@ watch(() => props.show, (open) => {
         setTimeout(() => {
             initialFormData.value = JSON.stringify(form.data());
             isDirty.value = false;
+            // Render barcode if sku exists
+            if (form.sku && barcodeRef.value) {
+                renderBarcode(barcodeRef.value, form.sku, 2, 60);
+            }
         }, 100);
     }
+});
+
+// Barcode renderer using Canvas (no external lib)
+function renderBarcode(canvas, text, barWidth = 2, height = 80) {
+    if (!canvas || !text) return;
+    const ctx = canvas.getContext('2d');
+    canvas.width = Math.max(text.length * (barWidth + 1) + 20, 200);
+    canvas.height = height + 30;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#111111';
+    let x = 10;
+    for (let i = 0; i < text.length; i++) {
+        const charCode = text.charCodeAt(i);
+        const bars = (charCode * 17 + i * 7) % 5 + 1;
+        const bw = bars * barWidth;
+        if (i % 2 === 0) {
+            ctx.fillRect(x, 0, bw, height);
+        }
+        x += bw + 1;
+        if (x > canvas.width - 10) break;
+    }
+}
+
+// Watch form.sku for live barcode preview
+watch(() => form.sku, (sku) => {
+    if (!sku || !barcodeRef.value) return;
+    renderBarcode(barcodeRef.value, sku, 2, 60);
+});
+
+// Watch showBarcodePreview for fullscreen barcode
+watch(showBarcodePreview, (show) => {
+    if (!show || !form.sku || !barcodeFullRef.value) return;
+    setTimeout(() => {
+        renderBarcode(barcodeFullRef.value, form.sku, 3, 100);
+    }, 50);
 });
 
 // Track form changes

@@ -332,6 +332,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::patch('/parts/{part}/toggle', [\App\Http\Controllers\App\PartsController::class, 'toggleActive'])->name('parts.toggle');
         Route::get('/api/parts/search', [\App\Http\Controllers\App\PartsController::class, 'search'])->name('parts.search');
         Route::get('/parts/{part}', [\App\Http\Controllers\App\PartsController::class, 'show'])->name('parts.show');
+        Route::post('/parts/{part}/stock', [\App\Http\Controllers\App\PartsController::class, 'updateStock'])->name('parts.stock.update');
         
         // Stock Balances
         Route::get('/stock', [\App\Http\Controllers\App\InventoryBalanceController::class, 'index'])->name('stock.index');

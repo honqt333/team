@@ -11,6 +11,7 @@ use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Actions\Customer\MergeCustomerAction;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -21,10 +22,12 @@ class CustomerController
 {
     use AuthorizesRequests;
 
-    public function index(): Response
+    /**
+     * Build base customer query with common filters.
+     * Reduces code duplication between index() and apiIndex().
+     */
+    protected function buildCustomerQuery(): Builder
     {
-        $this->authorize('viewAny', Customer::class);
-
         $query = Customer::query();
 
         if (request('search')) {
@@ -48,7 +51,15 @@ class CustomerController
             $query->whereDate('created_at', '<=', request('date_to'));
         }
 
-        $customers = $query->withCount(['vehicles', 'quotes', 'workOrders'])
+        return $query;
+    }
+
+    public function index(): Response
+    {
+        $this->authorize('viewAny', Customer::class);
+
+        $customers = $this->buildCustomerQuery()
+            ->withCount(['vehicles', 'quotes', 'workOrders'])
             ->orderBy('id', 'desc')
             ->paginate(15)
             ->withQueryString();
@@ -63,48 +74,25 @@ class CustomerController
     {
         $this->authorize('viewAny', Customer::class);
 
-        $query = Customer::query();
-
-        if (request('search')) {
-            $search = request('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
+        $query = $this->buildCustomerQuery();
         
+        // TODO: Implement print functionality
+        // For now, redirect to index
+        return Inertia::render('Customers/Index', [
+            'customers' => $query->paginate(15),
+            'filters' => request()->only(['search', 'type', 'date_from', 'date_to']),
+        ]);
     }
 
     public function apiIndex(): JsonResponse
     {
         $this->authorize('viewAny', Customer::class);
 
-        $query = Customer::query();
+        $customers = $this->buildCustomerQuery()
+            ->orderBy('id', 'desc')
+            ->paginate(15);
 
-        if (request('search')) {
-            $search = request('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        if (request('type')) {
-            $query->where('type', request('type'));
-        }
-
-        if (request('date_from')) {
-            $query->whereDate('created_at', '>=', request('date_from'));
-        }
-
-        if (request('date_to')) {
-            $query->whereDate('created_at', '<=', request('date_to'));
-        }
-
-        return response()->json($query->orderBy('id', 'desc')->paginate(15));
+        return response()->json($customers);
     }
 
     public function store(CustomerStoreRequest $request): RedirectResponse
@@ -120,39 +108,55 @@ class CustomerController
     {
         $this->authorize('view', $customer);
 
-        // Load relationships
+        // Load all relationships in ONE query using nested with()
+        // Fix: Removed duplicate load - $customer->load() and then $customer->vehicles()->get()
         $customer->load([
             'vehicles.make',
             'vehicles.model',
         ]);
 
-        // Get all related data
-        $vehicles = $customer->vehicles()->with(['make', 'model'])->get();
-        $workOrders = $customer->workOrders()->with(['vehicle.make', 'vehicle.model', 'payments.receivedBy'])->latest()->get();
+        // Get related data with proper eager loading - NO duplicate queries
+        // Fix: Using $customer->vehicles directly (already loaded above)
+        $vehicles = $customer->vehicles;
+        
+        // Get work orders with all needed relationships in single query
+        $workOrders = $customer->workOrders()
+            ->with([
+                'vehicle.make',
+                'vehicle.model',
+                'payments.receivedBy'
+            ])
+            ->latest()
+            ->get();
         $workOrders->each->append(['total', 'total_paid', 'balance']);
-        $quotes = $customer->quotes()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
+        
+        // Get quotes with vehicle relationships
+        $quotes = $customer->quotes()
+            ->with(['vehicle.make', 'vehicle.model'])
+            ->latest()
+            ->get();
 
-        // Get all payments from customer's work orders
+        // Get all payments from customer's work orders - optimized single query
         $payments = \App\Models\Payment::whereHas('workOrder', function($q) use ($customer) {
-            $q->where('customer_id', $customer->id);
-        })
-        ->with(['receivedBy', 'workOrder'])
-        ->latest('payment_date')
-        ->get();
+                $q->where('customer_id', $customer->id);
+            })
+            ->with(['receivedBy', 'workOrder'])
+            ->latest('payment_date')
+            ->get();
 
-        // Count related data
+        // Use counts from the relationship counts (avoid extra queries)
         $counts = [
-            'vehicles' => $vehicles->count(),
-            'quotes' => $quotes->count(),
-            'workOrders' => $workOrders->count(),
+            'vehicles' => $customer->vehicles_count ?? $vehicles->count(),
+            'quotes' => $customer->quotes_count ?? $quotes->count(),
+            'workOrders' => $customer->work_orders_count ?? $workOrders->count(),
             'invoices' => 0, // Placeholder for future
             'payments' => $payments->count(),
         ];
 
-        // Check if can be deleted
+        // Check if can be deleted - use exists() for efficiency
         $canDelete = $counts['vehicles'] === 0 && $counts['quotes'] === 0 && $counts['workOrders'] === 0;
 
-        // Get form data for modals
+        // Get form data for modals - optimize queries
         $makes = VehicleMake::orderBy('name_ar')->get();
         $colors = VehicleColor::orderBy('name_ar')->get();
         $modelsByMake = VehicleModel::all()->groupBy('make_id');

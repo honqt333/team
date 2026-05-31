@@ -4,12 +4,19 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Part;
+use App\Models\InventoryBalance;
+use App\Models\Warehouse;
+use App\Services\Inventory\InventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class PartsController extends Controller
 {
+    public function __construct(
+        protected InventoryService $inventoryService
+    ) {}
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Part::class);
@@ -20,7 +27,6 @@ class PartsController extends Controller
             ->search($request->input('search'))
             ->when($request->input('status') === 'active', fn($q) => $q->active())
             ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
-            ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
             ->when($request->input('category'), fn($q, $catId) => $q->where('category_id', $catId))
             ->with(['unit', 'category', 'inventoryBalances.warehouse.center'])
             ->withSum('inventoryBalances', 'qty_on_hand')
@@ -28,29 +34,35 @@ class PartsController extends Controller
 
         $parts = $query->paginate(25)->withQueryString();
 
-
         $units = \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get();
         $categories = \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get();
 
+        $warehouses = Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))
+            ->where('is_active', true)
+            ->with('center')
+            ->orderBy('name')
+            ->get(['id', 'name', 'center_id', 'is_default'])
+            ->map(fn($w) => [
+                'id' => $w->id,
+                'name' => $w->name,
+                'center_id' => $w->center_id,
+                'center_name' => $w->center?->name_ar ?? $w->center?->name_en ?? '',
+                'is_default' => $w->is_default,
+            ]);
+
         return Inertia::render('Inventory/Parts/Index', [
             'parts' => $parts,
-            'categories' => $categories, // Passing full objects now instead of just strings
+            'categories' => $categories,
             'units' => $units,
+            'warehouses' => $warehouses,
             'filters' => $request->only(['search', 'status', 'category']),
         ]);
     }
 
     public function create()
     {
-        $this->authorize('create', Part::class);
-
-        $tenantId = auth()->user()->tenant_id;
-
-        return Inertia::render('Inventory/Parts/Form', [
-            'part' => null,
-            'units' => \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
-            'categories' => \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
-        ]);
+        // Not used - modal handled by Index.vue
+        abort(404);
     }
 
     public function store(Request $request)
@@ -58,16 +70,11 @@ class PartsController extends Controller
         $this->authorize('create', Part::class);
 
         $tenantId = auth()->user()->tenant_id;
+        $userId = auth()->id();
 
         $validated = $request->validate([
             'sku' => [
                 'required',
-                'string',
-                'max:50',
-                Rule::unique('parts')->where('tenant_id', $tenantId),
-            ],
-            'barcode' => [
-                'nullable',
                 'string',
                 'max:50',
                 Rule::unique('parts')->where('tenant_id', $tenantId),
@@ -77,12 +84,17 @@ class PartsController extends Controller
             'unit_id' => 'required|exists:inventory_units,id',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
-            'min_qty' => 'nullable|numeric|min:0',
-            'reorder_qty' => 'nullable|numeric|min:0',
-            'default_sale_price' => 'nullable|numeric|min:0',
-            'min_sale_price' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
             'image' => 'nullable|image|max:2048',
+            'warehouse_data' => 'nullable|array',
+            'warehouse_data.*.warehouse_id' => 'required_with:warehouse_data|exists:warehouses,id',
+            'warehouse_data.*.cost_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.sale_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.min_sale_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.initial_stock' => 'nullable|numeric|min:0',
+            'warehouse_data.*.min_stock' => 'nullable|numeric|min:0',
+            'warehouse_data.*.storage_location' => 'nullable|string|max:50',
+            'warehouse_data.*.allow_price_change' => 'nullable|boolean',
+            'warehouse_data.*.is_active' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
@@ -91,7 +103,13 @@ class PartsController extends Controller
 
         $validated['tenant_id'] = $tenantId;
 
+        // Create part
         $part = Part::create($validated);
+
+        // Handle warehouse stock entries
+        if (!empty($validated['warehouse_data'])) {
+            $this->syncWarehouseBalances($part, $validated['warehouse_data'], $userId);
+        }
 
         return redirect()->route('app.inventory.parts.index')
             ->with('success', __('inventory.parts.created'));
@@ -99,51 +117,42 @@ class PartsController extends Controller
 
     public function edit(Part $part)
     {
-        $this->authorize('update', $part);
-
-        $tenantId = auth()->user()->tenant_id;
-
-        return Inertia::render('Inventory/Parts/Form', [
-            'part' => $part,
-            'units' => \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
-            'categories' => \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
-        ]);
+        // Not used - modal handled by Index.vue
+        abort(404);
     }
 
     public function update(Request $request, Part $part)
     {
         $this->authorize('update', $part);
 
-        $tenantId = auth()->user()->tenant_id;
+        $userId = auth()->id();
 
         $validated = $request->validate([
             'sku' => [
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('parts')->where('tenant_id', $tenantId)->ignore($part->id),
-            ],
-            'barcode' => [
-                'nullable',
-                'string',
-                'max:50',
-                Rule::unique('parts')->where('tenant_id', $tenantId)->ignore($part->id),
+                Rule::unique('parts')->where('tenant_id', auth()->user()->tenant_id)->ignore($part->id),
             ],
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'unit_id' => 'required|exists:inventory_units,id',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
-            'min_qty' => 'nullable|numeric|min:0',
-            'reorder_qty' => 'nullable|numeric|min:0',
-            'default_sale_price' => 'nullable|numeric|min:0',
-            'min_sale_price' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
             'image' => 'nullable|image|max:2048',
+            'warehouse_data' => 'nullable|array',
+            'warehouse_data.*.warehouse_id' => 'required_with:warehouse_data|exists:warehouses,id',
+            'warehouse_data.*.cost_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.sale_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.min_sale_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.initial_stock' => 'nullable|numeric|min:0',
+            'warehouse_data.*.min_stock' => 'nullable|numeric|min:0',
+            'warehouse_data.*.storage_location' => 'nullable|string|max:50',
+            'warehouse_data.*.allow_price_change' => 'nullable|boolean',
+            'warehouse_data.*.is_active' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
-            // Delete old image
             if ($part->image_path) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($part->image_path);
             }
@@ -155,7 +164,13 @@ class PartsController extends Controller
             $validated['image_path'] = null;
         }
 
+        // Update part
         $part->update($validated);
+
+        // Handle warehouse stock entries
+        if (array_key_exists('warehouse_data', $validated)) {
+            $this->syncWarehouseBalances($part, $validated['warehouse_data'] ?? [], $userId);
+        }
 
         return redirect()->route('app.inventory.parts.index')
             ->with('success', __('inventory.parts.updated'));
@@ -194,7 +209,97 @@ class PartsController extends Controller
             'moves' => $moves,
             'units' => \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
             'categories' => \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+            'warehouses' => Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))
+                ->where('is_active', true)
+                ->with('center')
+                ->orderBy('name')
+                ->get(['id', 'name', 'center_id', 'is_default'])
+                ->map(fn($w) => [
+                    'id' => $w->id,
+                    'name' => $w->name,
+                    'center_id' => $w->center_id,
+                    'center_name' => $w->center?->name_ar ?? $w->center?->name_en ?? '',
+                    'is_default' => $w->is_default,
+                ]),
         ]);
+    }
+
+    /**
+     * Sync warehouse balances for a part (used by store, update, and updateStock).
+     */
+    protected function syncWarehouseBalances(Part $part, array $warehouseData, int $userId): void
+    {
+        if (empty($warehouseData)) {
+            return;
+        }
+
+        $currentBalances = $part->inventoryBalances()
+            ->whereIn('warehouse_id', collect($warehouseData)->pluck('warehouse_id'))
+            ->get()
+            ->keyBy('warehouse_id');
+
+        foreach ($warehouseData as $whData) {
+            $warehouseId = $whData['warehouse_id'];
+            $currentBalance = $currentBalances->get($warehouseId);
+            $currentQty = $currentBalance?->qty_on_hand ?? 0;
+            $initialStock = (float) ($whData['initial_stock'] ?? 0);
+            $stockDifference = $initialStock - $currentQty;
+
+            InventoryBalance::updateOrCreate(
+                [
+                    'part_id' => $part->id,
+                    'warehouse_id' => $warehouseId,
+                ],
+                [
+                    'wac_cost' => $whData['cost_price'] ?? 0,
+                    'sale_price' => $whData['sale_price'] ?? 0,
+                    'min_sale_price' => $whData['min_sale_price'] ?? 0,
+                    'min_stock' => $whData['min_stock'] ?? 0,
+                    'storage_location' => $whData['storage_location'] ?? null,
+                    'allow_price_change' => $whData['allow_price_change'] ?? false,
+                    'is_active' => $whData['is_active'] ?? true,
+                ]
+            );
+
+            // If stock changed, create receipt/adjustment
+            if ($stockDifference != 0) {
+                $this->inventoryService->receipt(
+                    warehouseId: $warehouseId,
+                    partId: $part->id,
+                    qty: abs($stockDifference),
+                    unitCost: (float) ($whData['cost_price'] ?? 0),
+                    userId: $userId,
+                    notes: $stockDifference > 0 ? 'تحديث رصيد افتتاحي' : 'تعديل رصيد',
+                    referenceType: Part::class,
+                    referenceId: $part->id,
+                );
+            }
+        }
+    }
+
+    /**
+     * Update stock balances for a part.
+     */
+    public function updateStock(Request $request, Part $part)
+    {
+        $this->authorize('update', $part);
+
+        $validated = $request->validate([
+            'warehouse_data' => 'required|array|min:1',
+            'warehouse_data.*.warehouse_id' => 'required|exists:warehouses,id',
+            'warehouse_data.*.cost_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.sale_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.min_sale_price' => 'nullable|numeric|min:0',
+            'warehouse_data.*.initial_stock' => 'nullable|numeric|min:0',
+            'warehouse_data.*.min_stock' => 'nullable|numeric|min:0',
+            'warehouse_data.*.storage_location' => 'nullable|string|max:50',
+            'warehouse_data.*.allow_price_change' => 'nullable|boolean',
+            'warehouse_data.*.is_active' => 'nullable|boolean',
+        ]);
+
+        $this->syncWarehouseBalances($part, $validated['warehouse_data'], auth()->id());
+
+        return back()->with('success', __('inventory.parts.updated'));
     }
 
     /**

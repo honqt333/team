@@ -458,7 +458,6 @@
                                         <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.item.tab_service') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.columns.code') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.qty') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.total') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.status') }}</th>
@@ -469,7 +468,6 @@
                                         <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white">{{ isRtl ? item.name_ar : item.name_en }}</td>
                                         <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold">{{ toEnglish(item.work_order_code) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">{{ formatDate(item.created_at) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ toEnglish(item.qty) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ formatCurrency(item.price) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black">{{ formatCurrency(item.total) }}</td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap">

@@ -56,21 +56,29 @@
                     </div>
 
                     <div class="flex items-center gap-3">
+<button
+                             v-if="can('inventory.parts.edit')"
+                             @click="editPart"
+                             class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-sm hover:shadow active:scale-95"
+                         >
+                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                             {{ $t('common.edit') }}
+                         </button>
                          <button
-                            v-if="can('inventory.parts.edit')"
-                            @click="editPart"
-                            class="flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-all shadow-sm hover:shadow active:scale-95"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                            {{ $t('common.edit') }}
-                        </button>
-                        <button
-                            class="flex items-center gap-2 px-5 py-2.5 bg-gray-900 dark:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95"
-                            @click="printBarcode"
-                        >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            {{ $t('inventory.parts.print_barcode') }}
-                        </button>
+                             v-if="can('inventory.parts.edit')"
+                             @click="openStockModal"
+                             class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95"
+                         >
+                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                             {{ $t('inventory.parts.warehouse_stock') }}
+                         </button>
+                         <button
+                             class="flex items-center gap-2 px-5 py-2.5 bg-gray-900 dark:bg-gray-600 text-white rounded-xl text-sm font-bold transition-all shadow-lg active:scale-95"
+                             @click="printBarcode"
+                         >
+                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                             {{ $t('inventory.parts.print_barcode') }}
+                         </button>
                     </div>
                 </div>
 
@@ -282,6 +290,15 @@
                 :categories="categories"
                 @close="showEditModal = false"
             />
+
+            <!-- Stock Modal -->
+            <StockModal
+                :show="showStockModal"
+                :part="part"
+                :warehouses="warehouses"
+                :existing-balances="balances"
+                @close="showStockModal = false"
+            />
         </div>
     </AppLayout>
 </template>
@@ -292,14 +309,19 @@ import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useI18n } from 'vue-i18n';
 import CreateModal from './CreateModal.vue';
+import StockModal from './StockModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
     part: Object,
     balances: Array,
     moves: Object,
-    units: Array, // Passed for Edit Modal
-    categories: Array, // Passed for Edit Modal
+    units: Array,
+    categories: Array,
+    warehouses: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const { t, locale } = useI18n();
@@ -308,9 +330,14 @@ const { formatQuantity, formatCurrency } = useNumberFormat();
 const can = (permission) => page.props.auth?.permissions?.includes(permission) ?? false;
 
 const showEditModal = ref(false);
+const showStockModal = ref(false);
 
 const editPart = () => {
     showEditModal.value = true;
+};
+
+const openStockModal = () => {
+    showStockModal.value = true;
 };
 
 const totalStock = computed(() => {
