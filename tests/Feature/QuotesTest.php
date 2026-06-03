@@ -165,6 +165,8 @@ class QuotesTest extends TestCase
             'created_by' => $this->user->id,
         ]);
 
+        $this->service->update(['name_ar' => 'Service A', 'name_en' => 'Service A']);
+
         QuoteLine::create([
             'quote_id' => $quote->id,
             'service_id' => $this->service->id,

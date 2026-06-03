@@ -70,8 +70,8 @@ class WorkOrderPartsController extends Controller
             }
         }
 
-        // Validate min price if warehouse part
-        if ($validated['source'] === 'warehouse' && !empty($validated['part_id'])) {
+        // Validate min price if warehouse part and not included in package
+        if ($validated['source'] === 'warehouse' && !empty($validated['part_id']) && !($validated['include_in_package'] ?? false)) {
             $part = Part::find($validated['part_id']);
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?: 1);
@@ -126,10 +126,11 @@ class WorkOrderPartsController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        // Validate min price if warehouse part
+        // Validate min price if warehouse part and not included in package
         $source = $validated['source'] ?? $workOrderPart->source;
         $partId = $validated['part_id'] ?? $workOrderPart->part_id;
-        if ($source === 'warehouse' && !empty($partId)) {
+        $includeInPackage = $validated['include_in_package'] ?? $workOrderPart->include_in_package;
+        if ($source === 'warehouse' && !empty($partId) && !$includeInPackage) {
             $part = Part::find($partId);
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?? $workOrderPart->qty);

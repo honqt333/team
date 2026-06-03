@@ -254,4 +254,66 @@ class WorkOrderInventoryTest extends TestCase
         $this->assertFalse($stock['sufficient']);
         $this->assertEquals(50, $stock['shortage']);
     }
+
+    /** @test */
+    public function it_issues_warehouse_parts_from_inventory_on_quote_conversion()
+    {
+        // 1. Create a Quote
+        $quote = \App\Models\Quote::create([
+            'tenant_id' => $this->workOrder->tenant_id,
+            'center_id' => $this->workOrder->center_id,
+            'customer_id' => $this->workOrder->customer_id,
+            'vehicle_id' => $this->workOrder->vehicle_id,
+            'code' => 'QT-CONV-TEST',
+            'status' => \App\Models\Quote::STATUS_APPROVED,
+            'approved_at' => now(),
+            'approved_by' => $this->user->id,
+            'created_by' => $this->user->id,
+        ]);
+
+        // 2. Create Quote Line (Service)
+        $quoteLine = \App\Models\QuoteLine::create([
+            'quote_id' => $quote->id,
+            'service_id' => $this->workOrderItem->service_id,
+            'description' => 'Test Service',
+            'qty' => 1,
+            'unit_price' => 100.00,
+        ]);
+
+        // 3. Create Quote Part (Warehouse Sourced)
+        \App\Models\QuotePart::create([
+            'quote_id' => $quote->id,
+            'quote_line_id' => $quoteLine->id,
+            'part_id' => $this->part->id,
+            'source' => 'warehouse',
+            'name' => $this->part->name_ar,
+            'qty' => 10,
+            'unit_price' => 75.00,
+        ]);
+
+        // 4. Convert Quote to Work Order
+        $conversionService = app(\App\Services\QuoteConversionService::class);
+        $newWorkOrder = $conversionService->convert($quote, $this->user);
+
+        // 5. Assertions
+        $this->assertNotNull($newWorkOrder);
+        
+        // Assert that the Work Order Item Part is created and has correct status and inventory move linked
+        $woPart = $newWorkOrder->parts->first();
+        $this->assertNotNull($woPart);
+        $this->assertEquals(WorkOrderItemPart::STATUS_ISSUED, $woPart->status);
+        $this->assertNotNull($woPart->inventory_move_id);
+        $this->assertEquals(50.00, $woPart->cost_snapshot);
+
+        // Assert that stock balance is correctly reduced
+        $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)
+            ->where('part_id', $this->part->id)
+            ->first();
+        $this->assertEquals(90, $balance->qty_on_hand); // 100 - 10
+
+        // Assert that the inventory move records it correctly
+        $move = InventoryMove::find($woPart->inventory_move_id);
+        $this->assertEquals(InventoryMove::TYPE_ISSUE_TO_WORKORDER, $move->move_type);
+        $this->assertEquals(-10, $move->qty);
+    }
 }

@@ -55,6 +55,18 @@
                             <span>{{ $t('quotes.actions.approve') }}</span>
                         </button>
                     </Tooltip>
+
+                    <!-- Convert to Work Order (if already approved) -->
+                    <Tooltip :text="$t('quotes.actions.convert_to_work_order') || 'تحويل لأمر عمل'">
+                        <button v-if="quote.status === 'approved'"
+                            @click="approveQuote"
+                            class="flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                            <span>{{ $t('quotes.actions.convert_to_work_order') || 'تحويل لأمر عمل' }}</span>
+                        </button>
+                    </Tooltip>
                     
                     <!-- Delete (Conditional) -->
                     <Tooltip :text="$t('common.delete')">
@@ -80,7 +92,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div v-if="quote.status === 'converted' && quote.converted_work_order" class="mt-1 flex justify-end">
+                        <div v-if="['converted', 'approved'].includes(quote.status) && quote.converted_work_order" class="mt-1 flex justify-end">
                              <Link :href="route('work-orders.show', quote.converted_work_order.id)" 
                                 class="text-xs font-black text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 px-3 py-1.5 rounded-xl flex items-center gap-2 hover:bg-purple-100 transition-all border border-purple-100 dark:border-purple-800 shadow-sm">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
@@ -195,7 +207,7 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                         <div class="w-2 h-5 bg-amber-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') || 'التكلفة و الدفع' }}
+                        {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
                     <div class="overflow-x-auto flex-1">
@@ -206,7 +218,7 @@
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('work_orders.price') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
-                                    <th v-if="hasTax" class="pb-2 text-center font-bold uppercase tracking-wider italic">VAT (15%)</th>
+                                    <th v-if="hasTax" class="pb-2 text-center font-bold uppercase tracking-wider italic">{{ $t('common.vat_with_rate', { rate: quote.tax_rate_snapshot || 15 }) }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
@@ -356,7 +368,7 @@
                             <div class="flex items-center gap-2">
                                 <!-- Delete Dept Button (Conditional) -->
                                 <button
-                                    v-if="(quote.status === 'draft' || quote.status === 'sent') && getLinesForDept(dept.id).length === 0"
+                                    v-if="(quote.status === 'draft' || quote.status === 'sent') && (!dept.is_virtual || dept.id === 'packages') && getLinesForDept(dept.id).length === 0"
                                     @click.stop="removeDepartment(dept.id)"
                                     class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
                                     :title="$t('quotes.confirm_remove_department')">
@@ -372,53 +384,62 @@
                             <!-- Services List -->
                             <div class="flex flex-col gap-3">
                                 <div v-for="(line, index) in getLinesForDept(dept.id)" :key="line.id"
-                                    class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 transition-all hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 group relative">
-                                    <div class="flex items-center justify-between">
-                                        <!-- Right Side: Icon + Title + Price -->
-                                        <div class="flex items-start gap-4 flex-1 min-w-0">
-                                            <!-- Status Icon -->
-                                            <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 flex items-center justify-center">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                </svg>
+                                    class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 border-s-indigo-500/80 p-4 transition-all hover:shadow-lg hover:shadow-indigo-500/5 hover:border-gray-200 dark:hover:border-gray-600 group relative">
+                                    <div class="flex items-start justify-between gap-4">
+                                        <!-- Right Side: Content -->
+                                        <div class="flex-1 min-w-0">
+                                            <!-- Title and Index Row -->
+                                            <div class="flex items-start gap-2.5">
+                                                <span class="text-gray-400 font-semibold font-mono text-sm mt-0.5 select-none">{{ index + 1 }}.</span>
+                                                <div class="flex-1 min-w-0">
+                                                    <button @click="editLine(line)" type="button"
+                                                        class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-snug">
+                                                        {{ line.title }}
+                                                    </button>
+                                                    <!-- Description Block -->
+                                                    <div v-if="line.description && line.description !== line.title" 
+                                                        class="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50/50 dark:bg-gray-900/40 p-2.5 rounded-lg border border-gray-100/50 dark:border-gray-850 leading-relaxed">
+                                                        {{ line.description }}
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            <div class="flex-1 min-w-0">
-                                                <!-- Title Row -->
-                                                <div class="flex items-baseline gap-2 mb-1">
-                                                    <span class="text-gray-400 font-medium font-mono text-sm leading-none">{{ index + 1 }}.</span>
-                                                    <button @click="editLine(line)" type="button"
-                                                        class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-tight">
-                                                        {{ line.description || getName(line.service) }}
-                                                    </button>
+                                            <!-- Divider line -->
+                                            <div class="border-t border-gray-100/75 dark:border-gray-800/80 my-3"></div>
+
+                                            <!-- Meta Row: Price badges with SVGs -->
+                                            <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                                <!-- Labor/Service cost badge -->
+                                                <div class="inline-flex items-center gap-1.5 bg-indigo-50/80 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100/80 dark:border-indigo-900/40 px-3 py-1 rounded-full text-xs font-semibold" 
+                                                    :title="$t('work_orders.item.service_cost')">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    </svg>
+                                                    <span>{{ $t('work_orders.item.service_cost') }}:</span>
+                                                    <span class="font-bold font-mono">{{ formatCurrency((line.unit_price * (line.qty || 1)) - (line.discount_amount || 0)) }}</span>
                                                 </div>
 
-                                                <!-- Meta Row: Price badge -->
-                                                <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                                                    <!-- Prices Group -->
-                                                    <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-md">
-                                                        <!-- Labor/Service cost -->
-                                                        <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium" :title="$t('work_orders.item.service_cost')">
-                                                            <span class="text-indigo-500">🔧</span>
-                                                            <span class="font-mono">{{ formatCurrency((line.unit_price * (line.qty || 1)) - (line.discount_amount || 0)) }}</span>
-                                                        </div>
-                                                        <!-- Parts (if any) -->
-                                                        <div v-if="line.parts_total > 0" class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium border-s border-gray-200 dark:border-gray-600 ps-3" :title="$t('work_orders.item.parts_cost')">
-                                                            <span class="text-amber-500">🔩</span>
-                                                            <span class="font-mono">{{ formatCurrency(line.parts_total) }}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <!-- Discount indicator -->
-                                                    <span v-if="line.discount_amount > 0" class="text-xs text-red-500 line-through font-mono">
-                                                        {{ formatCurrency(line.unit_price * line.qty) }}
-                                                    </span>
+                                                <!-- Parts cost badge -->
+                                                <div v-if="line.parts_total > 0" 
+                                                    class="inline-flex items-center gap-1.5 bg-amber-50/80 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-100/80 dark:border-amber-900/40 px-3 py-1 rounded-full text-xs font-semibold" 
+                                                    :title="$t('work_orders.item.parts_cost')">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 00-2 2zM9 9h6v6H9V9z"/>
+                                                    </svg>
+                                                    <span>{{ $t('work_orders.item.parts_cost') }}:</span>
+                                                    <span class="font-bold font-mono">{{ formatCurrency(line.parts_total) }}</span>
                                                 </div>
+
+                                                <!-- Discount indicator -->
+                                                <span v-if="line.discount_amount > 0" class="inline-flex items-center bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 px-2.5 py-0.5 rounded-full text-xs font-semibold border border-red-100 dark:border-red-900/30 line-through font-mono">
+                                                    {{ formatCurrency(line.unit_price * line.qty) }}
+                                                </span>
                                             </div>
                                         </div>
 
                                         <!-- Left Side: Actions -->
-                                        <div v-if="quote.status === 'draft' || quote.status === 'sent'" class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700 ps-3">
+                                        <div v-if="quote.status === 'draft' || quote.status === 'sent'" class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700/70 ps-3 shrink-0 mt-0.5">
                                             <button @click="editLine(line)"
                                                 class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
                                                 :title="$t('common.edit')">
@@ -581,9 +602,15 @@ const approveQuote = async () => {
         showApprovalModal.value = true;
     } else {
         const confirmed = await confirm({
-            title: t('quotes.messages.confirm_approve_title'),
-            message: t('quotes.messages.confirm_approve'),
-            confirmText: t('quotes.actions.approve'),
+            title: props.quote.status === 'approved'
+                ? 'تحويل عرض السعر إلى أمر عمل'
+                : t('quotes.messages.confirm_approve_title'),
+            message: props.quote.status === 'approved'
+                ? 'سيتم إنشاء أمر عمل (كرت صيانة) جديد بناءً على هذا التقييم المعتمد.'
+                : t('quotes.messages.confirm_approve'),
+            confirmText: props.quote.status === 'approved'
+                ? 'تحويل لأمر عمل'
+                : t('quotes.actions.approve'),
             type: 'success'
         });
 
@@ -604,14 +631,32 @@ const submitApproval = () => {
 // Computed: Sort departments by sort_order
 const visibleDepartments = computed(() => {
     const depts = props.quoteDepartments || [];
-    return (Array.isArray(depts) ? depts : Object.values(depts))
+    const list = [...(Array.isArray(depts) ? depts : Object.values(depts))]
         .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+
+    // Virtual packages section - only show if it has package lines or show_packages_section is explicitly active
+    const hasPackageLines = props.linesByDepartment['packages'] && props.linesByDepartment['packages'].length > 0;
+    const showPackagesSection = props.quote.show_packages_section;
+
+    if (hasPackageLines || showPackagesSection) {
+        list.push({
+            id: 'packages',
+            name_ar: 'باقات الخدمات',
+            name_en: 'Service Packages',
+            is_virtual: true
+        });
+    }
+
+    return list;
 });
 
 // Computed: Get active department's services for the modal dropdown
 const activeDepartmentServices = computed(() => {
     if (!activeDepartmentId.value) return [];
-    return (props.services || []).filter(s => s.department_id === activeDepartmentId.value);
+    if (activeDepartmentId.value === 'packages') {
+        return (props.services || []).filter(s => s.type === 'package');
+    }
+    return (props.services || []).filter(s => s.department_id === activeDepartmentId.value && s.type !== 'package');
 });
 
 // Helper: Get lines for a specific department
@@ -784,7 +829,11 @@ function openServiceModal(deptId) {
 function editLine(line) {
     // Find dept for this line
     const service = props.services.find(s => s.id === line.service_id);
-    activeDepartmentId.value = service?.department_id;
+    if (service?.type === 'package') {
+        activeDepartmentId.value = 'packages';
+    } else {
+        activeDepartmentId.value = service?.department_id;
+    }
 
     editingLine.value = line;
     showServiceModal.value = true;
@@ -824,7 +873,7 @@ function shareQuote() {
 
 // Print quote
 function printQuote() {
-    window.print();
+    window.open(route('app.quotes.print', props.quote.id), '_blank');
 }
 
 // Delete quote

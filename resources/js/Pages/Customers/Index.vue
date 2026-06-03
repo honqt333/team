@@ -399,7 +399,7 @@
                 </div>
                 <div v-else-if="!nextPageUrl && allCustomers.length > 0"
                     class="text-sm text-gray-400 dark:text-gray-500">
-                    {{ $t('customers.all_loaded') || 'تم تحميل جميع العملاء' }}
+                    {{ $t('customers.all_loaded') }}
                 </div>
             </div>
         </div>
@@ -414,14 +414,15 @@
             <div class="print-section hidden">
                 <!-- Header -->
                 <PrintHeader :title="$t('customers.title')" />
-
                 <!-- Table -->
                 <table class="print-table">
                     <thead>
                         <tr>
                             <th style="width: 40px;">#</th>
                             <th>{{ $t('customers.columns.name') }}</th>
+                            <th>{{ $t('customers.columns.contact_name') }}</th>
                             <th>{{ $t('customers.columns.phone') }}</th>
+                            <th>{{ $t('customers.columns.email') }}</th>
                             <th>{{ $t('customers.columns.type') }}</th>
                             <th>{{ $t('customers.columns.balance') }}</th>
                         </tr>
@@ -430,10 +431,12 @@
                         <tr v-for="(customer, index) in allCustomers" :key="customer.id">
                             <td>{{ toEnglish(index + 1) }}</td>
                             <td class="font-bold">{{ customer.name }}</td>
+                            <td>{{ customer.contact_name || '-' }}</td>
                             <td dir="ltr">{{ toEnglish(customer.phone) }}</td>
+                            <td>{{ customer.email || '-' }}</td>
                             <td>
                                 <span class="print-badge">
-                                    {{ customer.type ? $t(`customers.type.${customer.type}`) : '-' }}
+                                     {{ customer.type ? $t(`customers.type.${customer.type}`) : '-' }}
                                 </span>
                             </td>
                             <td class="font-bold">
@@ -602,7 +605,15 @@ function exportCustomers() {
     const params = new URLSearchParams();
     if (searchQuery.value) params.set('search', searchQuery.value);
     if (typeFilter.value) params.set('type', typeFilter.value);
-    window.location.href = route('customers.export') + '?' + params.toString();
+    
+    const url = route('customers.export') + '?' + params.toString();
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
     setTimeout(() => {
         exporting.value = false;
     }, 2000);

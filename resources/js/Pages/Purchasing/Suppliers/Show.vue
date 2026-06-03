@@ -8,15 +8,7 @@
                 <div class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-orange-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <!-- Absolute Top Bar (Nav & Actions) -->
                     <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20">
-                        <!-- Back Button -->
-                        <Tooltip :text="$t('common.back')">
-                            <Link :href="route('app.purchasing.suppliers.index')"
-                                class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300 text-orange-600">
-                                <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                            </Link>
-                        </Tooltip>
+                        <BackButton :href="route('app.purchasing.suppliers.index')" />
 
                         <!-- Actions Group -->
                         <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
@@ -126,8 +118,16 @@
                                     <span class="text-xl lg:text-2xl font-black text-blue-600 dark:text-blue-400 group-hover/stat:scale-110 transition-transform">{{ counts.invoices }}</span>
                                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('purchasing.suppliers.invoices') }}</span>
                                 </div>
-                                <div class="group/stat flex flex-col items-center justify-center h-20 lg:w-48 lg:h-24 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-3xl border border-emerald-100/50 dark:border-emerald-800/30 hover:bg-white dark:hover:bg-emerald-900/40 transition-all hover:shadow-lg hover:shadow-emerald-500/10 col-span-2 sm:col-span-1">
-                                    <span class="text-xl lg:text-2xl font-black text-emerald-600 dark:text-emerald-400 group-hover/stat:scale-110 transition-transform">{{ formatCurrency(balance) }}</span>
+                                <div :class="[
+                                    'group/stat flex flex-col items-center justify-center h-20 lg:w-48 lg:h-24 rounded-3xl border transition-all hover:bg-white col-span-2 sm:col-span-1',
+                                    balance < -0.01
+                                        ? 'bg-red-50/50 dark:bg-red-900/20 border-red-100/50 dark:border-red-800/30 hover:shadow-red-500/10 dark:hover:bg-red-900/40 hover:shadow-lg'
+                                        : 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100/50 dark:border-emerald-800/30 hover:shadow-emerald-500/10 dark:hover:bg-emerald-900/40 hover:shadow-lg'
+                                ]">
+                                    <span :class="[
+                                        'text-xl lg:text-2xl font-black group-hover/stat:scale-110 transition-transform',
+                                        balance < -0.01 ? 'text-red-650 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+                                    ]">{{ formatCurrency(balance) }}</span>
                                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('purchasing.suppliers.balance') }}</span>
                                 </div>
                             </div>
@@ -266,7 +266,7 @@
                                     <svg class="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                                     </svg>
-                                    {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء' }}
+                                    {{ $t('invoices.purchases.add') }}
                                 </button>
                                 <div class="flex rounded-xl bg-gray-100 dark:bg-gray-900 p-1">
                                     <Tooltip :text="$t('common.grid_view')">
@@ -374,7 +374,7 @@
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.discount') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal_after') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">VAT</th>
+                                            <th class="py-3 px-4 text-center font-bold">{{ $t('common.vat') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.total') }}</th>
                                             <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.remaining') }}</th>
                                         </tr>
@@ -424,12 +424,12 @@
                                 <thead>
                                     <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
                                         <th class="py-3 px-4 text-center font-bold">#</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.method') || 'طريقة الدفع' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') || 'نوع العملية' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') || 'تاريخ الدفع' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') || 'رقم الفاتورة' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') || 'المبلغ' }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.recorded_by') || 'قام بالتحديث' }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.method') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.recorded_by') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
@@ -440,7 +440,7 @@
                                         </td>
                                         <td class="py-4 px-4 text-center font-bold">
                                             <span :class="payment.type === 'refund' ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs font-bold">
-                                                {{ payment.type === 'refund' ? ($t('payments.types.refund') || 'استرجاع') : ($t('payments.types.payment') || 'دفعة مالية') }}
+                                                {{ payment.type === 'refund' ? ($t('payments.types.refund')) : ($t('payments.types.payment')) }}
                                             </span>
                                         </td>
                                         <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">
@@ -509,6 +509,7 @@ import CreateModal from './CreateModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import BackButton from '@/Components/BackButton.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
 
@@ -593,11 +594,12 @@ const tabs = computed(() => [
 
 function formatCurrency(value) {
     if (!value && value !== 0) return '';
+    const val = Math.abs(value) < 0.01 ? 0 : value;
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'SAR',
         minimumFractionDigits: 0
-    }).format(value);
+    }).format(val);
 }
 
 function formatDate(dateString) {

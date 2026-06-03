@@ -2,6 +2,9 @@
 
 return [
     'active' => 'Active',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'expand' => 'Expand',
     'inactive' => 'Inactive',
     'status' => 'Status',
     'save' => 'Save',
@@ -9,6 +12,7 @@ return [
     'delete' => 'Delete',
     'edit' => 'Edit',
     'add' => 'Add',
+    'select' => 'Select',
     'search' => 'Search',
     'name' => 'Name',
     'phone' => 'Phone',

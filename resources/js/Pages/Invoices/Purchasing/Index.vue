@@ -17,15 +17,7 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <Link
-                        :href="route('app.invoices.hub')"
-                        :title="$t('common.back')"
-                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 text-amber-600 group"
-                    >
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.invoices.hub')" />
                 </template>
 
                 <template #icon>
@@ -45,7 +37,7 @@
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
                             </svg>
-                            {{ $t('invoices.purchases.add') || 'إضافة فاتورة شراء مباشر' }}
+                            {{ $t('invoices.purchases.add') }}
                         </button>
 
                         <!-- Actions Group -->
@@ -299,7 +291,7 @@
                                                     <Link :href="route().has('app.invoices.purchases.show') ? route('app.invoices.purchases.show', invoice.id) : '#'" class="font-bold text-amber-600 dark:text-amber-400 hover:underline">
                                                         #{{ invoice.code }}
                                                     </Link>
-                                                    <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref') || 'مرجع المورد'">
+                                                    <span v-if="invoice.invoice_number" class="text-[10px] text-gray-400 font-mono mt-0.5" :title="$t('purchasing.invoices.supplier_ref')">
                                                         REF: {{ invoice.invoice_number }}
                                                     </span>
                                                 </div>
@@ -360,7 +352,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                 </svg>
                             </div>
-                            <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('invoices.purchases.no_returns') || 'لا توجد فواتير مرتجع مشتريات' }}</p>
+                            <p class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('invoices.purchases.no_returns') }}</p>
                         </div>
 
                         <!-- Grid View -->
@@ -397,32 +389,30 @@
                                     </div>
                                 </div>
 
-                                <div class="p-6 ps-8 flex-1 flex flex-col">
+                                <div class="p-4 ps-6 flex-1 flex flex-col">
                                     <!-- Body Content -->
-                                    <div class="text-center mb-5">
-                                        <h4 class="text-[11px] font-black text-slate-800 dark:text-white mb-5 line-clamp-1 opacity-90">{{ $page.props.center?.name || 'مركز فريق الخدمة' }}</h4>
-                                        <div class="flex items-center gap-2 justify-end mb-4 group-hover:translate-x-[-4px] transition-transform">
+                                    <div class="text-center mb-3">
+                                        <h4 class="text-[11px] font-black text-slate-800 dark:text-white mb-3 line-clamp-1 opacity-90">{{ $page.props.center?.name || 'مركز فريق الخدمة' }}</h4>
+                                        <div class="flex items-center gap-2 justify-end mb-3 group-hover:translate-x-[-4px] transition-transform">
                                             <p class="text-[11px] font-black text-slate-600 dark:text-slate-300">{{ ret.purchase_invoice?.supplier?.name || '—' }}</p>
                                             <div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
                                         </div>
-                                        <div class="w-full h-[1.5px] bg-gradient-to-r from-transparent via-gray-100 dark:via-gray-700 to-transparent my-5"></div>
+                                        <div class="w-full h-[1.5px] bg-gradient-to-r from-transparent via-gray-100 dark:via-gray-700 to-transparent my-3"></div>
                                     </div>
 
                                     <!-- Bottom Info -->
-                                    <div class="mt-auto space-y-4">
-                                        <div class="flex flex-col gap-3">
+                                    <div class="mt-auto space-y-3">
+                                        <div class="flex flex-col gap-2">
                                             <div class="flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/30 p-2 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
-                                                <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.subtotal) }}</span>
-                                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.subtotal') }}</span>
+                                                <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.total) }}</span>
+                                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.total') }}</span>
                                             </div>
-                                            <div class="flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/30 p-2 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
-                                                <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.tax_amount) }}</span>
-                                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.tax') }}</span>
-                                            </div>
-                                            <div class="flex justify-between items-center bg-rose-50/10 dark:bg-rose-900/10 p-2 rounded-xl">
-                                                <span class="text-sm font-black text-rose-600 dark:text-rose-400 font-mono" dir="ltr">{{ formatCurrency(ret.total) }}</span>
-                                                <span class="text-[10px] font-black text-rose-400 uppercase">{{ $t('invoices.total') }}</span>
-                                            </div>
+                                            <template v-if="getReturnRemainingBalance(ret) > 0.01">
+                                                <div class="flex justify-between items-center bg-red-50/10 dark:bg-red-900/10 p-2 rounded-xl">
+                                                    <span class="text-sm font-black text-red-600 dark:text-red-400 font-mono" dir="ltr">{{ formatCurrency(getReturnRemainingBalance(ret)) }}</span>
+                                                    <span class="text-[10px] font-black text-red-400 uppercase">{{ $t('payments.remaining_refund') }}</span>
+                                                </div>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
@@ -530,6 +520,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import PurchaseInvoiceFormModal from '@/Components/Purchasing/PurchaseInvoiceFormModal.vue';
@@ -568,7 +559,7 @@ const onInvoiceSaved = () => {
     showCreateModal.value = false;
 };
 
-const activeTab = ref('invoices');
+const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'invoices');
 const invoicesViewMode = ref(localStorage.getItem('purchaseInvoicesViewMode') || 'grid');
 const returnsViewMode = ref(localStorage.getItem('purchaseReturnsViewMode') || 'list');
 
@@ -665,5 +656,17 @@ const stripeClass = (status) => {
         cancelled: 'bg-red-500',
     };
     return map[status] || 'bg-gray-200 dark:bg-gray-700';
+};
+
+const getReturnRemainingBalance = (ret) => {
+    const payments = ret.purchase_invoice?.payments || [];
+    const cashRefunds = payments.filter(p => p.type === 'refund' && p.payment_method !== 'debit_note');
+    const matchedCashRefunds = cashRefunds.filter(p => p.notes?.includes(ret.code));
+    const refundPayments = matchedCashRefunds.length > 0 ? matchedCashRefunds : cashRefunds;
+    const cashRefundsTotal = refundPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    const debitNotePayment = payments.find(p => p.type === 'refund' && p.payment_method === 'debit_note' && p.notes?.includes(ret.code));
+    const debitNoteAmount = debitNotePayment ? parseFloat(debitNotePayment.amount) || 0 : 0;
+    const remaining = parseFloat(ret.total) - cashRefundsTotal - debitNoteAmount;
+    return Math.max(0, remaining);
 };
 </script>

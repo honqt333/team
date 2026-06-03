@@ -312,7 +312,7 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-gray-900 dark:text-white">{{ $t('purchasing.orders.create_credit_invoice') }}</h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('purchasing.orders.credit_invoice_hint') || 'Remaining amount will be recorded as a debt' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $t('purchasing.orders.credit_invoice_hint') }}</p>
                         </div>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">

@@ -63,7 +63,7 @@
                 <div>
                     <div class="flex items-center justify-between mb-1.5">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {{ $t('customers.form.whatsapp') || 'WhatsApp' }}
+                            {{ $t('customers.form.whatsapp') }}
                         </label>
                         <button
                             v-if="form.phone && normalizePhone(form.phone) !== normalizePhone(form.whatsapp)"
@@ -71,7 +71,7 @@
                             @click="form.whatsapp = form.phone"
                             class="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                         >
-                            {{ $t('customers.form.copy_from_phone') || 'Copy phone' }}
+                            {{ $t('customers.form.copy_from_phone') }}
                         </button>
                     </div>
                     <vue-tel-input

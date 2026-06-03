@@ -32,7 +32,7 @@
                 <!-- Tab 1: Main Info -->
                 <div v-show="activeTab === 'main_info'" class="space-y-4">
                     <!-- Search Section (Hide if pre-selected vehicle exists and not editing) -->
-                    <div v-if="!vehicle && !workOrder"
+                    <div v-if="!vehicle && (!workOrder || !selectedVehicle)"
                         class="relative bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                         <div class="flex items-center justify-between mb-3">
                             <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -96,9 +96,9 @@
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="font-medium text-gray-900 dark:text-white" dir="ltr">{{
-                                        toEnglish(vehicle.plate_number) }}
-                                    </p>
+                                    <div class="mb-1">
+                                        <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
+                                    </div>
                                     <p class="text-sm text-gray-500 dark:text-gray-400">{{ toEnglish(vehicle.customer?.name) }} -
                                         {{
                                             toEnglish(vehicle.customer?.phone) }}</p>
@@ -130,17 +130,13 @@
                         <!-- Header / Plate Section -->
                         <div class="bg-gray-50 dark:bg-gray-900/50 p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="bg-white dark:bg-gray-800 border-2 border-gray-700 dark:border-gray-500 rounded-md px-3 py-1 flex flex-col items-center justify-center min-w-[100px] shadow-sm">
-                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 leading-tight" dir="ltr">{{ toEnglish(selectedVehicle.plate_number) }}</span>
-                                    <div class="w-full h-px bg-gray-200 dark:bg-gray-600 my-0.5"></div>
-                                    <span class="text-[8px] font-bold text-gray-400 tracking-widest uppercase">KSA</span>
-                                </div>
+                                <SaudiPlateDisplay :plate-number="selectedVehicle.plate_number" size="sm" />
                                 <div class="flex flex-col">
                                     <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{{ $t('common.selected') }}</span>
                                     <h4 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">{{ getVehicleDisplay(selectedVehicle) }}</h4>
                                 </div>
                             </div>
-                            <button type="button" @click="clearSelection"
+                            <button v-if="!vehicle && !workOrder" type="button" @click="clearSelection"
                                 class="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-500 transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -237,8 +233,8 @@
                             </div>
                         </div>
                         <div class="relative">
-                            <input v-model="form.odometer" type="text" inputmode="numeric"
-                                @input="form.odometer = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
+                            <input v-model="form.mileage" type="text" inputmode="numeric"
+                                @input="form.mileage = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
                                 :placeholder="$t('work_orders.form.odometer_placeholder')"
                                 class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                             <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
@@ -268,8 +264,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 {{ $t('work_orders.form.entry_date') }}
                             </label>
-                            <input v-model="form.entry_date" type="date"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
+                            <CustomDatePicker v-model="form.entry_date" />
                         </div>
 
                         <!-- Expected End Date -->
@@ -277,8 +272,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                                 {{ $t('work_orders.form.expected_end_date') }}
                             </label>
-                            <input v-model="form.expected_end_date" type="date" :min="form.entry_date"
-                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500" />
+                            <CustomDatePicker v-model="form.expected_end_date" />
                         </div>
                     </div>
                 </div>
@@ -368,11 +362,13 @@ import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import VehicleMileageModal from '@/Components/Vehicles/VehicleMileageModal.vue';
 import VehicleConditionReport from '@/Components/WorkOrders/VehicleConditionReport.vue';
 import VehiclePhotoUploader from '@/Components/WorkOrders/VehiclePhotoUploader.vue';
+import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -448,7 +444,7 @@ const form = useForm({
     vehicle_id: props.workOrder?.vehicle_id || props.vehicle?.id || '',
     customer_complaint: props.workOrder?.customer_complaint || '',
     initial_assessment: props.workOrder?.initial_assessment || '',
-    odometer: props.workOrder?.odometer || '',
+    mileage: props.workOrder?.mileage || '',
     allow_lower_odometer: false,
     contact_name: props.workOrder?.contact_name || '',
     contact_phone: props.workOrder?.contact_phone || '',
@@ -468,7 +464,7 @@ watch(() => props.show, (newVal) => {
         form.vehicle_id = props.workOrder.vehicle_id || '';
         form.customer_complaint = props.workOrder.customer_complaint || '';
         form.initial_assessment = props.workOrder.initial_assessment || '';
-        form.odometer = props.workOrder.odometer || '';
+        form.mileage = props.workOrder.mileage || '';
         form.allow_lower_odometer = false;
         form.contact_name = props.workOrder.contact_name || '';
         form.contact_phone = props.workOrder.contact_phone || '';
@@ -503,7 +499,7 @@ watch(() => props.vehicle, (val) => {
         selectedVehicle.value = val;
         form.vehicle_id = val.id;
         form.customer_id = val.customer_id;
-        form.odometer = val.odometer || '';
+        form.mileage = val.odometer || '';
         lastVehicleOdometer.value = val.odometer || 0;
     }
 }, { immediate: true });
@@ -570,7 +566,7 @@ function selectVehicle(vehicle) {
     selectedVehicle.value = vehicle;
     form.customer_id = vehicle.customer_id || (vehicle.customer ? vehicle.customer.id : '');
     form.vehicle_id = vehicle.id;
-    form.odometer = vehicle.odometer || '';
+    form.mileage = vehicle.odometer || '';
     lastVehicleOdometer.value = vehicle.odometer || 0;
 
     // Auto-fill contact info from customer if available
@@ -612,7 +608,7 @@ function submitForm() {
 
     // Set odometer on vehicle object for warning check
     if (selectedVehicle.value) {
-        selectedVehicle.value.odometer = form.odometer;
+        selectedVehicle.value.odometer = form.mileage;
     }
 
     const options = {
@@ -641,7 +637,7 @@ function resetForm() {
     form.vehicle_id = '';
     form.customer_complaint = '';
     form.initial_assessment = '';
-    form.odometer = '';
+    form.mileage = '';
     form.contact_name = '';
     form.contact_phone = '';
     form.entry_date = today;
@@ -668,8 +664,8 @@ watch(() => props.show, (isOpen) => {
 });
 
 const showOdometerWarning = computed(() => {
-    if (!selectedVehicle.value || !form.odometer || lastVehicleOdometer.value <= 0) return false;
-    return Number(form.odometer) < lastVehicleOdometer.value;
+    if (!selectedVehicle.value || !form.mileage || lastVehicleOdometer.value <= 0) return false;
+    return Number(form.mileage) < lastVehicleOdometer.value;
 });
 
 function getVehicleDisplay(vehicle) {

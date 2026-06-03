@@ -14,17 +14,7 @@
         </template>
 
         <form @submit.prevent="submitForm" class="space-y-5">
-            <!-- Department (Required by backend) -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ $t('services_management.form.department') }} <span class="text-red-500">*</span>
-                </label>
-                <SearchableSelect v-model="form.department_id" :options="departments" :label="''"
-                    :placeholder="$t('common.choose')" option-label="name" option-value="id"
-                    :error="form.errors.department_id" />
-                <p v-if="form.errors.department_id" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{
-                    form.errors.department_id }}</p>
-            </div>
+
 
             <!-- Names Row -->
             <div class="grid grid-cols-2 gap-4">
@@ -48,8 +38,11 @@
                         {{ $t('services_management.form.name_en') }} <span class="text-red-500">*</span>
                     </label>
                     <input type="text" v-model="form.name_en" dir="ltr"
+                        required
                         :placeholder="$t('services_management.form.name_en_placeholder')"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
+                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        :class="{ 'border-red-500': form.errors.name_en }" />
+                    <p v-if="form.errors.name_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_en }}</p>
                 </div>
             </div>
 
@@ -283,7 +276,7 @@ const newItem = ref({
 });
 
 const form = useForm({
-    department_id: '',
+    department_id: null,
     name_ar: '',
     name_en: '',
     description_ar: '',
@@ -415,7 +408,7 @@ function calculateTotal() {
 // Initialize form when service prop changes
 watch(() => props.service, (newService) => {
     if (newService) {
-        form.department_id = newService.department_id || '';
+        form.department_id = newService.department_id || null;
         form.name_ar = newService.name_ar || '';
         form.name_en = newService.name_en || '';
         form.description_ar = newService.description_ar || '';

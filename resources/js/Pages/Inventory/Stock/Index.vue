@@ -16,11 +16,7 @@
                 badgeDot="bg-emerald-500"
             >
                 <template #back>
-                    <Link :href="route('app.inventory.hub')" class="p-2 -ml-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-full transition-all">
-                        <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.inventory.hub')" />
                 </template>
 
                 <template #icon>
@@ -97,7 +93,7 @@
                                     :options="warehouses"
                                     option-label="name"
                                     option-value="id"
-                                    :placeholder="$t('inventory.stock.select_warehouse') || 'اختر المستودع'"
+                                    :placeholder="$t('inventory.stock.select_warehouse')"
                                     :label="''"
                                     @change="applyFilters"
                                 />
@@ -209,7 +205,6 @@
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
                                     <div class="font-mono"><span dir="ltr">{{ balance.part?.sku }}</span></div>
-                                    <div v-if="balance.part?.barcode" class="text-xs text-gray-500 font-mono"><span dir="ltr">{{ balance.part?.barcode }}</span></div>
                                 </td>
                                 <td class="px-4 py-3 text-start">
                                     <Link :href="route('app.inventory.parts.show', balance.part_id)" class="group/part">
@@ -229,16 +224,16 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-600 dark:text-gray-300">
-                                    <span class="font-mono" dir="ltr">{{ formatQuantity(balance.part?.min_qty || 0) }}</span>
+                                    <span class="font-mono" dir="ltr">{{ formatQuantity(balance.min_stock || 0) }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
                                     <span class="font-mono" dir="ltr">{{ formatCurrency(balance.wac_cost) }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
-                                    <span class="font-mono" dir="ltr">{{ formatCurrency(balance.part?.default_sale_price) }}</span>
+                                    <span class="font-mono" dir="ltr">{{ formatCurrency(balance.sale_price) }}</span>
                                 </td>
                                 <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
-                                    <span class="font-mono" dir="ltr">{{ formatCurrency(balance.part?.min_sale_price) }}</span>
+                                    <span class="font-mono" dir="ltr">{{ formatCurrency(balance.min_sale_price) }}</span>
                                 </td>
                             </tr>
                             <tr v-if="!balances.data.length">
@@ -280,28 +275,28 @@
                         </div>
 
                         <!-- Details Grid -->
-                        <div class="space-y-1.5 pt-2 border-t border-gray-50 dark:border-gray-700">
+<div class="space-y-1.5 pt-2 border-t border-gray-50 dark:border-gray-700">
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.wac') }}:</span>
                                 <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatCurrency(balance.wac_cost) }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
-                                <span class="text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.default_sale_price') }}:</span>
-                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatCurrency(balance.part?.default_sale_price) }}</span>
+                                <span class="text-gray-500 dark:text-gray-400">{{ $t('inventory.parts.sale_price') }}:</span>
+                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatCurrency(balance.sale_price) }}</span>
                             </div>
                             <div class="flex justify-between items-center text-sm">
                                 <span class="text-gray-500 dark:text-gray-400">{{ $t('inventory.stock.min_qty') }}:</span>
-                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatQuantity(balance.part?.min_qty) }}</span>
+                                <span class="font-mono font-medium text-gray-700 dark:text-gray-300" dir="ltr">{{ formatQuantity(balance.min_stock) }}</span>
                             </div>
                         </div>
 
                         <!-- Min Sale Price Badge -->
                         <div class="flex justify-start pt-2">
                              <div class="inline-flex items-center gap-1 border border-red-400 rounded px-2 py-1 text-xs text-red-500 dark:text-red-400 bg-white dark:bg-gray-800">
-                                <span>{{ $t('inventory.parts.min_sale_price') }}:</span>
-                                <span class="font-bold font-mono" dir="ltr">{{ formatCurrency(balance.part?.min_sale_price) }}</span>
+                                 <span>{{ $t('inventory.parts.min_sale_price') }}:</span>
+                                 <span class="font-bold font-mono" dir="ltr">{{ formatCurrency(balance.min_sale_price) }}</span>
                             </div>
-                        </div>
+                         </div>
                     </div>
 
                     <!-- Footer / Brand Placeholder -->
@@ -389,6 +384,7 @@ import { ref, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { debounce } from 'lodash-es';
@@ -456,7 +452,7 @@ const debouncedSearch = debounce(applyFilters, 300);
 
 const getStockStatusClass = (balance) => {
     const qty = balance.qty_on_hand;
-    const minQty = balance.part?.min_qty || 0;
+    const minQty = balance.min_stock || 0;
     
     if (qty <= 0) {
         return 'bg-red-500 text-white shadow-sm'; // Out of stock

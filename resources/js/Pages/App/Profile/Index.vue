@@ -173,7 +173,7 @@ const regenerateCodes = () => regenForm.post(route('app.security.2fa.regenerate'
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            {{ $t('profile.photo.hr_locked') || 'تتم إدارة الصورة عبر ملف الموارد البشرية' }}
+                            {{ $t('profile.photo.hr_locked') }}
                         </div>
                     </div>
                 </div>
@@ -224,13 +224,12 @@ const regenerateCodes = () => regenForm.post(route('app.security.2fa.regenerate'
 
             <div v-if="activeTab === 'profile'"
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">{{ $t('profile.info.title') ||
-                    'معلومات الملف الشخصي' }}</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">{{ $t('profile.info.title') }}</h3>
 
                 <form @submit.prevent="updateProfile" class="space-y-6 max-w-xl">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                            $t('profile.info.name') || 'الاسم' }}</label>
+                            $t('profile.info.name') }}</label>
                         <input type="text" v-model="profileForm.name"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                             required />
@@ -240,7 +239,7 @@ const regenerateCodes = () => regenForm.post(route('app.security.2fa.regenerate'
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                            $t('profile.info.email') || 'البريد الإلكتروني' }}</label>
+                            $t('profile.info.email') }}</label>
                         <input type="email" v-model="profileForm.email"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500"
                             required />
@@ -250,17 +249,16 @@ const regenerateCodes = () => regenForm.post(route('app.security.2fa.regenerate'
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                            $t('profile.info.phone') || 'رقم الهاتف' }}</label>
+                            $t('profile.info.phone') }}</label>
                         <input type="tel" :value="user.phone" disabled dir="ltr"
                             class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed" />
-                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.info.phone_hint') ||
-                            'رقم الهاتف المسجل عند إنشاء الحساب (للقراءة فقط)' }}</p>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $t('profile.info.phone_hint') }}</p>
                     </div>
 
                     <div class="flex items-center gap-4">
                         <button type="submit" :disabled="profileForm.processing"
                             class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50 transition-colors">
-                            {{ $t('profile.info.save_changes') || 'حفظ التغييرات' }}
+                            {{ $t('profile.info.save_changes') }}
                         </button>
                     </div>
                 </form>

@@ -117,7 +117,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     
     // Work Order Departments
     Route::post('/work-orders/{work_order}/departments', [WorkOrderController::class, 'addDepartment'])->name('work-orders.departments.store');
-    Route::delete('/work-orders/{work_order}/departments/{department}', [WorkOrderController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
+    Route::delete('/work-orders/{work_order}/departments/{department_id}', [WorkOrderController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
     
     // Work Order Parts (Inventory Integration)
     Route::post('/work-orders/{workOrder}/parts', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'store'])->name('work-orders.parts.store');
@@ -170,6 +170,10 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::post('/work-orders/{work_order}/items/{item}/notes', [WorkOrderController::class, 'addNote'])->name('work-orders.items.notes.store');
     Route::delete('/work-orders/{work_order}/items/{item}/notes/{note}', [WorkOrderController::class, 'deleteNote'])->name('work-orders.items.notes.destroy');
     
+    // Work Order General Notes
+    Route::post('/work-orders/{work_order}/notes', [WorkOrderController::class, 'addGeneralNote'])->name('work-orders.notes.store');
+    Route::delete('/work-orders/{work_order}/notes/{note}', [WorkOrderController::class, 'deleteGeneralNote'])->name('work-orders.notes.destroy');
+    
     // Work Order Photos
     Route::post('/work-orders/{workOrder}/photos', [WorkOrderController::class, 'uploadPhotos'])->name('work-orders.photos.store');
     Route::delete('/work-orders/{workOrder}/photos/{photo}', [WorkOrderController::class, 'deletePhoto'])->name('work-orders.photos.destroy');
@@ -186,11 +190,12 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::post('/quotes/{quote}/reject', [QuoteApprovalController::class, 'reject'])->name('app.quotes.reject');
     Route::get('/quotes/search', [QuoteController::class, 'search'])->name('app.quotes.search');
     Route::get('/quotes/{quote}', [QuoteController::class, 'show'])->name('app.quotes.show');
+    Route::get('/quotes/{quote}/print', [QuoteController::class, 'print'])->name('app.quotes.print');
     Route::post('/quotes/{quote}/services', [QuoteController::class, 'addService'])->name('app.quotes.services.store');
     Route::put('/quotes/{quote}/services/{line}', [QuoteController::class, 'updateService'])->name('app.quotes.services.update');
     Route::delete('/quotes/{quote}/services/{line}', [QuoteController::class, 'deleteService'])->name('app.quotes.services.destroy');
     Route::post('/quotes/{quote}/departments', [QuoteController::class, 'addDepartment'])->name('app.quotes.departments.store');
-    Route::delete('/quotes/{quote}/departments/{department}', [QuoteController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
+    Route::delete('/quotes/{quote}/departments/{department_id}', [QuoteController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
     
     // Quote Parts
     Route::post('/quotes/{quote}/parts', [QuoteController::class, 'addPart'])->name('app.quotes.parts.store');
@@ -327,6 +332,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::patch('/parts/{part}/toggle', [\App\Http\Controllers\App\PartsController::class, 'toggleActive'])->name('parts.toggle');
         Route::get('/api/parts/search', [\App\Http\Controllers\App\PartsController::class, 'search'])->name('parts.search');
         Route::get('/parts/{part}', [\App\Http\Controllers\App\PartsController::class, 'show'])->name('parts.show');
+        Route::post('/parts/{part}/stock', [\App\Http\Controllers\App\PartsController::class, 'updateStock'])->name('parts.stock.update');
         
         // Stock Balances
         Route::get('/stock', [\App\Http\Controllers\App\InventoryBalanceController::class, 'index'])->name('stock.index');
@@ -538,11 +544,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
         Route::get('/purchases', [\App\Http\Controllers\App\InvoicesController::class, 'purchasesIndex'])->name('purchases.index');
         Route::post('/purchases', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'store'])->name('purchases.store');
         Route::get('/purchases/{purchaseInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'show'])->name('purchases.show');
+        Route::get('/purchases/{purchaseInvoice}/print', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'print'])->name('purchases.print');
         Route::post('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadAttachment'])->name('purchases.attachment.store');
         Route::delete('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyAttachment'])->name('purchases.attachment.destroy');
         Route::post('/purchases/{purchaseInvoice}/payments', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordPayment'])->name('purchases.payments.store');
         Route::post('/purchases/{purchaseInvoice}/returns', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturn'])->name('purchases.returns.store');
         Route::get('/purchases/returns/{purchaseReturnInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'showReturn'])->name('purchases.returns.show');
+        Route::get('/purchases/returns/{purchaseReturnInvoice}/print', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'printReturn'])->name('purchases.returns.print');
         Route::post('/purchases/returns/{purchaseReturnInvoice}/refunds', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturnRefund'])->name('purchases.returns.refunds.store');
         Route::post('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadReturnAttachment'])->name('purchases.returns.attachment.store');
         Route::delete('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyReturnAttachment'])->name('purchases.returns.attachment.destroy');

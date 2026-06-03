@@ -11,14 +11,7 @@
                 badgeText="text-blue-600 dark:text-blue-400" badgeBorder="border-blue-100/50 dark:border-blue-800/30"
                 badgeDot="bg-blue-500">
                 <template #back>
-                    <Link :href="route('app.purchasing.purchases.index')" :title="$t('common.back')"
-                        class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 text-blue-600 group">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none"
-                            stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.purchasing.purchases.index')" />
                 </template>
 
                 <template #icon>
@@ -37,7 +30,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                     d="M12 4v16m8-8H4" />
                             </svg>
-                            {{ $t('invoices.sales.create_invoice') || 'إنشاء فاتورة بيع' }}
+                            {{ $t('invoices.sales.create_invoice') }}
                         </button>
 
                         <!-- Actions Group -->
@@ -231,37 +224,37 @@
                                             #</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.invoice_number') || 'رقم الفاتورة' }}</th>
+                                            {{ $t('invoices.invoice_number') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.issue_date') || 'تاريخ الفاتورة' }}</th>
+                                            {{ $t('invoices.issue_date') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('common.customer') || 'العميل' }}</th>
+                                            {{ $t('common.customer') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.gross_total') || 'المجموع' }}</th>
+                                            {{ $t('invoices.gross_total') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.discount') || 'الخصم' }}</th>
+                                            {{ $t('invoices.discount') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.subtotal') || 'المجموع الفرعي' }}</th>
+                                            {{ $t('invoices.subtotal') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            VAT</th>
+                                            {{ $t('common.vat') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.grand_total') || 'مبلغ الفاتورة' }}</th>
+                                            {{ $t('invoices.grand_total') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('invoices.balance') || 'الباقي' }}</th>
+                                            {{ $t('invoices.balance') }}</th>
                                         <th
                                             class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('common.status') || 'الحالة' }}</th>
+                                            {{ $t('common.status') }}</th>
                                         <th
                                             class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">
-                                            {{ $t('common.actions') || 'الإجراءات' }}</th>
+                                            {{ $t('common.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
@@ -415,6 +408,7 @@ import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import SalesInvoiceFormModal from '@/Components/Purchasing/SalesInvoiceFormModal.vue';

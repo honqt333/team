@@ -7,16 +7,16 @@
                 <p v-if="centerName" class="text-sm font-medium text-gray-600">{{ centerName }}</p>
                 <div class="mt-2 text-[10px] space-y-0.5 text-gray-500">
                     <p v-if="phone">
-                        {{ isRtl ? 'الهاتف' : 'Phone' }}: <span dir="ltr">{{ toEnglish(phone) }}</span>
+                        {{ $t('common.phone') }}: <span dir="ltr">{{ toEnglish(phone) }}</span>
                     </p>
                     <p v-if="email">
-                        {{ isRtl ? 'البريد' : 'Email' }}: {{ email }}
+                        {{ $t('common.email') }}: {{ email }}
                     </p>
                     <p v-if="crNumber">
-                        {{ isRtl ? 'السجل التجاري' : 'CR' }}: {{ toEnglish(crNumber) }}
+                        {{ $t('company_profile.profile.cr_number') }}: {{ toEnglish(crNumber) }}
                     </p>
                     <p v-if="taxNumber">
-                        {{ isRtl ? 'الرقم الضريبي' : 'VAT' }}: {{ toEnglish(taxNumber) }}
+                        {{ $t('common.vat') }}: {{ toEnglish(taxNumber) }}
                     </p>
                 </div>
             </div>

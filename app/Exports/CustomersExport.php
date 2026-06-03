@@ -38,8 +38,10 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, Shoul
         return $query->withCount('vehicles')->orderBy('name')->get()->map(function ($customer) use ($typeNames) {
             return [
                 'name' => $customer->name,
+                'contact_name' => $customer->contact_name,
                 'type' => $typeNames[$customer->type] ?? $customer->type,
                 'phone' => $customer->phone,
+                'whatsapp' => $customer->whatsapp,
                 'email' => $customer->email,
                 'balance' => $customer->balance ?? 0,
                 'vehicles_count' => $customer->vehicles_count ?? 0,
@@ -51,8 +53,10 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, Shoul
     {
         return [
             'الاسم / Name',
+            'اسم المسؤول / Contact Person',
             'النوع / Type',
             'رقم الهاتف / Phone',
+            'الواتساب / WhatsApp',
             'البريد الإلكتروني / Email',
             'الرصيد / Balance',
             'عدد المركبات / Vehicles Count',

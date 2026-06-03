@@ -22,7 +22,9 @@ return new class extends Migration
         });
 
         // Expand payment_method enum to include more options
-        DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'mada', 'visa', 'mastercard', 'transfer', 'apple_pay', 'stc_pay', 'tabby', 'tamara', 'credit', 'other') DEFAULT 'cash'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'mada', 'visa', 'mastercard', 'transfer', 'apple_pay', 'stc_pay', 'tabby', 'tamara', 'credit', 'other') DEFAULT 'cash'");
+        }
     }
 
     public function down(): void
@@ -32,6 +34,8 @@ return new class extends Migration
             $table->dropColumn('work_order_id');
         });
 
-        DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'card', 'transfer', 'credit') DEFAULT 'cash'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'card', 'transfer', 'credit') DEFAULT 'cash'");
+        }
     }
 };

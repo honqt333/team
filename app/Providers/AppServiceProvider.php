@@ -9,6 +9,7 @@ use App\Models\HR\Employee;
 use App\Models\Quote;
 use App\Models\QuoteLine;
 use App\Models\Service;
+use App\Models\Supplier;
 use App\Models\Vehicle;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
@@ -21,6 +22,7 @@ use App\Policies\HR\EmployeePolicy;
 use App\Policies\QuoteLinePolicy;
 use App\Policies\QuotePolicy;
 use App\Policies\ServicePolicy;
+use App\Policies\SupplierPolicy;
 use App\Policies\VehicleColorPolicy;
 use App\Policies\VehicleMakePolicy;
 use App\Policies\VehicleModelPolicy;
@@ -58,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(VehicleColor::class, VehicleColorPolicy::class);
         Gate::policy(Quote::class, QuotePolicy::class);
         Gate::policy(QuoteLine::class, QuoteLinePolicy::class);
+        Gate::policy(Supplier::class, SupplierPolicy::class);
         
         // HR Policies
         Gate::policy(Employee::class, EmployeePolicy::class);

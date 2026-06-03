@@ -6,14 +6,7 @@
                 
                 <div class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-indigo-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20" :dir="isRtl ? 'rtl' : 'ltr'">
-                        <Link :href="route('customers.index')"
-                            :title="$t('common.back')"
-                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                    d="M14 5l7 7-7 7M21 12H3" />
-                            </svg>
-                        </Link>
+                        <BackButton :href="route('customers.index')" />
 
                         <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                             <button v-if="can('crm.customers.update') || isAnyAdmin()" @click="showEditModal = true"
@@ -61,7 +54,7 @@
 
                     <div class="relative z-10 p-6 pt-16">
                         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                            <div class="flex items-center gap-6 flex-1">
+                            <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-6 flex-1">
                                 <div class="relative">
                                     <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/35 flex items-center justify-center text-white ring-4 ring-indigo-50 dark:ring-indigo-900/20 transition-transform group-hover:scale-[1.03] duration-500">
                                         <span class="text-3xl lg:text-5xl font-black">
@@ -79,7 +72,7 @@
                                 </div>
 
                                 <div class="flex-1">
-                                    <div class="flex flex-wrap items-center gap-2 lg:gap-3 mb-1">
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 lg:gap-3 mb-1">
                                         <h1 class="text-2xl lg:text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                             {{ customer.name }}
                                         </h1>
@@ -92,7 +85,7 @@
                                     </div>
                                     <p class="text-sm font-bold text-indigo-500/80 dark:text-indigo-400/80 mb-4">{{ $t('customers.subtitle') }}</p>
                                     
-                                    <div class="flex flex-wrap items-center gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
                                         <span v-if="(customer.type === 'company' || customer.type === 'government') && customer.contact_name"
                                             class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100/50">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,6 +160,29 @@
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.payments') }}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div v-if="customer.notes" class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-600 rounded-[2rem] blur opacity-[0.04] group-hover:opacity-[0.08] transition duration-700"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-[1.75rem] shadow-xl border border-amber-100/50 dark:border-amber-900/20 p-6 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-[0.02] pointer-events-none select-none">
+                        <svg class="w-24 h-24 text-amber-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-inner flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 space-y-1 text-start">
+                            <h3 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{{ $t('customers.form.notes') }}</h3>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ customer.notes }}</p>
                         </div>
                     </div>
                 </div>
@@ -284,13 +300,7 @@
                                         class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-900/50">
                                         <!-- Plate Number Badge -->
                                         <div class="flex items-center gap-2">
-                                            <div
-                                                class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-0.5 shadow-sm">
-                                                <span
-                                                    class="text-base font-bold text-gray-900 dark:text-gray-100 tracking-wider font-mono">
-                                                    {{ vehicle.plate_number }}
-                                                </span>
-                                            </div>
+                                            <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
                                         </div>
                                         <!-- Color Dot -->
                                         <span v-if="vehicle.color"
@@ -395,7 +405,7 @@
                                         class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
                                         <td
                                             class="px-4 py-3 font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">
-                                            <span dir="ltr" class="inline-block">{{ vehicle.plate_number }}</span></td>
+                                            <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" /></td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
                                             getMakeName(vehicle) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">{{
@@ -495,14 +505,29 @@
                                             $t(`work_orders.status.${order.status}`) }}</span>
                                 </div>
                                 <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 mb-3">
-                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                                    </svg>
-                                    <span dir="ltr" class="truncate">{{ order.vehicle?.plate_number }}</span>
+                                    <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
                                     <span class="text-gray-400 mx-0.5">•</span>
                                     <span class="truncate">{{ getVehicleName(order.vehicle) }}</span>
+                                </div>
+                                <!-- Financial Metrics Grid -->
+                                <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
+                                    <!-- Total -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.invoice_total') }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatPrice(order.total || 0) }}</span>
+                                    </div>
+                                    <!-- Paid -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.columns.paid') }}</span>
+                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatPrice(order.total_paid || 0) }}</span>
+                                    </div>
+                                    <!-- Balance -->
+                                    <div class="flex flex-col items-center justify-center py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.columns.balance') }}</span>
+                                        <span class="text-[11px] font-black" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400'">
+                                            {{ formatPrice(order.balance || 0) }}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div
                                     class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
@@ -529,6 +554,15 @@
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('work_orders.columns.created_at') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ $t('work_orders.invoice_total') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ $t('work_orders.columns.paid') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ $t('work_orders.columns.balance') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -539,10 +573,8 @@
                                             class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                             {{ order.code }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                            <div class="flex flex-col">
-                                                <span dir="ltr"
-                                                    class="text-sm font-bold w-fit text-start inline-block">{{
-                                                    order.vehicle?.plate_number }}</span>
+                                            <div class="flex flex-col items-center gap-1">
+                                                <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
                                                 <span class="text-xs text-gray-500">{{ getVehicleName(order.vehicle)
                                                     }}</span>
                                             </div>
@@ -554,6 +586,16 @@
                                         </td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{
                                             formatDate(order.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                                            {{ formatPrice(order.total || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
+                                            {{ formatPrice(order.total_paid || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold whitespace-nowrap"
+                                            :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">
+                                            {{ formatPrice(order.balance || 0) }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -619,9 +661,34 @@
                                         class="px-2 py-0.5 text-xs font-medium rounded-full">{{
                                             $t(`quotes.status.${quote.status}`) }}</span>
                                 </div>
-                                <div class="text-sm text-gray-600 dark:text-gray-400" dir="ltr">{{
-                                    quote.vehicle?.plate_number }}</div>
-                                <div class="mt-2 text-xs text-gray-400">{{ formatDate(quote.created_at) }}</div>
+                                <div class="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 mb-3">
+                                    <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
+                                    <span class="text-gray-400 mx-0.5">•</span>
+                                    <span class="truncate">{{ getVehicleName(quote.vehicle) }}</span>
+                                </div>
+                                <!-- Financial Metrics Grid -->
+                                <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
+                                    <!-- Price -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.price') }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatPrice(quote.total_excl_tax || 0) }}</span>
+                                    </div>
+                                    <!-- VAT -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('common.vat') }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatPrice(quote.total_tax || 0) }}</span>
+                                    </div>
+                                    <!-- Total -->
+                                    <div class="flex flex-col items-center justify-center py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('common.total') }}</span>
+                                        <span class="text-[11px] font-black text-amber-600 dark:text-amber-400">
+                                            {{ formatPrice(quote.total || 0) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                                    <span class="text-xs text-gray-400">{{ formatDate(quote.created_at) }}</span>
+                                </div>
                             </Link>
                         </div>
 
@@ -643,6 +710,15 @@
                                         <th
                                             class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
                                             {{ $t('quotes.columns.created_at') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ $t('work_orders.price') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ $t('common.vat') }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">
+                                            {{ $t('common.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -653,10 +729,9 @@
                                             class="px-4 py-3 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                                             {{ quote.code }}</td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                                            <div class="flex flex-col">
-                                                <span dir="ltr"
-                                                    class="text-sm font-bold w-fit text-start inline-block">{{
-                                                    quote.vehicle?.plate_number }}</span>
+                                            <div class="flex flex-col items-center gap-1">
+                                                <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
+                                                <span class="text-xs text-gray-500">{{ getVehicleName(quote.vehicle) }}</span>
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap">
@@ -666,6 +741,15 @@
                                         </td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{
                                             formatDate(quote.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">
+                                            {{ formatPrice(quote.total_excl_tax || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                                            {{ formatPrice(quote.total_tax || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">
+                                            {{ formatPrice(quote.total || 0) }}
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -778,8 +862,8 @@
                                             <span dir="ltr" class="inline-block">{{ formatDate(payment.payment_date)
                                                 }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes') || 'تسجيل دفعة تلقائية عند استلام الفاتورة') : payment.notes">
-                                            {{ payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes') || 'تسجيل دفعة تلقائية عند استلام الفاتورة') : (payment.notes || '-') }}
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes')) : payment.notes">
+                                            {{ payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes')) : (payment.notes || '-') }}
                                         </td>
                                         <td class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white whitespace-nowrap">
                                             <span dir="ltr" class="inline-block">{{ formatPrice(payment.amount)
@@ -845,6 +929,7 @@ import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
 import CustomerMergeModal from '@/Components/Customers/CustomerMergeModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const props = defineProps({
     customer: Object,

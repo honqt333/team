@@ -39,7 +39,7 @@
                     >
                         <span class="flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
-                            {{ $t('inventory.moves.adjustment_in') || 'زيادة' }}
+                            {{ $t('inventory.moves.adjustment_in') }}
                         </span>
                     </button>
                     <button 
@@ -54,7 +54,7 @@
                     >
                         <span class="flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M20 12H4"/></svg>
-                            {{ $t('inventory.moves.adjustment_out') || 'نقص' }}
+                            {{ $t('inventory.moves.adjustment_out') }}
                         </span>
                     </button>
                 </div>

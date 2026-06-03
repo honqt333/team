@@ -244,7 +244,7 @@ class EmployeeController extends Controller
         $validated = $request->validate([
             // Basic Info
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'phone' => 'nullable|string|max:20|unique:hr_employees,phone,' . $employee->id . ',id,tenant_id,' . TenancyContext::tenantId(),
             'email' => 'required|email|max:255|unique:hr_employees,email,' . $employee->id . ',id,tenant_id,' . TenancyContext::tenantId(),
             'gender' => 'nullable|in:male,female',

@@ -60,6 +60,7 @@ class SystemSettingsController extends Controller
                 'terms_first_page' => $existing['terms_first_page'] ?? false,
                 'show_stamp' => $existing['show_stamp'] ?? true,
                 'show_iban' => $existing['show_iban'] ?? false,
+                'show_customer_address' => $existing['show_customer_address'] ?? true,
                 'signatures' => $existing['signatures'] ?? [],
                 'updated_at' => $existing['updated_at'] ?? null,
                 'updated_by' => $existing['updated_by'] ?? null,

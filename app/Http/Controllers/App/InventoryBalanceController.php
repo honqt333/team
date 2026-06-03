@@ -56,11 +56,10 @@ class InventoryBalanceController extends Controller
         $order = $request->input('order', 'desc');
         
         $query = InventoryBalance::forWarehouse($warehouse->id)
-            ->with(['part' => fn($q) => $q->select('id', 'sku', 'barcode', 'name_ar', 'name_en', 'unit_id', 'category_id', 'min_qty', 'description', 'default_sale_price', 'min_sale_price')->with(['category', 'unit'])])
+            ->with(['part' => fn($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'description')->with(['category', 'unit'])])
             ->when($request->input('search'), function ($q, $search) {
                 $q->whereHas('part', fn($pq) => 
                     $pq->where('sku', 'like', "%{$search}%")
-                       ->orWhere('barcode', 'like', "%{$search}%")
                        ->orWhere('name_ar', 'like', "%{$search}%")
                        ->orWhere('name_en', 'like', "%{$search}%")
                 );

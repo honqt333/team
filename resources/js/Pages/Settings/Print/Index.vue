@@ -14,13 +14,7 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <Link href="/app/settings"
-                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-600 dark:text-amber-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
-                        :title="$t('common.back')">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton href="/app/settings" />
                 </template>
 
                 <template #icon>
@@ -43,130 +37,253 @@
                 </template>
             </PageHeader>
 
-            <!-- Documents Table -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-start border-collapse">
-                        <thead>
-                            <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
-                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center w-16">
-                                    {{ $t('print_settings.columns.id') }}
-                                </th>
-                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                    {{ $t('print_settings.columns.name') }}
-                                </th>
-                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                    {{ $t('print_settings.columns.print_terms') }}
-                                </th>
-                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                    {{ $t('print_settings.columns.terms_first_page') }}
-                                </th>
-                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                    {{ $t('print_settings.columns.show_stamp') }}
-                                </th>
-                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                    {{ $t('print_settings.columns.show_iban') }}
-                                </th>
-                                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">
-                                    {{ $t('print_settings.columns.updated_at') }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                            <tr v-for="(doc, key, index) in form.documents" :key="key" class="hover:bg-gray-50/50 dark:hover:bg-gray-900/20 transition-colors">
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 font-medium text-center">
-                                    {{ index + 1 }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex flex-col">
-                                        <button @click="openEditModal(key)" class="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:underline text-start">
-                                            {{ $t('print_settings.' + key) }}
-                                        </button>
-                                        <button @click="openTermsList(key)" class="text-[10px] text-gray-400 hover:text-amber-500 transition-colors text-start">
-                                            {{ $t('print_settings.terms_and_conditions') }}
-                                        </button>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <input type="checkbox" v-model="doc.print_terms" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-amber-600 focus:ring-amber-500 transition-all cursor-pointer" />
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <input type="checkbox" v-model="doc.terms_first_page" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-amber-600 focus:ring-amber-500 transition-all cursor-pointer" />
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <input type="checkbox" v-model="doc.show_stamp" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-amber-600 focus:ring-amber-500 transition-all cursor-pointer" />
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <input type="checkbox" v-model="doc.show_iban" class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-amber-600 focus:ring-amber-500 transition-all cursor-pointer" />
-                                </td>
-                                <td class="px-6 py-4 text-center">
-                                    <div v-if="doc.updated_at" class="flex flex-col items-center gap-1">
-                                        <div class="w-6 h-6 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
-                                            <svg class="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 1.944A11.947 11.947 0 012.183 5c.1 3.144.694 6.228 1.713 9.146.164.47.41.912.726 1.304l2.583 3.23a.75.75 0 001.188 0l2.583-3.23a4.506 4.506 0 00.726-1.304c1.02-2.918 1.613-6.002 1.713-9.146A11.947 11.947 0 0110 1.944zM10 18a.75.75 0 01-.75-.75V2.75a.75.75 0 011.5 0v14.5A.75.75 0 0110 18z" clip-rule="evenodd" />
-                                            </svg>
-                                        </div>
-                                        <span class="text-[10px] text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ doc.updated_at }}</span>
-                                    </div>
-                                    <span v-else class="text-xs text-gray-400">-</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Main Split-Screen Container -->
+            <div class="flex flex-col lg:flex-row gap-6 items-start">
                 
-                <!-- Note at Bottom -->
-                <div class="p-4 bg-gray-50/50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
-                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400">
-                        {{ $t('print_settings.note') }}
-                    </p>
-                </div>
-            </div>
+                <!-- Right Side: Settings Control Panel (5/12 width on large screen) -->
+                <div class="w-full lg:w-5/12 space-y-6">
+                    
+                    <!-- Section 1: Template Selection & Visual Styles -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-5">
+                            <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            نموذج وهوية الطباعة العامة
+                        </h3>
 
-            <!-- Visual Settings (Old section kept below for logo/stamp/etc) -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-6">
-                    <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                    {{ $t('print_settings.visual_preferences') }}
-                </h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/30">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('print_settings.show_logo') }}</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="form.visual.show_logo" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
-                            </label>
+                        <!-- Active Template Selector -->
+                        <div class="space-y-3 mb-6">
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest">قالب الطباعة الافتراضي</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div 
+                                    v-for="tmpl in availableTemplates" 
+                                    :key="tmpl.id"
+                                    class="p-4 rounded-2xl border text-start transition-all duration-300 flex flex-col justify-between min-h-[110px] relative overflow-hidden group"
+                                    :class="form.visual.active_template === tmpl.id 
+                                        ? 'border-amber-500 bg-amber-500/[0.04] ring-2 ring-amber-500/20' 
+                                        : 'border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30 hover:border-gray-200 dark:hover:border-gray-700'"
+                                >
+                                    <!-- Premium/Integration Badge -->
+                                    <div v-if="tmpl.premium" class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-[8px] font-black tracking-wide border border-indigo-100 dark:border-indigo-900/50">
+                                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                        تكامل إضافي
+                                    </div>
+
+                                    <div class="flex flex-col gap-1 pr-1 pt-1">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xs font-black text-gray-800 dark:text-gray-200">{{ tmpl.name }}</span>
+                                            <span v-if="form.visual.active_template === tmpl.id" class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                        </div>
+                                        <span class="text-[10px] text-gray-400 leading-normal line-clamp-2">{{ tmpl.description }}</span>
+                                    </div>
+
+                                    <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100/50 dark:border-gray-800/50 w-full">
+                                        <button 
+                                            type="button"
+                                            @click="selectTemplate(tmpl)"
+                                            class="text-[9px] font-bold px-2.5 py-1 rounded-lg transition-all"
+                                            :class="form.visual.active_template === tmpl.id
+                                                ? 'bg-amber-500 text-white shadow-sm'
+                                                : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 dark:bg-gray-800 dark:border-gray-750 dark:text-gray-300'"
+                                        >
+                                            {{ form.visual.active_template === tmpl.id ? 'القالب النشط' : 'تعيين كافتراضي' }}
+                                        </button>
+                                        <span v-if="tmpl.premium" class="text-[9px] text-indigo-500 font-black font-mono">{{ tmpl.premium_price }}</span>
+                                        <span v-else class="text-[9px] text-emerald-500 font-bold">مشمول مجاناً</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/30">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('print_settings.show_stamp') }}</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="form.visual.show_stamp" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
-                            </label>
-                        </div>
-                        <div class="flex items-center justify-between p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/30">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('print_settings.show_qr_code') }}</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="form.visual.show_qr_code" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
-                            </label>
+
+                        <!-- General Toggles & Color -->
+                        <div class="space-y-3.5">
+                            <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
+                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">إظهار شعار المركز</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.visual.show_logo" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
+                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">تفعيل الختم الرسمي العام</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.visual.show_stamp" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
+                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">إظهار كود المعاينة QR</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="form.visual.show_qr_code" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
+                                </label>
+                            </div>
+
+                            <div class="p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
+                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">اللون الأساسي للهوية</label>
+                                <div class="flex items-center gap-3">
+                                    <input v-model="form.visual.primary_color" type="color" class="w-10 h-10 rounded-lg border-0 p-0 overflow-hidden cursor-pointer bg-transparent" />
+                                    <input v-model="form.visual.primary_color" type="text" class="flex-1 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs" dir="ltr" />
+                                </div>
+                            </div>
+
+                            <div class="p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
+                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">النص التذييلي الافتراضي (الفوتر)</label>
+                                <textarea v-model="form.visual.footer_text" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-normal" :placeholder="$t('print_settings.footer_placeholder')"></textarea>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/30">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('print_settings.primary_color') }}</label>
-                            <div class="flex items-center gap-4">
-                                <input v-model="form.visual.primary_color" type="color" class="w-12 h-12 rounded-lg border-0 p-0 overflow-hidden cursor-pointer bg-transparent" />
-                                <input v-model="form.visual.primary_color" type="text" class="flex-1 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm" dir="ltr" />
+                    <!-- Section 2: Document Customizations -->
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            إعدادات المستندات الخاصة
+                        </h3>
+
+                        <!-- Document Selector Drawer list -->
+                        <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                            <button 
+                                v-for="(doc, key) in form.documents" 
+                                :key="key"
+                                type="button"
+                                @click="selectDocument(key)"
+                                class="w-full p-3 rounded-xl border text-start transition-all flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-900/50"
+                                :class="selectedDocKey === key ? 'border-emerald-500 bg-emerald-50/10 dark:bg-emerald-950/10 font-bold' : 'border-gray-100 dark:border-gray-700/60 bg-transparent'"
+                            >
+                                <div class="flex flex-col">
+                                    <span class="text-xs text-gray-800 dark:text-gray-200">{{ $t('print_settings.' + key) }}</span>
+                                    <span class="text-[9px] text-gray-400 font-mono font-normal">{{ doc.title_ar || 'بدون عنوان مخصص' }}</span>
+                                </div>
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Active Document Form Customization (Visible only when a document is clicked) -->
+                        <div v-if="selectedDocKey" class="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/80 space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">تخصيص: {{ $t('print_settings.' + selectedDocKey) }}</span>
+                                <button type="button" @click="selectedDocKey = null" class="text-[10px] text-gray-400 hover:text-red-500">إغلاق التخصيص</button>
+                            </div>
+
+                            <!-- Title Inputs (Arabic & English) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase">عنوان المستند المطبوع (عربي)</label>
+                                    <input v-model="form.documents[selectedDocKey].title_ar" type="text" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white text-xs text-end" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="block text-[10px] font-bold text-gray-400 uppercase">Document Print Title (English)</label>
+                                    <input v-model="form.documents[selectedDocKey].title_en" type="text" class="w-full px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-950 dark:text-white text-xs text-start" />
+                                </div>
+                            </div>
+
+                            <!-- Specific Document Toggles -->
+                            <div class="grid grid-cols-2 gap-2 text-[10px] text-gray-600 dark:text-gray-300 font-semibold">
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer">
+                                    <input type="checkbox" v-model="form.documents[selectedDocKey].print_terms" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+                                    <span>طباعة الشروط</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer">
+                                    <input type="checkbox" v-model="form.documents[selectedDocKey].terms_first_page" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+                                    <span>الشروط بالصفحة الأولى</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer">
+                                    <input type="checkbox" v-model="form.documents[selectedDocKey].show_stamp" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+                                    <span>تفعيل الختم</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer">
+                                    <input type="checkbox" v-model="form.documents[selectedDocKey].show_iban" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+                                    <span>إظهار IBAN البنكي</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer col-span-2">
+                                    <input type="checkbox" v-model="form.documents[selectedDocKey].show_customer_address" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+                                    <span>إظهار عنوان العميل في البيانات</span>
+                                </label>
+                            </div>
+
+                            <!-- Signatures & Terms Custom Modals Links -->
+                            <div class="grid grid-cols-2 gap-3 pt-2">
+                                <button type="button" @click="openEditModal(selectedDocKey)" class="flex items-center justify-center gap-1.5 py-2 px-3 border border-indigo-200 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-xl text-[10px] font-bold transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                    </svg>
+                                    تعديل التوقيعات الرسمية
+                                </button>
+                                <button type="button" @click="openTermsList(selectedDocKey)" class="flex items-center justify-center gap-1.5 py-2 px-3 border border-amber-200 hover:border-amber-400 text-amber-600 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-950/10 rounded-xl text-[10px] font-bold transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                    </svg>
+                                    تعديل الشروط والأحكام
+                                </button>
                             </div>
                         </div>
-                        <div class="p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50/30 dark:bg-gray-900/30">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ $t('print_settings.footer_text') }}</label>
-                            <textarea v-model="form.visual.footer_text" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm" :placeholder="$t('print_settings.footer_placeholder')"></textarea>
+                    </div>
+                </div>
+
+                <!-- Left Side: Interactive Live Preview Sandbox (7/12 width) -->
+                <div class="w-full lg:w-7/12 bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700 sticky top-6">
+                    
+                    <!-- Sandbox Control Bar -->
+                    <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700 mb-6 flex-wrap gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">منصة المعاينة التفاعلية الحية</h3>
                         </div>
+
+                        <!-- Toolbar Options -->
+                        <div class="flex items-center gap-2 flex-wrap text-xs">
+                            <!-- Document selector in preview -->
+                            <select 
+                                v-model="previewDocType" 
+                                class="px-2 py-1 rounded bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-xs cursor-pointer focus:ring-0 focus:outline-none"
+                            >
+                                <option v-for="(doc, key) in form.documents" :key="key" :value="key">
+                                    معاينة: {{ $t('print_settings.' + key) }}
+                                </option>
+                            </select>
+
+                            <!-- Zoom / Scale controls -->
+                            <select 
+                                v-model="previewScale" 
+                                class="px-2 py-1 rounded bg-gray-50 border border-gray-200 dark:bg-gray-700 dark:border-gray-600 text-gray-800 dark:text-gray-200 text-xs cursor-pointer focus:ring-0 focus:outline-none"
+                            >
+                                <option value="scale-[0.55]">مكبر (55%)</option>
+                                <option value="scale-[0.65]">مكبر (65%)</option>
+                                <option value="scale-[0.75]">مكبر (75%)</option>
+                                <option value="scale-[0.85]">مكبر (85%)</option>
+                                <option value="scale-[1.0]">الحجم الأصلي (100%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Outer Paper Container -->
+                    <div class="bg-gray-900/5 dark:bg-gray-950/20 p-6 rounded-xl border border-dashed border-gray-200 dark:border-gray-800 flex justify-center overflow-auto max-h-[70vh]">
+                        
+                        <!-- Scaled Paper Engine Box -->
+                        <div class="transition-all duration-300 shrink-0 transform" :class="previewScale">
+                            <PrintEngine 
+                                :documentType="previewDocType"
+                                :data="dummyPrintData"
+                                :centerData="dummyCenterData"
+                                :documentSettings="form.documents[previewDocType]"
+                                :visualSettings="form.visual"
+                                :previewMode="true"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-[10px] text-gray-400 text-center select-none">
+                        * المعاينة تمثل الشكل التقريبي النهائي للمستند عند الطباعة.
                     </div>
                 </div>
             </div>
@@ -191,18 +308,65 @@
             @close="editingTermsDoc = null"
             @save="handleDocSave"
         />
+
+        <!-- Upgrade Premium Template Modal -->
+        <div v-if="showUpgradeModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300">
+            <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in duration-200">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/30 text-amber-500 flex items-center justify-center border border-amber-100 dark:border-amber-900/50">
+                        <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white">تفعيل القالب المتميز</h3>
+                        <p class="text-[10px] text-gray-400">تكامل القوالب والحلول الإضافية</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 leading-relaxed text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 p-4 rounded-2xl border border-gray-100 dark:border-gray-750 mb-6">
+                    <p>لقد قمت باختيار القالب المتميز: <strong class="text-gray-900 dark:text-white">{{ selectedPremiumTemplate?.name }}</strong>.</p>
+                    <p>هذا القالب يتطلب تفعيل تكامل "حزمة قوالب الطباعة الفاخرة" عبر لوحة التحكم العامة لمتجر التكاملات.</p>
+                    <div class="flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-2 bg-indigo-50/50 dark:bg-indigo-950/20 p-2 rounded-xl">
+                        <span>الرسوم الإضافية المقدرة:</span>
+                        <span class="font-mono">{{ selectedPremiumTemplate?.premium_price }}</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button 
+                        type="button"
+                        @click="requestActivation"
+                        class="flex-1 py-2.5 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-amber-600/10"
+                    >
+                        إرسال طلب تفعيل التكامل
+                    </button>
+                    <button 
+                        type="button"
+                        @click="showUpgradeModal = false"
+                        class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-bold transition-all"
+                    >
+                        إغلاق المعاينة
+                    </button>
+                </div>
+            </div>
+        </div>
     </AppLayout>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { Link, useForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import { useToast } from '@/Composables/useToast';
 import TermsModal from './Modals/TermsModal.vue';
 import TermsListModal from './Modals/TermsListModal.vue';
+
+// Import newly created PrintEngine wrapper
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const { t } = useI18n();
 const { success } = useToast();
@@ -215,6 +379,7 @@ const form = useForm({
     section: 'print',
     documents: props.print_settings?.documents ?? {},
     visual: props.print_settings?.visual ?? {
+        active_template: 'TemplateDefaultA4',
         show_logo: true,
         show_stamp: true,
         show_qr_code: true,
@@ -223,8 +388,75 @@ const form = useForm({
     }
 });
 
+// If visual.active_template is missing in backend, set default
+if (!form.visual.active_template) {
+    form.visual.active_template = 'TemplateDefaultA4';
+}
+
 const editingDoc = ref(null);
 const editingTermsDoc = ref(null);
+
+// Premium template upgrade refs and actions
+const showUpgradeModal = ref(false);
+const selectedPremiumTemplate = ref(null);
+
+const availableTemplates = [
+    {
+        id: 'TemplateDefaultA4',
+        name: 'Classic A4',
+        description: 'طباعة A4 للمكاتب والمستندات الرسمية والمبيعات',
+        premium: false,
+        premium_price: null
+    },
+    {
+        id: 'TemplateThermal80',
+        name: 'Thermal 80mm',
+        description: 'طباعة حرارية ضيقة للفواتير السريعة والعملاء ورسائل الواتساب',
+        premium: false,
+        premium_price: null
+    },
+    {
+        id: 'TemplateModernA4',
+        name: 'Modern Compact A4',
+        description: 'قالب A4 عصري وموفر للحبر ذو تصميم مضغوط وأنيق وجدول خدمات ملون',
+        premium: true,
+        premium_price: '49 ر.س / شهرياً'
+    },
+    {
+        id: 'TemplateSleekThermal',
+        name: 'Sleek Thermal 80mm',
+        description: 'تصميم إيصال حراري حديث بلمسة داكنة وتفاصيل انسيابية وتصميم أنيق',
+        premium: true,
+        premium_price: '29 ر.س / شهرياً'
+    }
+];
+
+function selectTemplate(template) {
+    // Set active in form (updates the sandbox preview immediately!)
+    form.visual.active_template = template.id;
+    
+    // If premium, show upgrade details modal
+    if (template.premium) {
+        selectedPremiumTemplate.value = template;
+        showUpgradeModal.value = true;
+    }
+}
+
+function requestActivation() {
+    showUpgradeModal.value = false;
+    success('تم إرسال طلب التفعيل بنجاح! سيقوم فريق التكامل بالاتصال بك لتفعيل القالب خلال 24 ساعة.');
+}
+
+// Sandbox reactive state
+const selectedDocKey = ref('invoice'); // Current active customization
+const previewDocType = ref('invoice'); // Current active preview document
+const previewScale = ref('scale-[0.65]'); // Default zoom layout
+
+// Select document to customize and preview
+function selectDocument(key) {
+    selectedDocKey.value = key;
+    previewDocType.value = key;
+}
 
 function openEditModal(key) {
     editingDoc.value = key;
@@ -250,5 +482,42 @@ function save() {
         },
     });
 }
-</script>
 
+// Sandbox Dummy Data
+const dummyCenterData = computed(() => ({
+    name: 'مركز خدمة برو لصيانة السيارات',
+    logo: '/logo.png', // Fallback URL
+    tax_number: '310298374200003',
+    address: 'الرياض، حي الصحافة، طريق الملك عبد العزيز',
+    phone: '+966 55 123 4567',
+    website: 'www.khidmapro.com',
+    iban: 'SA80 4000 0000 1234 5678 9012',
+    stamp_url: props.print_settings?.visual?.stamp_url || ''
+}));
+
+const dummyPrintData = computed(() => ({
+    code: 'WO-100293',
+    created_at: new Date(),
+    odometer: '45,210',
+    expected_end_date: new Date(Date.now() + 86400000 * 2), // 2 days from now
+    customer: {
+        name: 'أحمد عبد الله القحطاني',
+        phone: '+966 50 123 4567'
+    },
+    vehicle: {
+        make: 'تويوتا',
+        model: 'كامري GLE',
+        year: '2023',
+        plate: 'ح ص ك 9922',
+        color: 'أبيض لؤلؤي'
+    },
+    items: [
+        { service_name: 'فحص كمبيوتر وبرمجة كاملة', description: 'فحص جميع الحساسات ومسح الأخطاء السابقة وإعادة التدوير', qty: 1, unit_price: 150, is_part: false },
+        { service_name: 'تغيير زيت المحرك مع الفلتر', description: 'زيت سينثيتك بالكامل 5W-30 يقطع مسافة 10,000 كم مع السيفون الأصلي', qty: 1, unit_price: 280, is_part: false },
+        { service_name: 'تغيير فحمات الفرامل الأمامية', description: 'قطع غيار أصلية مع خرط الهوبات الأمامية وضبط الميزانية', qty: 1, unit_price: 320, technician: 'المهندس سليم', is_part: false },
+        { service_name: 'فحمات فرامل أمامية (قطع غيار)', description: 'من المستودع الرئيسي - تويوتا أصلي', qty: 1, unit_price: 240, is_part: true }
+    ],
+    amount: 250, // For receipt
+    notes: 'دفعة مقدمة لصيانة السيارة المذكورة أعلاه وبدء أعمال الفحص والبرمجة.'
+}));
+</script>

@@ -217,7 +217,7 @@ class InvoicesController extends Controller
             ->paginate(25, ['*'], 'returns_page')
             ->withQueryString();
 
-        $suppliers = Supplier::forTenant($tenantId)->active()->get(['id', 'name']);
+        $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
         $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
         $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);

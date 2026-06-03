@@ -110,7 +110,7 @@ class CenterSettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'manager_name' => 'nullable|string|max:255',
             'center_type' => 'nullable|string|max:255',
             'license_number' => 'nullable|string|max:100',

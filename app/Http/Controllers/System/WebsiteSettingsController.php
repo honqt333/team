@@ -68,8 +68,17 @@ class WebsiteSettingsController extends Controller
                 'landing_hero_title_en' => Setting::get('landing.hero.title.en', 'Welcome to the Era of Smart Workshop Management'),
                 'landing_hero_subtitle_ar' => Setting::get('landing.hero.subtitle.ar', 'النظام الأول المعتمد لإدارة مراكز صيانة السيارات. فحص رقمي، فواتير إلكترونية، إدارة المخزون، ونقاط البيع في منصة واحدة متكاملة.'),
                 'landing_hero_subtitle_en' => Setting::get('landing.hero.subtitle.en', 'The certified #1 system for car workshop management. Digital inspections, e-invoices, inventory, and POS in one integrated platform.'),
-                'landing_hero_cta_text_ar' => Setting::get('landing.hero.cta_text.ar', 'اشترك الآن مجاناً'),
-                'landing_hero_cta_text_en' => Setting::get('landing.hero.cta_text.en', 'Start Your Free Trial Now'),
+                'landing_hero_cta_text_ar' => Setting::get('landing.hero.cta.text.ar', 'اشترك الآن مجاناً'),
+                'landing_hero_cta_text_en' => Setting::get('landing.hero.cta.text.en', 'Start Your Free Trial Now'),
+
+                // Hero Typed Animation
+                'landing_hero_typed_enabled' => Setting::get('landing.hero.typed.enabled', '1'),
+                'landing_hero_typed_prefix_ar' => Setting::get('landing.hero.typed.prefix.ar', 'أدر'),
+                'landing_hero_typed_prefix_en' => Setting::get('landing.hero.typed.prefix.en', 'Elevate'),
+                'landing_hero_typed_suffix_ar' => Setting::get('landing.hero.typed.suffix.ar', 'بذكاء حقيقي'),
+                'landing_hero_typed_suffix_en' => Setting::get('landing.hero.typed.suffix.en', 'With Real Intelligence'),
+                'landing_hero_typed_phrases_ar' => Setting::get('landing.hero.typed.phrases.ar', 'مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا'),
+                'landing_hero_typed_phrases_en' => Setting::get('landing.hero.typed.phrases.en', 'Your Workshop|Your Revenue|Your Team|Your Future'),
                 
                 'landing_features_title_ar' => Setting::get('landing.features.title.ar', 'لماذا نظام Carag هو خيارك الأفضل؟'),
                 'landing_features_title_en' => Setting::get('landing.features.title.en', 'Why Carag is Your Best Choice?'),
@@ -138,9 +147,17 @@ class WebsiteSettingsController extends Controller
             'settings' => 'required|array',
         ]);
 
+        // Define allowed image keys for file validation
+        $imageKeys = ['website_logo', 'website_favicon'];
+
         foreach ($request->settings as $key => $value) {
-            // Handle Direct File Uploads (Logo, Favicon)
+            // Validate file uploads (logo, favicon)
             if ($request->hasFile("settings.$key")) {
+                if (in_array($key, $imageKeys)) {
+                    $request->validate([
+                        "settings.$key" => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:2048',
+                    ]);
+                }
                 $file = $request->file("settings.$key");
                 $path = $file->store('website', 'public');
                 $value = asset('storage/' . $path);
@@ -150,11 +167,19 @@ class WebsiteSettingsController extends Controller
             if ($key === 'landing_banners_list' && is_array($value)) {
                 foreach ($value as $index => &$item) {
                     if ($request->hasFile("settings.landing_banners_list.$index.image")) {
+                        $request->validate([
+                            "settings.landing_banners_list.$index.image" => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:2048',
+                        ]);
                         $file = $request->file("settings.landing_banners_list.$index.image");
                         $path = $file->store('website/banners', 'public');
                         $item['image'] = asset('storage/' . $path);
                     }
                 }
+            }
+
+            // Validate text field lengths to prevent abuse
+            if (is_string($value) && strlen($value) > 50000) {
+                return back()->withErrors(['settings' => 'قيمة الحقل طويلة جداً']);
             }
 
             // Encode arrays to JSON strings

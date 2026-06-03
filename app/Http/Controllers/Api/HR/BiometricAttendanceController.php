@@ -169,7 +169,7 @@ class BiometricAttendanceController extends Controller
         }
 
         $validated = $request->validate([
-            'records' => 'required|array|max:100',
+            'records' => 'required|array|max:50',
             'records.*.employee_identifier' => 'required|string',
             'records.*.action' => 'required|in:check_in,check_out',
             'records.*.timestamp' => 'required|date',

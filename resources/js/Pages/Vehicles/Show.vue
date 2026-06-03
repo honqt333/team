@@ -8,15 +8,7 @@
                 <div class="relative bg-white dark:bg-gray-800 rounded-[2.25rem] shadow-2xl shadow-indigo-500/10 border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <!-- Navigation & Actions Bar -->
                     <div class="absolute top-0 inset-x-0 p-4 flex items-center justify-between z-20" :dir="isRtl ? 'rtl' : 'ltr'">
-                        <Tooltip :text="$t('common.back')">
-                            <Link :href="route('vehicles.index')"
-                                class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 text-indigo-600">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M14 5l7 7-7 7M21 12H3" />
-                                </svg>
-                            </Link>
-                        </Tooltip>
+                        <BackButton :href="route('vehicles.index')" />
 
                         <div class="flex items-center gap-2 p-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm">
                             <Tooltip :text="$t('common.edit')">
@@ -73,7 +65,7 @@
 
                     <div class="relative z-10 p-6 pt-16">
                         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                            <div class="flex items-center gap-6 flex-1">
+                            <div class="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-start gap-6 flex-1">
                                 <!-- Vehicle Brand/Logo Container -->
                                 <div class="relative">
                                     <div class="w-24 h-24 rounded-[2.25rem] bg-gradient-to-br from-indigo-600 to-purple-600 shadow-xl shadow-indigo-500/35 flex items-center justify-center text-white ring-4 ring-indigo-50 dark:ring-indigo-900/20 transition-transform group-hover:scale-[1.03] duration-500 overflow-hidden p-4">
@@ -92,7 +84,7 @@
                                 </div>
 
                                 <div class="flex-1">
-                                    <div class="flex flex-wrap items-center gap-3 mb-1">
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-1">
                                         <h1 class="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                             {{ getVehicleName(vehicle) }}
                                         </h1>
@@ -100,7 +92,7 @@
                                     </div>
                                     <p class="text-sm font-bold text-indigo-500/80 dark:text-indigo-400/80 mb-4">{{ $t('vehicles.subtitle') }}</p>
                                     
-                                    <div class="flex flex-wrap items-center gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
                                         <Link v-if="vehicle.customer" :href="route('customers.show', vehicle.customer.id)"
                                             class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-100/50 hover:bg-white dark:hover:bg-indigo-900/40 transition-all shadow-sm">
                                             <div class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center">
@@ -110,6 +102,16 @@
                                             </div>
                                             {{ vehicle.customer?.name }}
                                         </Link>
+
+                                        <span v-if="vehicle.customer?.contact_name"
+                                            class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-100/50">
+                                            <div class="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center">
+                                                <svg class="w-4.5 h-4.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                            </div>
+                                            {{ $t('customers.form.contact_name') }}: {{ vehicle.customer.contact_name }}
+                                        </span>
                                         
                                         <span v-if="vehicle.odometer" 
                                             class="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-teal-50/50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border border-teal-100/50">
@@ -135,7 +137,7 @@
                             </div>
 
                             <!-- Stats Cards -->
-                            <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex flex-wrap items-center justify-center lg:justify-start gap-3 w-full lg:w-auto">
                                 <div class="group/stat flex flex-col items-center justify-center w-20 h-20 lg:w-24 lg:h-24 bg-indigo-50/50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-100/50 dark:border-indigo-800/30 hover:bg-white dark:hover:bg-indigo-900/40 transition-all hover:shadow-lg hover:shadow-indigo-500/10">
                                     <span class="text-2xl font-black text-indigo-600 dark:text-indigo-400 group-hover/stat:scale-110 transition-transform">{{ toEnglish(counts.workOrders) }}</span>
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('customers.work_orders') }}</span>
@@ -149,6 +151,29 @@
                                     <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('invoices.title') }}</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Section -->
+            <div v-if="vehicle.notes" class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-600 rounded-[2rem] blur opacity-[0.04] group-hover:opacity-[0.08] transition duration-700"></div>
+                <div class="relative bg-white dark:bg-gray-800 rounded-[1.75rem] shadow-xl border border-amber-100/50 dark:border-amber-900/20 p-6 overflow-hidden">
+                    <div class="absolute top-0 right-0 p-6 opacity-[0.02] pointer-events-none select-none">
+                        <svg class="w-24 h-24 text-amber-900 dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-inner flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 space-y-1 text-start">
+                            <h3 class="text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-widest">{{ $t('vehicles.form.notes') }}</h3>
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ vehicle.notes }}</p>
                         </div>
                     </div>
                 </div>
@@ -241,8 +266,25 @@
                                     <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ toEnglish(order.code) }}</span>
                                     <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                 </div>
-                                <div class="text-lg font-black text-gray-900 dark:text-white mb-3">
-                                    {{ formatCurrency(order.total_incl_tax || 0) }}
+                                <!-- Financial Metrics Grid -->
+                                <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
+                                    <!-- Total -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.invoice_total') }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatCurrency(order.total || 0) }}</span>
+                                    </div>
+                                    <!-- Paid -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.columns.paid') }}</span>
+                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatCurrency(order.total_paid || 0) }}</span>
+                                    </div>
+                                    <!-- Balance -->
+                                    <div class="flex flex-col items-center justify-center py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.columns.balance') }}</span>
+                                        <span class="text-[11px] font-black" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-slate-400'">
+                                            {{ formatCurrency(order.balance || 0) }}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
                                     {{ formatDate(order.created_at) }}
@@ -257,7 +299,9 @@
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.invoice_total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.paid') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.balance') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
                                     </tr>
                                 </thead>
@@ -267,7 +311,9 @@
                                         <td class="px-4 py-3 text-center whitespace-nowrap">
                                             <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-center font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ formatCurrency(order.total_incl_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ formatCurrency(order.total || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ formatCurrency(order.total_paid || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-bold whitespace-nowrap" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">{{ formatCurrency(order.balance || 0) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(order.created_at) }}</td>
                                     </tr>
                                 </tbody>
@@ -319,8 +365,25 @@
                                     <span class="font-mono font-bold text-amber-600 dark:text-amber-400">{{ toEnglish(quote.code) }}</span>
                                     <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
                                 </div>
-                                <div class="text-lg font-black text-gray-900 dark:text-white mb-3">
-                                    {{ formatCurrency(quote.total_incl_tax || 0) }}
+                                <!-- Financial Metrics Grid -->
+                                <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
+                                    <!-- Price -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.price') }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatCurrency(quote.total_excl_tax || 0) }}</span>
+                                    </div>
+                                    <!-- VAT -->
+                                    <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('common.vat') }}</span>
+                                        <span class="text-[11px] font-black text-slate-700 dark:text-slate-300">{{ formatCurrency(quote.total_tax || 0) }}</span>
+                                    </div>
+                                    <!-- Total -->
+                                    <div class="flex flex-col items-center justify-center py-0.5">
+                                        <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('common.total') }}</span>
+                                        <span class="text-[11px] font-black text-amber-600 dark:text-amber-400">
+                                            {{ formatCurrency(quote.total || 0) }}
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
                                     {{ formatDate(quote.created_at) }}
@@ -335,6 +398,8 @@
                                     <tr class="bg-gray-100 dark:bg-gray-800">
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.price') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.vat') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.total') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
                                     </tr>
@@ -345,7 +410,9 @@
                                         <td class="px-4 py-3 text-center whitespace-nowrap">
                                             <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-center font-black text-gray-800 dark:text-gray-200 whitespace-nowrap">{{ formatCurrency(quote.total_incl_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ formatCurrency(quote.total_excl_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ formatCurrency(quote.total_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ formatCurrency(quote.total || 0) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(quote.created_at) }}</td>
                                     </tr>
                                 </tbody>
@@ -379,6 +446,128 @@
                         </div>
                     </div>
 
+                    <!-- ========== SERVICES TAB ========== -->
+                    <div v-if="activeTab === 'services'" class="space-y-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('work_orders.services_total') }}</h3>
+                        </div>
+                        <div v-if="services.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800">
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.item.tab_service') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.columns.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.status') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="item in services" :key="item.id" @click="router.visit(route('work-orders.show', item.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white">{{ isRtl ? item.name_ar : item.name_en }}</td>
+                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold">{{ toEnglish(item.work_order_code) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">{{ formatDate(item.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ formatCurrency(item.price) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black">{{ formatCurrency(item.total) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                            <span :class="getStatusClass(item.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">
+                                                {{ $t(`work_orders.status.${item.status}`) || item.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="text-center py-12">
+                            <p class="text-gray-500 dark:text-gray-400 font-bold">{{ $t('customers.no_work_orders') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- ========== PARTS TAB ========== -->
+                    <div v-if="activeTab === 'parts'" class="space-y-4">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('work_orders.parts_total') }}</h3>
+                        </div>
+                        <div v-if="parts.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800">
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.name') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.part_number') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.columns.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.source') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.qty') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.status') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="part in parts" :key="part.id" @click="router.visit(route('work-orders.show', part.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white">{{ part.name }}</td>
+                                        <td class="px-4 py-3 text-center font-mono text-xs text-gray-600 dark:text-gray-400 font-semibold">{{ toEnglish(part.part_number) || '-' }}</td>
+                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold">{{ toEnglish(part.work_order_code) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">{{ formatDate(part.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center text-xs font-bold">
+                                            <span class="px-2 py-0.5 rounded-full" :class="part.source === 'warehouse' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30' : part.source === 'external' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30'">
+                                                {{ part.source === 'warehouse' ? $t('work_orders.item.part_source.warehouse') : part.source === 'external' ? $t('work_orders.item.part_source.external') : $t('work_orders.item.part_source.customer') }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ toEnglish(part.qty) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ formatCurrency(part.price) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black">{{ formatCurrency(part.total) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full" :class="part.status === 'issued' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : part.status === 'reversed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' : 'bg-gray-100 text-gray-700 dark:bg-gray-700'">
+                                                {{ part.status === 'issued' ? $t('inventory.parts.statuses.issued') : part.status === 'reversed' ? $t('inventory.parts.statuses.reversed') : part.status === 'cancelled' ? $t('common.status_cancelled') : $t('inventory.parts.statuses.pending') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="text-center py-12">
+                            <p class="text-gray-500 dark:text-gray-400 font-bold">{{ $t('inventory.parts.empty') }}</p>
+                        </div>
+                    </div>
+
+                    <!-- ========== NOTES TAB ========== -->
+                    <div v-if="activeTab === 'notes'" class="space-y-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('work_orders.item.tab_notes') }}</h3>
+                        </div>
+                        <div v-if="workOrderNotes.length > 0" class="space-y-4">
+                            <div v-for="note in workOrderNotes" :key="note.id" @click="router.visit(route('work-orders.show', note.id))"
+                                class="group relative bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-150 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md cursor-pointer transition-all">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
+                                    <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center">#{{ toEnglish(note.code) }}</span>
+                                    <span class="text-xs font-medium text-gray-400">{{ formatDate(note.created_at) }}</span>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-start">
+                                    <!-- Customer Complaint -->
+                                    <div v-if="note.customer_complaint" class="space-y-1">
+                                        <h4 class="text-xs font-black text-rose-500 uppercase tracking-wider">{{ $t('work_orders.print_view.customer_complaint') }}</h4>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.customer_complaint }}</p>
+                                    </div>
+                                    <!-- Initial Assessment -->
+                                    <div v-if="note.initial_assessment" class="space-y-1">
+                                        <h4 class="text-xs font-black text-amber-500 uppercase tracking-wider">{{ $t('quotes.form_tabs.initial_assessment') }}</h4>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.initial_assessment }}</p>
+                                    </div>
+                                    <!-- General Notes -->
+                                    <div v-if="note.notes" class="space-y-1">
+                                        <h4 class="text-xs font-black text-indigo-500 uppercase tracking-wider">{{ $t('common.notes') }}</h4>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.notes }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="text-center py-12">
+                            <p class="text-gray-500 dark:text-gray-400 font-bold">{{ $t('work_orders.item.no_notes') }}</p>
+                        </div>
+                    </div>
+
                     <!-- ========== MILEAGE TAB ========== -->
                     <div v-if="activeTab === 'mileage'" class="space-y-4">
                          <div class="flex items-center justify-between mb-4">
@@ -391,8 +580,9 @@
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.value') }}</th>
                                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.difference') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المصدر</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">المستخدم</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.source') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.user') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -409,10 +599,17 @@
                                             <span v-else class="text-xs text-gray-400 italic font-bold">-</span>
                                         </td>
                                         <td class="px-4 py-3 text-center text-xs font-bold text-gray-500">
-                                            {{ toEnglish(log.reference_code) || 'تحديث يدوي' }}
+                                            {{ toEnglish(log.reference_code) || $t('common.manual_update') }}
                                         </td>
                                         <td class="px-4 py-3 text-center text-xs font-bold text-gray-500">
-                                            {{ log.creator?.name || 'النظام' }}
+                                            {{ log.creator?.name || $t('common.system') }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500 w-12">
+                                            <button @click.stop="deleteMileageLog(log)" class="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -438,12 +635,14 @@
 import { ref, computed, h, onMounted, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import VehicleFormModal from '@/Components/Vehicles/VehicleFormModal.vue';
 import WorkOrderFormModal from '@/Components/WorkOrders/WorkOrderFormModal.vue';
 import QuoteFormModal from '@/Components/Quotes/QuoteFormModal.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import BackButton from '@/Components/BackButton.vue';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import { usePermission } from '@/Composables/usePermission';
@@ -487,13 +686,101 @@ const ClipboardIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', strok
 const StarIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.175 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.382-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z' })]);
 const ReceiptIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' })]);
 const MapIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7l5-2.5 5.553 2.776a1 1 0 01.447.894v10.764a1 1 0 01-1.447.894L14 17l-5 3z' })]);
+const WrenchIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z' })]);
+const CogIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }), h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })]);
+const DocumentTextIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })]);
+
+const services = computed(() => {
+    const list = [];
+    props.workOrders.forEach(order => {
+        if (order.items) {
+            order.items.forEach(item => {
+                list.push({
+                    id: item.id,
+                    work_order_code: order.code,
+                    work_order_id: order.id,
+                    name_ar: item.service?.name_ar || item.title,
+                    name_en: item.service?.name_en || item.title,
+                    qty: item.qty,
+                    price: item.unit_price,
+                    total: item.qty * item.unit_price,
+                    status: item.status,
+                    created_at: order.created_at,
+                });
+            });
+        }
+    });
+    return list;
+});
+
+const parts = computed(() => {
+    const list = [];
+    props.workOrders.forEach(order => {
+        if (order.parts) {
+            order.parts.forEach(part => {
+                list.push({
+                    id: part.id,
+                    work_order_code: order.code,
+                    work_order_id: order.id,
+                    name: part.name,
+                    part_number: part.part_number,
+                    qty: part.qty,
+                    price: part.unit_price,
+                    total: part.total,
+                    source: part.source,
+                    status: part.status,
+                    created_at: order.created_at,
+                });
+            });
+        }
+    });
+    return list;
+});
+
+const workOrderNotes = computed(() => {
+    const list = [];
+    props.workOrders.forEach(order => {
+        if (order.notes || order.customer_complaint || order.initial_assessment) {
+            list.push({
+                id: order.id,
+                code: order.code,
+                created_at: order.created_at,
+                customer_complaint: order.customer_complaint,
+                initial_assessment: order.initial_assessment,
+                notes: order.notes,
+            });
+        }
+    });
+    return list;
+});
 
 const tabs = computed(() => [
     { key: 'workOrders', label: t('customers.work_orders'), count: props.counts.workOrders, icon: ClipboardIcon },
     { key: 'ratings', label: t('quotes.title'), count: props.counts.quotes, icon: StarIcon },
     { key: 'invoices', label: t('invoices.title'), count: props.counts.invoices, icon: ReceiptIcon },
+    { key: 'services', label: t('work_orders.item.tab_service'), count: services.value.length, icon: WrenchIcon },
+    { key: 'parts', label: t('work_orders.item.tab_parts'), count: parts.value.length, icon: CogIcon },
+    { key: 'notes', label: t('work_orders.item.tab_notes'), count: workOrderNotes.value.length, icon: DocumentTextIcon },
     { key: 'mileage', label: t('vehicles.mileage.history'), count: props.vehicle.mileage_logs?.length || 0, icon: MapIcon },
 ]);
+
+async function deleteMileageLog(log) {
+    const result = await confirm({
+        title: t('common.delete_confirm') || 'تأكيد الحذف',
+        message: t('vehicles.mileage.confirm_delete_log', { mileage: log.mileage }) || `هل أنت متأكد من حذف قراءة العداد (${log.mileage} كم)؟`,
+        confirmText: t('common.delete') || 'حذف',
+        type: 'danger'
+    });
+
+    if (result) {
+        try {
+            await axios.delete(route('vehicles.mileage-logs.destroy', [props.vehicle.id, log.id]));
+            router.reload({ only: ['vehicle'] });
+        } catch (error) {
+            console.error('Failed to delete mileage log:', error);
+        }
+    }
+}
 
 const filteredWorkOrders = computed(() => {
     if (!props.workOrders) return [];

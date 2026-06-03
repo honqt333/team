@@ -8,7 +8,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
                 </div>
-                {{ service ? $t('services_management.edit') : $t('services_management.add') }}
+                {{ service && service.id ? $t('services_management.edit') : $t('services_management.add') }}
             </div>
         </template>
 
@@ -57,9 +57,12 @@
                         type="text" 
                         v-model="form.name_en"
                         dir="ltr"
+                        required
                         :placeholder="$t('services_management.form.name_en_placeholder')"
                         class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                        :class="{ 'border-red-500': form.errors.name_en }"
                     />
+                    <p v-if="form.errors.name_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_en }}</p>
                 </div>
             </div>
 
@@ -468,8 +471,10 @@ watch(() => props.service, (newService) => {
 
 // Reset form when modal opens for create
 watch(() => props.show, (open) => {
-    if (open && !props.service) {
+    if (open && (!props.service || !props.service.id)) {
+        const preSelectedDeptId = props.service ? props.service.department_id : '';
         form.reset();
+        form.department_id = preSelectedDeptId;
         form.is_active = true;
         form.type = 'internal';
         form.duration_unit = 'minutes';
@@ -486,11 +491,11 @@ function submitForm() {
         return;
     }
     
-    const url = props.service 
+    const url = props.service && props.service.id 
         ? `/app/services/${props.service.id}` 
         : '/app/services';
     
-    const method = props.service ? 'put' : 'post';
+    const method = props.service && props.service.id ? 'put' : 'post';
 
     form[method](url, {
         preserveScroll: true,

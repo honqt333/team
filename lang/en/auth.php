@@ -22,4 +22,9 @@ return [
     'verify_phone_first' => 'Please verify your phone number first',
     'rate_limit_exceeded' => 'Too many attempts. Please wait :minutes minutes',
     'resend_cooldown' => 'Please wait :seconds seconds before resending',
+
+    // 2FA
+    '2fa' => [
+        'required' => 'Two-factor authentication is required for this account. Please enable it to continue.',
+    ],
 ];

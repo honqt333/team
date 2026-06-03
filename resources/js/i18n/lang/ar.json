@@ -33,7 +33,11 @@
     "code": "الكود",
     "app_name": "خدمة برو",
     "app_slogan": "نظام ادارة مراكز خدمات السيارات",
+    "app_tagline": "حلول الخدمات",
     "save": "حفظ",
+    "yes": "نعم",
+    "no": "لا",
+    "expand": "تكبير",
     "save_as_draft": "حفظ كمسودة",
     "apply": "تطبيق",
     "minute": "دقيقة",
@@ -62,6 +66,7 @@
     "to": "إلى",
     "date_from": "من تاريخ",
     "date_to": "إلى تاريخ",
+    "error_alert_title": "خطأ في الإرسال",
     "error_occurred": "حدث خطأ ما",
     "create": "إنشاء",
     "update": "تحديث",
@@ -69,9 +74,10 @@
     "confirm": "تأكيد",
     "max": "الحد الأقصى",
     "search": "بحث",
+    "search_permissions": "بحث في الصلاحيات...",
     "share": "مشاركة",
     "change": "تغيير",
-    "unit": "وحدة",
+    "unit": "الوحدة",
     "loading": "جار التحميل...",
     "na": "—",
     "choose": "اختر...",
@@ -84,6 +90,7 @@
     "add": "إضافة",
     "remove": "إزالة",
     "total": "الإجمالي",
+    "activate": "تفعيل",
     "active": "مفعل",
     "inactive": "غير مفعل",
     "print": "طباعة",
@@ -102,6 +109,8 @@
     "saved_success": "تم الحفظ بنجاح",
     "please_complete_required_fields": "يرجى إكمال الحقول الإجبارية وإضافة أصناف للحفظ",
     "vat_settings_updated": "تم تحديث إعدادات الضريبة بنجاح. يرجى تسجيل الدخول مرة أخرى.",
+    "vat": "ضريبة القيمة المضافة",
+    "vat_with_rate": "ضريبة القيمة المضافة ({rate}%)",
     "vat_included": "شامل الضريبة",
     "saving": "جاري الحفظ...",
     "loading_map": "جاري تحميل الخريطة...",
@@ -135,19 +144,16 @@
     "logged_in": "لقد قمت بتسجيل الدخول!",
     "discard": "تجاهل",
     "read_only": "قراءة فقط",
-    "qty": "الكمية",
-    "supplier": "المورد",
-    "grid_view": "عرض الشبكة",
-    "list_view": "عرض القائمة",
     "reset": "إعادة تعيين",
-    "unit_price": "سعر الوحدة",
     "no_contact": "لا توجد معلومات اتصال",
     "created_at": "تاريخ الإنشاء",
     "created_by": "أنشئ بواسطة",
     "updated_at": "تاريخ التحديث",
     "general_info": "المعلومات العامة",
     "by": "بواسطة",
+    "generated_by_system": "تمت بواسطة النظام",
     "select": "اختر",
+    "select_customer": "اختر العميل",
     "all": "الكل",
     "all_categories": "جميع الفئات",
     "all_centers": "جميع الفروع",
@@ -158,13 +164,12 @@
     "basic_info": "البيانات الأساسية",
     "overview": "نظرة عامة",
     "showing": "عرض",
+    "signature": "التوقيع",
     "of": "من",
     "cannot_delete_has_data": "لا يمكن الحذف: السجل مرتبط ببيانات أخرى",
-    "customer": "العميل",
     "details": "التفاصيل",
     "description": "الوصف",
     "phone": "الهاتف",
-    "view": "عرض",
     "manage": "إدارة",
     "finance": "المالية",
     "hr_department": "الموارد البشرية",
@@ -172,13 +177,15 @@
     "department": "القسم",
     "minutes": "دقيقة",
     "days": "يوم",
+    "deactivate": "تعطيل",
     "date": "التاريخ",
     "records": "سجل",
     "save_changes": "حفظ التغييرات",
     "save_and_add_another": "حفظ وإضافة آخر",
     "view_details": "عرض التفاصيل",
+    "view_all": "عرض الكل",
     "km": "كم",
-    "unit": "الوحدة",
+    "unknown": "غير معروف",
     "list": "قائمة",
     "grid": "شبكة",
     "validation": {
@@ -198,7 +205,8 @@
     "attachments_uploaded_successfully": "تم رفع المرفقات بنجاح",
     "attachment_deleted": "تم حذف المرفق بنجاح",
     "invalid_file_type": "نوع الملف غير صالح: {file}",
-    "file_too_large": "حجم الملف كبير جداً: {file} (الحد الأقصى {size})"
+    "file_too_large": "حجم الملف كبير جداً: {file} (الحد الأقصى {size})",
+    "notes_placeholder": "اكتب ملاحظاتك هنا..."
   },
   "nav": {
     "brand": "Carag",
@@ -229,6 +237,13 @@
     "toggle": "تبديل المظهر",
     "light": "مضيء",
     "dark": "داكن"
+  },
+  "auth": {
+    "set_password": "تعيين كلمة المرور",
+    "set_password_hint": "قم بتعيين كلمة المرور الخاصة بك، :name",
+    "password": "كلمة المرور",
+    "confirm_password": "تأكيد كلمة المرور",
+    "set_password_action": "تعيين كلمة المرور"
   },
   "customers": {
     "address": "العنوان",
@@ -366,7 +381,8 @@
       "error": "حدث خطأ أثناء الاستيراد",
       "supported_formats": "xlsx, xls, csv",
       "errors": "أخطاء الاستيراد",
-      "start_import": "بدء الاستيراد"
+      "start_import": "بدء الاستيراد",
+      "importing": "جاري الاستيراد..."
     },
     "customer": "العميل",
     "tax_number": "الرقم الضريبي"
@@ -449,6 +465,23 @@
     "payments_receipt_desc": "جميع المدفوعات المسجلة على هذا الكرت"
   },
   "work_orders": {
+    "service_modal": {
+      "duration_value": "مدة الخدمة",
+      "duration_unit": "الفترة",
+      "warranty_value": "ضمان الخدمة",
+      "warranty_unit": "الفترة",
+      "timeline": "الجدول الزمني",
+      "started_at": "تاريخ البداية",
+      "due_date": "تاريخ الاستحقاق",
+      "work_order_expected_end_date": "تاريخ إغلاق كرت الصيانة المتوقع",
+      "pricing": "سعر الخدمة والخصومات",
+      "minutes": "دقائق",
+      "hours": "ساعات",
+      "days": "أيام",
+      "weeks": "أسابيع",
+      "months": "أشهر",
+      "years": "سنوات"
+    },
     "activities": {
       "title": "سجل الأنشطة",
       "no_activities": "لا يوجد أنشطة مسجلة بعد",
@@ -474,6 +507,7 @@
       }
     },
     "title": "أوامر العمل",
+    "title_singular": "كرت عمل",
     "total": "الإجمالي",
     "balance": "المتبقي",
     "cost_and_payment": "التكلفة والدفع",
@@ -488,6 +522,8 @@
     "days_remaining": "متبقي {days} يوم",
     "due_today": "اليوم موعد التسليم",
     "completed_in_days": "اكتمل في {days} يوم",
+    "general_note": "ملاحظة عامة",
+    "vat_header": "VAT ({rate}%)",
     "add": "إنشاء أمر عمل",
     "edit": "تعديل كرت عمل",
     "details": "تفاصيل كرت العمل",
@@ -591,16 +627,19 @@
     "status": {
       "draft": "مسودة",
       "open": "مفتوح",
+      "pending": "قيد الانتظار",
       "in_progress": "قيد التنفيذ",
       "ready_for_qc": "جاهز للفحص (QC)",
       "done": "مكتمل",
-      "cancelled": "ملغي"
+      "cancelled": "ملغي",
+      "general_note": "ملاحظة عامة"
     },
     "show": {
       "no_services": "لا توجد خدمات",
       "no_parts": "لا توجد قطع غيار",
       "tabs": {
         "services": "الخدمات",
+        "notes": "المذكرات",
         "parts": "قطع الغيار",
         "technicians": "الفنيون",
         "payments": "المدفوعات",
@@ -681,6 +720,7 @@
       "formats": "PNG, JPG, JPEG حتى 5MB",
       "add_caption": "أضف وصف...",
       "no_photos": "لا توجد صور",
+      "delete_confirm": "هل أنت متأكد من حذف هذه الصورة؟",
       "error_size": "حجم الملف {file} يتجاوز الحد المسموح {size} ميجابايت",
       "error_max_files": "لقد وصلت للحد الأقصى لعدد الملفات وهو {max}",
       "types": {
@@ -700,6 +740,7 @@
       "price": "سعر الخدمة",
       "discount": "الخصم",
       "qty": "الكمية",
+      "amount": "المبلغ",
       "total_cost": "إجمالي التكلفة",
       "service_cost": "تكلفة الخدمة",
       "parts_cost": "تكلفة القطع",
@@ -725,7 +766,8 @@
       "assigned_at": "تاريخ التعيين",
       "add_note": "إضافة ملاحظة",
       "note_placeholder": "اكتب ملاحظتك هنا...",
-      "no_notes": "لا توجد ملاحظات"
+      "no_notes": "لا توجد ملاحظات",
+      "add_service_first_to_write_notes": "يرجى إضافة خدمة أولاً لتتمكن من كتابة مذكرات."
     },
     "print_view": {
       "customer": "العميل",
@@ -763,13 +805,20 @@
       "customer_signature_short": "توقيع العميل",
       "odometer": "عداد الكيلومترات",
       "fuel_level": "مستوى الوقود",
-      "na": "غير محدد"
+      "na": "غير محدد",
+      "labor_services": "أجور الخدمات واليد العاملة",
+      "received_from": "استلمنا من السيد/ة",
+      "amount_of": "مبلغاً وقدره",
+      "for_label": "وذلك لقاء",
+      "receipt": "سند قبض",
+      "calculation": "الحساب"
     },
     "all_loaded": "تم تحميل جميع كروت العمل"
   },
   "departments": {
     "title": "إدارة الأقسام",
     "add": "إضافة قسم",
+    "choose_default": "اختر من الأقسام الافتراضية المتاحة لتعبئة تلقائية:",
     "edit": "تعديل قسم",
     "search": "بحث في الأقسام...",
     "total_count": "قسم",
@@ -795,6 +844,7 @@
   },
   "services_management": {
     "title": "إدارة الخدمات",
+    "add_department_first": "يرجى إضافة قسم أولاً لتتمكن من إضافة خدمات.",
     "subtitle": "إدارة الخدمات، الباقات، والفحوصات الفنية",
     "inspections": "الفحوصات المنهجية",
     "inspections_empty": "لا توجد فحوصات",
@@ -1196,6 +1246,7 @@
     "go_to_existing": "الانتقال للتقييم الحالي",
     "title": "التقييمات",
     "subtitle": "إدارة عروض الأسعار والتقييمات الأولية للمركبات",
+    "confirm_remove_department": "إزالة القسم",
     "create": "إنشاء تقييم",
     "add": "إضافة تقييم",
     "edit": "تعديل التقييم",
@@ -1214,7 +1265,9 @@
       "external": "شراء خارجي",
       "external_hint": "تأمين من مورد خارجي",
       "customer": "من العميل",
-      "customer_hint": "أحضرها العميل معه"
+      "customer_hint": "أحضرها العميل معه",
+      "issue_more": "صرف المزيد",
+      "return_to_warehouse": "إعادة إلى المخزن"
     },
     "card": {
       "services": "الخدمات",
@@ -1305,7 +1358,8 @@
       "copy_link": "نسخ الرابط",
       "email": "بريد إلكتروني",
       "print": "طباعة",
-      "delete": "حذف"
+      "delete": "حذف",
+      "convert_to_work_order": "تحويل لأمر عمل"
     },
     "messages": {
       "confirm_approve_title": "اعتماد التقييم وتحويله",
@@ -1553,7 +1607,8 @@
     },
     "warehouses": {
       "title": "المستودعات",
-      "single": "المستودع"
+      "single": "المستودع",
+      "select": "اختر المستودع"
     },
     "locations": {
       "location": "الموقع"
@@ -1574,6 +1629,7 @@
       "sku": "الرمز",
       "sku_placeholder": "01234",
       "sku_barcode": "رقم القطعة / باركود",
+      "sku_or_barcode": "رمز المنتج / الباركود",
       "barcode": "الباركود",
       "print_barcode": "طباعة الباركود",
       "category": "التصنيف",
@@ -1584,6 +1640,8 @@
       "contains": "تحتوي على",
       "current_stock": "المخزون الحالي",
       "category_placeholder": "زيوت، فلاتر، فرامل...",
+      "choose_warehouse": "اختر المستودع",
+      "warehouse": "المستودع",
       "unit": "وحدة التخزين",
       "description": "الوصف",
       "description_placeholder": "أدخل وصف تفصيلي للقطعة",
@@ -1591,11 +1649,15 @@
       "inventory_pricing": "المخزون والتسعير",
       "make_model_placeholder": " ",
       "make_model_hint": " ",
+      "image": "الصورة",
+      "photo": "الصورة",
+      "add_image": "إضافة صورة",
       "min_qty": "الحد الأدنى للمخزون",
       "min_qty_hint": "تنبيه عند انخفاض المخزون",
       "reorder_qty": "كمية إعادة الطلب",
       "price": "السعر",
       "cost_price": "سعر التكلفة",
+      "wac_cost": "سعر الكلفة المرجح",
       "sale_price": "سعر البيع",
       "default_sale_price": "سعر البيع الافتراضي",
       "min_sale_price": "أقل سعر للبيع",
@@ -1621,7 +1683,18 @@
         "pending": "معلق",
         "issued": "مصروف",
         "reversed": "معكوس"
-      }
+      },
+      "sku_or_barcode_placeholder": "أدخل رمز المنتج أو امسح الباركود",
+      "sku_or_barcode_hint": "يُستخدم كرمز المنتج ومسح الباركود",
+      "warehouse_stock": "مخزون المستودع",
+      "select_warehouse": "اختر المستودع",
+      "add_warehouse": "إضافة مستودع",
+      "edit_warehouse": "تعديل المستودع",
+      "barcode_preview": "معاينة الباركود",
+      "initial_stock": "الرصيد الافتتاحي",
+      "min_stock": "الحد الأدنى للمخزون",
+      "storage_location": "الموقع",
+      "allow_price_change": "تعديل السعر"
     },
     "units": {
       "single": "وحدة",
@@ -1673,6 +1746,9 @@
       "receipt": "استلام",
       "adjust": "تسوية",
       "reverse": "عكس",
+      "adjustment_in": "تسوية زيادة",
+      "adjustment_out": "تسوية نقص",
+      "adjustment_type": "نوع التسوية",
       "reversed": "معكوسة",
       "confirm_reverse": "هل تريد عكس هذه الحركة؟",
       "empty": "لا توجد حركات",
@@ -1738,14 +1814,15 @@
       "empty": "لا توجد تحويلات",
       "statuses": {
         "draft": "مسودة",
-        "sent": "مرسل",
-        "received": "مستلم",
-        "cancelled": "ملغي"
+        "sent": "مرسلة",
+        "received": "مستلمة",
+        "cancelled": "ملغية"
       }
     }
   },
   "purchasing": {
-    "title": "المشتريات",
+    "title": "المتجر",
+    "subtitle": "إدارة بيانات الموردين والمشتريات",
     "suppliers": {
       "title": "الموردين",
       "subtitle": "إدارة بيانات الموردين",
@@ -1802,7 +1879,8 @@
       "title": "فواتير المشتريات",
       "auto_generated_from_grn": "تم إنشاؤها تلقائياً من سند استلام البضاعة: {code}",
       "code": "رقم الفاتورة",
-      "date": "تاريخ الفاتورة"
+      "date": "تاريخ الفاتورة",
+      "supplier_ref": "مرجع المورد"
     },
     "orders": {
       "title": "أوامر الشراء",
@@ -2004,13 +2082,12 @@
     "purchases": {
       "title": "فواتير المشتريات",
       "subtitle": "إدارة فواتير الشراء وإرجاعات الشراء",
-      "tab_invoices": "فواتير المشتريات",
+      "tab_invoices": "المشتريات",
       "tab_returns": "إرجاعات الشراء",
       "no_returns": "لا توجد إرجاعات شراء",
       "add": "إضافة فاتورة شراء مباشر",
       "invoice": "فاتورة شراء",
       "return_invoice": "فاتورة مرتجع شراء",
-      "tab_invoices": "المشتريات",
       "create": "إنشاء فاتورة شراء مباشرة",
       "invoice_number": "رقم فاتورة المورد",
       "invoice_number_placeholder": "أدخل رقم فاتورة المورد المباشر",
@@ -2043,11 +2120,20 @@
       "paid": "مدفوعة"
     },
     "tax_rate": "نسبة الضريبة",
-    "grand_total": "الإجمالي شامل الضريبة",
     "total_paid": "المدفوع",
     "all_statuses": "جميع الحالات",
     "date_from": "من تاريخ",
-    "date_to": "إلى تاريخ"
+    "date_to": "إلى تاريخ",
+    "create_debit_note": "إنشاء إشعار مدين",
+    "debit_note": "إشعار مدين",
+    "debit_note_date": "تاريخ إشعار المدين",
+    "debit_note_hint": "إنشاء إشعار مدين لهذه المرتجعات",
+    "original_attachment_ref": "مرجع: مرفق فاتورة الشراء الأصلية",
+    "payment_status": {
+      "paid": "مدفوعة",
+      "unpaid": "غير مدفوعة",
+      "partial": "مدفوع جزئياً"
+    }
   },
   "payments": {
     "title": "المدفوعات",
@@ -2064,6 +2150,7 @@
     "pay_partial": "دفع جزئي",
     "no_payments": "لا توجد مدفوعات",
     "no_payments_desc": "لا توجد مدفوعات مسجلة لهذه الفاتورة حتى الآن.",
+    "no_refunds": "لا توجد دفعات مستردة مسجلة",
     "auto_payment_notes": "تسجيل دفعة تلقائية عند استلام الفاتورة",
     "recorded_by": "قام بالتحديث",
     "form": {
@@ -2094,9 +2181,17 @@
       "tabby": "تابي",
       "tamara": "تمارا",
       "credit": "آجل",
+      "debit_note": "إشعار مدين",
       "other": "أخرى"
     },
-    "amount_exceeds_balance": "المبلغ لا يمكن أن يتجاوز المتبقي"
+    "amount_exceeds_balance": "المبلغ لا يمكن أن يتجاوز المتبقي",
+    "debit_note_registered_notes": "تم تسجيل إشعار مدين للمبلغ المتبقي المسترد من المرتجع: {code}",
+    "refund_for_return_notes": "دفعة مستردة لفاتورة الإرجاع: {code}",
+    "remaining_refund": "المتبقي لم يسترد",
+    "cannot_refund_unpaid": "لا يمكن تسجيل مبالغ مستردة لأن الفاتورة لم تدفع",
+    "errors": {
+      "cannot_refund_unpaid_invoice": "لا يمكن تسجيل دفعة مستردة لفاتورة شراء لم تدفع بعد"
+    }
   },
   "hr": {
     "title": "الموارد البشرية",
@@ -2117,13 +2212,16 @@
       "subtitle": "إدارة ملفات الموظفين",
       "total": "إجمالي الموظفين",
       "employee": "موظف",
+      "departments": "الأقسام",
       "add": "إضافة موظف",
       "hire_date": "تاريخ التعيين",
+      "monthly": "شهري",
       "contract_end_date": "تاريخ انتهاء العقد",
       "link_user": "ربط بمستخدم",
       "no_user_link": "بدون ربط",
       "link_user_hint": "ربط الموظف بحساب مستخدم للوصول للنظام",
       "name": "الاسم",
+      "phone": "الهاتف",
       "department": "القسم",
       "total_allowances": "إجمالي البدلات",
       "total_deductions": "إجمالي الخصومات",
@@ -2136,9 +2234,11 @@
       "number": "الرقم الوظيفي",
       "employee_number": "الرقم الوظيفي",
       "job_title": "المسمى الوظيفي",
+      "job_titles": "المسميات الوظيفية",
       "employee_type": "نوع الموظف",
       "base_salary": "الراتب الأساسي",
       "no_employees": "لا يوجد موظفين",
+      "print_report": "تقرير الموظفين",
       "gender": "الجنس",
       "nationality": "الجنسية",
       "national_id": "رقم الهوية",
@@ -2218,6 +2318,8 @@
     },
     "attendance": {
       "title": "الحضور والانصراف",
+      "shift_start": "بداية الدوام",
+      "shift_end": "نهاية الدوام",
       "subtitle": "سجل حضور الموظفين",
       "date": "التاريخ",
       "check_in": "تسجيل دخول",
@@ -2238,6 +2340,12 @@
     },
     "leaves": {
       "title": "الإجازات والدوام",
+      "status": {
+        "pending": "معلقة",
+        "approved": "مقبولة",
+        "rejected": "مرفوضة",
+        "cancelled": "ملغاة"
+      },
       "add": "إضافة إجازة",
       "edit": "تعديل إجازة",
       "type": "نوع الإجازة",
@@ -2249,17 +2357,11 @@
       "end_date": "تاريخ النهاية",
       "days": "عدد الأيام",
       "request_leave": "طلب إجازة",
-      "status": {
-        "pending": "معلقة",
-        "approved": "مقبولة",
-        "rejected": "مرفوضة",
-        "cancelled": "ملغاة"
-      },
       "types": {
-        "annual": "سنوية",
-        "sick": "مرضية",
+        "annual": "سنوي",
+        "sick": "مرضي",
         "unpaid": "بدون راتب",
-        "emergency": "طارئة",
+        "emergency": "طارئ",
         "maternity": "أمومة",
         "paternity": "أبوة",
         "other": "أخرى"
@@ -2276,8 +2378,10 @@
     },
     "payroll": {
       "title": "الرواتب",
+      "pending": "قيد الانتظار",
       "subtitle": "إدارة كشوف الرواتب الشهرية",
       "generate": "إنشاء مسير رواتب",
+      "regenerate": "إعادة إنشاء",
       "details": "تفاصيل المسيّرة",
       "monthly_salaries": "الرواتب الشهرية",
       "period": "الفترة",
@@ -2288,6 +2392,7 @@
       "total_salaries": "إجمالي الرواتب",
       "total_deductions": "إجمالي الخصومات",
       "total_net": "صافي الإجمالي",
+      "total_allowances": "إجمالي البدلات",
       "status": "الحالة",
       "items": "تفاصيل الموظفين",
       "base_salary": "الراتب الأساسي",
@@ -2295,6 +2400,7 @@
       "deductions": "الخصومات",
       "gosi": "التأمينات",
       "net_salary": "الصافي",
+      "paid": "مدفوعة",
       "approve": "اعتماد",
       "mark_paid": "تسجيل كمدفوع",
       "print_report": "طباعة كشف الرواتب",
@@ -2347,7 +2453,7 @@
           "advance": "سلفة",
           "bonus": "مكافأة",
           "compensation": "تعويض",
-          "penalty": "جزاء",
+          "penalty": "غرامة",
           "other": "أخرى"
         }
       },
@@ -2778,5 +2884,90 @@
   },
   "suppliers": {
     "tax_number": "الرقم الضريبي"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "subtitle": "مرحباً بك في نظام خدمة برو. إليك ملخص أداء مركزك اليوم.",
+    "greeting_morning": "صباح الخير",
+    "greeting_afternoon": "مساء الخير",
+    "greeting_evening": "مساء النور",
+    "vs_last_month": "مقارنةً بالشهر الماضي",
+    "work_orders_this_month": "أوامر عمل الشهر",
+    "revenue_this_month": "إيرادات الشهر",
+    "outstanding_balance": "المستحقات",
+    "total_customers": "إجمالي العملاء",
+    "active_count": "{n} نشط حالياً",
+    "payments_today": "تحصيل اليوم: {n}",
+    "new_this_month": "{n} جديد هذا الشهر",
+    "insight_revenue_up": "الإيرادات مرتفعة {pct}%",
+    "insight_revenue_down": "الإيرادات منخفضة {pct}%",
+    "insight_vs_last_month": "مقارنة بالشهر الماضي",
+    "insight_overdue_wo": "{n} أمر عمل متأخر",
+    "insight_new_customers": "{n} عميل جديد هذا الشهر",
+    "insight_this_month": "هذا الشهر",
+    "insight_wo_up": "أوامر العمل مرتفعة {pct}%",
+    "insight_wo_down": "أوامر العمل منخفضة {pct}%",
+    "analytics_title": "التحليلات والرسوم البيانية",
+    "insights_title": "نظرة عامة وإجراءات",
+    "recent_activity": "النشاط الأخير",
+    "revenue_chart_title": "الإيرادات",
+    "last_30_days": "آخر 30 يوم",
+    "daily_avg": "متوسط يومي",
+    "best_day": "أفضل يوم",
+    "work_orders_status": "توزيع أوامر العمل",
+    "this_month": "هذا الشهر",
+    "weekly_work_orders": "أوامر العمل الأسبوعية",
+    "last_7_days": "آخر 7 أيام",
+    "total": "الإجمالي",
+    "recent_work_orders": "أحدث أوامر العمل",
+    "recent_invoices": "أحدث الفواتير",
+    "latest_8": "آخر 8 سجلات",
+    "no_recent_work_orders": "لا توجد أوامر عمل حديثة",
+    "no_recent_invoices": "لا توجد فواتير حديثة",
+    "alerts_title": "التنبيهات",
+    "alerts_attention": "{n} تنبيه يحتاج انتباهك",
+    "all_clear": "كل شيء على ما يرام",
+    "overdue_work_orders": "أوامر عمل متأخرة",
+    "overdue_work_orders_desc": "تجاوزت تاريخ الانتهاء المتوقع",
+    "overdue_invoices": "فواتير مستحقة",
+    "overdue_invoices_desc": "فواتير غير مدفوعة منذ أكثر من 30 يوم",
+    "low_stock_parts": "قطع تحت الحد الأدنى",
+    "low_stock_parts_desc": "مخزون منخفض يحتاج إعادة طلب",
+    "everything_looks_great": "كل شيء يسير بشكل ممتاز!",
+    "no_alerts_attention": "لا توجد تنبيهات تحتاج انتباهك حالياً.",
+    "quick_actions": "الإجراءات السريعة",
+    "quick_actions_subtitle": "وصول سريع للعمليات الأكثر استخداماً",
+    "new_work_order": "أمر عمل جديد",
+    "new_customer": "عميل جديد",
+    "new_invoice": "فاتورة جديدة",
+    "new_quote": "تقييم جديد",
+    "reports": "التقارير",
+    "settings": "الإعدادات",
+    "no_data": "لا توجد بيانات",
+    "customize": "تخصيص",
+    "customize_hint": "اسحب وأفلت لتنظيم أو إخفاء عناصر لوحة التحكم",
+    "drag_to_reorder": "اسحب لإعادة الترتيب",
+    "reset": "إعادة تعيين",
+    "save_layout": "حفظ التخطيط"
+  },
+  "landing": {
+    "learn_more": "المزيد",
+    "explore_features": "استكشف المميزات",
+    "no_contracts": "بدون عقود",
+    "free_trial": "نسخة تجريبية مجانية",
+    "support_24_7": "دعم فني 24/7",
+    "uptime": "استقرار",
+    "active_shops": "ورشة نشطة",
+    "exclusive_tools": "أدواتنا الحصرية",
+    "pricing_plans": "الخطط والأسعار",
+    "monthly": "شهري",
+    "yearly": "سنوي",
+    "most_popular": "الأكثر طلباً",
+    "price_unit": "ريال/شهر",
+    "start_now": "ابدأ الآن",
+    "login": "دخول",
+    "version_2_coming_soon": "الإصدار 2.0 — قريباً",
+    "elevate": "أدر",
+    "with_intelligence": "بذكاء حقيقي"
   }
 }

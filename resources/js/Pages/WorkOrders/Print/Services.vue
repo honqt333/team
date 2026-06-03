@@ -1,95 +1,39 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8" :dir="isRtl ? 'rtl' : 'ltr'">
-        <!-- Reusable Print Header -->
-        <PrintHeader 
-            :title="page.props.tenant?.work_order_title || $t('work_orders.print_view.work_order')"
-            :subtitle="workOrder.code"
-            :work-order="workOrder"
-        />
+    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+        <!-- Print / Back Controls (hidden during print) -->
+        <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
+            <!-- Back Button -->
+            <button 
+                @click="goBack" 
+                class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                {{ $t('common.back') }}
+            </button>
 
-        <!-- Customer & Vehicle Info -->
-        <div class="grid grid-cols-2 gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
-            <div>
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.customer') }}:</span> <span class="font-bold mr-2">{{ workOrder.customer?.name }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.phone') }}:</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.customer?.phone }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.entry_date') }}:</span> <span class="font-bold mr-2">{{ formatDate(workOrder.entry_date) }}</span></p>
-            </div>
-            <div :class="isRtl ? 'text-left' : 'text-right'">
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.vehicle') }}:</span> <span class="font-bold mr-2">{{ vehicleName }}</span></p>
-                <p class="mb-1"><span class="text-gray-500">{{ $t('work_orders.print_view.plate') }}:</span> <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.plate_number }}</span></p>
-            </div>
-        </div>
-
-        <!-- Services by Department -->
-        <div class="mb-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">{{ $t('work_orders.print_view.required_services') }}</h3>
-            
-            <div v-for="(items, deptId) in itemsByDepartment" :key="deptId" class="mb-4">
-                <h4 class="font-semibold text-gray-700 bg-gray-100 px-3 py-2 rounded">
-                    {{ getDepartmentName(deptId) }}
-                </h4>
-                <table class="w-full text-sm mt-2">
-                    <thead>
-                        <tr class="border-b">
-                            <th class="py-2 text-right w-10">#</th>
-                            <th class="py-2 text-right">{{ $t('work_orders.print_view.service') }}</th>
-                            <th class="py-2 text-center w-32">{{ $t('work_orders.print_view.technician') }}</th>
-                            <th class="py-2 text-center w-20">{{ $t('work_orders.print_view.status') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item, idx) in items" :key="item.id" class="border-b border-gray-100">
-                            <td class="py-2 text-right text-gray-500">{{ idx + 1 }}</td>
-                            <td class="py-2 text-right">{{ item.title || item.service?.name_ar || item.service?.name_en }}</td>
-                            <td class="py-2 text-center">{{ item.technicians?.[0]?.name || '-' }}</td>
-                            <td class="py-2 text-center">
-                                <span class="px-2 py-0.5 rounded text-xs" :class="getStatusClass(item.status)">
-                                    {{ getStatusLabel(item.status) }}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Customer Complaint -->
-        <div v-if="workOrder.customer_complaint" class="mb-6 p-4 bg-orange-50 rounded-lg border border-orange-200">
-            <h3 class="font-bold text-orange-700 mb-2">{{ $t('work_orders.print_view.customer_complaint') }}</h3>
-            <p class="text-gray-700 whitespace-pre-wrap">{{ workOrder.customer_complaint }}</p>
-        </div>
-
-        <!-- Signatures -->
-        <div class="mt-8 pt-4 border-t grid grid-cols-3 gap-4 text-center text-sm text-gray-600">
-            <div>
-                <p class="mb-8">{{ $t('work_orders.print_view.manager_signature') }}</p>
-                <p class="border-t pt-2">_________________</p>
-            </div>
-            <div>
-                <p class="mb-8">{{ $t('work_orders.print_view.technician_signature') }}</p>
-                <p class="border-t pt-2">_________________</p>
-            </div>
-            <div>
-                <p class="mb-8">{{ $t('work_orders.print_view.customer_signature') }}</p>
-                <p class="border-t pt-2">_________________</p>
-            </div>
-        </div>
-
-        <!-- Terms & Conditions (Print Only) -->
-        <div v-if="page.props.tenant?.work_order_terms" class="mt-12 pt-6 border-t border-gray-200">
-            <h3 class="text-sm font-bold text-gray-900 mb-2">{{ $t('work_orders.print_view.terms_conditions') }}</h3>
-            <p class="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{{ page.props.tenant.work_order_terms }}</p>
-        </div>
-
-        <!-- Print Button -->
-        <div class="fixed bottom-4 left-4 print:hidden">
-            <button @click="printPage" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            <!-- Print Button -->
+            <button 
+                @click="printPage" 
+                class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
+                :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                 </svg>
                 {{ $t('work_orders.print_view.print_btn') }}
             </button>
         </div>
+
+        <PrintEngine 
+            documentType="work_order"
+            :data="mappedData"
+            :centerData="mappedCenterData"
+            :documentSettings="documentSettings"
+            :visualSettings="visualSettings"
+            :previewMode="false"
+        />
     </div>
 </template>
 
@@ -97,9 +41,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
-import PrintHeader from '@/Components/Print/PrintHeader.vue';
-
-const page = usePage();
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const props = defineProps({
     workOrder: Object,
@@ -107,50 +49,114 @@ const props = defineProps({
     departments: Object,
 });
 
+const page = usePage();
 const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
-const vehicleName = computed(() => {
+const goBack = () => window.history.back();
+const printPage = () => window.print();
+
+const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
+
+const mappedData = computed(() => {
     const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
     const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
-    return `${make} ${model}`.trim() || '-';
+    const vehicleStr = `${make} ${model}`.trim() || '-';
+
+    const items = (props.workOrder.items || []).map(item => ({
+        service_name: item.title || item.service?.name_ar || item.service?.name_en || '',
+        description: item.description || '',
+        technicians: (item.technicians || []).map(t => t.name).filter(Boolean),
+        status: item.status || null,
+        started_at: item.started_at || null,
+        due_date: item.due_date || null,
+        is_part: false
+    }));
+
+    return {
+        code: props.workOrder.code,
+        created_at: new Date().toISOString(),
+        entry_date: props.workOrder.entry_date,
+        expected_end_date: props.workOrder.expected_end_date,
+        mileage: props.workOrder.mileage,
+        odometer: props.workOrder.mileage ? formatNumber(props.workOrder.mileage) : '-',
+        fuel_level: props.workOrder.fuel_level,
+        customer_complaint: props.workOrder.customer_complaint,
+        initial_assessment: props.workOrder.initial_assessment,
+        reception_signature: props.workOrder.reception_signature,
+        delivery_signature: props.workOrder.delivery_signature,
+        customer: {
+            name: props.workOrder.customer?.name,
+            phone: props.workOrder.customer?.phone,
+            address: props.workOrder.customer?.address_line,
+            tax_number: props.workOrder.customer?.tax_number,
+        },
+        vehicle: {
+            make: vehicleStr,
+            plate: props.workOrder.vehicle?.plate_number,
+            color: props.workOrder.vehicle?.color,
+        },
+        items: items
+    };
 });
 
-const formatDate = (date) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US');
-};
-
-const getDepartmentName = (deptId) => {
-    const dept = props.departments?.[deptId];
-    if (dept) return isRtl.value ? dept.name_ar : dept.name_en;
-    return $t('common.other');
-};
-
-const getStatusClass = (status) => ({
-    pending: 'bg-gray-100 text-gray-600',
-    in_progress: 'bg-blue-100 text-blue-600',
-    completed: 'bg-green-100 text-green-600',
-    cancelled: 'bg-red-100 text-red-600',
-}[status] || 'bg-gray-100 text-gray-600');
-
-const getStatusLabel = (status) => {
-    const labels = { 
-        pending: $t('work_orders.item.status_pending'), 
-        in_progress: $t('work_orders.item.status_in_progress'), 
-        completed: $t('work_orders.item.status_completed'), 
-        cancelled: $t('work_orders.item.status_cancelled') 
+const mappedCenterData = computed(() => {
+    const center = props.workOrder.center || {};
+    const tenant = props.workOrder.tenant || page.props.tenant || {};
+    return {
+        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
+        tax_number: center.vat_number || tenant.vat_number,
+        cr_number: tenant.cr_number,
+        phone: center.phone || tenant.phone,
+        logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
+        iban: tenant.iban || '',
+        address: center.address || tenant.address || '',
+        stamp_url: center.stamp_url || '',
     };
-    return labels[status] || status;
-};
+});
 
-const printPage = () => window.print();
+const documentSettings = computed(() => {
+    const tenantSettings = page.props.tenant?.print_settings;
+    const docSettings = tenantSettings?.documents?.['work_order'] || {};
+    return {
+        title_ar: docSettings.title_ar || 'كرت صيانة',
+        title_en: docSettings.title_en || 'Work Order',
+        terms: docSettings.terms || [],
+        print_terms: docSettings.print_terms !== false,
+        show_stamp: docSettings.show_stamp !== false,
+        show_customer_address: docSettings.show_customer_address !== false,
+        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
+            { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
+            { name_ar: 'توقيع الفني', name_en: 'Technician Signature' },
+            { name_ar: 'توقيع العميل', name_en: 'Customer Signature' }
+        ]
+    };
+});
+
+const visualSettings = computed(() => {
+    const tenantSettings = page.props.tenant?.print_settings;
+    const vis = tenantSettings?.visual || {};
+    const center = props.workOrder.center || {};
+    return {
+        active_template: vis.active_template || 'TemplateDefaultA4',
+        show_logo: vis.show_logo !== false,
+        show_stamp: vis.show_stamp !== false,
+        show_qr_code: vis.show_qr_code !== false,
+        primary_color: vis.primary_color || '#fbbf24',
+        footer_text: vis.footer_text || '',
+        stamp_url: center.stamp_url || vis.stamp_url || ''
+    };
+});
 </script>
 
 <style>
 @media print {
     @page { size: A4; margin: 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
     .print-container { padding: 0; }
+    .print-container,
+    .print-container * {
+        visibility: visible !important;
+    }
 }
 </style>

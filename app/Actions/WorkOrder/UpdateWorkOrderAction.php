@@ -119,6 +119,7 @@ class UpdateWorkOrderAction
 
             $workOrder->logActivity('updated', __('work_orders.activities.actions.updated'));
 
+            $workOrder->refresh();
             return $workOrder;
         });
     }

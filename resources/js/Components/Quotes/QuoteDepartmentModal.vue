@@ -91,7 +91,14 @@ const form = useForm({
 
 // Departments to show
 const departments = computed(() => {
-    return props.availableDepartments || [];
+    const list = [...(props.availableDepartments || [])];
+    list.push({
+        id: 'packages',
+        name_ar: 'باقات الخدمات',
+        name_en: 'Service Packages',
+        name: 'Service Packages'
+    });
+    return list;
 });
 
 // Check if a department has services in the quote
@@ -122,7 +129,13 @@ watch(() => props.show, (isOpen) => {
         // Reset form to current quote state
         form.customer_id = props.quote.customer_id;
         form.vehicle_id = props.quote.vehicle_id;
-        form.departments = props.quote.departments ? props.quote.departments.map(d => d.id) : [];
+        
+        const deptIds = props.quote.departments ? props.quote.departments.map(d => d.id) : [];
+        if (props.quote.show_packages_section) {
+            deptIds.push('packages');
+        }
+        form.departments = deptIds;
+        
         form.notes = props.quote.notes;
         form.customer_complaint = props.quote.customer_complaint;
         form.initial_assessment = props.quote.initial_assessment;

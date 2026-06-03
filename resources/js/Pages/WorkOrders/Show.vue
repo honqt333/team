@@ -102,12 +102,9 @@
                         <!-- Spacer -->
                         <div class="w-8"></div>
                         <!-- Center: Plate + Model -->
-                        <div class="text-center">
-                            <h3 class="text-xl font-black text-gray-900 dark:text-white tracking-widest uppercase group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors"
-                                dir="ltr">
-                                {{ workOrder.vehicle?.plate_number }}
-                            </h3>
-                            <p class="text-xs font-semibold text-blue-500 dark:text-blue-400 mt-0.5">
+                        <div class="text-center flex flex-col items-center">
+                            <SaudiPlateDisplay :plate-number="workOrder.vehicle?.plate_number" size="md" />
+                            <p class="text-xs font-semibold text-blue-500 dark:text-blue-400 mt-1.5">
                                 {{ getName(workOrder.vehicle?.make) }} {{ getName(workOrder.vehicle?.model) }} {{
                                     workOrder.vehicle?.year }}
                             </p>
@@ -169,7 +166,7 @@
                                     class="absolute bottom-full right-0 mb-2 hidden group-hover/customer:block z-50 pointer-events-none">
                                     <div
                                         class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                                        {{ $t('customers.view_profile') || 'عرض ملف العميل' }}
+                                        {{ $t('customers.view_profile') }}
                                     </div>
                                     <div
                                         class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1">
@@ -189,7 +186,7 @@
                                     class="absolute bottom-full right-0 mb-2 hidden group-hover/contact:block z-50 pointer-events-none">
                                     <div
                                         class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                                        {{ $t('work_orders.form.contact_name') || 'اسم جهة الاتصال' }}
+                                        {{ $t('work_orders.form.contact_name') }}
                                     </div>
                                     <div
                                         class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1">
@@ -214,7 +211,7 @@
                                     class="absolute bottom-full right-0 mb-2 hidden group-hover/whatsapp:block z-50 pointer-events-none">
                                     <div
                                         class="bg-gray-900 dark:bg-gray-700 text-white text-xs font-medium px-2 py-1 rounded-lg whitespace-nowrap shadow-lg">
-                                        {{ $t('common.open_in_whatsapp') || 'فتح باستخدام الواتساب' }}
+                                        {{ $t('common.open_in_whatsapp') }}
                                     </div>
                                     <div
                                         class="absolute top-full right-4 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45 -mt-1">
@@ -252,7 +249,7 @@
                             </svg>
                             <span class="text-sm font-bold text-teal-600 dark:text-teal-400 font-mono cursor-default"
                                 dir="ltr">
-                                {{ workOrder.odometer ? Number(workOrder.odometer).toLocaleString() + ' km' : '—' }}
+                                {{ workOrder.mileage ? Number(workOrder.mileage).toLocaleString() + ' km' : '—' }}
                             </span>
                             <div
                                 class="absolute bottom-full right-0 mb-2 hidden group-hover/odo:block z-50 pointer-events-none">
@@ -273,7 +270,7 @@
                     class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                         <div class="w-2 h-5 bg-amber-500 rounded-full"></div>
-                        {{ $t('work_orders.cost_and_payment') || 'التكلفة و الدفع' }}
+                        {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
                     <div class="overflow-x-auto flex-1">
@@ -290,7 +287,7 @@
                                     <th class="pb-2 text-end font-bold uppercase tracking-wider">{{ $t('common.amount')
                                         }}</th>
                                     <th v-if="hasTax" class="pb-2 text-end font-bold uppercase tracking-wider italic">
-                                        VAT (15%)</th>
+                                        {{ $t('work_orders.vat_header', { rate: workOrder.tax_rate_snapshot || 15 }) }}</th>
                                     <th
                                         class="pb-2 text-end font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">
                                         {{ $t('common.total') }}</th>
@@ -542,9 +539,9 @@
                                         </span>
                                     </div>
 
-                                    <div class="flex items-center gap-2">
+   <div class="flex items-center gap-2">
                                         <!-- Remove Department Button -->
-                                        <button v-if="!isReadOnly && getDepartmentItems(dept.id).length === 0"
+                                        <button v-if="!isReadOnly && (!dept.is_virtual || dept.id === 'packages') && getDepartmentItems(dept.id).length === 0"
                                             @click.stop="removeDepartment(dept.id)"
                                             class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
                                             :title="$t('common.delete')">
@@ -561,154 +558,150 @@
                                     <!-- Services List -->
                                     <div class="flex flex-col gap-3">
                                         <div v-for="(item, index) in getDepartmentItems(dept.id)" :key="item.id"
-                                            class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 p-4 transition-all hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 group relative">
-                                            <div class="flex items-center justify-between">
-                                                <!-- Right Side: Status + Title + Meta -->
-                                                <div class="flex items-start gap-4 flex-1">
-                                                    <!-- Status Icon (Large) -->
-                                                    <div class="mt-1 flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-colors"
-                                                        :class="{
-                                                            'bg-gray-50 text-gray-400 dark:bg-gray-700 dark:text-gray-500': item.status === 'pending',
-                                                            'bg-blue-50 text-blue-500 dark:bg-blue-900/20 dark:text-blue-400': item.status === 'in_progress',
-                                                            'bg-teal-50 text-teal-500 dark:bg-teal-900/20 dark:text-teal-400': item.status === 'ready_for_qc',
-                                                            'bg-green-50 text-green-500 dark:bg-green-900/20 dark:text-green-400': item.status === 'completed',
-                                                            'bg-yellow-50 text-yellow-500 dark:bg-yellow-900/20 dark:text-yellow-400': item.status === 'on_hold',
-                                                            'bg-red-50 text-red-500 dark:bg-red-900/20 dark:text-red-400': item.status === 'cancelled'
-                                                        }">
-                                                        <svg v-if="item.status === 'completed'" class="w-6 h-6"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                        <svg v-else-if="item.status === 'in_progress'" class="w-6 h-6"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                        </svg>
-                                                        <svg v-else-if="item.status === 'cancelled'" class="w-6 h-6"
-                                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                        </svg>
-                                                        <svg v-else class="w-6 h-6" fill="none" stroke="currentColor"
-                                                            viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="2"
-                                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
+                                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 p-4 transition-all hover:shadow-lg hover:shadow-indigo-500/5 hover:border-gray-200 dark:hover:border-gray-600 group relative"
+                                            :class="{
+                                                'border-s-gray-300 dark:border-s-gray-600': item.status === 'pending',
+                                                'border-s-blue-500': item.status === 'in_progress',
+                                                'border-s-teal-500': item.status === 'ready_for_qc',
+                                                'border-s-emerald-500': item.status === 'completed',
+                                                'border-s-amber-500': item.status === 'on_hold',
+                                                'border-s-rose-500': item.status === 'cancelled'
+                                            }">
+                                            <div class="flex items-start justify-between gap-4">
+                                                <!-- Right Side: Content -->
+                                                <div class="flex-1 min-w-0">
+                                                    <!-- Title Row with Status Badge -->
+                                                    <div class="flex items-start gap-2.5">
+                                                        <span class="text-gray-400 font-semibold font-mono text-sm mt-0.5 select-none">{{ index + 1 }}.</span>
+                                                        <div class="flex-1 min-w-0">
+                                                            <div class="flex items-center gap-2 flex-wrap mb-1">
+                                                                <button v-if="!isReadOnly"
+                                                                    @click.stop="openEditServiceModal(item)" type="button"
+                                                                    class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-snug">
+                                                                    {{ item.service ? getName(item.service) : item.title }}
+                                                                </button>
+                                                                <span v-else
+                                                                    class="font-bold text-gray-900 dark:text-white text-base text-start leading-snug">
+                                                                    {{ item.service ? getName(item.service) : item.title }}
+                                                                </span>
+
+                                                                <!-- Status Badge -->
+                                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none shrink-0"
+                                                                    :class="{
+                                                                        'bg-gray-50 text-gray-500 border border-gray-200/60 dark:bg-gray-700/30 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
+                                                                        'bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
+                                                                        'bg-teal-50 text-teal-600 border border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
+                                                                        'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
+                                                                        'bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
+                                                                        'bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
+                                                                    }">
+                                                                    <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                                        :class="{
+                                                                            'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
+                                                                            'bg-blue-500': item.status === 'in_progress',
+                                                                            'bg-teal-500': item.status === 'ready_for_qc',
+                                                                            'bg-emerald-500': item.status === 'completed',
+                                                                            'bg-amber-500': item.status === 'on_hold',
+                                                                            'bg-rose-500': item.status === 'cancelled'
+                                                                        }"></span>
+                                                                    <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
+                                                                </span>
+                                                            </div>
+
+                                                            <!-- Description Block -->
+                                                            <div v-if="item.service && item.title && item.title !== getName(item.service)" 
+                                                                class="text-xs text-gray-500 dark:text-gray-400 mt-2 bg-gray-50/50 dark:bg-gray-900/40 p-2.5 rounded-lg border border-gray-100/50 dark:border-gray-850 leading-relaxed">
+                                                                {{ item.title }}
+                                                            </div>
+                                                        </div>
                                                     </div>
 
-                                                    <div class="flex-1 min-w-0">
-                                                        <!-- Title Row - CLICKABLE -->
-                                                        <div class="flex items-baseline gap-2 mb-1">
-                                                            <span
-                                                                class="text-gray-400 font-medium font-mono text-sm leading-none">{{
-                                                                    index + 1 }}.</span>
-                                                            <button v-if="!isReadOnly"
-                                                                @click.stop="openEditServiceModal(item)" type="button"
-                                                                class="font-bold text-gray-900 dark:text-white text-lg hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-tight">
-                                                                {{ item.title || getName(item.service) }}
-                                                            </button>
-                                                            <span v-else
-                                                                class="font-bold text-gray-900 dark:text-white text-lg text-start leading-tight">
-                                                                {{ item.title || getName(item.service) }}
-                                                            </span>
+                                                    <!-- Divider Line -->
+                                                    <div class="border-t border-gray-100/75 dark:border-gray-800/80 my-3"></div>
+
+                                                    <!-- Meta Row: Price | Technician | Warranty | Date -->
+                                                    <div class="flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                                        <!-- Labor Price Badge -->
+                                                        <div class="inline-flex items-center gap-1.5 bg-indigo-50/80 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 border border-indigo-100/80 dark:border-indigo-900/40 px-3 py-1 rounded-full text-xs font-semibold"
+                                                            :title="$t('work_orders.item.service_cost')">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                            </svg>
+                                                            <span>{{ $t('work_orders.item.service_cost') }}:</span>
+                                                            <span class="font-bold font-mono text-gray-900 dark:text-gray-100">{{ formatPrice(item.line_total || item.total) }}</span>
                                                         </div>
 
-                                                        <!-- Meta Row: Price | Technician -->
-                                                        <div
-                                                            class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                                            <!-- Prices Group -->
-                                                            <div
-                                                                class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-md">
-                                                                <!-- Labor -->
-                                                                <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium"
-                                                                    :title="$t('work_orders.item.service_cost')">
-                                                                    <span class="text-indigo-500">🔧</span>
-                                                                    <span>{{ formatPrice(item.line_total || item.total)
-                                                                        }}</span>
-                                                                </div>
-                                                                <!-- Parts (if any) -->
-                                                                <div v-if="item.parts_total > 0"
-                                                                    class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-medium border-s border-gray-200 dark:border-gray-600 ps-3"
-                                                                    :title="$t('work_orders.item.parts_cost')">
-                                                                    <span class="text-amber-500">🔩</span>
-                                                                    <span>{{ formatPrice(item.parts_total) }}</span>
-                                                                </div>
-                                                            </div>
+                                                        <!-- Parts Cost Badge (if any) -->
+                                                        <div v-if="item.parts_total > 0"
+                                                            class="inline-flex items-center gap-1.5 bg-amber-50/80 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300 border border-amber-100/80 dark:border-amber-900/40 px-3 py-1 rounded-full text-xs font-semibold"
+                                                            :title="$t('work_orders.item.parts_cost')">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 00-2 2zM9 9h6v6H9V9z"/>
+                                                            </svg>
+                                                            <span>{{ $t('work_orders.item.parts_cost') }}:</span>
+                                                            <span class="font-bold font-mono text-gray-900 dark:text-gray-100">{{ formatPrice(item.parts_total) }}</span>
+                                                        </div>
 
-                                                            <div v-if="item.technicians && item.technicians.length"
-                                                                class="flex items-center gap-1.5">
-                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                                <div class="flex items-center gap-1">
-                                                                    <svg class="w-3.5 h-3.5 text-gray-400" fill="none"
-                                                                        stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round"
-                                                                            stroke-linejoin="round" stroke-width="2"
-                                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                                                    </svg>
-                                                                    <span>{{ item.technicians[0].name }}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div v-else
-                                                                class="flex items-center gap-1.5 text-amber-500">
-                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                                <span>{{ $t('work_orders.item.assign_technician')
-                                                                    }}</span>
-                                                            </div>
+                                                        <!-- Technician Badge -->
+                                                        <div v-if="item.technicians && item.technicians.length"
+                                                            class="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                            </svg>
+                                                            <span>{{ item.technicians[0].name }}</span>
+                                                        </div>
+                                                        <!-- Not Assigned Prompt Badge -->
+                                                        <div v-else
+                                                            class="inline-flex items-center gap-1.5 bg-rose-50/50 dark:bg-rose-950/10 text-rose-600 dark:text-rose-400 border border-dashed border-rose-200 dark:border-rose-900/40 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">
+                                                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                            </svg>
+                                                            <span>{{ $t('work_orders.item.assign_technician') }}</span>
+                                                        </div>
 
-                                                            <!-- Warranty Info -->
-                                                            <div v-if="item.warranty_expires_at"
-                                                                class="flex items-center gap-1.5 text-green-600 dark:text-green-400">
-                                                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                                                <svg class="w-3.5 h-3.5" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                                                </svg>
-                                                                <span class="text-xs font-bold">{{
-                                                                    $t('services_management.warranty') }}: {{
-                                                                        formatDate(item.warranty_expires_at) }}</span>
-                                                            </div>
+                                                        <!-- Warranty Info Badge -->
+                                                        <div v-if="item.warranty_expires_at"
+                                                            class="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-100/80 dark:border-emerald-900/40 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                                            </svg>
+                                                            <span>{{ $t('services_management.warranty') }}: {{ formatDate(item.warranty_expires_at) }}</span>
+                                                        </div>
+
+                                                        <!-- Date Created Badge -->
+                                                        <div class="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                            </svg>
+                                                            <span>{{ formatDate(item.created_at) }}</span>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <!-- Left Side: Actions + Date -->
-                                                <div class="flex items-center gap-4 pl-2">
-                                                    <!-- Date Badge (Red Style) -->
-                                                    <span
-                                                        class="hidden sm:inline-flex bg-red-500 text-white text-xs px-2.5 py-1 rounded-md font-bold shadow-sm">
-                                                        {{ formatDate(item.created_at) }}
-                                                    </span>
-
-                                                    <div v-if="!isReadOnly"
-                                                        class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700 ps-3">
-                                                        <button @click.stop="openEditServiceModal(item)"
-                                                            class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                                            :title="$t('common.edit')">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                            </svg>
-                                                        </button>
-                                                        <button @click.stop="deleteServiceItem(item)"
-                                                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                                            :title="$t('common.delete')">
-                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                                <!-- Left Side: Actions -->
+                                                <div v-if="!isReadOnly"
+                                                    class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700/70 ps-3 shrink-0 mt-0.5">
+                                                    <button @click.stop="openEditServiceModal(item)"
+                                                        class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                                        :title="$t('common.edit')">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button @click.stop="deleteServiceItem(item)"
+                                                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                                        :title="$t('common.delete')">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -750,6 +743,167 @@
                             </div>
                             <p v-else class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.show.no_services') }}
                             </p>
+                        </div>
+                    </div>
+
+                    <!-- Notes Tab -->
+                    <div v-if="activeTab === 'notes'" key="tab-notes" class="space-y-6">
+                        <!-- Top Bar (Toggle, Search, Add Button) -->
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <div class="flex items-center gap-3 w-full sm:w-auto">
+                                <!-- View Mode Toggler -->
+                                <div class="flex items-center bg-gray-100 dark:bg-gray-900 p-1 rounded-xl">
+                                    <button type="button" @click="viewMode = 'list'" :class="['p-1.5 rounded-lg transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300']">
+                                        <!-- List Icon -->
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" @click="viewMode = 'grid'" :class="['p-1.5 rounded-lg transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300']">
+                                        <!-- Grid Icon -->
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <!-- Search Input -->
+                                <div class="relative w-full sm:w-64">
+                                    <input v-model="searchQuery" type="text" :placeholder="$t('work_orders.search') + '...'"
+                                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-600">
+                                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Add Button in Header -->
+                            <div v-if="!isReadOnly" class="flex items-center gap-3">
+                                <button type="button" @click="showAddNoteModal = true"
+                                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0f2c28] hover:bg-teal-800 rounded-xl transition-all shadow-sm hover:shadow-md">
+                                    <span>+</span>
+                                    <span>{{ $t('work_orders.show.tabs.notes') }}</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Notes List (Grid / List Toggleable) -->
+                        <div v-if="filteredNotes.length > 0" :class="[viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3']">
+                            <div v-for="note in filteredNotes" :key="note.id"
+                                :class="[
+                                    'bg-[#fffbeb] dark:bg-amber-950/10 border border-amber-200/60 dark:border-amber-900/30 p-4 sm:p-5 rounded-2xl shadow-sm relative group hover:shadow-md transition-all duration-200',
+                                    viewMode === 'list' ? 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4' : 'flex flex-col justify-between h-full min-h-[160px]'
+                                ]">
+                                
+                                <!-- LIST VIEW LAYOUT -->
+                                <template v-if="viewMode === 'list'">
+                                    <!-- Right side: User, Service and Note Content -->
+                                    <div class="flex items-start gap-4 flex-1">
+                                        <div class="flex-shrink-0">
+                                            <img v-if="note.user?.photo_url" :src="note.user.photo_url" class="w-10 h-10 rounded-full object-cover">
+                                            <div v-else class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
+                                                {{ note.user?.name?.charAt(0) || 'U' }}
+                                            </div>
+                                        </div>
+                                        <div class="space-y-1 min-w-0">
+                                            <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                                <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                    {{ note.user?.name || $t('common.system') }}
+                                                </h4>
+                                                <span class="text-[10px] text-gray-400 font-semibold uppercase tracking-wider bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-md">
+                                                    {{ getUserRoleName(note.user) }}
+                                                </span>
+                                            </div>
+                                            <button v-if="note.item_id" type="button" @click="openServiceNotesModal(note.item_id)" class="text-xs font-semibold text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 hover:underline text-right block">
+                                                {{ note.service_title_formatted }}
+                                            </button>
+                                            <p v-else class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                                                {{ note.service_title_formatted }}
+                                            </p>
+                                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mt-2 leading-relaxed">
+                                                {{ note.content }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Left side: Date & Time + Actions -->
+                                    <div class="flex items-center justify-between sm:flex-col sm:items-end gap-2 text-right sm:border-l border-amber-200/30 sm:pl-4">
+                                        <div class="text-[11px] text-gray-400 dark:text-gray-500 font-mono leading-tight font-bold">
+                                            <div>{{ getNoteDate(note.created_at) }}</div>
+                                            <div class="text-gray-300 dark:text-gray-600">{{ getNoteTime(note.created_at) }}</div>
+                                        </div>
+                                        <button v-if="!isReadOnly" type="button" @click="handleDeleteNote(note.item_id, note.id)"
+                                            class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors sm:opacity-0 sm:group-hover:opacity-100 focus:opacity-100"
+                                            :title="$t('common.delete')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </template>
+
+                                <!-- GRID VIEW LAYOUT -->
+                                <template v-else>
+                                    <div class="flex flex-col h-full justify-between">
+                                        <div>
+                                            <!-- Card Header (Avatar + Name & Role + Date) -->
+                                            <div class="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-amber-200/30 dark:border-amber-900/10">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="flex-shrink-0">
+                                                        <img v-if="note.user?.photo_url" :src="note.user.photo_url" class="w-9 h-9 rounded-full object-cover">
+                                                        <div v-else class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+                                                            {{ note.user?.name?.charAt(0) || 'U' }}
+                                                        </div>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <h4 class="text-sm font-bold text-gray-900 dark:text-white truncate leading-tight">
+                                                            {{ note.user?.name || $t('common.system') }}
+                                                        </h4>
+                                                        <span class="text-[9px] text-gray-400 font-semibold uppercase tracking-wider block">
+                                                            {{ getUserRoleName(note.user) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-[10px] text-gray-400 dark:text-gray-500 font-mono text-right font-bold leading-tight">
+                                                    <div>{{ getNoteDate(note.created_at) }}</div>
+                                                    <div class="text-gray-300 dark:text-gray-600">{{ getNoteTime(note.created_at) }}</div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Service / Department green text -->
+                                            <button v-if="note.item_id" type="button" @click="openServiceNotesModal(note.item_id)" class="text-xs font-semibold text-teal-600 hover:text-teal-800 dark:text-teal-400 dark:hover:text-teal-300 hover:underline text-right block mb-2">
+                                                {{ note.service_title_formatted }}
+                                            </button>
+                                            <p v-else class="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                                                {{ note.service_title_formatted }}
+                                            </p>
+
+                                            <!-- Note Content -->
+                                            <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                                                {{ note.content }}
+                                            </p>
+                                        </div>
+
+                                        <!-- Card Footer Actions -->
+                                        <div v-if="!isReadOnly" class="flex justify-end mt-4 pt-3 border-t border-amber-200/20 dark:border-amber-900/10">
+                                            <button type="button" @click="handleDeleteNote(note.item_id, note.id)"
+                                                class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                                                :title="$t('common.delete')">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-else class="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                            <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
+                                <span class="text-2xl">📝</span>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.no_notes') }}</p>
                         </div>
                     </div>
 
@@ -1022,7 +1176,7 @@
         <WorkOrderServiceModal v-if="showItemModal || showServiceModal" :show="showItemModal || showServiceModal"
             :work-order="workOrder" :item="selectedItem" :department-id="selectedDepartmentId" :services="services"
             :technicians="technicians" :inventory-units="inventoryUnits" :warehouses="warehouses"
-            :read-only="isReadOnly" @close="showItemModal ? closeItemModal() : closeServiceModal()"
+            :read-only="isReadOnly" :initial-tab="serviceModalInitialTab" @close="showItemModal ? closeItemModal() : closeServiceModal()"
             @saved="showItemModal ? handleItemSaved() : handleServiceSaved()" />
 
         <!-- Add Part Modal -->
@@ -1043,6 +1197,49 @@
 
         <WorkOrderAttachmentModal v-if="showAttachmentModal" :show="showAttachmentModal" :work-order="workOrder"
             @close="showAttachmentModal = false" @saved="refreshWorkOrder" />
+
+        <!-- Floating Add Note Button -->
+        <button v-if="activeTab === 'notes' && !isReadOnly" @click="showAddNoteModal = true"
+            class="fixed bottom-6 left-6 z-40 w-14 h-14 bg-[#0f2c28] hover:bg-teal-800 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 scale-100 hover:scale-105 active:scale-95"
+            :title="$t('work_orders.item.add_note')">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+        </button>
+
+        <!-- Add Note Modal -->
+        <BaseModal :show="showAddNoteModal" @close="showAddNoteModal = false" size="md">
+            <template #title>
+                {{ $t('work_orders.item.add_note') }}
+            </template>
+
+            <form @submit.prevent="handleAddNote" class="space-y-4 text-right">
+                <div class="space-y-1">
+                    <!-- Note Content -->
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        {{ $t('work_orders.item.tab_notes') }}
+                    </label>
+                    <textarea v-model="newNoteContent" required rows="5"
+                        :placeholder="$t('work_orders.item.note_placeholder')"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"></textarea>
+                </div>
+            </form>
+
+            <template #footer>
+                <button type="button" @click="showAddNoteModal = false"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                    {{ $t('common.cancel') }}
+                </button>
+                <button type="submit" @click="handleAddNote" :disabled="isSubmittingNote || !newNoteContent.trim()"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2">
+                    <svg v-if="isSubmittingNote" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ $t('common.save') }}</span>
+                </button>
+            </template>
+        </BaseModal>
     </AppLayout>
 </template>
 
@@ -1070,6 +1267,8 @@ import InspectionChecklist from '@/Components/WorkOrders/InspectionChecklist.vue
 import WorkOrderSignatures from '@/Components/WorkOrders/WorkOrderSignatures.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import { usePermission } from '@/Composables/usePermission';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const { can } = usePermission();
 
@@ -1482,19 +1681,49 @@ const displayDepartments = computed(() => {
 
     // Add departments with items
     Object.keys(props.itemsByDepartment).forEach(id => {
-        if (id !== '0') deptIds.add(parseInt(id));
+        if (id !== '0' && id !== 'packages') deptIds.add(parseInt(id));
     });
 
     // Add work order's linked departments
     props.workOrder.departments?.forEach(dept => deptIds.add(dept.id));
 
-    return props.departments.filter(d => deptIds.has(d.id));
+    // Get database departments matching active list
+    const list = props.departments.filter(d => deptIds.has(d.id));
+
+    // Virtual packages section - only show if it has package items or show_packages_section is active
+    const hasPackageItems = props.itemsByDepartment['packages'] && props.itemsByDepartment['packages'].length > 0;
+    const showPackagesSection = props.workOrder.show_packages_section;
+
+    if (hasPackageItems || showPackagesSection) {
+        list.push({
+            id: 'packages',
+            name_ar: 'باقات الخدمات',
+            name_en: 'Service Packages',
+            is_virtual: true
+        });
+    }
+
+    return list;
 });
 
 // Departments that can still be added
 const availableDepartments = computed(() => {
     const usedIds = displayDepartments.value.map(d => d.id);
-    return props.departments.filter(d => !usedIds.includes(d.id));
+    const list = props.departments.filter(d => !usedIds.includes(d.id));
+
+    // Append virtual packages department if not added and available
+    const canEdit = !isReadOnly.value;
+    const hasAvailablePackages = props.services?.some(s => s.type === 'package');
+    if (canEdit && hasAvailablePackages && !usedIds.includes('packages')) {
+        list.push({
+            id: 'packages',
+            name_ar: 'باقات الخدمات',
+            name_en: 'Service Packages',
+            name: 'Service Packages'
+        });
+    }
+
+    return list;
 });
 
 // Get items for a specific department
@@ -1529,33 +1758,54 @@ function addDepartment(deptId) {
 
 // Service modal state
 const showServiceModal = ref(false);
-const selectedItem = ref(null);
+const selectedItemId = ref(null);
 const selectedDepartmentId = ref(null);
+
+const selectedItem = computed(() => {
+    if (!selectedItemId.value) return null;
+    return props.workOrder?.items?.find(i => i.id === selectedItemId.value) || null;
+});
 
 // Services filtered by department
 const departmentServices = computed(() => {
     if (!selectedDepartmentId.value) return [];
-    return props.services.filter(s => s.department_id === selectedDepartmentId.value);
+    if (selectedDepartmentId.value === 'packages') {
+        return props.services.filter(s => s.type === 'package');
+    }
+    return props.services.filter(s => s.department_id === selectedDepartmentId.value && s.type !== 'package');
 });
 
 // Open add service modal
 function openAddServiceModal(deptId) {
     selectedDepartmentId.value = deptId;
-    selectedItem.value = null;
+    selectedItemId.value = null;
     showServiceModal.value = true;
 }
 
 // Open edit service modal (advanced modal with tabs)
 function openEditServiceModal(item) {
-    selectedItem.value = item;
+    selectedItemId.value = item.id;
+    serviceModalInitialTab.value = 'service';
     showItemModal.value = true;
+}
+
+const serviceModalInitialTab = ref('service');
+
+function openServiceNotesModal(itemId) {
+    const item = props.workOrder.items.find(i => i.id === itemId);
+    if (item) {
+        selectedItemId.value = itemId;
+        serviceModalInitialTab.value = 'notes';
+        showItemModal.value = true;
+    }
 }
 
 // Close service modal
 function closeServiceModal() {
     showServiceModal.value = false;
-    selectedItem.value = null;
+    selectedItemId.value = null;
     selectedDepartmentId.value = null;
+    serviceModalInitialTab.value = 'service';
 }
 
 // Handle service saved
@@ -1571,7 +1821,8 @@ const showItemModal = ref(false);
 // Close item modal
 function closeItemModal() {
     showItemModal.value = false;
-    selectedItem.value = null;
+    selectedItemId.value = null;
+    serviceModalInitialTab.value = 'service';
 }
 
 // Handle item saved
@@ -1596,6 +1847,137 @@ async function deleteServiceItem(item) {
     }
 }
 
+// State for the dedicated Notes Tab
+const viewMode = ref(localStorage.getItem('work_orders_notes_view_mode') || 'list');
+watch(viewMode, (newVal) => {
+    localStorage.setItem('work_orders_notes_view_mode', newVal);
+});
+const searchQuery = ref('');
+const showAddNoteModal = ref(false);
+const newNoteContent = ref('');
+const isSubmittingNote = ref(false);
+
+// Collect only general notes from work order general_notes relation (notes from services are not shown here)
+const allNotes = computed(() => {
+    const notes = props.workOrder?.general_notes || props.workOrder?.generalNotes || [];
+    return notes
+        .map(note => {
+            const serviceTitle = note.work_order_item
+                ? (getName(note.work_order_item.service) || note.work_order_item.title)
+                : '';
+            return {
+                id: note.id,
+                content: note.content,
+                created_at: note.created_at,
+                user: note.user,
+                item_id: note.work_order_item_id || null,
+                service_title_formatted: serviceTitle || t('work_orders.general_note'),
+            };
+        })
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+});
+
+// Filter notes by search query
+const filteredNotes = computed(() => {
+    let list = allNotes.value;
+    if (searchQuery.value.trim()) {
+        const q = searchQuery.value.toLowerCase();
+        list = list.filter(note => 
+            note.content.toLowerCase().includes(q) ||
+            note.service_title_formatted.toLowerCase().includes(q) ||
+            (note.user?.name && note.user.name.toLowerCase().includes(q))
+        );
+    }
+    return list;
+});
+
+// Get user role name helper
+const getUserRoleName = (user) => {
+    if (!user) return '';
+    if (user.is_system_admin) return 'System Admin';
+    if (user.roles && user.roles.length > 0) {
+        const roleName = user.roles[0].name;
+        const rolesMap = {
+            'super_admin': 'Super Admin',
+            'business_owner': 'Business Owner',
+            'admin': 'Admin',
+            'manager': 'Manager',
+            'technician': 'Technician',
+            'receptionist': 'Receptionist'
+        };
+        return rolesMap[roleName] || roleName;
+    }
+    return 'Staff';
+};
+
+// Date & Time formatting helpers for notes list
+const getNoteDate = (createdAt) => {
+    if (!createdAt) return '';
+    const d = new Date(createdAt);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${year}-${month}-${day}`;
+};
+
+const getNoteTime = (createdAt) => {
+    if (!createdAt) return '';
+    const d = new Date(createdAt);
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+};
+
+// Add a note (General Note)
+function handleAddNote() {
+    if (!newNoteContent.value.trim()) return;
+    
+    isSubmittingNote.value = true;
+    router.post(route('work-orders.notes.store', { 
+        work_order: props.workOrder.id
+    }), {
+        content: newNoteContent.value
+    }, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+            newNoteContent.value = '';
+            showAddNoteModal.value = false;
+            success(t('common.saved_success'));
+        },
+        onFinish: () => {
+            isSubmittingNote.value = false;
+        }
+    });
+}
+
+// Delete a note
+async function handleDeleteNote(itemId, noteId) {
+    const confirmed = await confirm({
+        title: t('common.confirm_delete_title'),
+        message: t('common.confirm_delete_message'),
+        confirmText: t('common.delete'),
+        cancelText: t('common.cancel'),
+        type: 'danger',
+    });
+
+    if (confirmed) {
+        const deleteRoute = itemId 
+            ? route('work-orders.items.notes.destroy', { work_order: props.workOrder.id, item: itemId, note: noteId })
+            : route('work-orders.notes.destroy', { work_order: props.workOrder.id, note: noteId });
+
+        router.delete(deleteRoute, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                success(t('common.deleted_success'));
+            }
+        });
+    }
+}
+
+
 const tabs = computed(() => {
     const allTabs = [
         { key: 'services', label: t('work_orders.show.tabs.services'), icon: '🔧' },
@@ -1604,6 +1986,7 @@ const tabs = computed(() => {
         { key: 'payments', label: t('work_orders.show.tabs.payments'), icon: '💰' },
         { key: 'condition', label: t('work_orders.show.tabs.condition'), icon: '🚗' },
         { key: 'photos', label: t('work_orders.show.tabs.photos'), icon: '📸' },
+        { key: 'notes', label: t('work_orders.show.tabs.notes'), icon: '📝' },
         { key: 'attachments', label: t('work_orders.show.tabs.attachments'), icon: '📎' },
         { key: 'inspections', label: t('work_orders.show.tabs.inspections'), icon: '🔍' },
         { key: 'signatures', label: t('work_orders.show.tabs.signatures'), icon: '✍️' },
@@ -1691,7 +2074,7 @@ async function removeDepartment(deptId) {
     });
 
     if (confirmed) {
-        router.delete(route('work-orders.departments.destroy', { work_order: props.workOrder.id, department: deptId }), {
+        router.delete(route('work-orders.departments.destroy', { work_order: props.workOrder.id, department_id: deptId }), {
             onSuccess: () => {
                 success(t('common.deleted_success'));
             },

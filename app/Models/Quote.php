@@ -63,6 +63,7 @@ class Quote extends Model
         'tax_breakdown',
         'uuid',
         'rejection_reason',
+        'show_packages_section',
     ];
 
     protected $casts = [
@@ -74,6 +75,7 @@ class Quote extends Model
         'rejected_at' => 'datetime',
         'converted_at' => 'datetime',
         'tax_breakdown' => 'array', // JSON cast
+        'show_packages_section' => 'boolean',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -208,7 +210,7 @@ class Quote extends Model
 
     public function canBeApproved(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT]);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_APPROVED]);
     }
 
     public function canBeRejected(): bool

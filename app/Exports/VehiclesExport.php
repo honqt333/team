@@ -36,6 +36,7 @@ class VehiclesExport implements FromCollection, WithHeadings, WithStyles, Should
                 'year' => $vehicle->year,
                 'color' => $vehicle->color,
                 'customer_name' => $vehicle->customer ? $vehicle->customer->name : '-',
+                'contact_name' => $vehicle->customer ? $vehicle->customer->contact_name : '-',
                 'customer_phone' => $vehicle->customer ? $vehicle->customer->phone : '-',
             ];
         });
@@ -50,6 +51,7 @@ class VehiclesExport implements FromCollection, WithHeadings, WithStyles, Should
             'السنة / Year',
             'اللون / Color',
             'اسم العميل / Customer Name',
+            'اسم المسؤول / Contact Person',
             'رقم الهاتف / Phone Number',
         ];
     }

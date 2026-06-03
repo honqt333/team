@@ -16,16 +16,7 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <Tooltip :content="$t('common.back')">
-                        <Link
-                            :href="route('app.invoices.purchases.index')"
-                            class="p-2.5 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300 text-amber-600 group"
-                        >
-                            <svg class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                        </Link>
-                    </Tooltip>
+                    <BackButton :href="route('app.invoices.purchases.index')" />
                 </template>
 
                 <template #icon>
@@ -51,15 +42,16 @@
 
                         <!-- Print Button -->
                         <Tooltip :content="$t('common.print')">
-                            <button
-                                @click="printInvoice"
+                            <a
+                                :href="route('app.invoices.purchases.print', invoice.id)"
+                                target="_blank"
                                 class="flex items-center gap-2 px-4 py-2 bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-200 hover:text-amber-600 dark:hover:text-amber-400 rounded-xl border border-gray-200 dark:border-gray-700 transition-all font-bold text-xs shadow-sm"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                 </svg>
                                 <span>{{ $t('common.print') }}</span>
-                            </button>
+                            </a>
                         </Tooltip>
 
                         <!-- Add Payment Button -->
@@ -181,7 +173,7 @@
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('common.discount') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic">VAT (15%)</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic">{{ $t('common.vat') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
@@ -338,7 +330,7 @@
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.net_unit_price') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.received_qty') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">{{ $t('invoices.subtotal') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic">VAT</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic">{{ $t('common.vat') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
@@ -591,6 +583,7 @@
                                 <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.date') }}</th>
                                 <th class="py-4 px-6 text-center font-bold">{{ $t('invoices.returned_items') }}</th>
                                 <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.notes') }}</th>
+                                <th class="py-4 px-6 text-center font-bold">{{ $t('payments.remaining_refund') }}</th>
                                 <th class="py-4 px-6 text-center font-bold text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
@@ -616,6 +609,9 @@
                                 </td>
                                 <td class="py-4 px-6 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="ret.notes">
                                     {{ ret.notes || '—' }}
+                                </td>
+                                <td class="py-4 px-6 text-center font-black font-mono text-xs" :class="calculateRemainingRefund(ret) > 0.01 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'" dir="ltr">
+                                    {{ formatCurrency(calculateRemainingRefund(ret)) }}
                                 </td>
                                 <td class="py-4 px-6 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">
                                     {{ formatCurrency(ret.total) }}
@@ -842,6 +838,7 @@
                                     </div>
                                 </div>
                                 <button
+                                    v-if="hasPayments"
                                     type="button"
                                     @click="openRefundPaymentModal()"
                                     class="flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
@@ -851,6 +848,9 @@
                                     </svg>
                                     {{ $t('payments.add_payment') }}
                                 </button>
+                                <span v-else class="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-900/30">
+                                    {{ $t('payments.cannot_refund_unpaid') }}
+                                </span>
                             </div>
 
                             <!-- High-tier Metrics Box -->
@@ -1059,7 +1059,7 @@
                                 <span class="font-bold text-gray-750 dark:text-gray-300 font-mono" dir="ltr">{{ formatCurrencyEnglish(isLineInclusive(selectedReturnLine) ? ((itemReturnQty * itemReturnPrice) / (1 + ((selectedReturnLine?.tax_rate || 0)/100))) : (itemReturnQty * itemReturnPrice)) }}</span>
                             </div>
                             <div v-if="(selectedReturnLine?.tax_rate || 0) > 0" class="flex justify-between">
-                                <span class="text-gray-400">VAT ({{ selectedReturnLine?.tax_rate || 0 }}%) <span v-if="isLineInclusive(selectedReturnLine)" class="text-[10px] text-gray-500">({{ $t('common.vat_included') }})</span></span>
+                                <span class="text-gray-400">{{ $t('common.vat_with_rate', { rate: selectedReturnLine?.tax_rate || 0 }) }} <span v-if="isLineInclusive(selectedReturnLine)" class="text-[10px] text-gray-500">({{ $t('common.vat_included') }})</span></span>
                                 <span class="font-bold text-gray-750 dark:text-gray-300 font-mono" dir="ltr">{{ formatCurrencyEnglish(isLineInclusive(selectedReturnLine) ? ((itemReturnQty * itemReturnPrice) - ((itemReturnQty * itemReturnPrice) / (1 + ((selectedReturnLine?.tax_rate || 0)/100)))) : ((itemReturnQty * itemReturnPrice) * ((selectedReturnLine?.tax_rate || 0) / 100))) }}</span>
                             </div>
                             <div class="h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
@@ -1107,10 +1107,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { Link, useForm, router } from '@inertiajs/vue3';
+import { Link, useForm, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import Tooltip from '@/Components/Tooltip.vue';
@@ -1120,7 +1121,9 @@ const props = defineProps({
     invoice: Object,
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+const page = usePage();
+const isRtl = computed(() => locale.value === 'ar');
 const { toEnglish, formatCurrency } = useNumberFormat();
 
 const formatCurrencyEnglish = (amount) => {
@@ -1431,10 +1434,6 @@ const getCenterAddress = (center) => {
     return parts.join('، ');
 };
 
-const printInvoice = () => {
-    window.print();
-};
-
 const statusClass = (status) => {
     const map = {
         paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
@@ -1443,5 +1442,14 @@ const statusClass = (status) => {
         cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800',
     };
     return map[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+};
+
+const calculateRemainingRefund = (ret) => {
+    const allRefunds = props.invoice.payments?.filter(p => p.type === 'refund') || [];
+    const matchingRefunds = allRefunds.filter(p => 
+        p.notes?.includes(ret.code) || p.reference?.includes(ret.code)
+    );
+    const refundsTotal = matchingRefunds.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    return Math.max(0, parseFloat(ret.total) - refundsTotal);
 };
 </script>

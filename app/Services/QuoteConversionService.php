@@ -4,9 +4,11 @@ namespace App\Services;
 
 use App\Models\Quote;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
+use App\Services\Inventory\WorkOrderPartsService;
 use App\Support\TenancyContext;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +22,9 @@ class QuoteConversionService
      */
     public function convert(Quote $quote, User $user): WorkOrder
     {
+        // Load missing relationships to ensure lines and parts collections are up-to-date
+        $quote->loadMissing(['lines', 'parts']);
+
         // Validate quote can be converted
         if ($quote->isConverted()) {
             throw new \InvalidArgumentException('Quote has already been converted.');
@@ -43,6 +48,9 @@ class QuoteConversionService
                 'code' => $code,
                 'status' => WorkOrder::STATUS_OPEN,
                 'notes' => $quote->notes,
+                'customer_complaint' => $quote->customer_complaint,
+                'initial_assessment' => $quote->initial_assessment,
+                'mileage' => $quote->odometer,
                 'opened_at' => now(),
                 'entry_date' => now()->toDateString(),
                 'expected_end_date' => now()->toDateString(),
@@ -56,7 +64,7 @@ class QuoteConversionService
                     'service_id' => $quoteLine->service_id,
                     'tenant_id' => $quote->tenant_id,
                     'center_id' => $quote->center_id,
-                    'title' => $quoteLine->description,
+                    'title' => $quoteLine->title,
                     'qty' => $quoteLine->qty,
                     'unit_price' => $quoteLine->unit_price,
                     'base_price_snapshot' => $quoteLine->base_price_snapshot,
@@ -73,26 +81,29 @@ class QuoteConversionService
             }
 
             // Copy quote parts to work order item parts
+            $defaultWarehouse = Warehouse::getOrCreateDefault($quote->center_id);
+            $partsService = app(WorkOrderPartsService::class);
+            $allowNegative = $user->can('inventory.override_negative_stock');
+
             foreach ($quote->parts as $quotePart) {
-                WorkOrderItemPart::create([
+                $partsService->addPart([
                     'work_order_id' => $workOrder->id,
                     'work_order_item_id' => $quotePart->quote_line_id ? ($lineIdMap[$quotePart->quote_line_id] ?? null) : null,
                     'tenant_id' => $quote->tenant_id,
                     'center_id' => $quote->center_id,
                     'part_id' => $quotePart->part_id,
-                    'unit_id' => $quotePart->unit_id,
-                    'source' => $quotePart->source,
+                    'warehouse_id' => $quotePart->isFromWarehouse() ? $defaultWarehouse->id : null,
                     'name' => $quotePart->name,
                     'part_number' => $quotePart->part_number,
-                    'notes' => $quotePart->description,
+                    'source' => $quotePart->source,
+                    'unit_id' => $quotePart->unit_id,
                     'qty' => $quotePart->qty,
                     'unit_price' => $quotePart->unit_price,
                     'discount' => $quotePart->discount,
-                    'total' => $quotePart->total,
                     'include_in_package' => $quotePart->include_in_package,
                     'hide_on_print' => $quotePart->hide_on_print,
-                    'status' => WorkOrderItemPart::STATUS_PENDING,
-                ]);
+                    'notes' => $quotePart->description,
+                ], $allowNegative);
             }
 
             // Update quote status
@@ -101,6 +112,9 @@ class QuoteConversionService
                 'converted_at' => now(),
                 'converted_work_order_id' => $workOrder->id,
             ]);
+
+            // Clear cached relations to ensure clean load of converted items and parts
+            $workOrder->unsetRelations()->load(['items', 'parts']);
 
             return $workOrder;
         });

@@ -17,6 +17,7 @@ const canvasRef = ref(null);
 const cursorX = ref(0);
 const cursorY = ref(0);
 const cursorVisible = ref(false);
+let particles = [];
 const statsVisible = ref(false);
 const statsCounters = ref({});
 
@@ -62,6 +63,7 @@ function switchLang() {
   if (langLoading.value) return;
   langLoading.value = true;
   const next = isRtl.value ? 'en' : 'ar';
+  localStorage.setItem('app.locale', next);
   router.post(route('locale.set'), { locale: next }, {
     onFinish: () => {
       langLoading.value = false;
@@ -71,10 +73,28 @@ function switchLang() {
 }
 
 // ── Typed Text Effect ─────────────────────────────────────────────────────────
-const typedPhrases = computed(() => isRtl.value
-  ? ['مركزك الآن', 'أرباحك اليوم', 'فريقك معك', 'مستقبلك هنا']
-  : ['Your Workshop', 'Your Revenue', 'Your Team', 'Your Future']
-);
+const hexToRgb = (hex) => {
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.substring(0, 2), 16);
+  const g = parseInt(clean.substring(2, 4), 16);
+  const b = parseInt(clean.substring(4, 6), 16);
+  return isNaN(r) || isNaN(g) || isNaN(b) ? '99,102,241' : `${r}, ${g}, ${b}`;
+};
+
+const cssVars = computed(() => {
+  const pc = props.settings.primary_color || 'var(--primary)';
+  return {
+    '--primary': pc,
+    '--primary-rgb': hexToRgb(pc),
+    fontFamily: isRtl.value ? 'Cairo, sans-serif' : 'Outfit, sans-serif',
+  };
+});
+
+const typedPhrases = computed(() => {
+  const raw = isRtl.value ? props.settings.hero_typed_phrases_ar : props.settings.hero_typed_phrases_en;
+  if (!raw) return isRtl.value ? ['مركزك الآن', 'أرباحك اليوم', 'فريقك معك', 'مستقبلك هنا'] : ['Your Workshop', 'Your Revenue', 'Your Team', 'Your Future'];
+  return raw.split(/[\n|]+/).map(s => s.trim()).filter(Boolean);
+});
 let typedIndex = 0, typedChar = 0, typedTimer = null, typedErasing = false;
 function runTyped() {
   const phrases = typedPhrases.value;
@@ -113,8 +133,68 @@ function animateCounter(target, duration = 2000) {
   });
 }
 
-// ── Particle Canvas ───────────────────────────────────────────────────────────
+// ── Particle Canvas with Idle Freeze ──────────────────────────────────────────
 let animFrameId = null;
+let particlePaused = false;
+let idleTimer = null;
+
+function pauseParticles() {
+  particlePaused = true;
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  animFrameId = null;
+}
+
+function resumeParticles() {
+  if (!particlePaused) return;
+  particlePaused = false;
+  if (animFrameId) cancelAnimationFrame(animFrameId);
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  // Re-draw a single frozen frame if available, then resume loop
+  animFrameId = requestAnimationFrame(draw);
+}
+
+function resetIdleTimer() {
+  clearTimeout(idleTimer);
+  if (particlePaused) resumeParticles();
+  idleTimer = setTimeout(pauseParticles, 30000);
+}
+
+function draw() {
+  if (particlePaused) return;
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const color = isDark.value ? '150,120,255' : '79,70,229';
+  particles.forEach(p => {
+    p.x += p.dx; p.y += p.dy;
+    if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${color},${p.opacity})`;
+    ctx.fill();
+  });
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(${color},${0.15 * (1 - dist / 120)})`;
+        ctx.lineWidth = 0.5;
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  animFrameId = requestAnimationFrame(draw);
+}
+
 function initParticles(canvas) {
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -123,7 +203,7 @@ function initParticles(canvas) {
   window.addEventListener('resize', resize);
 
   const count = Math.min(60, Math.floor(window.innerWidth / 20));
-  const particles = Array.from({ length: count }, () => ({
+  particles = Array.from({ length: count }, () => ({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
     r: Math.random() * 1.5 + 0.5,
@@ -132,41 +212,15 @@ function initParticles(canvas) {
     opacity: Math.random() * 0.5 + 0.1,
   }));
 
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const color = isDark.value ? '150,120,255' : '79,70,229';
-    particles.forEach(p => {
-      p.x += p.dx; p.y += p.dy;
-      if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
-      if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${color},${p.opacity})`;
-      ctx.fill();
-    });
-    // Draw connections
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < 120) {
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(${color},${0.15 * (1 - dist / 120)})`;
-          ctx.lineWidth = 0.5;
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
-        }
-      }
-    }
-    animFrameId = requestAnimationFrame(draw);
-  }
   draw();
 }
 
-// ── Cursor Glow ───────────────────────────────────────────────────────────────
+// ── Cursor Glow (throttled) ───────────────────────────────────────────────────
+let lastCursorUpdate = 0;
 function handleMouseMove(e) {
+  const now = performance.now();
+  if (now - lastCursorUpdate < 50) return;
+  lastCursorUpdate = now;
   cursorX.value = e.clientX;
   cursorY.value = e.clientY;
   cursorVisible.value = true;
@@ -224,8 +278,15 @@ onMounted(async () => {
   }
   applyTheme();
 
-  window.addEventListener('scroll', () => { isScrolled.value = window.scrollY > 60; });
+  window.addEventListener('scroll', () => { isScrolled.value = window.scrollY > 60; }, { passive: true });
   window.addEventListener('mousemove', handleMouseMove);
+  // Idle freeze for particles
+  const activityEvents = ['mousemove', 'scroll', 'click', 'keydown', 'touchstart'];
+  activityEvents.forEach(ev => window.addEventListener(ev, resetIdleTimer));
+  document.addEventListener('visibilitychange', () => {
+    document.hidden ? pauseParticles() : resetIdleTimer();
+  });
+  resetIdleTimer();
   await nextTick();
   initParticles(canvasRef.value);
   // Init stat counters with '0'
@@ -247,6 +308,7 @@ onUnmounted(() => {
   if (animFrameId) cancelAnimationFrame(animFrameId);
   if (revealObserver) revealObserver.disconnect();
   clearTimeout(typedTimer);
+  clearTimeout(idleTimer);
   window.removeEventListener('mousemove', handleMouseMove);
 });
 
@@ -312,14 +374,23 @@ const getSocialIcon = (platform) => {
   <Head>
     <title>{{ t('title_ar', 'title_en') }}</title>
     <meta name="description" :content="t('description_ar', 'description_en')">
+    <meta v-if="settings.keywords" name="keywords" :content="settings.keywords">
+    <meta property="og:title" :content="t('title_ar', 'title_en')">
+    <meta property="og:description" :content="t('description_ar', 'description_en')">
+    <meta v-if="settings.banners_list && settings.banners_list[0]" property="og:image" :content="settings.banners_list[0].image">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" :content="isRtl ? 'ar_SA' : 'en_US'">
     <link v-if="settings.favicon" rel="icon" :href="settings.favicon" type="image/x-icon">
-      <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <link v-if="settings.banners_list && settings.banners_list[0]" rel="preload" as="image" :href="settings.banners_list[0].image" fetchpriority="high">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet">
   </Head>
 
   <div :class="['lp-root min-h-screen overflow-x-hidden']" :data-theme="isDark ? 'dark' : 'light'"
-    :dir="isRtl ? 'rtl' : 'ltr'" :style="isRtl ? 'font-family:Cairo,sans-serif' : 'font-family:Outfit,sans-serif'">
+    :dir="isRtl ? 'rtl' : 'ltr'" :style="cssVars">
 
     <!-- Cursor Glow -->
     <div class="cursor-glow" :style="`left:${cursorX}px;top:${cursorY}px`"></div>
@@ -374,7 +445,7 @@ const getSocialIcon = (platform) => {
         <nav class="lp-nav">
           <a href="#" class="lp-logo">
             <div class="logo-mark">
-              <img v-if="settings.logo" :src="settings.logo" alt="logo">
+              <img v-if="settings.logo" :src="settings.logo" alt="logo" width="44" height="44">
               <span v-else>C</span>
             </div>
             <span class="logo-name">{{ t('title_ar', 'title_en') }}</span>
@@ -398,7 +469,7 @@ const getSocialIcon = (platform) => {
               </svg>
             </button>
             <button @click="switchLang" class="lang-btn">{{ isRtl ? 'EN' : 'AR' }}</button>
-            <Link :href="route('login')" class="btn-ghost-sm">{{ $t('landing.login') }}</Link>
+            <Link :href="route('login')" class="btn-ghost-sm">{{ t('login_button_text_ar', 'login_button_text_en') }}</Link>
             <Link :href="route('register')" class="btn-primary-sm">{{ t('hero_cta_text_ar', 'hero_cta_text_en') }}
             </Link>
             <button @click="isMobileMenuOpen = !isMobileMenuOpen" class="icon-btn lg-hidden">
@@ -414,7 +485,7 @@ const getSocialIcon = (platform) => {
             <a v-for="m in (settings.header_menu || [])" :key="m.url" :href="m.url || '#'" class="mobile-link">{{
               isRtl ? m.label_ar : m.label_en }}</a>
             <div class="mobile-actions">
-              <Link :href="route('login')" class="btn-ghost-sm w-full text-center">{{ $t('landing.login') }}</Link>
+              <Link :href="route('login')" class="btn-ghost-sm w-full text-center">{{ t('login_button_text_ar', 'login_button_text_en') }}</Link>
               <Link :href="route('register')" class="btn-primary-sm text-center">{{
                 t('hero_cta_text_ar', 'hero_cta_text_en') }}</Link>
             </div>
@@ -434,10 +505,13 @@ const getSocialIcon = (platform) => {
               <span class="badge-dot"></span>{{ isRtl ? 'الإصدار 2.0 — قريباً' : 'Version 2.0 — Coming Soon' }}
             </div>
             <h1 class="hero-h1">
-              <span>{{ isRtl ? 'أدر' : 'Elevate' }}</span>
-              <span class="grad-text">{{ activeTyped }}<span class="caret">|</span></span>
-              <span>{{ isRtl ? 'بذكاء حقيقي' : 'With Real Intelligence' }}</span>
+              <span>{{ t('hero_title_ar', 'hero_title_en') }}</span>
             </h1>
+            <div v-if="settings.hero_typed_enabled" class="typed-line">
+              <span v-if="t('hero_typed_prefix_ar', 'hero_typed_prefix_en')" class="typed-prefix">{{ t('hero_typed_prefix_ar', 'hero_typed_prefix_en') }}</span>
+              <span class="grad-text">{{ activeTyped }}<span class="caret">|</span></span>
+              <span v-if="t('hero_typed_suffix_ar', 'hero_typed_suffix_en')" class="typed-suffix">{{ t('hero_typed_suffix_ar', 'hero_typed_suffix_en') }}</span>
+            </div>
             <p class="hero-sub">{{ t('hero_subtitle_ar', 'hero_subtitle_en') }}</p>
             <div class="hero-btns">
               <Link :href="route('register')" class="btn-cta">{{ $t('landing.start_now') }}</Link>
@@ -457,7 +531,7 @@ const getSocialIcon = (platform) => {
                     class="dot g"></span><span class="url-bar">carag.pro/dashboard</span></div>
                 <div class="mockup-screen">
                   <img v-if="settings.banners_list && settings.banners_list[0]" :src="settings.banners_list[0].image"
-                    alt="Dashboard" class="w-full">
+                    alt="Dashboard" class="w-full" fetchpriority="high" width="1600" height="1000">
                   <div v-else class="ph-screen">
                     <div class="ph-row">
                       <div class="ph-b b1"></div>
@@ -547,7 +621,7 @@ const getSocialIcon = (platform) => {
               <div v-if="plan.is_featured" class="plan-badge">{{ $t('landing.most_popular') }}</div>
               <h3 class="plan-name">{{ isRtl ? plan.name_ar : plan.name_en }}</h3>
               <div class="plan-price">
-                <span class="price-num">{{ billingCycle === 'yearly' ? Math.round(plan.price_monthly * 0.8) :
+                <span class="price-num">{{ billingCycle === 'yearly' ? (plan.price_yearly || Math.round(plan.price_monthly * 0.8)) :
                   plan.price_monthly
                   }}</span>
                 <span class="price-unit">{{ $t('landing.price_unit') }}</span>
@@ -596,7 +670,7 @@ const getSocialIcon = (platform) => {
               style="filter: grayscale(1); opacity: 0.6; transition: all 0.3s;"
               onmouseover="this.style.filter='grayscale(0)'; this.style.opacity='1';"
               onmouseout="this.style.filter='grayscale(1)'; this.style.opacity='0.6';">
-              <img :src="client.logo_url" :alt="client.name"
+              <img :src="client.logo_url" :alt="client.name" loading="lazy"
                 style="height: 60px; object-fit: contain; max-width: 150px;" />
             </div>
           </div>
@@ -765,7 +839,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6366f1;
+  background: var(--primary);
   border-radius: 9px
 }
 
@@ -790,6 +864,8 @@ html {
 }
 
 .lp-root {
+  --primary: var(--primary);
+  --primary-rgb: var(--primary-rgb);
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -810,7 +886,7 @@ html {
   width: 500px;
   height: 500px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(99, 102, 241, .1), transparent 70%);
+  background: radial-gradient(circle, rgba(var(--primary-rgb), .1), transparent 70%);
   pointer-events: none;
   z-index: 1;
   transform: translate(-50%, -50%);
@@ -835,7 +911,7 @@ html {
 .a1 {
   width: 700px;
   height: 700px;
-  background: rgba(99, 102, 241, .12);
+  background: rgba(var(--primary-rgb), .12);
   top: -200px;
   left: -150px
 }
@@ -861,7 +937,7 @@ html {
 .grid-overlay {
   position: absolute;
   inset: 0;
-  background-image: linear-gradient(rgba(99, 102, 241, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, .04) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(var(--primary-rgb), .04) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--primary-rgb), .04) 1px, transparent 1px);
   background-size: 60px 60px
 }
 
@@ -926,14 +1002,14 @@ html {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
   font-size: 1.25rem;
   color: #fff;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, .4);
+  box-shadow: 0 8px 24px rgba(var(--primary-rgb), .4);
   overflow: hidden
 }
 
@@ -950,7 +1026,7 @@ html {
 }
 
 .logo-name em {
-  color: #6366f1;
+  color: var(--primary);
   font-style: normal
 }
 
@@ -978,7 +1054,7 @@ html {
   left: 0;
   right: 0;
   height: 2px;
-  background: #6366f1;
+  background: var(--primary);
   transform: scaleX(0);
   transition: transform .25s
 }
@@ -1012,9 +1088,9 @@ html {
 }
 
 .icon-btn:hover {
-  background: rgba(99, 102, 241, .1);
-  color: #6366f1;
-  border-color: rgba(99, 102, 241, .3)
+  background: rgba(var(--primary-rgb), .1);
+  color: var(--primary);
+  border-color: rgba(var(--primary-rgb), .3)
 }
 
 .lang-btn {
@@ -1031,28 +1107,28 @@ html {
 }
 
 .lang-btn:hover {
-  background: rgba(99, 102, 241, .1);
-  color: #6366f1;
-  border-color: rgba(99, 102, 241, .3)
+  background: rgba(var(--primary-rgb), .1);
+  color: var(--primary);
+  border-color: rgba(var(--primary-rgb), .3)
 }
 
 .btn-primary-sm {
   padding: .625rem 1.5rem;
   border-radius: 12px;
-  background: #6366f1;
+  background: var(--primary);
   color: #fff;
   font-size: .875rem;
   font-weight: 700;
   text-decoration: none;
   letter-spacing: .03em;
   transition: all .2s;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, .3)
+  box-shadow: 0 8px 24px rgba(var(--primary-rgb), .3)
 }
 
 .btn-primary-sm:hover {
   background: #4f46e5;
   transform: translateY(-1px);
-  box-shadow: 0 12px 32px rgba(99, 102, 241, .4)
+  box-shadow: 0 12px 32px rgba(var(--primary-rgb), .4)
 }
 
 .btn-ghost-sm {
@@ -1069,15 +1145,15 @@ html {
 }
 
 .btn-ghost-sm:hover {
-  background: rgba(99, 102, 241, .1);
-  color: #6366f1;
-  border-color: rgba(99, 102, 241, .3)
+  background: rgba(var(--primary-rgb), .1);
+  color: var(--primary);
+  border-color: rgba(var(--primary-rgb), .3)
 }
 
 .btn-ghost-sm:hover {
-  background: rgba(99, 102, 241, .1);
-  color: #6366f1;
-  border-color: rgba(99, 102, 241, .3)
+  background: rgba(var(--primary-rgb), .1);
+  color: var(--primary);
+  border-color: rgba(var(--primary-rgb), .3)
 }
 
 .lg-hidden {
@@ -1135,9 +1211,9 @@ html {
 }
 
 .maint-btn:hover {
-  background: rgba(99, 102, 241, .1);
-  border-color: #6366f1;
-  color: #6366f1
+  background: rgba(var(--primary-rgb), .1);
+  border-color: var(--primary);
+  color: var(--primary)
 }
 
 .slide-down-enter-active,
@@ -1189,8 +1265,8 @@ html {
   gap: .625rem;
   padding: .5rem 1.25rem;
   border-radius: 9999px;
-  background: rgba(99, 102, 241, .1);
-  border: 1px solid rgba(99, 102, 241, .25);
+  background: rgba(var(--primary-rgb), .1);
+  border: 1px solid rgba(var(--primary-rgb), .25);
   color: #818cf8;
   font-size: .8rem;
   font-weight: 700;
@@ -1202,7 +1278,7 @@ html {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #6366f1;
+  background: var(--primary);
   animation: dotPing 1.5s infinite
 }
 
@@ -1231,7 +1307,7 @@ html {
 }
 
 .grad-text {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+  background: linear-gradient(135deg, var(--primary), #8b5cf6, #ec4899);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -1240,8 +1316,29 @@ html {
 
 .caret {
   animation: blink .8s step-end infinite;
-  color: #6366f1;
+  color: var(--primary);
   font-weight: 200
+}
+
+.typed-line {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -.04em;
+  min-height: 1.2em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35em
+}
+
+.typed-prefix {
+  color: var(--text);
+  white-space: nowrap
+}
+
+.typed-suffix {
+  color: var(--text);
+  white-space: nowrap
 }
 
 @keyframes blink {
@@ -1275,18 +1372,18 @@ html {
   gap: .625rem;
   padding: 1rem 2rem;
   border-radius: 16px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
   color: #fff;
   font-size: 1rem;
   font-weight: 700;
   text-decoration: none;
-  box-shadow: 0 16px 40px rgba(99, 102, 241, .4);
+  box-shadow: 0 16px 40px rgba(var(--primary-rgb), .4);
   transition: all .3s
 }
 
 .btn-cta:hover {
   transform: translateY(-3px);
-  box-shadow: 0 24px 50px rgba(99, 102, 241, .5)
+  box-shadow: 0 24px 50px rgba(var(--primary-rgb), .5)
 }
 
 .btn-ghost {
@@ -1305,8 +1402,8 @@ html {
 }
 
 .btn-ghost:hover {
-  border-color: #6366f1;
-  color: #6366f1;
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-2px)
 }
 
@@ -1346,7 +1443,7 @@ html {
 .mockup-glow {
   position: absolute;
   inset: -60px;
-  background: radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, .25), transparent 70%);
+  background: radial-gradient(ellipse at 50% 50%, rgba(var(--primary-rgb), .25), transparent 70%);
   animation: glowPulse 4s ease-in-out infinite alternate
 }
 
@@ -1366,7 +1463,7 @@ html {
   position: relative;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(99, 102, 241, .2);
+  border: 1px solid rgba(var(--primary-rgb), .2);
   background: #0a0a14;
   box-shadow: 0 50px 100px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(255, 255, 255, .05)
 }
@@ -1444,7 +1541,7 @@ html {
 }
 
 .b1 {
-  background-image: linear-gradient(90deg, rgba(99, 102, 241, .08) 25%, rgba(99, 102, 241, .2) 50%, rgba(99, 102, 241, .08) 75%)
+  background-image: linear-gradient(90deg, rgba(var(--primary-rgb), .08) 25%, rgba(var(--primary-rgb), .2) 50%, rgba(var(--primary-rgb), .08) 75%)
 }
 
 .b2 {
@@ -1473,7 +1570,7 @@ html {
   pointer-events: none;
   position: absolute;
   inset: -20px;
-  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, .3), transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(var(--primary-rgb), .3), transparent 70%);
   filter: blur(40px);
   z-index: -1
 }
@@ -1541,7 +1638,7 @@ html {
   font-weight: 800;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: #6366f1;
+  color: var(--primary);
   margin-bottom: .75rem;
   display: block
 }
@@ -1577,27 +1674,28 @@ html {
 }
 
 .feat-card:hover {
-  border-color: rgba(99, 102, 241, .4);
-  background: rgba(99, 102, 241, .05);
+  border-color: rgba(var(--primary-rgb), .4);
+  background: rgba(var(--primary-rgb), .05);
   transform: translateY(-8px);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, .15)
+  box-shadow: 0 30px 60px rgba(0, 0, 0, .15);
+  will-change: transform
 }
 
 .feat-icon {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: rgba(99, 102, 241, .1);
+  background: rgba(var(--primary-rgb), .1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6366f1;
+  color: var(--primary);
   margin-bottom: 1.5rem;
   transition: all .3s
 }
 
 .feat-card:hover .feat-icon {
-  background: rgba(99, 102, 241, .2);
+  background: rgba(var(--primary-rgb), .2);
   transform: scale(1.1) rotate(5deg)
 }
 
@@ -1683,15 +1781,15 @@ html {
   width: 52px;
   height: 28px;
   border-radius: 14px;
-  background: rgba(99, 102, 241, .2);
-  border: 1px solid rgba(99, 102, 241, .3);
+  background: rgba(var(--primary-rgb), .2);
+  border: 1px solid rgba(var(--primary-rgb), .3);
   position: relative;
   cursor: pointer;
   transition: background .3s
 }
 
 .toggle-switch.on {
-  background: #6366f1
+  background: var(--primary)
 }
 
 .toggle-knob {
@@ -1746,8 +1844,8 @@ html {
 }
 
 .plan-card.featured {
-  border-color: rgba(99, 102, 241, .5);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, .3), 0 20px 60px rgba(99, 102, 241, .15)
+  border-color: rgba(var(--primary-rgb), .5);
+  box-shadow: 0 0 0 1px rgba(var(--primary-rgb), .3), 0 20px 60px rgba(var(--primary-rgb), .15)
 }
 
 .plan-badge {
@@ -1755,7 +1853,7 @@ html {
   top: -14px;
   left: 50%;
   transform: translateX(-50%);
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
   color: #fff;
   padding: .35rem 1.25rem;
   border-radius: 999px;
@@ -1811,7 +1909,7 @@ html {
 }
 
 .check {
-  color: #6366f1;
+  color: var(--primary);
   font-weight: 700;
   flex-shrink: 0
 }
@@ -1829,13 +1927,13 @@ html {
 }
 
 .plan-btn-primary {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
   color: #fff;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, .4)
+  box-shadow: 0 8px 24px rgba(var(--primary-rgb), .4)
 }
 
 .plan-btn-primary:hover {
-  box-shadow: 0 16px 40px rgba(99, 102, 241, .5);
+  box-shadow: 0 16px 40px rgba(var(--primary-rgb), .5);
   transform: translateY(-2px)
 }
 
@@ -1846,8 +1944,8 @@ html {
 }
 
 .plan-btn-ghost:hover {
-  border-color: #6366f1;
-  color: #6366f1
+  border-color: var(--primary);
+  color: var(--primary)
 }
 
 .faq-list {
@@ -1867,13 +1965,13 @@ html {
 }
 
 .faq-item:hover {
-  border-color: rgba(99, 102, 241, .3)
+  border-color: rgba(var(--primary-rgb), .3)
 }
 
 .faq-num {
   font-size: 2rem;
   font-weight: 900;
-  color: rgba(99, 102, 241, .3);
+  color: rgba(var(--primary-rgb), .3);
   flex-shrink: 0;
   line-height: 1
 }
@@ -2006,7 +2104,7 @@ html {
 }
 
 .footer-logo em {
-  color: #6366f1;
+  color: var(--primary);
   font-style: normal
 }
 
@@ -2039,7 +2137,7 @@ html {
 }
 
 .social-link:hover {
-  background: #6366f1;
+  background: var(--primary);
   color: #fff;
   transform: translateY(-3px)
 }
@@ -2086,7 +2184,7 @@ html {
   font-weight: 800;
   letter-spacing: .15em;
   text-transform: uppercase;
-  color: #6366f1;
+  color: var(--primary);
   margin-bottom: 1.5rem
 }
 
@@ -2124,7 +2222,8 @@ html {
   opacity: 0;
   transform: translateY(32px);
   transition: opacity .8s cubic-bezier(.2, .8, .2, 1), transform .8s cubic-bezier(.2, .8, .2, 1);
-  transition-delay: var(--d, 0ms)
+  transition-delay: var(--d, 0ms);
+  will-change: transform, opacity
 }
 
 .sr.is-visible {
@@ -2240,13 +2339,13 @@ html {
   width: 100px;
   height: 100px;
   border-radius: 28px;
-  background: rgba(99, 102, 241, .1);
-  border: 2px solid rgba(99, 102, 241, .2);
+  background: rgba(var(--primary-rgb), .1);
+  border: 2px solid rgba(var(--primary-rgb), .2);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 2rem;
-  color: #6366f1
+  color: var(--primary)
 }
 
 .maint-box h1 {

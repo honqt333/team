@@ -55,7 +55,7 @@
                                     <th class="px-4 py-3">{{ $t('quotes.service_modal.discount') }}</th>
                                     <th class="px-4 py-3">{{ $t('work_orders.item.qty') }}</th>
                                     <th class="px-4 py-3">{{ $t('quotes.service_modal.total_cost') }}</th>
-                                    <th class="px-4 py-3">VAT</th>
+                                    <th class="px-4 py-3">{{ $t('common.vat') }}</th>
                                     <th class="px-4 py-3 w-16">{{ $t('common.actions') }}</th>
                                 </tr>
                             </thead>

@@ -12,6 +12,7 @@ class QuoteLine extends Model
     protected $fillable = [
         'quote_id',
         'service_id',
+        'department_id',
         'description',
         'qty',
         'unit_price',
@@ -32,6 +33,7 @@ class QuoteLine extends Model
     ];
 
     protected $casts = [
+        'department_id' => 'integer',
         'qty' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'base_price_snapshot' => 'decimal:2',
@@ -52,6 +54,10 @@ class QuoteLine extends Model
     {
         // Auto-calculate totals on creating/updating using PricingHelper
         static::saving(function (QuoteLine $line) {
+            if ($line->service_id && $line->service) {
+                $line->department_id = $line->service->department_id;
+            }
+
             $computed = PricingHelper::computeLineTotal(
                 (float) $line->unit_price,
                 $line->discount_type ?? 'none',
@@ -106,6 +112,11 @@ class QuoteLine extends Model
         return $this->belongsTo(Service::class);
     }
 
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
     public function parts(): HasMany
     {
         return $this->hasMany(QuotePart::class, 'quote_line_id');
@@ -124,6 +135,17 @@ class QuoteLine extends Model
             ->sum('total') ?: 0;
     }
 
-    protected $appends = ['parts_total'];
+    /**
+     * Get localized title for the quote line.
+     */
+    public function getTitleAttribute(): string
+    {
+        if ($this->service_id && $this->service) {
+            return $this->service->name;
+        }
+        return $this->description ?: 'أخرى';
+    }
+
+    protected $appends = ['parts_total', 'title'];
 }
 

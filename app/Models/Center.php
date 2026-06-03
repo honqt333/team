@@ -43,6 +43,14 @@ class Center extends Model
         'is_main' => 'boolean',
     ];
 
+    protected $appends = [
+        'logo_light_url',
+        'logo_dark_url',
+        'logo_invoice_url',
+        'stamp_url',
+        'display_name',
+    ];
+
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
@@ -100,6 +108,6 @@ class Center extends Model
         if ($locale === 'en' && $this->name_en) {
             return $this->name_en;
         }
-        return $this->name_ar ?? $this->name_en ?? $this->name;
+        return $this->name_ar ?? $this->name_en ?? $this->name ?? '';
     }
 }

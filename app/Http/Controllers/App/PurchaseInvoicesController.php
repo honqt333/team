@@ -36,7 +36,7 @@ class PurchaseInvoicesController extends Controller
             ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
             ->orderBy('id', 'desc');
 
-        $suppliers = Supplier::forTenant($tenantId)->active()->get(['id', 'name']);
+        $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
         $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
         $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
         $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
@@ -294,6 +294,15 @@ class PurchaseInvoicesController extends Controller
             
             // Record refund payments (multi-entry array)
             $refundPaymentsTotal = 0;
+            if (!empty($validated['refund_payments'])) {
+                $hasPayments = $purchaseInvoice->payments()->where('type', \App\Models\Payment::TYPE_PAYMENT)->exists();
+                if (!$hasPayments) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'refund_payments' => [__('payments.errors.cannot_refund_unpaid_invoice') ?? 'لا يمكن تسجيل دفعة مستردة لفاتورة شراء لم تدفع بعد']
+                    ]);
+                }
+            }
+
             foreach ($validated['refund_payments'] ?? [] as $refundEntry) {
                 $refundPaymentsTotal += (float) ($refundEntry['amount'] ?? 0);
             }
@@ -408,6 +417,16 @@ class PurchaseInvoicesController extends Controller
     {
         $purchaseInvoice = $purchaseReturnInvoice->purchaseInvoice;
 
+        $hasPayments = $purchaseInvoice->payments()
+            ->where('type', \App\Models\Payment::TYPE_PAYMENT)
+            ->exists();
+
+        if (!$hasPayments) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'amount' => [__('payments.errors.cannot_refund_unpaid_invoice') ?? 'لا يمكن تسجيل دفعة مستردة لفاتورة شراء لم تدفع بعد']
+            ]);
+        }
+
         // Calculate current remaining balance on this return invoice
         $allRefunds = $purchaseInvoice->payments()
             ->where('type', \App\Models\Payment::TYPE_REFUND)
@@ -452,5 +471,40 @@ class PurchaseInvoicesController extends Controller
         ]);
 
         return back()->with('success', __('payments.recorded') ?? 'تم تسجيل الدفعة بنجاح');
+    }
+
+    /**
+     * Print purchase invoice view
+     */
+    public function print(PurchaseInvoice $purchaseInvoice)
+    {
+        $purchaseInvoice->load([
+            'supplier', 
+            'purchaseOrder', 
+            'lines.part', 
+            'center.address', 
+            'payments.receivedBy'
+        ]);
+
+        return Inertia::render('Purchasing/Invoices/Print', [
+            'invoice' => $purchaseInvoice,
+        ]);
+    }
+
+    /**
+     * Print purchase return invoice view
+     */
+    public function printReturn(\App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
+    {
+        $purchaseReturnInvoice->load([
+            'purchaseInvoice.supplier',
+            'purchaseInvoice.payments.receivedBy',
+            'lines.part',
+            'center.address',
+        ]);
+
+        return Inertia::render('Purchasing/Invoices/ReturnPrint', [
+            'returnInvoice' => $purchaseReturnInvoice,
+        ]);
     }
 }

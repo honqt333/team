@@ -16,12 +16,23 @@ class InventoryBalance extends Model
         'qty_on_hand',
         'wac_cost',
         'last_move_at',
+        'sale_price',
+        'min_sale_price',
+        'min_stock',
+        'storage_location',
+        'allow_price_change',
+        'is_active',
     ];
 
     protected $casts = [
         'qty_on_hand' => 'decimal:3',
         'wac_cost' => 'decimal:4',
         'last_move_at' => 'datetime',
+        'sale_price' => 'decimal:2',
+        'min_sale_price' => 'decimal:2',
+        'min_stock' => 'decimal:3',
+        'allow_price_change' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -59,7 +70,7 @@ class InventoryBalance extends Model
 
     public function scopeLowStock($query)
     {
-        return $query->whereRaw('qty_on_hand <= (SELECT min_qty FROM parts WHERE parts.id = inventory_balances.part_id)');
+        return $query->whereRaw('qty_on_hand <= min_stock');
     }
 
     // ─────────────────────────────────────────────────────────────

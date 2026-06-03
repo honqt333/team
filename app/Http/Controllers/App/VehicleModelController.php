@@ -50,7 +50,7 @@ class VehicleModelController extends Controller
         $validated = $request->validate([
             'make_id' => 'required|exists:vehicle_makes,id',
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'is_active' => 'boolean',
         ]);
 
@@ -76,7 +76,7 @@ class VehicleModelController extends Controller
         $validated = $request->validate([
             'make_id' => 'required|exists:vehicle_makes,id',
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'is_active' => 'boolean',
         ]);
 

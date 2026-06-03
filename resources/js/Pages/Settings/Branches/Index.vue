@@ -14,13 +14,7 @@
                 badgeDot="bg-blue-500"
             >
                 <template #back>
-                    <Link href="/app/settings"
-                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
-                        :title="$t('common.back')">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton href="/app/settings" />
                 </template>
 
                 <template #icon>
@@ -183,6 +177,7 @@
 import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import { Link } from '@inertiajs/vue3';
 import BranchFormModal from './BranchFormModal.vue';
 

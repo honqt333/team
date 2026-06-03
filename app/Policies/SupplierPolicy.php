@@ -15,7 +15,8 @@ class SupplierPolicy
     public function view(User $user, Supplier $supplier): bool
     {
         return $user->can('purchasing.suppliers.view') 
-            && $user->tenant_id === $supplier->tenant_id;
+            && $user->tenant_id === $supplier->tenant_id
+            && ($supplier->center_id === $user->current_center_id || is_null($supplier->center_id));
     }
 
     public function create(User $user): bool
@@ -26,12 +27,14 @@ class SupplierPolicy
     public function update(User $user, Supplier $supplier): bool
     {
         return $user->can('purchasing.suppliers.update') 
-            && $user->tenant_id === $supplier->tenant_id;
+            && $user->tenant_id === $supplier->tenant_id
+            && ($supplier->center_id === $user->current_center_id || is_null($supplier->center_id));
     }
 
     public function delete(User $user, Supplier $supplier): bool
     {
         return $user->can('purchasing.suppliers.deactivate') 
-            && $user->tenant_id === $supplier->tenant_id;
+            && $user->tenant_id === $supplier->tenant_id
+            && ($supplier->center_id === $user->current_center_id || is_null($supplier->center_id));
     }
 }

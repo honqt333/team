@@ -75,7 +75,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'is_active' => 'boolean',
         ]);
 
@@ -92,7 +92,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'is_active' => 'boolean',
         ]);
 
@@ -118,7 +118,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'department_id' => 'nullable|exists:departments,id',
             'is_active' => 'boolean',
         ]);
@@ -136,7 +136,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'department_id' => 'nullable|exists:departments,id',
             'is_active' => 'boolean',
         ]);
@@ -163,7 +163,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'is_flexible' => 'boolean',
             'type' => 'required_if:is_flexible,false|in:fixed,percentage',
             'amount' => 'required_if:is_flexible,false|numeric|min:0.01',
@@ -190,7 +190,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'is_flexible' => 'boolean',
             'type' => 'required_if:is_flexible,false|in:fixed,percentage',
             'amount' => 'required_if:is_flexible,false|numeric|min:0.01',
@@ -226,7 +226,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'is_flexible' => 'boolean',
             'type' => 'required_if:is_flexible,false|in:fixed,percentage',
             'amount' => 'required_if:is_flexible,false|numeric|min:0.01',
@@ -253,7 +253,7 @@ class SettingsController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'is_flexible' => 'boolean',
             'type' => 'required_if:is_flexible,false|in:fixed,percentage',
             'amount' => 'required_if:is_flexible,false|numeric|min:0.01',

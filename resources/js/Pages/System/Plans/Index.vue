@@ -144,6 +144,14 @@
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الترتيب</label>
                                     <input v-model.number="form.sort_order" type="number" min="0" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" />
                                 </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">الوصف (عربي)</label>
+                                    <textarea v-model="form.description_ar" rows="2" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" dir="ltr">Description (EN)</label>
+                                    <textarea v-model="form.description_en" rows="2" dir="ltr" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"></textarea>
+                                </div>
                             </div>
                             
                             <!-- Pricing -->
@@ -194,6 +202,20 @@
                                     <input v-model="form.is_featured" type="checkbox" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
                                     <span class="text-gray-700 dark:text-gray-300">مميزة</span>
                                 </label>
+                            </div>
+
+                            <!-- Features -->
+                            <div>
+                                <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">مميزات الباقة</h4>
+                                <div class="space-y-2">
+                                    <div v-for="(feature, index) in form.features" :key="index" class="flex gap-2">
+                                        <input v-model="form.features[index]" type="text" class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white" :placeholder="'ميزة ' + (index + 1)" />
+                                        <button @click="form.features.splice(index, 1)" type="button" class="px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">✕</button>
+                                    </div>
+                                    <button @click="form.features.push('')" type="button" class="text-sm text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300">
+                                        + إضافة ميزة
+                                    </button>
+                                </div>
                             </div>
                         </form>
                         

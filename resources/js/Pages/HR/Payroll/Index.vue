@@ -14,13 +14,7 @@
                 badgeDot="bg-emerald-500"
             >
                 <template #back>
-                    <Link :href="route('app.hr.index')"
-                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
-                        :title="$t('common.back')">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.hr.index')" />
                 </template>
 
                 <template #icon>
@@ -205,6 +199,7 @@ import { ref, onMounted } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { useToast } from '@/Composables/useToast';

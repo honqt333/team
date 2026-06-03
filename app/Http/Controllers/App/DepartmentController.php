@@ -42,7 +42,7 @@ class DepartmentController
                     ->where(fn ($query) => $query->where('center_id', $centerId))
                     ->withoutTrashed(),
             ],
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',
@@ -68,7 +68,7 @@ class DepartmentController
                     ->ignore($department->id)
                     ->withoutTrashed(),
             ],
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string|max:1000',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'boolean',

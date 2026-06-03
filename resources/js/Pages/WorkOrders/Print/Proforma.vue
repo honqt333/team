@@ -1,205 +1,39 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8" :dir="isRtl ? 'rtl' : 'ltr'">
-        <!-- Reusable Print Header -->
-        <PrintHeader 
-            :title="page.props.tenant?.work_order_title || (isRtl ? 'فاتورة أولية' : 'Proforma Invoice')"
-            :subtitle="workOrder.code"
-            :work-order="workOrder"
-        />
-
-        <!-- Work Order Info -->
-        <div class="grid grid-cols-3 gap-4 mb-6 text-sm">
-            <div>
-                <span class="text-gray-500">{{ isRtl ? 'رقم كرت الصيانة:' : 'Work Order No:' }}</span>
-                <span class="font-bold mr-2">{{ workOrder.code }}</span>
-            </div>
-            <div>
-                <span class="text-gray-500">{{ isRtl ? 'تاريخ الفاتورة:' : 'Invoice Date:' }}</span>
-                <span class="font-bold mr-2">{{ formatDate(new Date()) }}</span>
-            </div>
-            <div>
-                <span class="text-gray-500">{{ isRtl ? 'تاريخ الدخول:' : 'Entry Date:' }}</span>
-                <span class="font-bold mr-2">{{ formatDate(workOrder.entry_date) }}</span>
-            </div>
-        </div>
-
-        <!-- Customer & Vehicle Info -->
-        <div class="grid grid-cols-2 gap-6 mb-6 p-4 bg-gray-50 rounded-lg">
-            <!-- Customer Info -->
-            <div>
-                <p class="mb-1">
-                    <span class="text-gray-500">{{ isRtl ? 'اسم العميل:' : 'Customer:' }}</span>
-                    <span class="font-bold mr-2">{{ workOrder.customer?.name }}</span>
-                </p>
-                <p v-if="workOrder.contact_name" class="mb-1">
-                    <span class="text-gray-500">{{ isRtl ? 'اسم المسؤول:' : 'Contact:' }}</span>
-                    <span class="font-bold mr-2">{{ workOrder.contact_name }}</span>
-                </p>
-                <p v-if="workOrder.customer?.phone" class="mb-1">
-                    <span class="text-gray-500">{{ isRtl ? 'الهاتف:' : 'Phone:' }}</span>
-                    <span class="font-bold mr-2" dir="ltr">{{ workOrder.customer?.phone }}</span>
-                </p>
-            </div>
-
-            <!-- Vehicle Info -->
-            <div :class="isRtl ? 'text-left' : 'text-right'">
-                <p class="mb-1">
-                    <span class="text-gray-500">{{ isRtl ? 'الماركة:' : 'Make:' }}</span>
-                    <span class="font-bold mr-2">{{ vehicleName }}</span>
-                </p>
-                <p class="mb-1">
-                    <span class="text-gray-500">{{ isRtl ? 'اللون:' : 'Color:' }}</span>
-                    <span class="font-bold mr-2">{{ workOrder.vehicle?.color || (isRtl ? 'غير محدد' : 'N/A') }}</span>
-                </p>
-                <p class="mb-1">
-                    <span class="text-gray-500">{{ isRtl ? 'رقم اللوحة:' : 'Plate:' }}</span>
-                    <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.plate_number }}</span>
-                </p>
-                <p v-if="workOrder.vehicle?.vin" class="mb-1">
-                    <span class="text-gray-500">{{ isRtl ? 'رقم الهيكل:' : 'VIN:' }}</span>
-                    <span class="font-bold mr-2" dir="ltr">{{ workOrder.vehicle?.vin }}</span>
-                </p>
-            </div>
-        </div>
-
-        <!-- Services Section -->
-        <div class="mb-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">{{ isRtl ? 'الخدمات' : 'Services' }}</h3>
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b-2 border-gray-300">
-                        <th class="py-2 text-right w-10">#</th>
-                        <th class="py-2 text-right">{{ isRtl ? 'الوصف' : 'Description' }}</th>
-                        <th class="py-2 text-center w-24">{{ isRtl ? 'السعر' : 'Price' }}</th>
-                        <th class="py-2 text-center w-24 text-red-600">{{ isRtl ? 'الخصم' : 'Disc.' }}</th>
-                        <th class="py-2 text-left w-24">{{ isRtl ? 'المبلغ' : 'Total' }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <template v-for="(items, deptId) in itemsByDepartment" :key="deptId">
-                        <tr v-for="(item, idx) in items" :key="item.id" class="border-b border-gray-200">
-                            <td class="py-2 text-right text-gray-500">{{ idx + 1 }}</td>
-                            <td class="py-2 text-right">{{ item.title || item.service?.name_ar || item.service?.name_en }}</td>
-                            <td class="py-2 text-center" dir="ltr">{{ formatPrice(item.unit_price * item.qty) }}</td>
-                            <td class="py-2 text-center text-red-600" dir="ltr">{{ formatPrice(getDiscount(item)) }}</td>
-                            <td class="py-2 text-left font-medium" dir="ltr">{{ formatPrice(item.line_total || (item.qty * item.unit_price)) }}</td>
-                        </tr>
-                    </template>
-                </tbody>
-                <tfoot>
-                    <tr class="font-bold">
-                        <td colspan="4" class="py-2 text-left">{{ isRtl ? 'مجموع الخدمات:' : 'Services Total:' }}</td>
-                        <td class="py-2 text-left" dir="ltr">{{ formatPrice(servicesTotal) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <!-- Parts Section -->
-        <div v-if="allParts.length > 0" class="mb-6">
-            <h3 class="text-lg font-bold text-gray-900 mb-3 border-b pb-2">{{ isRtl ? 'قطع الغيار' : 'Parts' }}</h3>
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="border-b-2 border-gray-300">
-                        <th class="py-2 text-right w-10">#</th>
-                        <th class="py-2 text-right">{{ isRtl ? 'الوصف' : 'Description' }}</th>
-                        <th class="py-2 text-center w-24">{{ isRtl ? 'السعر' : 'Price' }}</th>
-                        <th class="py-2 text-center w-20 text-red-600">{{ isRtl ? 'الخصم' : 'Disc.' }}</th>
-                        <th class="py-2 text-center w-20">{{ isRtl ? 'الكمية' : 'Qty' }}</th>
-                        <th class="py-2 text-left w-24">{{ isRtl ? 'المبلغ' : 'Total' }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(part, idx) in allParts" :key="part.id" class="border-b border-gray-200">
-                        <td class="py-2 text-right text-gray-500">{{ idx + 1 }}</td>
-                        <td class="py-2 text-right">{{ part.name || part.part?.name_ar || part.part?.name_en }}</td>
-                        <td class="py-2 text-center" dir="ltr">{{ formatPrice(part.unit_price) }}</td>
-                        <td class="py-2 text-center text-red-600" dir="ltr">0.00</td>
-                        <td class="py-2 text-center" dir="ltr">{{ part.qty }}</td>
-                        <td class="py-2 text-left font-medium" dir="ltr">{{ formatPrice(part.qty * part.unit_price) }}</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr class="font-bold">
-                        <td colspan="5" class="py-2 text-left">{{ isRtl ? 'مجموع قطع الغيار:' : 'Parts Total:' }}</td>
-                        <td class="py-2 text-left" dir="ltr">{{ formatPrice(partsTotal) }}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-
-        <!-- Summary -->
-        <div class="mb-6 flex justify-end">
-            <table class="w-64 text-sm">
-                <tbody>
-                    <tr class="border-b">
-                        <td class="py-2 text-gray-600">{{ isRtl ? 'الخدمات' : 'Services' }}</td>
-                        <td class="py-2 text-left font-medium" dir="ltr">{{ formatPrice(servicesTotal) }}</td>
-                    </tr>
-                    <tr v-if="partsTotal > 0" class="border-b">
-                        <td class="py-2 text-gray-600">{{ isRtl ? 'قطع الغيار' : 'Parts' }}</td>
-                        <td class="py-2 text-left font-medium" dir="ltr">{{ formatPrice(partsTotal) }}</td>
-                    </tr>
-                    <tr class="border-b bg-gray-50">
-                        <td class="py-2 font-bold">{{ isRtl ? 'المجموع' : 'Total' }}</td>
-                        <td class="py-2 text-left font-bold" dir="ltr">{{ formatPrice(grandTotal) }}</td>
-                    </tr>
-                    <tr v-if="totalPaid > 0" class="border-b">
-                        <td class="py-2 text-green-600">{{ isRtl ? 'المدفوع' : 'Paid' }}</td>
-                        <td class="py-2 text-left font-medium text-green-600" dir="ltr">{{ formatPrice(totalPaid) }}</td>
-                    </tr>
-                    <tr class="bg-gray-100">
-                        <td class="py-2 font-bold text-red-600">{{ isRtl ? 'الباقي' : 'Balance' }}</td>
-                        <td class="py-2 text-left font-bold text-red-600" dir="ltr">{{ formatPrice(balance) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Notes -->
-        <div v-if="workOrder.notes" class="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 class="text-sm font-bold text-gray-700 mb-2">{{ isRtl ? 'ملاحظات' : 'Notes' }}</h3>
-            <p class="text-sm text-gray-600 whitespace-pre-wrap">{{ workOrder.notes }}</p>
-        </div>
-
-        <!-- Footer Signatures -->
-        <div class="mt-8 pt-4 border-t border-gray-200">
-            <div class="flex justify-between items-start">
-                <!-- Center Stamp -->
-                <div class="text-center">
-                    <div v-if="workOrder.center?.stamp_url" class="w-24 h-24 mx-auto mb-2">
-                        <img :src="workOrder.center.stamp_url" alt="Stamp" class="w-full h-full object-contain" />
-                    </div>
-                    <p class="text-sm text-gray-600">{{ workOrder.center?.name }}</p>
-                </div>
-
-                <!-- Signatures -->
-                <div :class="['space-y-4', isRtl ? 'text-left' : 'text-right']">
-                    <div>
-                        <p class="text-sm text-gray-600">{{ isRtl ? 'توقيع المدير' : 'Manager Signature' }}: _________________</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">{{ isRtl ? 'توقيع العميل' : 'Customer Signature' }}: _________________</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Terms & Conditions (Print Only) -->
-        <div v-if="page.props.tenant?.work_order_terms" class="mt-12 pt-6 border-t border-gray-200">
-            <h3 class="text-sm font-bold text-gray-900 mb-2">{{ isRtl ? 'الشروط والأحكام' : 'Terms & Conditions' }}</h3>
-            <p class="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{{ page.props.tenant.work_order_terms }}</p>
-        </div>
-
-        <!-- Print Button -->
-        <div class="fixed bottom-4 left-4 print:hidden">
-            <button @click="printPage" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+        <!-- Print / Back Controls (hidden during print) -->
+        <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
+            <!-- Back Button -->
+            <button 
+                @click="goBack" 
+                class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                {{ isRtl ? 'طباعة' : 'Print' }}
+                {{ $t('common.back') }}
+            </button>
+
+            <!-- Print Button -->
+            <button 
+                @click="printPage" 
+                class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
+                :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
+            >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                </svg>
+                {{ $t('common.print') }}
             </button>
         </div>
+
+        <PrintEngine 
+            documentType="proforma_invoice"
+            :data="mappedData"
+            :centerData="mappedCenterData"
+            :documentSettings="documentSettings"
+            :visualSettings="visualSettings"
+            :previewMode="false"
+        />
     </div>
 </template>
 
@@ -207,9 +41,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePage } from '@inertiajs/vue3';
-import PrintHeader from '@/Components/Print/PrintHeader.vue';
-
-const page = usePage();
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const props = defineProps({
     workOrder: Object,
@@ -224,26 +56,14 @@ const props = defineProps({
     taxSettings: Object,
 });
 
+const page = usePage();
 const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
-const vehicleName = computed(() => {
-    const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
-    const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
-    return `${make} ${model}`.trim() || '-';
-});
+const goBack = () => window.history.back();
+const printPage = () => window.print();
 
-const formatDate = (date) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US');
-};
-
-const formatPrice = (amount) => {
-    return new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    }).format(amount || 0);
-};
+const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
 
 const getDiscount = (item) => {
     if (!item.discount_value || item.discount_type === 'none') return 0;
@@ -254,13 +74,119 @@ const getDiscount = (item) => {
     return 0;
 };
 
-const printPage = () => window.print();
+const mappedData = computed(() => {
+    const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
+    const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
+    const vehicleStr = `${make} ${model}`.trim() || '-';
+
+    // Map services
+    const services = (props.workOrder.items || []).map(item => ({
+        service_name: item.title || item.service?.name_ar || item.service?.name_en || '',
+        description: item.description || '',
+        qty: item.qty || 1,
+        unit_price: item.unit_price || 0,
+        discount: getDiscount(item),
+        is_part: false
+    }));
+
+    // Map parts
+    const parts = (props.allParts || []).map(part => ({
+        service_name: part.name || part.part?.name_ar || part.part?.name_en || '',
+        description: part.description || '',
+        qty: part.qty || 1,
+        unit_price: part.unit_price || 0,
+        discount: 0,
+        is_part: true
+    }));
+
+    return {
+        code: props.workOrder.code,
+        created_at: new Date().toISOString(),
+        entry_date: props.workOrder.entry_date,
+        mileage: props.workOrder.mileage,
+        odometer: props.workOrder.mileage ? formatNumber(props.workOrder.mileage) : '-',
+        fuel_level: props.workOrder.fuel_level,
+        customer_complaint: props.workOrder.customer_complaint,
+        reception_signature: props.workOrder.reception_signature,
+        delivery_signature: props.workOrder.delivery_signature,
+        customer: {
+            name: props.workOrder.customer?.name,
+            phone: props.workOrder.customer?.phone,
+            address: props.workOrder.customer?.address_line,
+            tax_number: props.workOrder.customer?.tax_number,
+        },
+        vehicle: {
+            make: vehicleStr,
+            plate: props.workOrder.vehicle?.plate_number,
+            color: props.workOrder.vehicle?.color,
+        },
+        tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot,
+        total_excl_tax: props.grandTotal ?? 0,
+        total_tax: 0,
+        total_incl_tax: props.grandTotal ?? 0,
+        discount_amount: 0,
+        total_paid: props.totalPaid ?? 0,
+        balance: props.balance ?? 0,
+        items: [...services, ...parts]
+    };
+});
+
+const mappedCenterData = computed(() => {
+    const center = props.workOrder.center || {};
+    const tenant = props.workOrder.tenant || page.props.tenant || {};
+    return {
+        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
+        tax_number: center.vat_number || tenant.vat_number,
+        cr_number: tenant.cr_number,
+        phone: center.phone || tenant.phone,
+        logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
+        iban: tenant.iban || '',
+        address: center.address || tenant.address || '',
+        stamp_url: center.stamp_url || '',
+    };
+});
+
+const documentSettings = computed(() => {
+    const tenantSettings = page.props.tenant?.print_settings;
+    const docSettings = tenantSettings?.documents?.['proforma_invoice'] || {};
+    return {
+        title_ar: docSettings.title_ar || 'فاتورة أولية',
+        title_en: docSettings.title_en || 'Proforma Invoice',
+        terms: docSettings.terms || [],
+        print_terms: docSettings.print_terms !== false,
+        show_stamp: docSettings.show_stamp !== false,
+        show_customer_address: docSettings.show_customer_address !== false,
+        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
+            { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
+            { name_ar: 'توقيع العميل', name_en: 'Customer Signature' }
+        ]
+    };
+});
+
+const visualSettings = computed(() => {
+    const tenantSettings = page.props.tenant?.print_settings;
+    const vis = tenantSettings?.visual || {};
+    const center = props.workOrder.center || {};
+    return {
+        active_template: vis.active_template || 'TemplateDefaultA4',
+        show_logo: vis.show_logo !== false,
+        show_stamp: vis.show_stamp !== false,
+        show_qr_code: vis.show_qr_code !== false,
+        primary_color: vis.primary_color || '#fbbf24',
+        footer_text: vis.footer_text || '',
+        stamp_url: center.stamp_url || vis.stamp_url || ''
+    };
+});
 </script>
 
 <style>
 @media print {
-    @page { size: A4; margin: 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { size: A4; margin: 0 1cm; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: white !important; }
     .print-container { padding: 0; }
+    .print-container,
+    .print-container * {
+        visibility: visible !important;
+    }
 }
 </style>

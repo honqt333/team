@@ -16,11 +16,7 @@
                 badgeDot="bg-blue-500"
             >
                 <template #back>
-                    <Link :href="route('app.inventory.hub')" class="p-2 -ml-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-all">
-                        <svg class="w-6 h-6 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('app.inventory.hub')" />
                 </template>
 
                 <template #icon>
@@ -74,7 +70,6 @@
 
                         <!-- Add Part Button -->
                         <button
-                            v-if="can('inventory.parts.create') || isAnyAdmin()"
                             @click="createPart"
                             class="flex items-center justify-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-black shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all group/add"
                         >
@@ -160,11 +155,11 @@
                             <tr>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-12">#</th>
                                 <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase w-16">
-                                    {{ $t('inventory.parts.photo') || 'Photo' }}
+                                    {{ $t('inventory.parts.photo') }}
                                 </th>
                                 <th @click="toggleSort('sku')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        {{ $t('inventory.parts.sku') }} / {{ $t('inventory.parts.barcode') || 'Barcode' }}
+                                        {{ $t('inventory.parts.sku') }} / {{ $t('inventory.parts.barcode') }}
                                         <SortIcon :active="sortColumn === 'sku'" :direction="sortDirection" />
                                     </div>
                                 </th>
@@ -176,7 +171,7 @@
                                 </th>
                                 <th @click="toggleSort('description')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                                     <div class="flex items-center justify-center gap-1.5">
-                                        {{ $t('inventory.parts.description') || 'Description' }}
+                                        {{ $t('inventory.parts.description') }}
                                         <SortIcon :active="sortColumn === 'description'" :direction="sortDirection" />
                                     </div>
                                 </th>
@@ -258,6 +253,16 @@
                                         >
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </button>
+                                        <button
+                                            v-if="can('inventory.parts.edit')"
+                                            @click="editPartStock(part)"
+                                            class="p-2 text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                            :title="$t('inventory.parts.warehouse_stock')"
+                                        >
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                                             </svg>
                                         </button>
                                         <button
@@ -396,15 +401,16 @@
                                                     {{ balance.warehouse?.center?.name || balance.warehouse?.name || '-' }}
                                                 </td>
                                                 <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(balance.wac_cost) }}</td>
-                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(part.default_sale_price) }}</td>
-                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(part.min_sale_price) }}</td>
+                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(balance.sale_price) }}</td>
+                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(balance.min_sale_price) }}</td>
                                                 <td class="py-2 text-center font-medium text-gray-900 dark:text-white px-1">
                                                     {{ formatQuantity(balance.qty_on_hand) }} {{ locale === 'ar' ? part.unit?.name_ar : (part.unit?.name_en || part.unit?.name_ar) }}
                                                 </td>
                                                 <td class="py-2 text-center px-1">
-                                                    <svg class="w-3 h-3 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    <svg v-if="balance.is_active" class="w-3 h-3 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    <svg v-else class="w-3 h-3 text-red-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </td>
-                                                <td class="py-2 text-gray-500 px-1">-</td>
+                                                <td class="py-2 text-gray-500 px-1">{{ balance.storage_location || '-' }}</td>
                                             </tr>
                                             <tr v-if="!part.inventory_balances?.length">
                                                 <td colspan="8" class="py-3 text-center text-gray-400 italic">
@@ -455,13 +461,23 @@
                 </div>
             </div>
 
-            <!-- Create/Edit Modal -->
+<!-- Create/Edit Modal -->
             <CreateModal
                 :show="showCreateModal"
                 :part="editingPart"
                 :units="units"
                 :categories="categories"
+                :warehouses="warehouses"
                 @close="closeModal"
+            />
+
+            <!-- Stock Modal -->
+            <StockModal
+                :show="showStockModal"
+                :part="stockEditingPart"
+                :warehouses="warehouses"
+                :existing-balances="stockEditingPart?.inventory_balances || []"
+                @close="closeStockModal"
             />
         </div>
     </AppLayout>
@@ -515,8 +531,10 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import { debounce } from 'lodash-es';
 import CreateModal from './CreateModal.vue';
+import StockModal from './StockModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import PrintHeader from '@/Components/Print/PrintHeader.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -531,6 +549,10 @@ const props = defineProps({
         default: () => [],
     },
     units: {
+        type: Array,
+        default: () => [],
+    },
+    warehouses: {
         type: Array,
         default: () => [],
     },
@@ -622,6 +644,9 @@ const toggleView = (mode) => {
 const showCreateModal = ref(false);
 const editingPart = ref(null);
 
+const showStockModal = ref(false);
+const stockEditingPart = ref(null);
+
 const createPart = () => {
     editingPart.value = null;
     showCreateModal.value = true;
@@ -632,9 +657,19 @@ const editPart = (part) => {
     showCreateModal.value = true;
 };
 
+const editPartStock = (part) => {
+    stockEditingPart.value = part;
+    showStockModal.value = true;
+};
+
 const closeModal = () => {
     showCreateModal.value = false;
     editingPart.value = null;
+};
+
+const closeStockModal = () => {
+    showStockModal.value = false;
+    stockEditingPart.value = null;
 };
 
 const applyFilters = () => {

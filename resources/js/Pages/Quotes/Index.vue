@@ -219,8 +219,11 @@
                                 <div class="flex items-center gap-2">
                                     <span class="text-[10px] font-black text-gray-400 dark:text-gray-500 tracking-widest uppercase">#{{ toEnglish(quote.code) }}</span>
                                 </div>
+                                <div v-if="quote.created_at" class="text-[9px] font-bold text-slate-400">
+                                    {{ formatDate(quote.created_at) }}
+                                </div>
                                 <!-- Converted WO Link (Under ID) -->
-                                <div v-if="quote.status === 'converted' && (quote.converted_work_order?.id || quote.converted_work_order_id)" 
+                                <div v-if="['converted', 'approved'].includes(quote.status) && (quote.converted_work_order?.id || quote.converted_work_order_id)" 
                                     class="flex items-center gap-1 group/link"
                                     @click.stop>
                                             <Link :href="route('work-orders.show', quote.converted_work_order?.id || quote.converted_work_order_id)" 
@@ -247,24 +250,8 @@
                                 </div>
                             </Tooltip>
                             
-                            <!-- Saudi Plate (Realistic Style) -->
-                            <Tooltip :text="$t('vehicles.plate_number')">
-                                <div class="relative w-40 h-10 bg-white border-2 border-gray-900 rounded-lg flex overflow-hidden shadow-sm group-hover:shadow-md transition-all cursor-pointer">
-                                    <div class="w-1/4 border-r-2 border-gray-900 bg-gray-50 flex flex-col items-center justify-between py-0.5">
-                                        <span class="text-[7px] font-black leading-none text-gray-500">KSA</span>
-                                        <div class="w-2 h-2 rounded-full bg-green-600 shadow-sm shadow-green-500/50"></div>
-                                        <span class="text-[7px] font-black leading-none text-gray-500">{{ $t('vehicles.plate.countries.sa') }}</span>
-                                    </div>
-                                    <div class="flex-1 flex items-center justify-center gap-3 px-1.5">
-                                        <span class="text-lg font-black text-gray-900 tracking-widest font-mono">
-                                            {{ toEnglish(quote.vehicle?.plate_number?.split(' ')?.[0] || '1234') }}
-                                        </span>
-                                        <span class="text-lg font-black text-gray-900 tracking-[0.4em] font-mono">
-                                            {{ toEnglish(quote.vehicle?.plate_number?.split(' ')?.[1] || 'ABC') }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </Tooltip>
+                            <!-- Saudi Plate -->
+                            <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
                         </div>
 
                         <!-- Vehicle Name & Customer -->
@@ -438,9 +425,21 @@
                                     {{ toEnglish(index + 1) }}
                                 </td>
                                 <td class="px-4 py-4 text-center whitespace-nowrap">
-                                    <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
-                                        #{{ toEnglish(quote.code) }}
-                                    </span>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
+                                            #{{ toEnglish(quote.code) }}
+                                        </span>
+                                        <!-- Converted WO Link -->
+                                        <div v-if="['converted', 'approved'].includes(quote.status) && (quote.converted_work_order?.id || quote.converted_work_order_id)" 
+                                            class="flex items-center gap-1 group/link"
+                                            @click.stop>
+                                            <Link :href="route('work-orders.show', quote.converted_work_order?.id || quote.converted_work_order_id)" 
+                                                class="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/40 px-2 py-0.5 rounded-lg flex items-center gap-1 hover:bg-purple-100 transition-all border border-purple-100 dark:border-purple-800/50">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                {{ quote.converted_work_order?.code }}
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     <div class="flex flex-col items-center gap-1">
@@ -501,7 +500,7 @@
                 </div>
                 <div v-else-if="allQuotes.length >= (quotes?.total || 0) && (quotes?.total || 0) > 0"
                     class="text-sm text-gray-400 dark:text-gray-600">
-                    {{ $t('quotes.all_loaded') || 'All quotes loaded' }}
+                    {{ $t('quotes.all_loaded') }}
                 </div>
             </div>
         </div>

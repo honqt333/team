@@ -4,6 +4,7 @@ import { Head, router, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import Breadcrumb from '@/Components/Breadcrumb.vue';
 import UserManagementTabs from '@/Pages/Settings/Partials/UserManagementTabs.vue';
 import RoleFormModal from './RoleFormModal.vue';
@@ -80,13 +81,7 @@ const deleteRole = () => {
                 badgeDot="bg-pink-500"
             >
                 <template #back>
-                    <Link :href="route('settings.index')"
-                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-pink-50 dark:hover:bg-pink-900/20 text-pink-600 dark:text-pink-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
-                        :title="$t('common.back')">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton :href="route('settings.index')" />
                 </template>
 
                 <template #icon>

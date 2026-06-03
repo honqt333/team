@@ -10,7 +10,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'mada', 'visa', 'mastercard', 'transfer', 'apple_pay', 'stc_pay', 'tabby', 'tamara', 'credit', 'other', 'debit_note') DEFAULT 'cash'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'mada', 'visa', 'mastercard', 'transfer', 'apple_pay', 'stc_pay', 'tabby', 'tamara', 'credit', 'other', 'debit_note') DEFAULT 'cash'");
+        }
     }
 
     /**
@@ -18,6 +20,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'mada', 'visa', 'mastercard', 'transfer', 'apple_pay', 'stc_pay', 'tabby', 'tamara', 'credit', 'other') DEFAULT 'cash'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE payments MODIFY payment_method ENUM('cash', 'mada', 'visa', 'mastercard', 'transfer', 'apple_pay', 'stc_pay', 'tabby', 'tamara', 'credit', 'other') DEFAULT 'cash'");
+        }
     }
 };

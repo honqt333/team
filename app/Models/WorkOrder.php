@@ -115,6 +115,7 @@ class WorkOrder extends Model
         'delivery_signature',
         'reception_signed_at',
         'delivery_signed_at',
+        'show_packages_section',
     ];
 
     protected $casts = [
@@ -127,6 +128,7 @@ class WorkOrder extends Model
         'tax_breakdown' => 'array',
         'reception_signed_at' => 'datetime',
         'delivery_signed_at' => 'datetime',
+        'show_packages_section' => 'boolean',
     ];
 
     // ==================== Relationships ====================
@@ -191,7 +193,7 @@ class WorkOrder extends Model
      */
     public function payments(): HasMany
     {
-        return $this->hasMany(Payment::class)->orderByDesc('payment_date');
+        return $this->hasMany(Payment::class);
     }
 
     /**
@@ -224,6 +226,14 @@ class WorkOrder extends Model
     public function inspections(): HasMany
     {
         return $this->hasMany(WorkOrderInspection::class)->orderByDesc('performed_at');
+    }
+
+    /**
+     * Get all notes for this work order (both general and item-linked).
+     */
+    public function generalNotes(): HasMany
+    {
+        return $this->hasMany(WorkOrderItemNote::class, 'work_order_id');
     }
 
     /**
@@ -522,5 +532,23 @@ class WorkOrder extends Model
     public function isCancelled(): bool
     {
         return $this->status === self::STATUS_CANCELLED;
+    }
+
+    /**
+     * Scope to filter work orders with outstanding balance (credit invoices).
+     * Total charges (items + parts) > total payments.
+     */
+    public function scopeHasOutstandingBalance($query): void
+    {
+        $query->whereRaw('(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))');
+    }
+
+    /**
+     * Get the raw SQL snippet for the outstanding balance condition.
+     * Useful when combining with other whereRaw calls.
+     */
+    public static function outstandingBalanceSql(): string
+    {
+        return '(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))';
     }
 }

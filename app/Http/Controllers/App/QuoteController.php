@@ -253,7 +253,15 @@ class QuoteController extends Controller
 
         // Sync departments
         if ($request->has('departments') && is_array($request->departments)) {
-            $quote->departments()->sync($request->departments);
+            $departments = $request->departments;
+            $showPackages = false;
+            if (($key = array_search('packages', $departments)) !== false) {
+                $showPackages = true;
+                unset($departments[$key]);
+                $departments = array_values($departments);
+            }
+            $quote->show_packages_section = $showPackages;
+            $quote->departments()->sync($departments);
         }
 
         // Create lines
@@ -379,7 +387,15 @@ class QuoteController extends Controller
 
         // Sync departments if provided
         if ($request->has('departments')) {
-            $quote->departments()->sync($request->departments);
+            $departments = $request->departments ?? [];
+            $showPackages = false;
+            if (($key = array_search('packages', $departments)) !== false) {
+                $showPackages = true;
+                unset($departments[$key]);
+                $departments = array_values($departments);
+            }
+            $quote->update(['show_packages_section' => $showPackages]);
+            $quote->departments()->sync($departments);
         }
 
         // Only update lines if provided in request to prevent accidental deletion
@@ -460,7 +476,10 @@ class QuoteController extends Controller
 
         // Group lines by department
         $linesByDepartment = $quote->lines->groupBy(function ($line) {
-            return $line->service?->department_id ?? 0;
+            if ($line->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
+            return $line->department_id ?? $line->service?->department_id ?? 0;
         });
 
         $departments = Department::where('is_active', true)
@@ -517,8 +536,9 @@ class QuoteController extends Controller
         }
 
         $validated = $request->validate([
-            'service_id' => ['required', 'exists:services,id'],
-            'description' => ['nullable', 'string', 'max:500'],
+            'service_id' => ['nullable', 'exists:services,id'],
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'description' => ['required_without:service_id', 'nullable', 'string', 'max:500'],
             'qty' => ['required', 'numeric', 'min:0.01'],
             'unit_price' => ['required', 'numeric', 'min:0'],
             'discount_type' => ['nullable', 'in:none,percentage,fixed'],
@@ -532,7 +552,7 @@ class QuoteController extends Controller
             'pending_parts.*.discount' => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        $service = Service::find($validated['service_id']);
+        $service = $validated['service_id'] ? Service::find($validated['service_id']) : null;
 
         // Validate price constraints based on service settings
         $unitPrice = (float) $validated['unit_price'];
@@ -540,12 +560,12 @@ class QuoteController extends Controller
         $discountValue = (float) ($validated['discount_value'] ?? 0);
         
         // If price override not allowed, force base_price (but allow discount with min_price check)
-        if (!$service->allow_price_override) {
+        if ($service && !$service->allow_price_override) {
             $unitPrice = (float) $service->base_price;
         }
         
         // Always check min_price constraint on FINAL price (after discount)
-        $minPrice = (float) ($service->min_price ?? 0);
+        $minPrice = $service ? (float) ($service->min_price ?? 0) : 0;
         if ($minPrice > 0) {
             // Calculate final price using same logic as frontend
             $discountAmount = PricingHelper::computeDiscountAmount($unitPrice, $discountType, $discountValue);
@@ -564,11 +584,12 @@ class QuoteController extends Controller
         $line = QuoteLine::create([
             'quote_id' => $quote->id,
             'service_id' => $validated['service_id'],
-            'description' => $validated['description'] ?? $service->name,
+            'department_id' => $validated['department_id'],
+            'description' => $validated['description'] ?? ($service ? $service->name : 'أخرى'),
             'qty' => $validated['qty'],
             'unit_price' => $unitPrice,
-            'base_price_snapshot' => $service->base_price ?? $unitPrice,
-            'min_price_snapshot' => $service->min_price ?? 0,
+            'base_price_snapshot' => $service?->base_price ?? $unitPrice,
+            'min_price_snapshot' => $service ? ($service->min_price ?? 0) : 0,
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
         ]);
@@ -701,7 +722,16 @@ class QuoteController extends Controller
         }
 
         $validated = $request->validate([
-            'department_id' => ['required', 'exists:departments,id'],
+            'department_id' => ['required'],
+        ]);
+
+        if ($validated['department_id'] === 'packages') {
+            $quote->update(['show_packages_section' => true]);
+            return redirect()->back();
+        }
+
+        $request->validate([
+            'department_id' => ['exists:departments,id'],
         ]);
 
         // Add department to pivot table
@@ -713,13 +743,34 @@ class QuoteController extends Controller
     /**
      * Remove a department from the quote.
      */
-    public function removeDepartment(Quote $quote, int $department): RedirectResponse
+    public function removeDepartment(Quote $quote, string $department_id): RedirectResponse
     {
         $this->authorize('update', $quote);
 
         if (!$quote->canBeEdited()) {
             abort(403, 'Cannot modify departments of a converted quote.');
         }
+
+        if ($department_id === 'packages') {
+            $hasPackages = $quote->lines()
+                ->whereHas('service', fn($q) => $q->where('type', \App\Models\Service::TYPE_PACKAGE))
+                ->exists();
+
+            if ($hasPackages) {
+                return redirect()->back()->withErrors([
+                    'error' => __('quotes.cannot_remove_package_department_with_items')
+                ]);
+            }
+
+            $quote->update(['show_packages_section' => false]);
+
+            return redirect()->back();
+        }
+
+        if (!is_numeric($department_id)) {
+            abort(404);
+        }
+        $department = (int) $department_id;
 
         // Check if department has any services in this quote
         $hasServices = $quote->lines()
@@ -766,19 +817,27 @@ class QuoteController extends Controller
             'hide_on_print' => ['boolean'],
         ]);
 
-        // Validate min price if warehouse part
-        if ($validated['source'] === 'warehouse' && !empty($validated['part_id'])) {
-            $part = Part::find($validated['part_id']);
-            if ($part && $part->min_sale_price > 0) {
-                $qty = (float) ($validated['qty'] ?: 1);
-                $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? 0) / $qty) : 0;
-                $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
+        // Validate min price if warehouse part and not included in package
+        if ($validated['source'] === 'warehouse' && !empty($validated['part_id']) && !($validated['include_in_package'] ?? false)) {
+            $partId = (int) $validated['part_id'];
+            $qty = (float) ($validated['qty'] ?: 1);
+            $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? 0) / $qty) : 0;
+            $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
+            
+            // Get min_sale_price from InventoryBalance for current warehouse
+            $user = auth()->user();
+            $warehouse = \App\Models\Warehouse::forCenter($user->current_center_id)->default()->first();
+            
+            if ($warehouse) {
+                $balance = \App\Models\InventoryBalance::where('part_id', $partId)
+                    ->where('warehouse_id', $warehouse->id)
+                    ->first();
                 
-                if ($finalPrice < (float) $part->min_sale_price) {
+                if ($balance && $balance->min_sale_price > 0 && $finalPrice < (float) $balance->min_sale_price) {
                     return redirect()->back()->withErrors([
                         'unit_price' => __('pricing.final_price_below_minimum', [
                             'final' => number_format($finalPrice, 2),
-                            'min' => number_format((float) $part->min_sale_price, 2),
+                            'min' => number_format((float) $balance->min_sale_price, 2),
                         ])
                     ]);
                 }
@@ -824,22 +883,30 @@ class QuoteController extends Controller
             'hide_on_print' => ['boolean'],
         ]);
 
-        // Validate min price if warehouse part
+        // Validate min price if warehouse part and not included in package
         $source = $validated['source'] ?? $quotePart->source;
         $partId = $validated['part_id'] ?? $quotePart->part_id;
-        if ($source === 'warehouse' && !empty($partId)) {
-            $part = Part::find($partId);
-            if ($part && $part->min_sale_price > 0) {
-                $qty = (float) ($validated['qty'] ?? $quotePart->qty);
-                $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? $quotePart->discount) / $qty) : 0;
-                $unitPrice = (float) ($validated['unit_price'] ?? $quotePart->unit_price);
-                $finalPrice = $unitPrice - $unitDiscount;
+        $includeInPackage = $validated['include_in_package'] ?? $quotePart->include_in_package;
+        if ($source === 'warehouse' && !empty($partId) && !$includeInPackage) {
+            $qty = (float) ($validated['qty'] ?? $quotePart->qty);
+            $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? $quotePart->discount) / $qty) : 0;
+            $unitPrice = (float) ($validated['unit_price'] ?? $quotePart->unit_price);
+            $finalPrice = $unitPrice - $unitDiscount;
+            
+            // Get min_sale_price from InventoryBalance for current warehouse
+            $user = auth()->user();
+            $warehouse = \App\Models\Warehouse::forCenter($user->current_center_id)->default()->first();
+            
+            if ($warehouse) {
+                $balance = \App\Models\InventoryBalance::where('part_id', $partId)
+                    ->where('warehouse_id', $warehouse->id)
+                    ->first();
                 
-                if ($finalPrice < (float) $part->min_sale_price) {
+                if ($balance && $balance->min_sale_price > 0 && $finalPrice < (float) $balance->min_sale_price) {
                     return redirect()->back()->withErrors([
                         'unit_price' => __('pricing.final_price_below_minimum', [
                             'final' => number_format($finalPrice, 2),
-                            'min' => number_format((float) $part->min_sale_price, 2),
+                            'min' => number_format((float) $balance->min_sale_price, 2),
                         ])
                     ]);
                 }
@@ -876,6 +943,31 @@ class QuoteController extends Controller
         $quote->save();
 
         return redirect()->back();
+    }
+
+    /**
+     * Print the specified quote.
+     */
+    public function print(Quote $quote): Response
+    {
+        $this->authorize('view', $quote);
+
+        $quote->load([
+            'center.address',
+            'customer',
+            'vehicle.make',
+            'vehicle.customer',
+            'vehicle.model',
+            'lines.service.department',
+            'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
+            'parts.quoteLine',
+            'departments',
+            'createdByUser',
+        ]);
+
+        return Inertia::render('Quotes/Print', [
+            'quote' => $quote,
+        ]);
     }
 }
 

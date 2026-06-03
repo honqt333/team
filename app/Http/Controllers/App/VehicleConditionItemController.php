@@ -46,7 +46,7 @@ class VehicleConditionItemController extends Controller
     {
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'required|string|max:255',
             'category_id' => 'required|exists:vehicle_condition_categories,id',
             'is_active' => 'boolean',
         ]);
@@ -70,7 +70,7 @@ class VehicleConditionItemController extends Controller
 
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
-            'name_en' => 'nullable|string|max:255',
+            'name_en' => 'sometimes|required|string|max:255',
             'category_id' => 'required|exists:vehicle_condition_categories,id',
             'is_active' => 'boolean',
         ]);

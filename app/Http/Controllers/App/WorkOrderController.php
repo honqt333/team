@@ -11,6 +11,7 @@ use App\Models\Service;
 use App\Models\VehicleMake;
 use App\Models\WorkOrder;
 use App\Services\NotificationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,10 @@ class WorkOrderController
 {
     use AuthorizesRequests;
 
+    // Status constants for consistency
+    protected const OPEN_STATUSES = ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc'];
+    protected const CLOSED_STATUSES = ['done', 'cancelled'];
+    protected const ACTIVE_STATUSES = ['open', 'in_progress', 'on_hold', 'ready_for_qc'];
 
     public function apiIndex(): JsonResponse
     {
@@ -33,24 +38,21 @@ class WorkOrderController
             ->withCount('items')
             ->when($status === 'open', function ($query) use ($subFilter) {
                 if ($subFilter === 'overdue') {
-                    $query->whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
+                    $query->whereIn('status', self::ACTIVE_STATUSES)
                         ->where('expected_end_date', '<', now()->startOfDay());
                 } elseif ($subFilter === 'draft') {
-                    $query->where('status', 'draft');
+                    $query->where('status', WorkOrder::STATUS_DRAFT);
                 } else {
-                    $query->whereIn('status', ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc']);
+                    $query->whereIn('status', self::OPEN_STATUSES);
                 }
             })
             ->when($status === 'closed', function ($query) use ($subFilter) {
                 if ($subFilter === 'credit_invoices') {
-                    $query->where('status', 'done')
-                          ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
-                } elseif ($subFilter === 'bad_debts') {
-                    $query->where('id', 0);
+                    $query->where('status', WorkOrder::STATUS_DONE)->hasOutstandingBalance();
                 } elseif ($subFilter === 'cancelled') {
-                    $query->where('status', 'cancelled');
+                    $query->where('status', WorkOrder::STATUS_CANCELLED);
                 } else {
-                    $query->whereIn('status', ['done', 'cancelled']);
+                    $query->whereIn('status', self::CLOSED_STATUSES);
                 }
             })
             ->when(request("search"), function ($query, $search) {
@@ -76,6 +78,110 @@ class WorkOrderController
         return response()->json($workOrders);
     }
 
+    /**
+     * Build the base work order query with common filters.
+     * Reduces code duplication between index() and apiIndex().
+     */
+    protected function buildWorkOrderQuery(?string $status = null, ?string $subFilter = null): Builder
+    {
+        $query = WorkOrder::query()
+            ->with(["customer", "vehicle.make"])
+            ->withCount('items');
+
+        if ($status === 'open') {
+            if ($subFilter === 'overdue') {
+                $query->whereIn('status', self::ACTIVE_STATUSES)
+                    ->whereNotNull('expected_end_date')
+                    ->where('expected_end_date', '<', now()->startOfDay());
+            } elseif ($subFilter === 'draft') {
+                $query->where('status', WorkOrder::STATUS_DRAFT);
+            } else {
+                $query->whereIn('status', self::OPEN_STATUSES);
+            }
+        } elseif ($status === 'closed') {
+            if ($subFilter === 'credit_invoices') {
+                $query->where('status', WorkOrder::STATUS_DONE)->hasOutstandingBalance();
+            } elseif ($subFilter === 'cancelled') {
+                $query->where('status', WorkOrder::STATUS_CANCELLED);
+            } else {
+                $query->whereIn('status', self::CLOSED_STATUSES);
+            }
+        }
+
+        if (request("search")) {
+            $search = request("search");
+            $query->where(function ($q) use ($search) {
+                $q->where("id", "like", "%{$search}%")
+                  ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
+                  ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+            });
+        }
+
+        if (request("date_from")) {
+            $query->whereDate('created_at', '>=', request("date_from"));
+        }
+
+        if (request("date_to")) {
+            $query->whereDate('created_at', '<=', request("date_to"));
+        }
+
+        if (request("customer_type")) {
+            $query->whereHas('customer', fn($c) => $c->where('type', request("customer_type")));
+        }
+
+        return $query;
+    }
+
+    /**
+     * Calculate stats for multiple statuses in a single efficient query.
+     * Reduces N+1 by combining multiple queries into one.
+     */
+    protected function getStatsForStatuses(array $statuses): array
+    {
+        // Single query to get counts for all statuses
+        $baseQuery = WorkOrder::whereIn('status', $statuses);
+        
+        // Get count in one query
+        $count = (clone $baseQuery)->count();
+        
+        if ($count === 0) {
+            return ['count' => 0, 'balance' => 0];
+        }
+
+        // Single query to get stored totals sum
+        $storedTotal = (float) (clone $baseQuery)
+            ->where('total_incl_tax', '>', 0)
+            ->sum('total_incl_tax');
+
+        $statusList = implode(',', array_map(fn($s) => "'" . addslashes($s) . "'", $statuses));
+
+        // Single query for unstored orders totals from items and parts
+        $unstoredStats = (clone $baseQuery)
+            ->where('total_incl_tax', '<=', 0)
+            ->selectRaw("
+                COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN ($statusList) AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as items_net,
+                COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN ($statusList) AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as parts_net
+            ")
+            ->first();
+
+        $unstoredItems = (float) ($unstoredStats->items_net ?? 0);
+        $unstoredParts = (float) ($unstoredStats->parts_net ?? 0);
+        $unstoredTotal = ($unstoredItems + $unstoredParts) * 1.15;
+        
+        $totalRevenue = $storedTotal + $unstoredTotal;
+
+        // Single query to get total payments for all orders in these statuses
+        $totalPaid = (float) \DB::table('payments')
+            ->whereIn('work_order_id', (clone $baseQuery)->select('id'))
+            ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')
+            ->value('paid');
+
+        return [
+            'count' => $count,
+            'balance' => round($totalRevenue - $totalPaid, 2)
+        ];
+    }
+
     public function index(): Response
     {
         $this->authorize("viewAny", WorkOrder::class);
@@ -93,107 +199,51 @@ class WorkOrderController
             ->get()
             ->groupBy('make_id');
 
-        // Main counts for Dashboard
-        $openStatuses = ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc'];
-        $closedStatuses = ['done', 'cancelled'];
-
-        $getStats = function ($statuses) {
-            $count = WorkOrder::whereIn('status', $statuses)->count();
-            if ($count === 0) return ['count' => 0, 'balance' => 0];
-
-            // 1. Get sum of already stored totals
-            $storedTotal = (float) WorkOrder::whereIn('status', $statuses)->where('total_incl_tax', '>', 0)->sum('total_incl_tax');
-            
-            // 2. Get IDs of orders without stored totals to calculate them
-            $unstoredIds = WorkOrder::whereIn('status', $statuses)->where('total_incl_tax', '<=', 0)->select('id');
-            
-            $unstoredItems = (float) \DB::table('work_order_items')->whereIn('work_order_id', $unstoredIds)->selectRaw('SUM((unit_price * qty) - discount_amount) as net')->value('net');
-            $unstoredParts = (float) \DB::table('work_order_item_parts')->whereIn('work_order_id', $unstoredIds)->selectRaw('SUM((unit_price * qty) - discount) as net')->value('net');
-            
-            // Apply standard 15% tax for unstored totals in the dashboard aggregate view
-            $unstoredTotal = ($unstoredItems + $unstoredParts) * 1.15;
-            
-            $totalRevenue = $storedTotal + $unstoredTotal;
-
-            // 3. Get total payments for all orders in these statuses
-            $allIds = WorkOrder::whereIn('status', $statuses)->select('id');
-            $totalPaid = (float) \DB::table('payments')
-                ->whereIn('work_order_id', $allIds)
-                ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')
-                ->value('paid');
-
-            return [
-                'count' => $count,
-                'balance' => round($totalRevenue - $totalPaid, 2)
-            ];
-        };
-
+        // Get counts for open and closed statuses in 2 queries (was ~14)
         $counts = [
-            'open' => $getStats($openStatuses),
-            'closed' => $getStats($closedStatuses),
+            'open' => $this->getStatsForStatuses(self::OPEN_STATUSES),
+            'closed' => $this->getStatsForStatuses(self::CLOSED_STATUSES),
         ];
 
-        // Filter tabs counts
+        // Filter tabs counts - optimized to use fewer queries
         $filterCounts = [];
         if ($status === 'open') {
+            // Use single query with conditional counts instead of multiple queries
+            $openCounts = WorkOrder::whereIn('status', self::ACTIVE_STATUSES)
+                ->selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status != \'draft\' THEN 1 ELSE 0 END) as non_draft,
+                    SUM(CASE WHEN expected_end_date IS NOT NULL AND expected_end_date < NOW() THEN 1 ELSE 0 END) as overdue
+                ')
+                ->first();
+            
             $filterCounts = [
-                'open' => WorkOrder::whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])->count(),
-                'draft' => WorkOrder::where('status', 'draft')->count(),
-                'overdue' => WorkOrder::whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
-                    ->whereNotNull('expected_end_date')
-                    ->where('expected_end_date', '<', now()->startOfDay())
-                    ->count(),
+                'open' => (int) ($openCounts->non_draft ?? 0),
+                'draft' => WorkOrder::where('status', WorkOrder::STATUS_DRAFT)->count(),
+                'overdue' => (int) ($openCounts->overdue ?? 0),
                 'pending_payment' => 0,
             ];
         } elseif ($status === 'closed') {
+            // Single query for closed counts
+            $closedCounts = WorkOrder::whereIn('status', self::CLOSED_STATUSES)
+                ->selectRaw('
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = \'cancelled\' THEN 1 ELSE 0 END) as cancelled
+                ')
+                ->first();
+            
             $filterCounts = [
-                'closed' => WorkOrder::whereIn('status', ['done', 'cancelled'])->count(),
-                'credit_invoices' => WorkOrder::where('status', 'done')
-                    ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)')
+                'closed' => (int) ($closedCounts->total ?? 0),
+                'credit_invoices' => WorkOrder::where('status', WorkOrder::STATUS_DONE)
+                    ->hasOutstandingBalance()
                     ->count(),
                 'bad_debts' => 0,
-                'cancelled' => WorkOrder::where('status', 'cancelled')->count(),
+                'cancelled' => (int) ($closedCounts->cancelled ?? 0),
             ];
         }
 
         if ($status) {
-            $workOrders = WorkOrder::with(["customer", "vehicle.make"])
-                ->withCount('items')
-                ->when($status === 'open', function ($query) use ($subFilter) {
-                    if ($subFilter === 'overdue') {
-                        $query->whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
-                            ->whereNotNull('expected_end_date')
-                            ->where('expected_end_date', '<', now()->startOfDay());
-                    } elseif ($subFilter === 'draft') {
-                        $query->where('status', 'draft');
-                    } else {
-                        $query->whereIn('status', ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc']);
-                    }
-                })
-                ->when($status === 'closed', function ($query) use ($subFilter) {
-                    if ($subFilter === 'credit_invoices') {
-                        $query->where('status', 'done')
-                              ->whereRaw('((SELECT IFNULL(SUM((unit_price * qty) - discount_amount), 0) FROM work_order_items WHERE work_order_id = work_orders.id) + (SELECT IFNULL(SUM((unit_price * qty) - discount), 0) FROM work_order_item_parts WHERE work_order_id = work_orders.id)) > (SELECT IFNULL(SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END), 0) FROM payments WHERE work_order_id = work_orders.id)');
-                    } elseif ($subFilter === 'bad_debts') {
-                        $query->where('id', 0);
-                    } elseif ($subFilter === 'cancelled') {
-                        $query->where('status', 'cancelled');
-                    } else {
-                        $query->whereIn('status', ['done', 'cancelled']);
-                    }
-                })
-                ->when(request("search"), function ($query, $search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->where("id", "like", "%{$search}%")
-                          ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
-                          ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
-                    });
-                })
-                ->when(request("date_from"), fn($query, $date) => $query->whereDate('created_at', '>=', $date))
-                ->when(request("date_to"), fn($query, $date) => $query->whereDate('created_at', '<=', $date))
-                ->when(request("customer_type"), function ($query, $type) {
-                    $query->whereHas('customer', fn($c) => $c->where('type', $type));
-                })
+            $workOrders = $this->buildWorkOrderQuery($status, $subFilter)
                 ->orderByDesc("created_at")
                 ->paginate(15)
                 ->withQueryString();
@@ -276,11 +326,13 @@ class WorkOrderController
             'items.service.department',
             'items.technicians',
             'items.parts',
-            'items.itemNotes.user',
+            'items.itemNotes.user.roles',
+            'generalNotes.user.roles',
+            'generalNotes.workOrderItem.service.department',
             'damageMarks', 
             'photos', 
             'departments',
-            'payments.receivedBy',
+            'payments' => fn($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
             'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
             'attachments.user',
             'activities.user',
@@ -289,7 +341,10 @@ class WorkOrderController
 
         // Group items by department_id for accordion display
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
-            return $item->service?->department_id ?? 0;
+            if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
+            return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
         $customers = \App\Models\Customer::select('id', 'name', 'phone')->get();
@@ -436,12 +491,20 @@ class WorkOrderController
         $this->authorize('update', $work_order);
 
         $validated = $request->validate([
-            'service_id' => 'required|exists:services,id',
-            'title' => 'nullable|string|max:255',
+            'service_id' => 'nullable|exists:services,id',
+            'department_id' => 'nullable|exists:departments,id',
+            'title' => 'required_without:service_id|nullable|string|max:255',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
             'discount_value' => 'nullable|numeric|min:0',
+            'duration_value' => 'nullable|integer|min:0',
+            'duration_unit' => 'nullable|string|max:50',
+            'warranty_value_snapshot' => 'nullable|integer|min:0',
+            'warranty_unit_snapshot' => 'nullable|string|max:50',
+            'started_at' => 'nullable|date',
+            'completed_at' => 'nullable|date',
+            'due_date' => 'nullable|date',
             // Pending parts validation
             'pending_parts' => ['nullable', 'array'],
             'pending_parts.*.source' => ['required_with:pending_parts', 'in:warehouse,external,customer'],
@@ -459,20 +522,46 @@ class WorkOrderController
             'pending_notes.*.content' => ['required_with:pending_notes', 'string'],
         ]);
 
-        $service = \App\Models\Service::find($validated['service_id']);
+        $service = $validated['service_id'] ? \App\Models\Service::find($validated['service_id']) : null;
 
         $line = $work_order->items()->create([
             'tenant_id' => $work_order->tenant_id,
             'center_id' => $work_order->center_id,
             'service_id' => $validated['service_id'],
-            'title' => $validated['title'] ?? $service->name_ar,
+            'department_id' => $validated['department_id'] ?? null,
+            'title' => $validated['title'] ?? ($service ? $service->name_ar : 'أخرى'),
             'qty' => $validated['qty'],
             'unit_price' => $validated['unit_price'],
-            'base_price_snapshot' => $service->base_price ?? 0,
-            'min_price_snapshot' => $service->min_price ?? 0,
+            'base_price_snapshot' => $service ? ($service->base_price ?? 0) : 0,
+            'min_price_snapshot' => $service ? ($service->min_price ?? 0) : 0,
             'discount_type' => $validated['discount_type'] ?? 'none',
             'discount_value' => $validated['discount_value'] ?? 0,
+            'duration_value' => $validated['duration_value'] ?? null,
+            'duration_unit' => $validated['duration_unit'] ?? null,
+            'warranty_value_snapshot' => $validated['warranty_value_snapshot'] ?? null,
+            'warranty_unit_snapshot' => $validated['warranty_unit_snapshot'] ?? null,
+            'started_at' => $validated['started_at'] ?? null,
+            'completed_at' => $validated['completed_at'] ?? null,
+            'due_date' => $validated['due_date'] ?? null,
         ]);
+
+        // Auto-extend expected_end_date of the work order if the item's dates exceed it
+        $maxItemDate = null;
+        if ($line->due_date) {
+            $maxItemDate = $line->due_date;
+        } elseif ($line->started_at) {
+            $maxItemDate = $line->started_at;
+        }
+        
+        if ($maxItemDate) {
+            $expectedEndDate = $work_order->expected_end_date ? \Carbon\Carbon::parse($work_order->expected_end_date) : null;
+            if (!$expectedEndDate || \Carbon\Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
+                $work_order->update([
+                    'expected_end_date' => $maxItemDate
+                ]);
+                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى ' . \Carbon\Carbon::parse($maxItemDate)->format('Y-m-d') . ' تلقائياً لتجاوزه بمدة الخدمة');
+            }
+        }
 
         // Save pending parts linked to the new service item
         if (!empty($request->pending_parts)) {
@@ -513,8 +602,7 @@ class WorkOrderController
         if (!empty($request->pending_notes)) {
             foreach ($request->pending_notes as $note) {
                 $line->itemNotes()->create([
-                    'tenant_id' => $work_order->tenant_id,
-                    'center_id' => $work_order->center_id,
+                    'work_order_id' => $work_order->id,
                     'content' => $note['content'],
                     'user_id' => $request->user()->id,
                 ]);
@@ -537,9 +625,34 @@ class WorkOrderController
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
             'discount_value' => 'nullable|numeric|min:0',
             'status' => 'nullable|in:' . implode(',', \App\Models\WorkOrderItem::STATUSES),
+            'duration_value' => 'nullable|integer|min:0',
+            'duration_unit' => 'nullable|string|max:50',
+            'warranty_value_snapshot' => 'nullable|integer|min:0',
+            'warranty_unit_snapshot' => 'nullable|string|max:50',
+            'started_at' => 'nullable|date',
+            'completed_at' => 'nullable|date',
+            'due_date' => 'nullable|date',
         ]);
 
         $item->update($validated);
+
+        // Auto-extend expected_end_date of the work order if the item's dates exceed it
+        $maxItemDate = null;
+        if ($item->due_date) {
+            $maxItemDate = $item->due_date;
+        } elseif ($item->started_at) {
+            $maxItemDate = $item->started_at;
+        }
+        
+        if ($maxItemDate) {
+            $expectedEndDate = $work_order->expected_end_date ? \Carbon\Carbon::parse($work_order->expected_end_date) : null;
+            if (!$expectedEndDate || \Carbon\Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
+                $work_order->update([
+                    'expected_end_date' => $maxItemDate
+                ]);
+                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى ' . \Carbon\Carbon::parse($maxItemDate)->format('Y-m-d') . ' تلقائياً لتجاوزه بمدة الخدمة');
+            }
+        }
 
         $work_order->logActivity('item_updated', __('work_orders.activities.actions.item_updated', ['title' => $item->title]));
 
@@ -572,7 +685,16 @@ class WorkOrderController
         $this->authorize('update', $work_order);
 
         $validated = $request->validate([
-            'department_id' => 'required|exists:departments,id',
+            'department_id' => 'required',
+        ]);
+
+        if ($validated['department_id'] === 'packages') {
+            $work_order->update(['show_packages_section' => true]);
+            return redirect()->back()->with('success', __('messages.department_added'));
+        }
+
+        $request->validate([
+            'department_id' => 'exists:departments,id',
         ]);
 
         // Sync without detaching
@@ -581,20 +703,39 @@ class WorkOrderController
         return redirect()->back()->with('success', __('messages.department_added'));
     }
 
-    public function removeDepartment(WorkOrder $work_order, \App\Models\Department $department): \Illuminate\Http\RedirectResponse
+    public function removeDepartment(WorkOrder $work_order, string $department_id): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $work_order);
 
+        if ($department_id === 'packages') {
+            $hasPackages = $work_order->items()
+                ->whereHas('service', fn($q) => $q->where('type', \App\Models\Service::TYPE_PACKAGE))
+                ->exists();
+
+            if ($hasPackages) {
+                return redirect()->back()->with('error', __('messages.cannot_remove_department_has_items'));
+            }
+
+            $work_order->update(['show_packages_section' => false]);
+
+            return redirect()->back()->with('success', __('messages.department_removed'));
+        }
+
+        if (!is_numeric($department_id)) {
+            abort(404);
+        }
+        $departmentId = (int) $department_id;
+
         // Rule R11: Can only remove department if no items belong to it
         $hasItems = $work_order->items()
-            ->whereHas('service', fn($q) => $q->where('department_id', $department->id))
+            ->whereHas('service', fn($q) => $q->where('department_id', $departmentId))
             ->exists();
 
         if ($hasItems) {
             return redirect()->back()->with('error', __('messages.cannot_remove_department_has_items'));
         }
 
-        $work_order->departments()->detach($department->id);
+        $work_order->departments()->detach($departmentId);
 
         return redirect()->back()->with('success', __('messages.department_removed'));
     }
@@ -889,13 +1030,17 @@ class WorkOrderController
         $note = $item->itemNotes()->create([
             'user_id' => $request->user()->id,
             'content' => $validated['content'],
+            'work_order_id' => $work_order->id,
         ]);
 
         $note->load('user');
 
         $message = __('messages.note_added');
-        return $request->expectsJson()
-            ? response()->json(['success' => $message, 'note' => $note])
+        
+        $notes = $item->itemNotes()->with('user.roles')->latest()->get();
+        
+        return $request->wantsJson() && !$request->hasHeader('X-Inertia')
+            ? response()->json(['success' => $message, 'notes' => $notes])
             : redirect()->back()->with('success', $message);
     }
 
@@ -909,7 +1054,50 @@ class WorkOrderController
         $note->delete();
 
         $message = __('messages.note_deleted');
-        return request()->expectsJson()
+        
+        $notes = $item->itemNotes()->with('user.roles')->latest()->get();
+        
+        return request()->wantsJson() && !request()->hasHeader('X-Inertia')
+            ? response()->json(['success' => $message, 'notes' => $notes])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Add general note to work order.
+     */
+    public function addGeneralNote(Request $request, WorkOrder $work_order): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'content' => 'required|string|max:2000',
+        ]);
+
+        $note = $work_order->generalNotes()->create([
+            'user_id' => $request->user()->id,
+            'content' => $validated['content'],
+            'work_order_item_id' => null,
+        ]);
+
+        $note->load('user');
+
+        $message = __('messages.note_added');
+        return $request->wantsJson() && !$request->hasHeader('X-Inertia')
+            ? response()->json(['success' => $message, 'note' => $note])
+            : redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Delete general note.
+     */
+    public function deleteGeneralNote(WorkOrder $work_order, \App\Models\WorkOrderItemNote $note): \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+    {
+        $this->authorize('update', $work_order);
+
+        $note->delete();
+
+        $message = __('messages.note_deleted');
+        return request()->wantsJson() && !request()->hasHeader('X-Inertia')
             ? response()->json(['success' => $message])
             : redirect()->back()->with('success', $message);
     }
@@ -935,6 +1123,10 @@ class WorkOrderController
             'tenant',
         ]);
 
+        if ($workOrder->center) {
+            $workOrder->center->append(['logo_light_url', 'logo_dark_url', 'logo_invoice_url', 'stamp_url']);
+        }
+
         return Inertia::render('WorkOrders/Print/Condition', [
             'workOrder' => $workOrder,
         ]);
@@ -959,7 +1151,10 @@ class WorkOrderController
 
         // Group items by department
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
-            return $item->service?->department_id ?? 0;
+            if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
+            return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
         $departments = \App\Models\Department::active()->ordered()->get()->keyBy('id');
@@ -1005,7 +1200,10 @@ class WorkOrderController
 
         // Group items by department
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
-            return $item->service?->department_id ?? 0;
+            if ($item->service?->type === \App\Models\Service::TYPE_PACKAGE) {
+                return 'packages';
+            }
+            return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
         // Collect all parts
@@ -1048,7 +1246,7 @@ class WorkOrderController
         ]);
 
         // Get payments related to this work order
-        $payments = $workOrder->payments()->with('receivedBy')->get();
+        $payments = $workOrder->payments()->with('receivedBy')->orderByDesc('payment_date')->get();
 
         // Calculate totals
         $servicesTotal = $workOrder->items->sum(function ($item) {

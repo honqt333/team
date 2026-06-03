@@ -14,13 +14,7 @@
                 badgeDot="bg-emerald-500"
             >
                 <template #back>
-                    <Link href="/app/settings"
-                        class="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 shadow-md transition-all border border-gray-100 dark:border-gray-700 group/back"
-                        :title="$t('common.back')">
-                        <svg class="w-5 h-5 rtl:rotate-180 group-hover/back:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-                        </svg>
-                    </Link>
+                    <BackButton href="/app/settings" />
                 </template>
 
                 <template #icon>
@@ -431,7 +425,7 @@
                     <div v-if="activeTab === 'vat'" class="space-y-6">
                         <!-- VAT Toggle (Top Right) -->
                         <div class="flex items-center justify-end gap-3">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">VAT</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('common.vat') }}</span>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input type="checkbox" v-model="form.vat.vat_enabled" class="sr-only peer">
                                 <div
@@ -583,7 +577,7 @@
                                                             <th
                                                                 class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
                                                                 {{ $t('company_profile.vat.table_vat') }}
-                                                                <div class="text-xs font-normal text-gray-500">VAT</div>
+                                                                <div class="text-xs font-normal text-gray-500">{{ $t('common.vat') }}</div>
                                                                 <div class="text-xs font-normal text-gray-400">({{
                                                                     $t('company_profile.vat.inclusive') }})</div>
                                                             </th>
@@ -887,6 +881,7 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
+import BackButton from '@/Components/BackButton.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import { useToast } from '@/Composables/useToast';
 import L from 'leaflet';

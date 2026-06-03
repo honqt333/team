@@ -147,7 +147,7 @@
                             <th class="px-6 py-4 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('inventory.parts.unit_price') }}</th>
                             <th class="px-6 py-4 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('work_orders.item.qty') }}</th>
                             <th class="px-6 py-4 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('quotes.show.amount') }}</th>
-                            <th v-if="showVat" class="px-6 py-4 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest">VAT</th>
+                            <th v-if="showVat" class="px-6 py-4 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('common.vat') }}</th>
                             <th class="px-6 py-4 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('quotes.show.total') }}</th>
                             <th v-if="!readOnly" class="px-6 py-4"></th>
                         </tr>
@@ -210,7 +210,7 @@
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
             </div>
             <p class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider mb-1">{{ emptyMessage || $t('quotes.show.no_parts') }}</p>
-            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">{{ $t('quotes.parts_display.empty_hint') || 'ابدأ بإضافة قطع الغيار للتقييم' }}</p>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">{{ $t('quotes.parts_display.empty_hint') }}</p>
             <button v-if="!readOnly" @click="$emit('add')"
                 class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white text-xs font-bold uppercase tracking-wider rounded-xl transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>

@@ -60,7 +60,7 @@
                             <textarea
                                 v-model="form.notes"
                                 rows="3"
-                                :placeholder="$t('common.notes_placeholder') || '...'"
+                                :placeholder="$t('common.notes_placeholder')"
                                 class="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900/50 border-0 ring-1 ring-gray-200 dark:ring-gray-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 transition-all text-gray-900 dark:text-white"
                             ></textarea>
                             <p v-if="form.errors.notes" class="text-xs text-red-500 px-1">{{ form.errors.notes }}</p>

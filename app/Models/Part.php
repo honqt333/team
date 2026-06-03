@@ -23,11 +23,11 @@ class Part extends Model
         'category_id',
         'description',
         'image_path',
-        'min_qty',
-        'reorder_qty',
+        'is_active',
         'default_sale_price',
         'min_sale_price',
-        'is_active',
+        'min_qty',
+        'reorder_qty',
     ];
 
     protected $appends = ['image_url', 'name'];
@@ -43,11 +43,11 @@ class Part extends Model
     }
 
     protected $casts = [
-        'min_qty' => 'decimal:3',
-        'reorder_qty' => 'decimal:3',
+        'is_active' => 'boolean',
         'default_sale_price' => 'decimal:2',
         'min_sale_price' => 'decimal:2',
-        'is_active' => 'boolean',
+        'min_qty' => 'decimal:3',
+        'reorder_qty' => 'decimal:3',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -101,7 +101,6 @@ class Part extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('sku', 'like', "%{$search}%")
-              ->orWhere('barcode', 'like', "%{$search}%")
               ->orWhere('name_ar', 'like', "%{$search}%")
               ->orWhere('name_en', 'like', "%{$search}%");
         });
