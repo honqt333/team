@@ -1,9 +1,14 @@
 <template>
     <DialogModal :show="show" @close="handleClose" max-width="md">
         <template #title>
-            <span class="text-xl font-bold">
-                {{ editRowData ? warehouseName : $t('inventory.parts.add_warehouse') }}
-            </span>
+            <div class="flex flex-col gap-0.5">
+                <span class="text-xl font-bold">
+                    {{ editRowData ? $t('inventory.parts.edit_warehouse') : $t('inventory.parts.add_warehouse') }}
+                </span>
+                <span v-if="partName" class="text-sm font-normal text-indigo-600 dark:text-indigo-400">
+                    {{ partName }}
+                </span>
+            </div>
         </template>
 
         <template #content>
@@ -184,17 +189,17 @@ const props = defineProps({
         type: Object,
         default: null,
     },
-    warehouseName: {
+    partName: {
         type: String,
         default: '',
     },
 });
 
-const emit = defineEmits(['close', 'add', 'update']);
+const emit = defineEmits(['close', 'save']);
 const page = usePage();
 
 const warehouseOptions = computed(() => {
-    const used = [...props.usedWarehouseIds];
+    let used = [...props.usedWarehouseIds];
     // When editing, the row's warehouse should still be available
     if (props.editRowData) {
         used = used.filter(id => id !== props.editRowData.warehouse_id);
@@ -217,6 +222,13 @@ function toEnglish(str) {
     });
 }
 
+// Strip trailing decimal zeros: 5.00 → "5", 5.50 → "5.5"
+function trimNum(val) {
+    const n = parseFloat(val ?? 0);
+    if (isNaN(n)) return '0';
+    return parseFloat(n.toFixed(4)).toString();
+}
+
 function sanitizeNumber(event, field) {
     let value = event.target.value;
     value = toEnglish(value);
@@ -226,7 +238,8 @@ function sanitizeNumber(event, field) {
         value = parts[0] + '.' + parts.slice(1).join('');
     }
     event.target.value = value;
-    form[field] = value ? parseFloat(value) || 0 : 0;
+    // Store as string so "5." isn't immediately converted to 5 while typing
+    form[field] = value;
 }
 
 const form = useForm({
@@ -247,16 +260,21 @@ watch(
     (data) => {
         if (data && data.warehouse_id != null) {
             form.warehouse_id = data.warehouse_id ?? '';
-            form.cost_price = data.cost_price ?? 0;
-            form.sale_price = data.sale_price ?? 0;
-            form.min_sale_price = data.min_sale_price ?? 0;
-            form.initial_stock = data.initial_stock ?? 0;
-            form.min_stock = data.min_stock ?? 0;
+            form.cost_price = trimNum(data.cost_price);
+            form.sale_price = trimNum(data.sale_price);
+            form.min_sale_price = trimNum(data.min_sale_price);
+            form.initial_stock = trimNum(data.initial_stock);
+            form.min_stock = trimNum(data.min_stock);
             form.storage_location = data.storage_location ?? '';
             form.is_active = data.is_active ?? true;
             form.allow_price_change = data.allow_price_change ?? false;
         } else {
             form.reset();
+            form.cost_price = '0';
+            form.sale_price = '0';
+            form.min_sale_price = '0';
+            form.initial_stock = '0';
+            form.min_stock = '0';
             form.is_active = true;
             form.allow_price_change = false;
         }
@@ -269,23 +287,21 @@ const handleClose = () => {
 };
 
 const submit = () => {
+    if (!form.warehouse_id) return;
+
     const data = {
         warehouse_id: form.warehouse_id,
-        cost_price: form.cost_price,
-        sale_price: form.sale_price,
-        min_sale_price: form.min_sale_price,
-        initial_stock: form.initial_stock,
-        min_stock: form.min_stock,
+        cost_price:     parseFloat(form.cost_price)     || 0,
+        sale_price:     parseFloat(form.sale_price)     || 0,
+        min_sale_price: parseFloat(form.min_sale_price) || 0,
+        initial_stock:  parseFloat(form.initial_stock)  || 0,
+        min_stock:      parseFloat(form.min_stock)      || 0,
         storage_location: form.storage_location,
         is_active: form.is_active,
         allow_price_change: form.allow_price_change,
     };
 
-    if (props.editRowData) {
-        emit('update', data);
-    } else {
-        emit('add', data);
-    }
+    emit('save', data);
     emit('close');
 };
 </script>

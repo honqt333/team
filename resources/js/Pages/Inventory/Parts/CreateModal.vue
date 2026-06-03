@@ -86,12 +86,12 @@
                     </div>
                 </div>
 
-                <!-- Row 2: SKU & Barcode -->
+                <!-- Row 2: رقم القطعة / باركود  +  وحدة التخزين -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- SKU -->
+                    <!-- SKU / Barcode (merged) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            {{ $t('inventory.parts.sku') }} <span class="text-red-500">*</span>
+                            {{ $t('inventory.parts.sku') }} / {{ $t('inventory.parts.barcode') }} <span class="text-red-500">*</span>
                         </label>
                         <input
                             v-model="form.sku"
@@ -121,33 +121,7 @@
                         </div>
                     </div>
 
-                    <!-- Barcode -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            {{ $t('inventory.parts.barcode') }}
-                        </label>
-                        <div class="relative">
-                            <input
-                                v-model="form.barcode"
-                                type="text"
-                                dir="ltr"
-                                @input="sanitizeInput($event, 'barcode')"
-                                :class="['w-full pl-10 pr-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white font-mono focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all', form.errors.barcode ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600']"
-                                placeholder="Scan..."
-                            />
-                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5h2v14H3V5zm4 0h2v14H7V5zm4 0h1v14h-1V5zm3 0h2v14h-2V5zm4 0h1v14h-1V5zm3 0h2v14h-2V5z" />
-                                </svg>
-                            </div>
-                        </div>
-                        <p v-if="form.errors.barcode" class="mt-1 text-xs text-red-500">{{ form.errors.barcode }}</p>
-                    </div>
-                </div>
-
-                <!-- Row 3: Unit & Category -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Unit -->
+                    <!-- Unit (moved here from Row 3) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             {{ $t('inventory.parts.unit') }} <span class="text-red-500">*</span>
@@ -163,26 +137,26 @@
                             required
                         />
                     </div>
+                </div>
 
-                    <!-- Category -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            {{ $t('inventory.parts.category') }}
-                        </label>
-                        <SearchableSelect
-                            v-model="form.category_id"
-                            :options="categoryOptions"
-                            option-label="label"
-                            option-value="value"
-                            :label="''"
-                            :placeholder="$t('common.select')"
-                            :error="form.errors.category_id"
-                        />
-                        <p class="mt-2 text-xs text-gray-500 flex items-center gap-1">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            {{ $t('inventory.parts.make_model_hint') }}
-                        </p>
-                    </div>
+                <!-- Row 3: Category only -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                        {{ $t('inventory.parts.category') }}
+                    </label>
+                    <SearchableSelect
+                        v-model="form.category_id"
+                        :options="categoryOptions"
+                        option-label="label"
+                        option-value="value"
+                        :label="''"
+                        :placeholder="$t('common.select')"
+                        :error="form.errors.category_id"
+                    />
+                    <p class="mt-2 text-xs text-gray-500 flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        {{ $t('inventory.parts.make_model_hint') }}
+                    </p>
                 </div>
 
                 <!-- Row 4: Description -->
@@ -276,106 +250,6 @@
                         {{ $t('common.no_records') }}
                     </div>
                 </div>
-
-                <!-- Row 6: Pricing & Inventory Group -->
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">
-                        {{ $t('inventory.parts.inventory_pricing') }}
-                    </h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Default Sale Price -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('inventory.parts.default_sale_price') }}
-                            </label>
-                            <input 
-                                v-model="form.default_sale_price" 
-                                type="text" 
-                                @input="sanitizeInput($event, 'default_sale_price')" 
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all font-mono" 
-                                dir="ltr" 
-                            />
-                        </div>
-                        
-                        <!-- Min Sale Price -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('inventory.parts.min_sale_price') }}
-                            </label>
-                            <input 
-                                v-model="form.min_sale_price" 
-                                type="text" 
-                                @input="sanitizeInput($event, 'min_sale_price')" 
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all font-mono" 
-                                dir="ltr" 
-                            />
-                        </div>
-
-                        <!-- Cost (Read Only) -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('inventory.stock.wac') }} ({{ $t('common.read_only') }})
-                            </label>
-                            <input 
-                                disabled 
-                                :value="0" 
-                                type="text" 
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-500 focus:ring-0 shadow-sm font-mono cursor-not-allowed" 
-                                dir="ltr" 
-                            />
-                        </div>
-
-                        <!-- Min Qty -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('inventory.parts.min_qty') }}
-                            </label>
-                            <input 
-                                v-model="form.min_qty" 
-                                type="text" 
-                                @input="sanitizeInput($event, 'min_qty')" 
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all font-mono" 
-                                dir="ltr" 
-                            />
-                        </div>
-
-                        <!-- Reorder Qty -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                                {{ $t('inventory.parts.reorder_qty') }}
-                            </label>
-                            <input 
-                                v-model="form.reorder_qty" 
-                                type="text" 
-                                @input="sanitizeInput($event, 'reorder_qty')" 
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 shadow-sm transition-all font-mono" 
-                                dir="ltr" 
-                            />
-                        </div>
-
-                        <!-- Active Toggle -->
-                        <div class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-gray-900/30">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('common.active') }}</span>
-                            <button 
-                                type="button" 
-                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" 
-                                :class="[form.is_active ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700']" 
-                                role="switch" 
-                                @click="form.is_active = !form.is_active"
-                            >
-                                <span 
-                                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" 
-                                    :class="[
-                                        form.is_active 
-                                            ? (isAr ? '-translate-x-5' : 'translate-x-5') 
-                                            : 'translate-x-0'
-                                    ]"
-                                ></span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </div>
         </template>
 
@@ -436,6 +310,7 @@
         :edit-row-data="editingWarehouseData"
         :warehouses="props.warehouses"
         :used-warehouse-ids="usedWarehouseIds"
+        :part-name="(isAr ? form.name_ar : form.name_en) || form.name_ar || form.name_en || form.sku"
         @close="closeAddWarehouseModal"
         @save="editingWarehouseIndex !== null ? updateWarehouseFromModal($event) : addWarehouseFromModal($event)"
     />
@@ -445,6 +320,7 @@
 import { useForm, usePage } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
 import { ref, watch, computed } from 'vue';
+import JsBarcode from 'jsbarcode';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
@@ -619,7 +495,7 @@ const getWarehouseCenter = (warehouseId) => {
 };
 
 const formatNumber = (num) => {
-    return Number(num || 0).toFixed(2);
+    return parseFloat(Number(num || 0).toFixed(4)).toString();
 };
 
 const openAddWarehouseModal = () => {
@@ -661,46 +537,43 @@ watch(() => props.show, (open) => {
             isDirty.value = false;
             // Render barcode if sku exists
             if (form.sku && barcodeRef.value) {
-                renderBarcode(barcodeRef.value, form.sku, 2, 60);
+                renderBarcode(barcodeRef.value, form.sku, 40);
             }
         }, 100);
     }
 });
 
-// Barcode renderer using Canvas (no external lib)
-function renderBarcode(canvas, text, barWidth = 2, height = 80) {
+// Real barcode renderer using JsBarcode (Code128)
+function renderBarcode(canvas, text, height = 40) {
     if (!canvas || !text) return;
-    const ctx = canvas.getContext('2d');
-    canvas.width = Math.max(text.length * (barWidth + 1) + 20, 200);
-    canvas.height = height + 30;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#111111';
-    let x = 10;
-    for (let i = 0; i < text.length; i++) {
-        const charCode = text.charCodeAt(i);
-        const bars = (charCode * 17 + i * 7) % 5 + 1;
-        const bw = bars * barWidth;
-        if (i % 2 === 0) {
-            ctx.fillRect(x, 0, bw, height);
-        }
-        x += bw + 1;
-        if (x > canvas.width - 10) break;
+    try {
+        JsBarcode(canvas, text, {
+            format: 'CODE128',
+            width: 1.5,
+            height: height,
+            displayValue: false,
+            margin: 4,
+            background: '#ffffff',
+            lineColor: '#111111',
+        });
+    } catch (e) {
+        // Invalid barcode value — clear canvas
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 }
 
 // Watch form.sku for live barcode preview
 watch(() => form.sku, (sku) => {
     if (!sku || !barcodeRef.value) return;
-    renderBarcode(barcodeRef.value, sku, 2, 60);
+    renderBarcode(barcodeRef.value, sku, 40);
 });
 
 // Watch showBarcodePreview for fullscreen barcode
 watch(showBarcodePreview, (show) => {
     if (!show || !form.sku || !barcodeFullRef.value) return;
     setTimeout(() => {
-        renderBarcode(barcodeFullRef.value, form.sku, 3, 100);
+        renderBarcode(barcodeFullRef.value, form.sku, 90);
     }, 50);
 });
 
