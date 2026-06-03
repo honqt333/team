@@ -118,8 +118,16 @@
                                     <span class="text-xl lg:text-2xl font-black text-blue-600 dark:text-blue-400 group-hover/stat:scale-110 transition-transform">{{ counts.invoices }}</span>
                                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('purchasing.suppliers.invoices') }}</span>
                                 </div>
-                                <div class="group/stat flex flex-col items-center justify-center h-20 lg:w-48 lg:h-24 bg-emerald-50/50 dark:bg-emerald-900/20 rounded-3xl border border-emerald-100/50 dark:border-emerald-800/30 hover:bg-white dark:hover:bg-emerald-900/40 transition-all hover:shadow-lg hover:shadow-emerald-500/10 col-span-2 sm:col-span-1">
-                                    <span class="text-xl lg:text-2xl font-black text-emerald-600 dark:text-emerald-400 group-hover/stat:scale-110 transition-transform">{{ formatCurrency(balance) }}</span>
+                                <div :class="[
+                                    'group/stat flex flex-col items-center justify-center h-20 lg:w-48 lg:h-24 rounded-3xl border transition-all hover:bg-white col-span-2 sm:col-span-1',
+                                    balance < -0.01
+                                        ? 'bg-red-50/50 dark:bg-red-900/20 border-red-100/50 dark:border-red-800/30 hover:shadow-red-500/10 dark:hover:bg-red-900/40 hover:shadow-lg'
+                                        : 'bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-100/50 dark:border-emerald-800/30 hover:shadow-emerald-500/10 dark:hover:bg-emerald-900/40 hover:shadow-lg'
+                                ]">
+                                    <span :class="[
+                                        'text-xl lg:text-2xl font-black group-hover/stat:scale-110 transition-transform',
+                                        balance < -0.01 ? 'text-red-650 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+                                    ]">{{ formatCurrency(balance) }}</span>
                                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">{{ $t('purchasing.suppliers.balance') }}</span>
                                 </div>
                             </div>
@@ -586,11 +594,12 @@ const tabs = computed(() => [
 
 function formatCurrency(value) {
     if (!value && value !== 0) return '';
+    const val = Math.abs(value) < 0.01 ? 0 : value;
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'SAR',
         minimumFractionDigits: 0
-    }).format(value);
+    }).format(val);
 }
 
 function formatDate(dateString) {

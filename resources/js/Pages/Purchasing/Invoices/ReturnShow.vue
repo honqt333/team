@@ -16,7 +16,7 @@
                 badgeDot="bg-rose-500"
             >
                 <template #back>
-                    <BackButton :href="route('app.invoices.purchases.index')" />
+                    <BackButton :href="route('app.invoices.purchases.index', { tab: 'returns' })" />
                 </template>
 
                 <template #icon>
@@ -154,29 +154,42 @@
                             <thead>
                                 <tr class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2">
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.description') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-rose-500 italic">{{ $t('common.amount') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic">{{ $t('common.vat') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('invoices.subtotal') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.vat') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white">{{ $t('invoices.grand_total') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
                                 <!-- Returned elements row -->
-                                <tr class="group">
-                                    <td class="py-2.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('invoices.purchases.tab_invoices') }}</td>
-                                    <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.subtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.subtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.tax_amount) }}</td>
-                                    <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(returnInvoice.total) }}</td>
+                                <tr class="group hover:bg-gray-50/50 dark:hover:bg-gray-900/10 transition-colors">
+                                    <td class="py-3 text-center font-bold text-gray-900 dark:text-white">{{ $t('invoices.returned_items') }}</td>
+                                    <td class="py-3 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.subtotal) }}</td>
+                                    <td class="py-3 text-center font-mono text-gray-500">{{ formatCurrency(returnInvoice.tax_amount) }}</td>
+                                    <td class="py-3 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(returnInvoice.total) }}</td>
                                 </tr>
 
-                                <!-- Grand Total Row -->
-                                <tr class="bg-rose-50 dark:bg-rose-900/10 font-black border-t-2 border-rose-200 dark:border-rose-800">
-                                    <td class="py-2.5 text-center text-rose-900 dark:text-rose-450 font-black uppercase">{{ $t('invoices.grand_total') }}</td>
-                                    <td class="py-2.5 text-center font-mono text-rose-700 dark:text-rose-300">{{ formatCurrency(returnInvoice.subtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-rose-700 dark:text-rose-300">{{ formatCurrency(returnInvoice.subtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-rose-700 dark:text-rose-300">{{ formatCurrency(returnInvoice.tax_amount) }}</td>
-                                    <td class="py-2.5 text-center font-black text-rose-600 dark:text-rose-400 font-mono text-xl">{{ formatCurrency(returnInvoice.total) }}</td>
+                                <!-- Refunded payments row -->
+                                <tr v-if="refundPaymentsTotal > 0.01" class="group hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10 transition-colors text-emerald-600 dark:text-emerald-400">
+                                    <td class="py-3 text-center font-bold">{{ $t('invoices.refund_grand_total') }}</td>
+                                    <td class="py-3 text-center font-mono">{{ formatCurrency(refundedSubtotal) }}</td>
+                                    <td class="py-3 text-center font-mono">{{ formatCurrency(refundedTax) }}</td>
+                                    <td class="py-3 text-center font-black font-mono text-base">{{ formatCurrency(refundPaymentsTotal) }}</td>
+                                </tr>
+
+                                <!-- Debit note row -->
+                                <tr v-if="debitNoteAmount > 0.01" class="group hover:bg-amber-50/20 dark:hover:bg-amber-950/10 transition-colors text-amber-600 dark:text-amber-400">
+                                    <td class="py-3 text-center font-bold">{{ $t('invoices.debit_note') }}</td>
+                                    <td class="py-3 text-center font-mono">{{ formatCurrency(debitNoteSubtotal) }}</td>
+                                    <td class="py-3 text-center font-mono">{{ formatCurrency(debitNoteTax) }}</td>
+                                    <td class="py-3 text-center font-black font-mono text-base">{{ formatCurrency(debitNoteAmount) }}</td>
+                                </tr>
+
+                                <!-- Remaining balance row -->
+                                <tr v-if="remainingTotal > 0.01" class="group hover:bg-rose-50/20 dark:hover:bg-rose-950/10 transition-colors text-rose-600 dark:text-rose-450">
+                                    <td class="py-3 text-center font-bold">{{ $t('payments.remaining_refund') }}</td>
+                                    <td class="py-3 text-center font-mono">{{ formatCurrency(remainingSubtotal) }}</td>
+                                    <td class="py-3 text-center font-mono">{{ formatCurrency(remainingTax) }}</td>
+                                    <td class="py-3 text-center font-black font-mono text-base">{{ formatCurrency(remainingTotal) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -354,6 +367,22 @@
                         <div class="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
                         {{ $t('invoices.payments_history') }}
                     </h3>
+
+                    <!-- Add Refund Button -->
+                    <button
+                        v-if="remainingTotal > 0.01 && hasPayments"
+                        @click="showAddPaymentModal = true"
+                        class="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-rose-500/20 active:scale-95 shrink-0"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span>{{ $t('payments.add_payment') }}</span>
+                    </button>
+                    <!-- Unpaid Invoice Warning -->
+                    <span v-else-if="remainingTotal > 0.01 && !hasPayments" class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1">
+                        <span>⚠️</span> <span>{{ $t('payments.cannot_refund_unpaid') }}</span>
+                    </span>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -379,10 +408,10 @@
                                     <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">
                                         {{ formatDate(payment.payment_date) }}
                                     </td>
-                                    <td class="py-4 px-4 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="payment.notes">
+                                    <td class="py-4 px-4 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="translateNote(payment.notes)">
                                         <div class="flex flex-col items-center gap-0.5">
                                             <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t(`payments.methods.${payment.payment_method}`) || payment.payment_method }}</span>
-                                            <span class="text-[10px]">{{ payment.notes || '—' }}</span>
+                                            <span class="text-[10px]">{{ translateNote(payment.notes) || '—' }}</span>
                                         </div>
                                     </td>
                                     <td class="py-4 px-4 text-center font-black text-red-650 dark:text-red-400 font-mono" dir="ltr">
@@ -517,6 +546,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- Add Refund Payment Modal -->
+        <PurchaseOrderPaymentModal
+            :show="showAddPaymentModal"
+            :balance="remainingTotal"
+            default-type="refund"
+            @close="showAddPaymentModal = false"
+            @saved="saveRefundPayment"
+        />
     </AppLayout>
 </template>
 
@@ -528,6 +566,7 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
 import Tooltip from '@/Components/Tooltip.vue';
+import PurchaseOrderPaymentModal from '@/Components/Purchasing/PurchaseOrderPaymentModal.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 
 const props = defineProps({
@@ -633,9 +672,98 @@ const formatDate = (dateStr) => {
 };
 
 const refundPayments = computed(() => {
-    const allRefunds = props.returnInvoice.purchase_invoice?.payments?.filter(p => p.type === 'refund') || [];
+    const allRefunds = props.returnInvoice.purchase_invoice?.payments?.filter(p => p.type === 'refund' && p.payment_method !== 'debit_note') || [];
     const codeMatch = allRefunds.filter(p => p.notes?.includes(props.returnInvoice.code));
     return codeMatch.length > 0 ? codeMatch : allRefunds;
 });
+
+const translateNote = (note) => {
+    if (!note) return '—';
+    if (note.includes('Debit note registered for remaining refund of return:')) {
+        const code = note.replace('Debit note registered for remaining refund of return:', '').trim();
+        return t('payments.debit_note_registered_notes', { code });
+    }
+    if (note.includes('Refund for return invoice:')) {
+        const code = note.replace('Refund for return invoice:', '').trim();
+        return t('payments.refund_for_return_notes', { code });
+    }
+    return note;
+};
+
+const refundPaymentsTotal = computed(() => {
+    return refundPayments.value.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+});
+
+const refundedSubtotal = computed(() => {
+    if (!props.returnInvoice.total) return 0;
+    return refundPaymentsTotal.value * (props.returnInvoice.subtotal / props.returnInvoice.total);
+});
+
+const refundedTax = computed(() => {
+    if (!props.returnInvoice.total) return 0;
+    return refundPaymentsTotal.value * (props.returnInvoice.tax_amount / props.returnInvoice.total);
+});
+
+const debitNotePayment = computed(() => {
+    const allRefunds = props.returnInvoice.purchase_invoice?.payments?.filter(p => p.type === 'refund' && p.payment_method === 'debit_note') || [];
+    return allRefunds.find(p => p.notes?.includes(props.returnInvoice.code)) || null;
+});
+
+const debitNoteAmount = computed(() => {
+    return debitNotePayment.value ? parseFloat(debitNotePayment.value.amount) || 0 : 0;
+});
+
+const debitNoteSubtotal = computed(() => {
+    if (!props.returnInvoice.total) return 0;
+    return debitNoteAmount.value * (props.returnInvoice.subtotal / props.returnInvoice.total);
+});
+
+const debitNoteTax = computed(() => {
+    if (!props.returnInvoice.total) return 0;
+    return debitNoteAmount.value * (props.returnInvoice.tax_amount / props.returnInvoice.total);
+});
+
+const remainingTotal = computed(() => {
+    return Math.max(0, props.returnInvoice.total - refundPaymentsTotal.value - debitNoteAmount.value);
+});
+
+const remainingSubtotal = computed(() => {
+    if (!props.returnInvoice.total) return 0;
+    return remainingTotal.value * (props.returnInvoice.subtotal / props.returnInvoice.total);
+});
+
+const remainingTax = computed(() => {
+    if (!props.returnInvoice.total) return 0;
+    return remainingTotal.value * (props.returnInvoice.tax_amount / props.returnInvoice.total);
+});
+
+const showAddPaymentModal = ref(false);
+const paymentForm = useForm({
+    amount: '',
+    payment_method: 'cash',
+    payment_date: '',
+    reference: '',
+    notes: '',
+});
+
+const hasPayments = computed(() => {
+    return props.returnInvoice.purchase_invoice?.payments?.some(p => p.type === 'payment') || false;
+});
+
+const saveRefundPayment = (paymentData) => {
+    paymentForm.amount = paymentData.amount;
+    paymentForm.payment_method = paymentData.payment_method;
+    paymentForm.payment_date = paymentData.payment_date;
+    paymentForm.reference = paymentData.reference;
+    paymentForm.notes = paymentData.notes;
+
+    paymentForm.post(route('app.invoices.purchases.returns.refunds.store', props.returnInvoice.id), {
+        preserveScroll: true,
+        onSuccess: () => {
+            showAddPaymentModal.value = false;
+            paymentForm.reset();
+        },
+    });
+};
 
 </script>

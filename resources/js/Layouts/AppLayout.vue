@@ -121,7 +121,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        {{ $t('nav.quotes') }}
+                        <span class="flex-1 text-start">{{ $t('nav.quotes') }}</span>
+                        <span v-if="page.props.auth?.approved_quotes_count > 0"
+                            class="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                            {{ page.props.auth.approved_quotes_count }}
+                        </span>
                     </a>
 
                     <Link v-if="can('invoices.view')" :href="route('app.invoices.hub')" :class="[
@@ -728,7 +732,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        {{ $t('nav.quotes') }}
+                        <span class="flex-1 text-start">{{ $t('nav.quotes') }}</span>
+                        <span v-if="page.props.auth?.approved_quotes_count > 0"
+                            class="px-2 py-0.5 text-xs font-bold rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">
+                            {{ page.props.auth.approved_quotes_count }}
+                        </span>
                     </a>
 
                     <Link v-if="can('invoices.view')" :href="route('app.invoices.hub')" @click="mobileMenuOpen = false" :class="[

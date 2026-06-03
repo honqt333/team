@@ -224,8 +224,10 @@
                                     </svg>
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="text-xs font-black text-gray-900 dark:text-gray-100">{{
-                                        formatCurrency(supplier.balance) }}</span>
+                                    <span :class="[
+                                        'text-xs font-black',
+                                        supplier.balance < -0.01 ? 'text-red-650 dark:text-red-400 font-bold' : 'text-gray-900 dark:text-gray-100'
+                                    ]">{{ formatCurrency(supplier.balance) }}</span>
                                     <span class="text-[9px] font-bold text-gray-500 uppercase">{{
                                         $t('purchasing.suppliers.balance') }}</span>
                                 </div>
@@ -323,7 +325,10 @@
                                 <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white">{{ supplier.name }}</td>
                                 <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300">{{ supplier.contact_person || '-' }}</td>
                                 <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300" dir="ltr">{{ supplier.phone || '-' }}</td>
-                                <td class="px-4 py-3 text-center text-sm font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(supplier.balance) }}</td>
+                                <td :class="[
+                                    'px-4 py-3 text-center text-sm font-bold',
+                                    supplier.balance < -0.01 ? 'text-red-650 dark:text-red-400 font-bold' : 'text-blue-600 dark:text-blue-400'
+                                ]">{{ formatCurrency(supplier.balance) }}</td>
                                 <td class="px-4 py-3 text-center">
                                     <span
                                         class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300">
@@ -379,7 +384,10 @@
                                 <td dir="ltr" class="text-left">{{ supplier.email || '-' }}</td>
                                 <td>{{ supplier.type === 'parts' ? $t('purchasing.suppliers.type_parts') :
                                     $t('purchasing.suppliers.type_services') }}</td>
-                                <td dir="ltr" class="text-left font-bold">{{ formatCurrency(supplier.balance) }}</td>
+                                <td dir="ltr" :class="[
+                                    'text-left font-bold',
+                                    supplier.balance < -0.01 ? 'text-red-650' : ''
+                                ]">{{ formatCurrency(supplier.balance) }}</td>
                                 <td>{{ supplier.is_active ? $t('common.active') : $t('common.inactive') }}</td>
                             </tr>
                         </tbody>
@@ -470,11 +478,12 @@ const resetFilters = () => {
 
 function formatCurrency(value) {
     if (!value && value !== 0) return '-';
+    const val = Math.abs(value) < 0.01 ? 0 : value;
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'SAR',
         minimumFractionDigits: 0
-    }).format(value);
+    }).format(val);
 }
 
 function exportSuppliers() {

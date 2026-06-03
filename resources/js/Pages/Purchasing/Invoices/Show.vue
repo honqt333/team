@@ -583,6 +583,7 @@
                                 <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.date') }}</th>
                                 <th class="py-4 px-6 text-center font-bold">{{ $t('invoices.returned_items') }}</th>
                                 <th class="py-4 px-6 text-center font-bold">{{ $t('payments.form.notes') }}</th>
+                                <th class="py-4 px-6 text-center font-bold">{{ $t('payments.remaining_refund') }}</th>
                                 <th class="py-4 px-6 text-center font-bold text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
@@ -608,6 +609,9 @@
                                 </td>
                                 <td class="py-4 px-6 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate" :title="ret.notes">
                                     {{ ret.notes || '—' }}
+                                </td>
+                                <td class="py-4 px-6 text-center font-black font-mono text-xs" :class="calculateRemainingRefund(ret) > 0.01 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'" dir="ltr">
+                                    {{ formatCurrency(calculateRemainingRefund(ret)) }}
                                 </td>
                                 <td class="py-4 px-6 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">
                                     {{ formatCurrency(ret.total) }}
@@ -834,6 +838,7 @@
                                     </div>
                                 </div>
                                 <button
+                                    v-if="hasPayments"
                                     type="button"
                                     @click="openRefundPaymentModal()"
                                     class="flex items-center justify-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-md shadow-red-500/10 hover:shadow-lg hover:shadow-red-500/20 hover:-translate-y-0.5 active:scale-95 w-full sm:w-auto"
@@ -843,6 +848,9 @@
                                     </svg>
                                     {{ $t('payments.add_payment') }}
                                 </button>
+                                <span v-else class="text-xs text-amber-600 dark:text-amber-400 font-bold bg-amber-50 dark:bg-amber-950/20 px-3 py-1.5 rounded-lg border border-amber-200/50 dark:border-amber-900/30">
+                                    {{ $t('payments.cannot_refund_unpaid') }}
+                                </span>
                             </div>
 
                             <!-- High-tier Metrics Box -->
@@ -1434,5 +1442,14 @@ const statusClass = (status) => {
         cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800',
     };
     return map[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+};
+
+const calculateRemainingRefund = (ret) => {
+    const allRefunds = props.invoice.payments?.filter(p => p.type === 'refund') || [];
+    const matchingRefunds = allRefunds.filter(p => 
+        p.notes?.includes(ret.code) || p.reference?.includes(ret.code)
+    );
+    const refundsTotal = matchingRefunds.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    return Math.max(0, parseFloat(ret.total) - refundsTotal);
 };
 </script>

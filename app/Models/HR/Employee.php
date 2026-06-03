@@ -272,9 +272,9 @@ class Employee extends Model
     // Accessors
     public function getDisplayNameAttribute(): string
     {
-        return app()->getLocale() === 'ar' && $this->name_ar
+        return (app()->getLocale() === 'ar' && $this->name_ar)
             ? $this->name_ar
-            : ($this->name_en ?? $this->name_ar);
+            : ($this->name_en ?? $this->name_ar ?? '');
     }
 
     // Calculate total allowances for this employee

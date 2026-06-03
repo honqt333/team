@@ -401,15 +401,16 @@
                                                     {{ balance.warehouse?.center?.name || balance.warehouse?.name || '-' }}
                                                 </td>
                                                 <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(balance.wac_cost) }}</td>
-                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(part.default_sale_price) }}</td>
-                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(part.min_sale_price) }}</td>
+                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(balance.sale_price) }}</td>
+                                                <td class="py-2 text-center text-gray-600 dark:text-gray-400 px-1">{{ formatCurrency(balance.min_sale_price) }}</td>
                                                 <td class="py-2 text-center font-medium text-gray-900 dark:text-white px-1">
                                                     {{ formatQuantity(balance.qty_on_hand) }} {{ locale === 'ar' ? part.unit?.name_ar : (part.unit?.name_en || part.unit?.name_ar) }}
                                                 </td>
                                                 <td class="py-2 text-center px-1">
-                                                    <svg class="w-3 h-3 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    <svg v-if="balance.is_active" class="w-3 h-3 text-green-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                                    <svg v-else class="w-3 h-3 text-red-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                                 </td>
-                                                <td class="py-2 text-gray-500 px-1">-</td>
+                                                <td class="py-2 text-gray-500 px-1">{{ balance.storage_location || '-' }}</td>
                                             </tr>
                                             <tr v-if="!part.inventory_balances?.length">
                                                 <td colspan="8" class="py-3 text-center text-gray-400 italic">

@@ -33,11 +33,9 @@ class SuppliersController extends Controller
 
         $suppliers = $query->paginate(25)->withQueryString();
 
-        // Calculate real balance from unpaid purchase invoices
+        // Calculate real balance using calculateBalance helper
         $suppliers->getCollection()->transform(function ($supplier) {
-            $supplier->balance = $supplier->purchaseInvoices()
-                ->whereNotIn('status', ['draft', 'cancelled'])
-                ->sum('balance');
+            $supplier->balance = $supplier->calculateBalance();
             return $supplier;
         });
 
@@ -63,10 +61,8 @@ class SuppliersController extends Controller
             'payments' => $supplier->payments->count(),
         ];
 
-        // Calculate balance: sum of unpaid balances of non-draft, non-cancelled invoices
-        $balance = $supplier->purchaseInvoices
-            ->whereNotIn('status', ['draft', 'cancelled'])
-            ->sum('balance');
+        // Calculate balance using calculateBalance helper
+        $balance = $supplier->calculateBalance();
 
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
@@ -185,11 +181,9 @@ class SuppliersController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'code', 'phone', 'email', 'type', 'tax_number', 'is_active']);
 
-        // Attach real balance from unpaid invoices
+        // Attach real balance using calculateBalance helper
         $suppliers->transform(function ($supplier) {
-            $supplier->balance = $supplier->purchaseInvoices()
-                ->whereNotIn('status', ['draft', 'cancelled'])
-                ->sum('balance');
+            $supplier->balance = $supplier->calculateBalance();
             return $supplier;
         });
 

@@ -198,7 +198,86 @@
                     ></textarea>
                 </div>
 
-                <!-- Row 5: Pricing & Inventory Group -->
+                <!-- Row 5: Warehouse Stock Section -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            {{ $t('inventory.parts.warehouse_stock') }}
+                        </h3>
+                        <button
+                            type="button"
+                            @click="openAddWarehouseModal"
+                            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg flex items-center gap-1"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            {{ $t('common.add') }}
+                        </button>
+                    </div>
+
+                    <div v-if="form.warehouse_data.length > 0" class="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-xl">
+                        <table class="min-w-full text-xs">
+                            <thead class="bg-gray-50 dark:bg-gray-800">
+                                <tr>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold w-8">#</th>
+                                    <th class="px-2 py-2.5 text-start text-gray-500 font-semibold">{{ $t('inventory.parts.warehouse') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.parts.wac_cost') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.parts.sale_price') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.parts.min_sale_price') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.parts.initial_stock') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.parts.min_stock') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.stock.current_stock') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('common.status') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.parts.allow_price_change') }}</th>
+                                    <th class="px-2 py-2.5 text-center text-gray-500 font-semibold">{{ $t('inventory.parts.storage_location') }}</th>
+                                    <th class="px-2 py-2.5 w-8"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                                <tr v-for="(row, index) in form.warehouse_data" :key="index">
+                                    <td class="px-2 py-2 text-center text-gray-400 font-mono">{{ index + 1 }}</td>
+                                    <td class="px-2 py-2">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ getWarehouseName(row.warehouse_id) }}</div>
+                                        <div class="text-[10px] text-gray-500">{{ getWarehouseCenter(row.warehouse_id) }}</div>
+                                    </td>
+                                    <td class="px-2 py-2 text-center"><span class="font-mono">{{ formatNumber(row.cost_price) }}</span></td>
+                                    <td class="px-2 py-2 text-center"><span class="font-mono">{{ formatNumber(row.sale_price) }}</span></td>
+                                    <td class="px-2 py-2 text-center"><span class="font-mono">{{ formatNumber(row.min_sale_price) }}</span></td>
+                                    <td class="px-2 py-2 text-center"><span class="font-mono">{{ formatNumber(row.initial_stock) }}</span></td>
+                                    <td class="px-2 py-2 text-center"><span class="font-mono">{{ formatNumber(row.min_stock) }}</span></td>
+                                    <td class="px-2 py-2 text-center"><span class="font-mono">{{ formatNumber(row.initial_stock) }}</span></td>
+                                    <td class="px-2 py-2 text-center">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-medium" :class="row.is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-500'">
+                                            {{ row.is_active ? $t('common.active') : $t('common.inactive') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 text-center">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-medium" :class="row.allow_price_change ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-gray-100 text-gray-500'">
+                                            {{ row.allow_price_change ? $t('common.yes') : $t('common.no') }}
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 text-center"><span class="font-mono">{{ row.storage_location || '-' }}</span></td>
+                                    <td class="px-2 py-2 text-center">
+                                        <button type="button" @click.stop="editWarehouseRow(index)" class="text-blue-500 hover:text-blue-700 p-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div v-else class="text-center py-6 text-gray-500 dark:text-gray-400 text-sm">
+                        {{ $t('common.no_records') }}
+                    </div>
+                </div>
+
+                <!-- Row 6: Pricing & Inventory Group -->
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
                     <h3 class="text-base font-bold text-gray-900 dark:text-white mb-4">
                         {{ $t('inventory.parts.inventory_pricing') }}
@@ -350,6 +429,16 @@
             </div>
         </template>
     </DialogModal>
+
+    <!-- Warehouse Stock Modal -->
+    <WarehouseStockModal
+        :show="showAddWarehouseModal"
+        :edit-row-data="editingWarehouseData"
+        :warehouses="props.warehouses"
+        :used-warehouse-ids="usedWarehouseIds"
+        @close="closeAddWarehouseModal"
+        @save="editingWarehouseIndex !== null ? updateWarehouseFromModal($event) : addWarehouseFromModal($event)"
+    />
 </template>
 
 <script setup>
@@ -360,6 +449,7 @@ import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import WarehouseStockModal from './WarehouseStockModal.vue';
 
 const props = defineProps({
     show: Boolean,
@@ -369,6 +459,10 @@ const props = defineProps({
         default: () => [],
     },
     categories: {
+        type: Array,
+        default: () => [],
+    },
+    warehouses: {
         type: Array,
         default: () => [],
     },
@@ -387,6 +481,9 @@ const imagePreview = ref(null);
 const showBarcodePreview = ref(false);
 const barcodeRef = ref(null);
 const barcodeFullRef = ref(null);
+const showAddWarehouseModal = ref(false);
+const editingWarehouseIndex = ref(null);
+const editingWarehouseData = ref(null);
 
 const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -449,8 +546,27 @@ const form = useForm({
     is_active: true,
     image: null,
     remove_image: false,
+    warehouse_data: [],
     _method: 'POST',
 });
+
+// Must be declared before the watch below (const arrow functions are NOT hoisted)
+const getInitialWarehouseData = () => {
+    if (props.part?.inventory_balances && props.part.inventory_balances.length > 0) {
+        return props.part.inventory_balances.map(balance => ({
+            warehouse_id: balance.warehouse_id,
+            cost_price: balance.wac_cost || 0,
+            sale_price: balance.sale_price || 0,
+            min_sale_price: balance.min_sale_price || 0,
+            initial_stock: balance.qty_on_hand || 0,
+            min_stock: balance.min_stock || 0,
+            storage_location: balance.storage_location || '',
+            is_active: balance.is_active ?? true,
+            allow_price_change: balance.allow_price_change ?? false,
+        }));
+    }
+    return [];
+};
 
 watch(() => props.part, (part) => {
     if (part) {
@@ -469,6 +585,7 @@ watch(() => props.part, (part) => {
         form.is_active = part.is_active;
         form.image = null;
         form.remove_image = false;
+        form.warehouse_data = getInitialWarehouseData();
         imagePreview.value = part.image_url;
     } else {
         form.reset();
@@ -477,11 +594,65 @@ watch(() => props.part, (part) => {
         form.unit_id = props.units.length > 0 ? props.units[0].id : '';
         form.image = null;
         form.remove_image = false;
+        form.warehouse_data = getInitialWarehouseData();
         imagePreview.value = null;
     }
 }, { immediate: true });
 
-// Handle modal open
+// Warehouse helpers
+const usedWarehouseIds = computed(() => {
+    const ids = form.warehouse_data.map(r => r.warehouse_id);
+    if (editingWarehouseIndex.value !== null) {
+        return ids.filter(id => id !== editingWarehouseData.value?.warehouse_id);
+    }
+    return ids;
+});
+
+const getWarehouseName = (warehouseId) => {
+    const warehouse = props.warehouses.find(w => w.id === warehouseId);
+    return warehouse?.name || '';
+};
+
+const getWarehouseCenter = (warehouseId) => {
+    const warehouse = props.warehouses.find(w => w.id === warehouseId);
+    return warehouse?.center_name || '';
+};
+
+const formatNumber = (num) => {
+    return Number(num || 0).toFixed(2);
+};
+
+const openAddWarehouseModal = () => {
+    editingWarehouseIndex.value = null;
+    editingWarehouseData.value = null;
+    showAddWarehouseModal.value = true;
+};
+
+const editWarehouseRow = (index) => {
+    const row = form.warehouse_data[index];
+    editingWarehouseIndex.value = index;
+    editingWarehouseData.value = { ...row };
+    showAddWarehouseModal.value = true;
+};
+
+const closeAddWarehouseModal = () => {
+    showAddWarehouseModal.value = false;
+    editingWarehouseIndex.value = null;
+    editingWarehouseData.value = null;
+};
+
+const addWarehouseFromModal = (data) => {
+    form.warehouse_data.push(data);
+};
+
+const updateWarehouseFromModal = (data) => {
+    if (editingWarehouseIndex.value !== null) {
+        form.warehouse_data[editingWarehouseIndex.value] = { ...data };
+    }
+    closeAddWarehouseModal();
+};
+
+
 watch(() => props.show, (open) => {
     if (open) {
         // Reset sections state if desired, or keep as is

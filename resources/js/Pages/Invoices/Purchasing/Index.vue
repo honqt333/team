@@ -389,32 +389,30 @@
                                     </div>
                                 </div>
 
-                                <div class="p-6 ps-8 flex-1 flex flex-col">
+                                <div class="p-4 ps-6 flex-1 flex flex-col">
                                     <!-- Body Content -->
-                                    <div class="text-center mb-5">
-                                        <h4 class="text-[11px] font-black text-slate-800 dark:text-white mb-5 line-clamp-1 opacity-90">{{ $page.props.center?.name || 'مركز فريق الخدمة' }}</h4>
-                                        <div class="flex items-center gap-2 justify-end mb-4 group-hover:translate-x-[-4px] transition-transform">
+                                    <div class="text-center mb-3">
+                                        <h4 class="text-[11px] font-black text-slate-800 dark:text-white mb-3 line-clamp-1 opacity-90">{{ $page.props.center?.name || 'مركز فريق الخدمة' }}</h4>
+                                        <div class="flex items-center gap-2 justify-end mb-3 group-hover:translate-x-[-4px] transition-transform">
                                             <p class="text-[11px] font-black text-slate-600 dark:text-slate-300">{{ ret.purchase_invoice?.supplier?.name || '—' }}</p>
                                             <div class="w-1.5 h-1.5 rounded-full bg-rose-500"></div>
                                         </div>
-                                        <div class="w-full h-[1.5px] bg-gradient-to-r from-transparent via-gray-100 dark:via-gray-700 to-transparent my-5"></div>
+                                        <div class="w-full h-[1.5px] bg-gradient-to-r from-transparent via-gray-100 dark:via-gray-700 to-transparent my-3"></div>
                                     </div>
 
                                     <!-- Bottom Info -->
-                                    <div class="mt-auto space-y-4">
-                                        <div class="flex flex-col gap-3">
+                                    <div class="mt-auto space-y-3">
+                                        <div class="flex flex-col gap-2">
                                             <div class="flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/30 p-2 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
-                                                <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.subtotal) }}</span>
-                                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.subtotal') }}</span>
+                                                <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.total) }}</span>
+                                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.total') }}</span>
                                             </div>
-                                            <div class="flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/30 p-2 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-slate-700 transition-colors">
-                                                <span class="text-xs font-black text-slate-800 dark:text-white font-mono" dir="ltr">{{ formatCurrency(ret.tax_amount) }}</span>
-                                                <span class="text-[10px] font-black text-slate-400 uppercase">{{ $t('invoices.tax') }}</span>
-                                            </div>
-                                            <div class="flex justify-between items-center bg-rose-50/10 dark:bg-rose-900/10 p-2 rounded-xl">
-                                                <span class="text-sm font-black text-rose-600 dark:text-rose-400 font-mono" dir="ltr">{{ formatCurrency(ret.total) }}</span>
-                                                <span class="text-[10px] font-black text-rose-400 uppercase">{{ $t('invoices.total') }}</span>
-                                            </div>
+                                            <template v-if="getReturnRemainingBalance(ret) > 0.01">
+                                                <div class="flex justify-between items-center bg-red-50/10 dark:bg-red-900/10 p-2 rounded-xl">
+                                                    <span class="text-sm font-black text-red-600 dark:text-red-400 font-mono" dir="ltr">{{ formatCurrency(getReturnRemainingBalance(ret)) }}</span>
+                                                    <span class="text-[10px] font-black text-red-400 uppercase">{{ $t('payments.remaining_refund') }}</span>
+                                                </div>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
@@ -561,7 +559,7 @@ const onInvoiceSaved = () => {
     showCreateModal.value = false;
 };
 
-const activeTab = ref('invoices');
+const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'invoices');
 const invoicesViewMode = ref(localStorage.getItem('purchaseInvoicesViewMode') || 'grid');
 const returnsViewMode = ref(localStorage.getItem('purchaseReturnsViewMode') || 'list');
 
@@ -658,5 +656,17 @@ const stripeClass = (status) => {
         cancelled: 'bg-red-500',
     };
     return map[status] || 'bg-gray-200 dark:bg-gray-700';
+};
+
+const getReturnRemainingBalance = (ret) => {
+    const payments = ret.purchase_invoice?.payments || [];
+    const cashRefunds = payments.filter(p => p.type === 'refund' && p.payment_method !== 'debit_note');
+    const matchedCashRefunds = cashRefunds.filter(p => p.notes?.includes(ret.code));
+    const refundPayments = matchedCashRefunds.length > 0 ? matchedCashRefunds : cashRefunds;
+    const cashRefundsTotal = refundPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+    const debitNotePayment = payments.find(p => p.type === 'refund' && p.payment_method === 'debit_note' && p.notes?.includes(ret.code));
+    const debitNoteAmount = debitNotePayment ? parseFloat(debitNotePayment.amount) || 0 : 0;
+    const remaining = parseFloat(ret.total) - cashRefundsTotal - debitNoteAmount;
+    return Math.max(0, remaining);
 };
 </script>

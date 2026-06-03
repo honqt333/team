@@ -343,7 +343,8 @@
       "copy_link": "Copy link",
       "email": "Email",
       "print": "Print",
-      "delete": "Delete"
+      "delete": "Delete",
+      "convert_to_work_order": "Convert to Work Order"
     },
     "messages": {
       "confirm_approve_title": "Evaluation approval and transfer",
@@ -2180,6 +2181,7 @@
     "date_from": "From date",
     "date_to": "To date",
     "create_debit_note": "Create Debit Note",
+    "debit_note": "Debit Note",
     "debit_note_date": "Debit Note Date",
     "debit_note_hint": "Create a debit note for this return",
     "original_attachment_ref": "Original Purchase Invoice Attachment",
@@ -2235,9 +2237,17 @@
       "tabby": "Tabby",
       "tamara": "Tamara",
       "credit": "Yes",
+      "debit_note": "Debit Note",
       "other": "Other"
     },
-    "amount_exceeds_balance": "The amount cannot exceed the remaining balance"
+    "amount_exceeds_balance": "The amount cannot exceed the remaining balance",
+    "debit_note_registered_notes": "Debit note registered for remaining refund of return: {code}",
+    "refund_for_return_notes": "Refund for return invoice: {code}",
+    "remaining_refund": "Remaining Balance (Unrefunded)",
+    "cannot_refund_unpaid": "Refunds cannot be recorded because the invoice is unpaid",
+    "errors": {
+      "cannot_refund_unpaid_invoice": "Cannot record a refund payment for an unpaid purchase invoice"
+    }
   },
   "hr": {
     "title": "Human resources",

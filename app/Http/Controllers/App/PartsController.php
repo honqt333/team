@@ -79,12 +79,17 @@ class PartsController extends Controller
                 'max:50',
                 Rule::unique('parts')->where('tenant_id', $tenantId),
             ],
+            'barcode' => 'nullable|string|max:50',
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'unit_id' => 'required|exists:inventory_units,id',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'image' => 'nullable|image|max:2048',
+            'default_sale_price' => 'nullable|numeric|min:0',
+            'min_sale_price' => 'nullable|numeric|min:0',
+            'min_qty' => 'nullable|numeric|min:0',
+            'reorder_qty' => 'nullable|numeric|min:0',
             'warehouse_data' => 'nullable|array',
             'warehouse_data.*.warehouse_id' => 'required_with:warehouse_data|exists:warehouses,id',
             'warehouse_data.*.cost_price' => 'nullable|numeric|min:0',
@@ -103,12 +108,16 @@ class PartsController extends Controller
 
         $validated['tenant_id'] = $tenantId;
 
+        // Extract warehouse_data before creating the part (not a DB column)
+        $warehouseData = $validated['warehouse_data'] ?? [];
+        unset($validated['warehouse_data']);
+
         // Create part
         $part = Part::create($validated);
 
         // Handle warehouse stock entries
-        if (!empty($validated['warehouse_data'])) {
-            $this->syncWarehouseBalances($part, $validated['warehouse_data'], $userId);
+        if (!empty($warehouseData)) {
+            $this->syncWarehouseBalances($part, $warehouseData, $userId);
         }
 
         return redirect()->route('app.inventory.parts.index')
@@ -134,12 +143,17 @@ class PartsController extends Controller
                 'max:50',
                 Rule::unique('parts')->where('tenant_id', auth()->user()->tenant_id)->ignore($part->id),
             ],
+            'barcode' => 'nullable|string|max:50',
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'unit_id' => 'required|exists:inventory_units,id',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'image' => 'nullable|image|max:2048',
+            'default_sale_price' => 'nullable|numeric|min:0',
+            'min_sale_price' => 'nullable|numeric|min:0',
+            'min_qty' => 'nullable|numeric|min:0',
+            'reorder_qty' => 'nullable|numeric|min:0',
             'warehouse_data' => 'nullable|array',
             'warehouse_data.*.warehouse_id' => 'required_with:warehouse_data|exists:warehouses,id',
             'warehouse_data.*.cost_price' => 'nullable|numeric|min:0',
@@ -164,12 +178,19 @@ class PartsController extends Controller
             $validated['image_path'] = null;
         }
 
+        // Extract warehouse_data before updating the part (not a DB column)
+        $warehouseData = null;
+        if (array_key_exists('warehouse_data', $validated)) {
+            $warehouseData = $validated['warehouse_data'] ?? [];
+            unset($validated['warehouse_data']);
+        }
+
         // Update part
         $part->update($validated);
 
         // Handle warehouse stock entries
-        if (array_key_exists('warehouse_data', $validated)) {
-            $this->syncWarehouseBalances($part, $validated['warehouse_data'] ?? [], $userId);
+        if ($warehouseData !== null) {
+            $this->syncWarehouseBalances($part, $warehouseData, $userId);
         }
 
         return redirect()->route('app.inventory.parts.index')

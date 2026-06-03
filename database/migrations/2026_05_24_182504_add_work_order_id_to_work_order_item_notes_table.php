@@ -27,9 +27,22 @@ return new class extends Migration
         });
 
         // Backfill work_order_id for existing notes
-        \Illuminate\Support\Facades\DB::table('work_order_item_notes')
-            ->join('work_order_items', 'work_order_item_notes.work_order_item_id', '=', 'work_order_items.id')
-            ->update(['work_order_item_notes.work_order_id' => \Illuminate\Support\Facades\DB::raw('work_order_items.work_order_id')]);
+        if (\Illuminate\Support\Facades\DB::connection()->getDriverName() === 'sqlite') {
+            \Illuminate\Support\Facades\DB::table('work_order_item_notes')->get()->each(function ($note) {
+                $item = \Illuminate\Support\Facades\DB::table('work_order_items')
+                    ->where('id', $note->work_order_item_id)
+                    ->first();
+                if ($item) {
+                    \Illuminate\Support\Facades\DB::table('work_order_item_notes')
+                        ->where('id', $note->id)
+                        ->update(['work_order_id' => $item->work_order_id]);
+                }
+            });
+        } else {
+            \Illuminate\Support\Facades\DB::table('work_order_item_notes')
+                ->join('work_order_items', 'work_order_item_notes.work_order_item_id', '=', 'work_order_items.id')
+                ->update(['work_order_item_notes.work_order_id' => \Illuminate\Support\Facades\DB::raw('work_order_items.work_order_id')]);
+        }
     }
 
     /**

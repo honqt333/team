@@ -108,6 +108,6 @@ class Center extends Model
         if ($locale === 'en' && $this->name_en) {
             return $this->name_en;
         }
-        return $this->name_ar ?? $this->name_en ?? $this->name;
+        return $this->name_ar ?? $this->name_en ?? $this->name ?? '';
     }
 }

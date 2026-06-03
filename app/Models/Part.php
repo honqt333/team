@@ -16,6 +16,7 @@ class Part extends Model
     protected $fillable = [
         'tenant_id',
         'sku',
+        'barcode',
         'name_ar',
         'name_en',
         'unit_id',
@@ -23,6 +24,10 @@ class Part extends Model
         'description',
         'image_path',
         'is_active',
+        'default_sale_price',
+        'min_sale_price',
+        'min_qty',
+        'reorder_qty',
     ];
 
     protected $appends = ['image_url', 'name'];
@@ -39,6 +44,10 @@ class Part extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'default_sale_price' => 'decimal:2',
+        'min_sale_price' => 'decimal:2',
+        'min_qty' => 'decimal:3',
+        'reorder_qty' => 'decimal:3',
     ];
 
     // ─────────────────────────────────────────────────────────────

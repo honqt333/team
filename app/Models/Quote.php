@@ -210,7 +210,7 @@ class Quote extends Model
 
     public function canBeApproved(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT]);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_SENT, self::STATUS_APPROVED]);
     }
 
     public function canBeRejected(): bool

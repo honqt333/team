@@ -153,14 +153,15 @@ class WorkOrderController
             ->where('total_incl_tax', '>', 0)
             ->sum('total_incl_tax');
 
+        $statusList = implode(',', array_map(fn($s) => "'" . addslashes($s) . "'", $statuses));
+
         // Single query for unstored orders totals from items and parts
         $unstoredStats = (clone $baseQuery)
             ->where('total_incl_tax', '<=', 0)
-            ->selectRaw('
-                COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN (' . implode(',', array_fill(0, count($statuses), '?')) . ') AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as items_net,
-                COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN (' . implode(',', array_fill(0, count($statuses), '?')) . ') AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as parts_net
-            ')
-            ->setBindings(array_merge($statuses, $statuses))
+            ->selectRaw("
+                COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN ($statusList) AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as items_net,
+                COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN ($statusList) AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as parts_net
+            ")
             ->first();
 
         $unstoredItems = (float) ($unstoredStats->items_net ?? 0);

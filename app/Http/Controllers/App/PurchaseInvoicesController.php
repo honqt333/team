@@ -294,6 +294,15 @@ class PurchaseInvoicesController extends Controller
             
             // Record refund payments (multi-entry array)
             $refundPaymentsTotal = 0;
+            if (!empty($validated['refund_payments'])) {
+                $hasPayments = $purchaseInvoice->payments()->where('type', \App\Models\Payment::TYPE_PAYMENT)->exists();
+                if (!$hasPayments) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'refund_payments' => [__('payments.errors.cannot_refund_unpaid_invoice') ?? 'لا يمكن تسجيل دفعة مستردة لفاتورة شراء لم تدفع بعد']
+                    ]);
+                }
+            }
+
             foreach ($validated['refund_payments'] ?? [] as $refundEntry) {
                 $refundPaymentsTotal += (float) ($refundEntry['amount'] ?? 0);
             }
@@ -407,6 +416,16 @@ class PurchaseInvoicesController extends Controller
     public function recordReturnRefund(Request $request, \App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
     {
         $purchaseInvoice = $purchaseReturnInvoice->purchaseInvoice;
+
+        $hasPayments = $purchaseInvoice->payments()
+            ->where('type', \App\Models\Payment::TYPE_PAYMENT)
+            ->exists();
+
+        if (!$hasPayments) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'amount' => [__('payments.errors.cannot_refund_unpaid_invoice') ?? 'لا يمكن تسجيل دفعة مستردة لفاتورة شراء لم تدفع بعد']
+            ]);
+        }
 
         // Calculate current remaining balance on this return invoice
         $allRefunds = $purchaseInvoice->payments()

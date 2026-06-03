@@ -425,9 +425,21 @@
                                     {{ toEnglish(index + 1) }}
                                 </td>
                                 <td class="px-4 py-4 text-center whitespace-nowrap">
-                                    <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
-                                        #{{ toEnglish(quote.code) }}
-                                    </span>
+                                    <div class="flex flex-col items-center gap-1">
+                                        <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
+                                            #{{ toEnglish(quote.code) }}
+                                        </span>
+                                        <!-- Converted WO Link -->
+                                        <div v-if="['converted', 'approved'].includes(quote.status) && (quote.converted_work_order?.id || quote.converted_work_order_id)" 
+                                            class="flex items-center gap-1 group/link"
+                                            @click.stop>
+                                            <Link :href="route('work-orders.show', quote.converted_work_order?.id || quote.converted_work_order_id)" 
+                                                class="text-[10px] font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/40 px-2 py-0.5 rounded-lg flex items-center gap-1 hover:bg-purple-100 transition-all border border-purple-100 dark:border-purple-800/50">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                                {{ quote.converted_work_order?.code }}
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td class="px-4 py-4 text-center">
                                     <div class="flex flex-col items-center gap-1">

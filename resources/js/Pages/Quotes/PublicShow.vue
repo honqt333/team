@@ -1,8 +1,8 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 dark:from-gray-900 dark:via-gray-900 dark:to-slate-900" dir="rtl">
+    <div class="min-h-screen bg-slate-100 dark:bg-gray-900 pb-12 print:bg-white print:pb-0" dir="rtl">
 
         <!-- Flash Messages -->
-        <div v-if="$page.props.flash?.success" class="fixed top-4 inset-x-4 z-50 flex justify-center">
+        <div v-if="$page.props.flash?.success" class="fixed top-4 inset-x-4 z-50 flex justify-center print:hidden">
             <div class="bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3 max-w-md">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 <span class="font-bold text-sm">{{ $page.props.flash.success }}</span>
@@ -10,8 +10,8 @@
         </div>
 
         <!-- Header -->
-        <header class="bg-white/80 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40">
-            <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+        <header class="bg-white/80 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 sticky top-0 z-40 print:hidden">
+            <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
                 <!-- Center Logo & Name -->
                 <div class="flex items-center gap-3">
                     <img v-if="quote.center?.logo_light_url" :src="quote.center.logo_light_url" alt="logo"
@@ -31,10 +31,10 @@
             </div>
         </header>
 
-        <main class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+        <main class="max-w-4xl mx-auto px-4 py-8 space-y-6 print:p-0 print:m-0">
 
             <!-- Status Banner -->
-            <div :class="statusBannerClass" class="rounded-2xl px-5 py-4 flex items-center gap-4">
+            <div :class="statusBannerClass" class="rounded-2xl px-5 py-4 flex items-center gap-4 print:hidden">
                 <div :class="statusIconClass" class="p-2.5 rounded-xl flex-shrink-0">
                     <!-- Draft/Sent -->
                     <svg v-if="['draft','sent'].includes(quote.status)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -52,117 +52,22 @@
                 </div>
             </div>
 
-            <!-- Vehicle & Customer Info Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm">
-                <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700/50">
-                    <h2 class="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider">{{ t('quotes.public.vehicle_info') }}</h2>
-                </div>
-                <div class="p-5 grid grid-cols-2 gap-4">
-                    <div v-if="quote.vehicle">
-                        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">{{ t('common.vehicle') }}</p>
-                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ quote.vehicle.make }} {{ quote.vehicle.model }}</p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ quote.vehicle.year }}</p>
-                    </div>
-                    <div v-if="quote.vehicle?.plate_number">
-                        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">{{ t('vehicles.columns.plate_number') }}</p>
-                        <SaudiPlateDisplay :plate-number="quote.vehicle.plate_number" size="sm" />
-                    </div>
-                    <div v-if="quote.customer">
-                        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">{{ t('common.customer') }}</p>
-                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ quote.customer.name }}</p>
-                    </div>
-                    <div v-if="quote.odometer">
-                        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">{{ t('work_orders.form.odometer') }}</p>
-                        <p class="font-bold text-gray-900 dark:text-white text-sm">{{ Number(quote.odometer).toLocaleString('ar-SA-u-nu-latn') }} كم</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Services -->
-            <div v-if="quote.lines?.length" class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm">
-                <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700/50">
-                    <h2 class="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider">{{ t('quotes.public.services') }}</h2>
-                </div>
-                <div class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                    <div v-for="line in quote.lines" :key="line.id" class="px-5 py-4 flex items-start justify-between gap-4">
-                        <div class="flex-1 min-w-0">
-                            <p class="font-bold text-gray-900 dark:text-white text-sm">{{ line.title }}</p>
-                            <p v-if="line.description && line.description !== line.title" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ line.description }}</p>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ t('quotes.public.qty') }}: {{ line.qty }} × {{ formatAmount(line.unit_price) }}</p>
-                        </div>
-                        <div class="text-right flex-shrink-0">
-                            <p v-if="line.discount_amount > 0" class="text-xs text-gray-400 line-through">{{ formatAmount(line.qty * line.unit_price) }}</p>
-                            <p class="font-black text-gray-900 dark:text-white text-sm">{{ formatAmount(line.line_total) }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Parts -->
-            <div v-if="quote.parts?.length" class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm">
-                <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700/50">
-                    <h2 class="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider">{{ t('quotes.public.parts') }}</h2>
-                </div>
-                <div class="divide-y divide-gray-50 dark:divide-gray-700/50">
-                    <div v-for="part in quote.parts" :key="part.id" class="px-5 py-4 flex items-start justify-between gap-4">
-                        <div class="flex-1 min-w-0">
-                            <p class="font-bold text-gray-900 dark:text-white text-sm">{{ part.name }}</p>
-                            <p v-if="part.part_number" class="text-xs text-gray-400 font-mono mt-0.5">{{ part.part_number }}</p>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{{ t('quotes.public.qty') }}: {{ part.qty }} × {{ formatAmount(part.unit_price) }}</p>
-                        </div>
-                        <div class="text-right flex-shrink-0">
-                            <p class="font-black text-gray-900 dark:text-white text-sm">{{ formatAmount(part.total_incl_tax || part.total) }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Price Summary -->
-            <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl text-white shadow-xl shadow-indigo-200 dark:shadow-none overflow-hidden">
-                <div class="p-5 space-y-3">
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-indigo-200">{{ t('quotes.show.subtotal') }}</span>
-                        <span class="font-bold">{{ formatAmount(quote.subtotal) }}</span>
-                    </div>
-                    <div v-if="Number(quote.total_discount) > 0" class="flex justify-between items-center text-sm">
-                        <span class="text-indigo-200">{{ t('quotes.show.discount') }}</span>
-                        <span class="font-bold text-red-300">- {{ formatAmount(quote.total_discount) }}</span>
-                    </div>
-                    <div v-if="quote.tax_enabled_snapshot" class="flex justify-between items-center text-sm">
-                        <span class="text-indigo-200">{{ t('quotes.show.vat') }} ({{ quote.tax_rate_snapshot }}%)</span>
-                        <span class="font-bold">{{ formatAmount(quote.total_tax) }}</span>
-                    </div>
-                    <div class="border-t border-white/20 pt-3 mt-3 flex justify-between items-center">
-                        <span class="text-indigo-100 font-bold uppercase tracking-wider text-sm">{{ t('quotes.show.total') }}</span>
-                        <span class="text-2xl font-black tracking-tight">{{ formatAmount(quote.total) }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Notes / Complaint -->
-            <div v-if="quote.customer_complaint || quote.notes || quote.tenant?.quote_terms" class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm">
-                <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700/50">
-                    <h2 class="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider">{{ t('quotes.public.notes') }}</h2>
-                </div>
-                <div class="p-5 space-y-4">
-                    <div v-if="quote.customer_complaint">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ t('quotes.form.customer_complaint') }}</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ quote.customer_complaint }}</p>
-                    </div>
-                    <div v-if="quote.notes">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ t('quotes.form.notes') }}</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">{{ quote.notes }}</p>
-                    </div>
-                    <!-- Terms & Conditions -->
-                    <div v-if="quote.tenant?.quote_terms" class="pt-4 border-t border-gray-50 dark:border-gray-700/50">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">{{ t('center_settings.tabs.print') }}</p>
-                        <p class="text-[11px] text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">{{ quote.tenant.quote_terms }}</p>
-                    </div>
+            <!-- PrintEngine Document Sheet -->
+            <div class="print-sheet-wrapper print-container w-full overflow-x-auto bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700 shadow-sm p-4 flex justify-start md:justify-center min-w-0 print:border-none print:shadow-none print:p-0">
+                <div class="print-sheet-content inline-block shrink-0 min-w-[210mm] print:min-w-0 print:w-full">
+                    <PrintEngine 
+                        :documentType="'quotation'"
+                        :data="mappedPrintData"
+                        :centerData="mappedCenterData"
+                        :documentSettings="documentSettings"
+                        :visualSettings="visualSettings"
+                        :previewMode="false"
+                    />
                 </div>
             </div>
 
             <!-- Action Buttons (only for draft/sent) -->
-            <div v-if="quote.can_be_actioned" class="space-y-4">
+            <div v-if="quote.can_be_actioned" class="space-y-4 print:hidden">
                 <p class="text-center text-sm font-bold text-gray-500 dark:text-gray-400">{{ t('quotes.public.action_prompt') }}</p>
                 <div class="grid grid-cols-2 gap-4">
                     <button @click="handleApprove"
@@ -181,7 +86,7 @@
             </div>
 
             <!-- Contact Hub -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 overflow-hidden shadow-sm print:hidden">
                 <div class="px-5 py-4 border-b border-gray-50 dark:border-gray-700/50">
                     <h2 class="font-black text-gray-900 dark:text-white text-sm uppercase tracking-wider">{{ t('quotes.public.contact_us') }}</h2>
                 </div>
@@ -203,7 +108,7 @@
                         <span class="text-xs font-black text-blue-700 dark:text-blue-300">{{ t('quotes.public.call') }}</span>
                     </a>
                     <!-- Print -->
-                    <button @click="window.print()"
+                    <button @click="printPage"
                         class="flex flex-col items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-all active:scale-95 border border-gray-100 dark:border-gray-700">
                         <div class="w-10 h-10 bg-gray-700 dark:bg-gray-600 rounded-xl flex items-center justify-center shadow-md shadow-gray-200 dark:shadow-none">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
@@ -214,13 +119,13 @@
             </div>
 
             <!-- Footer -->
-            <div class="pb-8 text-center">
+            <div class="pb-8 text-center print:hidden">
                 <p class="text-xs text-gray-400">{{ t('quotes.public.powered_by') }}</p>
             </div>
         </main>
 
         <!-- Rejection Modal -->
-        <div v-if="showRejectModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" @click.self="showRejectModal = false">
+        <div v-if="showRejectModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 print:hidden" @click.self="showRejectModal = false">
             <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
                 <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700">
                     <h3 class="font-black text-gray-900 dark:text-white text-lg">{{ t('quotes.public.reject_title') }}</h3>
@@ -251,18 +156,21 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { router } from '@inertiajs/vue3';
-import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import { router, usePage } from '@inertiajs/vue3';
+import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const props = defineProps({
     quote: Object,
 });
 
+const page = usePage();
 const { t } = useI18n();
 
 const showRejectModal = ref(false);
 const rejectionReason = ref('');
 const submitting = ref(false);
+
+const printPage = () => window.print();
 
 // Center display name (Arabic first, then English)
 const centerName = computed(() => {
@@ -270,17 +178,6 @@ const centerName = computed(() => {
     if (!c) return '';
     return c.name_ar || c.name_en || c.name || '';
 });
-
-// Format currency amounts
-function formatAmount(value) {
-    const num = parseFloat(value || 0);
-    const currency = props.quote?.currency_code || 'SAR';
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 2,
-    }).format(num);
-}
 
 function cleanPhone(phone) {
     return phone ? phone.replace(/[\s\+]/g, '') : '';
@@ -303,6 +200,138 @@ const statusIconClass = computed(() => ({
 
 const statusText = computed(() => t(`quotes.public.status_text.${props.quote.status}`));
 const statusSubtext = computed(() => t(`quotes.public.status_subtext.${props.quote.status}`));
+
+// Helper for Center Address
+const getCenterAddress = (center) => {
+    if (!center || !center.address) return '';
+    const addr = center.address;
+    const parts = [
+        addr.building_number ? `${t('common.building') || 'مبنى'} ${addr.building_number}` : '',
+        addr.street ? `${t('common.street') || 'شارع'} ${addr.street}` : '',
+        addr.district ? `${t('common.district') || 'حي'} ${addr.district}` : '',
+        addr.city ? addr.city : '',
+        addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
+    ].filter(Boolean);
+    return parts.join('، ');
+};
+
+const mappedPrintData = computed(() => {
+    let vehicleStr = '-';
+    if (props.quote.vehicle) {
+        const make = props.quote.vehicle.make || '';
+        const model = props.quote.vehicle.model || '';
+        vehicleStr = `${make} ${model}`.trim() || '-';
+    }
+
+    const services = (props.quote.lines || []).map(line => ({
+        service_name: line.title || line.description || '—',
+        description: line.description || '',
+        qty: Number(line.qty || 1),
+        unit_price: Number(line.unit_price || 0),
+        discount: Number(line.discount_amount || 0),
+        is_part: false,
+        is_taxable: line.is_taxable !== false,
+        tax_rate_snapshot: Number(line.tax_rate_snapshot || 0),
+        tax_amount: Number(line.tax_amount || 0),
+        total: Number(line.line_total || 0)
+    }));
+
+    const parts = (props.quote.parts || []).map(part => ({
+        service_name: part.name || '—',
+        description: part.part_number || 'NO-SKU',
+        qty: Number(part.qty || 1),
+        unit_price: Number(part.unit_price || 0),
+        discount: Number(part.discount || 0),
+        is_part: true,
+        is_taxable: part.is_taxable !== false,
+        tax_rate_snapshot: Number(part.tax_rate_snapshot || 0),
+        tax_amount: Number(part.tax_amount || 0),
+        total: Number(part.total_incl_tax || part.total || 0)
+    }));
+
+    return {
+        code: props.quote.code,
+        created_at: props.quote.created_at,
+        entry_date: props.quote.created_at,
+        mileage: props.quote.odometer,
+        odometer: props.quote.odometer ? Number(props.quote.odometer).toLocaleString() : '-',
+        customer_complaint: props.quote.customer_complaint,
+        customer: {
+            name: props.quote.customer?.name || '—',
+            phone: props.quote.customer?.phone || '',
+            address: props.quote.customer_address_snapshot || props.quote.customer?.address_line || '',
+            tax_number: props.quote.customer_vat_snapshot || props.quote.customer?.tax_number || '',
+        },
+        vehicle: {
+            make: vehicleStr,
+            plate: props.quote.vehicle?.plate_number,
+            color: props.quote.vehicle?.color,
+        },
+        tax_enabled_snapshot: props.quote.tax_enabled_snapshot !== false,
+        pricing_mode_snapshot: props.quote.pricing_mode_snapshot || 'exclusive',
+        total_excl_tax: Number(props.quote.total_excl_tax || 0),
+        total_tax: Number(props.quote.total_tax || 0),
+        total_incl_tax: Number(props.quote.total_incl_tax || 0),
+        total_paid: 0,
+        balance: Number(props.quote.total || 0),
+        items: [...services, ...parts]
+    };
+});
+
+const mappedCenterData = computed(() => {
+    const center = props.quote.center || {};
+    const tenant = props.quote.tenant || page.props?.tenant || {};
+    return {
+        name: localeName(center, tenant),
+        tax_number: center.vat_number || tenant.vat_number,
+        cr_number: tenant.cr_number,
+        phone: center.phone || tenant.phone,
+        logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
+        iban: tenant.iban || '',
+        address: getCenterAddress(center) || tenant.address || '',
+        stamp_url: center.stamp_url || '',
+    };
+});
+
+function localeName(center, tenant) {
+    const isAr = page.props?.locale === 'ar' || true;
+    if (isAr) {
+        return center.name_ar || center.name || tenant.name;
+    }
+    return center.name_en || center.name || tenant.name;
+}
+
+const documentSettings = computed(() => {
+    const tenantSettings = props.quote.tenant?.print_settings || page.props?.tenant?.print_settings;
+    const docSettings = tenantSettings?.documents?.['quote'] || tenantSettings?.documents?.['quotation'] || {};
+    return {
+        title_ar: docSettings.title_ar || 'عرض سعر / تقييم',
+        title_en: docSettings.title_en || 'Price Quotation / Assessment',
+        terms: docSettings.terms || (props.quote.tenant?.quote_terms ? [props.quote.tenant.quote_terms] : []),
+        print_terms: docSettings.print_terms !== false,
+        show_stamp: docSettings.show_stamp !== false,
+        show_customer_address: docSettings.show_customer_address !== false,
+        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
+            { name_ar: 'توقيع المستشار الفني', name_en: 'Service Advisor Signature' },
+            { name_ar: 'توقيع العميل للاعتماد', name_en: 'Customer Signature' }
+        ]
+    };
+});
+
+const visualSettings = computed(() => {
+    const tenantSettings = props.quote.tenant?.print_settings || page.props?.tenant?.print_settings;
+    const vis = tenantSettings?.visual || {};
+    const center = props.quote.center || {};
+    return {
+        active_template: vis.active_template || 'TemplateDefaultA4',
+        show_logo: vis.show_logo !== false,
+        show_stamp: vis.show_stamp !== false,
+        show_qr_code: vis.show_qr_code !== false,
+        primary_color: vis.primary_color || '#3b82f6',
+        footer_text: vis.footer_text || props.quote.tenant?.print_settings?.footer_text || '',
+        stamp_url: center.stamp_url || vis.stamp_url || ''
+    };
+});
 
 // Actions
 function handleApprove() {
@@ -329,7 +358,59 @@ function handleReject() {
 
 <style>
 @media print {
-    .print-hidden { display: none !important; }
-    body { background: white !important; }
+    @page {
+        size: A4;
+        margin: 0.5cm 1cm;
+    }
+    html, body, #app {
+        background: white !important;
+        overflow: visible !important;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: white !important;
+    }
+    /* Hide header, footer, actions, and custom print hidden classes */
+    header, footer, .print\:hidden, .print-hidden, [class*="print:hidden"] {
+        display: none !important;
+    }
+    /* Set page body structure for printing */
+    .min-h-screen {
+        min-height: 0 !important;
+        background: white !important;
+        padding-bottom: 0 !important;
+        display: block !important;
+        overflow: visible !important;
+    }
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        display: block !important;
+        overflow: visible !important;
+    }
+    .print-sheet-wrapper {
+        display: block !important;
+        overflow: visible !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background: white !important;
+    }
+    .print-sheet-content {
+        display: block !important;
+        overflow: visible !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .print-engine-wrapper {
+        display: block !important;
+        overflow: visible !important;
+    }
 }
 </style>

@@ -1358,7 +1358,8 @@
       "copy_link": "نسخ الرابط",
       "email": "بريد إلكتروني",
       "print": "طباعة",
-      "delete": "حذف"
+      "delete": "حذف",
+      "convert_to_work_order": "تحويل لأمر عمل"
     },
     "messages": {
       "confirm_approve_title": "اعتماد التقييم وتحويله",
@@ -2124,6 +2125,7 @@
     "date_from": "من تاريخ",
     "date_to": "إلى تاريخ",
     "create_debit_note": "إنشاء إشعار مدين",
+    "debit_note": "إشعار مدين",
     "debit_note_date": "تاريخ إشعار المدين",
     "debit_note_hint": "إنشاء إشعار مدين لهذه المرتجعات",
     "original_attachment_ref": "مرجع: مرفق فاتورة الشراء الأصلية",
@@ -2179,9 +2181,17 @@
       "tabby": "تابي",
       "tamara": "تمارا",
       "credit": "آجل",
+      "debit_note": "إشعار مدين",
       "other": "أخرى"
     },
-    "amount_exceeds_balance": "المبلغ لا يمكن أن يتجاوز المتبقي"
+    "amount_exceeds_balance": "المبلغ لا يمكن أن يتجاوز المتبقي",
+    "debit_note_registered_notes": "تم تسجيل إشعار مدين للمبلغ المتبقي المسترد من المرتجع: {code}",
+    "refund_for_return_notes": "دفعة مستردة لفاتورة الإرجاع: {code}",
+    "remaining_refund": "المتبقي لم يسترد",
+    "cannot_refund_unpaid": "لا يمكن تسجيل مبالغ مستردة لأن الفاتورة لم تدفع",
+    "errors": {
+      "cannot_refund_unpaid_invoice": "لا يمكن تسجيل دفعة مستردة لفاتورة شراء لم تدفع بعد"
+    }
   },
   "hr": {
     "title": "الموارد البشرية",

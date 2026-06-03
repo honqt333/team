@@ -88,6 +88,43 @@ class Supplier extends Model
         return $this->hasManyThrough(Payment::class, PurchaseInvoice::class);
     }
 
+    public function calculateBalance(): float
+    {
+        $invoicesBalance = 0.0;
+        $totalCredits = 0.0;
+        $totalDebitNotes = 0.0;
+
+        foreach ($this->purchaseInvoices()->whereNotIn('status', [\App\Models\PurchaseInvoice::STATUS_DRAFT, \App\Models\PurchaseInvoice::STATUS_CANCELLED])->get() as $inv) {
+            $invoicesBalance += (float) $inv->balance;
+
+            $payments = (float) $inv->payments()
+                ->where('type', \App\Models\Payment::TYPE_PAYMENT)
+                ->where('payment_method', '!=', 'debit_note')
+                ->sum('amount');
+
+            $returnsTotal = (float) $inv->returnInvoices()->sum('total');
+
+            $cashRefunds = (float) $inv->payments()
+                ->where('type', \App\Models\Payment::TYPE_REFUND)
+                ->where('payment_method', '!=', 'debit_note')
+                ->sum('amount');
+
+            $debitNotes = (float) $inv->payments()
+                ->where('type', \App\Models\Payment::TYPE_REFUND)
+                ->where('payment_method', 'debit_note')
+                ->sum('amount');
+
+            $overpaid = max(0.0, $payments + $returnsTotal - (float) $inv->total);
+            $credit = max(0.0, $overpaid - $cashRefunds - $debitNotes);
+
+            $totalCredits += $credit;
+            $totalDebitNotes += $debitNotes;
+        }
+
+        $balance = round($invoicesBalance - $totalCredits - $totalDebitNotes, 2);
+        return $balance == 0.0 ? 0.0 : $balance;
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Scopes
     // ─────────────────────────────────────────────────────────────

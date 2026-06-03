@@ -55,6 +55,18 @@
                             <span>{{ $t('quotes.actions.approve') }}</span>
                         </button>
                     </Tooltip>
+
+                    <!-- Convert to Work Order (if already approved) -->
+                    <Tooltip :text="$t('quotes.actions.convert_to_work_order') || 'تحويل لأمر عمل'">
+                        <button v-if="quote.status === 'approved'"
+                            @click="approveQuote"
+                            class="flex items-center gap-2 px-6 py-2.5 bg-purple-600 text-white rounded-2xl font-bold shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                            <span>{{ $t('quotes.actions.convert_to_work_order') || 'تحويل لأمر عمل' }}</span>
+                        </button>
+                    </Tooltip>
                     
                     <!-- Delete (Conditional) -->
                     <Tooltip :text="$t('common.delete')">
@@ -590,9 +602,15 @@ const approveQuote = async () => {
         showApprovalModal.value = true;
     } else {
         const confirmed = await confirm({
-            title: t('quotes.messages.confirm_approve_title'),
-            message: t('quotes.messages.confirm_approve'),
-            confirmText: t('quotes.actions.approve'),
+            title: props.quote.status === 'approved'
+                ? 'تحويل عرض السعر إلى أمر عمل'
+                : t('quotes.messages.confirm_approve_title'),
+            message: props.quote.status === 'approved'
+                ? 'سيتم إنشاء أمر عمل (كرت صيانة) جديد بناءً على هذا التقييم المعتمد.'
+                : t('quotes.messages.confirm_approve'),
+            confirmText: props.quote.status === 'approved'
+                ? 'تحويل لأمر عمل'
+                : t('quotes.actions.approve'),
             type: 'success'
         });
 
