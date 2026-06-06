@@ -92,6 +92,25 @@ class InventoryMove extends Model
         return $this->morphTo();
     }
 
+    /**
+     * Polymorphic accessor: returns the WorkOrder linked to this move, if any.
+     * Safe across all reference types — only WorkOrderItemPart carries a WorkOrder.
+     * Use this instead of `with('reference.workOrder')` in eager loads, because
+     * `workOrder` only exists on WorkOrderItemPart (and the move's reference_type
+     * may legitimately be other models that don't have a `workOrder` relation).
+     */
+    public function getWorkOrderAttribute(): ?\App\Models\WorkOrder
+    {
+        $ref = $this->reference;
+        if ($ref instanceof \App\Models\WorkOrderItemPart) {
+            return $ref->workOrder;
+        }
+        if ($ref instanceof \App\Models\WorkOrder) {
+            return $ref;
+        }
+        return null;
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Scopes
     // ─────────────────────────────────────────────────────────────

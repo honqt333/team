@@ -8,12 +8,16 @@ import { ref, computed } from 'vue';
 const { locale } = useI18n();
 const isRTL = computed(() => locale.value === 'ar');
 
-defineProps({
+const props = defineProps({
     canResetPassword: {
         type: Boolean,
     },
     status: {
         type: String,
+    },
+    asAdmin: {
+        type: Boolean,
+        default: false,
     },
 });
 
@@ -26,7 +30,11 @@ const form = useForm({
 const showPassword = ref(false);
 
 const submit = () => {
-    form.post(route('login'), {
+    // When this component is rendered for the admin-panel login (via
+    // /admin/login), post to admin.login.store; otherwise use the regular
+    // /login route for tenant users.
+    const target = props.asAdmin ? route('admin.login.store') : route('login');
+    form.post(target, {
         onFinish: () => form.reset('password'),
     });
 };
@@ -34,18 +42,24 @@ const submit = () => {
 
 <template>
     <AuthLayout>
-        <Head :title="isRTL ? 'تسجيل الدخول' : 'Login'" />
+        <Head :title="isRTL ? (props.asAdmin ? 'لوحة الإدارة' : 'تسجيل الدخول') : (props.asAdmin ? 'Admin Panel' : 'Login')" />
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8 font-cairo">
-            {{ isRTL ? 'تسجيل الدخول' : 'Sign In' }}
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-2 font-cairo">
+            {{ isRTL ? (props.asAdmin ? 'لوحة الإدارة' : 'تسجيل الدخول') : (props.asAdmin ? 'Admin Panel Login' : 'Sign In') }}
         </h2>
+        <p v-if="props.asAdmin" class="text-sm text-gray-500 dark:text-gray-400 text-center mb-8">
+            {{ isRTL ? 'دخول مخصص للوحة إدارة النظام' : 'System administration only' }}
+        </p>
+        <p v-else class="mb-8"></p>
 
         <div v-if="status" class="mb-4 text-sm font-medium text-green-600 dark:text-green-400 text-center">
             {{ status }}
         </div>
 
         <form @submit.prevent="submit" class="space-y-6">
+            <!-- Hidden flag so LoginRequest knows to look in AdminUser first -->
+            <input v-if="props.asAdmin" type="hidden" name="as_admin" value="1" />
             <!-- Email -->
             <div>
                 <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -115,7 +129,7 @@ const submit = () => {
             </button>
 
             <!-- Links -->
-            <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center justify-between text-sm" v-if="!props.asAdmin">
                 <Link
                     :href="route('register')"
                     class="font-medium text-violet-600 hover:text-violet-500 dark:text-violet-400"

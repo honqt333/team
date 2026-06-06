@@ -220,7 +220,7 @@ class PartsController extends Controller
             ->get();
 
         $moves = $part->inventoryMoves()
-            ->with(['warehouse.center', 'reference.workOrder'])
+            ->with(['warehouse.center', 'reference'])
             ->orderBy('posted_at', 'desc')
             ->paginate(20);
             
@@ -283,6 +283,8 @@ class PartsController extends Controller
             );
 
             // If stock changed, create receipt/adjustment
+            // NOTE: No external document — this is a manual stock adjustment,
+            // so reference is null (Part itself is not a polymorphic "document").
             if ($stockDifference != 0) {
                 $this->inventoryService->receipt(
                     warehouseId: $warehouseId,
@@ -291,8 +293,8 @@ class PartsController extends Controller
                     unitCost: (float) ($whData['cost_price'] ?? 0),
                     userId: $userId,
                     notes: $stockDifference > 0 ? 'تحديث رصيد افتتاحي' : 'تعديل رصيد',
-                    referenceType: Part::class,
-                    referenceId: $part->id,
+                    referenceType: null,
+                    referenceId: null,
                 );
             }
         }

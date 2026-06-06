@@ -555,7 +555,7 @@
                                     </a>
 
                                     <!-- System Admin Panel Link -->
-                                    <a v-if="page.props.auth?.user?.is_system_admin" href="/system"
+                                    <a v-if="isAnyAdmin()" href="/system"
                                         class="flex items-center gap-3 px-4 py-2.5 text-sm text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors"
                                         @click="userMenuOpen = false">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1075,7 +1075,7 @@ import { usePermission } from '@/Composables/usePermission';
 
 const { locale } = useI18n();
 const page = usePage();
-const { can, hasRole } = usePermission();
+const { can, hasRole, isAnyAdmin } = usePermission();
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);

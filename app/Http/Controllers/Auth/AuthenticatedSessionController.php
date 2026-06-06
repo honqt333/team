@@ -16,11 +16,15 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
+        // `?as=admin` on the URL flags the form as the admin-panel login.
+        $asAdmin = $request->boolean('as_admin') || $request->input('as') === 'admin';
+
         return Inertia::render('Auth/Login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => session('status'),
+            'asAdmin' => $asAdmin,
         ]);
     }
 

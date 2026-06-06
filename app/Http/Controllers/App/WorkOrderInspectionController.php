@@ -13,9 +13,13 @@ class WorkOrderInspectionController extends Controller
 {
     /**
      * Get available inspection templates.
+     * Templates are global catalog data (not tenant-scoped), so we don't
+     * check tenant ownership here. Only check permission + work-order access.
      */
     public function getTemplates(WorkOrder $workOrder)
     {
+        $this->authorize('view', $workOrder);
+
         $items = VehicleConditionItem::whereHas('category', function ($query) {
                 $query->where('is_active', true);
             })
@@ -33,6 +37,9 @@ class WorkOrderInspectionController extends Controller
      */
     public function store(Request $request, WorkOrder $workOrder)
     {
+        $this->authorize('create', WorkOrderInspection::class);
+        $this->authorize('view', $workOrder);
+
         $validated = $request->validate([
             'results' => 'required|array',
             'results.*.item_id' => 'required|exists:vehicle_condition_items,id',
@@ -61,11 +68,17 @@ class WorkOrderInspectionController extends Controller
      */
     public function show(WorkOrder $workOrder, WorkOrderInspection $inspection)
     {
+        $this->authorize('view', $inspection);
+        // Defense in depth: the inspection must belong to the work order in the URL
+        if ($inspection->work_order_id !== $workOrder->id) {
+            abort(404);
+        }
+
         $inspection->load(['performedBy']);
         // We also need the current condition items so we can show names
         $items = VehicleConditionItem::with('category')->get();
         $inspection->items = $items;
-        
+
         return response()->json($inspection);
     }
 }

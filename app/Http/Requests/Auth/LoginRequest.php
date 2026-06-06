@@ -46,27 +46,33 @@ class LoginRequest extends FormRequest
         $password = $this->input('password');
         $remember = $this->boolean('remember');
 
-        // First, check admin_users table
-        $adminUser = \App\Models\AdminUser::where('email', $email)
-            ->where('is_active', true)
-            ->first();
+        // The login form may indicate which side of the system it represents
+        // via a `?as=admin` query string (admin login form) or a `login_as` field.
+        // When omitted, default to the tenant (User) login.
+        $asAdmin = $this->boolean('as_admin')
+            || $this->routeIs('admin.login.*')
+            || $this->input('as') === 'admin';
 
-        if ($adminUser && \Illuminate\Support\Facades\Hash::check($password, $adminUser->password)) {
-            // Admin user found - login with admin guard
-            Auth::guard('admin')->login($adminUser, $remember);
-            $adminUser->updateLoginInfo();
-            RateLimiter::clear($this->throttleKey());
-            
-            // Store flag for redirect
-            session(['is_admin_login' => true]);
-            return;
-        }
+        if ($asAdmin) {
+            // Admin login — must match an active AdminUser
+            $adminUser = \App\Models\AdminUser::where('email', $email)
+                ->where('is_active', true)
+                ->first();
 
-        // Second, check users table
-        if (Auth::attempt($this->only('email', 'password') + ['is_active' => true], $remember)) {
-            RateLimiter::clear($this->throttleKey());
-            session(['is_admin_login' => false]);
-            return;
+            if ($adminUser && \Illuminate\Support\Facades\Hash::check($password, $adminUser->password)) {
+                Auth::guard('admin')->login($adminUser, $remember);
+                $adminUser->updateLoginInfo();
+                RateLimiter::clear($this->throttleKey());
+                session(['is_admin_login' => true]);
+                return;
+            }
+        } else {
+            // Tenant login — must match an active User
+            if (Auth::attempt($this->only('email', 'password') + ['is_active' => true], $remember)) {
+                RateLimiter::clear($this->throttleKey());
+                session(['is_admin_login' => false]);
+                return;
+            }
         }
 
         RateLimiter::hit($this->throttleKey());

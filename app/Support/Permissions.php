@@ -49,6 +49,9 @@ class Permissions
     public const WORK_ORDERS_EXPORT = 'crm.work_orders.export';
     public const WORK_ORDERS_IMPORT = 'crm.work_orders.import';
 
+    /** Work Order Inspections */
+    public const WORK_ORDERS_INSPECT = 'crm.work_orders.inspect';
+
     // ========================================
     // PURCHASING MODULE
     // ========================================
@@ -65,6 +68,21 @@ class Permissions
     public const POS_UPDATE = 'purchasing.pos.update';
     public const POS_SEND = 'purchasing.pos.send';
     public const POS_CANCEL = 'purchasing.pos.cancel';
+
+    /** Purchase Invoices */
+    public const PURCHASE_INVOICES_VIEW = 'purchasing.invoices.view';
+    public const PURCHASE_INVOICES_CREATE = 'purchasing.invoices.create';
+    public const PURCHASE_INVOICES_UPDATE = 'purchasing.invoices.update';
+    public const PURCHASE_INVOICES_DELETE = 'purchasing.invoices.delete';
+
+    /** Purchase Returns */
+    public const RETURNS_VIEW = 'purchasing.returns.view';
+    public const RETURNS_CREATE = 'purchasing.returns.create';
+    public const RETURNS_UPDATE = 'purchasing.returns.update';
+    public const RETURNS_DELETE = 'purchasing.returns.delete';
+
+    /** Purchase Payments / Refunds */
+    public const PURCHASE_PAYMENTS_MANAGE = 'purchasing.payments.manage';
     
     // ========================================
     // QUOTES MODULE
@@ -145,6 +163,12 @@ class Permissions
     public const HR_PAYMENTS_UPDATE = 'hr.payments.update';
     public const HR_PAYMENTS_DELETE = 'hr.payments.delete';
     public const HR_PAYMENTS_APPROVE = 'hr.payments.approve';
+
+    /** Employee Contracts */
+    public const HR_CONTRACTS_VIEW = 'hr.contracts.view';
+    public const HR_CONTRACTS_CREATE = 'hr.contracts.create';
+    public const HR_CONTRACTS_UPDATE = 'hr.contracts.update';
+    public const HR_CONTRACTS_DELETE = 'hr.contracts.delete';
 
     // ========================================
     // EMPLOYEE PORTAL (Self-Service)
@@ -253,6 +277,7 @@ class Permissions
                 self::WORK_ORDERS_CREATE,
                 self::WORK_ORDERS_UPDATE,
                 self::WORK_ORDERS_DELETE,
+                self::WORK_ORDERS_INSPECT,
             ],
             'quotes' => [
                 self::QUOTES_VIEW,
@@ -287,6 +312,19 @@ class Permissions
                 self::POS_SEND,
                 self::POS_CANCEL,
             ],
+            'purchasing_invoices' => [
+                self::PURCHASE_INVOICES_VIEW,
+                self::PURCHASE_INVOICES_CREATE,
+                self::PURCHASE_INVOICES_UPDATE,
+                self::PURCHASE_INVOICES_DELETE,
+                self::PURCHASE_PAYMENTS_MANAGE,
+            ],
+            'purchasing_returns' => [
+                self::RETURNS_VIEW,
+                self::RETURNS_CREATE,
+                self::RETURNS_UPDATE,
+                self::RETURNS_DELETE,
+            ],
             'workcards' => [
                 self::WORKCARDS_VIEW,
                 self::WORKCARDS_CREATE,
@@ -303,6 +341,10 @@ class Permissions
                 self::HR_EMPLOYEES_CREATE,
                 self::HR_EMPLOYEES_UPDATE,
                 self::HR_EMPLOYEES_DELETE,
+                self::HR_CONTRACTS_VIEW,
+                self::HR_CONTRACTS_CREATE,
+                self::HR_CONTRACTS_UPDATE,
+                self::HR_CONTRACTS_DELETE,
             ],
             'hr_attendance' => [
                 self::HR_ATTENDANCE_VIEW,

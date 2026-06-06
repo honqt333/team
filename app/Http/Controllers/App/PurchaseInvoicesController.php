@@ -20,6 +20,8 @@ class PurchaseInvoicesController extends Controller
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', PurchaseInvoice::class);
+
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
@@ -59,6 +61,8 @@ class PurchaseInvoicesController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', PurchaseInvoice::class);
+
         $user = auth()->user();
 
         $validated = $request->validate([
@@ -92,6 +96,8 @@ class PurchaseInvoicesController extends Controller
 
     public function show(PurchaseInvoice $purchaseInvoice)
     {
+        $this->authorize('view', $purchaseInvoice);
+
         $purchaseInvoice->load([
             'supplier', 
             'purchaseOrder', 
@@ -109,6 +115,8 @@ class PurchaseInvoicesController extends Controller
 
     public function uploadAttachment(Request $request, PurchaseInvoice $purchaseInvoice)
     {
+        $this->authorize('update', $purchaseInvoice);
+
         $request->validate([
             'attachment' => 'required|file|mimes:pdf,jpg,png|max:1024', // max 1MB (1024KB)
         ]);
@@ -129,6 +137,8 @@ class PurchaseInvoicesController extends Controller
 
     public function destroyAttachment(PurchaseInvoice $purchaseInvoice)
     {
+        $this->authorize('update', $purchaseInvoice);
+
         if ($purchaseInvoice->attachment_path) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($purchaseInvoice->attachment_path);
             $purchaseInvoice->update([
@@ -141,6 +151,8 @@ class PurchaseInvoicesController extends Controller
 
     public function recordPayment(Request $request, PurchaseInvoice $purchaseInvoice)
     {
+        $this->authorize('managePayments', $purchaseInvoice);
+
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01|max:' . $purchaseInvoice->balance,
             'payment_method' => 'required|string',
@@ -176,8 +188,10 @@ class PurchaseInvoicesController extends Controller
 
     public function recordReturn(Request $request, PurchaseInvoice $purchaseInvoice)
     {
+        $this->authorize('createReturn', $purchaseInvoice);
+
         $user = auth()->user();
-        
+
         $validated = $request->validate([
             'return_date'                          => 'required|date',
             'notes'                                => 'nullable|string|max:1000',
@@ -369,6 +383,8 @@ class PurchaseInvoicesController extends Controller
 
     public function showReturn(\App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
     {
+        $this->authorize('viewReturn', $purchaseReturnInvoice);
+
         $purchaseReturnInvoice->load([
             'purchaseInvoice.supplier',
             'purchaseInvoice.payments.receivedBy',
@@ -383,6 +399,8 @@ class PurchaseInvoicesController extends Controller
 
     public function uploadReturnAttachment(Request $request, \App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
     {
+        $this->authorize('updateReturn', $purchaseReturnInvoice);
+
         $request->validate([
             'attachment' => 'required|file|mimes:pdf,jpg,png|max:1024', // max 1MB (1024KB)
         ]);
@@ -403,6 +421,8 @@ class PurchaseInvoicesController extends Controller
 
     public function destroyReturnAttachment(\App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
     {
+        $this->authorize('updateReturn', $purchaseReturnInvoice);
+
         if ($purchaseReturnInvoice->attachment_path) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($purchaseReturnInvoice->attachment_path);
             $purchaseReturnInvoice->update([
@@ -415,6 +435,8 @@ class PurchaseInvoicesController extends Controller
 
     public function recordReturnRefund(Request $request, \App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
     {
+        $this->authorize('managePayments', $purchaseReturnInvoice);
+
         $purchaseInvoice = $purchaseReturnInvoice->purchaseInvoice;
 
         $hasPayments = $purchaseInvoice->payments()
@@ -478,6 +500,8 @@ class PurchaseInvoicesController extends Controller
      */
     public function print(PurchaseInvoice $purchaseInvoice)
     {
+        $this->authorize('view', $purchaseInvoice);
+
         $purchaseInvoice->load([
             'supplier', 
             'purchaseOrder', 
@@ -496,6 +520,8 @@ class PurchaseInvoicesController extends Controller
      */
     public function printReturn(\App\Models\PurchaseReturnInvoice $purchaseReturnInvoice)
     {
+        $this->authorize('viewReturn', $purchaseReturnInvoice);
+
         $purchaseReturnInvoice->load([
             'purchaseInvoice.supplier',
             'purchaseInvoice.payments.receivedBy',
