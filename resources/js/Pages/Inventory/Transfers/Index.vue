@@ -91,22 +91,22 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                 {{ $t('inventory.transfers.code') }}
                             </th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                 {{ $t('inventory.transfers.from') }}
                             </th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                 {{ $t('inventory.transfers.to') }}
                             </th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                 {{ $t('common.status') }}
                             </th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                 {{ $t('common.created_at') }}
                             </th>
-                            <th class="px-6 py-3"></th>
+                            <th class="px-6 py-3 align-middle text-center"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -115,7 +115,7 @@
                             :key="transfer.id"
                             class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
                         >
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap align-middle">
                                 <a 
                                     :href="route('app.inventory.transfers.show', transfer.id)"
                                     class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium"
@@ -123,21 +123,21 @@
                                     {{ transfer.code }}
                                 </a>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white align-middle">
                                 {{ transfer.from_warehouse?.name }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white align-middle">
                                 {{ transfer.to_warehouse?.name }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap align-middle">
                                 <span :class="statusClass(transfer.status)">
                                     {{ $t('inventory.transfers.statuses.' + transfer.status) }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400 text-sm">
+                            <td class="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-gray-400 text-sm align-middle">
                                 {{ formatDate(transfer.created_at) }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-end">
+                            <td class="px-6 py-4 whitespace-nowrap text-end align-middle">
                                 <a
                                     :href="route('app.inventory.transfers.show', transfer.id)"
                                     class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"

@@ -58,40 +58,40 @@
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">المستأجر</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الباقة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">القسط</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">المبلغ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الاستحقاق</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الحالة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الإجراءات</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">المستأجر</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الباقة</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">القسط</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">المبلغ</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الاستحقاق</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الحالة</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="installment in installments.data" :key="installment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span class="text-gray-900 dark:text-white">{{ installment.invoice?.tenant?.trade_name || '-' }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span class="text-gray-600 dark:text-gray-400 text-sm">{{ installment.invoice?.subscription?.plan?.name_ar || '-' }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span class="text-gray-900 dark:text-white">{{ installment.installment_number }} / {{ installment.invoice?.installment_count }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span class="font-semibold text-gray-900 dark:text-white">{{ formatCurrency(installment.amount) }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="isOverdue(installment) ? 'text-red-600 font-medium' : 'text-gray-500 dark:text-gray-400'">
                                     {{ formatDate(installment.due_date) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="getStatusClass(installment.status)" class="px-2 py-1 rounded-full text-xs font-medium">
                                     {{ getStatusLabel(installment.status) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <div class="flex gap-2">
                                     <button 
                                         v-if="installment.status !== 'paid'"
@@ -107,7 +107,7 @@
                             </td>
                         </tr>
                         <tr v-if="!installments.data?.length">
-                            <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="7" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 align-middle">
                                 لا توجد أقساط
                             </td>
                         </tr>

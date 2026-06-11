@@ -104,29 +104,29 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('common.employee') }}
                                 </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('hr.attendance.status') }}
                                 </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('hr.attendance.check_in') }}
                                 </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('hr.attendance.check_out') }}
                                 </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('hr.attendance.late') }}
                                 </th>
-                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('common.actions') }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="employee in employees" :key="employee.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
                                             <img v-if="employee.photo_url" :src="employee.photo_url" class="w-full h-full object-cover">
@@ -144,7 +144,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <span v-if="employee.attendance" :class="[
                                         'px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm transition-all',
                                         getStatusColor(employee.attendance.status)
@@ -155,13 +155,13 @@
                                         {{ $t('hr.attendance.not_marked') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-center font-mono text-sm">
+                                <td class="px-6 py-4 text-center font-mono text-sm align-middle">
                                     {{ employee.attendance?.check_in || '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-center font-mono text-sm">
+                                <td class="px-6 py-4 text-center font-mono text-sm align-middle">
                                     {{ employee.attendance?.check_out || '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <template v-if="employee.attendance?.late_minutes > 0">
                                         <span class="px-2 py-1 rounded-lg text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                                             {{ employee.attendance.late_minutes }} {{ $t('common.minutes') }}
@@ -174,7 +174,7 @@
                                     </template>
                                     <span v-else class="text-gray-400">—</span>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <div class="flex items-center justify-center gap-2">
                                         <button 
                                             v-if="!employee.attendance"
@@ -214,7 +214,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!employees.length">
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('common.no_data') }}
                                 </td>
                             </tr>

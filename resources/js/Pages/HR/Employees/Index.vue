@@ -226,23 +226,23 @@
                             <thead
                                 class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">{{ $t('hr.employees.number') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ $t('common.name') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ $t('hr.employees.job_title') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ $t('hr.employees.branch') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ $t('common.department') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ $t('hr.employees.base_salary') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ $t('common.phone') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ $t('common.actions') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('hr.employees.number') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('common.name') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('hr.employees.job_title') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('hr.employees.branch') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('common.department') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('hr.employees.base_salary') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('common.phone') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ $t('common.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="employee in employees.data" :key="employee.id"
                                     class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                    <td class="px-6 py-4 font-mono text-xs text-gray-600 dark:text-gray-400">
+                                    <td class="px-6 py-4 font-mono text-xs text-gray-600 dark:text-gray-400 align-middle">
                                         {{ employee.employee_number }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <div class="flex items-center gap-3">
                                             <div
                                                 class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
@@ -261,22 +261,22 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         {{ employee.job_title?.name_ar || '-' }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         {{ employee.center?.name || '-' }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         {{ employee.department?.name || '-' }}
                                     </td>
-                                    <td class="px-6 py-4 font-mono">
+                                    <td class="px-6 py-4 font-mono align-middle">
                                         {{ employee.base_salary?.toLocaleString() || '0' }}
                                     </td>
-                                    <td class="px-6 py-4 font-mono text-xs" dir="ltr">
+                                    <td class="px-6 py-4 font-mono text-xs align-middle" dir="ltr">
                                         {{ employee.phone || '-' }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <Link :href="route('app.hr.employees.show', employee.id)"
                                             class="text-violet-600 dark:text-violet-400 hover:underline font-medium">
                                             {{ $t('common.view') }}
@@ -284,7 +284,7 @@
                                     </td>
                                 </tr>
                                 <tr v-if="!employees.data?.length">
-                                    <td colspan="8" class="px-6 py-12 text-center">
+                                    <td colspan="8" class="px-6 py-12 text-center align-middle">
                                         <div
                                             class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
                                             <span class="text-2xl">👥</span>

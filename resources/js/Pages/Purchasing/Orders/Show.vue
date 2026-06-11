@@ -218,26 +218,26 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                <th class="px-4 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">
                                     {{ $t('purchasing.orders.part_name') }}
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.orders.qty_ordered') }}
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.orders.qty_received') }}
                                 </th>
-                                <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">
                                     {{ $t('purchasing.orders.unit_cost') }}
                                 </th>
-                                <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                <th class="px-4 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">
                                     {{ $t('purchasing.orders.line_total') }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="item in order.items" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 align-middle">
                                     <div class="flex items-center gap-3">
                                         <div class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
                                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -255,24 +255,24 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-center font-mono text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-center font-mono text-gray-900 dark:text-white align-middle">
                                     {{ item.qty_ordered }}
                                 </td>
-                                <td class="px-4 py-3 text-center">
+                                <td class="px-4 py-3 text-center align-middle">
                                     <span :class="getReceivedClass(item)">
                                         {{ item.qty_received || 0 }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-end font-mono text-gray-600 dark:text-gray-400">
+                                <td class="px-4 py-3 text-end font-mono text-gray-600 dark:text-gray-400 align-middle">
                                     {{ formatCurrency(item.unit_cost) }}
                                 </td>
-                                <td class="px-4 py-3 text-end font-mono font-medium text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-end font-mono font-medium text-gray-900 dark:text-white align-middle">
                                     {{ formatCurrency(item.line_total) }}
                                 </td>
                             </tr>
 
                             <tr v-if="!order.items?.length">
-                                <td colspan="5" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="5" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('purchasing.orders.no_items') }}
                                 </td>
                             </tr>
@@ -369,21 +369,21 @@
                 <table class="w-full mb-8">
                     <thead>
                         <tr class="border-b-2">
-                            <th class="px-4 py-3 text-start text-xs font-bold uppercase">{{ $t('inventory.parts.title') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold uppercase">{{ $t('common.quantity') }}</th>
-                            <th class="px-4 py-3 text-end text-xs font-bold uppercase">{{ $t('inventory.parts.unit_price') }}</th>
-                            <th class="px-4 py-3 text-end text-xs font-bold uppercase">{{ $t('common.total') }}</th>
+                            <th class="px-4 py-3 text-start text-xs font-bold uppercase align-middle text-center">{{ $t('inventory.parts.title') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase align-middle">{{ $t('common.quantity') }}</th>
+                            <th class="px-4 py-3 text-end text-xs font-bold uppercase align-middle text-center">{{ $t('inventory.parts.unit_price') }}</th>
+                            <th class="px-4 py-3 text-end text-xs font-bold uppercase align-middle text-center">{{ $t('common.total') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y">
                         <tr v-for="item in order.items" :key="item.id">
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-4 align-middle">
                                 <div class="font-bold text-gray-900">{{ item.part?.name_ar || item.part?.name_en }}</div>
                                 <div class="text-xs text-gray-500 font-mono">{{ item.part?.sku }}</div>
                             </td>
-                            <td class="px-4 py-4 text-center font-mono font-bold">{{ toEnglish(item.qty_ordered) }}</td>
-                            <td class="px-4 py-4 text-end font-mono">{{ formatCurrency(item.unit_cost) }}</td>
-                            <td class="px-4 py-4 text-end font-mono font-bold">{{ formatCurrency(item.line_total) }}</td>
+                            <td class="px-4 py-4 text-center font-mono font-bold align-middle">{{ toEnglish(item.qty_ordered) }}</td>
+                            <td class="px-4 py-4 text-end font-mono align-middle">{{ formatCurrency(item.unit_cost) }}</td>
+                            <td class="px-4 py-4 text-end font-mono font-bold align-middle">{{ formatCurrency(item.line_total) }}</td>
                         </tr>
                     </tbody>
                 </table>

@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call(VehicleMakesSeeder::class);
         $this->call(VehicleColorsSeeder::class);
         $this->call(ServiceSeeder::class);
+        $this->call(VehicleConditionSeeder::class);
 
         // 4. Create Test Data (Optional, but useful for now)
         $this->call(TestDataSeeder::class);

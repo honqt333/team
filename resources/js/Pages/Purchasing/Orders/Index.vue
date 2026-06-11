@@ -112,48 +112,48 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.orders.code') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.orders.supplier') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.orders.date') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.orders.total') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('common.status') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="order in orders.data" :key="order.id"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td class="px-4 py-3 text-center text-sm font-mono text-blue-600 dark:text-blue-400" dir="ltr" lang="en">
+                                <td class="px-4 py-3 text-center text-sm font-mono text-blue-600 dark:text-blue-400 align-middle" dir="ltr" lang="en">
                                     <Link :href="route('app.purchasing.orders.show', order.id)" class="hover:underline">
                                         {{ order.code }}
                                     </Link>
                                 </td>
-                                <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white">{{ order.supplier?.name }}
+                                <td class="px-4 py-3 text-center text-sm text-gray-900 dark:text-white align-middle">{{ order.supplier?.name }}
                                 </td>
-                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300" dir="ltr" lang="en">
+                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300 align-middle" dir="ltr" lang="en">
                                     {{ formatDate(order.order_date) }}
                                 </td>
-                                <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white font-mono"
+                                <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white font-mono align-middle"
                                     dir="ltr" lang="en">
                                     {{ formatCurrency(order.total) }}
                                 </td>
-                                <td class="px-4 py-3 text-center">
+                                <td class="px-4 py-3 text-center align-middle">
                                     <span :class="getStatusBadgeClass(order.status)">
                                         {{ getStatusLabel(order.status) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-center">
+                                <td class="px-4 py-3 text-center align-middle">
                                     <Link :href="route('app.purchasing.orders.show', order.id)"
                                         class="p-2 text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400">
                                         <svg class="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +166,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!orders.data.length">
-                                <td colspan="6" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('purchasing.orders.empty') }}
                                 </td>
                             </tr>
@@ -188,20 +188,20 @@
                 <table class="w-full mt-6">
                     <thead>
                         <tr>
-                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.code') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.supplier') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.date') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('purchasing.orders.total') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2">{{ $t('common.status') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle">{{ $t('purchasing.orders.code') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle">{{ $t('purchasing.orders.supplier') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle">{{ $t('purchasing.orders.date') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle">{{ $t('purchasing.orders.total') }}</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold uppercase border-b-2 align-middle">{{ $t('common.status') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="order in orders.data" :key="order.id" class="border-b">
-                            <td class="px-4 py-3 text-center text-sm font-mono">{{ order.code }}</td>
-                            <td class="px-4 py-3 text-center text-sm">{{ order.supplier?.name }}</td>
-                            <td class="px-4 py-3 text-center text-sm font-mono">{{ formatDate(order.order_date) }}</td>
-                            <td class="px-4 py-3 text-center text-sm font-mono">{{ formatCurrency(order.total) }}</td>
-                            <td class="px-4 py-3 text-center text-sm font-bold">{{ getStatusLabel(order.status) }}</td>
+                            <td class="px-4 py-3 text-center text-sm font-mono align-middle">{{ order.code }}</td>
+                            <td class="px-4 py-3 text-center text-sm align-middle">{{ order.supplier?.name }}</td>
+                            <td class="px-4 py-3 text-center text-sm font-mono align-middle">{{ formatDate(order.order_date) }}</td>
+                            <td class="px-4 py-3 text-center text-sm font-mono align-middle">{{ formatCurrency(order.total) }}</td>
+                            <td class="px-4 py-3 text-center text-sm font-bold align-middle">{{ getStatusLabel(order.status) }}</td>
                         </tr>
                     </tbody>
                 </table>

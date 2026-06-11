@@ -113,20 +113,20 @@ const deleteRole = () => {
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900/50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider align-middle text-center">
                                 {{ t('roles.name') }}
                             </th>
-                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider align-middle text-center">
                                 {{ t('roles.users_count') }}
                             </th>
-                            <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase tracking-wider align-middle text-center">
                                 {{ t('common.actions') }}
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="role in roles" :key="role.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap align-middle">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
                                     {{ $page.props.locale === 'ar' ? (role.label_ar || role.name) : (role.label_en || role.name) }}
                                 </div>
@@ -134,12 +134,12 @@ const deleteRole = () => {
                                     {{ role.description }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap align-middle">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
                                     {{ role.users_count }}
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                            <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium align-middle">
                                 <button
                                     @click="openEditModal(role)"
                                     class="text-violet-600 dark:text-violet-400 hover:text-violet-900 dark:hover:text-violet-300 mx-2"
@@ -157,7 +157,7 @@ const deleteRole = () => {
                             </td>
                         </tr>
                         <tr v-if="roles.length === 0">
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="3" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                 {{ t('common.no_data') }}
                             </td>
                         </tr>

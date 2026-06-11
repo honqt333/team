@@ -18,27 +18,27 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الرمز</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الاسم</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الخصم</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الاستخدام</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الحالة</th>
-                                <th class="px-6 py-4"></th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الرمز</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الاسم</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الخصم</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الاستخدام</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الحالة</th>
+                                <th class="px-6 py-4 align-middle text-center"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="code in promoCodes" :key="code.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded">
                                         {{ code.code }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-gray-900 dark:text-white">{{ code.name }}</td>
-                                <td class="px-6 py-4 text-gray-900 dark:text-white">{{ code.discount_description }}</td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-gray-900 dark:text-white align-middle">{{ code.name }}</td>
+                                <td class="px-6 py-4 text-gray-900 dark:text-white align-middle">{{ code.discount_description }}</td>
+                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400 align-middle">
                                     {{ code.times_used }} / {{ code.max_uses || '∞' }}
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <span v-if="code.is_valid" class="px-2 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full text-xs">
                                         صالح
                                     </span>
@@ -46,7 +46,7 @@
                                         {{ !code.is_active ? 'غير نشط' : 'منتهي' }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-end">
+                                <td class="px-6 py-4 text-end align-middle">
                                     <button @click="openModal(code)" class="text-indigo-600 hover:text-indigo-700 font-medium text-sm me-3">
                                         تعديل
                                     </button>

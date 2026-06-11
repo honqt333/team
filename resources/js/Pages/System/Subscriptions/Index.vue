@@ -76,39 +76,39 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">المستأجر</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الباقة</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الدورة</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">الحالة</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ينتهي في</th>
-                                <th class="px-6 py-4"></th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">المستأجر</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الباقة</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الدورة</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">الحالة</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">ينتهي في</th>
+                                <th class="px-6 py-4 align-middle text-center"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="sub in subscriptions.data" :key="sub.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <div>
                                         <p class="font-medium text-gray-900 dark:text-white">{{ sub.tenant?.trade_name || sub.tenant?.name }}</p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">#{{ sub.tenant?.id }}</p>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <span class="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded text-sm font-medium">
                                         {{ sub.plan?.name_ar }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400 align-middle">
                                     {{ sub.billing_cycle === 'yearly' ? 'سنوي' : 'شهري' }}
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <span :class="getStatusClass(sub.status)" class="px-2 py-1 rounded-full text-xs font-medium">
                                         {{ getStatusLabel(sub.status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400 align-middle">
                                     {{ formatDate(sub.ends_at) }}
                                 </td>
-                                <td class="px-6 py-4 text-end">
+                                <td class="px-6 py-4 text-end align-middle">
                                     <Link :href="`/system/subscriptions/${sub.id}`" class="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
                                         عرض
                                     </Link>

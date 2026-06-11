@@ -25,32 +25,32 @@
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">العنوان</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">النوع</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">الفئة المستهدفة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">الحالة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">المشاهدات</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">التاريخ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">الإجراءات</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">العنوان</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">النوع</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">الفئة المستهدفة</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">الحالة</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">المشاهدات</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">التاريخ</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="item in announcements.data" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <a :href="`/system/announcements/${item.id}`" class="font-medium text-gray-900 dark:text-white hover:text-indigo-600">{{ item.title }}</a>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="getTypeClass(item.type)" class="px-2 py-1 rounded-full text-xs">{{ getTypeLabel(item.type) }}</span>
                             </td>
-                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-sm">{{ getTargetLabel(item.target) }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 text-sm align-middle">{{ getTargetLabel(item.target) }}</td>
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="item.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'" class="px-2 py-1 rounded-full text-xs">
                                     {{ item.is_published ? 'منشور' : 'مسودة' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ item.reads_count }}</td>
-                            <td class="px-4 py-3 text-gray-500 text-sm">{{ formatDate(item.created_at) }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 text-gray-600 dark:text-gray-400 align-middle">{{ item.reads_count }}</td>
+                            <td class="px-4 py-3 text-gray-500 text-sm align-middle">{{ formatDate(item.created_at) }}</td>
+                            <td class="px-4 py-3 align-middle">
                                 <div class="flex gap-2">
                                     <a :href="`/system/announcements/${item.id}`" class="text-indigo-600 hover:text-indigo-800 text-sm">عرض</a>
                                     <button @click="deleteAnnouncement(item)" class="text-red-600 hover:text-red-800 text-sm">حذف</button>
@@ -58,7 +58,7 @@
                             </td>
                         </tr>
                         <tr v-if="!announcements.data?.length">
-                            <td colspan="7" class="px-4 py-8 text-center text-gray-500">لا توجد إعلانات</td>
+                            <td colspan="7" class="px-4 py-8 text-center text-gray-500 align-middle">لا توجد إعلانات</td>
                         </tr>
                     </tbody>
                 </table>

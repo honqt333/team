@@ -70,17 +70,17 @@
                         <table class="w-full text-sm">
                             <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
-                                    <th class="px-6 py-4 text-start font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.period') }}</th>
-                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.employees_count') }}</th>
-                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.total_net') }}</th>
-                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.status') }}</th>
-                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('common.created_by') }}</th>
-                                    <th class="px-6 py-4 text-end font-medium text-gray-600 dark:text-gray-300">{{ $t('common.actions') }}</th>
+                                    <th class="px-6 py-4 text-start font-medium text-gray-600 dark:text-gray-300 align-middle text-center">{{ $t('hr.payroll.period') }}</th>
+                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('hr.payroll.employees_count') }}</th>
+                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('hr.payroll.total_net') }}</th>
+                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('hr.payroll.status') }}</th>
+                                    <th class="px-6 py-4 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('common.created_by') }}</th>
+                                    <th class="px-6 py-4 text-end font-medium text-gray-600 dark:text-gray-300 align-middle text-center">{{ $t('common.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 <tr v-for="run in payrollRuns.data" :key="run.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <div class="font-bold text-gray-900 dark:text-white">
                                             {{ formatPeriod(run.period_start, run.period_end) }}
                                         </div>
@@ -88,16 +88,16 @@
                                             {{ $t('hr.payroll.payment_date') }}: {{ formatDate(run.payment_date) }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-6 py-4 text-center align-middle">
                                         <span class="font-bold text-gray-900 dark:text-white">{{ run.items_count }}</span>
                                         <span class="text-gray-500"> {{ $t('hr.employees.employee') }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-6 py-4 text-center align-middle">
                                         <span class="font-bold text-emerald-600 dark:text-emerald-400">
                                             {{ formatCurrency(run.items_sum_net_salary || 0) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-6 py-4 text-center align-middle">
                                         <span :class="[
                                             'px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-sm transition-all',
                                             getStatusClass(run.status)
@@ -105,7 +105,7 @@
                                             {{ $t(`hr.payroll.statuses.${run.status}`) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-6 py-4 text-center align-middle">
                                         <div class="flex items-center justify-center gap-2">
                                             <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold text-gray-500">
                                                 {{ run.created_by?.name?.charAt(0) }}
@@ -113,7 +113,7 @@
                                             <span class="text-xs text-gray-600 dark:text-gray-400 font-bold">{{ run.created_by?.name }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <div class="flex items-center justify-end gap-1.5 p-1 bg-gray-50/50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700/50 w-fit ms-auto">
                                             <Link 
                                                 :href="route('app.hr.payroll.show', run.id)" 
@@ -139,7 +139,7 @@
                                     </td>
                                 </tr>
                                 <tr v-if="!payrollRuns.data?.length">
-                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                         <span class="text-4xl block mb-4">💵</span>
                                         {{ $t('hr.payroll.no_payrolls') }}
                                     </td>

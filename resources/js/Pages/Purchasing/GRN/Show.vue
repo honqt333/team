@@ -86,21 +86,21 @@
                             <table class="w-full">
                                 <thead class="bg-gray-50/50 dark:bg-gray-900/50">
                                     <tr>
-                                        <th class="px-6 py-3 text-start text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('inventory.parts.title') }}</th>
-                                        <th class="px-6 py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('common.quantity') }}</th>
-                                        <th class="px-6 py-3 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('inventory.parts.unit_price') }}</th>
-                                        <th class="px-6 py-3 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest">{{ $t('common.total') }}</th>
+                                        <th class="px-6 py-3 text-start text-[10px] font-black text-gray-400 uppercase tracking-widest align-middle text-center">{{ $t('inventory.parts.title') }}</th>
+                                        <th class="px-6 py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest align-middle">{{ $t('common.quantity') }}</th>
+                                        <th class="px-6 py-3 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest align-middle text-center">{{ $t('inventory.parts.unit_price') }}</th>
+                                        <th class="px-6 py-3 text-end text-[10px] font-black text-gray-400 uppercase tracking-widest align-middle text-center">{{ $t('common.total') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <tr v-for="item in grn.items" :key="item.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
-                                        <td class="px-6 py-4">
+                                        <td class="px-6 py-4 align-middle">
                                             <div class="font-bold text-gray-900 dark:text-white">{{ item.part?.name_ar || item.part?.name_en }}</div>
                                             <div class="text-xs text-gray-400 font-mono">{{ item.part?.sku }}</div>
                                         </td>
-                                        <td class="px-6 py-4 text-center font-black font-mono text-gray-600 dark:text-gray-400">{{ toEnglish(item.qty_received) }}</td>
-                                        <td class="px-6 py-4 text-end font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(item.unit_cost) }}</td>
-                                        <td class="px-6 py-4 text-end font-black font-mono text-gray-900 dark:text-white">{{ formatCurrency(item.qty_received * item.unit_cost) }}</td>
+                                        <td class="px-6 py-4 text-center font-black font-mono text-gray-600 dark:text-gray-400 align-middle">{{ toEnglish(item.qty_received) }}</td>
+                                        <td class="px-6 py-4 text-end font-mono text-gray-600 dark:text-gray-400 align-middle">{{ formatCurrency(item.unit_cost) }}</td>
+                                        <td class="px-6 py-4 text-end font-black font-mono text-gray-900 dark:text-white align-middle">{{ formatCurrency(item.qty_received * item.unit_cost) }}</td>
                                     </tr>
                                 </tbody>
                             </table>

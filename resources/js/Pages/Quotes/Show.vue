@@ -214,43 +214,43 @@
                         <table class="w-full text-sm">
                             <thead>
                                 <tr class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50">
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.type') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('work_orders.price') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic">{{ $t('work_orders.discount') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider">{{ $t('common.amount') }}</th>
-                                    <th v-if="hasTax" class="pb-2 text-center font-bold uppercase tracking-wider italic">{{ $t('common.vat_with_rate', { rate: quote.tax_rate_snapshot || 15 }) }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white">{{ $t('common.total') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('common.type') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('work_orders.price') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic align-middle">{{ $t('work_orders.discount') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('common.amount') }}</th>
+                                    <th v-if="hasTax" class="pb-2 text-center font-bold uppercase tracking-wider italic align-middle">{{ $t('common.vat_with_rate', { rate: quote.tax_rate_snapshot || 15 }) }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider tracking-widest text-gray-900 dark:text-white align-middle">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
                                 <!-- Services Row -->
                                 <tr class="group">
-                                    <td class="py-1.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.services') }}</td>
-                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.services.price) }}</td>
-                                    <td class="py-1.5 text-center font-mono text-red-500 italic">{{ totals.services.discount > 0 ? '-' + formatCurrency(totals.services.discount) : '0.00' }}</td>
-                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.services.amount) }}</td>
-                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.services.tax) }}</td>
-                                    <td class="py-1.5 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.services.total) }}</td>
+                                    <td class="py-1.5 text-center font-bold text-gray-900 dark:text-white align-middle">{{ $t('quotes.show.tabs.services') }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(totals.services.price) }}</td>
+                                    <td class="py-1.5 text-center font-mono text-red-500 italic align-middle">{{ totals.services.discount > 0 ? '-' + formatCurrency(totals.services.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(totals.services.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(totals.services.tax) }}</td>
+                                    <td class="py-1.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(totals.services.total) }}</td>
                                 </tr>
 
                                 <!-- Parts Row -->
                                 <tr class="group">
-                                    <td class="py-1.5 text-center font-bold text-gray-900 dark:text-white">{{ $t('quotes.show.tabs.spare_parts') }}</td>
-                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.parts.price) }}</td>
-                                    <td class="py-1.5 text-center font-mono text-red-500 italic">{{ totals.parts.discount > 0 ? '-' + formatCurrency(totals.parts.discount) : '0.00' }}</td>
-                                    <td class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.parts.amount) }}</td>
-                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-gray-500">{{ formatCurrency(totals.parts.tax) }}</td>
-                                    <td class="py-1.5 text-center font-black text-gray-900 dark:text-white font-mono text-base">{{ formatCurrency(totals.parts.total) }}</td>
+                                    <td class="py-1.5 text-center font-bold text-gray-900 dark:text-white align-middle">{{ $t('quotes.show.tabs.spare_parts') }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(totals.parts.price) }}</td>
+                                    <td class="py-1.5 text-center font-mono text-red-500 italic align-middle">{{ totals.parts.discount > 0 ? '-' + formatCurrency(totals.parts.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(totals.parts.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(totals.parts.tax) }}</td>
+                                    <td class="py-1.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(totals.parts.total) }}</td>
                                 </tr>
 
                                 <!-- Grand Total Row -->
                                 <tr class="bg-amber-50 dark:bg-amber-900/10 font-black border-t-2 border-amber-200 dark:border-amber-800">
-                                    <td class="py-1.5 text-center text-amber-900 dark:text-amber-400 font-black uppercase">{{ $t('common.total') }}</td>
-                                    <td class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.price) }}</td>
-                                    <td class="py-1.5 text-center font-mono text-red-600 italic">{{ totals.grand.discount > 0 ? '-' + formatCurrency(totals.grand.discount) : '0.00' }}</td>
-                                    <td class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.amount) }}</td>
-                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300">{{ formatCurrency(totals.grand.tax) }}</td>
-                                    <td class="py-1.5 text-center font-black text-amber-600 dark:text-amber-400 font-mono text-xl">{{ formatCurrency(totals.grand.total) }}</td>
+                                    <td class="py-1.5 text-center text-amber-900 dark:text-amber-400 font-black uppercase align-middle">{{ $t('common.total') }}</td>
+                                    <td class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300 align-middle">{{ formatCurrency(totals.grand.price) }}</td>
+                                    <td class="py-1.5 text-center font-mono text-red-600 italic align-middle">{{ totals.grand.discount > 0 ? '-' + formatCurrency(totals.grand.discount) : '0.00' }}</td>
+                                    <td class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300 align-middle">{{ formatCurrency(totals.grand.amount) }}</td>
+                                    <td v-if="hasTax" class="py-1.5 text-center font-mono text-amber-700 dark:text-amber-300 align-middle">{{ formatCurrency(totals.grand.tax) }}</td>
+                                    <td class="py-1.5 text-center font-black text-amber-600 dark:text-amber-400 font-mono text-xl align-middle">{{ formatCurrency(totals.grand.total) }}</td>
                                 </tr>
                             </tbody>
                         </table>

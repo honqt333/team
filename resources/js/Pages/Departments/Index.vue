@@ -86,11 +86,11 @@
                     <table class="min-w-full">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('departments.columns.name') }}</th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('departments.columns.description') }}</th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('departments.columns.services_count') }}</th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('departments.columns.status') }}</th>
-                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.actions') }}</th>
+                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('departments.columns.name') }}</th>
+                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('departments.columns.description') }}</th>
+                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('departments.columns.services_count') }}</th>
+                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('departments.columns.status') }}</th>
+                                <th class="px-5 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -99,7 +99,7 @@
                                 :key="dept.id"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors"
                             >
-                                <td class="px-5 py-4">
+                                <td class="px-5 py-4 align-middle">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold text-white flex-shrink-0 bg-gradient-to-br from-orange-500 to-amber-500">
                                             {{ getName(dept).charAt(0).toUpperCase() }}
@@ -107,15 +107,15 @@
                                         <span class="font-medium text-gray-900 dark:text-white">{{ getName(dept) }}</span>
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                                <td class="px-5 py-4 text-gray-600 dark:text-gray-400 max-w-xs truncate align-middle">
                                     {{ dept.description || '—' }}
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-5 py-4 align-middle">
                                     <span class="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
                                         {{ dept.services_count }} {{ $t('departments.services') }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-5 py-4 align-middle">
                                     <button
                                         @click="toggleActive(dept)"
                                         :disabled="togglingId === dept.id"
@@ -127,7 +127,7 @@
                                         {{ dept.is_active ? $t('common.active') : $t('common.inactive') }}
                                     </button>
                                 </td>
-                                <td class="px-5 py-4">
+                                <td class="px-5 py-4 align-middle">
                                     <div class="flex items-center gap-2">
                                         <button
                                             v-if="can('departments.edit')"

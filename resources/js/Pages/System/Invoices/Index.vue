@@ -55,36 +55,36 @@
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">رقم الفاتورة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">المستأجر</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">المبلغ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الاستحقاق</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الحالة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الإجراءات</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">رقم الفاتورة</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">المستأجر</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">المبلغ</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الاستحقاق</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الحالة</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="invoice in invoices.data" :key="invoice.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span class="font-mono text-sm text-gray-900 dark:text-white">{{ invoice.invoice_number }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span class="text-gray-900 dark:text-white">{{ invoice.tenant?.trade_name || '-' }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span class="font-semibold text-gray-900 dark:text-white">{{ formatCurrency(invoice.total) }}</span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="isOverdue(invoice) ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'">
                                     {{ formatDate(invoice.due_date) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="getStatusClass(invoice.status)" class="px-2 py-1 rounded-full text-xs font-medium">
                                     {{ getStatusLabel(invoice.status) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <div class="flex gap-2">
                                     <a :href="`/system/invoices/${invoice.id}`" class="text-indigo-600 hover:text-indigo-800 text-sm">عرض</a>
                                     <a :href="`/system/invoices/${invoice.id}/download`" class="text-gray-600 hover:text-gray-800 text-sm">PDF</a>
@@ -92,7 +92,7 @@
                             </td>
                         </tr>
                         <tr v-if="!invoices.data?.length">
-                            <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 align-middle">
                                 لا توجد فواتير
                             </td>
                         </tr>

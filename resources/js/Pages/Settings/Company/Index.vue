@@ -571,34 +571,34 @@
                                                     <thead class="bg-gray-50 dark:bg-gray-700">
                                                         <tr>
                                                             <th
-                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
+                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle">
                                                                 {{ $t('company_profile.vat.table_amount') }}
                                                             </th>
                                                             <th
-                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
+                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle">
                                                                 {{ $t('company_profile.vat.table_vat') }}
                                                                 <div class="text-xs font-normal text-gray-500">{{ $t('common.vat') }}</div>
                                                                 <div class="text-xs font-normal text-gray-400">({{
                                                                     $t('company_profile.vat.inclusive') }})</div>
                                                             </th>
                                                             <th
-                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300">
+                                                                class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 align-middle">
                                                                 {{ $t('company_profile.vat.table_total') }}
                                                             </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <tr class="bg-white dark:bg-gray-800">
-                                                            <td class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium"
+                                                            <td class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium align-middle"
                                                                 :class="{ 'bg-blue-50 dark:bg-blue-900/20': vatExplanationToggle }">
                                                                 {{ vatExplanationToggle ? '86.96' : '100' }}
                                                             </td>
                                                             <td
-                                                                class="px-4 py-4 text-center text-gray-600 dark:text-gray-400">
+                                                                class="px-4 py-4 text-center text-gray-600 dark:text-gray-400 align-middle">
                                                                 13.04
                                                             </td>
                                                             <td
-                                                                class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium">
+                                                                class="px-4 py-4 text-center text-gray-900 dark:text-white font-medium align-middle">
                                                                 100
                                                             </td>
                                                         </tr>

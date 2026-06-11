@@ -162,41 +162,41 @@
                         <table class="w-full text-xs">
                             <thead class="bg-gray-50 dark:bg-gray-700/50">
                                 <tr>
-                                    <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">#</th>
-                                    <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.moves.type') }}</th>
-                                    <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('common.details') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.stock.previous_stock') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.stock.qty') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.moves.balance_after') }}</th>
+                                    <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle text-center">#</th>
+                                    <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle text-center">{{ $t('inventory.moves.type') }}</th>
+                                    <th class="px-4 py-4 text-start font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle text-center">{{ $t('common.details') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.stock.previous_stock') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.stock.qty') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.moves.balance_after') }}</th>
                                     
                                     <!-- Cost Section -->
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30">{{ $t('inventory.parts.cost_price') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30">{{ $t('inventory.stock.wac') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30">{{ $t('inventory.parts.cost_total') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30 align-middle">{{ $t('inventory.parts.cost_price') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30 align-middle">{{ $t('inventory.stock.wac') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider bg-gray-50/50 dark:bg-gray-700/30 align-middle">{{ $t('inventory.parts.cost_total') }}</th>
  
                                     <!-- Price Section (Sales) -->
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.sale_price') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.discount') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.subtotal') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.vat') }}</th>
-                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.parts.total') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.parts.sale_price') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.parts.discount') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.parts.subtotal') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.parts.vat') }}</th>
+                                    <th class="px-4 py-4 text-center font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle">{{ $t('inventory.parts.total') }}</th>
                                     
-                                    <th class="px-4 py-4 text-end font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider">{{ $t('inventory.moves.date') }}</th>
+                                    <th class="px-4 py-4 text-end font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap uppercase tracking-wider align-middle text-center">{{ $t('inventory.moves.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 <tr v-for="move in moves.data" :key="move.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                                    <td class="px-4 py-4 font-mono text-gray-400">{{ move.id }}</td>
+                                    <td class="px-4 py-4 font-mono text-gray-400 align-middle">{{ move.id }}</td>
                                     
                                     <!-- Type -->
-                                    <td class="px-4 py-4 whitespace-nowrap">
+                                    <td class="px-4 py-4 whitespace-nowrap align-middle">
                                         <span :class="getAllMoveTypeBadgeClass(move.move_type)">
                                             {{ getMoveTypeLabel(move.move_type) }}
                                         </span>
                                     </td>
  
                                      <!-- Details (Warehouse / Ref) -->
-                                    <td class="px-4 py-4 text-gray-600 dark:text-gray-300 whitespace-nowrap">
+                                    <td class="px-4 py-4 text-gray-600 dark:text-gray-300 whitespace-nowrap align-middle">
                                          <div class="flex flex-col">
                                              <span>{{ move.warehouse?.name }}</span>
                                              <span v-if="move.reference" class="text-[10px] text-gray-400">
@@ -206,11 +206,11 @@
                                      </td>
  
                                      <!-- Stock Balance Logic -->
-                                    <td class="px-4 py-4 text-center font-mono text-gray-500">
+                                    <td class="px-4 py-4 text-center font-mono text-gray-500 align-middle">
                                          {{ formatQuantity(Number(move.balance_after) - Number(move.qty)) }}
                                      </td>
                                      
-                                    <td class="px-4 py-4 text-center whitespace-nowrap">
+                                    <td class="px-4 py-4 text-center whitespace-nowrap align-middle">
                                          <span :class="[
                                              'font-mono font-medium',
                                              move.qty > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
@@ -219,60 +219,60 @@
                                          </span>
                                      </td>
  
-                                    <td class="px-4 py-4 text-center font-mono font-bold text-gray-700 dark:text-gray-200">
+                                    <td class="px-4 py-4 text-center font-mono font-bold text-gray-700 dark:text-gray-200 align-middle">
                                          {{ formatQuantity(move.balance_after) }}
                                      </td>
  
                                      <!-- Cost Data -->
-                                    <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30">
+                                    <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30 align-middle">
                                          {{ formatCurrency(move.unit_cost) }}
                                      </td>
-                                    <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30">
+                                    <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30 align-middle">
                                          {{ formatCurrency(move.wac_after) }}
                                      </td>
-                                    <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30">
+                                    <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 bg-gray-50/30 dark:bg-gray-800/30 align-middle">
                                          {{ formatCurrency(Number(move.qty) * Number(move.unit_cost)) }}
                                      </td>
  
                                      <!-- Sales Data (Only relevant for Issues/WorkOrders) -->
                                      <template v-if="isSalesMove(move)">
                                          <!-- Price -->
-                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400">
+                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 align-middle">
                                              {{ formatCurrency(getSalesPrice(move)) }}
                                          </td>
                                          <!-- Discount -->
-                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400">
+                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 align-middle">
                                              {{ formatCurrency(getSalesDiscount(move)) }}
                                          </td>
                                          <!-- Subtotal -->
-                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400">
+                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 align-middle">
                                              {{ formatCurrency(getSalesSubtotal(move)) }}
                                          </td>
                                          <!-- VAT -->
-                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400">
+                                        <td class="px-4 py-4 text-center font-mono text-gray-600 dark:text-gray-400 align-middle">
                                              {{ formatCurrency(getSalesTax(move)) }}
                                          </td>
                                          <!-- Total -->
-                                        <td class="px-4 py-4 text-center font-mono font-bold text-gray-800 dark:text-white">
+                                        <td class="px-4 py-4 text-center font-mono font-bold text-gray-800 dark:text-white align-middle">
                                              {{ formatCurrency(getSalesTotal(move)) }}
                                          </td>
                                      </template>
                                      <template v-else>
-                                        <td class="px-4 py-4 text-center text-gray-300">-</td>
-                                        <td class="px-4 py-4 text-center text-gray-300">-</td>
-                                        <td class="px-4 py-4 text-center text-gray-300">-</td>
-                                        <td class="px-4 py-4 text-center text-gray-300">-</td>
-                                        <td class="px-4 py-4 text-center text-gray-300">-</td>
+                                        <td class="px-4 py-4 text-center text-gray-300 align-middle">-</td>
+                                        <td class="px-4 py-4 text-center text-gray-300 align-middle">-</td>
+                                        <td class="px-4 py-4 text-center text-gray-300 align-middle">-</td>
+                                        <td class="px-4 py-4 text-center text-gray-300 align-middle">-</td>
+                                        <td class="px-4 py-4 text-center text-gray-300 align-middle">-</td>
                                      </template>
  
                                      <!-- Date -->
-                                    <td class="px-4 py-4 text-end text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap">
+                                    <td class="px-4 py-4 text-end text-xs text-gray-500 dark:text-gray-400 font-mono whitespace-nowrap align-middle">
                                          {{ formatDate(move.posted_at) }}
                                          <div class="text-[10px] opacity-70">{{ move.posted_by_user?.name || '-' }}</div>
                                      </td>
                                 </tr>
                                 <tr v-if="!moves.data.length">
-                                    <td colspan="14" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="14" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 align-middle">
                                         {{ $t('inventory.moves.empty') }}
                                     </td>
                                 </tr>

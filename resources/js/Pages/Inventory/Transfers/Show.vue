@@ -78,22 +78,22 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.parts.sku') }}</th>
-                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.parts.name') }}</th>
-                            <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.transfers.qty_requested') }}</th>
-                            <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.transfers.qty_sent') }}</th>
-                            <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">{{ $t('inventory.transfers.qty_received') }}</th>
-                            <th class="px-6 py-3" v-if="transfer.status === 'draft'"></th>
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">{{ $t('inventory.parts.sku') }}</th>
+                            <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">{{ $t('inventory.parts.name') }}</th>
+                            <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">{{ $t('inventory.transfers.qty_requested') }}</th>
+                            <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">{{ $t('inventory.transfers.qty_sent') }}</th>
+                            <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center">{{ $t('inventory.transfers.qty_received') }}</th>
+                            <th class="px-6 py-3 align-middle text-center" v-if="transfer.status === 'draft'"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="item in transfer.items" :key="item.id">
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ item.part?.sku }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ item.part?.name_ar || item.part?.name_en }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ formatQuantity(item.qty_requested) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ formatQuantity(item.qty_sent) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end">{{ formatQuantity(item.qty_received) }}</td>
-                            <td class="px-6 py-4 text-end" v-if="transfer.status === 'draft'">
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle">{{ item.part?.sku }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle">{{ item.part?.name_ar || item.part?.name_en }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end align-middle">{{ formatQuantity(item.qty_requested) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end align-middle">{{ formatQuantity(item.qty_sent) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 dark:text-white text-end align-middle">{{ formatQuantity(item.qty_received) }}</td>
+                            <td class="px-6 py-4 text-end align-middle" v-if="transfer.status === 'draft'">
                                 <button @click="removeItem(item)" class="text-red-500 hover:text-red-700">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>

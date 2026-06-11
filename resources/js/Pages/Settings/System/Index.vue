@@ -88,27 +88,27 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.logo') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_ar') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_en') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('system_settings.columns.is_active') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.updated_by') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('common.actions') }}
                                 </th>
                             </tr>
@@ -116,7 +116,7 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="make in makesData" :key="make.id"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <div v-if="make.logo_path"
                                         class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center p-1 border border-gray-200 dark:border-gray-600">
                                         <img :src="`/storage/${make.logo_path}`" class="w-full h-full object-contain" />
@@ -126,13 +126,13 @@
                                         {{ make.name_ar.charAt(0) }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle">
                                     {{ make.name_ar }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle">
                                     {{ make.name_en || '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <button v-if="make.source !== 'system'" @click="toggleActive('makes', make)" :class="[
                                         'px-3 py-1 text-xs font-medium rounded-full transition-colors',
                                         make.is_active
@@ -150,7 +150,7 @@
                                         {{ make.is_active ? $t('common.active') : $t('common.inactive') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">
                                     <span v-if="make.source === 'system'"
                                         class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
                                         {{ $t('common.system') }}
@@ -161,7 +161,7 @@
                                             Date(make.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <div v-if="make.source !== 'system'" class="flex items-center justify-center gap-2">
                                         <button @click="openEditModal('make', make)"
                                             class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors">
@@ -182,7 +182,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!makesData?.length">
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('common.no_data') }}
                                 </td>
                             </tr>
@@ -194,27 +194,27 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_ar') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_en') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.make') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('system_settings.columns.is_active') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.updated_by') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('common.actions') }}
                                 </th>
                             </tr>
@@ -222,16 +222,16 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="model in modelsData" :key="model.id"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle">
                                     {{ model.name_ar }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle">
                                     {{ model.name_en || '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle">
                                     {{ model.make ? getName(model.make) : '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <button v-if="model.source !== 'system'" @click="toggleActive('models', model)"
                                         :class="[
                                             'px-3 py-1 text-xs font-medium rounded-full transition-colors',
@@ -250,7 +250,7 @@
                                         {{ model.is_active ? $t('common.active') : $t('common.inactive') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">
                                     <span v-if="model.source === 'system'"
                                         class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
                                         {{ $t('common.system') }}
@@ -261,7 +261,7 @@
                                             Date(model.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <div v-if="model.source !== 'system'"
                                         class="flex items-center justify-center gap-2">
                                         <button @click="openEditModal('model', model)"
@@ -283,7 +283,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!modelsData?.length">
-                                <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('common.no_data') }}
                                 </td>
                             </tr>
@@ -295,27 +295,27 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.color') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_ar') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_en') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('system_settings.columns.is_active') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.updated_by') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('common.actions') }}
                                 </th>
                             </tr>
@@ -323,7 +323,7 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="color in colorsData" :key="color.id"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 rounded-lg border-2 border-gray-200 dark:border-gray-600 shadow-inner"
                                             :style="{ backgroundColor: color.hex_code || '#CCCCCC' }"></div>
@@ -331,13 +331,13 @@
                                             color.hex_code || '—' }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle">
                                     {{ color.name_ar }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle">
                                     {{ color.name_en || '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <button v-if="color.source !== 'system'" @click="toggleActive('colors', color)"
                                         :class="[
                                             'px-3 py-1 text-xs font-medium rounded-full transition-colors',
@@ -356,7 +356,7 @@
                                         {{ color.is_active ? $t('common.active') : $t('common.inactive') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">
                                     <span v-if="color.source === 'system'"
                                         class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
                                         {{ $t('common.system') }}
@@ -367,7 +367,7 @@
                                             Date(color.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <div v-if="color.source !== 'system'"
                                         class="flex items-center justify-center gap-2">
                                         <button @click="openEditModal('color', color)"
@@ -389,7 +389,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!colorsData?.length">
-                                <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('common.no_data') }}
                                 </td>
                             </tr>
@@ -403,23 +403,23 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_ar') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.name_en') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('system_settings.columns.is_active') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">
                                     {{ $t('system_settings.columns.updated_by') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                    class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('common.actions') }}
                                 </th>
                             </tr>
@@ -427,13 +427,13 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="item in conditionItemsData" :key="item.id"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle">
                                     {{ item.name_ar }}
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle">
                                     {{ item.name_en || '—' }}
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <button v-if="item.source !== 'system'"
                                         @click="toggleActive('condition-items', item)" :class="[
                                             'px-3 py-1 text-xs font-medium rounded-full transition-colors',
@@ -452,7 +452,7 @@
                                         {{ item.is_active ? $t('common.active') : $t('common.inactive') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">
                                     <span v-if="item.source === 'system'"
                                         class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
                                         {{ $t('common.system') }}
@@ -463,7 +463,7 @@
                                             Date(item.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-center">
+                                <td class="px-6 py-4 text-center align-middle">
                                     <div v-if="item.source !== 'system'" class="flex items-center justify-center gap-2">
                                         <button @click="openEditModal('condition_item', item)"
                                             class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors">
@@ -484,7 +484,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!conditionItemsData?.length">
-                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('common.no_data') }}
                                 </td>
                             </tr>

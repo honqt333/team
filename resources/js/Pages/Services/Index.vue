@@ -240,39 +240,39 @@
                                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                                         <tr>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.number') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.name') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.base_price') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.min_price') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.duration') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.warranty') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 align-middle">
                                                 {{ $t('services_management.columns.allow_price_override') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.updated_by') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 align-middle">
                                                 {{ $t('services_management.columns.actions') }}
                                             </th>
                                         </tr>
@@ -281,11 +281,11 @@
                                         <tr v-for="(service, index) in dept.services" :key="service.id"
                                             class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
                                             <!-- # -->
-                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle">
                                                 {{ index + 1 }}
                                             </td>
                                             <!-- Name -->
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 py-3 align-middle">
                                                 <div class="flex items-center gap-2">
                                                     <button v-if="can('services.update')"
                                                         @click="openQuickEditModal(service)"
@@ -302,16 +302,16 @@
                                                 </div>
                                             </td>
                                             <!-- Base Price -->
-                                            <td class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400">
+                                            <td class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400 align-middle">
                                                 {{ service.base_price }} ر.س
                                             </td>
                                             <!-- Min Price -->
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300 align-middle">
                                                 {{ service.min_price ? `${service.min_price} ر.س` :
                                                     $t('services_management.not_set') }}
                                             </td>
                                             <!-- Duration -->
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300 align-middle">
                                                 <span v-if="service.duration_value">
                                                     {{ service.duration_value }} {{
                                                         $t(`services_management.duration_units.${service.duration_unit}`)
@@ -322,7 +322,7 @@
                                                     }}</span>
                                             </td>
                                             <!-- Warranty -->
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300 align-middle">
                                                 <span v-if="service.warranty_value">
                                                     {{ service.warranty_value }} {{
                                                         $t(`services_management.warranty_units.${service.warranty_unit}`)
@@ -333,7 +333,7 @@
                                                     }}</span>
                                             </td>
                                             <!-- Allow Price Override -->
-                                            <td class="px-4 py-3 text-center">
+                                            <td class="px-4 py-3 text-center align-middle">
                                                 <span v-if="service.allow_price_override"
                                                     class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -352,11 +352,11 @@
                                                 </span>
                                             </td>
                                             <!-- Updated By -->
-                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">
+                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm align-middle">
                                                 {{ service.updater?.name || $t('services_management.not_set') }}
                                             </td>
                                             <!-- Actions -->
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 py-3 align-middle">
                                                 <div class="flex items-center justify-center gap-1">
                                                     <button @click.stop="toggleServiceActive(service)"
                                                         :class="service.is_active
@@ -429,39 +429,39 @@
                                     <thead class="bg-gray-50 dark:bg-gray-900/50">
                                         <tr>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.number') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.name') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.base_price') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.min_price') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.duration') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.warranty') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 align-middle">
                                                 {{ $t('services_management.columns.allow_price_override') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                                 {{ $t('services_management.columns.updated_by') }}
                                             </th>
                                             <th
-                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400">
+                                                class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 align-middle">
                                                 {{ $t('services_management.columns.actions') }}
                                             </th>
                                         </tr>
@@ -470,11 +470,11 @@
                                         <tr v-for="(service, index) in unassignedServices" :key="service.id"
                                             class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
                                             <!-- # -->
-                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle">
                                                 {{ index + 1 }}
                                             </td>
                                             <!-- Name -->
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 py-3 align-middle">
                                                 <div class="flex items-center gap-2">
                                                     <button v-if="can('services.update')"
                                                         @click="openQuickEditModal(service)"
@@ -491,16 +491,16 @@
                                                 </div>
                                             </td>
                                             <!-- Base Price -->
-                                            <td class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400">
+                                            <td class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400 align-middle">
                                                 {{ service.base_price }} ر.س
                                             </td>
                                             <!-- Min Price -->
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300 align-middle">
                                                 {{ service.min_price ? `${service.min_price} ر.س` :
                                                     $t('services_management.not_set') }}
                                             </td>
                                             <!-- Duration -->
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300 align-middle">
                                                 <span v-if="service.duration_value">
                                                     {{ service.duration_value }} {{
                                                         $t(`services_management.duration_units.${service.duration_unit}`)
@@ -511,7 +511,7 @@
                                                     }}</span>
                                             </td>
                                             <!-- Warranty -->
-                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300">
+                                            <td class="px-4 py-3 text-gray-600 dark:text-gray-300 align-middle">
                                                 <span v-if="service.warranty_value">
                                                     {{ service.warranty_value }} {{
                                                         $t(`services_management.warranty_units.${service.warranty_unit}`)
@@ -522,7 +522,7 @@
                                                     }}</span>
                                             </td>
                                             <!-- Allow Price Override -->
-                                            <td class="px-4 py-3 text-center">
+                                            <td class="px-4 py-3 text-center align-middle">
                                                 <span v-if="service.allow_price_override"
                                                     class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor"
@@ -541,11 +541,11 @@
                                                 </span>
                                             </td>
                                             <!-- Updated By -->
-                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm">
+                                            <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm align-middle">
                                                 {{ service.updater?.name || $t('services_management.not_set') }}
                                             </td>
                                             <!-- Actions -->
-                                            <td class="px-4 py-3">
+                                            <td class="px-4 py-3 align-middle">
                                                 <div class="flex items-center justify-center gap-1">
                                                     <button @click.stop="toggleServiceActive(service)"
                                                         :class="service.is_active
@@ -618,22 +618,22 @@
                         <table class="w-full text-sm">
                             <thead class="bg-gray-50 dark:bg-gray-900/50">
                                 <tr>
-                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                         {{ $t('services_management.columns.number') }}
                                     </th>
-                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                         {{ $t('services_management.columns.name') }}
                                     </th>
-                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                         {{ $t('services_management.columns.base_price') }}
                                     </th>
-                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                         {{ $t('packages.items') }}
                                     </th>
-                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                    <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                         {{ $t('services_management.columns.updated_by') }}
                                     </th>
-                                    <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400">
+                                    <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 align-middle">
                                         {{ $t('services_management.columns.actions') }}
                                     </th>
                                 </tr>
@@ -641,9 +641,9 @@
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 <tr v-for="(pkg, index) in filteredPackages" :key="pkg.id"
                                     class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ index + 1 }}
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle">{{ index + 1 }}
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-3 align-middle">
                                         <button v-if="can('services.update')" @click="openEditPackageModal(pkg)"
                                             class="font-medium text-gray-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors cursor-pointer">
                                             {{ getName(pkg) }}
@@ -652,17 +652,17 @@
                                             {{ getName(pkg) }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400">
+                                    <td class="px-4 py-3 font-semibold text-teal-600 dark:text-teal-400 align-middle">
                                         {{ pkg.base_price }} {{ $t('common.currency_sar') }}
                                     </td>
-                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle">
                                         {{ pkg.items?.length || 0 }} {{ $t('services_management.services')
                                         }}
                                     </td>
-                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle">
                                         {{ pkg.updater?.name || $t('services_management.not_set') }}
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-3 align-middle">
                                         <div class="flex items-center justify-center gap-1">
                                             <button @click.stop="toggleServiceActive(pkg)" :class="pkg.is_active
                                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
@@ -808,16 +808,16 @@
                             <table class="w-full text-sm">
                                 <thead class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700/50">
                                     <tr>
-                                        <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 w-16">
+                                        <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 w-16 align-middle text-center">
                                             {{ $t('services_management.columns.number') }}
                                         </th>
-                                        <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400">
+                                        <th class="px-4 py-3 text-start font-medium text-gray-500 dark:text-gray-400 align-middle text-center">
                                             {{ $t('services_management.columns.name') }}
                                         </th>
-                                        <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 w-32">
+                                        <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 w-32 align-middle">
                                             {{ $t('common.status') }}
                                         </th>
-                                        <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 w-32">
+                                        <th class="px-4 py-3 text-center font-medium text-gray-500 dark:text-gray-400 w-32 align-middle">
                                             {{ $t('services_management.columns.actions') }}
                                         </th>
                                     </tr>
@@ -825,8 +825,8 @@
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <tr v-for="(item, index) in category.items" :key="item.id"
                                         class="hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors">
-                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ index + 1 }}</td>
-                                    <td class="px-4 py-3">
+                                        <td class="px-4 py-3 text-gray-500 dark:text-gray-400 align-middle">{{ index + 1 }}</td>
+                                    <td class="px-4 py-3 align-middle">
                                         <div class="flex items-center gap-2">
                                             <button @click="openInspectionModal(item)"
                                                 class="font-medium text-gray-900 dark:text-white hover:text-amber-600 dark:hover:text-amber-400 hover:underline transition-colors cursor-pointer"
@@ -838,7 +838,7 @@
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="px-4 py-3 text-center">
+                                    <td class="px-4 py-3 text-center align-middle">
                                         <span :class="item.is_active
                                             ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
                                             : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'"
@@ -846,7 +846,7 @@
                                             {{ item.is_active ? $t('common.active') : $t('common.inactive') }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-3 align-middle">
                                         <div class="flex items-center justify-center gap-1">
                                             <button @click.stop="toggleInspectionActive(item)"
                                                 :disabled="item.source === 'system'"

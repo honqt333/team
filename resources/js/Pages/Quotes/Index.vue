@@ -349,10 +349,10 @@
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12 align-middle">
                                     <Tooltip :text="$t('common.id')">#</Tooltip>
                                 </th>
-                                <th @click="toggleSort('code')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <th @click="toggleSort('code')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle">
                                     <Tooltip :text="$t('quotes.columns.code')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('quotes.columns.code') }}
@@ -360,7 +360,7 @@
                                         </div>
                                     </Tooltip>
                                 </th>
-                                <th @click="toggleSort('vehicle')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <th @click="toggleSort('vehicle')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle">
                                     <Tooltip :text="$t('quotes.columns.vehicle')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('quotes.columns.vehicle') }}
@@ -368,7 +368,7 @@
                                         </div>
                                     </Tooltip>
                                 </th>
-                                <th @click="toggleSort('customer')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <th @click="toggleSort('customer')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle">
                                     <Tooltip :text="$t('quotes.columns.customer')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('quotes.columns.customer') }}
@@ -376,7 +376,7 @@
                                         </div>
                                     </Tooltip>
                                 </th>
-                                <th @click="toggleSort('services')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <th @click="toggleSort('services')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle">
                                     <Tooltip :text="$t('quotes.card.services')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('quotes.card.services') }}
@@ -384,7 +384,7 @@
                                         </div>
                                     </Tooltip>
                                 </th>
-                                <th @click="toggleSort('subtotal')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <th @click="toggleSort('subtotal')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle">
                                     <Tooltip :text="$t('quotes.form.subtotal')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('quotes.form.subtotal') }}
@@ -392,7 +392,7 @@
                                         </div>
                                     </Tooltip>
                                 </th>
-                                <th @click="toggleSort('discount')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <th @click="toggleSort('discount')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle">
                                     <Tooltip :text="$t('quotes.form.discount')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('quotes.form.discount') }}
@@ -400,7 +400,7 @@
                                         </div>
                                     </Tooltip>
                                 </th>
-                                <th @click="toggleSort('total')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <th @click="toggleSort('total')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle">
                                     <Tooltip :text="$t('quotes.columns.total')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('quotes.columns.total') }}
@@ -408,7 +408,7 @@
                                         </div>
                                     </Tooltip>
                                 </th>
-                                <th @click="toggleSort('date')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-24">
+                                <th @click="toggleSort('date')" class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-24 align-middle">
                                     <Tooltip :text="$t('common.created_at')">
                                         <div class="flex items-center justify-center gap-1.5">
                                             {{ $t('common.created_at') }}
@@ -421,10 +421,10 @@
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                             <tr v-for="(quote, index) in sortedQuotes" :key="quote.id" @click="navigateToShow(quote)"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors group">
-                                <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400 font-medium align-middle">
                                     {{ toEnglish(index + 1) }}
                                 </td>
-                                <td class="px-4 py-4 text-center whitespace-nowrap">
+                                <td class="px-4 py-4 text-center whitespace-nowrap align-middle">
                                     <div class="flex flex-col items-center gap-1">
                                         <span class="text-sm font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline">
                                             #{{ toEnglish(quote.code) }}
@@ -441,7 +441,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <div class="flex flex-col items-center gap-1">
                                         <SaudiPlateDisplay :plate-number="quote.vehicle?.plate_number" size="sm" />
                                         <span class="text-[10px] text-gray-500 dark:text-gray-400 font-bold truncate max-w-[120px]">
@@ -449,32 +449,32 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <div class="text-sm font-medium text-gray-900 dark:text-gray-200">
                                         {{ quote.customer?.name || '-' }}
                                     </div>
                                 </td>
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-bold">
                                         {{ toEnglish(quote.lines_count || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <span class="text-sm font-medium text-gray-600 dark:text-gray-400">
                                         {{ formatNumber(quote.subtotal || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <span class="text-sm font-medium text-red-600 dark:text-red-400">
                                         {{ formatNumber(quote.total_discount || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <span class="text-sm font-black text-amber-600 dark:text-amber-400">
                                         {{ formatNumber(quote.total || 0) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-4 text-center whitespace-nowrap">
+                                <td class="px-4 py-4 text-center whitespace-nowrap align-middle">
                                     <span class="text-[11px] text-gray-500 dark:text-gray-400 font-medium">
                                         {{ formatDate(quote.created_at) }}
                                     </span>
@@ -518,24 +518,24 @@
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>{{ $t('quotes.columns.code') }}</th>
-                            <th>{{ $t('common.date') }}</th>
-                            <th>{{ $t('quotes.columns.vehicle') }}</th>
-                            <th>{{ $t('quotes.columns.customer') }}</th>
-                            <th>{{ $t('quotes.card.services') }}</th>
-                            <th>{{ $t('quotes.columns.total') }}</th>
+                            <th class="align-middle text-center">#</th>
+                            <th class="align-middle text-center">{{ $t('quotes.columns.code') }}</th>
+                            <th class="align-middle text-center">{{ $t('common.date') }}</th>
+                            <th class="align-middle text-center">{{ $t('quotes.columns.vehicle') }}</th>
+                            <th class="align-middle text-center">{{ $t('quotes.columns.customer') }}</th>
+                            <th class="align-middle text-center">{{ $t('quotes.card.services') }}</th>
+                            <th class="align-middle text-center">{{ $t('quotes.columns.total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(quote, index) in sortedQuotes" :key="quote.id">
-                            <td>{{ toEnglish(index + 1) }}</td>
-                            <td>{{ toEnglish(quote.code) }}</td>
-                            <td>{{ formatDate(quote.created_at) }}</td>
-                            <td dir="ltr" class="text-left font-sans">{{ toEnglish(quote.vehicle?.plate_number) || '-' }}</td>
-                            <td>{{ quote.customer?.name || '-' }}</td>
-                            <td>{{ toEnglish(quote.lines_count || 0) }}</td>
-                            <td>{{ formatNumber(quote.total || 0) }}</td>
+                            <td class="align-middle">{{ toEnglish(index + 1) }}</td>
+                            <td class="align-middle">{{ toEnglish(quote.code) }}</td>
+                            <td class="align-middle">{{ formatDate(quote.created_at) }}</td>
+                            <td dir="ltr" class="text-left font-sans align-middle">{{ toEnglish(quote.vehicle?.plate_number) || '-' }}</td>
+                            <td class="align-middle">{{ quote.customer?.name || '-' }}</td>
+                            <td class="align-middle">{{ toEnglish(quote.lines_count || 0) }}</td>
+                            <td class="align-middle">{{ formatNumber(quote.total || 0) }}</td>
                         </tr>
                     </tbody>
                 </table>

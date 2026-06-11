@@ -452,13 +452,13 @@
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
                                 <!-- # (Index) -->
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12 align-middle">
                                     #
                                 </th>
                                 <!-- رقم كرت الصيانة -->
                                 <th 
                                     @click="toggleSort('code')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
+                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group align-middle text-center"
                                 >
                                     <div class="flex items-center gap-1.5">
                                         {{ $t('work_orders.columns.code') }}
@@ -468,7 +468,7 @@
                                 <!-- تاريخ الانتهاء المتوقع -->
                                 <th 
                                     @click="toggleSort('expected_end_date')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
                                 >
                                     <div class="flex items-center gap-1.5">
                                         {{ $t('work_orders.columns.expected_end') }}
@@ -478,7 +478,7 @@
                                 <!-- المركبة -->
                                 <th 
                                     @click="toggleSort('vehicle')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
                                 >
                                     <div class="flex items-center gap-1.5">
                                         {{ $t('work_orders.columns.vehicle') }}
@@ -488,7 +488,7 @@
                                 <!-- اسم المسؤول -->
                                 <th 
                                     @click="toggleSort('contact_name')"
-                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
                                 >
                                     <div class="flex items-center gap-1.5">
                                         {{ $t('work_orders.columns.contact_name') }}
@@ -498,7 +498,7 @@
                                 <!-- الخدمات (عدد) -->
                                 <th 
                                     @click="toggleSort('services_count')"
-                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle"
                                 >
                                     <div class="flex items-center justify-center gap-1.5">
                                         {{ $t('work_orders.columns.services') }}
@@ -508,7 +508,7 @@
                                 <!-- مبلغ الفاتورة -->
                                 <th 
                                     @click="toggleSort('total')"
-                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
                                 >
                                     <div class="flex items-center justify-end gap-1.5">
                                         {{ $t('work_orders.columns.total') }}
@@ -518,7 +518,7 @@
                                 <!-- المبلغ المدفوع -->
                                 <th 
                                     @click="toggleSort('paid')"
-                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
                                 >
                                     <div class="flex items-center justify-end gap-1.5">
                                         {{ $t('work_orders.columns.paid') }}
@@ -528,7 +528,7 @@
                                 <!-- الباقي -->
                                 <th 
                                     @click="toggleSort('balance')"
-                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    class="px-4 py-3 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors align-middle text-center"
                                 >
                                     <div class="flex items-center justify-end gap-1.5">
                                         {{ $t('work_orders.columns.balance') }}
@@ -545,15 +545,15 @@
                                 class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
                             >
                                 <!-- # -->
-                                <td class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400 font-medium">
+                                <td class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400 font-medium align-middle">
                                     {{ toEnglish(index + 1) }}
                                 </td>
                                 <!-- رقم الكرت -->
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 align-middle">
                                     <span class="font-mono font-semibold text-indigo-600 dark:text-indigo-400">#{{ toEnglish(order.code || order.id) }}</span>
                                 </td>
                                 <!-- تاريخ الانتهاء -->
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 align-middle">
                                     <span 
                                         class="inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-lg"
                                         :class="getDateClass(order)"
@@ -565,7 +565,7 @@
                                     </span>
                                 </td>
                                 <!-- المركبة -->
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 align-middle">
                                     <div class="flex items-center gap-2">
                                         <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
                                         <span class="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[120px]">
@@ -574,25 +574,25 @@
                                     </div>
                                 </td>
                                 <!-- المسؤول -->
-                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300 align-middle">
                                     {{ order.contact_name || order.customer?.name || '-' }}
                                 </td>
                                 <!-- الخدمات -->
-                                <td class="px-4 py-3 text-center">
+                                <td class="px-4 py-3 text-center align-middle">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-bold">
                                         {{ toEnglish(order.items_count || 0) }}
                                     </span>
                                 </td>
                                 <!-- مبلغ الفاتورة -->
-                                <td class="px-4 py-3 text-end font-semibold text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-end font-semibold text-gray-900 dark:text-white align-middle">
                                     {{ formatNumber(order.total || 0) }}
                                 </td>
                                 <!-- المدفوع -->
-                                <td class="px-4 py-3 text-end font-medium text-green-600 dark:text-green-400">
+                                <td class="px-4 py-3 text-end font-medium text-green-600 dark:text-green-400 align-middle">
                                     {{ formatNumber(order.total_paid || 0) }}
                                 </td>
                                 <!-- الباقي -->
-                                <td class="px-4 py-3 text-end font-bold" :class="getBalanceColor(order)">
+                                <td class="px-4 py-3 text-end font-bold align-middle" :class="getBalanceColor(order)">
                                     {{ formatNumber(order.balance || 0) }}
                                 </td>
                             </tr>
@@ -638,32 +638,32 @@
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th>#</th>
-                            <th>{{ $t('work_orders.columns.code') }}</th>
-                            <th>{{ $t('common.date') }}</th>
-                            <th>{{ $t('work_orders.columns.vehicle') }}</th>
-                            <th>{{ $t('work_orders.columns.customer') }}</th>
-                            <th>{{ $t('work_orders.columns.status') }}</th>
-                            <th>{{ $t('work_orders.columns.total') }}</th>
-                            <th>{{ $t('work_orders.columns.paid') }}</th>
-                            <th>{{ $t('work_orders.columns.balance') }}</th>
+                            <th class="align-middle text-center">#</th>
+                            <th class="align-middle text-center">{{ $t('work_orders.columns.code') }}</th>
+                            <th class="align-middle text-center">{{ $t('common.date') }}</th>
+                            <th class="align-middle text-center">{{ $t('work_orders.columns.vehicle') }}</th>
+                            <th class="align-middle text-center">{{ $t('work_orders.columns.customer') }}</th>
+                            <th class="align-middle text-center">{{ $t('work_orders.columns.status') }}</th>
+                            <th class="align-middle text-center">{{ $t('work_orders.columns.total') }}</th>
+                            <th class="align-middle text-center">{{ $t('work_orders.columns.paid') }}</th>
+                            <th class="align-middle text-center">{{ $t('work_orders.columns.balance') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(order, index) in allWorkOrders" :key="order.id">
-                            <td>{{ toEnglish(index + 1) }}</td>
-                            <td>{{ toEnglish(order.code) }}</td>
-                            <td>{{ formatDate(order.entry_date) }}</td>
-                            <td dir="ltr" class="text-left font-sans">{{ toEnglish(order.vehicle?.plate_number) || '-' }}</td>
-                            <td>{{ order.customer?.name || '-' }}</td>
-                            <td>
+                            <td class="align-middle">{{ toEnglish(index + 1) }}</td>
+                            <td class="align-middle">{{ toEnglish(order.code) }}</td>
+                            <td class="align-middle">{{ formatDate(order.entry_date) }}</td>
+                            <td dir="ltr" class="text-left font-sans align-middle">{{ toEnglish(order.vehicle?.plate_number) || '-' }}</td>
+                            <td class="align-middle">{{ order.customer?.name || '-' }}</td>
+                            <td class="align-middle">
                                 <span class="print-badge">
                                     {{ $t(`work_orders.status.${order.status}`) }}
                                 </span>
                             </td>
-                            <td>{{ formatNumber(order.total || 0) }}</td>
-                            <td>{{ formatNumber(order.paid_amount || 0) }}</td>
-                            <td>{{ formatNumber((order.total || 0) - (order.paid_amount || 0)) }}</td>
+                            <td class="align-middle">{{ formatNumber(order.total || 0) }}</td>
+                            <td class="align-middle">{{ formatNumber(order.paid_amount || 0) }}</td>
+                            <td class="align-middle">{{ formatNumber((order.total || 0) - (order.paid_amount || 0)) }}</td>
                         </tr>
                     </tbody>
                 </table>

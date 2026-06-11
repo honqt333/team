@@ -266,17 +266,17 @@
                             <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
                                 <thead>
                                     <tr class="bg-gray-50/50 dark:bg-gray-900/80">
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">#</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.invoice_number') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.issue_date') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.supplier') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.discount') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.subtotal') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.tax') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.amount') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.balance') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.actions') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">#</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.invoice_number') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.issue_date') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('common.supplier') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.discount') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.subtotal') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.tax') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.amount') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.balance') }}</th>
+                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle text-center">{{ $t('common.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
@@ -285,8 +285,8 @@
                                         :key="invoice.id"
                                         class="group hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-all duration-200"
                                     >
-                                        <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono">{{ toEnglish(index + 1) }}</td>
-                                        <td class="px-4 py-4 text-center">
+                                        <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono align-middle">{{ toEnglish(index + 1) }}</td>
+                                        <td class="px-4 py-4 text-center align-middle">
                                             <div class="flex flex-col items-center">
                                                 <Link :href="route().has('app.invoices.purchases.show') ? route('app.invoices.purchases.show', invoice.id) : '#'" class="font-bold text-amber-600 dark:text-amber-400 hover:underline">
                                                     #{{ invoice.code }}
@@ -296,17 +296,17 @@
                                                 </span>
                                             </div>
                                         </td>
-                                        <td class="px-4 py-4 text-center text-xs text-gray-600 dark:text-gray-300 font-mono">{{ formatDate(invoice.issue_date) }}</td>
-                                        <td class="px-4 py-4 text-center">
+                                        <td class="px-4 py-4 text-center text-xs text-gray-600 dark:text-gray-300 font-mono align-middle">{{ formatDate(invoice.issue_date) }}</td>
+                                        <td class="px-4 py-4 text-center align-middle">
                                             <p class="font-medium text-gray-900 dark:text-white truncate max-w-[150px] mx-auto">{{ invoice.supplier?.name || '—' }}</p>
                                         </td>
-                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(invoice.total) }}</td>
-                                        <td class="px-4 py-4 text-center text-xs font-mono text-red-600 dark:text-red-400">{{ formatCurrency(invoice.discount_amount || 0) }}</td>
-                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(invoice.subtotal) }}</td>
-                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-500 dark:text-gray-500">{{ formatCurrency(invoice.tax_amount) }}</td>
-                                        <td class="px-4 py-4 text-center text-sm font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(invoice.total) }}</td>
-                                        <td class="px-4 py-4 text-center text-sm font-black text-amber-600 dark:text-amber-400 font-mono">{{ formatCurrency(invoice.balance || 0) }}</td>
-                                        <td class="px-4 py-4 text-end">
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400 align-middle">{{ formatCurrency(invoice.total) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-red-600 dark:text-red-400 align-middle">{{ formatCurrency(invoice.discount_amount || 0) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400 align-middle">{{ formatCurrency(invoice.subtotal) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-500 dark:text-gray-500 align-middle">{{ formatCurrency(invoice.tax_amount) }}</td>
+                                        <td class="px-4 py-4 text-center text-sm font-black text-gray-900 dark:text-white font-mono align-middle">{{ formatCurrency(invoice.total) }}</td>
+                                        <td class="px-4 py-4 text-center text-sm font-black text-amber-600 dark:text-amber-400 font-mono align-middle">{{ formatCurrency(invoice.balance || 0) }}</td>
+                                        <td class="px-4 py-4 text-end align-middle">
                                             <div class="flex items-center justify-end gap-1">
                                                 <Tooltip :content="$t('common.view')">
                                                     <Link :href="route('app.invoices.purchases.show', invoice.id)" class="p-2 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30 transition-all">
@@ -427,15 +427,15 @@
                             <table class="w-full min-w-[800px] divide-y divide-gray-100 dark:divide-gray-700/50">
                                 <thead>
                                     <tr class="bg-gray-50/50 dark:bg-gray-900/80">
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">#</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.return_code') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.original_invoice') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.return_date') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.supplier') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.subtotal') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('invoices.tax') }}</th>
-                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em]">{{ $t('common.actions') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">#</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.return_code') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.original_invoice') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.return_date') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('common.supplier') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.subtotal') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('invoices.tax') }}</th>
+                                        <th class="px-4 py-4 text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-4 text-end text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.15em] align-middle text-center">{{ $t('common.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-50 dark:divide-gray-700/30">
@@ -444,25 +444,25 @@
                                         :key="ret.id"
                                         class="group hover:bg-red-50/10 dark:hover:bg-red-900/5 transition-all duration-200"
                                     >
-                                        <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono">{{ toEnglish(index + 1) }}</td>
-                                        <td class="px-4 py-4 text-center">
+                                        <td class="px-4 py-4 text-center text-xs text-gray-400 font-mono align-middle">{{ toEnglish(index + 1) }}</td>
+                                        <td class="px-4 py-4 text-center align-middle">
                                             <Link :href="route('app.invoices.purchases.returns.show', ret.id)" class="font-bold text-red-600 dark:text-red-400 hover:underline font-mono">
                                                 #{{ ret.code }}
                                             </Link>
                                         </td>
-                                        <td class="px-4 py-4 text-center">
+                                        <td class="px-4 py-4 text-center align-middle">
                                             <Link :href="route('app.invoices.purchases.show', ret.purchase_invoice_id)" class="text-xs font-medium text-gray-600 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 transition-colors">
                                                 #{{ ret.purchase_invoice?.code }}
                                             </Link>
                                         </td>
-                                        <td class="px-4 py-4 text-center text-xs text-gray-600 dark:text-gray-300 font-mono">{{ formatDate(ret.return_date) }}</td>
-                                        <td class="px-4 py-4 text-center">
+                                        <td class="px-4 py-4 text-center text-xs text-gray-600 dark:text-gray-300 font-mono align-middle">{{ formatDate(ret.return_date) }}</td>
+                                        <td class="px-4 py-4 text-center align-middle">
                                             <p class="font-medium text-gray-900 dark:text-white truncate max-w-[150px] mx-auto">{{ ret.purchase_invoice?.supplier?.name || '—' }}</p>
                                         </td>
-                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400">{{ formatCurrency(ret.subtotal) }}</td>
-                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-500 dark:text-gray-500">{{ formatCurrency(ret.tax_amount) }}</td>
-                                        <td class="px-4 py-4 text-center text-sm font-black text-rose-600 dark:text-rose-400 font-mono">{{ formatCurrency(ret.total) }}</td>
-                                        <td class="px-4 py-4 text-end">
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-600 dark:text-gray-400 align-middle">{{ formatCurrency(ret.subtotal) }}</td>
+                                        <td class="px-4 py-4 text-center text-xs font-mono text-gray-500 dark:text-gray-500 align-middle">{{ formatCurrency(ret.tax_amount) }}</td>
+                                        <td class="px-4 py-4 text-center text-sm font-black text-rose-600 dark:text-rose-400 font-mono align-middle">{{ formatCurrency(ret.total) }}</td>
+                                        <td class="px-4 py-4 text-end align-middle">
                                             <div class="flex items-center justify-end gap-1">
                                                 <Tooltip :content="$t('common.view')">
                                                     <Link :href="route('app.invoices.purchases.returns.show', ret.id)" class="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all">

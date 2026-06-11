@@ -75,7 +75,9 @@
                                         ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                         : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                                 ]">
-                                    {{ branch.is_active ? $t('common.active') : $t('common.inactive') }}
+                                    {{ branch.is_active
+                                        ? $t('company_profile.branches.active')
+                                        : $t('company_profile.branches.inactive') }}
                                 </span>
                             </div>
 
@@ -88,8 +90,11 @@
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-0.5">{{ branch.name }}</h3>
 
                             <!-- Center Type -->
-                            <p class="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">{{ branch.center_type
-                                || '#' }}</p>
+                            <p class="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">
+                                {{ branch.center_type
+                                    ? $t(`company_profile.branches.center_type_${branch.center_type}`, branch.center_type)
+                                    : '—' }}
+                            </p>
 
                             <!-- Manager Name -->
                             <div v-if="branch.manager_name"
@@ -174,21 +179,35 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
-import { Link } from '@inertiajs/vue3';
+import { Link, usePage } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import BranchFormModal from './BranchFormModal.vue';
+import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
     branches: Array,
 });
 
 const showCreateModal = ref(false);
+const { t } = useI18n();
+const { success } = useToast();
 
 // Theme detection
 const isDark = computed(() => {
     return document.documentElement.classList.contains('dark');
 });
+
+// Flash message handling
+const page = usePage();
+const showFlash = (flash) => {
+    if (flash?.success) {
+        success(flash.success);
+    }
+};
+onMounted(() => showFlash(page.props.flash));
+watch(() => page.props.flash, showFlash);
 </script>

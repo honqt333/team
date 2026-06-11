@@ -83,11 +83,11 @@ const closeMessage = () => {
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50 dark:bg-gray-900">
                                     <tr>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الحالة</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">المرسل</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الموضوع</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
-                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإجراءات</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider align-middle">الحالة</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider align-middle">المرسل</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider align-middle">الموضوع</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider align-middle">التاريخ</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider align-middle">الإجراءات</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -96,21 +96,21 @@ const closeMessage = () => {
                                         class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
                                         @click="openMessage(message)"
                                     >
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4 whitespace-nowrap align-middle">
                                             <span v-if="!message.is_read" class="flex h-2 w-2 rounded-full bg-blue-600"></span>
                                             <span v-else class="flex h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white align-middle">
                                             <div class="font-medium">{{ message.name }}</div>
                                             <div class="text-gray-500 text-xs">{{ message.email }}</div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 align-middle">
                                             {{ message.subject || 'بدون موضوع' }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 align-middle">
                                             {{ new Date(message.created_at).toLocaleDateString('ar-EG') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium align-middle">
                                             <div class="flex items-center gap-3 rtl:space-x-reverse">
                                                 <a :href="`mailto:${message.email}`" @click.stop class="text-indigo-600 hover:text-indigo-900" title="إرسال بريد">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -125,7 +125,7 @@ const closeMessage = () => {
                                         </td>
                                     </tr>
                                     <tr v-if="messages.data.length === 0">
-                                        <td colspan="5" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">لا توجد رسائل حالياً</td>
+                                        <td colspan="5" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400 align-middle">لا توجد رسائل حالياً</td>
                                     </tr>
                                 </tbody>
                             </table>

@@ -299,22 +299,22 @@
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.suppliers.name') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.suppliers.contact') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.suppliers.phone') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.suppliers.balance') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('purchasing.suppliers.orders_count') }}</th>
                                 <th
-                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle">
                                     {{ $t('common.status') }}</th>
                             </tr>
                         </thead>
@@ -322,20 +322,20 @@
                             <tr v-for="supplier in suppliers.data" :key="supplier.id"
                                 @click="router.visit(route('app.purchasing.suppliers.show', supplier.id))"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors text-center">
-                                <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white">{{ supplier.name }}</td>
-                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300">{{ supplier.contact_person || '-' }}</td>
-                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300" dir="ltr">{{ supplier.phone || '-' }}</td>
+                                <td class="px-4 py-3 text-center text-sm font-medium text-gray-900 dark:text-white align-middle">{{ supplier.name }}</td>
+                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300 align-middle">{{ supplier.contact_person || '-' }}</td>
+                                <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300 align-middle" dir="ltr">{{ supplier.phone || '-' }}</td>
                                 <td :class="[
                                     'px-4 py-3 text-center text-sm font-bold',
                                     supplier.balance < -0.01 ? 'text-red-650 dark:text-red-400 font-bold' : 'text-blue-600 dark:text-blue-400'
-                                ]">{{ formatCurrency(supplier.balance) }}</td>
-                                <td class="px-4 py-3 text-center">
+                                ]" class="align-middle">{{ formatCurrency(supplier.balance) }}</td>
+                                <td class="px-4 py-3 text-center align-middle">
                                     <span
                                         class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-600 dark:text-gray-300">
                                         {{ supplier.purchase_orders_count }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-center">
+                                <td class="px-4 py-3 text-center align-middle">
                                     <span :class="[
                                         'inline-flex px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-sm transition-all',
                                         supplier.is_active
@@ -347,7 +347,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!suppliers.data.length">
-                                <td colspan="6" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="6" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('purchasing.suppliers.empty') }}
                                 </td>
                             </tr>
@@ -367,28 +367,28 @@
                     <table class="print-table">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>{{ $t('purchasing.suppliers.name') }}</th>
-                                <th>{{ $t('purchasing.suppliers.phone') }}</th>
-                                <th>{{ $t('purchasing.suppliers.email') }}</th>
-                                <th>{{ $t('purchasing.suppliers.type') }}</th>
-                                <th>{{ $t('purchasing.suppliers.balance') }}</th>
-                                <th>{{ $t('common.status') }}</th>
+                                <th class="align-middle text-center">#</th>
+                                <th class="align-middle text-center">{{ $t('purchasing.suppliers.name') }}</th>
+                                <th class="align-middle text-center">{{ $t('purchasing.suppliers.phone') }}</th>
+                                <th class="align-middle text-center">{{ $t('purchasing.suppliers.email') }}</th>
+                                <th class="align-middle text-center">{{ $t('purchasing.suppliers.type') }}</th>
+                                <th class="align-middle text-center">{{ $t('purchasing.suppliers.balance') }}</th>
+                                <th class="align-middle text-center">{{ $t('common.status') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="(supplier, index) in suppliers.data" :key="supplier.id">
-                                <td>{{ toEnglish(index + 1) }}</td>
-                                <td>{{ supplier.name }}</td>
-                                <td dir="ltr" class="text-left font-sans">{{ toEnglish(supplier.phone) || '-' }}</td>
-                                <td dir="ltr" class="text-left">{{ supplier.email || '-' }}</td>
-                                <td>{{ supplier.type === 'parts' ? $t('purchasing.suppliers.type_parts') :
+                                <td class="align-middle">{{ toEnglish(index + 1) }}</td>
+                                <td class="align-middle">{{ supplier.name }}</td>
+                                <td dir="ltr" class="text-left font-sans align-middle">{{ toEnglish(supplier.phone) || '-' }}</td>
+                                <td dir="ltr" class="text-left align-middle">{{ supplier.email || '-' }}</td>
+                                <td class="align-middle">{{ supplier.type === 'parts' ? $t('purchasing.suppliers.type_parts') :
                                     $t('purchasing.suppliers.type_services') }}</td>
                                 <td dir="ltr" :class="[
                                     'text-left font-bold',
                                     supplier.balance < -0.01 ? 'text-red-650' : ''
-                                ]">{{ formatCurrency(supplier.balance) }}</td>
-                                <td>{{ supplier.is_active ? $t('common.active') : $t('common.inactive') }}</td>
+                                ]" class="align-middle">{{ formatCurrency(supplier.balance) }}</td>
+                                <td class="align-middle">{{ supplier.is_active ? $t('common.active') : $t('common.inactive') }}</td>
                             </tr>
                         </tbody>
                     </table>

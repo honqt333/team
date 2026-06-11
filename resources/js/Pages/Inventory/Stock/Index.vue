@@ -151,8 +151,8 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
-                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('sku')">
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">#</th>
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle text-center" @click="sortBy('sku')">
                                     <div class="flex items-center gap-1">
                                         {{ $t('inventory.parts.part_number') }}
                                         <div class="flex flex-col">
@@ -162,7 +162,7 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('name')">
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle text-center" @click="sortBy('name')">
                                     <div class="flex items-center gap-1">
                                         {{ $t('inventory.parts.name') }}
                                         <div class="flex flex-col">
@@ -172,8 +172,8 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.description') }}</th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('qty_on_hand')">
+                                <th class="px-4 py-3 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('inventory.parts.description') }}</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle" @click="sortBy('qty_on_hand')">
                                     <div class="flex items-center justify-center gap-1">
                                         {{ $t('inventory.stock.available') }}
                                         <div class="flex flex-col">
@@ -183,8 +183,8 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.stock.min_qty') }}</th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('wac_cost')">
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('inventory.stock.min_qty') }}</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle" @click="sortBy('wac_cost')">
                                     <div class="flex items-center justify-center gap-1">
                                         {{ $t('inventory.stock.avg_cost') }}
                                         <div class="flex flex-col">
@@ -194,19 +194,19 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.price') }}</th>
-                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.min_sale_price') }}</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('inventory.parts.price') }}</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('inventory.parts.min_sale_price') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="(balance, index) in balances.data" :key="balance.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                <td class="px-4 py-3 text-start text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-3 text-start text-sm text-gray-500 dark:text-gray-400 align-middle">
                                     <span class="font-mono" dir="ltr">{{ (balances.current_page - 1) * balances.per_page + index + 1 }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white align-middle">
                                     <div class="font-mono"><span dir="ltr">{{ balance.part?.sku }}</span></div>
                                 </td>
-                                <td class="px-4 py-3 text-start">
+                                <td class="px-4 py-3 text-start align-middle">
                                     <Link :href="route('app.inventory.parts.show', balance.part_id)" class="group/part">
                                         <div class="text-sm font-bold text-blue-600 dark:text-blue-400 group-hover/part:text-blue-700 dark:group-hover/part:text-blue-300 group-hover/part:underline transition-all">
                                             {{ balance.part?.name_ar }}
@@ -214,8 +214,8 @@
                                     </Link>
                                     <div v-if="balance.part?.name_en" class="text-xs text-gray-500 dark:text-gray-400">{{ balance.part?.name_en }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-start text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate">{{ balance.part?.description || '-' }}</td>
-                                <td class="px-4 py-3 text-start">
+                                <td class="px-4 py-3 text-start text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate align-middle">{{ balance.part?.description || '-' }}</td>
+                                <td class="px-4 py-3 text-start align-middle">
                                     <span :class="[
                                         'inline-flex px-2 py-1 rounded-full text-sm font-medium font-mono',
                                         getStockStatusClass(balance)
@@ -223,21 +223,21 @@
                                         {{ formatQuantity(balance.qty_on_hand) }} {{ balance.part?.unit?.name_ar || balance.part?.unit }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-start text-sm text-gray-600 dark:text-gray-300">
+                                <td class="px-4 py-3 text-start text-sm text-gray-600 dark:text-gray-300 align-middle">
                                     <span class="font-mono" dir="ltr">{{ formatQuantity(balance.min_stock || 0) }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white align-middle">
                                     <span class="font-mono" dir="ltr">{{ formatCurrency(balance.wac_cost) }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white align-middle">
                                     <span class="font-mono" dir="ltr">{{ formatCurrency(balance.sale_price) }}</span>
                                 </td>
-                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white">
+                                <td class="px-4 py-3 text-start text-sm text-gray-900 dark:text-white align-middle">
                                     <span class="font-mono" dir="ltr">{{ formatCurrency(balance.min_sale_price) }}</span>
                                 </td>
                             </tr>
                             <tr v-if="!balances.data.length">
-                                <td colspan="9" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="9" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('inventory.stock.empty') }}
                                 </td>
                             </tr>
@@ -349,24 +349,24 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">#</th>
-                        <th>{{ $t('inventory.parts.part_number') }}</th>
-                        <th>{{ $t('inventory.parts.name') }}</th>
-                        <th>{{ $t('inventory.parts.category') }}</th>
-                        <th>{{ $t('inventory.stock.available') }}</th>
-                        <th>{{ $t('inventory.stock.avg_cost') }}</th>
-                        <th>{{ $t('inventory.parts.price') }}</th>
+                        <th style="width: 40px;" class="align-middle text-center">#</th>
+                        <th class="align-middle text-center">{{ $t('inventory.parts.part_number') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.parts.name') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.parts.category') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.stock.available') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.stock.avg_cost') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.parts.price') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(balance, index) in balances.data" :key="balance.id">
-                        <td>{{ index + 1 }}</td>
-                        <td class="font-bold">{{ balance.part?.sku }}</td>
-                        <td>{{ balance.part?.name_ar }}</td>
-                        <td>{{ balance.part?.category?.name_ar || '-' }}</td>
-                        <td>{{ formatQuantity(balance.qty_on_hand) }} {{ balance.part?.unit?.name_ar || '' }}</td>
-                        <td>{{ formatCurrency(balance.wac_cost) }}</td>
-                        <td>{{ formatCurrency(balance.part?.default_sale_price) }}</td>
+                        <td class="align-middle">{{ index + 1 }}</td>
+                        <td class="font-bold align-middle">{{ balance.part?.sku }}</td>
+                        <td class="align-middle">{{ balance.part?.name_ar }}</td>
+                        <td class="align-middle">{{ balance.part?.category?.name_ar || '-' }}</td>
+                        <td class="align-middle">{{ formatQuantity(balance.qty_on_hand) }} {{ balance.part?.unit?.name_ar || '' }}</td>
+                        <td class="align-middle">{{ formatCurrency(balance.wac_cost) }}</td>
+                        <td class="align-middle">{{ formatCurrency(balance.part?.default_sale_price) }}</td>
                     </tr>
                 </tbody>
             </table>

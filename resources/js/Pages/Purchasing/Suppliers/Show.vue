@@ -368,21 +368,21 @@
                                 <table class="w-full text-sm">
                                     <thead>
                                         <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
-                                            <th class="py-3 px-4 text-center font-bold">#</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.date') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.discount') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.subtotal_after') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('common.vat') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.total') }}</th>
-                                            <th class="py-3 px-4 text-center font-bold">{{ $t('invoices.purchases.remaining') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">#</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('purchasing.invoices.code') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('purchasing.invoices.date') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.purchases.subtotal') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.purchases.discount') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.purchases.subtotal_after') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('common.vat') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.purchases.total') }}</th>
+                                            <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.purchases.remaining') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
                                         <tr v-for="(inv, index) in filteredInvoices" :key="inv.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                            <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono">{{ index + 1 }}</td>
-                                            <td class="py-4 px-4 text-center font-bold text-gray-700 dark:text-gray-300 font-mono">
+                                            <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono align-middle">{{ index + 1 }}</td>
+                                            <td class="py-4 px-4 text-center font-bold text-gray-700 dark:text-gray-300 font-mono align-middle">
                                                 <div class="flex items-center justify-center gap-2">
                                                     <Link :href="route('app.invoices.purchases.show', inv.id)" class="text-blue-600 dark:text-blue-400 hover:underline">
                                                         {{ inv.code || inv.invoice_number }}
@@ -395,13 +395,13 @@
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">{{ formatDate(inv.issue_date) }}</td>
-                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrency(inv.subtotal) }}</td>
-                                            <td class="py-4 px-4 text-center font-black text-red-600 dark:text-red-400 font-mono" dir="ltr">{{ formatCurrency(inv.discount_amount) }}</td>
-                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrency(Number(inv.subtotal) - Number(inv.discount_amount)) }}</td>
-                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrency(inv.tax_amount) }}</td>
-                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">{{ formatCurrency(inv.total) }}</td>
-                                            <td class="py-4 px-4 text-center font-black font-mono" :class="inv.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'" dir="ltr">{{ formatCurrency(inv.balance) }}</td>
+                                            <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono align-middle" dir="ltr">{{ formatDate(inv.issue_date) }}</td>
+                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">{{ formatCurrency(inv.subtotal) }}</td>
+                                            <td class="py-4 px-4 text-center font-black text-red-600 dark:text-red-400 font-mono align-middle" dir="ltr">{{ formatCurrency(inv.discount_amount) }}</td>
+                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">{{ formatCurrency(Number(inv.subtotal) - Number(inv.discount_amount)) }}</td>
+                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">{{ formatCurrency(inv.tax_amount) }}</td>
+                                            <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">{{ formatCurrency(inv.total) }}</td>
+                                            <td class="py-4 px-4 text-center font-black font-mono align-middle" :class="inv.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'" dir="ltr">{{ formatCurrency(inv.balance) }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -423,39 +423,39 @@
                             <table class="w-full text-sm">
                                 <thead>
                                     <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
-                                        <th class="py-3 px-4 text-center font-bold">#</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.method') }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.type') }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.date') }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('purchasing.invoices.code') }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.form.amount') }}</th>
-                                        <th class="py-3 px-4 text-center font-bold">{{ $t('payments.recorded_by') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">#</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('payments.form.method') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('payments.form.type') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('payments.form.date') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('purchasing.invoices.code') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('payments.form.amount') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('payments.recorded_by') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
                                     <tr v-for="(payment, index) in paymentsList" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                                        <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono">{{ index + 1 }}</td>
-                                        <td class="py-4 px-4 text-center font-bold text-gray-700 dark:text-gray-300">
+                                        <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono align-middle">{{ index + 1 }}</td>
+                                        <td class="py-4 px-4 text-center font-bold text-gray-700 dark:text-gray-300 align-middle">
                                             {{ $t(`payments.methods.${payment.payment_method}`) || payment.payment_method }}
                                         </td>
-                                        <td class="py-4 px-4 text-center font-bold">
+                                        <td class="py-4 px-4 text-center font-bold align-middle">
                                             <span :class="payment.type === 'refund' ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs font-bold">
                                                 {{ payment.type === 'refund' ? ($t('payments.types.refund')) : ($t('payments.types.payment')) }}
                                             </span>
                                         </td>
-                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono" dir="ltr">
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono align-middle" dir="ltr">
                                             {{ formatDate(payment.payment_date) }}
                                         </td>
-                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-400 font-mono">
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-400 font-mono align-middle">
                                             <Link v-if="payment.purchase_invoice" :href="route('app.invoices.purchases.show', payment.purchase_invoice.id)" class="text-blue-600 dark:text-blue-400 hover:underline">
                                                 {{ payment.purchase_invoice.code || payment.purchase_invoice.invoice_number }}
                                             </Link>
                                             <span v-else>—</span>
                                         </td>
-                                        <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono" dir="ltr">
+                                        <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">
                                             {{ formatCurrency(payment.amount) }}
                                         </td>
-                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-semibold">
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-semibold align-middle">
                                             {{ payment.received_by?.name || '—' }}
                                         </td>
                                     </tr>

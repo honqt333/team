@@ -297,24 +297,24 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.invoice_total') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.paid') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.columns.balance') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.status') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('work_orders.invoice_total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('work_orders.columns.paid') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('work_orders.columns.balance') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="order in filteredWorkOrders" :key="order.id" @click="router.visit(route('work-orders.show', order.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 text-center font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">{{ toEnglish(order.code) }}</td>
-                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        <td class="px-4 py-3 text-center font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap align-middle">{{ toEnglish(order.code) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
                                             <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ formatCurrency(order.total || 0) }}</td>
-                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap">{{ formatCurrency(order.total_paid || 0) }}</td>
-                                        <td class="px-4 py-3 text-center font-bold whitespace-nowrap" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">{{ formatCurrency(order.balance || 0) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(order.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap align-middle">{{ formatCurrency(order.total || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap align-middle">{{ formatCurrency(order.total_paid || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-bold whitespace-nowrap align-middle" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">{{ formatCurrency(order.balance || 0) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap align-middle">{{ formatDate(order.created_at) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -396,24 +396,24 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.code') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.status') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('work_orders.price') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.vat') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.status') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('work_orders.price') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.vat') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">{{ $t('common.date') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="quote in filteredQuotes" :key="quote.id" @click="router.visit(route('app.quotes.show', quote.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ toEnglish(quote.code) }}</td>
-                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap align-middle">{{ toEnglish(quote.code) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
                                             <span :class="getQuoteStatusClass(quote.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`quotes.status.${quote.status}`) }}</span>
                                         </td>
-                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ formatCurrency(quote.total_excl_tax || 0) }}</td>
-                                        <td class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ formatCurrency(quote.total_tax || 0) }}</td>
-                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">{{ formatCurrency(quote.total || 0) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ formatDate(quote.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap align-middle">{{ formatCurrency(quote.total_excl_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap align-middle">{{ formatCurrency(quote.total_tax || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap align-middle">{{ formatCurrency(quote.total || 0) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap align-middle">{{ formatDate(quote.created_at) }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -455,22 +455,22 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.item.tab_service') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.columns.code') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.status') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('work_orders.item.tab_service') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('work_orders.columns.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.unit_price') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="item in services" :key="item.id" @click="router.visit(route('work-orders.show', item.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white">{{ isRtl ? item.name_ar : item.name_en }}</td>
-                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold">{{ toEnglish(item.work_order_code) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">{{ formatDate(item.created_at) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ formatCurrency(item.price) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black">{{ formatCurrency(item.total) }}</td>
-                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white align-middle">{{ isRtl ? item.name_ar : item.name_en }}</td>
+                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold align-middle">{{ toEnglish(item.work_order_code) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm align-middle">{{ formatDate(item.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ formatCurrency(item.price) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black align-middle">{{ formatCurrency(item.total) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
                                             <span :class="getStatusClass(item.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">
                                                 {{ $t(`work_orders.status.${item.status}`) || item.status }}
                                             </span>
@@ -493,32 +493,32 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.name') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.part_number') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('work_orders.columns.code') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.parts.source') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.qty') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.unit_price') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.total') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.status') }}</th>
+                                        <th class="px-4 py-3 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('inventory.parts.name') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('inventory.parts.part_number') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('work_orders.columns.code') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('inventory.parts.source') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.qty') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.unit_price') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.total') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="part in parts" :key="part.id" @click="router.visit(route('work-orders.show', part.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white">{{ part.name }}</td>
-                                        <td class="px-4 py-3 text-center font-mono text-xs text-gray-600 dark:text-gray-400 font-semibold">{{ toEnglish(part.part_number) || '-' }}</td>
-                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold">{{ toEnglish(part.work_order_code) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm">{{ formatDate(part.created_at) }}</td>
-                                        <td class="px-4 py-3 text-center text-xs font-bold">
+                                        <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white align-middle">{{ part.name }}</td>
+                                        <td class="px-4 py-3 text-center font-mono text-xs text-gray-600 dark:text-gray-400 font-semibold align-middle">{{ toEnglish(part.part_number) || '-' }}</td>
+                                        <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold align-middle">{{ toEnglish(part.work_order_code) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm align-middle">{{ formatDate(part.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center text-xs font-bold align-middle">
                                             <span class="px-2 py-0.5 rounded-full" :class="part.source === 'warehouse' ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30' : part.source === 'external' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' : 'bg-teal-100 text-teal-700 dark:bg-teal-900/30'">
                                                 {{ part.source === 'warehouse' ? $t('work_orders.item.part_source.warehouse') : part.source === 'external' ? $t('work_orders.item.part_source.external') : $t('work_orders.item.part_source.customer') }}
                                             </span>
                                         </td>
-                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ toEnglish(part.qty) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold">{{ formatCurrency(part.price) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black">{{ formatCurrency(part.total) }}</td>
-                                        <td class="px-4 py-3 text-center whitespace-nowrap">
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ toEnglish(part.qty) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ formatCurrency(part.price) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black align-middle">{{ formatCurrency(part.total) }}</td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
                                             <span class="px-2 py-0.5 text-xs font-semibold rounded-full" :class="part.status === 'issued' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : part.status === 'reversed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' : 'bg-gray-100 text-gray-700 dark:bg-gray-700'">
                                                 {{ part.status === 'issued' ? $t('inventory.parts.statuses.issued') : part.status === 'reversed' ? $t('inventory.parts.statuses.reversed') : part.status === 'cancelled' ? $t('common.status_cancelled') : $t('inventory.parts.statuses.pending') }}
                                             </span>
@@ -577,19 +577,19 @@
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.date') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.value') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('vehicles.mileage.difference') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.source') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.user') }}</th>
-                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12"></th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.date') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('vehicles.mileage.value') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('vehicles.mileage.difference') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.source') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.user') }}</th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12 align-middle"></th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     <tr v-for="(log, idx) in vehicle.mileage_logs" :key="log.id">
-                                        <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-400 text-sm font-bold">{{ formatDate(log.recorded_at || log.created_at) }}</td>
-                                        <td class="px-4 py-3 text-center font-black text-gray-900 dark:text-white">{{ toEnglish(log.mileage?.toLocaleString()) }} {{ $t('common.km') }}</td>
-                                        <td class="px-4 py-3 text-center">
+                                        <td class="px-4 py-3 text-center text-gray-600 dark:text-gray-400 text-sm font-bold align-middle">{{ formatDate(log.recorded_at || log.created_at) }}</td>
+                                        <td class="px-4 py-3 text-center font-black text-gray-900 dark:text-white align-middle">{{ toEnglish(log.mileage?.toLocaleString()) }} {{ $t('common.km') }}</td>
+                                        <td class="px-4 py-3 text-center align-middle">
                                             <span v-if="log.difference > 0" class="text-sm font-black text-emerald-600">
                                                 +{{ toEnglish(log.difference.toLocaleString()) }}
                                             </span>
@@ -598,13 +598,13 @@
                                             </span>
                                             <span v-else class="text-xs text-gray-400 italic font-bold">-</span>
                                         </td>
-                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500">
+                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500 align-middle">
                                             {{ toEnglish(log.reference_code) || $t('common.manual_update') }}
                                         </td>
-                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500">
+                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500 align-middle">
                                             {{ log.creator?.name || $t('common.system') }}
                                         </td>
-                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500 w-12">
+                                        <td class="px-4 py-3 text-center text-xs font-bold text-gray-500 w-12 align-middle">
                                             <button @click.stop="deleteMileageLog(log)" class="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

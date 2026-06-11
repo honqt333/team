@@ -24,23 +24,34 @@ const form = useForm({
     is_active: true,
 });
 
+const centerTypeOptions = [
+    { value: 'main', key: 'center_type_main' },
+    { value: 'branch', key: 'center_type_branch' },
+    { value: 'workshop', key: 'center_type_workshop' },
+    { value: 'warehouse', key: 'center_type_warehouse' },
+];
+
+const close = () => {
+    form.clearErrors();
+    form.reset();
+    emit('close');
+};
 
 const submit = () => {
     form.post(route('settings.branches.store'), {
         onSuccess: () => {
             success(t('company_profile.branches.created_successfully'));
-            emit('close');
             emit('saved');
-            form.reset();
+            close();
         },
         onError: () => error(t('common.error_occurred')),
-        preserveScroll: true
+        preserveScroll: true,
     });
 };
 </script>
 
 <template>
-    <BaseModal :show="show" @close="$emit('close')" size="lg">
+    <BaseModal :show="show" @close="close" size="lg">
         <template #title>
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
@@ -68,7 +79,7 @@ const submit = () => {
                     required
                     :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
                         form.errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                    :placeholder="t('company_profile.branches.name')"
+                    :placeholder="t('company_profile.branches.name_placeholder')"
                 />
                 <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name }}</p>
             </div>
@@ -77,31 +88,29 @@ const submit = () => {
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        الاسم بالعربية <span class="text-red-500">*</span>
+                        {{ t('company_profile.branches.name_ar') }}
                     </label>
                     <input
                         v-model="form.name_ar"
                         type="text"
-                        required
                         dir="rtl"
                         :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
                             form.errors.name_ar ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                        placeholder="الاسم بالعربية"
+                        :placeholder="t('company_profile.branches.name_ar_placeholder')"
                     />
                     <p v-if="form.errors.name_ar" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_ar }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        الاسم بالإنجليزية <span class="text-red-500">*</span>
+                        {{ t('company_profile.branches.name_en') }}
                     </label>
                     <input
                         v-model="form.name_en"
                         type="text"
-                        required
                         dir="ltr"
                         :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
                             form.errors.name_en ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                        placeholder="Branch Name in English"
+                        :placeholder="t('company_profile.branches.name_en_placeholder')"
                     />
                     <p v-if="form.errors.name_en" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name_en }}</p>
                 </div>
@@ -119,10 +128,9 @@ const submit = () => {
                         form.errors.center_type ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
                 >
                     <option value="">{{ t('common.select') }}</option>
-                    <option value="main">الفرع الرئيسي / Main Branch</option>
-                    <option value="branch">فرع فرعي / Sub Branch</option>
-                    <option value="workshop">ورشة / Workshop</option>
-                    <option value="warehouse">مستودع / Warehouse</option>
+                    <option v-for="opt in centerTypeOptions" :key="opt.value" :value="opt.value">
+                        {{ t(`company_profile.branches.${opt.key}`) }}
+                    </option>
                 </select>
                 <p v-if="form.errors.center_type" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.center_type }}</p>
             </div>
@@ -136,8 +144,10 @@ const submit = () => {
                     <input
                         v-model="form.manager_name"
                         type="text"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                            form.errors.manager_name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
                     />
+                    <p v-if="form.errors.manager_name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.manager_name }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -147,8 +157,10 @@ const submit = () => {
                         v-model="form.phone"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                            form.errors.phone ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
                     />
+                    <p v-if="form.errors.phone" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.phone }}</p>
                 </div>
             </div>
 
@@ -161,7 +173,8 @@ const submit = () => {
                     v-model="form.email"
                     type="email"
                     dir="ltr"
-                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                    :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
+                        form.errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
                 />
                 <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.email }}</p>
             </div>
@@ -170,12 +183,13 @@ const submit = () => {
             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
                 <div>
                     <p class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('common.active') }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">تفعيل الفرع لبدء العمل عليه</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ t('company_profile.branches.active_help') }}</p>
                 </div>
                 <button
                     type="button"
                     @click="form.is_active = !form.is_active"
-                    :class="['relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none',
+                    :aria-pressed="form.is_active"
+                    :class="['relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
                         form.is_active ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700']"
                 >
                     <span :class="['inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm',
@@ -185,7 +199,7 @@ const submit = () => {
         </form>
 
         <template #footer>
-            <button type="button" @click="$emit('close')"
+            <button type="button" @click="close"
                 class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium transition-colors">
                 {{ t('common.cancel') }}
             </button>

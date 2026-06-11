@@ -151,13 +151,13 @@ const toggleUserActive = (user) => {
                         <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3">{{ t('users.name', 'Name') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ t('users.email', 'Email') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ t('users.branches', 'Branches') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ t('users.role', 'Role') }}</th>
-                                    <th scope="col" class="px-6 py-3">{{ t('users.employee', 'Employee') }}</th>
-                                    <th scope="col" class="px-6 py-3 text-center">{{ t('users.status', 'Status') }}</th>
-                                    <th scope="col" class="px-6 py-3 text-center">{{ t('common.actions', 'Actions') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.name', 'Name') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.email', 'Email') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.branches', 'Branches') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.role', 'Role') }}</th>
+                                    <th scope="col" class="px-6 py-3 align-middle text-center">{{ t('users.employee', 'Employee') }}</th>
+                                    <th scope="col" class="px-6 py-3 text-center align-middle">{{ t('users.status', 'Status') }}</th>
+                                    <th scope="col" class="px-6 py-3 text-center align-middle">{{ t('common.actions', 'Actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -166,7 +166,7 @@ const toggleUserActive = (user) => {
                                     :key="user.id" 
                                     class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
                                 >
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <div class="flex items-center gap-3">
                                             <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/50 flex items-center justify-center text-violet-600 dark:text-violet-400 font-bold text-xs uppercase">
                                                 {{ user.name.charAt(0) }}
@@ -174,8 +174,8 @@ const toggleUserActive = (user) => {
                                             <span class="font-medium text-gray-900 dark:text-white">{{ user.name }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300">{{ user.email }}</td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 text-gray-600 dark:text-gray-300 align-middle">{{ user.email }}</td>
+                                    <td class="px-6 py-4 align-middle">
                                         <div class="flex flex-wrap gap-1">
                                             <span 
                                                 v-for="center in user.centers" 
@@ -186,19 +186,19 @@ const toggleUserActive = (user) => {
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <span v-if="user.roles && user.roles.length > 0" class="px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
                                             {{ getRoleLabel(user) }}
                                         </span>
                                         <span v-else class="text-gray-400 text-xs italic">-</span>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <span v-if="user.employee" class="text-emerald-600 dark:text-emerald-400 text-xs font-medium px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/30">
                                             {{ user.employee.name_ar || user.employee.name_en }}
                                         </span>
                                         <span v-else class="text-gray-400 text-xs italic">{{ t('users.no_employee', '-') }}</span>
                                     </td>
-                                    <td class="px-6 py-4 text-center">
+                                    <td class="px-6 py-4 text-center align-middle">
                                         <button 
                                             v-if="can('users.update') && user.id !== $page.props.auth.user.id"
                                             @click="toggleUserActive(user)"
@@ -217,7 +217,7 @@ const toggleUserActive = (user) => {
                                             {{ user.is_active ? t('users.active', 'Active') : t('users.inactive', 'Inactive') }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 align-middle">
                                         <div class="flex items-center justify-center gap-2">
                                             <button 
                                                 v-if="can('users.update')"
@@ -243,7 +243,7 @@ const toggleUserActive = (user) => {
                                     </td>
                                 </tr>
                                 <tr v-if="users.data.length === 0">
-                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                         <div class="flex flex-col items-center justify-center">
                                             <svg class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />

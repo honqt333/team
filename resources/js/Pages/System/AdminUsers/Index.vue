@@ -39,16 +39,16 @@
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">المستخدم</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">الدور</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">الحالة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">آخر دخول</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500">الإجراءات</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">المستخدم</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">الدور</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">الحالة</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">آخر دخول</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 align-middle">الإجراءات</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                         <tr v-for="admin in admins.data" :key="admin.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 font-bold">
                                         {{ admin.name?.charAt(0) }}
@@ -59,20 +59,20 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="getRoleClass(admin.role)" class="px-2 py-1 rounded-full text-xs">
                                     {{ getRoleLabel(admin.role) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <span :class="admin.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'" class="px-2 py-1 rounded-full text-xs">
                                     {{ admin.is_active ? 'نشط' : 'معطّل' }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-gray-500 text-sm">
+                            <td class="px-4 py-3 text-gray-500 text-sm align-middle">
                                 {{ admin.last_login_at ? formatDate(admin.last_login_at) : 'لم يسجل دخوله' }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 align-middle">
                                 <div class="flex gap-2">
                                     <button @click="openEditModal(admin)" class="text-indigo-600 hover:text-indigo-800 text-sm">تعديل</button>
                                     <button @click="deleteAdmin(admin)" class="text-red-600 hover:text-red-800 text-sm">حذف</button>
@@ -80,7 +80,7 @@
                             </td>
                         </tr>
                         <tr v-if="!admins.data?.length">
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">لا يوجد مستخدمين</td>
+                            <td colspan="5" class="px-4 py-8 text-center text-gray-500 align-middle">لا يوجد مستخدمين</td>
                         </tr>
                     </tbody>
                 </table>

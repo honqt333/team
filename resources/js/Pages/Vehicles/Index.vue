@@ -248,22 +248,22 @@
                     <table class="min-w-full">
                         <thead>
                             <tr class="bg-gray-50 dark:bg-gray-900/50">
-                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('vehicles.form.plate') }}
                                 </th>
-                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('vehicles.form.make') }}
                                 </th>
-                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('vehicles.form.model') }}
                                 </th>
-                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('vehicles.form.year') }}
                                 </th>
-                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('vehicles.form.customer') }}
                                 </th>
-                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                <th class="px-5 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
                                     {{ $t('customers.form.phone') }}
                                 </th>
                             </tr>
@@ -275,24 +275,24 @@
                                 @click="visitShowPage(vehicle)"
                                 class="hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
                             >
-                                <td class="px-5 py-4 text-center">
+                                <td class="px-5 py-4 text-center align-middle">
                                     <div class="flex justify-center">
                                         <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
                                     </div>
                                 </td>
-                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300">
+                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300 align-middle">
                                     {{ vehicle.display_make || $t('common.na') }}
                                 </td>
-                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300">
+                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300 align-middle">
                                     {{ vehicle.display_model || $t('common.na') }}
                                 </td>
-                                <td class="px-5 py-4 text-center text-gray-500 dark:text-gray-400">
+                                <td class="px-5 py-4 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ toEnglish(vehicle.year) || $t('common.na') }}
                                 </td>
-                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300">
+                                <td class="px-5 py-4 text-center text-gray-700 dark:text-gray-300 align-middle">
                                     {{ vehicle.customer?.name }}
                                 </td>
-                                <td class="px-5 py-4 text-center text-gray-500 dark:text-gray-400" dir="ltr">
+                                <td class="px-5 py-4 text-center text-gray-500 dark:text-gray-400 align-middle" dir="ltr">
                                     {{ toEnglish(vehicle.customer?.phone) }}
                                 </td>
                             </tr>
@@ -337,30 +337,30 @@
                 <table class="print-table">
                     <thead>
                         <tr>
-                            <th style="width: 40px;">#</th>
-                            <th>{{ $t('vehicles.form.plate') }}</th>
-                            <th>{{ $t('vehicles.form.make') }}</th>
-                            <th>{{ $t('vehicles.form.model') }}</th>
-                            <th>{{ $t('vehicles.form.year') }}</th>
-                            <th>{{ $t('vehicles.form.customer') }}</th>
-                            <th>{{ $t('customers.columns.contact_name') }}</th>
-                            <th>{{ $t('customers.form.phone') }}</th>
+                            <th style="width: 40px;" class="align-middle text-center">#</th>
+                            <th class="align-middle text-center">{{ $t('vehicles.form.plate') }}</th>
+                            <th class="align-middle text-center">{{ $t('vehicles.form.make') }}</th>
+                            <th class="align-middle text-center">{{ $t('vehicles.form.model') }}</th>
+                            <th class="align-middle text-center">{{ $t('vehicles.form.year') }}</th>
+                            <th class="align-middle text-center">{{ $t('vehicles.form.customer') }}</th>
+                            <th class="align-middle text-center">{{ $t('customers.columns.contact_name') }}</th>
+                            <th class="align-middle text-center">{{ $t('customers.form.phone') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(vehicle, index) in allVehicles" :key="vehicle.id">
-                            <td>{{ index + 1 }}</td>
-                            <td>
+                            <td class="align-middle">{{ index + 1 }}</td>
+                            <td class="align-middle">
                                 <div class="flex justify-center">
                                     <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="sm" />
                                 </div>
                             </td>
-                            <td>{{ vehicle.display_make || '-' }}</td>
-                            <td>{{ vehicle.display_model || '-' }}</td>
-                            <td>{{ toEnglish(vehicle.year) || '-' }}</td>
-                            <td>{{ vehicle.customer?.name || '-' }}</td>
-                            <td>{{ vehicle.customer?.contact_name || '-' }}</td>
-                            <td dir="ltr">{{ toEnglish(vehicle.customer?.phone) || '-' }}</td>
+                            <td class="align-middle">{{ vehicle.display_make || '-' }}</td>
+                            <td class="align-middle">{{ vehicle.display_model || '-' }}</td>
+                            <td class="align-middle">{{ toEnglish(vehicle.year) || '-' }}</td>
+                            <td class="align-middle">{{ vehicle.customer?.name || '-' }}</td>
+                            <td class="align-middle">{{ vehicle.customer?.contact_name || '-' }}</td>
+                            <td dir="ltr" class="align-middle">{{ toEnglish(vehicle.customer?.phone) || '-' }}</td>
                         </tr>
                     </tbody>
                 </table>

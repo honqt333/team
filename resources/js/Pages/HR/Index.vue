@@ -123,13 +123,13 @@
                     <table class="w-full text-sm">
                         <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                             <tr v-for="emp in recentEmployees" :key="emp.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-700/30 transition-colors">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <div class="flex flex-col">
                                         <span class="font-bold text-gray-900 dark:text-white">{{ isRtl ? emp.name_ar : emp.name_en }}</span>
                                         <span class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mt-0.5">{{ emp.employee_id || '#EMP-' + emp.id }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-end">
+                                <td class="px-6 py-4 text-end align-middle">
                                     <span class="inline-flex px-2 py-0.5 rounded-md text-[10px] font-black bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 uppercase tracking-widest border border-gray-200 dark:border-gray-600">
                                         {{ emp.job_title?.name_ar || '-' }}
                                     </span>

@@ -43,38 +43,38 @@
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">#</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">المستأجر</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">التواصل</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">المراكز</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">المستخدمين</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">الحالة</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">التسجيل</th>
-                                <th class="px-6 py-4"></th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">#</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">المستأجر</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">التواصل</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">المراكز</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">المستخدمين</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">الحالة</th>
+                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">التسجيل</th>
+                                <th class="px-6 py-4 align-middle text-center"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr v-for="tenant in tenants.data" :key="tenant.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ tenant.id }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">{{ tenant.id }}</td>
+                                <td class="px-6 py-4 align-middle">
                                     <div class="font-medium text-gray-900 dark:text-white">{{ tenant.trade_name || tenant.name }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ tenant.legal_name }}</div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 align-middle">
                                     <div class="text-sm text-gray-900 dark:text-white" dir="ltr">{{ tenant.phone }}</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ tenant.email }}</div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ tenant.centers_count }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white">{{ tenant.users_count }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle">{{ tenant.centers_count }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle">{{ tenant.users_count }}</td>
+                                <td class="px-6 py-4 align-middle">
                                     <span :class="getStatusClass(tenant.status)" class="px-2.5 py-1 rounded-full text-xs font-medium">
                                         {{ getStatusLabel(tenant.status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">
                                     {{ formatDate(tenant.created_at) }}
                                 </td>
-                                <td class="px-6 py-4 text-end">
+                                <td class="px-6 py-4 text-end align-middle">
                                     <Link :href="`/system/tenants/${tenant.id}`" class="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
                                         عرض
                                     </Link>

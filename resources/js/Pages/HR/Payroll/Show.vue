@@ -77,37 +77,37 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-4 py-3 text-start font-medium text-gray-600 dark:text-gray-300">{{ $t('common.employee') }}</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.base_salary') }}</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.allowances') }}</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.deductions') }}</th>
-                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300">{{ $t('hr.payroll.gosi') }}</th>
-                                <th class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400">{{ $t('hr.payroll.net_salary') }}</th>
-                                <th class="px-4 py-3 text-end font-medium text-gray-600 dark:text-gray-300 w-16" v-if="payrollRun.status === 'draft'"></th>
+                                <th class="px-4 py-3 text-start font-medium text-gray-600 dark:text-gray-300 align-middle text-center">{{ $t('common.employee') }}</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('hr.payroll.base_salary') }}</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('hr.payroll.allowances') }}</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('hr.payroll.deductions') }}</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300 align-middle">{{ $t('hr.payroll.gosi') }}</th>
+                                <th class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 align-middle">{{ $t('hr.payroll.net_salary') }}</th>
+                                <th class="px-4 py-3 text-end font-medium text-gray-600 dark:text-gray-300 w-16 align-middle text-center" v-if="payrollRun.status === 'draft'"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                             <tr v-for="item in payrollRun.items" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 group">
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 align-middle">
                                     <div class="font-bold text-gray-900 dark:text-white">{{ item.employee?.name_ar }}</div>
                                     <div class="text-xs text-gray-500">{{ item.employee?.job_title?.name_ar }}</div>
                                 </td>
-                                <td class="px-4 py-3 text-center font-mono">{{ formatCurrency(item.base_salary) }}</td>
-                                <td class="px-4 py-3 text-center font-mono text-emerald-600">
+                                <td class="px-4 py-3 text-center font-mono align-middle">{{ formatCurrency(item.base_salary) }}</td>
+                                <td class="px-4 py-3 text-center font-mono text-emerald-600 align-middle">
                                     +{{ formatCurrency(item.total_allowances) }}
                                     <div v-if="item.allowances_breakdown?.other > 0" class="text-[10px] text-gray-400">
                                         {{ $t('hr.financial.other_payments.title') }}: {{ formatCurrency(item.allowances_breakdown.other) }}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-center font-mono text-red-600">
+                                <td class="px-4 py-3 text-center font-mono text-red-600 align-middle">
                                     -{{ formatCurrency(item.total_deductions) }}
                                     <div v-if="item.deductions_breakdown?.other > 0" class="text-[10px] text-gray-400">
                                         {{ $t('hr.financial.other_payments.title') }}: {{ formatCurrency(item.deductions_breakdown.other) }}
                                     </div>
                                 </td>
-                                <td class="px-4 py-3 text-center font-mono text-orange-600">-{{ formatCurrency(item.gosi_amount) }}</td>
-                                <td class="px-4 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400">{{ formatCurrency(item.net_salary) }}</td>
-                                <td class="px-4 py-3 text-end" v-if="payrollRun.status === 'draft'">
+                                <td class="px-4 py-3 text-center font-mono text-orange-600 align-middle">-{{ formatCurrency(item.gosi_amount) }}</td>
+                                <td class="px-4 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400 align-middle">{{ formatCurrency(item.net_salary) }}</td>
+                                <td class="px-4 py-3 text-end align-middle" v-if="payrollRun.status === 'draft'">
                                     <button @click="deleteItem(item)" class="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

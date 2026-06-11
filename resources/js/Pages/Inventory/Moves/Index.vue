@@ -137,7 +137,7 @@
                     <table class="w-full" dir="rtl">
                         <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('id')">
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle" @click="sortBy('id')">
                                     <div class="flex items-center justify-center gap-1">
                                         {{ $t('inventory.moves.columns.row_number') }}
                                         <div class="flex flex-col">
@@ -147,7 +147,7 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('sku')">
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle text-center" @click="sortBy('sku')">
                                     <div class="flex items-center gap-1">
                                         {{ $t('inventory.moves.columns.part') }}
                                         <div class="flex flex-col">
@@ -157,9 +157,9 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.action') }}</th>
-                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.details') }}</th>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('balance_after')">
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('inventory.moves.columns.action') }}</th>
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">{{ $t('inventory.moves.columns.details') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle" @click="sortBy('balance_after')">
                                     <div class="flex items-center justify-center gap-1">
                                         {{ $t('inventory.moves.columns.stock_before') }}
                                         <div class="flex flex-col">
@@ -169,7 +169,7 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('qty')">
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle" @click="sortBy('qty')">
                                     <div class="flex items-center justify-center gap-1">
                                         {{ $t('inventory.moves.columns.qty') }}
                                         <div class="flex flex-col">
@@ -179,8 +179,8 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.stock_after') }}</th>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('unit_cost')">
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('inventory.moves.columns.stock_after') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle" @click="sortBy('unit_cost')">
                                     <div class="flex items-center justify-center gap-1">
                                         {{ $t('inventory.moves.columns.cost_price') }}
                                         <div class="flex flex-col">
@@ -190,8 +190,8 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('inventory.moves.columns.wac') }}</th>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('total_cost')">
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('inventory.moves.columns.wac') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle" @click="sortBy('total_cost')">
                                     <div class="flex items-center justify-center gap-1">
                                         {{ $t('inventory.moves.columns.cost_amount') }}
                                         <div class="flex flex-col">
@@ -201,7 +201,7 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group" @click="sortBy('posted_at')">
+                                <th class="px-4 py-4 text-start text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer group align-middle text-center" @click="sortBy('posted_at')">
                                     <div class="flex items-center gap-1">
                                         {{ $t('inventory.moves.columns.updated_at') }}
                                         <div class="flex flex-col">
@@ -211,7 +211,7 @@
                                         </div>
                                     </div>
                                 </th>
-                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ $t('common.actions') }}</th>
+                                <th class="px-4 py-4 text-center text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">{{ $t('common.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -220,10 +220,10 @@
                                 move.reversed_at ? 'opacity-50 line-through' : ''
                             ]">
                                 <!-- # -->
-                                <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400">{{ (moves.current_page - 1) * moves.per_page + index + 1 }}</td>
+                                <td class="px-4 py-4 text-center text-sm text-gray-500 dark:text-gray-400 align-middle">{{ (moves.current_page - 1) * moves.per_page + index + 1 }}</td>
                                 
                                 <!-- Part -->
-                                <td class="px-4 py-4 text-start">
+                                <td class="px-4 py-4 text-start align-middle">
                                     <Link :href="route('app.inventory.parts.show', move.part_id)" class="group/part">
                                         <div class="text-sm font-bold text-blue-600 dark:text-blue-400 group-hover/part:text-blue-700 dark:group-hover/part:text-blue-300 group-hover/part:underline transition-all">{{ move.part?.name_ar }}</div>
                                         <div class="text-xs text-gray-500 dark:text-gray-400 font-mono" dir="ltr">{{ move.part?.sku }}</div>
@@ -231,24 +231,24 @@
                                 </td>
                                 
                                 <!-- Action/Type -->
-                                <td class="px-4 py-4 text-start">
+                                <td class="px-4 py-4 text-start align-middle">
                                     <span :class="getMoveTypeBadgeClass(move.move_type)">
                                         {{ getMoveTypeLabel(move.move_type) }}
                                     </span>
                                 </td>
                                 
                                 <!-- Details/Notes -->
-                                <td class="px-4 py-4 text-start text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate" :title="move.notes">
+                                <td class="px-4 py-4 text-start text-sm text-gray-600 dark:text-gray-300 max-w-[200px] truncate align-middle" :title="move.notes">
                                     {{ move.notes || '-' }}
                                 </td>
                                 
                                 <!-- Stock Before -->
-                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono align-middle">
                                     {{ calculateStockBefore(move) }}
                                 </td>
                                 
                                  <!-- Quantity -->
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <span :class="[
                                         'font-mono text-sm font-medium',
                                         move.qty > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
@@ -258,32 +258,32 @@
                                 </td>
                                 
                                 <!-- Stock After -->
-                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono align-middle">
                                     {{ Number(move.balance_after).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 3 }) }}
                                 </td>
                                 
                                 <!-- Cost Price (Unit Cost) -->
-                                <td class="px-4 py-4 text-center text-sm text-gray-900 dark:text-white font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-900 dark:text-white font-mono align-middle">
                                     {{ formatCurrency(move.unit_cost) }}
                                 </td>
                                 
                                 <!-- WAC (Weighted Average Cost) -->
-                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-600 dark:text-gray-300 font-mono align-middle">
                                     {{ formatCurrency(move.wac_after) }}
                                 </td>
                                 
                                 <!-- Cost Amount (Total Cost) -->
-                                <td class="px-4 py-4 text-center text-sm text-gray-900 dark:text-white font-mono">
+                                <td class="px-4 py-4 text-center text-sm text-gray-900 dark:text-white font-mono align-middle">
                                     {{ formatCurrency(move.total_cost) }}
                                 </td>
                                 
                                 <!-- Updated At -->
-                                <td class="px-4 py-4 text-start text-sm text-gray-600 dark:text-gray-300" dir="ltr">
+                                <td class="px-4 py-4 text-start text-sm text-gray-600 dark:text-gray-300 align-middle" dir="ltr">
                                     {{ formatDate(move.posted_at) }}
                                 </td>
                                 
                                 <!-- Actions -->
-                                <td class="px-4 py-4 text-center">
+                                <td class="px-4 py-4 text-center align-middle">
                                     <button
                                         v-if="canReverse(move)"
                                         @click="reverseMove(move)"
@@ -300,7 +300,7 @@
                                 </td>
                             </tr>
                             <tr v-if="!moves.data.length">
-                                <td colspan="12" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <td colspan="12" class="px-4 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
                                     {{ $t('inventory.moves.empty') }}
                                 </td>
                             </tr>
@@ -363,29 +363,29 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 40px;">#</th>
-                        <th>{{ $t('inventory.moves.columns.part') }}</th>
-                        <th>{{ $t('inventory.moves.columns.action') }}</th>
-                        <th>{{ $t('inventory.moves.columns.qty') }}</th>
-                        <th>{{ $t('inventory.moves.columns.stock_after') }}</th>
-                        <th>{{ $t('inventory.moves.columns.cost_price') }}</th>
-                        <th>{{ $t('inventory.moves.columns.updated_at') }}</th>
+                        <th style="width: 40px;" class="align-middle text-center">#</th>
+                        <th class="align-middle text-center">{{ $t('inventory.moves.columns.part') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.moves.columns.action') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.moves.columns.qty') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.moves.columns.stock_after') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.moves.columns.cost_price') }}</th>
+                        <th class="align-middle text-center">{{ $t('inventory.moves.columns.updated_at') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(move, index) in moves.data" :key="move.id">
-                        <td>{{ index + 1 }}</td>
-                        <td class="font-bold">
+                        <td class="align-middle">{{ index + 1 }}</td>
+                        <td class="font-bold align-middle">
                             {{ move.part?.name_ar }}<br/>
                             <small class="text-gray-500">{{ move.part?.sku }}</small>
                         </td>
-                        <td>{{ getMoveTypeLabel(move.move_type) }}</td>
-                        <td dir="ltr" :class="move.qty > 0 ? 'text-green-600' : 'text-red-600'">
+                        <td class="align-middle">{{ getMoveTypeLabel(move.move_type) }}</td>
+                        <td dir="ltr" :class="move.qty > 0 ? 'text-green-600' : 'text-red-600'" class="align-middle">
                             {{ move.qty > 0 ? '+' : '' }}{{ formatQuantity(move.qty) }}
                         </td>
-                        <td>{{ formatQuantity(move.balance_after) }}</td>
-                        <td>{{ formatCurrency(move.unit_cost) }}</td>
-                        <td dir="ltr" class="text-[10px]">{{ formatDate(move.posted_at) }}</td>
+                        <td class="align-middle">{{ formatQuantity(move.balance_after) }}</td>
+                        <td class="align-middle">{{ formatCurrency(move.unit_cost) }}</td>
+                        <td dir="ltr" class="text-[10px] align-middle">{{ formatDate(move.posted_at) }}</td>
                     </tr>
                 </tbody>
             </table>
