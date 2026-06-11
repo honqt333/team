@@ -654,6 +654,21 @@ watch(() => props.vehicle, (val) => {
     }
 }, { immediate: true });
 
+// Watch for selectedVehicle to load customer relationship from props.customers if missing
+watch(selectedVehicle, (val) => {
+    if (!val) return;
+
+    if (!val.customer && val.customer_id && props.customers) {
+        const customerData = props.customers.find(c => c.id === val.customer_id);
+        if (customerData) {
+            selectedVehicle.value = {
+                ...val,
+                customer: customerData
+            };
+        }
+    }
+}, { immediate: true });
+
 const showOdometerWarning = computed(() => {
     if (!selectedVehicle.value || !form.odometer || lastVehicleOdometer.value <= 0) return false;
     return Number(form.odometer) < lastVehicleOdometer.value;

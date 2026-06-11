@@ -85,7 +85,7 @@ const mappedPrintData = computed(() => {
 
     const services = (props.quote.lines || []).map(line => ({
         service_name: line.service?.name || line.description || '—',
-        description: '',
+        description: (line.service && line.description !== line.service.name) ? line.description : '',
         qty: Number(line.qty || 1),
         unit_price: Number(line.unit_price || 0),
         discount: Number(line.discount_amount || 0),

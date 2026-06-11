@@ -131,4 +131,48 @@ class CustomersCrudTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['contact_name']);
     }
+
+    public function test_validation_tax_number_must_be_15_digits(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.customers.create']);
+
+        // Test with invalid letters
+        $response = $this->actingAs($user)->postJson('/app/customers', [
+            'type' => 'individual',
+            'name' => 'John Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '1234567890abcde',
+        ]);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['tax_number']);
+
+        // Test with less than 15 digits
+        $response = $this->actingAs($user)->postJson('/app/customers', [
+            'type' => 'individual',
+            'name' => 'John Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '1234567890',
+        ]);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['tax_number']);
+
+        // Test with more than 15 digits
+        $response = $this->actingAs($user)->postJson('/app/customers', [
+            'type' => 'individual',
+            'name' => 'John Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '1234567890123456',
+        ]);
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['tax_number']);
+
+        // Test with exactly 15 digits
+        $response = $this->actingAs($user)->postJson('/app/customers', [
+            'type' => 'individual',
+            'name' => 'John Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '123456789012345',
+        ]);
+        $response->assertRedirect();
+    }
 }

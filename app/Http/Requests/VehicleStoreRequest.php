@@ -85,9 +85,16 @@ class VehicleStoreRequest extends FormRequest
             ],
             'year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
             'color' => ['nullable', 'string', 'max:50'],
-            'vin' => ['nullable', 'string', 'max:50'],
+            'vin' => ['nullable', 'string', 'regex:/^[A-Za-z0-9]+$/', 'max:50'],
             'odometer' => ['nullable', 'integer', 'min:0'],
             'notes' => ['nullable', 'string', 'max:1000'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'vin.regex' => __('validation.vin_invalid'),
         ];
     }
 }

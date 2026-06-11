@@ -504,6 +504,32 @@ watch(() => props.vehicle, (val) => {
     }
 }, { immediate: true });
 
+// Watch for selectedVehicle to load customer relationship from props.customers if missing
+watch(selectedVehicle, (val) => {
+    if (!val) return;
+
+    if (!val.customer && val.customer_id && props.customers) {
+        const customerData = props.customers.find(c => c.id === val.customer_id);
+        if (customerData) {
+            selectedVehicle.value = {
+                ...val,
+                customer: customerData
+            };
+            return;
+        }
+    }
+
+    // Auto-fill contact info ONLY if creating a new record and they are currently empty
+    if (!props.workOrder && val.customer) {
+        if (!form.contact_name) {
+            form.contact_name = val.customer.name;
+        }
+        if (!form.contact_phone) {
+            form.contact_phone = val.customer.phone;
+        }
+    }
+}, { immediate: true });
+
 // Initial Load for Edit Mode or Pre-selection
 onMounted(() => {
     if (props.workOrder?.vehicle) {

@@ -46,7 +46,7 @@ class CustomerStoreRequest extends FormRequest
             ],
             'email' => ['nullable', 'string', 'email:rfc', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'tax_number' => ['nullable', 'string', 'max:50'],
+            'tax_number' => ['nullable', 'string', 'regex:/^\d{15}$/'],
             'address_line' => ['nullable', 'string', 'max:500'],
             'building_number' => ['nullable', 'string', 'max:50'],
             'postal_code' => ['nullable', 'string', 'max:20'],
@@ -65,10 +65,11 @@ class CustomerStoreRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'contact_name.required_if' => 'The contact name field is required when type is company.',
-            'phone.unique' => 'This phone number already exists for another customer.',
-            'phone.regex' => 'Please enter a valid Saudi phone number (e.g., 05xxxxxxxx or +966xxxxxxxxx).',
-            'whatsapp.regex' => 'Please enter a valid Saudi phone number (e.g., 05xxxxxxxx or +966xxxxxxxxx).',
+            'contact_name.required_if' => __('validation.required', ['attribute' => __('validation.attributes.contact_name')]),
+            'phone.unique' => __('validation.unique', ['attribute' => __('validation.attributes.phone')]),
+            'phone.regex' => __('validation.phone_regex_error'),
+            'whatsapp.regex' => __('validation.phone_regex_error'),
+            'tax_number.regex' => __('validation.tax_number_invalid'),
         ];
     }
 }

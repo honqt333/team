@@ -36,25 +36,25 @@
                     <input 
                         type="text" 
                         v-model="form.name"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
+                        :class="form.errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'"
                     />
                     <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name }}</p>
                 </div>
 
-                <!-- Contact Name (Companies & Government) -->
                 <div v-if="['company', 'government'].includes(form.type)">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('customers.form.contact_name') }}
+                        {{ $t('customers.form.contact_name') }} <span class="text-red-500">*</span>
                     </label>
                     <input 
                         type="text" 
                         v-model="form.contact_name"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
+                        :class="form.errors.contact_name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'"
                     />
                     <p v-if="form.errors.contact_name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.contact_name }}</p>
                 </div>
 
-                <!-- Tax Number (Companies Only - Optional) -->
                 <div v-if="form.type === 'company'" class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('customers.form.tax_number') }}
@@ -63,12 +63,12 @@
                         type="text" 
                         v-model="form.tax_number"
                         :placeholder="$t('customers.form.tax_placeholder')"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
+                        :class="form.errors.tax_number ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'"
                     />
                     <p v-if="form.errors.tax_number" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.tax_number }}</p>
                 </div>
 
-                <!-- Phone -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('customers.form.phone') }} <span class="text-red-500">*</span>
@@ -79,7 +79,8 @@
                         :inputOptions="{ placeholder: '05xxxxxxxx' }"
                         mode="international"
                         :validCharactersOnly="false"
-                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:border-transparent transition-all ltr"
+                        :class="form.errors.phone ? 'error-border' : 'border-gray-300 dark:border-gray-600'"
                     ></vue-tel-input>
                     <p v-if="form.errors.phone" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.phone }}</p>
                 </div>
@@ -105,12 +106,12 @@
                         :inputOptions="{ placeholder: '05xxxxxxxx' }"
                         mode="international"
                         :validCharactersOnly="false"
-                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-transparent transition-all ltr"
+                        class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:border-transparent transition-all ltr"
+                        :class="form.errors.whatsapp ? 'error-border' : 'border-gray-300 dark:border-gray-600'"
                     ></vue-tel-input>
                     <p v-if="form.errors.whatsapp" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.whatsapp }}</p>
                 </div>
 
-                <!-- Email -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                         {{ $t('customers.form.email') }}
@@ -118,7 +119,8 @@
                     <input 
                         type="email" 
                         v-model="form.email"
-                        class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                        class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
+                        :class="form.errors.email ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'"
                     />
                     <p v-if="form.errors.email" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.email }}</p>
                 </div>
@@ -181,17 +183,32 @@
                         </svg>
                         {{ $t('customers.form.address') }}
                     </h3>
-                    <button
-                        type="button"
-                        @click="clearAddressFields"
-                        class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        :title="$t('customers.form.clear_address')"
-                    >
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        {{ $t('customers.form.clear_address') }}
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            @click="fetchLocation"
+                            :disabled="isLocating"
+                            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors disabled:opacity-50"
+                            :title="$t('customers.form.locate_me')"
+                        >
+                            <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': isLocating }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            {{ isLocating ? $t('common.loading') : $t('customers.form.locate_me') }}
+                        </button>
+                        <button
+                            type="button"
+                            @click="clearAddressFields"
+                            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            :title="$t('customers.form.clear_address')"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                            {{ $t('customers.form.clear_address') }}
+                        </button>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -359,6 +376,7 @@ const page = usePage();
 const mapContainer = ref(null);
 const mapReady = ref(false);
 const geocodingLoading = ref(false);
+const isLocating = ref(false);
 
 let map = null;
 let marker = null;
@@ -426,11 +444,74 @@ watch(() => props.customer, (newCustomer) => {
     }
 }, { immediate: true });
 
+async function fetchLocation() {
+    isLocating.value = true;
+    
+    const useIpFallback = async () => {
+        console.log('[CustomerFormModal] Falling back to IP-based geolocation...');
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            if (!response.ok) throw new Error('IP geolocation failed');
+            const data = await response.json();
+            if (data && data.latitude && data.longitude) {
+                const lat = parseFloat(data.latitude);
+                const lng = parseFloat(data.longitude);
+                console.log('[CustomerFormModal] IP Geolocation success:', lat, lng);
+                
+                form.lat = parseFloat(lat.toFixed(7));
+                form.lng = parseFloat(lng.toFixed(7));
+                
+                if (map) {
+                    setMarker(lat, lng, true);
+                } else {
+                    reverseGeocode(form.lat, form.lng, true);
+                }
+                return;
+            }
+        } catch (err) {
+            console.warn('[CustomerFormModal] IP Geolocation failed:', err.message);
+        }
+        
+        // Final fallback: just use default lat/lng
+        isLocating.value = false;
+        nextTick(() => {
+            initialFormData.value = JSON.stringify(form.data());
+            isDirty.value = false;
+        });
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log('[CustomerFormModal] Browser Geolocation success:', latitude, longitude);
+                
+                form.lat = parseFloat(latitude.toFixed(7));
+                form.lng = parseFloat(longitude.toFixed(7));
+                
+                if (map) {
+                    setMarker(latitude, longitude, true);
+                } else {
+                    reverseGeocode(form.lat, form.lng, true);
+                }
+            },
+            (error) => {
+                console.warn('[CustomerFormModal] Browser Geolocation error:', error.message);
+                useIpFallback();
+            },
+            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+        );
+    } else {
+        useIpFallback();
+    }
+}
+
 // Handle modal open/close
 watch(() => props.show, async (open) => {
     if (open) {
         if (!props.customer) {
             form.reset();
+            fetchLocation();
         }
         await nextTick();
         
@@ -443,8 +524,11 @@ watch(() => props.show, async (open) => {
                 initMap();
                 setTimeout(() => {
                     if (map) map.invalidateSize();
-                    initialFormData.value = JSON.stringify(form.data());
-                    isDirty.value = false;
+                    // Only set initialFormData here if we are not still locating
+                    if (!isLocating.value) {
+                        initialFormData.value = JSON.stringify(form.data());
+                        isDirty.value = false;
+                    }
                 }, 100);
             } else if (attempts < 10) {
                 // Retry after 100ms, up to 10 times (1 second total)
@@ -463,7 +547,7 @@ watch(() => props.show, async (open) => {
 
 // Track form changes
 watch(() => form.data(), (newData) => {
-    if (initialFormData.value) {
+    if (initialFormData.value && !isLocating.value) {
         const currentData = JSON.stringify(newData);
         const isChanged = currentData !== initialFormData.value;
         if (isChanged !== isDirty.value) {
@@ -482,6 +566,35 @@ watch(() => form.phone, (newPhone, oldPhone) => {
     if (!form.whatsapp || cleanWhatsapp === cleanOldPhone) {
         form.whatsapp = newPhone || '';
     }
+});
+
+// Clear validation errors when inputs change
+watch(() => form.name, () => {
+    if (form.errors.name) form.clearErrors('name');
+});
+watch(() => form.contact_name, () => {
+    if (form.errors.contact_name) form.clearErrors('contact_name');
+});
+watch(() => form.type, () => {
+    if (form.errors.type) form.clearErrors('type');
+});
+watch(() => form.phone, () => {
+    if (form.errors.phone) form.clearErrors('phone');
+});
+watch(() => form.whatsapp, () => {
+    if (form.errors.whatsapp) form.clearErrors('whatsapp');
+});
+watch(() => form.email, () => {
+    if (form.errors.email) form.clearErrors('email');
+});
+watch(() => form.tax_number, (newVal) => {
+    if (newVal) {
+        const converted = convertArabicToEnglish(newVal).replace(/[^\d]/g, '').slice(0, 15);
+        if (converted !== newVal) {
+            form.tax_number = converted;
+        }
+    }
+    if (form.errors.tax_number) form.clearErrors('tax_number');
 });
 
 function initMap() {
@@ -570,7 +683,7 @@ function onMarkerDrag(e) {
     reverseGeocode(form.lat, form.lng);
 }
 
-function setMarker(lat, lng) {
+function setMarker(lat, lng, isInit = false) {
     form.lat = parseFloat(lat.toFixed(7));
     form.lng = parseFloat(lng.toFixed(7));
 
@@ -584,11 +697,11 @@ function setMarker(lat, lng) {
     map.panTo([lat, lng]);
     
     // Reverse geocode to fill address fields
-    reverseGeocode(form.lat, form.lng);
+    reverseGeocode(form.lat, form.lng, isInit);
 }
 
 // Reverse geocoding using OpenStreetMap Nominatim
-async function reverseGeocode(lat, lng) {
+async function reverseGeocode(lat, lng, isInit = false) {
     if (geocodingLoading.value) return;
     
     geocodingLoading.value = true;
@@ -669,6 +782,13 @@ async function reverseGeocode(lat, lng) {
         console.warn('Reverse geocoding failed:', error);
     } finally {
         geocodingLoading.value = false;
+        if (isInit) {
+            isLocating.value = false;
+            nextTick(() => {
+                initialFormData.value = JSON.stringify(form.data());
+                isDirty.value = false;
+            });
+        }
     }
 }
 
@@ -784,6 +904,13 @@ onUnmounted(() => {
 .vue-tel-input {
     border-radius: 0.75rem !important;
     border-color: #d1d5db !important; /* gray-300 */
+}
+.vue-tel-input.error-border {
+    border-color: #ef4444 !important;
+}
+.vue-tel-input.error-border:focus-within {
+    box-shadow: 0 0 0 2px #ef4444 !important;
+    border-color: transparent !important;
 }
 .dark .vue-tel-input {
     border-color: #4b5563 !important; /* gray-600 */

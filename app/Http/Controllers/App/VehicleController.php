@@ -201,7 +201,7 @@ class VehicleController
         ]);
 
         // Get all related data
-        $workOrders = $vehicle->workOrders()->with(['vehicle.make', 'vehicle.model', 'items.service', 'parts'])->latest()->get();
+        $workOrders = $vehicle->workOrders()->with(['vehicle.make', 'vehicle.model', 'items.service', 'parts', 'generalNotes.user'])->latest()->get();
         $workOrders->each->append(['total', 'total_paid', 'balance']);
         $quotes = $vehicle->quotes()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
         

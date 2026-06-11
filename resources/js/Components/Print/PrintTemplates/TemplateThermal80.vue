@@ -100,10 +100,10 @@
                         class="flex flex-col text-[10px] pb-2 border-b border-gray-50 last:border-0"
                     >
                         <div class="flex justify-between font-bold text-gray-900">
-                            <span>{{ index + 1 }}. {{ item.service_name || item.description }}</span>
+                            <span class="whitespace-pre-wrap">{{ index + 1 }}. {{ item.service_name || item.description }}</span>
                             <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency((item.unit_price * (item.qty || 1)) - (item.discount || 0)) }}</span>
                         </div>
-                        <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug">
+                        <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug whitespace-pre-wrap">
                              {{ item.description }}
                         </div>
                         <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
@@ -124,10 +124,10 @@
                         class="flex flex-col text-[10px] pb-2 border-b border-gray-50 last:border-0"
                     >
                         <div class="flex justify-between font-bold text-gray-900">
-                            <span>{{ index + 1 }}. {{ item.service_name || item.description }}</span>
+                            <span class="whitespace-pre-wrap">{{ index + 1 }}. {{ item.service_name || item.description }}</span>
                             <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency((item.unit_price * (item.qty || 1)) - (item.discount || 0)) }}</span>
                         </div>
-                        <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug">
+                        <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug whitespace-pre-wrap">
                              {{ item.description }}
                         </div>
                         <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
@@ -271,9 +271,9 @@
             </div>
 
             <!-- Thermal Small Stamp -->
-            <div v-if="visualSettings.show_stamp" class="absolute bottom-2 left-4 w-16 h-16 select-none pointer-events-none z-10 opacity-70 -rotate-12 transition-all">
+            <div v-if="visualSettings.show_stamp && (previewMode || centerData.stamp_url || visualSettings.stamp_url)" class="absolute bottom-2 left-4 w-16 h-16 select-none pointer-events-none z-10 opacity-70 -rotate-12 transition-all">
                 <img v-if="centerData.stamp_url || visualSettings.stamp_url" :src="centerData.stamp_url || visualSettings.stamp_url" class="w-full h-full object-contain" />
-                <svg v-else class="w-full h-full text-emerald-600/80" fill="none" viewBox="0 0 100 100" stroke="currentColor">
+                <svg v-else-if="previewMode" class="w-full h-full text-emerald-600/80" fill="none" viewBox="0 0 100 100" stroke="currentColor">
                     <circle cx="50" cy="50" r="45" stroke-width="2.5" stroke-dasharray="3 3"/>
                     <circle cx="50" cy="50" r="38" stroke-width="1.5"/>
                     <text x="50" y="38" font-size="6" font-weight="bold" fill="currentColor" text-anchor="middle" font-family="sans-serif">خدمة برو</text>

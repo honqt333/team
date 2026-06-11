@@ -544,20 +544,9 @@
                                     <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center">#{{ toEnglish(note.code) }}</span>
                                     <span class="text-xs font-medium text-gray-400">{{ formatDate(note.created_at) }}</span>
                                 </div>
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-start">
-                                    <!-- Customer Complaint -->
-                                    <div v-if="note.customer_complaint" class="space-y-1">
-                                        <h4 class="text-xs font-black text-rose-500 uppercase tracking-wider">{{ $t('work_orders.print_view.customer_complaint') }}</h4>
-                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.customer_complaint }}</p>
-                                    </div>
-                                    <!-- Initial Assessment -->
-                                    <div v-if="note.initial_assessment" class="space-y-1">
-                                        <h4 class="text-xs font-black text-amber-500 uppercase tracking-wider">{{ $t('quotes.form_tabs.initial_assessment') }}</h4>
-                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.initial_assessment }}</p>
-                                    </div>
+                                <div class="text-start">
                                     <!-- General Notes -->
                                     <div v-if="note.notes" class="space-y-1">
-                                        <h4 class="text-xs font-black text-indigo-500 uppercase tracking-wider">{{ $t('common.notes') }}</h4>
                                         <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.notes }}</p>
                                     </div>
                                 </div>
@@ -740,14 +729,16 @@ const parts = computed(() => {
 const workOrderNotes = computed(() => {
     const list = [];
     props.workOrders.forEach(order => {
-        if (order.notes || order.customer_complaint || order.initial_assessment) {
-            list.push({
-                id: order.id,
-                code: order.code,
-                created_at: order.created_at,
-                customer_complaint: order.customer_complaint,
-                initial_assessment: order.initial_assessment,
-                notes: order.notes,
+        if (order.general_notes && order.general_notes.length > 0) {
+            order.general_notes.forEach(note => {
+                list.push({
+                    id: note.id,
+                    work_order_id: order.id,
+                    work_order_code: order.code,
+                    created_at: note.created_at,
+                    content: note.content,
+                    user_name: note.user?.name || t('common.system'),
+                });
             });
         }
     });

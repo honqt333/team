@@ -113,6 +113,9 @@ return [
     'customer_required' => 'العميل مطلوب.',
     'vehicle_required' => 'المركبة مطلوبة.',
     'expected_end_date_after_entry' => 'تاريخ الانتهاء المتوقع يجب أن يكون بعد أو يساوي تاريخ الدخول.',
+    'phone_regex_error' => 'يرجى إدخال رقم جوال سعودي صحيح (مثال: 05xxxxxxxx أو +966xxxxxxxxx).',
+    'tax_number_invalid' => 'يجب أن يتكون الرقم الضريبي من 15 رقماً إنجليزياً فقط.',
+    'vin_invalid' => 'يجب أن يتكون رقم الهيكل من حروف وأرقام إنجليزية فقط.',
 
     // Custom attribute names
     'attributes' => [
@@ -121,6 +124,8 @@ return [
         'password' => 'كلمة المرور',
         'password_confirmation' => 'تأكيد كلمة المرور',
         'phone' => 'رقم الهاتف',
+        'whatsapp' => 'الواتساب',
+        'contact_name' => 'اسم المسؤول',
         'company_name' => 'الاسم التجاري',
         'first_name' => 'الاسم الأول',
         'last_name' => 'اسم الأخير',

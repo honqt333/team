@@ -196,10 +196,12 @@
                         type="text" 
                         v-model="form.vin"
                         dir="ltr"
-                        @input="form.vin = normalizeArabicNumerals($event.target.value)"
+                        @input="form.vin = normalizeArabicNumerals($event.target.value).replace(/[^a-zA-Z0-9]/g, '').toUpperCase()"
                         :placeholder="$t('vehicles.form.vin_placeholder')"
                         class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                        :class="{ 'border-red-500 focus:ring-red-500': form.errors.vin }"
                     />
+                    <p v-if="form.errors.vin" class="mt-1 text-xs text-red-600 dark:text-red-400">{{ form.errors.vin }}</p>
                 </div>
             </div>
 
@@ -390,6 +392,13 @@ watch(() => form.data(), () => {
         isDirty.value = JSON.stringify(form.data()) !== initialFormData.value;
     }
 }, { deep: true });
+
+// Clear VIN validation error on change
+watch(() => form.vin, () => {
+    if (form.errors.vin) {
+        form.clearErrors('vin');
+    }
+});
 
 // Watch for customers prop updates to auto-select pending customer
 watch(() => props.customers, (newCustomers, oldCustomers) => {

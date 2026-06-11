@@ -6,4 +6,14 @@ return [
     'customer_required' => 'Customer is required.',
     'vehicle_required' => 'Vehicle is required.',
     'expected_end_date_after_entry' => 'Expected end date must be after or equal to entry date.',
+    'phone_regex_error' => 'Please enter a valid Saudi phone number (e.g., 05xxxxxxxx or +966xxxxxxxxx).',
+    'tax_number_invalid' => 'The tax number must be exactly 15 English digits.',
+    'vin_invalid' => 'The chassis number must contain only English letters and numbers.',
+
+    // Custom attribute names
+    'attributes' => [
+        'contact_name' => "Responsible Person's Name",
+        'phone' => 'Phone number',
+        'whatsapp' => 'WhatsApp number',
+    ],
 ];
