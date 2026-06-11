@@ -1,5 +1,21 @@
 <script setup>
-defineProps({ form: Object, addItem: Function, removeItem: Function });
+import { computed } from 'vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const props = defineProps({ form: Object, addItem: Function, removeItem: Function });
+
+const platformOptions = computed(() => [
+    { value: 'facebook', label: 'Facebook' },
+    { value: 'twitter', label: 'X (Twitter)' },
+    { value: 'instagram', label: 'Instagram' },
+    { value: 'linkedin', label: 'LinkedIn' },
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'snapchat', label: 'Snapchat' },
+    { value: 'whatsapp', label: 'WhatsApp' },
+    { value: 'telegram', label: 'Telegram' },
+    { value: 'custom', label: 'Custom' },
+]);
 </script>
 
 <template>
@@ -40,18 +56,13 @@ defineProps({ form: Object, addItem: Function, removeItem: Function });
           <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
             <div class="sm:col-span-3">
               <label class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 mb-1 block">المنصة</label>
-              <select v-model="link.platform" class="input-enterprise">
-                <option value="facebook">Facebook</option>
-                <option value="twitter">X (Twitter)</option>
-                <option value="instagram">Instagram</option>
-                <option value="linkedin">LinkedIn</option>
-                <option value="youtube">YouTube</option>
-                <option value="tiktok">TikTok</option>
-                <option value="snapchat">Snapchat</option>
-                <option value="whatsapp">WhatsApp</option>
-                <option value="telegram">Telegram</option>
-                <option value="custom">Custom</option>
-              </select>
+              <SearchableSelect
+                v-model="link.platform"
+                :options="platformOptions"
+                option-label="label"
+                option-value="value"
+                compact
+              />
             </div>
             <div class="sm:col-span-8">
               <label class="text-[10px] uppercase font-bold text-gray-500 dark:text-gray-400 mb-1 block">الرابط الكامل (URL)</label>

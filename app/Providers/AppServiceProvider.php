@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\AdminUser;
+use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Department;
 use App\Models\HR\Attendance;
@@ -91,6 +92,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Observers
         Employee::observe(\App\Observers\EmployeeObserver::class);
+        Center::observe(\App\Observers\CenterObserver::class);
 
         // Super Admin Bypass
         // Two auth models: User (web guard, spatie/permission) and

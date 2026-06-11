@@ -26,12 +26,14 @@
                     @keyup.enter="applyFilters"
                     class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white w-64"
                 />
-                <select v-model="role" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    <option value="">كل الأدوار</option>
-                    <option value="super_admin">مدير النظام</option>
-                    <option value="admin">مسؤول</option>
-                    <option value="support">دعم فني</option>
-                </select>
+                <SearchableSelect
+                    v-model="role"
+                    :options="roleOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="كل الأدوار"
+                    compact
+                />
             </div>
             
             <!-- Table -->
@@ -181,9 +183,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const roleOptions = computed(() => [
+    { value: 'super_admin', label: 'مدير النظام' },
+    { value: 'admin', label: 'مسؤول' },
+    { value: 'support', label: 'دعم فني' },
+]);
 
 const props = defineProps({
     admins: Object,

@@ -13,11 +13,14 @@
             
             <!-- Filters -->
             <div class="flex gap-4">
-                <select v-model="status" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    <option value="">الكل</option>
-                    <option value="published">منشور</option>
-                    <option value="draft">مسودة</option>
-                </select>
+                <SearchableSelect
+                    v-model="status"
+                    :options="statusOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="الكل"
+                    compact
+                />
             </div>
             
             <!-- Table -->
@@ -68,9 +71,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const statusOptions = computed(() => [
+    { value: 'published', label: 'منشور' },
+    { value: 'draft', label: 'مسودة' },
+]);
 import { useConfirm } from '@/Composables/useConfirm';
 
 const { confirm } = useConfirm();

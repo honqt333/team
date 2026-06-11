@@ -98,13 +98,15 @@
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">إضافة رصيد SMS</h3>
                         <form @submit.prevent="addCredits" class="space-y-4">
                             <div v-if="!selectedTenant">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">المستأجر</label>
-                                <select v-model="form.tenant_id" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                                    <option value="">اختر المستأجر</option>
-                                    <option v-for="tenant in balances.data" :key="tenant.tenant_id" :value="tenant.tenant_id">
-                                        {{ tenant.tenant?.trade_name }}
-                                    </option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="form.tenant_id"
+                                    :options="balances.data"
+                                    :option-label="(t) => t.tenant?.trade_name"
+                                    option-value="tenant_id"
+                                    label="المستأجر"
+                                    placeholder="اختر المستأجر"
+                                    required
+                                />
                             </div>
                             <div v-else class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
                                 <p class="text-sm text-gray-600 dark:text-gray-400">المستأجر</p>
@@ -138,6 +140,7 @@
 import { ref } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     balances: Object,

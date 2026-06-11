@@ -41,13 +41,15 @@
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 dir="ltr"
                             />
-                            <select 
+                            <SearchableSelect
                                 v-else
                                 v-model="form.config[field.key]"
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            >
-                                <option v-for="opt in field.options" :key="opt" :value="opt">{{ opt }}</option>
-                            </select>
+                                :options="(field.options || []).map((opt) => ({ value: opt, label: opt }))"
+                                option-label="label"
+                                option-value="value"
+                                :error="form.errors[`config.${field.key}`]"
+                                compact
+                            />
                             <p v-if="form.errors[`config.${field.key}`]" class="mt-1 text-sm text-red-600 dark:text-red-400">
                                 {{ form.errors[`config.${field.key}`] }}
                             </p>
@@ -184,6 +186,7 @@
 import { ref, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     integration: Object,

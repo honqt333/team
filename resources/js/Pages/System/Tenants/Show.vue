@@ -306,12 +306,13 @@
                             </label>
                             
                             <div v-if="securityForm.two_factor_enabled">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">مستوى الإلزام</label>
-                                <select v-model="securityForm.two_factor_enforcement" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                    <option value="disabled">غير ملزم (اختياري)</option>
-                                    <option value="optional">اختياري (ينصح به)</option>
-                                    <option value="required">إلزامي (للمستخدمين الجدد)</option>
-                                </select>
+                                <SearchableSelect
+                                    v-model="securityForm.two_factor_enforcement"
+                                    :options="twoFactorEnforcementOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    label="مستوى الإلزام"
+                                />
                                 <p class="text-xs text-gray-500 mt-2">
                                     يحدد هذا الإعداد ما إذا كان يجب على مستخدمي المستأجر تفعيل المصادقة الثنائية.
                                 </p>
@@ -409,9 +410,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     tenant: Object,
@@ -426,6 +428,12 @@ const showSecurityModal = ref(false);
 const suspendReason = ref('');
 const extendDays = ref(14);
 const deleteConfirmation = ref('');
+
+const twoFactorEnforcementOptions = computed(() => [
+    { value: 'disabled', label: 'غير ملزم (اختياري)' },
+    { value: 'optional', label: 'اختياري (ينصح به)' },
+    { value: 'required', label: 'إلزامي (للمستخدمين الجدد)' },
+]);
 
 const securityForm = useForm({
     two_factor_enabled: Boolean(props.tenant.two_factor_enabled),

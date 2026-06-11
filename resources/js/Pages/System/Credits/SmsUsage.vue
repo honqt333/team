@@ -37,13 +37,14 @@
             
             <!-- Filters -->
             <div class="flex gap-4">
-                <select v-model="status" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    <option value="">كل الحالات</option>
-                    <option value="sent">مرسل</option>
-                    <option value="delivered">تم التسليم</option>
-                    <option value="failed">فشل</option>
-                    <option value="pending">قيد الإرسال</option>
-                </select>
+                <SearchableSelect
+                    v-model="status"
+                    :options="statusOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="كل الحالات"
+                    compact
+                />
             </div>
             
             <!-- Table -->
@@ -87,9 +88,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const statusOptions = computed(() => [
+    { value: 'sent', label: 'مرسل' },
+    { value: 'delivered', label: 'تم التسليم' },
+    { value: 'failed', label: 'فشل' },
+    { value: 'pending', label: 'قيد الإرسال' },
+]);
 
 const props = defineProps({
     logs: Object,

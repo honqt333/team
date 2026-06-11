@@ -97,20 +97,15 @@
                 <form @submit.prevent="submitLeave" class="space-y-4">
                     <!-- Leave Type -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {{ $t('hr.leaves.type') }}
-                        </label>
-                        <select
+                        <SearchableSelect
                             v-model="leaveForm.type"
-                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-violet-500"
-                        >
-                            <option value="annual">{{ $t('hr.leaves.types.annual') }}</option>
-                            <option value="sick">{{ $t('hr.leaves.types.sick') }}</option>
-                            <option value="unpaid">{{ $t('hr.leaves.types.unpaid') }}</option>
-                            <option value="emergency">{{ $t('hr.leaves.types.emergency') }}</option>
-                            <option value="other">{{ $t('hr.leaves.types.other') }}</option>
-                        </select>
-                        <p v-if="leaveForm.errors.type" class="text-xs text-red-500 mt-1">{{ leaveForm.errors.type }}</p>
+                            :options="leaveTypeOptions"
+                            option-label="label"
+                            option-value="value"
+                            :label="$t('hr.leaves.type')"
+                            :error="leaveForm.errors.type"
+                            required
+                        />
                     </div>
 
                     <!-- Date Range -->
@@ -175,10 +170,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useForm, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import Modal from '@/Components/Modal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
@@ -190,6 +186,15 @@ const props = defineProps({
 });
 
 const { t } = useI18n();
+
+const leaveTypeOptions = computed(() => [
+    { value: 'annual', label: t('hr.leaves.types.annual') },
+    { value: 'sick', label: t('hr.leaves.types.sick') },
+    { value: 'unpaid', label: t('hr.leaves.types.unpaid') },
+    { value: 'emergency', label: t('hr.leaves.types.emergency') },
+    { value: 'other', label: t('hr.leaves.types.other') },
+]);
+
 const { success, error } = useToast();
 
 // Format date from ISO to readable format

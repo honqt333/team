@@ -28,20 +28,16 @@
                     
                     <!-- Category Dropdown -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            {{ $t('common.category') }} <span class="text-red-500">*</span>
-                        </label>
-                        <select
+                        <SearchableSelect
                             v-model="form.category_id"
-                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all"
+                            :options="categories"
+                            option-label="name"
+                            option-value="id"
+                            :label="$t('common.category')"
+                            :placeholder="$t('common.select')"
+                            :error="form.errors.category_id"
                             required
-                        >
-                            <option value="" disabled>{{ $t('common.select') }}</option>
-                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                                {{ cat.name }}
-                            </option>
-                        </select>
-                        <p v-if="form.errors.category_id" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.category_id }}</p>
+                        />
                     </div>
 
                     <!-- Arabic Name -->
@@ -117,6 +113,7 @@
 import { ref, computed, watch } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import Modal from '@/Components/Modal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     show: Boolean,

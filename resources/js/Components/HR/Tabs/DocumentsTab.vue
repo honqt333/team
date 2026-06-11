@@ -99,20 +99,16 @@
                                     required />
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
+                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                        $t('hr.documents.type') }}</label>
-                                    <select v-model="form.type"
-                                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        required>
-                                        <option value="id">{{ $t('hr.documents.types.id') }}</option>
-                                        <option value="passport">{{ $t('hr.documents.types.passport') }}</option>
-                                        <option value="license">{{ $t('hr.documents.types.license') }}</option>
-                                        <option value="certificate">{{ $t('hr.documents.types.certificate') }}</option>
-                                        <option value="contract">{{ $t('hr.documents.types.contract') }}</option>
-                                        <option value="other">{{ $t('hr.documents.types.other') }}</option>
-                                    </select>
+                                    <SearchableSelect
+                                        v-model="form.type"
+                                        :options="typeOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :label="$t('hr.documents.type')"
+                                        required
+                                    />
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
@@ -149,16 +145,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useForm, router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     employee: Object,
 });
 
+const { t } = useI18n();
 const { success, error } = useToast();
 const showUploadModal = ref(false);
+
+const typeOptions = computed(() => [
+    { value: 'id', label: t('hr.documents.types.id') },
+    { value: 'passport', label: t('hr.documents.types.passport') },
+    { value: 'license', label: t('hr.documents.types.license') },
+    { value: 'certificate', label: t('hr.documents.types.certificate') },
+    { value: 'contract', label: t('hr.documents.types.contract') },
+    { value: 'other', label: t('hr.documents.types.other') },
+]);
 
 const form = useForm({
     title: '',

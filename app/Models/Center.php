@@ -63,6 +63,16 @@ class Center extends Model
             ->withTimestamps();
     }
 
+    public function warehouses(): HasMany
+    {
+        return $this->hasMany(Warehouse::class);
+    }
+
+    public function defaultWarehouse(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Warehouse::class)->where('is_default', true);
+    }
+
     public function address(): HasOne
     {
         return $this->hasOne(CenterAddress::class);

@@ -126,14 +126,14 @@
                             :placeholder="$t('work_orders.item.part_name')"
                             class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
                         />
-                        <select
+                        <SearchableSelect
                             v-model="partForm.source"
-                            class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-                        >
-                            <option value="warehouse">{{ $t('work_orders.item.part_source.warehouse') }}</option>
-                            <option value="external">{{ $t('work_orders.item.part_source.external') }}</option>
-                            <option value="customer">{{ $t('work_orders.item.part_source.customer') }}</option>
-                        </select>
+                            :options="partSourceOptions"
+                            option-label="label"
+                            option-value="value"
+                            :placeholder="$t('work_orders.item.source')"
+                            compact
+                        />
                         <input
                             v-model="partForm.qty"
                             type="number"
@@ -199,15 +199,16 @@
                 <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                     <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ $t('work_orders.item.assign_technician') }}</h4>
                     <div class="flex gap-3">
-                        <select
-                            v-model="technicianForm.user_id"
-                            class="flex-1 px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
-                        >
-                            <option value="">{{ $t('common.choose') }}</option>
-                            <option v-for="tech in availableTechnicians" :key="tech.id" :value="tech.id">
-                                {{ tech.name }}
-                            </option>
-                        </select>
+                        <div class="flex-1">
+                            <SearchableSelect
+                                v-model="technicianForm.user_id"
+                                :options="availableTechnicians"
+                                option-label="name"
+                                option-value="id"
+                                :placeholder="$t('common.choose')"
+                                compact
+                            />
+                        </div>
                         <button
                             type="button"
                             @click="assignTechnician"
@@ -332,6 +333,7 @@ import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -344,6 +346,12 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t } = useI18n();
 const { formatCurrency } = useNumberFormat();
+
+const partSourceOptions = computed(() => [
+    { value: 'warehouse', label: t('work_orders.item.part_source.warehouse') },
+    { value: 'external', label: t('work_orders.item.part_source.external') },
+    { value: 'customer', label: t('work_orders.item.part_source.customer') },
+]);
 
 // State
 const activeTab = ref('service');

@@ -16,15 +16,16 @@
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ $t('inventory.parts.add_warehouse') }}:
                     </label>
-                    <select
-                        v-model="selectedWarehouseId"
-                        class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="">{{ $t('inventory.parts.select_warehouse') }}</option>
-                        <option v-for="wh in availableWarehouses" :key="wh.id" :value="wh.id">
-                            {{ wh.name }} - {{ wh.center_name }}
-                        </option>
-                    </select>
+                    <div class="flex-1">
+                        <SearchableSelect
+                            v-model="selectedWarehouseId"
+                            :options="availableWarehouses"
+                            :option-label="(wh) => `${wh.name} - ${wh.center_name}`"
+                            option-value="id"
+                            :placeholder="$t('inventory.parts.select_warehouse')"
+                            compact
+                        />
+                    </div>
                     <button
                         type="button"
                         @click="addWarehouse"
@@ -198,6 +199,7 @@
 import { ref, computed, watch } from 'vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import DialogModal from '@/Components/DialogModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     show: Boolean,

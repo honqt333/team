@@ -97,12 +97,14 @@
                             <div v-if="item.id" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <!-- Period Type -->
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('hr.financial.period_type') }}</label>
-                                    <select v-model="item.period_type" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
-                                        <option value="indefinite">{{ $t('hr.financial.periods.indefinite') }}</option>
-                                        <option value="fixed_period">{{ $t('hr.financial.periods.fixed_period') }}</option>
-                                        <option value="one_time">{{ $t('hr.financial.periods.one_time') }}</option>
-                                    </select>
+                                    <SearchableSelect
+                                        v-model="item.period_type"
+                                        :options="periodTypeOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :label="$t('hr.financial.period_type')"
+                                        compact
+                                    />
                                 </div>
                                 <!-- Start Month -->
                                 <div v-if="item.period_type !== 'indefinite'">
@@ -208,12 +210,14 @@
                             <div v-if="item.id" class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <!-- Period Type -->
                                 <div>
-                                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">{{ $t('hr.financial.period_type') }}</label>
-                                    <select v-model="item.period_type" class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
-                                        <option value="indefinite">{{ $t('hr.financial.periods.indefinite') }}</option>
-                                        <option value="fixed_period">{{ $t('hr.financial.periods.fixed_period') }}</option>
-                                        <option value="one_time">{{ $t('hr.financial.periods.one_time') }}</option>
-                                    </select>
+                                    <SearchableSelect
+                                        v-model="item.period_type"
+                                        :options="periodTypeOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :label="$t('hr.financial.period_type')"
+                                        compact
+                                    />
                                 </div>
                                 <!-- Start Month -->
                                 <div v-if="item.period_type !== 'indefinite'">
@@ -264,8 +268,10 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import BankInfoTab from '@/Components/HR/Tabs/Financial/BankInfoTab.vue';
 import SalariesTab from '@/Components/HR/Tabs/Financial/SalariesTab.vue';
 import PaymentHistoryTab from '@/Components/HR/Tabs/Financial/PaymentHistoryTab.vue';
@@ -277,6 +283,14 @@ const props = defineProps({
     payrollItems: { type: Array, default: () => [] },
     otherPayments: { type: Array, default: () => [] },
 });
+
+const { t } = useI18n();
+
+const periodTypeOptions = computed(() => [
+    { value: 'indefinite', label: t('hr.financial.periods.indefinite') },
+    { value: 'fixed_period', label: t('hr.financial.periods.fixed_period') },
+    { value: 'one_time', label: t('hr.financial.periods.one_time') },
+]);
 
 const tabs = [
     { key: 'bank', label: 'hr.financial.tabs.bank_info', icon: '🏦' },

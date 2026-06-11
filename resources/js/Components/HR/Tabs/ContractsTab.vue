@@ -124,16 +124,14 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                        $t('common.status') }}</label>
-                                    <select v-model="form.status"
-                                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                        required>
-                                        <option value="draft">{{ $t('hr.contracts.status.draft') }}</option>
-                                        <option value="active">{{ $t('hr.contracts.status.active') }}</option>
-                                        <option value="expired">{{ $t('hr.contracts.status.expired') }}</option>
-                                        <option value="cancelled">{{ $t('hr.contracts.status.cancelled') }}</option>
-                                    </select>
+                                    <SearchableSelect
+                                        v-model="form.status"
+                                        :options="statusOptions"
+                                        option-label="label"
+                                        option-value="value"
+                                        :label="$t('common.status')"
+                                        required
+                                    />
                                 </div>
 
                                 <div
@@ -181,17 +179,27 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useForm, router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     employee: Object,
 });
 
+const { t } = useI18n();
 const { success } = useToast();
 const showModal = ref(false);
 const editingId = ref(null);
+
+const statusOptions = computed(() => [
+    { value: 'draft', label: t('hr.contracts.status.draft') },
+    { value: 'active', label: t('hr.contracts.status.active') },
+    { value: 'expired', label: t('hr.contracts.status.expired') },
+    { value: 'cancelled', label: t('hr.contracts.status.cancelled') },
+]);
 
 const form = useForm({
     contract_number: '',

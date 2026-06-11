@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\HR\EmployeeType;
+use App\Models\HR\JobTitle;
+use App\Models\InventoryUnit;
 use App\Support\Permissions;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -22,12 +25,12 @@ class TenantSetupService
         foreach ($roles as $roleName => $roleData) {
             $role = Role::firstOrCreate(
                 [
-                    'name' => $roleName, 
+                    'name' => $roleName,
                     'guard_name' => 'web',
                     'tenant_id' => $tenantId
                 ],
                 [
-                    'name' => $roleName, 
+                    'name' => $roleName,
                     'guard_name' => 'web',
                     'tenant_id' => $tenantId,
                     'label_ar' => $roleData['label_ar'],
@@ -35,7 +38,7 @@ class TenantSetupService
                     'description' => $roleData['description'],
                 ]
             );
-            
+
             // Update existing roles if they exist to ensure new fields are populated
             if (!$role->wasRecentlyCreated) {
                 $role->update([
@@ -54,6 +57,145 @@ class TenantSetupService
                 }
             }
         }
+    }
+
+    /**
+     * Seed default per-tenant lookup data: inventory units, employee types,
+     * job titles. Idempotent — uses firstOrCreate keyed on
+     * (tenant_id, name_ar) so re-runs won't create duplicates.
+     *
+     * Note: Nationalities are global (not tenant-scoped) and live in
+     * `Database\Seeders\NationalitiesSeeder`. They are seeded once on
+     * `php artisan db:seed`, not per-tenant.
+     *
+     * @param int $tenantId
+     * @return void
+     */
+    public function seedDefaultsForTenant(int $tenantId): void
+    {
+        $this->seedInventoryUnits($tenantId);
+        $this->seedEmployeeTypes($tenantId);
+        $this->seedJobTitles($tenantId);
+    }
+
+    /**
+     * Default inventory units (وحدات المخزون).
+     * Per-tenant, so each tenant can rename/add/delete freely afterwards.
+     */
+    protected function seedInventoryUnits(int $tenantId): void
+    {
+        $units = $this->getDefaultInventoryUnits();
+        foreach ($units as $unit) {
+            InventoryUnit::firstOrCreate(
+                [
+                    'tenant_id' => $tenantId,
+                    'name_ar'   => $unit['name_ar'],
+                ],
+                [
+                    'tenant_id' => $tenantId,
+                    'name_ar'   => $unit['name_ar'],
+                    'name_en'   => $unit['name_en'],
+                    'is_active' => true,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Default employee types (أنواع الموظفين).
+     */
+    protected function seedEmployeeTypes(int $tenantId): void
+    {
+        $types = $this->getDefaultEmployeeTypes();
+        foreach ($types as $type) {
+            EmployeeType::firstOrCreate(
+                [
+                    'tenant_id' => $tenantId,
+                    'name_ar'   => $type['name_ar'],
+                ],
+                [
+                    'tenant_id' => $tenantId,
+                    'name_ar'   => $type['name_ar'],
+                    'name_en'   => $type['name_en'],
+                    'is_active' => true,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Default job titles (المسميات الوظيفية).
+     * The `default_role_name` field maps each title to a system role
+     * so that new employees with this title automatically receive the
+     * corresponding role. See EmployeeObserver for the assignment logic.
+     */
+    protected function seedJobTitles(int $tenantId): void
+    {
+        $titles = $this->getDefaultJobTitles();
+        foreach ($titles as $title) {
+            JobTitle::firstOrCreate(
+                [
+                    'tenant_id' => $tenantId,
+                    'name_ar'   => $title['name_ar'],
+                ],
+                [
+                    'tenant_id'        => $tenantId,
+                    'name_ar'          => $title['name_ar'],
+                    'name_en'          => $title['name_en'],
+                    'default_role_name'=> $title['default_role_name'] ?? null,
+                    'is_active'        => true,
+                ]
+            );
+        }
+    }
+
+    /**
+     * Default inventory units — bilingual AR/EN.
+     *
+     * @return array<int, array{name_ar: string, name_en: string}>
+     */
+    public function getDefaultInventoryUnits(): array
+    {
+        return [
+            ['name_ar' => 'حبة',  'name_en' => 'Piece'],
+        ];
+    }
+
+    /**
+     * Default employee types — bilingual AR/EN.
+     *
+     * @return array<int, array{name_ar: string, name_en: string}>
+     */
+    public function getDefaultEmployeeTypes(): array
+    {
+        return [
+            ['name_ar' => 'دائم',  'name_en' => 'Permanent'],
+            ['name_ar' => 'مؤقت',  'name_en' => 'Temporary'],
+        ];
+    }
+
+    /**
+     * Default job titles — bilingual AR/EN with optional default role
+     * mapping. Roles that don't exist yet are silently skipped
+     * (the safety net lets this run on a fresh tenant before all
+     * roles are seeded).
+     *
+     * @return array<int, array{name_ar: string, name_en: string, default_role_name?: string|null}>
+     */
+    public function getDefaultJobTitles(): array
+    {
+        return [
+            ['name_ar' => 'إداري',     'name_en' => 'Admin',         'default_role_name' => 'receptionist'],
+            ['name_ar' => 'بنشري',     'name_en' => 'Buncher',       'default_role_name' => 'technician'],
+            ['name_ar' => 'سائق',      'name_en' => 'Driver',        'default_role_name' => 'technician'],
+            ['name_ar' => 'سمكري',     'name_en' => 'Bodywork Tech', 'default_role_name' => 'technician'],
+            ['name_ar' => 'ميكانيكي',  'name_en' => 'Mechanic',      'default_role_name' => 'technician'],
+            ['name_ar' => 'كهربائي',   'name_en' => 'Electrician',   'default_role_name' => 'technician'],
+            ['name_ar' => 'عامل',      'name_en' => 'Worker',        'default_role_name' => 'technician'],
+            ['name_ar' => 'محاسب',     'name_en' => 'Accountant',    'default_role_name' => 'accountant'],
+            ['name_ar' => 'مدير',      'name_en' => 'Manager',       'default_role_name' => 'branch_manager'],
+            ['name_ar' => 'مشرف',      'name_en' => 'Supervisor',    'default_role_name' => 'branch_manager'],
+        ];
     }
 
     /**

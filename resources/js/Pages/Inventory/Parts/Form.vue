@@ -163,16 +163,15 @@
                                 <tr v-for="(row, index) in form.warehouse_data" :key="index">
                                     <!-- Warehouse Select -->
                                     <td class="px-4 py-3">
-                                        <select
+                                        <SearchableSelect
                                             v-model="row.warehouse_id"
-                                            class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-blue-500"
+                                            :options="availableWarehouses(row.warehouse_id, index)"
+                                            :option-label="(wh) => `${wh.name} - ${wh.center_name}`"
+                                            option-value="id"
+                                            :placeholder="$t('inventory.parts.select_warehouse')"
                                             :disabled="index > 0 && isWarehouseSelected(row.warehouse_id, index)"
-                                        >
-                                            <option value="">{{ $t('inventory.parts.select_warehouse') }}</option>
-                                            <option v-for="wh in availableWarehouses(row.warehouse_id, index)" :key="wh.id" :value="wh.id">
-                                                {{ wh.name }} - {{ wh.center_name }}
-                                            </option>
-                                        </select>
+                                            compact
+                                        />
                                     </td>
                                     <!-- Cost Price -->
                                     <td class="px-4 py-3">

@@ -117,12 +117,13 @@
                                 <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">الخصم</h4>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">نوع الخصم</label>
-                                        <select v-model="form.discount_type" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                            <option value="percentage">نسبة مئوية (%)</option>
-                                            <option value="fixed">مبلغ ثابت (ر.س)</option>
-                                            <option value="trial_days">أيام تجربة إضافية</option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.discount_type"
+                                            :options="discountTypeOptions"
+                                            option-label="label"
+                                            option-value="value"
+                                            label="نوع الخصم"
+                                        />
                                     </div>
                                     <div>
                                         <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{ discountLabel }}</label>
@@ -159,19 +160,23 @@
                                 <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-3">القيود</h4>
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">الباقة</label>
-                                        <select v-model="form.plan_id" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                            <option :value="null">جميع الباقات</option>
-                                            <option v-for="plan in plans" :key="plan.id" :value="plan.id">{{ plan.name_ar }}</option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.plan_id"
+                                            :options="(plans || []).map((p) => ({ value: p.id, label: p.name_ar }))"
+                                            option-label="label"
+                                            option-value="value"
+                                            label="الباقة"
+                                            placeholder="جميع الباقات"
+                                        />
                                     </div>
                                     <div>
-                                        <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">دورة الفوترة</label>
-                                        <select v-model="form.billing_cycle" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
-                                            <option value="any">الكل</option>
-                                            <option value="monthly">شهري فقط</option>
-                                            <option value="yearly">سنوي فقط</option>
-                                        </select>
+                                        <SearchableSelect
+                                            v-model="form.billing_cycle"
+                                            :options="billingCycleOptions"
+                                            option-label="label"
+                                            option-value="value"
+                                            label="دورة الفوترة"
+                                        />
                                     </div>
                                 </div>
                             </div>
@@ -209,6 +214,19 @@
 import { ref, computed } from 'vue';
 import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const discountTypeOptions = computed(() => [
+    { value: 'percentage', label: 'نسبة مئوية (%)' },
+    { value: 'fixed', label: 'مبلغ ثابت (ر.س)' },
+    { value: 'trial_days', label: 'أيام تجربة إضافية' },
+]);
+
+const billingCycleOptions = computed(() => [
+    { value: 'any', label: 'الكل' },
+    { value: 'monthly', label: 'شهري فقط' },
+    { value: 'yearly', label: 'سنوي فقط' },
+]);
 
 const props = defineProps({
     promoCodes: Array,

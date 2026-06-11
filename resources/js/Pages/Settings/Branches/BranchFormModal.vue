@@ -1,7 +1,9 @@
 <script setup>
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import { computed } from 'vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { useToast } from '@/Composables/useToast';
 
 
@@ -14,7 +16,6 @@ const { t } = useI18n();
 const { success, error } = useToast();
 
 const form = useForm({
-    name: '',
     name_ar: '',
     name_en: '',
     center_type: '',
@@ -24,12 +25,12 @@ const form = useForm({
     is_active: true,
 });
 
-const centerTypeOptions = [
-    { value: 'main', key: 'center_type_main' },
-    { value: 'branch', key: 'center_type_branch' },
-    { value: 'workshop', key: 'center_type_workshop' },
-    { value: 'warehouse', key: 'center_type_warehouse' },
-];
+const centerTypeOptions = computed(() => [
+    { value: 'main', label: t('company_profile.branches.center_type_main') },
+    { value: 'branch', label: t('company_profile.branches.center_type_branch') },
+    { value: 'workshop', label: t('company_profile.branches.center_type_workshop') },
+    { value: 'warehouse', label: t('company_profile.branches.center_type_warehouse') },
+]);
 
 const close = () => {
     form.clearErrors();
@@ -68,31 +69,16 @@ const submit = () => {
         </template>
 
         <form @submit.prevent="submit" class="space-y-5">
-            <!-- Name General -->
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ t('company_profile.branches.name') }} <span class="text-red-500">*</span>
-                </label>
-                <input
-                    v-model="form.name"
-                    type="text"
-                    required
-                    :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                        form.errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                    :placeholder="t('company_profile.branches.name_placeholder')"
-                />
-                <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name }}</p>
-            </div>
-
             <!-- Name AR + Name EN -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ t('company_profile.branches.name_ar') }}
+                        {{ t('company_profile.branches.name_ar') }} <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.name_ar"
                         type="text"
+                        required
                         dir="rtl"
                         :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
                             form.errors.name_ar ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
@@ -102,11 +88,12 @@ const submit = () => {
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ t('company_profile.branches.name_en') }}
+                        {{ t('company_profile.branches.name_en') }} <span class="text-red-500">*</span>
                     </label>
                     <input
                         v-model="form.name_en"
                         type="text"
+                        required
                         dir="ltr"
                         :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
                             form.errors.name_en ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
@@ -118,21 +105,16 @@ const submit = () => {
 
             <!-- Center Type -->
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    {{ t('company_profile.branches.center_type') }} <span class="text-red-500">*</span>
-                </label>
-                <select
+                <SearchableSelect
                     v-model="form.center_type"
+                    :options="centerTypeOptions"
+                    option-label="label"
+                    option-value="value"
+                    :label="t('company_profile.branches.center_type')"
+                    :placeholder="t('common.select')"
                     required
-                    :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all',
-                        form.errors.center_type ? 'border-red-500' : 'border-gray-300 dark:border-gray-600']"
-                >
-                    <option value="">{{ t('common.select') }}</option>
-                    <option v-for="opt in centerTypeOptions" :key="opt.value" :value="opt.value">
-                        {{ t(`company_profile.branches.${opt.key}`) }}
-                    </option>
-                </select>
-                <p v-if="form.errors.center_type" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.center_type }}</p>
+                    :error="form.errors.center_type"
+                />
             </div>
 
             <!-- Manager + Phone -->

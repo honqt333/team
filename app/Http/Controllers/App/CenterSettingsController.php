@@ -5,6 +5,7 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\Center;
 use App\Models\CenterWorkingHour;
+use App\Support\CenterTypeGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -117,8 +118,13 @@ class CenterSettingsController extends Controller
             'vat_number' => 'nullable|string|max:50',
         ]);
 
+        // Apply "single main center" rule BEFORE updating — if the user
+        // promoted this center to main, any previous main is demoted
+        // atomically, and the is_main flag is normalized.
+        $validated = CenterTypeGuard::applyMainRule($center, $validated);
+
         $center->update($validated);
-        
+
         // Also update main name
         $center->name = $validated['name_ar'];
         $center->save();

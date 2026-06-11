@@ -24,16 +24,14 @@
                     </div>
                     
                     <!-- Status Filter -->
-                    <select 
-                        v-model="statusFilter" 
-                        @change="applyFilters"
-                        class="px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="">جميع الحالات</option>
-                        <option value="active">نشط</option>
-                        <option value="trial">تجريبي</option>
-                        <option value="suspended">معلّق</option>
-                    </select>
+                    <SearchableSelect
+                        v-model="statusFilter"
+                        :options="statusOptions"
+                        option-label="label"
+                        option-value="value"
+                        placeholder="جميع الحالات"
+                        compact
+                    />
                 </div>
             </div>
             
@@ -120,9 +118,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
     tenants: Object,
@@ -131,6 +130,12 @@ const props = defineProps({
 
 const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || '');
+
+const statusOptions = computed(() => [
+    { value: 'active', label: 'نشط' },
+    { value: 'trial', label: 'تجريبي' },
+    { value: 'suspended', label: 'معلّق' },
+]);
 
 let searchTimeout = null;
 

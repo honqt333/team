@@ -93,10 +93,14 @@ class Tenant extends Model
     protected static function booted(): void
     {
         static::created(function (Tenant $tenant) {
-            // Seed default roles for the new tenant
-            (new \App\Services\TenantSetupService())->seedRolesForTenant($tenant->id);
-            
-            // Create default settings if needed (future)
+            $service = new \App\Services\TenantSetupService();
+
+            // Seed default roles + permissions for the new tenant
+            $service->seedRolesForTenant($tenant->id);
+
+            // Seed default lookup data (units, employee types, job titles).
+            // Idempotent — safe to re-run via the backfill command.
+            $service->seedDefaultsForTenant($tenant->id);
         });
     }
 }

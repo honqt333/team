@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Center;
+use App\Support\CenterTypeGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -39,9 +40,8 @@ class BranchesController extends Controller
         $this->authorize('create', Center::class);
 
         $validated = $request->validate([
-            'name'         => 'required|string|max:255',
-            'name_ar'      => 'nullable|string|max:255',
-            'name_en'      => 'nullable|string|max:255',
+            'name_ar'      => 'required_without:name_en|nullable|string|max:255',
+            'name_en'      => 'required_without:name_ar|nullable|string|max:255',
             'center_type'  => 'required|string|in:main,branch,workshop,warehouse',
             'manager_name' => 'nullable|string|max:255',
             'phone'        => 'nullable|string|max:50',
@@ -49,10 +49,16 @@ class BranchesController extends Controller
             'is_active'    => 'sometimes|boolean',
         ]);
 
-        // Generate unique slug from English name (fallback to name or name_ar)
-        $slugSource = $validated['name_en']
-            ?? $validated['name_ar']
-            ?? $validated['name'];
+        // Derive the legacy `name` column from whichever localized name the
+        // user provided. The DB column is NOT NULL but we don't expose it in
+        // the form anymore — the form only has name_ar / name_en.
+        $localizedName = $validated['name_ar']
+            ?? $validated['name_en']
+            ?? 'فرع بدون اسم';
+        $validated['name'] = $localizedName;
+
+        // Generate unique slug from English name (fallback to Arabic)
+        $slugSource = $validated['name_en'] ?? $validated['name_ar'] ?? $localizedName;
         $validated['slug'] = Str::slug($slugSource) . '-' . Str::lower(Str::random(6));
 
         // Normalize is_active (checkbox may send 'true'/'false' or true/false)
@@ -60,7 +66,22 @@ class BranchesController extends Controller
 
         $user = auth()->user();
         $tenant = $user->tenant;
+
+        // Determine if this new center is being designated as main.
+        // We do this BEFORE create so the flag is set correctly in one
+        // transaction, and so the rule demotes any previous main center
+        // atomically with the new center's insertion.
+        $wantsMain = ($validated['center_type'] ?? null) === 'main';
+        $validated['is_main'] = $wantsMain;
+
         $center = $tenant->centers()->create($validated);
+
+        // Apply "single main center" rule: if the new center is being
+        // designated as main, transfer that designation from any other
+        // center that currently holds it.
+        if ($wantsMain) {
+            CenterTypeGuard::applyMainRule($center, $validated);
+        }
 
         // Attach the current user (company manager) to the new center
         // so they can immediately switch to and access it

@@ -102,29 +102,16 @@
                                 <input v-model="form.profile.manager_name" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ $t('center_settings.profile.center_type') }}
-                                    <span v-if="props.center?.is_main && !props.center?.canModifyMain" class="text-xs text-gray-400 font-normal">({{ $t('common.read_only') }})</span>
-                                </label>
-                                <div class="relative">
-                                    <input 
-                                        v-model="form.profile.center_type" 
-                                        type="text" 
-                                        :disabled="props.center?.is_main && !props.center?.canModifyMain"
-                                        :placeholder="$t('center_settings.profile.center_type_placeholder')" 
-                                        :class="[
-                                            'w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                                            props.center?.is_main && !props.center?.canModifyMain 
-                                                ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-                                                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
-                                        ]" 
-                                    />
-                                    <div v-if="props.center?.is_main && !props.center?.canModifyMain" class="absolute inset-y-0 rtl:right-auto rtl:left-0 ltr:right-0 flex items-center px-3 pointer-events-none">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                                        </svg>
-                                    </div>
-                                </div>
+                                <SearchableSelect
+                                    v-model="form.profile.center_type"
+                                    :options="centerTypeOptions"
+                                    option-label="label"
+                                    option-value="value"
+                                    :label="$t('center_settings.profile.center_type')"
+                                    :placeholder="$t('common.select')"
+                                    :disabled="props.center?.is_main && !props.center?.canModifyMain"
+                                />
+                                <p v-if="props.center?.is_main && !props.center?.canModifyMain" class="mt-1 text-xs text-gray-400">({{ $t('common.read_only') }})</p>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.profile.license_number') }}</label>
@@ -356,6 +343,7 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
 import BackButton from '@/Components/BackButton.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
 import { Link, router } from '@inertiajs/vue3';
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -435,6 +423,13 @@ const form = ref({
         close_time: wh.close_time?.slice(0, 5) ?? '17:00',
     })) ?? [],
 });
+
+const centerTypeOptions = computed(() => [
+    { value: 'main', label: t('company_profile.branches.center_type_main') },
+    { value: 'branch', label: t('company_profile.branches.center_type_branch') },
+    { value: 'workshop', label: t('company_profile.branches.center_type_workshop') },
+    { value: 'warehouse', label: t('company_profile.branches.center_type_warehouse') },
+]);
 
 const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 

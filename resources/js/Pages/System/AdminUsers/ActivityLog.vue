@@ -10,17 +10,26 @@
             
             <!-- Filters -->
             <div class="flex gap-4">
-                <select v-model="adminId" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    <option value="">كل المسؤولين</option>
-                    <option v-for="admin in admins" :key="admin.id" :value="admin.id">{{ admin.name }}</option>
-                </select>
-                <select v-model="action" @change="applyFilters" class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
-                    <option value="">كل الإجراءات</option>
-                    <option value="login">تسجيل دخول</option>
-                    <option value="create">إنشاء</option>
-                    <option value="update">تعديل</option>
-                    <option value="delete">حذف</option>
-                </select>
+                <div class="flex-1">
+                    <SearchableSelect
+                        v-model="adminId"
+                        :options="admins"
+                        option-label="name"
+                        option-value="id"
+                        placeholder="كل المسؤولين"
+                        compact
+                    />
+                </div>
+                <div class="flex-1">
+                    <SearchableSelect
+                        v-model="action"
+                        :options="actionOptions"
+                        option-label="label"
+                        option-value="value"
+                        placeholder="كل الإجراءات"
+                        compact
+                    />
+                </div>
             </div>
             
             <!-- Table -->
@@ -56,9 +65,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const actionOptions = computed(() => [
+    { value: 'login', label: 'تسجيل دخول' },
+    { value: 'create', label: 'إنشاء' },
+    { value: 'update', label: 'تعديل' },
+    { value: 'delete', label: 'حذف' },
+]);
 
 const props = defineProps({
     logs: Object,
