@@ -67,6 +67,14 @@ class PurchasingService
             ]);
         }
 
+        $part = \App\Models\Part::find($data['part_id']);
+        if ($part && !empty($data['purchase_unit_id'])) {
+            $part->update([
+                'purchase_unit_id' => $data['purchase_unit_id'],
+                'purchase_conversion_factor' => $data['purchase_conversion_factor'] ?? 1.0,
+            ]);
+        }
+
         return PurchaseOrderItem::create([
             'purchase_order_id' => $po->id,
             'part_id' => $data['part_id'],
@@ -222,14 +230,33 @@ class PurchasingService
         return DB::transaction(function () use ($grn, $userId) {
             $po = $grn->purchaseOrder;
 
+            // Load part relationship to access conversion factor
+            $grn->load('items.part');
+
             // Process each GRN item
             foreach ($grn->items as $grnItem) {
+                $part = $grnItem->part;
+
+                // Convert purchase qty → stock qty using the part's conversion factor
+                // e.g. 1 carton (purchase unit) × 12 (factor) = 12 pieces (stock unit)
+                $conversionFactor = (float) ($part?->purchase_conversion_factor ?? 1);
+                if ($conversionFactor <= 0) {
+                    $conversionFactor = 1;
+                }
+                $qtyInStock = round((float) $grnItem->qty_received * $conversionFactor, 4);
+
+                // Unit cost must also be adjusted per stock unit
+                // If 1 carton costs 120 and contains 12 pieces → cost per piece = 10
+                $unitCostPerStockUnit = $conversionFactor > 1
+                    ? round((float) $grnItem->unit_cost / $conversionFactor, 6)
+                    : (float) $grnItem->unit_cost;
+
                 // Create inventory receipt move
                 $move = $this->inventoryService->receipt(
                     warehouseId: $grn->warehouse_id,
                     partId: $grnItem->part_id,
-                    qty: (float) $grnItem->qty_received,
-                    unitCost: (float) $grnItem->unit_cost,
+                    qty: $qtyInStock,
+                    unitCost: $unitCostPerStockUnit,
                     userId: $userId,
                     referenceType: GrnItem::class,
                     referenceId: $grnItem->id,
@@ -239,7 +266,7 @@ class PurchasingService
                 // Link move to GRN item
                 $grnItem->update(['inventory_move_id' => $move->id]);
 
-                // Update PO item received qty
+                // Update PO item received qty (in purchase units, not stock units)
                 $poItem = $grnItem->purchaseOrderItem;
                 $poItem->increment('qty_received', $grnItem->qty_received);
             }
@@ -395,6 +422,14 @@ class PurchasingService
             $grnItems = [];
             if (!empty($data['items'])) {
                 foreach ($data['items'] as $item) {
+                    $part = \App\Models\Part::find($item['part_id']);
+                    if ($part && !empty($item['purchase_unit_id'])) {
+                        $part->update([
+                            'purchase_unit_id' => $item['purchase_unit_id'],
+                            'purchase_conversion_factor' => $item['purchase_conversion_factor'] ?? 1.0,
+                        ]);
+                    }
+
                     $poItem = PurchaseOrderItem::create([
                         'purchase_order_id' => $po->id,
                         'part_id' => $item['part_id'],

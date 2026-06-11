@@ -739,6 +739,7 @@
       "description": "وصف الخدمة",
       "description_placeholder": "أدخل وصف الخدمة...",
       "price": "سعر الخدمة",
+      "part_price": "سعر القطعة",
       "discount": "الخصم",
       "qty": "الكمية",
       "amount": "المبلغ",
@@ -807,7 +808,7 @@
       "odometer": "عداد الكيلومترات",
       "fuel_level": "مستوى الوقود",
       "na": "غير محدد",
-      "labor_services": "أجور الخدمات واليد العاملة",
+      "labor_services": "الخدمات ",
       "received_from": "استلمنا من السيد/ة",
       "amount_of": "مبلغاً وقدره",
       "for_label": "وذلك لقاء",
@@ -1709,7 +1710,9 @@
       "initial_stock": "الرصيد الافتتاحي",
       "min_stock": "الحد الأدنى للمخزون",
       "storage_location": "الموقع",
-      "allow_price_change": "تعديل السعر"
+      "allow_price_change": "تعديل السعر",
+      "purchase_unit_hint": "وحدة الشراء من المورد (إن اختلفت عن وحدة التخزين)",
+      "conversion_factor_hint": "كم وحدة تخزين = 1 وحدة شراء؟ مثال: كرتون = 12 قطعة"
     },
     "units": {
       "single": "وحدة",
@@ -1848,7 +1851,7 @@
       "code": "رمز المورد",
       "code_placeholder": "SUP-001",
       "name": "اسم المورد",
-      "contact": "جهة الاتصال",
+      "contact": "اسم المسئول ",
       "phone": "الهاتف",
       "email": "البريد الإلكتروني",
       "address": "العنوان",

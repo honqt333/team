@@ -20,6 +20,8 @@ class Part extends Model
         'name_ar',
         'name_en',
         'unit_id',
+        'purchase_unit_id',
+        'purchase_conversion_factor',
         'category_id',
         'description',
         'image_path',
@@ -43,11 +45,12 @@ class Part extends Model
     }
 
     protected $casts = [
-        'is_active' => 'boolean',
-        'default_sale_price' => 'decimal:2',
-        'min_sale_price' => 'decimal:2',
-        'min_qty' => 'decimal:3',
-        'reorder_qty' => 'decimal:3',
+        'is_active'                   => 'boolean',
+        'default_sale_price'          => 'decimal:2',
+        'min_sale_price'              => 'decimal:2',
+        'min_qty'                     => 'decimal:3',
+        'reorder_qty'                 => 'decimal:3',
+        'purchase_conversion_factor'  => 'decimal:4',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -62,6 +65,11 @@ class Part extends Model
     public function unit(): BelongsTo
     {
         return $this->belongsTo(InventoryUnit::class, 'unit_id');
+    }
+
+    public function purchaseUnit(): BelongsTo
+    {
+        return $this->belongsTo(InventoryUnit::class, 'purchase_unit_id');
     }
 
     public function category(): BelongsTo

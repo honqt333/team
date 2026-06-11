@@ -37,7 +37,7 @@
                         type="text" 
                         v-model="form.name"
                         class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                        :class="form.errors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'"
+                        :class="form.errors.name ? 'border-red-500 focus:ring-red-500' : (!form.name ? 'border-red-300 dark:border-red-800 focus:ring-indigo-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500')"
                     />
                     <p v-if="form.errors.name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.name }}</p>
                 </div>
@@ -50,7 +50,7 @@
                         type="text" 
                         v-model="form.contact_name"
                         class="w-full px-4 py-2.5 border rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:border-transparent transition-all"
-                        :class="form.errors.contact_name ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500'"
+                        :class="form.errors.contact_name ? 'border-red-500 focus:ring-red-500' : (!form.contact_name ? 'border-red-300 dark:border-red-800 focus:ring-indigo-500' : 'border-gray-300 dark:border-gray-600 focus:ring-indigo-500')"
                     />
                     <p v-if="form.errors.contact_name" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.contact_name }}</p>
                 </div>
@@ -80,7 +80,7 @@
                         mode="international"
                         :validCharactersOnly="false"
                         class="w-full text-sm rounded-xl bg-white dark:bg-gray-900 focus-within:ring-2 focus-within:border-transparent transition-all ltr"
-                        :class="form.errors.phone ? 'error-border' : 'border-gray-300 dark:border-gray-600'"
+                        :class="form.errors.phone ? 'error-border' : (!form.phone ? 'required-border' : 'border-gray-300 dark:border-gray-600')"
                     ></vue-tel-input>
                     <p v-if="form.errors.phone" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ form.errors.phone }}</p>
                 </div>
@@ -904,6 +904,12 @@ onUnmounted(() => {
 .vue-tel-input {
     border-radius: 0.75rem !important;
     border-color: #d1d5db !important; /* gray-300 */
+}
+.vue-tel-input.required-border {
+    border-color: #fca5a5 !important;
+}
+.dark .vue-tel-input.required-border {
+    border-color: #991b1b !important;
 }
 .vue-tel-input.error-border {
     border-color: #ef4444 !important;

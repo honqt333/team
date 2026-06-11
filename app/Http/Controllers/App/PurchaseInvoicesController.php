@@ -78,6 +78,8 @@ class PurchaseInvoicesController extends Controller
             'items.*.qty' => 'required|numeric|min:0.001',
             'items.*.unit_cost' => 'required|numeric|min:0',
             'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+            'items.*.purchase_unit_id' => 'nullable|exists:inventory_units,id',
+            'items.*.purchase_conversion_factor' => 'nullable|numeric|min:0.0001',
             'payments' => 'nullable|array',
             'payments.*.amount' => 'required|numeric|min:0.01',
             'payments.*.payment_method' => 'required|string',
@@ -438,16 +440,6 @@ class PurchaseInvoicesController extends Controller
         $this->authorize('managePayments', $purchaseReturnInvoice);
 
         $purchaseInvoice = $purchaseReturnInvoice->purchaseInvoice;
-
-        $hasPayments = $purchaseInvoice->payments()
-            ->where('type', \App\Models\Payment::TYPE_PAYMENT)
-            ->exists();
-
-        if (!$hasPayments) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'amount' => [__('payments.errors.cannot_refund_unpaid_invoice') ?? 'لا يمكن تسجيل دفعة مستردة لفاتورة شراء لم تدفع بعد']
-            ]);
-        }
 
         // Calculate current remaining balance on this return invoice
         $allRefunds = $purchaseInvoice->payments()

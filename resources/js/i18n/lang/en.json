@@ -813,6 +813,7 @@
       "description": "Service description",
       "description_placeholder": "Enter service description...",
       "price": "Service price",
+      "part_price": "Part price",
       "discount": "Discount",
       "qty": "Quantity",
       "amount": "Amount",
@@ -981,7 +982,9 @@
       "initial_stock": "Initial Stock",
       "min_stock": "Min Stock",
       "storage_location": "Location",
-      "allow_price_change": "Price Edit"
+      "allow_price_change": "Price Edit",
+      "purchase_unit_hint": "Unit used when purchasing from supplier (if different from storage unit)",
+      "conversion_factor_hint": "How many storage units = 1 purchase unit? e.g. 1 carton = 12 pieces"
     },
     "settings": {
       "title": "Inventory settings",

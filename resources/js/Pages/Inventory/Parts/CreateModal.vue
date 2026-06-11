@@ -139,6 +139,55 @@
                     </div>
                 </div>
 
+                <!-- Row 2b: وحدة الشراء ومعامل التحويل -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-blue-50/40 dark:bg-blue-900/10 p-4 rounded-2xl border border-blue-100 dark:border-blue-800/30">
+                    <!-- وحدة الشراء -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            {{ $t('purchasing.items.purchase_unit') }}
+                        </label>
+                        <SearchableSelect
+                            v-model="form.purchase_unit_id"
+                            :options="unitOptions"
+                            option-label="label"
+                            option-value="value"
+                            :label="''"
+                            :placeholder="$t('common.optional')"
+                            :error="form.errors.purchase_unit_id"
+                        />
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            {{ $t('inventory.parts.purchase_unit_hint') }}
+                        </p>
+                    </div>
+
+                    <!-- معامل التحويل -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                            {{ $t('purchasing.items.conversion_factor') }}
+                        </label>
+                        <div class="relative">
+                            <input
+                                v-model="form.purchase_conversion_factor"
+                                type="number"
+                                min="0.0001"
+                                step="0.0001"
+                                dir="ltr"
+                                lang="en"
+                                :disabled="!form.purchase_unit_id"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 shadow-sm font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+                                :placeholder="'1'"
+                            />
+                            <span v-if="form.purchase_unit_id" class="absolute inset-y-0 left-3 flex items-center text-xs text-gray-400 pointer-events-none">
+                                {{ unitOptions.find(u => u.value === form.purchase_unit_id)?.label }}
+                                &nbsp;=&nbsp;
+                            </span>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            {{ $t('inventory.parts.conversion_factor_hint') }}
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Row 3: Category only -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -413,6 +462,8 @@ const form = useForm({
     name_ar: '',
     name_en: '',
     unit_id: '',
+    purchase_unit_id: '',
+    purchase_conversion_factor: 1,
     category_id: '',
     description: '',
     min_qty: 0,
@@ -452,6 +503,8 @@ watch(() => props.part, (part) => {
         form.name_ar = part.name_ar;
         form.name_en = part.name_en;
         form.unit_id = part.unit_id;
+        form.purchase_unit_id = part.purchase_unit_id || '';
+        form.purchase_conversion_factor = parseFloat(part.purchase_conversion_factor) || 1;
         form.category_id = part.category_id;
         form.description = part.description;
         form.min_qty = parseFloat(part.min_qty || 0);
@@ -468,6 +521,8 @@ watch(() => props.part, (part) => {
         form.id = null;
         form.is_active = true;
         form.unit_id = props.units.length > 0 ? props.units[0].id : '';
+        form.purchase_unit_id = '';
+        form.purchase_conversion_factor = 1;
         form.image = null;
         form.remove_image = false;
         form.warehouse_data = getInitialWarehouseData();

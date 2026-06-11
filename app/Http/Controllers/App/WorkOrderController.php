@@ -333,7 +333,7 @@ class WorkOrderController
             'photos', 
             'departments',
             'payments' => fn($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
-            'parts.part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
+            'parts.part' => fn($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
             'attachments.user',
             'activities.user',
             'inspections.performedBy',

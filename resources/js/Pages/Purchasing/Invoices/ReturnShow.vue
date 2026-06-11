@@ -370,7 +370,7 @@
 
                     <!-- Add Refund Button -->
                     <button
-                        v-if="remainingTotal > 0.01 && hasPayments"
+                        v-if="remainingRefundToRecord > 0.01"
                         @click="showAddPaymentModal = true"
                         class="flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-rose-500/20 active:scale-95 shrink-0"
                     >
@@ -379,10 +379,6 @@
                         </svg>
                         <span>{{ $t('payments.add_payment') }}</span>
                     </button>
-                    <!-- Unpaid Invoice Warning -->
-                    <span v-else-if="remainingTotal > 0.01 && !hasPayments" class="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1">
-                        <span>⚠️</span> <span>{{ $t('payments.cannot_refund_unpaid') }}</span>
-                    </span>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -550,7 +546,7 @@
         <!-- Add Refund Payment Modal -->
         <PurchaseOrderPaymentModal
             :show="showAddPaymentModal"
-            :balance="remainingTotal"
+            :balance="remainingRefundToRecord"
             default-type="refund"
             @close="showAddPaymentModal = false"
             @saved="saveRefundPayment"
@@ -735,6 +731,10 @@ const remainingSubtotal = computed(() => {
 const remainingTax = computed(() => {
     if (!props.returnInvoice.total) return 0;
     return remainingTotal.value * (props.returnInvoice.tax_amount / props.returnInvoice.total);
+});
+
+const remainingRefundToRecord = computed(() => {
+    return Math.max(0, props.returnInvoice.total - refundPaymentsTotal.value);
 });
 
 const showAddPaymentModal = ref(false);

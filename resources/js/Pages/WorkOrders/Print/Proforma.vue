@@ -90,14 +90,16 @@ const mappedData = computed(() => {
     }));
 
     // Map parts
-    const parts = (props.allParts || []).map(part => ({
-        service_name: part.name || part.part?.name_ar || part.part?.name_en || '',
-        description: part.description || '',
-        qty: part.qty || 1,
-        unit_price: part.unit_price || 0,
-        discount: 0,
-        is_part: true
-    }));
+    const parts = (props.allParts || [])
+        .filter(part => !part.hide_on_print)
+        .map(part => ({
+            service_name: part.name || part.part?.name_ar || part.part?.name_en || '',
+            description: part.description || '',
+            qty: part.qty || 1,
+            unit_price: part.unit_price || 0,
+            discount: 0,
+            is_part: true
+        }));
 
     return {
         code: props.workOrder.code,

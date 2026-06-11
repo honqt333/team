@@ -305,15 +305,29 @@
 
                         <!-- Address Section -->
                         <div class="pt-6 border-t border-gray-200 dark:border-gray-700">
-                            <div class="flex items-center gap-2 text-gray-900 dark:text-white mb-4">
-                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <h3 class="text-lg font-semibold">{{ $t('company_profile.profile.address') }}</h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2 text-gray-900 dark:text-white">
+                                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                    <h3 class="text-lg font-semibold">{{ $t('company_profile.profile.address') }}</h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="fetchLocation"
+                                    :disabled="isLocating"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                >
+                                    <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': isLocating }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                    {{ isLocating ? $t('common.loading') : $t('customers.form.locate_me') }}
+                                </button>
                             </div>
 
                             <!-- Street Name -->
@@ -1305,6 +1319,77 @@ async function reverseGeocode(lat, lng) {
     }
 }
 
+const isLocating = ref(false);
+
+async function fetchLocation() {
+    isLocating.value = true;
+    
+    const useIpFallback = async () => {
+        console.log('[Company/Index] Falling back to IP-based geolocation...');
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            if (!response.ok) throw new Error('IP geolocation failed');
+            const data = await response.json();
+            if (data && data.latitude && data.longitude) {
+                const lat = parseFloat(data.latitude);
+                const lng = parseFloat(data.longitude);
+                console.log('[Company/Index] IP Geolocation success:', lat, lng);
+                
+                form.value.address.latitude = parseFloat(lat.toFixed(7));
+                form.value.address.longitude = parseFloat(lng.toFixed(7));
+                
+                if (map) {
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                        marker.on('dragend', onMarkerDrag);
+                    }
+                    map.setView([lat, lng], 13);
+                }
+                reverseGeocode(lat, lng);
+                isLocating.value = false;
+                return;
+            }
+        } catch (err) {
+            console.warn('[Company/Index] IP Geolocation failed:', err.message);
+        }
+        
+        isLocating.value = false;
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log('[Company/Index] Browser Geolocation success:', latitude, longitude);
+                
+                form.value.address.latitude = parseFloat(latitude.toFixed(7));
+                form.value.address.longitude = parseFloat(longitude.toFixed(7));
+                
+                if (map) {
+                    if (marker) {
+                        marker.setLatLng([latitude, longitude]);
+                    } else {
+                        marker = L.marker([latitude, longitude], { draggable: true }).addTo(map);
+                        marker.on('dragend', onMarkerDrag);
+                    }
+                    map.setView([latitude, longitude], 13);
+                }
+                reverseGeocode(latitude, longitude);
+                isLocating.value = false;
+            },
+            (error) => {
+                console.warn('[Company/Index] Browser Geolocation error:', error.message);
+                useIpFallback();
+            },
+            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+        );
+    } else {
+        useIpFallback();
+    }
+}
+
 // Watch for tab changes to init/destroy map
 watch(activeTab, async (newTab) => {
     if (newTab === 'contact') {
@@ -1312,6 +1397,9 @@ watch(activeTab, async (newTab) => {
         initMap();
         setTimeout(() => {
             if (map) map.invalidateSize();
+            if (!form.value.address.latitude && !form.value.address.longitude) {
+                fetchLocation();
+            }
         }, 300);
     } else {
         destroyMap();
@@ -1332,6 +1420,9 @@ onMounted(() => {
             initMap();
             setTimeout(() => {
                 if (map) map.invalidateSize();
+                if (!form.value.address.latitude && !form.value.address.longitude) {
+                    fetchLocation();
+                }
             }, 300);
         });
     }

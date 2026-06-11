@@ -608,6 +608,8 @@ const submit = () => {
             unit_cost: unitCost,
             tax_rate: form.tax_included ? (tenantTaxSettings.value?.parts_vat_rate || 15) : 0,
             notes: item.notes || '',
+            purchase_unit_id: item.purchase_unit_id || null,
+            purchase_conversion_factor: item.conversion_factor || 1,
         };
     });
 

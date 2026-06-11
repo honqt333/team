@@ -58,6 +58,7 @@ class PurchasingInvoicesController extends Controller
             ->get()
             ->groupBy('make_id');
         $warehouses = \App\Models\Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
+        $units = \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get();
 
         return Inertia::render('Purchasing/Sales/Index', [
             'invoices' => $invoices,
@@ -68,6 +69,7 @@ class PurchasingInvoicesController extends Controller
             'departments' => $departments,
             'modelsByMake' => $modelsByMake,
             'warehouses' => $warehouses,
+            'units' => $units,
         ]);
     }
 

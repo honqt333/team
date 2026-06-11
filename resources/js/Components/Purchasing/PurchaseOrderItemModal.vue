@@ -22,34 +22,23 @@
                     :asyncSearch="true"
                     @search="debouncedSearch"
                     @change="onPartSelected"
-                    option-label="name_ar"
+                    :option-label="getName"
                     option-value="id"
                     :label="`${$t('inventory.parts.search_label')} *`"
                     :placeholder="$t('inventory.parts.search_placeholder')"
                     :disabled="!!item"
                 >
-                    <template #option="{ option: part }">
-                        <div class="w-full flex items-center justify-between group transition-colors">
-                            <div class="text-start">
-                                <div class="font-bold text-gray-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                                    {{ part.name_ar }}
-                                </div>
-                                <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-xs font-mono bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded" dir="ltr" lang="en">
-                                        {{ part.sku }}
-                                    </span>
-                                    <span class="text-xs text-gray-500">
-                                        {{ part.unit?.name_ar || part.unit?.name_en }}
-                                    </span>
-                                </div>
+                    <template #option="{ option }">
+                        <div class="flex items-center justify-between w-full">
+                            <div>
+                                <div class="font-bold text-gray-900 dark:text-white text-start">{{ toEnglish(getName(option)) }}</div>
+                                <div class="text-[10px] text-emerald-600 font-bold mt-0.5 text-start">{{ formatCurrency(option.default_sale_price) }}</div>
                             </div>
-                            <div class="text-end">
-                                <div class="text-sm font-bold text-gray-900 dark:text-white" dir="ltr" lang="en">
-                                    {{ formatCurrency(part.cost_price) }}
-                                </div>
-                                <div class="text-xs font-medium mt-0.5" dir="ltr" lang="en" :class="{ 'text-red-500': part.stock_qty <= 0, 'text-green-600': part.stock_qty > 0 }">
-                                    {{ toEnglish(part.stock_qty) }} {{ $t('inventory.stock.in_stock') }}
-                                </div>
+                            <div class="text-right flex flex-col items-end">
+                                <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(option.sku || option.barcode || '---') }}</span>
+                                <span class="text-[10px] font-bold mt-0.5" :class="Number(option.inventory_balances_sum_qty_on_hand) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'">
+                                    {{ $t('inventory.stock.available') }}: {{ formatQuantity(option.inventory_balances_sum_qty_on_hand || 0) }}
+                                </span>
                             </div>
                         </div>
                     </template>
@@ -68,12 +57,12 @@
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ selectedPart.name_ar }}</h4>
+                    <h4 class="text-lg font-black text-gray-900 dark:text-white uppercase tracking-tight">{{ getName(selectedPart) }}</h4>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 font-mono font-bold tracking-widest" dir="ltr" lang="en">{{ selectedPart.sku }}</p>
                 </div>
-                <div v-if="selectedPart.stock_qty !== undefined" dir="ltr" lang="en"
+                <div v-if="selectedPart.inventory_balances_sum_qty_on_hand !== undefined || selectedPart.stock_qty !== undefined" dir="ltr" lang="en"
                     class="text-xs font-black px-3 py-1.5 bg-white dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-blue-800 text-blue-600 dark:text-blue-400 whitespace-nowrap shadow-sm">
-                    {{ toEnglish(selectedPart.stock_qty) }} {{ $t('inventory.stock.in_stock') }}
+                    {{ toEnglish(selectedPart.inventory_balances_sum_qty_on_hand !== undefined ? selectedPart.inventory_balances_sum_qty_on_hand : selectedPart.stock_qty) }} {{ $t('inventory.stock.in_stock') }}
                 </div>
             </div>
 
@@ -149,7 +138,7 @@
                     <SearchableSelect
                         v-model="form.purchase_unit_id"
                         :options="availableUnits"
-                        option-label="name_ar"
+                        :option-label="getName"
                         option-value="id"
                         :placeholder="$t('common.choose')"
                         :disabled="isUnitLocked"
@@ -284,7 +273,9 @@ const form = ref({
     conversion_factor: 1,
 });
 
-const { sanitizeInput, formatCurrency: formatCurrencyEn, toEnglish } = useNumberFormat();
+const { sanitizeInput, formatCurrency: formatCurrencyEn, formatQuantity, toEnglish } = useNumberFormat();
+import { useLocalized } from '@/Composables/useLocalized';
+const { getName } = useLocalized();
 
 const searchQuery = ref('');
 const searchResults = ref([]);
@@ -294,11 +285,9 @@ const isUnitLocked = ref(true);
 const defaultUnitId = ref(null);
 
 const availableUnits = computed(() => {
-    if (isUnitLocked.value) {
-        return props.units.filter(u => u.id === form.value.purchase_unit_id);
-    }
-    // When unlocked, show all units to allow selection and maintain visibility
-    return props.units;
+    return isUnitLocked.value
+        ? props.units.filter(u => u.id === form.value.purchase_unit_id)
+        : props.units;
 });
 
 const resetForm = () => {
@@ -315,6 +304,23 @@ const resetForm = () => {
     searchResults.value = [];
 };
 
+const debouncedSearch = debounce(async (query) => {
+    const q = query !== undefined && query !== null ? String(query) : '';
+    searchQuery.value = q;
+
+    searching.value = true;
+    try {
+        const response = await axios.get(route('app.inventory.parts.search'), {
+            params: { q }
+        });
+        searchResults.value = response.data;
+    } catch (error) {
+        console.error(error);
+    } finally {
+        searching.value = false;
+    }
+}, 300);
+
 watch(() => props.show, (newVal) => {
     if (newVal) {
         if (props.item) {
@@ -329,6 +335,7 @@ watch(() => props.show, (newVal) => {
         } else {
             resetForm();
             isUnitLocked.value = true;
+            debouncedSearch(''); // Pre-fetch parts when adding a new item
         }
     }
 }, { immediate: true });
@@ -374,29 +381,6 @@ const calculatedTotal = computed(() => {
     }
 });
 
-const debouncedSearch = debounce(async (query) => {
-    if (query && query.length >= 2) {
-        searchQuery.value = query;
-    }
-    
-    if (searchQuery.value.length < 2) {
-        searchResults.value = [];
-        return;
-    }
-
-    searching.value = true;
-    try {
-        const response = await axios.get(route('app.inventory.parts.search'), {
-            params: { q: searchQuery.value }
-        });
-        searchResults.value = response.data;
-    } catch (error) {
-        console.error(error);
-    } finally {
-        searching.value = false;
-    }
-}, 300);
-
 const onPartSelected = (id) => {
     if (!id) {
         selectedPart.value = null;
@@ -414,17 +398,13 @@ const selectPart = (part) => {
     form.value.part_id = part.id;
     form.value.unit_cost = part.cost_price || 0;
     
-    // Inherit unit from part and lock it
-    form.value.purchase_unit_id = part.unit_id;
-    defaultUnitId.value = part.unit_id;
+    // وحدة الشراء: إذا كانت محددة على القطعة استخدمها، وإلا استخدم وحدة التخزين كـ fallback
+    form.value.purchase_unit_id = part.purchase_unit_id || part.unit_id;
+    defaultUnitId.value = form.value.purchase_unit_id;
     isUnitLocked.value = true;
     
-    // Set conversion factor if available on part
-    if (part.purchase_conversion) {
-        form.value.conversion_factor = part.purchase_conversion;
-    } else {
-        form.value.conversion_factor = 1;
-    }
+    // معامل التحويل: من القطعة إذا وجد، وإلا 1
+    form.value.conversion_factor = parseFloat(part.purchase_conversion_factor) || 1;
     
     searchQuery.value = part.name_ar;
 };
@@ -432,11 +412,7 @@ const selectPart = (part) => {
 const resetUnit = () => {
     if (selectedPart.value) {
         form.value.purchase_unit_id = defaultUnitId.value;
-        if (selectedPart.value.purchase_conversion) {
-            form.value.conversion_factor = selectedPart.value.purchase_conversion;
-        } else {
-            form.value.conversion_factor = 1;
-        }
+        form.value.conversion_factor = parseFloat(selectedPart.value.purchase_conversion_factor) || 1;
     }
     isUnitLocked.value = true;
 };

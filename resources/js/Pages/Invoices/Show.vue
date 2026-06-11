@@ -217,65 +217,71 @@
                         {{ $t('work_orders.cost_and_payment') }}
                     </h3>
 
-                    <div class="overflow-x-auto flex-1">
-                        <table class="w-full text-sm">
+                    <div class="overflow-x-auto md:overflow-x-visible flex-1">
+                        <table class="w-full min-w-[600px] md:min-w-0 text-sm">
                             <thead>
                                 <tr class="text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700/50 pb-2">
-                                    <th class="pb-2 text-start font-bold uppercase tracking-wider align-middle text-center">{{ $t('common.description') }}</th>
-                                    <th colspan="2" class="pb-2 align-middle text-center"></th>
-                                    <th class="pb-2 text-end font-bold uppercase tracking-wider text-gray-900 dark:text-white align-middle text-center">{{ $t('common.total') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('common.description') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('common.unit_price') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic align-middle">{{ $t('common.discount') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('common.amount') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic align-middle">{{ $t('common.vat') }}</th>
+                                    <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white align-middle">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-100/70 dark:divide-gray-700/30">
-                                <!-- Gross Total Row -->
-                                <tr class="group text-gray-700 dark:text-gray-300">
-                                    <td class="py-3 font-semibold align-middle">{{ $t('invoices.gross_total') }}</td>
-                                    <td colspan="2" class="py-3 align-middle"></td>
-                                    <td class="py-3 text-end font-bold font-mono text-gray-900 dark:text-white align-middle">{{ formatCurrency(grossTotal) }}</td>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
+                                <!-- Services Row -->
+                                <tr v-if="servicesSubtotal > 0" class="group">
+                                    <td class="py-2.5 text-center font-bold text-gray-900 dark:text-white align-middle">{{ $t('work_orders.services') }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(servicesGross) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-red-500 italic align-middle">{{ servicesDiscount > 0 ? '-' + formatCurrency(servicesDiscount) : '—' }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(servicesSubtotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(servicesTax) }}</td>
+                                    <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(servicesTotal) }}</td>
                                 </tr>
 
-                                <!-- Discount Row -->
-                                <tr v-if="discount > 0.01" class="group text-rose-600 dark:text-rose-400">
-                                    <td class="py-3 font-semibold flex items-center gap-1 align-middle">
-                                        <span>{{ $t('invoices.discount') }}</span>
-                                    </td>
-                                    <td colspan="2" class="py-3 align-middle"></td>
-                                    <td class="py-3 text-end font-bold font-mono align-middle">-{{ formatCurrency(discount) }}</td>
+                                <!-- Spare Parts Row -->
+                                <tr v-if="partsSubtotal > 0" class="group">
+                                    <td class="py-2.5 text-center font-bold text-gray-900 dark:text-white align-middle">{{ $t('quotes.show.tabs.spare_parts') }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(partsGross) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-red-500 italic align-middle">{{ partsDiscountAmt > 0 ? '-' + formatCurrency(partsDiscountAmt) : '—' }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(partsSubtotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(partsTax) }}</td>
+                                    <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(partsTotal) }}</td>
                                 </tr>
 
-                                <!-- Subtotal (Taxable Amount) Row -->
-                                <tr class="group text-gray-700 dark:text-gray-300">
-                                    <td class="py-3 font-semibold align-middle">{{ $t('invoices.subtotal') }}</td>
-                                    <td colspan="2" class="py-3 align-middle"></td>
-                                    <td class="py-3 text-end font-bold font-mono text-gray-950 dark:text-white align-middle">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
-                                </tr>
-
-                                <!-- VAT Row -->
-                                <tr class="group text-sky-650 dark:text-sky-400">
-                                    <td class="py-3 font-semibold align-middle">{{ $t('invoices.tax') }} ({{ invoice.tax_rate_snapshot }}%)</td>
-                                    <td colspan="2" class="py-3 align-middle"></td>
-                                    <td class="py-3 text-end font-bold font-mono align-middle">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
-                                </tr>
-
-                                <!-- Grand Total Row -->
-                                <tr class="bg-blue-50/50 dark:bg-blue-900/10 font-black border-t border-blue-100 dark:border-blue-800 text-blue-950 dark:text-blue-300">
-                                    <td class="py-3.5 text-base font-black uppercase text-blue-900 dark:text-blue-400 align-middle">{{ $t('invoices.grand_total') }}</td>
-                                    <td colspan="2" class="py-3.5 align-middle"></td>
-                                    <td class="py-3.5 text-end font-black font-mono text-xl text-blue-600 dark:text-blue-400 align-middle">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
+                                <!-- Fallback row if no work_order lines breakdown -->
+                                <tr v-if="servicesSubtotal === 0 && partsSubtotal === 0" class="group">
+                                    <td class="py-2.5 text-center font-bold text-gray-900 dark:text-white align-middle">{{ $t('invoices.invoice') }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(grossTotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-red-500 italic align-middle">{{ discount > 0 ? '-' + formatCurrency(discount) : '—' }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
+                                    <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
                                 </tr>
 
                                 <!-- Paid Row -->
                                 <tr class="group text-emerald-600 dark:text-emerald-400">
-                                    <td class="py-3 font-bold align-middle">{{ $t('invoices.paid') }}</td>
-                                    <td colspan="2" class="py-3 align-middle"></td>
-                                    <td class="py-3 text-end font-black font-mono text-base align-middle">{{ formatCurrency(invoice.total_paid) }}</td>
+                                    <td class="py-2.5 text-center font-bold align-middle">{{ $t('invoices.paid') }}</td>
+                                    <td colspan="4" class="py-2.5 align-middle"></td>
+                                    <td class="py-2.5 text-center font-black font-mono text-base align-middle">{{ formatCurrency(invoice.total_paid) }}</td>
                                 </tr>
 
                                 <!-- Balance Row -->
-                                <tr class="group text-red-650 dark:text-red-400">
-                                    <td class="py-3 font-bold align-middle">{{ $t('invoices.balance') }}</td>
-                                    <td colspan="2" class="py-3 align-middle"></td>
-                                    <td class="py-3 text-end font-black font-mono text-base align-middle" :class="balance > 0.01 ? 'text-red-650 dark:text-red-400' : 'text-emerald-650 dark:text-emerald-400'">{{ formatCurrency(balance) }}</td>
+                                <tr class="group" :class="balance > 0.01 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'">
+                                    <td class="py-2.5 text-center font-bold align-middle">{{ $t('invoices.balance') }}</td>
+                                    <td colspan="4" class="py-2.5 align-middle"></td>
+                                    <td class="py-2.5 text-center font-black font-mono text-base align-middle">{{ formatCurrency(balance) }}</td>
+                                </tr>
+
+                                <!-- Grand Total Summary Row -->
+                                <tr class="bg-blue-50 dark:bg-blue-900/10 font-black border-t-2 border-blue-200 dark:border-blue-800">
+                                    <td class="py-2.5 text-center text-blue-900 dark:text-blue-400 font-black uppercase align-middle">{{ $t('invoices.grand_total') }}</td>
+                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(grossTotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-red-600 italic align-middle">{{ discount > 0 ? '-' + formatCurrency(discount) : '—' }}</td>
+                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
+                                    <td class="py-2.5 text-center font-black text-blue-600 dark:text-blue-400 font-mono text-xl align-middle">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -551,6 +557,51 @@ const discount = computed(() => {
 const grossTotal = computed(() => {
     return calculatedInvoiceSubtotal.value + discount.value;
 });
+
+// ── Services breakdown ──────────────────────────────────────
+const servicesDiscount = computed(() => {
+    if (!props.invoice.work_order) return 0;
+    return props.invoice.work_order.items?.reduce((sum, item) => sum + Number(item.discount_amount || 0), 0) || 0;
+});
+
+const servicesSubtotal = computed(() => {
+    return (props.invoice.lines || [])
+        .filter(l => !l.is_part)
+        .reduce((sum, l) => sum + Number(l.line_total_excl_tax || 0), 0);
+});
+
+const servicesGross = computed(() => servicesSubtotal.value + servicesDiscount.value);
+
+const servicesTax = computed(() => {
+    return (props.invoice.lines || [])
+        .filter(l => !l.is_part)
+        .reduce((sum, l) => sum + Number(l.tax_amount || 0), 0);
+});
+
+const servicesTotal = computed(() => servicesSubtotal.value + servicesTax.value);
+
+// ── Spare Parts breakdown ───────────────────────────────────
+const partsDiscountAmt = computed(() => {
+    if (!props.invoice.work_order) return 0;
+    return props.invoice.work_order.parts?.reduce((sum, part) => sum + Number(part.discount || 0), 0) || 0;
+});
+
+const partsSubtotal = computed(() => {
+    return (props.invoice.lines || [])
+        .filter(l => l.is_part)
+        .reduce((sum, l) => sum + Number(l.line_total_excl_tax || 0), 0);
+});
+
+const partsGross = computed(() => partsSubtotal.value + partsDiscountAmt.value);
+
+const partsTax = computed(() => {
+    return (props.invoice.lines || [])
+        .filter(l => l.is_part)
+        .reduce((sum, l) => sum + Number(l.tax_amount || 0), 0);
+});
+
+const partsTotal = computed(() => partsSubtotal.value + partsTax.value);
+
 
 const onPaymentSaved = (paymentData) => {
     router.post(route('app.invoices.payments.store', props.invoice.id), paymentData, {

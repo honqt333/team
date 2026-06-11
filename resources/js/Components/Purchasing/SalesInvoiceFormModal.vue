@@ -15,7 +15,7 @@
 
         <form @submit.prevent="submitForm" class="space-y-6">
             <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <!-- Customer Selection -->
                     <div class="md:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
@@ -25,7 +25,7 @@
                             option-label="label" option-value="value"
                             :placeholder="$t('common.select_customer')" class="w-full" />
                     </div>
-                    <div>
+                    <div class="md:col-span-1">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {{ $t('invoices.issue_date') }} <span class="text-red-500">*</span>
                         </label>
@@ -201,6 +201,7 @@
         :show="showPartModal" 
         :workOrder="mockWorkOrderForTax"
         :warehouses="warehouses"
+        :units="units"
         :pendingMode="true"
         :showServiceSelect="false"
         @close="showPartModal = false" 
@@ -236,7 +237,8 @@ import { useToast } from '@/Composables/useToast';
 const props = defineProps({
     show: Boolean,
     customers: { type: Array, default: () => [] },
-    warehouses: { type: Array, default: () => [] }
+    warehouses: { type: Array, default: () => [] },
+    units: { type: Array, default: () => [] }
 });
 
 const emit = defineEmits(['close', 'saved']);

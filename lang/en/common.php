@@ -43,4 +43,13 @@ return [
     'error_occurred' => 'An error occurred',
     'error_alert_title' => 'There were errors with your submission',
     'vat_settings_updated' => 'VAT settings updated successfully. Please login again.',
+    // Address fields
+    'building' => 'Building',
+    'street' => 'Street',
+    'district' => 'District',
+    'postal_code' => 'Postal Code',
+    'na' => 'N/A',
+    'address' => 'Address',
+    'supplier' => 'Supplier',
 ];
+

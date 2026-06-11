@@ -48,12 +48,24 @@ class SupplierRequest extends FormRequest
             'country' => 'nullable|string|max:255',
             'lat' => 'nullable|numeric|between:-90,90',
             'lng' => 'nullable|numeric|between:-180,180',
-            'tax_number' => 'nullable|string|max:20',
+            'tax_number' => ['nullable', 'string', 'regex:/^\d{15}$/'],
             'cr_number' => 'nullable|string|max:20',
             'bank_name' => 'nullable|string|max:255',
             'iban' => 'nullable|string|max:34',
             'notes' => 'nullable|string|max:1000',
             'is_active' => 'sometimes|boolean',
+        ];
+    }
+
+    /**
+     * Get the error messages for the defined validation rules.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'tax_number.regex' => __('validation.tax_number_invalid'),
         ];
     }
 }

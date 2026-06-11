@@ -140,4 +140,55 @@ class SuppliersIsolationTest extends TestCase
             'name' => 'Supplier Center B', // Name should not be updated
         ]);
     }
+
+    public function test_supplier_tax_number_validation(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'purchasing.suppliers.create',
+        ]);
+
+        // 1. Valid 15-digit tax number passes
+        $response = $this->actingAs($user)->post('/app/purchasing/suppliers', [
+            'name' => 'Supplier A',
+            'type' => 'parts',
+            'contact_person' => 'Jane Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '123456789012345',
+        ]);
+        $response->assertRedirect();
+        $this->assertDatabaseHas('suppliers', [
+            'name' => 'Supplier A',
+            'tax_number' => '123456789012345',
+        ]);
+
+        // 2. Short tax number (14 digits) fails
+        $response = $this->actingAs($user)->post('/app/purchasing/suppliers', [
+            'name' => 'Supplier B',
+            'type' => 'parts',
+            'contact_person' => 'Jane Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '12345678901234',
+        ]);
+        $response->assertSessionHasErrors(['tax_number']);
+
+        // 3. Long tax number (16 digits) fails
+        $response = $this->actingAs($user)->post('/app/purchasing/suppliers', [
+            'name' => 'Supplier C',
+            'type' => 'parts',
+            'contact_person' => 'Jane Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '1234567890123456',
+        ]);
+        $response->assertSessionHasErrors(['tax_number']);
+
+        // 4. Non-numeric tax number fails
+        $response = $this->actingAs($user)->post('/app/purchasing/suppliers', [
+            'name' => 'Supplier D',
+            'type' => 'parts',
+            'contact_person' => 'Jane Doe',
+            'phone' => '+966501234567',
+            'tax_number' => '12345678901234a',
+        ]);
+        $response->assertSessionHasErrors(['tax_number']);
+    }
 }

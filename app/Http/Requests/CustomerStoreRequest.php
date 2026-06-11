@@ -29,7 +29,11 @@ class CustomerStoreRequest extends FormRequest
         return [
             'type' => ['required', 'string', Rule::in(['individual', 'company', 'government', 'vip'])],
             'name' => ['required', 'string', 'max:255'],
-            'contact_name' => ['nullable', 'string', 'max:255', 'required_if:type,company', 'required_if:type,government'],
+            'contact_name' => [
+                Rule::requiredIf(fn () => in_array($this->type, ['company', 'government'])),
+                'string',
+                'max:255'
+            ],
             'phone' => [
                 'required',
                 'string',

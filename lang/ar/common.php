@@ -43,4 +43,12 @@ return [
     'error_occurred' => 'حدث خطأ ما',
     'error_alert_title' => 'يوجد أخطاء في البيانات المدخلة',
     'vat_settings_updated' => 'تم تحديث إعدادات الضريبة بنجاح. يرجى تسجيل الدخول مرة أخرى.',
+    // Address fields
+    'building' => 'مبنى',
+    'street' => 'شارع',
+    'district' => 'حي',
+    'postal_code' => 'الرمز البريدي',
+    'na' => 'غير متوفر',
+    'address' => 'العنوان',
+    'supplier' => 'المورد',
 ];

@@ -648,7 +648,6 @@ const submit = () => {
         }
     };
 
-    // Transform items for backend: convert inclusive unit cost to tax-exclusive unit cost for the DB
     const transformedItems = form.items.map(item => {
         let unitCost = Number(item.unit_cost) || 0;
         if (form.tax_included && tenantTaxSettings.value?.vat_enabled) {
@@ -660,8 +659,8 @@ const submit = () => {
             qty_ordered: item.qty,
             unit_cost: unitCost,
             tax_rate: form.tax_included ? (tenantTaxSettings.value?.parts_vat_rate || 15) : 0,
-            // discount is not supported by backend yet, so we ignore it or handle via notes?
-            // For now we just send required fields.
+            purchase_unit_id: item.purchase_unit_id || null,
+            purchase_conversion_factor: item.conversion_factor || 1,
         };
     });
 

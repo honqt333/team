@@ -183,6 +183,7 @@ const selectOption = (option) => {
 };
 
 const clearSelection = (e) => {
+    if (props.disabled) return;
     e.stopPropagation(); 
     emit('update:modelValue', null);
     emit('change', null);
@@ -291,7 +292,7 @@ const scrollToHighlighted = () => {
                 </svg>
             </div>
              <!-- Clear Button (Only when selected and closed) -->
-            <div v-if="selectedOption && !isOpen && !required" 
+            <div v-if="selectedOption && !isOpen && !required && !disabled" 
                 class="absolute inset-y-0 end-0 flex items-center pe-3 cursor-pointer group"
                 @click="clearSelection"
             >

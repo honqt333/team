@@ -46,7 +46,7 @@ onMounted(() => {
 const startInspection = () => {
     inspectionForm.value.results = items.value.map(item => ({
         item_id: item.id,
-        status: 'good',
+        status: 'na',
         notes: ''
     }));
     showNewInspectionModal.value = true;

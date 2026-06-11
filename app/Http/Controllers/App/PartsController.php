@@ -83,6 +83,8 @@ class PartsController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'unit_id' => 'required|exists:inventory_units,id',
+            'purchase_unit_id' => 'nullable|exists:inventory_units,id',
+            'purchase_conversion_factor' => 'nullable|numeric|min:0.0001',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'image' => 'nullable|image|max:2048',
@@ -147,6 +149,8 @@ class PartsController extends Controller
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
             'unit_id' => 'required|exists:inventory_units,id',
+            'purchase_unit_id' => 'nullable|exists:inventory_units,id',
+            'purchase_conversion_factor' => 'nullable|numeric|min:0.0001',
             'category_id' => 'nullable|exists:inventory_categories,id',
             'description' => 'nullable|string|max:1000',
             'image' => 'nullable|image|max:2048',
@@ -337,7 +341,7 @@ class PartsController extends Controller
         $parts = Part::forTenant($tenantId)
             ->active()
             ->search($request->input('q'))
-            ->with(['unit'])
+            ->with(['unit', 'purchaseUnit', 'inventoryBalances.warehouse'])
             ->withSum('inventoryBalances', 'qty_on_hand')
             ->when($request->boolean('hide_out_of_stock'), function($query) {
                 $query->having('inventory_balances_sum_qty_on_hand', '>', 0);

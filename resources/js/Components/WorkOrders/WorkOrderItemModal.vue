@@ -147,7 +147,7 @@
                             type="number"
                             step="0.01"
                             min="0"
-                            :placeholder="$t('work_orders.item.price')"
+                            :placeholder="$t('work_orders.item.part_price')"
                             class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm"
                         />
                     </div>

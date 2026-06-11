@@ -548,7 +548,7 @@
                 <div v-if="visualSettings.show_stamp && (previewMode || centerData.stamp_url || visualSettings.stamp_url)" class="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none -rotate-12 z-10 select-none">
                     <img v-if="centerData.stamp_url || visualSettings.stamp_url" :src="centerData.stamp_url || visualSettings.stamp_url" class="w-28 h-28 object-contain" />
                     <!-- Fallback premium stamp design in SVG if in preview mode and image not provided -->
-                    <svg v-else-if="previewMode" class="w-28 h-28 text-emerald-600/80" fill="none" viewBox="0 0 100 100" stroke="currentColor">
+                    <svg v-else-if="previewMode" class="w-28 h-28 text-emerald-600/80 print:hidden" fill="none" viewBox="0 0 100 100" stroke="currentColor">
                         <circle cx="50" cy="50" r="45" stroke-width="2.5" stroke-dasharray="3 3"/>
                         <circle cx="50" cy="50" r="38" stroke-width="1.5"/>
                         <text x="50" y="38" font-size="6" font-weight="bold" fill="currentColor" text-anchor="middle" font-family="sans-serif">خدمة برو</text>

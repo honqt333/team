@@ -11,7 +11,7 @@
                 badgeText="text-blue-600 dark:text-blue-400" badgeBorder="border-blue-100/50 dark:border-blue-800/30"
                 badgeDot="bg-blue-500">
                 <template #back>
-                    <BackButton :href="route('app.purchasing.purchases.index')" />
+                    <BackButton :href="route('app.purchasing.hub')" />
                 </template>
 
                 <template #icon>
@@ -398,7 +398,7 @@
         <!-- Create Modal -->
         <SalesInvoiceFormModal v-if="showCreateModal" :show="showCreateModal" :customers="customers"
             :departments="departments" :makes="makes" :colors="colors" :modelsByMake="modelsByMake"
-            :warehouses="warehouses" @close="showCreateModal = false" @saved="handleSaved" />
+            :warehouses="warehouses" :units="units" @close="showCreateModal = false" @saved="handleSaved" />
     </AppLayout>
 </template>
 
@@ -434,6 +434,7 @@ const props = defineProps({
     modelsByMake: { type: Object, default: () => ({}) },
     departments: { type: Array, default: () => [] },
     warehouses: { type: Array, default: () => [] },
+    units: { type: Array, default: () => [] },
 });
 
 const { can, isAnyAdmin } = usePermission();

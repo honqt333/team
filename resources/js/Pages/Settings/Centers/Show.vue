@@ -161,7 +161,21 @@
                         </div>
 
                         <!-- Address Section -->
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white pt-4">{{ $t('center_settings.address.title') }}</h3>
+                        <div class="flex items-center justify-between pt-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('center_settings.address.title') }}</h3>
+                            <button
+                                type="button"
+                                @click="fetchLocation"
+                                :disabled="isLocating"
+                                class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                                <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': isLocating }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                {{ isLocating ? $t('common.loading') : $t('customers.form.locate_me') }}
+                            </button>
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.address.street') }}</label>
@@ -685,6 +699,75 @@ function destroyMap() {
     }
 }
 
+const isLocating = ref(false);
+
+async function fetchLocation() {
+    isLocating.value = true;
+    
+    const useIpFallback = async () => {
+        console.log('[Centers/Show] Falling back to IP-based geolocation...');
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            if (!response.ok) throw new Error('IP geolocation failed');
+            const data = await response.json();
+            if (data && data.latitude && data.longitude) {
+                const lat = parseFloat(data.latitude);
+                const lng = parseFloat(data.longitude);
+                console.log('[Centers/Show] IP Geolocation success:', lat, lng);
+                
+                form.value.address.latitude = parseFloat(lat.toFixed(7));
+                form.value.address.longitude = parseFloat(lng.toFixed(7));
+                
+                if (map) {
+                    if (marker) {
+                        marker.setLatLng([lat, lng]);
+                    } else {
+                        marker = L.marker([lat, lng]).addTo(map);
+                    }
+                    map.setView([lat, lng], 13);
+                }
+                reverseGeocode(lat, lng);
+                isLocating.value = false;
+                return;
+            }
+        } catch (err) {
+            console.warn('[Centers/Show] IP Geolocation failed:', err.message);
+        }
+        
+        isLocating.value = false;
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log('[Centers/Show] Browser Geolocation success:', latitude, longitude);
+                
+                form.value.address.latitude = parseFloat(latitude.toFixed(7));
+                form.value.address.longitude = parseFloat(longitude.toFixed(7));
+                
+                if (map) {
+                    if (marker) {
+                        marker.setLatLng([latitude, longitude]);
+                    } else {
+                        marker = L.marker([latitude, longitude]).addTo(map);
+                    }
+                    map.setView([latitude, longitude], 13);
+                }
+                reverseGeocode(latitude, longitude);
+                isLocating.value = false;
+            },
+            (error) => {
+                console.warn('[Centers/Show] Browser Geolocation error:', error.message);
+                useIpFallback();
+            },
+            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+        );
+    } else {
+        useIpFallback();
+    }
+}
+
 // Watch for tab change to init map when contact tab is active
 watch(activeTab, async (newTab) => {
     if (newTab === 'contact') {
@@ -692,13 +775,21 @@ watch(activeTab, async (newTab) => {
         setTimeout(() => {
             initMap();
             if (map) map.invalidateSize();
+            if (!form.value.address.latitude && !form.value.address.longitude) {
+                fetchLocation();
+            }
         }, 100);
     }
 });
 
 onMounted(() => {
     if (activeTab.value === 'contact') {
-        setTimeout(initMap, 100);
+        setTimeout(() => {
+            initMap();
+            if (!form.value.address.latitude && !form.value.address.longitude) {
+                fetchLocation();
+            }
+        }, 100);
     }
 });
 

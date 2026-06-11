@@ -538,17 +538,20 @@
                             <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('work_orders.item.tab_notes') }}</h3>
                         </div>
                         <div v-if="workOrderNotes.length > 0" class="space-y-4">
-                            <div v-for="note in workOrderNotes" :key="note.id" @click="router.visit(route('work-orders.show', note.id))"
+                            <div v-for="note in workOrderNotes" :key="note.id" @click="router.visit(route('work-orders.show', note.work_order_id))"
                                 class="group relative bg-white dark:bg-gray-800 rounded-3xl p-6 border border-gray-150 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-md cursor-pointer transition-all">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 border-b border-gray-100 dark:border-gray-700 pb-3">
-                                    <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center">#{{ toEnglish(note.code) }}</span>
+                                    <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center">#{{ toEnglish(note.work_order_code) }}</span>
                                     <span class="text-xs font-medium text-gray-400">{{ formatDate(note.created_at) }}</span>
                                 </div>
-                                <div class="text-start">
-                                    <!-- General Notes -->
-                                    <div v-if="note.notes" class="space-y-1">
-                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.notes }}</p>
+                                <div class="text-start space-y-2">
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-bold">
+                                        <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span>{{ note.user_name }}</span>
                                     </div>
+                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">{{ note.content }}</p>
                                 </div>
                             </div>
                         </div>

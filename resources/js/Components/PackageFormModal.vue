@@ -57,11 +57,6 @@
                         </svg>
                         {{ $t('packages.items') }}
                     </h3>
-                    <button type="button" @click="calculateTotal"
-                        class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
-                        v-if="form.items.length > 0">
-                        {{ $t('packages.calculate_total') }}
-                    </button>
                 </div>
 
                 <div class="p-4 space-y-4 rounded-b-xl">
@@ -132,9 +127,16 @@
 
                 <!-- Base Price -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                        {{ $t('pricing.base_price') }} <span class="text-red-500">*</span>
-                    </label>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {{ $t('pricing.base_price') }} <span class="text-red-500">*</span>
+                        </label>
+                        <button type="button" @click="calculateTotal"
+                            class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                            v-if="form.items.length > 0">
+                            {{ $t('packages.calculate_total') }}
+                        </button>
+                    </div>
                     <div class="relative">
                         <input type="number" v-model.number="form.base_price" inputmode="decimal" lang="en" step="0.01"
                             min="0"

@@ -94,7 +94,8 @@
                         v-model="form.tax_number"
                         type="text"
                         dir="ltr"
-                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 focus:border-indigo-500 dark:focus:border-indigo-500 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600"
+                        maxlength="15"
+                        :class="['w-full px-4 py-2.5 rounded-xl border bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 dark:focus:ring-indigo-500/20 shadow-sm transition-all placeholder-gray-400 dark:placeholder-gray-600', form.errors.tax_number ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-gray-300 dark:border-gray-600 focus:border-indigo-500 dark:focus:border-indigo-500']"
                     />
                     <p v-if="form.errors.tax_number" class="mt-1.5 text-sm text-red-500">{{ form.errors.tax_number }}</p>
                 </div>
@@ -137,13 +138,28 @@
                             </svg>
                             {{ $t('purchasing.suppliers.address_details') }}
                         </h3>
-                         <button
-                            type="button"
-                            @click="clearAddressFields"
-                            class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                        >
-                            {{ $t('purchasing.suppliers.clear_address') }}
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button
+                                type="button"
+                                @click="fetchLocation"
+                                :disabled="isLocating"
+                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                :title="$t('customers.form.locate_me')"
+                            >
+                                <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': isLocating }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                </svg>
+                                {{ isLocating ? $t('common.loading') : $t('customers.form.locate_me') }}
+                            </button>
+                            <button
+                                type="button"
+                                @click="clearAddressFields"
+                                class="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            >
+                                {{ $t('purchasing.suppliers.clear_address') }}
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -419,6 +435,79 @@ watch(() => form.phone, (newPhone, oldPhone) => {
     }
 });
 
+watch(() => form.tax_number, (newVal) => {
+    if (newVal) {
+        const converted = convertArabicToEnglish(newVal).replace(/[^\d]/g, '').slice(0, 15);
+        if (converted !== newVal) {
+            form.tax_number = converted;
+        }
+    }
+    if (form.errors.tax_number) form.clearErrors('tax_number');
+});
+
+const isLocating = ref(false);
+
+async function fetchLocation() {
+    isLocating.value = true;
+    
+    const useIpFallback = async () => {
+        console.log('[CreateModal] Falling back to IP-based geolocation...');
+        try {
+            const response = await fetch('https://ipapi.co/json/');
+            if (!response.ok) throw new Error('IP geolocation failed');
+            const data = await response.json();
+            if (data && data.latitude && data.longitude) {
+                const lat = parseFloat(data.latitude);
+                const lng = parseFloat(data.longitude);
+                console.log('[CreateModal] IP Geolocation success:', lat, lng);
+                
+                form.lat = parseFloat(lat.toFixed(7));
+                form.lng = parseFloat(lng.toFixed(7));
+                
+                if (map) {
+                    setMarker(lat, lng);
+                } else {
+                    reverseGeocode(form.lat, form.lng);
+                }
+                return;
+            }
+        } catch (err) {
+            console.warn('[CreateModal] IP Geolocation failed:', err.message);
+        }
+        
+        isLocating.value = false;
+        nextTick(() => {
+            initialFormData.value = JSON.stringify(form.data());
+            isDirty.value = false;
+        });
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log('[CreateModal] Browser Geolocation success:', latitude, longitude);
+                
+                form.lat = parseFloat(latitude.toFixed(7));
+                form.lng = parseFloat(longitude.toFixed(7));
+                
+                if (map) {
+                    setMarker(latitude, longitude);
+                } else {
+                    reverseGeocode(form.lat, form.lng);
+                }
+            },
+            (error) => {
+                console.warn('[CreateModal] Browser Geolocation error:', error.message);
+                useIpFallback();
+            },
+            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+        );
+    } else {
+        useIpFallback();
+    }
+}
+
 // Map Methods
 watch(() => props.show, async (open) => {
     if (open) {
@@ -426,6 +515,7 @@ watch(() => props.show, async (open) => {
             form.reset();
             form.type = 'parts';
             form.is_active = true;
+            fetchLocation();
         }
         await nextTick();
         initMap();

@@ -9,12 +9,27 @@
                 <SearchableSelect
                     v-model="form.part_id"
                     :options="parts"
-                    option-label="name"
+                    :option-label="getName"
                     option-value="id"
                     :placeholder="$t('inventory.parts.search_placeholder')"
-                    :searchable="true"
+                    :async-search="true"
                     @search="searchParts"
-                />
+                >
+                    <template #option="{ option }">
+                        <div class="flex items-center justify-between w-full">
+                            <div>
+                                <div class="font-bold text-gray-900 dark:text-white text-start">{{ toEnglish(getName(option)) }}</div>
+                                <div class="text-[10px] text-emerald-600 font-bold mt-0.5 text-start">{{ formatCurrency(option.default_sale_price) }}</div>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <span class="text-[10px] font-mono text-gray-500">{{ toEnglish(option.sku || option.barcode || '---') }}</span>
+                                <span class="text-[10px] font-bold mt-0.5" :class="Number(option.inventory_balances_sum_qty_on_hand) > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'">
+                                    {{ $t('inventory.stock.available') }}: {{ formatQuantity(option.inventory_balances_sum_qty_on_hand || 0) }}
+                                </span>
+                            </div>
+                        </div>
+                    </template>
+                </SearchableSelect>
                 <p v-if="errors.part_id" class="mt-1 text-sm text-red-500">{{ errors.part_id }}</p>
             </div>
 
@@ -92,6 +107,7 @@ import BaseModal from '@/Components/BaseModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import axios from 'axios';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { useLocalized } from '@/Composables/useLocalized';
 
 const props = defineProps({
     show: Boolean,
@@ -102,6 +118,7 @@ const emit = defineEmits(['close', 'saved']);
 
 const { success, error: showError } = useToast();
 const { formatQuantity, formatCurrency, toEnglish, sanitizeInput } = useNumberFormat();
+const { getName } = useLocalized();
 const processing = ref(false);
 const errors = reactive({});
 const parts = ref([]);
@@ -146,11 +163,7 @@ watch(() => props.show, (val) => {
 async function loadParts() {
     try {
         const response = await axios.get(route('app.inventory.parts.search'), { params: { q: '' } });
-        parts.value = response.data.map(p => ({
-            id: p.id,
-            name: `${p.sku} - ${p.name_ar}`,
-            default_sale_price: p.default_sale_price,
-        }));
+        parts.value = response.data;
     } catch (e) {
         console.error('Failed to load parts', e);
     }
@@ -159,11 +172,7 @@ async function loadParts() {
 async function searchParts(query) {
     try {
         const response = await axios.get(route('app.inventory.parts.search'), { params: { q: query } });
-        parts.value = response.data.map(p => ({
-            id: p.id,
-            name: `${p.sku} - ${p.name_ar}`,
-            default_sale_price: p.default_sale_price,
-        }));
+        parts.value = response.data;
     } catch (e) {
         console.error('Search failed', e);
     }

@@ -96,18 +96,20 @@ const mappedPrintData = computed(() => {
         total: Number(line.line_total || 0)
     }));
 
-    const parts = (props.quote.parts || []).map(part => ({
-        service_name: part.name || '—',
-        description: part.part_number || part.part?.sku || 'NO-SKU',
-        qty: Number(part.qty || 1),
-        unit_price: Number(part.unit_price || 0),
-        discount: Number(part.discount || 0),
-        is_part: true,
-        is_taxable: part.is_taxable !== false,
-        tax_rate_snapshot: Number(part.tax_rate_snapshot || 0),
-        tax_amount: Number(part.tax_amount || 0),
-        total: Number(part.total_incl_tax || part.total || 0)
-    }));
+    const parts = (props.quote.parts || [])
+        .filter(part => !part.hide_on_print)
+        .map(part => ({
+            service_name: part.name || '—',
+            description: part.part_number || part.part?.sku || 'NO-SKU',
+            qty: Number(part.qty || 1),
+            unit_price: Number(part.unit_price || 0),
+            discount: Number(part.discount || 0),
+            is_part: true,
+            is_taxable: part.is_taxable !== false,
+            tax_rate_snapshot: Number(part.tax_rate_snapshot || 0),
+            tax_amount: Number(part.tax_amount || 0),
+            total: Number(part.total_incl_tax || part.total || 0)
+        }));
 
     return {
         code: props.quote.code,

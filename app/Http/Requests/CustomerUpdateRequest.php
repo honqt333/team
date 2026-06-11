@@ -30,7 +30,14 @@ class CustomerUpdateRequest extends FormRequest
         return [
             'type' => ['sometimes', 'string', Rule::in(['individual', 'company', 'government', 'vip'])],
             'name' => ['sometimes', 'string', 'max:255'],
-            'contact_name' => ['nullable', 'string', 'max:255', 'required_if:type,company', 'required_if:type,government'],
+            'contact_name' => [
+                Rule::requiredIf(function() {
+                    $type = $this->type ?? $this->route('customer')?->type;
+                    return in_array($type, ['company', 'government']);
+                }),
+                'string',
+                'max:255'
+            ],
             'phone' => [
                 'sometimes',
                 'string',

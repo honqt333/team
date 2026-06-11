@@ -94,6 +94,8 @@ class PurchaseOrdersController extends Controller
             'items.*.qty_ordered' => 'required|numeric|min:0.001',
             'items.*.unit_cost' => 'required|numeric|min:0',
             'items.*.tax_rate' => 'nullable|numeric|min:0|max:100',
+            'items.*.purchase_unit_id' => 'nullable|exists:inventory_units,id',
+            'items.*.purchase_conversion_factor' => 'nullable|numeric|min:0.0001',
         ]);
 
         $validated['tenant_id'] = $user->tenant_id;
@@ -198,6 +200,8 @@ class PurchaseOrdersController extends Controller
             'qty_ordered' => 'required|numeric|min:0.001',
             'unit_cost' => 'required|numeric|min:0',
             'tax_rate' => 'nullable|numeric|min:0|max:100',
+            'purchase_unit_id' => 'nullable|exists:inventory_units,id',
+            'purchase_conversion_factor' => 'nullable|numeric|min:0.0001',
         ]);
 
         $this->purchasingService->addPurchaseOrderItem($purchaseOrder, $validated);
