@@ -1,26 +1,34 @@
 <template>
     <div class="space-y-4">
-        <!-- Add Department Dropdown -->
-        <div v-if="!isReadOnly" class="flex justify-end">
-            <div class="relative">
-                <button @click="showDeptMenu = !showDeptMenu"
-                    class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ $t('quotes.show.add_department') }}
-                </button>
-                <div v-if="showDeptMenu"
-                    class="absolute z-50 start-0 sm:start-auto sm:end-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-y-auto">
-                    <button v-for="dept in availableDepartments" :key="dept.id"
-                        @click="onAddDepartment(dept.id)"
-                        class="w-full px-4 py-2 text-start text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        {{ getName(dept) }}
+        <!-- Toolbar: Title & Add Button next to it -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-xl">🔧</span>
+                    {{ $t('work_orders.show.tabs.services') }}
+                </h3>
+
+                <!-- Add Department Dropdown -->
+                <div v-if="!isReadOnly" class="relative">
+                    <button @click="showDeptMenu = !showDeptMenu"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 4v16m8-8H4" />
+                        </svg>
+                        {{ $t('quotes.show.add_department') }}
                     </button>
-                    <p v-if="availableDepartments.length === 0" class="px-4 py-2 text-sm text-gray-400">
-                        {{ $t('quotes.show.all_departments_added') }}
-                    </p>
+                    <div v-if="showDeptMenu"
+                        class="absolute z-50 start-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-y-auto">
+                        <button v-for="dept in availableDepartments" :key="dept.id"
+                            @click="onAddDepartment(dept.id)"
+                            class="w-full px-4 py-2 text-start text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            {{ getName(dept) }}
+                        </button>
+                        <p v-if="availableDepartments.length === 0" class="px-4 py-2 text-sm text-gray-400">
+                            {{ $t('quotes.show.all_departments_added') }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -45,6 +53,18 @@
                     </div>
 
                     <div class="flex items-center gap-2">
+                        <!-- Print Button (if department has services) -->
+                        <button v-if="getItemsForDept(dept.id).length > 0"
+                            @click.stop="printDepartment(dept.id)"
+                            type="button"
+                            class="w-7 h-7 rounded-lg hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-400 text-gray-400 flex items-center justify-center transition-colors"
+                            :title="$t('common.print')">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                            </svg>
+                        </button>
+
                         <button v-if="!isReadOnly && (!dept.is_virtual || dept.id === PACKAGES_DEPT_KEY) && getItemsForDept(dept.id).length === 0"
                             @click.stop="emit('remove-department', dept.id)"
                             class="w-7 h-7 rounded-lg hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-900/20 dark:hover:text-red-400 text-gray-400 flex items-center justify-center transition-colors"
@@ -87,26 +107,84 @@
                                                     {{ item.service ? getName(item.service) : item.title }}
                                                 </span>
 
-                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none shrink-0"
-                                                    :class="{
-                                                        'bg-gray-50 text-gray-500 border border-gray-200/60 dark:bg-gray-700/30 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
-                                                        'bg-blue-50 text-blue-600 border border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
-                                                        'bg-teal-50 text-teal-600 border border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
-                                                        'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
-                                                        'bg-amber-50 text-amber-600 border border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
-                                                        'bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
-                                                    }">
-                                                    <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                <!-- Interactive Status Dropdown -->
+                                                <div class="relative inline-block shrink-0">
+                                                    <button
+                                                        v-if="!isReadOnly"
+                                                        @click.stop="activeDropdownItemId = activeDropdownItemId === item.id ? null : item.id"
+                                                        type="button"
+                                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none border transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
                                                         :class="{
-                                                            'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
-                                                            'bg-blue-500': item.status === 'in_progress',
-                                                            'bg-teal-500': item.status === 'ready_for_qc',
-                                                            'bg-emerald-500': item.status === 'completed',
-                                                            'bg-amber-500': item.status === 'on_hold',
-                                                            'bg-rose-500': item.status === 'cancelled'
-                                                        }"></span>
-                                                    <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
-                                                </span>
+                                                            'bg-gray-50 text-gray-500 border-gray-200 dark:bg-gray-800/40 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
+                                                            'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
+                                                            'bg-teal-50 text-teal-600 border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
+                                                            'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
+                                                            'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
+                                                            'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
+                                                        }"
+                                                    >
+                                                        <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                            :class="{
+                                                                'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
+                                                                'bg-blue-500': item.status === 'in_progress',
+                                                                'bg-teal-500': item.status === 'ready_for_qc',
+                                                                'bg-emerald-500': item.status === 'completed',
+                                                                'bg-amber-500': item.status === 'on_hold',
+                                                                'bg-rose-500': item.status === 'cancelled'
+                                                            }"></span>
+                                                        <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
+                                                        <svg class="w-2.5 h-2.5 text-gray-400 dark:text-gray-500 ms-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                    </button>
+                                                    <span v-else
+                                                        class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none border"
+                                                        :class="{
+                                                            'bg-gray-50 text-gray-500 border-gray-200/60 dark:bg-gray-700/30 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
+                                                            'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
+                                                            'bg-teal-50 text-teal-600 border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
+                                                            'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
+                                                            'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
+                                                            'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
+                                                        }"
+                                                    >
+                                                        <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                            :class="{
+                                                                'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
+                                                                'bg-blue-500': item.status === 'in_progress',
+                                                                'bg-teal-500': item.status === 'ready_for_qc',
+                                                                'bg-emerald-500': item.status === 'completed',
+                                                                'bg-amber-500': item.status === 'on_hold',
+                                                                'bg-rose-500': item.status === 'cancelled'
+                                                            }"></span>
+                                                        <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
+                                                    </span>
+
+                                                    <!-- Dropdown Menu -->
+                                                    <div v-if="activeDropdownItemId === item.id"
+                                                        class="absolute z-30 start-0 mt-1.5 w-40 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-xl shadow-xl py-1 overflow-hidden"
+                                                    >
+                                                        <!-- Invisible overlay to close dropdown -->
+                                                        <div class="fixed inset-0 z-[-1]" @click.stop="activeDropdownItemId = null"></div>
+
+                                                        <button v-for="status in availableStatuses" :key="status"
+                                                            @click.stop="changeItemStatus(item, status)"
+                                                            class="w-full px-4 py-2 text-start text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2"
+                                                            :class="item.status === status ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/20' : 'text-gray-700 dark:text-gray-300'"
+                                                        >
+                                                            <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                                :class="{
+                                                                    'bg-gray-400 dark:bg-gray-500': status === 'pending',
+                                                                    'bg-blue-500': status === 'in_progress',
+                                                                    'bg-teal-500': status === 'ready_for_qc',
+                                                                    'bg-emerald-500': status === 'completed',
+                                                                    'bg-amber-500': status === 'on_hold',
+                                                                    'bg-rose-500': status === 'cancelled'
+                                                                }"></span>
+                                                            {{ $t(`work_orders.item.status_${status}`) }}
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <div v-if="item.service && item.title && item.title !== getName(item.service)"
@@ -243,8 +321,12 @@ import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
 import { useFormatters } from '@/Composables/useFormatters';
+import axios from 'axios';
+import { router } from '@inertiajs/vue3';
+import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
+    workOrder: { type: Object, required: true },
     /** Map of departmentId -> WorkOrderItem[]. Pre-grouped by the controller. */
     itemsByDepartment: { type: Object, default: () => ({}) },
     /** Departments to display, after merging items + linked departments. */
@@ -262,6 +344,7 @@ const emit = defineEmits([
     'add-service',
     'edit-item',
     'delete-item',
+    'print-department',
 ]);
 
 // Sentinel key for the virtual "service packages" department bucket.
@@ -282,8 +365,47 @@ function formatPrice(value) {
 // Local UI state for the "add department" dropdown.
 const showDeptMenu = ref(false);
 
+const activeDropdownItemId = ref(null);
+const availableStatuses = ['pending', 'in_progress', 'ready_for_qc', 'on_hold', 'completed', 'cancelled'];
+const { success: toastSuccess, error: toastError } = useToast();
+
+function changeItemStatus(item, newStatus) {
+    if (item.status === newStatus) {
+        activeDropdownItemId.value = null;
+        return;
+    }
+
+    axios.patch(route('work-orders.items.status', { work_order: props.workOrder.id, item: item.id }), {
+        status: newStatus
+    }).then(res => {
+        toastSuccess(t('messages.item_status_updated'));
+        activeDropdownItemId.value = null;
+        router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+    }).catch(err => {
+        const errMsg = err.response?.data?.error || t('common.error');
+        toastError(errMsg);
+    });
+}
+
+function printDepartment(deptId) {
+    emit('print-department', deptId);
+}
+
 function getItemsForDept(deptId) {
-    return props.itemsByDepartment[deptId] || [];
+    const items = props.itemsByDepartment[deptId] || [];
+    const statusPriority = {
+        'pending': 1,
+        'in_progress': 2,
+        'ready_for_qc': 3,
+        'on_hold': 4,
+        'completed': 5,
+        'cancelled': 6
+    };
+    return [...items].sort((a, b) => {
+        const priorityA = statusPriority[a.status] || 7;
+        const priorityB = statusPriority[b.status] || 7;
+        return priorityA - priorityB;
+    });
 }
 
 function onAddDepartment(deptId) {

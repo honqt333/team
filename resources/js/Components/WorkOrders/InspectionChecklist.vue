@@ -99,14 +99,24 @@ const viewInspection = async (inspection) => {
 
 <template>
     <div class="space-y-6">
-        <div class="flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
-                {{ $t('work_orders.systematic.title') }}
-            </h3>
-            <div v-if="!readOnly" class="flex gap-2">
-                <PrimaryButton @click="startInspection">
+        <!-- Toolbar: Title & Add Button next to it -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-xl">🔍</span>
+                    {{ $t('work_orders.systematic.title') }}
+                </h3>
+
+                <button 
+                    v-if="!readOnly" 
+                    @click="startInspection"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
                     {{ $t('work_orders.systematic.start_inspection') }}
-                </PrimaryButton>
+                </button>
             </div>
         </div>
 

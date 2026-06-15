@@ -47,6 +47,8 @@ const props = defineProps({
     workOrder: Object,
     itemsByDepartment: Object,
     departments: Object,
+    printedDepartment: { type: Object, default: null },
+    printedTechnician: { type: Object, default: null },
 });
 
 const page = usePage();
@@ -66,7 +68,14 @@ const mappedData = computed(() => {
     const items = (props.workOrder.items || []).map(item => ({
         service_name: item.title || item.service?.name_ar || item.service?.name_en || '',
         description: item.description || '',
-        technicians: (item.technicians || []).map(t => t.name).filter(Boolean),
+        technicians: (item.technicians || []).map(t => {
+            if (t.employee) {
+                return locale.value === 'ar' 
+                    ? (t.employee.name_ar || t.employee.name_en || t.name) 
+                    : (t.employee.name_en || t.employee.name_ar || t.name);
+            }
+            return t.name;
+        }).filter(Boolean),
         status: item.status || null,
         started_at: item.started_at || null,
         due_date: item.due_date || null,
@@ -118,9 +127,23 @@ const mappedCenterData = computed(() => {
 const documentSettings = computed(() => {
     const tenantSettings = page.props.tenant?.print_settings;
     const docSettings = tenantSettings?.documents?.['work_order'] || {};
+    
+    let titleAr = docSettings.title_ar || 'كرت صيانة';
+    let titleEn = docSettings.title_en || 'Work Order';
+    
+    if (props.printedDepartment) {
+        titleAr = `${titleAr} - ${props.printedDepartment.name_ar}`;
+        titleEn = `${titleEn} - ${props.printedDepartment.name_en}`;
+    }
+
+    if (props.printedTechnician) {
+        titleAr = `${titleAr} - فني: ${props.printedTechnician.name_ar}`;
+        titleEn = `${titleEn} - Tech: ${props.printedTechnician.name_en}`;
+    }
+
     return {
-        title_ar: docSettings.title_ar || 'كرت صيانة',
-        title_en: docSettings.title_en || 'Work Order',
+        title_ar: titleAr,
+        title_en: titleEn,
         terms: docSettings.terms || [],
         print_terms: docSettings.print_terms !== false,
         show_stamp: docSettings.show_stamp !== false,

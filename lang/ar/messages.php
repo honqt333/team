@@ -55,4 +55,5 @@ return [
     'photos_uploaded_successfully' => 'تم رفع الصور بنجاح',
     'attachments_uploaded_successfully' => 'تم رفع المرفقات بنجاح',
     'attachment_deleted' => 'تم حذف المرفق بنجاح',
+    'inspection_saved' => 'تم حفظ الفحص بنجاح',
 ];

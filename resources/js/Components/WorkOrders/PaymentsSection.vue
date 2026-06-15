@@ -1,28 +1,42 @@
 <template>
     <div>
-        <!-- Header with Add Button -->
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('payments.title') }}</h3>
-            <button
-                v-if="!readOnly"
-                @click="showPaymentModal = true"
-                class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-xl shadow-lg flex items-center gap-2"
-            >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                {{ $t('payments.add_payment') }}
-            </button>
-        </div>
+        <!-- Toolbar: Title & Add Button next to it, Search input on the left (end) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-xl">💵</span>
+                    {{ $t('payments.title') }}
+                </h3>
 
-        <!-- Search -->
-        <div class="mb-4">
-            <input
-                type="text"
-                v-model="searchQuery"
-                :placeholder="$t('common.search') + '...'"
-                class="w-48 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-            />
+                <!-- Add Button (بجانب اسم المدفوعات) -->
+                <button
+                    v-if="!readOnly"
+                    @click="showPaymentModal = true"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-green-100 dark:shadow-none"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    {{ $t('payments.add_payment') }}
+                </button>
+            </div>
+
+            <!-- Search input (اقصى اليسار in RTL, i.e., at the end) -->
+            <div class="flex items-center gap-3 self-end sm:self-auto">
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </span>
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        :placeholder="$t('common.search') + '...'"
+                        class="w-full ps-9 pe-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all shadow-sm"
+                    />
+                </div>
+            </div>
         </div>
 
         <!-- Payments Table -->

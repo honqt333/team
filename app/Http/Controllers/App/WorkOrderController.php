@@ -300,7 +300,7 @@ class WorkOrderController
             // top-level `customer` relation already exposes the same record
             // and the Vue page does not read `workOrder.vehicle.customer`.
             'items.service.department',
-            'items.technicians',
+            'items.technicians.employee.jobTitle',
             'items.parts',
             'items.itemNotes.user.roles',
             'generalNotes.user.roles',
@@ -310,6 +310,7 @@ class WorkOrderController
             'departments',
             'payments' => fn($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
             'parts.part' => fn($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
+            'parts.workOrderItem.service',
             'attachments.user',
             'activities.user',
             'inspections.performedBy',
@@ -341,11 +342,17 @@ class WorkOrderController
         $technicians = \App\Models\HR\Employee::where('center_id', $workOrder->center_id)
             ->whereNotNull('user_id')
             ->active()
+            ->with(['jobTitle', 'user'])
             ->get()
             ->map(function ($employee) {
                 return [
                     'id' => $employee->user_id, // Use user_id as the compatible ID for assignment
                     'name' => $employee->display_name,
+                    'name_ar' => $employee->name_ar,
+                    'name_en' => $employee->name_en,
+                    'job_title_ar' => $employee->jobTitle?->name_ar,
+                    'job_title_en' => $employee->jobTitle?->name_en,
+                    'photo_url' => $employee->user?->photo_url,
                 ];
             });
         
@@ -461,6 +468,12 @@ class WorkOrderController
 
         if ($hasChanges) {
             $workOrder->logActivity('condition_updated', __('work_orders.activities.actions.condition_updated'));
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+            ]);
         }
 
         return back();
@@ -1128,10 +1141,67 @@ class WorkOrderController
             'vehicle.make',
             'vehicle.model',
             'items.service.department',
-            'items.technicians',
+            'items.technicians.employee.jobTitle',
             'center',
             'tenant',
         ]);
+
+        $departmentId = request('department_id');
+        $printedDepartment = null;
+
+        if ($departmentId !== null) {
+            // Filter work order items to only those belonging to this department
+            $filteredItems = $workOrder->items->filter(function ($item) use ($departmentId) {
+                $itemDeptId = $item->service?->type === \App\Models\Service::TYPE_PACKAGE 
+                    ? 'packages' 
+                    : ($item->department_id ?? $item->service?->department_id ?? 0);
+                return (string)$itemDeptId === (string)$departmentId;
+            });
+            $workOrder->setRelation('items', $filteredItems->values());
+
+            // Prepare department details for document title
+            if ($departmentId === 'packages') {
+                $printedDepartment = [
+                    'name_ar' => 'باقات الخدمات',
+                    'name_en' => 'Service Packages',
+                ];
+            } elseif ($departmentId === '0') {
+                $printedDepartment = [
+                    'name_ar' => 'خدمات غير مصنفة',
+                    'name_en' => 'Uncategorized Services',
+                ];
+            } else {
+                $dept = \App\Models\Department::find($departmentId);
+                if ($dept) {
+                    $printedDepartment = [
+                        'name_ar' => $dept->name_ar,
+                        'name_en' => $dept->name_en,
+                    ];
+                }
+            }
+        }
+
+        $technicianId = request('technician_id');
+        $printedTechnician = null;
+
+        if ($technicianId !== null) {
+            // Filter work order items to only those assigned to this technician
+            $filteredItems = $workOrder->items->filter(function ($item) use ($technicianId) {
+                return $item->technicians->contains('id', $technicianId);
+            });
+            $workOrder->setRelation('items', $filteredItems->values());
+
+            // Prepare technician details for document title
+            $user = \App\Models\User::with('employee')->find($technicianId);
+            if ($user) {
+                $employeeNameAr = $user->employee?->name_ar;
+                $employeeNameEn = $user->employee?->name_en;
+                $printedTechnician = [
+                    'name_ar' => $employeeNameAr ?: $user->name,
+                    'name_en' => $employeeNameEn ?: $user->name,
+                ];
+            }
+        }
 
         // Group items by department
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
@@ -1147,6 +1217,8 @@ class WorkOrderController
             'workOrder' => $workOrder,
             'itemsByDepartment' => $itemsByDepartment,
             'departments' => $departments,
+            'printedDepartment' => $printedDepartment,
+            'printedTechnician' => $printedTechnician,
         ]);
     }
 

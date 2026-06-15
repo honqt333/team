@@ -2,16 +2,30 @@
     <div class="space-y-6">
         <!-- Header with View Toggle -->
         <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 shadow-inner">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 shadow-inner">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">{{ $t('quotes.show.tabs.spare_parts') }}</h3>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{{ toEnglish(parts.length) }} {{ $t('quotes.show.tabs.spare_parts') }}</p>
+                    </div>
+                </div>
+
+                <!-- Add Part Button next to title -->
+                <button 
+                    v-if="!readOnly" 
+                    @click="$emit('add')"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>
-                </div>
-                <div>
-                    <h3 class="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">{{ $t('quotes.show.tabs.spare_parts') }}</h3>
-                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{{ toEnglish(parts.length) }} {{ $t('quotes.show.tabs.spare_parts') }}</p>
-                </div>
+                    {{ addButtonText || $t('quotes.show.add_part') }}
+                </button>
             </div>
 
             <!-- View Toggle Buttons -->
@@ -89,9 +103,16 @@
 
                     <!-- Linked Info -->
                     <div v-if="showService || isPending(part)" class="space-y-3 pt-1">
-                        <div v-if="showService && (part.quote_line || part.service)" class="flex items-center gap-2 text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10 p-2 rounded-lg">
+                        <div v-if="showService && getLinkedServiceName(part)" 
+                            @click="hasWoItem(part) ? clickService(part) : null"
+                            :class="[
+                                'flex items-center gap-2 text-[10px] font-bold p-2 rounded-lg transition-colors',
+                                hasWoItem(part) 
+                                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10 hover:bg-blue-100/60 dark:hover:bg-blue-900/20 cursor-pointer' 
+                                    : 'text-gray-500 bg-gray-50 dark:bg-gray-800'
+                            ]">
                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                            <span class="truncate">{{ part.quote_line?.description || getName(part.quote_line?.service) || getName(part.service) }}</span>
+                            <span class="truncate">{{ getLinkedServiceName(part) }}</span>
                         </div>
                         <div v-if="isPending(part)" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[9px] font-black uppercase">
                             <span class="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span>
@@ -167,8 +188,14 @@
                                 </span>
                             </td>
                             <td v-if="showService" class="px-6 py-4">
-                                <span class="text-[10px] font-bold text-gray-500 max-w-[120px] truncate block">
-                                    {{ part.quote_line?.description || getName(part.quote_line?.service) || getName(part.service) || '---' }}
+                                <button v-if="hasWoItem(part)"
+                                    @click.stop="clickService(part)"
+                                    type="button"
+                                    class="text-[10px] font-bold text-blue-650 hover:text-blue-700 dark:text-blue-450 dark:hover:text-blue-400 hover:underline max-w-[120px] truncate block text-start transition-colors">
+                                    {{ getLinkedServiceName(part) }}
+                                </button>
+                                <span v-else class="text-[10px] font-bold text-gray-500 max-w-[120px] truncate block">
+                                    {{ getLinkedServiceName(part) || '---' }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-end font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{{ formatCurrency(part.unit_price) }}</td>
@@ -237,7 +264,7 @@ const props = defineProps({
     pendingCheck: { type: Function, default: null }
 });
 
-const emit = defineEmits(['edit', 'delete', 'add']);
+const emit = defineEmits(['edit', 'delete', 'add', 'click-service']);
 const { getName } = useLocalized();
 const { formatCurrency, formatQuantity, toEnglish } = useNumberFormat();
 
@@ -254,6 +281,26 @@ watch(viewMode, (newVal) => localStorage.setItem(props.storageKey, newVal));
 const isPending = (part) => props.pendingCheck ? props.pendingCheck(part) : !part.id;
 
 const getUnitName = (part) => part.unit ? getName(part.unit) : '';
+
+const hasWoItem = (part) => !!(part.work_order_item_id || part.work_order_item || part.workOrderItem);
+
+function clickService(part) {
+    emit('click-service', part);
+}
+
+function getLinkedServiceName(part) {
+    if (part.quote_line) {
+        return part.quote_line.description || getName(part.quote_line.service);
+    }
+    const woItem = part.work_order_item || part.workOrderItem;
+    if (woItem) {
+        return woItem.title || getName(woItem.service);
+    }
+    if (part.service) {
+        return getName(part.service);
+    }
+    return '';
+}
 
 function getSourceColorClass(source, type) {
     const colors = {

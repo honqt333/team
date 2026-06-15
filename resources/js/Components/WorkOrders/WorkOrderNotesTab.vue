@@ -1,35 +1,55 @@
 <template>
     <div class="space-y-6">
-        <!-- Top bar: view-mode toggler + search + add button -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div class="flex items-center gap-3 w-full sm:w-auto">
+        <!-- Toolbar: Title & Add Button next to it, Search/Filter on the left (end) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-4">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="text-xl">📝</span>
+                    {{ $t('work_orders.show.tabs.notes') }}
+                </h3>
+
+                <!-- Add Button next to Title -->
+                <button
+                    v-if="!isReadOnly"
+                    type="button"
+                    @click="emit('open-add-note')"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ $t('work_orders.item.add_note') }}
+                </button>
+            </div>
+
+            <!-- Search and view mode toggle on the left (end of row in RTL, i.e., at the end) -->
+            <div class="flex items-center gap-3 self-end sm:self-auto">
                 <div class="flex items-center bg-gray-100 dark:bg-gray-900 p-1 rounded-xl">
                     <button type="button" @click="viewMode = 'list'" :class="['p-1.5 rounded-lg transition-all', viewMode === 'list' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300']">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
                     <button type="button" @click="viewMode = 'grid'" :class="['p-1.5 rounded-lg transition-all', viewMode === 'grid' ? 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300']">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                         </svg>
                     </button>
                 </div>
-                <div class="relative w-full sm:w-64">
-                    <input v-model="searchQuery" type="text" :placeholder="$t('work_orders.search') + '...'"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-600">
-                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-            </div>
 
-            <div v-if="!isReadOnly" class="flex items-center gap-3">
-                <button type="button" @click="showAddNoteModal = true"
-                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[#0f2c28] hover:bg-teal-800 rounded-xl transition-all shadow-sm hover:shadow-md">
-                    <span>+</span>
-                    <span>{{ $t('work_orders.show.tabs.notes') }}</span>
-                </button>
+                <div class="relative w-full sm:w-64">
+                    <span class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </span>
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        :placeholder="$t('work_orders.search') + '...'"
+                        class="w-full ps-9 pe-3 py-1.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-sm"
+                    />
+                </div>
             </div>
         </div>
 

@@ -48,4 +48,10 @@ return [
     'service_has_quote_lines_with_codes' => 'Cannot delete service - used in quotes: :codes',
     'service_has_work_order_items_with_codes' => 'Cannot delete service - used in work orders: :codes',
 
+    // Photos & Attachments
+    'photo_deleted' => 'Photo deleted successfully',
+    'photos_uploaded_successfully' => 'Photos uploaded successfully',
+    'attachments_uploaded_successfully' => 'Attachments uploaded successfully',
+    'attachment_deleted' => 'Attachment deleted successfully',
+    'inspection_saved' => 'Inspection saved successfully',
 ];

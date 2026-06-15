@@ -2932,7 +2932,16 @@
     "customize": "Customize",
     "customize_hint": "Drag & drop to reorder or hide dashboard widgets",
     "drag_to_reorder": "Drag to Reorder",
-    "reset": "Reset",
     "save_layout": "Save Layout"
+  },
+  "messages": {
+    "technician_assigned": "Technician assigned successfully",
+    "technician_removed": "Technician removed successfully",
+    "technician_not_belong_to_center": "This technician does not belong to this center",
+    "inspection_saved": "Inspection saved successfully",
+    "deleted_success": "Deleted successfully",
+    "saved_success": "Saved successfully",
+    "invalid_file_type": "Invalid file type: {file}",
+    "file_too_large": "File is too large: {file} (max {size})"
   }
 }

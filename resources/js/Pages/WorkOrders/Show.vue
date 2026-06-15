@@ -44,6 +44,7 @@
                     <!-- Services Tab (extracted to WorkOrderServicesTab) -->
                     <div v-if="activeTab === 'services'" key="tab-services">
                         <WorkOrderServicesTab
+                            :work-order="workOrder"
                             :items-by-department="itemsByDepartment"
                             :display-departments="displayDepartments"
                             :available-departments="availableDepartments"
@@ -54,6 +55,7 @@
                             @add-service="openAddServiceModal"
                             @edit-item="openEditServiceModal"
                             @delete-item="deleteServiceItem"
+                            @print-department="handlePrintDepartment"
                         />
                     </div>
 
@@ -70,28 +72,23 @@
 
                     <!-- Spare Parts Tab -->
                     <div v-if="activeTab === 'parts'" key="tab-parts" class="space-y-4">
-                        <!-- Add Part Button -->
-                        <div v-if="!isReadOnly" class="flex justify-end">
-                            <button @click="showAddPartModal = true"
-                                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('inventory.parts.add_to_wo') }}
-                            </button>
-                        </div>
-
                         <!-- Parts Display Component -->
                         <PartsDisplay :parts="normalizedPartsForDisplay" :read-only="isReadOnly"
                             storage-key="work_orders_parts_view_mode" :empty-message="$t('work_orders.show.no_parts')"
                             :add-button-text="$t('inventory.parts.add_to_wo')" @delete="deleteWorkOrderPart"
-                            @edit="editWorkOrderPart" @add="openAddPartModal" />
+                            @edit="editWorkOrderPart" @add="openAddPartModal"
+                            @click-service="handlePartServiceClick" />
                     </div>
 
                     <!-- Technicians Tab -->
                     <div v-if="activeTab === 'technicians'" key="tab-technicians">
-                        <TechniciansSection :work-order="workOrder" :items-by-department="itemsByDepartment" />
+                        <TechniciansSection 
+                            :work-order="workOrder" 
+                            :items-by-department="itemsByDepartment"
+                            :technicians="technicians"
+                            :read-only="isReadOnly"
+                            @click-service="openServiceTechniciansModal"
+                        />
                     </div>
 
                     <!-- Payments Tab -->
@@ -109,15 +106,23 @@
 
                     <!-- Photos Tab -->
                     <div v-if="activeTab === 'photos'" key="tab-photos" class="space-y-4">
-                        <div v-if="!isReadOnly" class="flex justify-end">
-                            <button @click="showPhotoModal = true"
-                                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
-                            </button>
+                        <!-- Toolbar: Title & Add Button next to it -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <div class="flex items-center gap-4">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <span class="text-xl">📸</span>
+                                    {{ $t('work_orders.show.tabs.photos') }}
+                                </h3>
+
+                                <button v-if="!isReadOnly" @click="showPhotoModal = true"
+                                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    {{ $t('common.add') }}
+                                </button>
+                            </div>
                         </div>
 
                         <div v-if="workOrder.photos?.length" class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -209,10 +214,7 @@
                                         class="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
                                         <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
                                             <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                                                {{ te(`work_orders.activities.actions.${activity.action}`)
-                                                    ? $t(`work_orders.activities.actions.${activity.action}`)
-                                                    : activity.description
-                                                }}
+                                                {{ getActivityDescription(activity) }}
                                             </h4>
                                             <span class="text-xs text-gray-400 font-medium">{{
                                                 formatDateTime(activity.created_at)
@@ -243,15 +245,23 @@
 
                     <!-- Attachments Tab -->
                     <div v-if="activeTab === 'attachments'" key="tab-attachments" class="space-y-4">
-                        <div v-if="!isReadOnly" class="flex justify-end">
-                            <button @click="showAttachmentModal = true"
-                                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v16m8-8H4" />
-                                </svg>
-                                {{ $t('common.add') }}
-                            </button>
+                        <!-- Toolbar: Title & Add Button next to it -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                            <div class="flex items-center gap-4">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                    <span class="text-xl">📎</span>
+                                    {{ $t('work_orders.show.tabs.attachments') }}
+                                </h3>
+
+                                <button v-if="!isReadOnly" @click="showAttachmentModal = true"
+                                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    {{ $t('common.add') }}
+                                </button>
+                            </div>
                         </div>
 
                         <div v-if="workOrder.attachments?.length"
@@ -357,14 +367,7 @@
         <WorkOrderAttachmentModal v-if="showAttachmentModal" :show="showAttachmentModal" :work-order="workOrder"
             @close="showAttachmentModal = false" @saved="refreshWorkOrder" />
 
-        <!-- Floating Add Note Button -->
-        <button v-if="activeTab === 'notes' && !isReadOnly" @click="showAddNoteModal = true"
-            class="fixed bottom-6 left-6 z-40 w-14 h-14 bg-[#0f2c28] hover:bg-teal-800 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 scale-100 hover:scale-105 active:scale-95"
-            :title="$t('work_orders.item.add_note')">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-        </button>
+
 
         <!-- Add Note Modal -->
         <BaseModal :show="showAddNoteModal" @close="showAddNoteModal = false" size="md">
@@ -406,6 +409,7 @@
 import BackButton from '@/Components/BackButton.vue';
 import { ref, computed, watch } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
+import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -471,6 +475,18 @@ const { confirm } = useConfirm();
 // the localized currency unit, so it composes the two at the call site.
 function formatPrice(value) {
     return formatCurrency(value) + ' ' + t('common.currency');
+}
+
+function getActivityDescription(activity) {
+    const key = `work_orders.activities.actions.${activity.action}`;
+    if (!te(key)) {
+        return activity.description;
+    }
+    const translation = t(key);
+    if (translation.includes(':') || translation.includes('{')) {
+        return activity.description;
+    }
+    return translation;
 }
 
 // Sentinel keys used inside the `itemsByDepartment` map. The controller
@@ -687,27 +703,21 @@ function sendConditionReport() {
     if (isReadOnly.value) return;
 
     conditionReportInFlight = true;
-    router.put(
+    axios.put(
         route('app.work-orders.update-condition', props.workOrder.id),
-        getCurrentConditionPayload(),
-        {
-            preserveScroll: true,
-            preserveState: true,
-            onFinish: () => {
-                conditionReportInFlight = false;
-                // If the user changed values while we were saving, persist
-                // the latest snapshot now (single follow-up call).
-                if (conditionReportPending) {
-                    conditionReportPending = false;
-                    sendConditionReport();
-                }
-            },
-            onError: () => {
-                conditionReportInFlight = false;
-                conditionReportPending = false;
-            },
-        },
-    );
+        getCurrentConditionPayload()
+    ).then(() => {
+        conditionReportInFlight = false;
+        // If the user changed values while we were saving, persist
+        // the latest snapshot now (single follow-up call).
+        if (conditionReportPending) {
+            conditionReportPending = false;
+            sendConditionReport();
+        }
+    }).catch(() => {
+        conditionReportInFlight = false;
+        conditionReportPending = false;
+    });
 }
 
 function scheduleConditionReportSave() {
@@ -732,12 +742,12 @@ function scheduleConditionReportSave() {
 // The queueing logic in scheduleConditionReportSave makes the watcher
 // safe to fire on every change, even during an in-flight save.
 watch(() => props.workOrder.fuel_level, (newVal, oldVal) => {
-    if (oldVal !== undefined) {
+    if (oldVal !== undefined && newVal !== oldVal) {
         scheduleConditionReportSave();
     }
 });
 watch(() => props.workOrder.damage_marks, (newVal, oldVal) => {
-    if (oldVal !== undefined) {
+    if (oldVal !== undefined && JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
         scheduleConditionReportSave();
     }
 }, { deep: true });
@@ -810,6 +820,12 @@ function handlePrint(type) {
     if (url) {
         window.open(url, '_blank');
     }
+}
+
+// Handle printing a specific department's services
+function handlePrintDepartment(deptId) {
+    const url = route('work-orders.print.services', [props.workOrder.id, { department_id: deptId }]);
+    window.open(url, '_blank');
 }
 
 // Delete work order part
@@ -952,6 +968,31 @@ function openServiceNotesModal(itemId) {
         selectedItemId.value = itemId;
         serviceModalInitialTab.value = 'notes';
         showItemModal.value = true;
+    }
+}
+
+function openServicePartsModal(itemId) {
+    const item = props.workOrder.items.find(i => i.id === itemId);
+    if (item) {
+        selectedItemId.value = itemId;
+        serviceModalInitialTab.value = 'parts';
+        showItemModal.value = true;
+    }
+}
+
+function openServiceTechniciansModal(itemId) {
+    const item = props.workOrder.items.find(i => i.id === itemId);
+    if (item) {
+        selectedItemId.value = itemId;
+        serviceModalInitialTab.value = 'technicians';
+        showItemModal.value = true;
+    }
+}
+
+function handlePartServiceClick(part) {
+    const itemId = part.work_order_item_id || part.work_order_item?.id || part.workOrderItem?.id;
+    if (itemId) {
+        openServicePartsModal(itemId);
     }
 }
 
