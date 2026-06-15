@@ -22,12 +22,12 @@
                                 </button>
                             </Tooltip>
 
-                            <Tooltip :text="(counts.orders > 0 || counts.invoices > 0 || counts.payments > 0) ? $t('common.cannot_delete_has_data') : $t('common.delete')">
+                            <Tooltip :text="(counts.orders > 0 || counts.invoices > 0 || counts.returns > 0 || counts.payments > 0) ? $t('common.cannot_delete_has_data') : $t('common.delete')">
                                 <button v-if="can('purchasing.suppliers.destroy')" @click="confirmDelete" 
-                                    :disabled="counts.orders > 0 || counts.invoices > 0 || counts.payments > 0"
+                                    :disabled="counts.orders > 0 || counts.invoices > 0 || counts.returns > 0 || counts.payments > 0"
                                     :class="[
                                         'inline-flex items-center gap-2 px-3 py-2 rounded-xl font-black text-xs border transition-all',
-                                        (counts.orders === 0 && counts.invoices === 0 && counts.payments === 0)
+                                        (counts.orders === 0 && counts.invoices === 0 && counts.returns === 0 && counts.payments === 0)
                                             ? 'border-red-100/70 dark:border-red-800/30 bg-red-50/70 dark:bg-red-900/20 text-red-700 dark:text-red-300 hover:bg-white dark:hover:bg-red-900/30 hover:shadow-md'
                                             : 'border-gray-200 dark:border-gray-700 bg-gray-100/70 dark:bg-gray-900/30 text-gray-400 cursor-not-allowed opacity-70'
                                     ]">
@@ -417,6 +417,63 @@
                         </div>
                     </div>
 
+                    <!-- ========== RETURNS TAB ========== -->
+                    <div v-if="activeTab === 'returns'" class="space-y-4">
+                        <div v-if="returnsList.length > 0" class="overflow-x-auto bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700/50 shadow-sm">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700 pb-3 bg-gray-50/50 dark:bg-gray-900/50">
+                                        <th class="py-3 px-4 text-center font-bold align-middle">#</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.return_code') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('payments.form.date') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('purchasing.invoices.code') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.purchases.subtotal') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('common.vat') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('common.total') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('invoices.returned_items') }}</th>
+                                        <th class="py-3 px-4 text-center font-bold align-middle">{{ $t('payments.form.notes') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
+                                    <tr v-for="(ret, index) in returnsList" :key="ret.id" class="hover:bg-rose-50/30 dark:hover:bg-rose-950/10 transition-colors">
+                                        <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono align-middle">{{ index + 1 }}</td>
+                                        <td class="py-4 px-4 text-center font-bold align-middle">
+                                            <Link :href="route('app.invoices.purchases.returns.show', ret.id)" class="text-rose-600 dark:text-rose-400 hover:underline font-mono">
+                                                {{ ret.code }}
+                                            </Link>
+                                        </td>
+                                        <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono align-middle" dir="ltr">{{ formatDate(ret.return_date) }}</td>
+                                        <td class="py-4 px-4 text-center align-middle">
+                                            <Link v-if="ret.purchase_invoice" :href="route('app.invoices.purchases.show', ret.purchase_invoice.id)" class="text-blue-600 dark:text-blue-400 hover:underline font-mono font-bold">
+                                                {{ ret.purchase_invoice.code || ret.purchase_invoice.invoice_number }}
+                                            </Link>
+                                            <span v-else class="text-gray-400">—</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">{{ formatCurrency(ret.subtotal) }}</td>
+                                        <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">{{ formatCurrency(ret.tax_amount) }}</td>
+                                        <td class="py-4 px-4 text-center font-black text-rose-600 dark:text-rose-400 font-mono align-middle" dir="ltr">{{ formatCurrency(ret.total) }}</td>
+                                        <td class="py-4 px-4 text-center font-black text-gray-700 dark:text-gray-300 align-middle" dir="ltr">
+                                            <span class="px-2 py-0.5 rounded-lg bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-[10px] font-black">
+                                                {{ ret.lines?.length || 0 }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate align-middle" :title="ret.notes">
+                                            {{ ret.notes || '—' }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div v-else class="text-center py-12 bg-white dark:bg-gray-800 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 shadow-sm">
+                            <div class="w-16 h-16 mx-auto rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3" />
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') }}</p>
+                        </div>
+                    </div>
+
                     <!-- ========== PAYMENTS TAB ========== -->
                     <div v-if="activeTab === 'payments'" class="space-y-4">
                         <div v-if="paymentsList.length > 0" class="overflow-x-auto">
@@ -439,7 +496,7 @@
                                             {{ $t(`payments.methods.${payment.payment_method}`) || payment.payment_method }}
                                         </td>
                                         <td class="py-4 px-4 text-center font-bold align-middle">
-                                            <span :class="payment.type === 'refund' ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs font-bold">
+                                            <span :class="payment.type === 'refund' ? 'text-red-600 dark:text-red-450 bg-red-50 dark:bg-red-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs font-bold">
                                                 {{ payment.type === 'refund' ? ($t('payments.types.refund')) : ($t('payments.types.payment')) }}
                                             </span>
                                         </td>
@@ -516,6 +573,7 @@ import { usePermission } from '@/Composables/usePermission';
 const props = defineProps({
     supplier: Object,
     purchaseInvoices: Array,
+    returnInvoices: Array,
     payments: Array,
     counts: Object,
     balance: Number,
@@ -534,11 +592,12 @@ const showInvoiceModal = ref(false);
 const activeTab = ref('overview');
 
 const onInvoiceSaved = () => {
-    router.reload({ only: ['purchaseInvoices', 'counts', 'balance', 'payments'] });
+    router.reload({ only: ['purchaseInvoices', 'returnInvoices', 'counts', 'balance', 'payments'] });
     showInvoiceModal.value = false;
 };
 
 const invoicesList = computed(() => props.purchaseInvoices || []);
+const returnsList = computed(() => props.returnInvoices || []);
 const paymentsList = computed(() => props.payments || []);
 
 const invoiceSearchQuery = ref('');
@@ -584,11 +643,13 @@ const getOverdueLabel = (dueDate) => {
 // Icons
 const HomeIcon = () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' })]);
 const InvoiceIcon = () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z' })]);
+const ReturnIcon = () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M16 15v-6a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3' })]);
 const PaymentIcon = () => h('svg', { class: 'w-4 h-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z' })]);
 
 const tabs = computed(() => [
     { key: 'overview', label: t('common.overview') || 'Overview', count: null, icon: HomeIcon, activeColor: 'text-blue-600 dark:text-blue-400' },
     { key: 'invoices', label: t('purchasing.suppliers.invoices'), count: props.counts.invoices || 0, icon: InvoiceIcon, activeColor: 'text-green-600 dark:text-green-400' },
+    { key: 'returns', label: t('invoices.return_history') || t('invoices.return_invoice') || 'Returns', count: props.counts.returns || 0, icon: ReturnIcon, activeColor: 'text-rose-600 dark:text-rose-400' },
     { key: 'payments', label: t('purchasing.suppliers.payments'), count: props.counts.payments || 0, icon: PaymentIcon, activeColor: 'text-purple-600 dark:text-purple-400' },
 ]);
 

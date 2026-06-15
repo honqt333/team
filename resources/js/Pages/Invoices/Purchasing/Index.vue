@@ -660,13 +660,15 @@ const stripeClass = (status) => {
 
 const getReturnRemainingBalance = (ret) => {
     const payments = ret.purchase_invoice?.payments || [];
-    const cashRefunds = payments.filter(p => p.type === 'refund' && p.payment_method !== 'debit_note');
+    // Real cash refunds = TYPE_REFUND only.
+    // Debit notes are NOT in the payments table — they live on the
+    // PurchaseReturnInvoice row (create_debit_note) and the invoice
+    // balance has already been reduced by the full return total.
+    const cashRefunds = payments.filter(p => p.type === 'refund');
     const matchedCashRefunds = cashRefunds.filter(p => p.notes?.includes(ret.code));
     const refundPayments = matchedCashRefunds.length > 0 ? matchedCashRefunds : cashRefunds;
     const cashRefundsTotal = refundPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
-    const debitNotePayment = payments.find(p => p.type === 'refund' && p.payment_method === 'debit_note' && p.notes?.includes(ret.code));
-    const debitNoteAmount = debitNotePayment ? parseFloat(debitNotePayment.amount) || 0 : 0;
-    const remaining = parseFloat(ret.total) - cashRefundsTotal - debitNoteAmount;
+    const remaining = parseFloat(ret.total) - cashRefundsTotal;
     return Math.max(0, remaining);
 };
 </script>

@@ -434,7 +434,10 @@
                                 <tr v-for="(payment, index) in invoice.payments" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono align-middle">{{ toEnglish(index + 1) }}</td>
                                     <td class="py-4 px-4 text-center font-bold align-middle">
-                                        <span :class="payment.type === 'refund' ? 'text-red-600 dark:text-red-450 bg-red-50 dark:bg-red-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs">
+                                        <span
+                                            :class="payment.type === 'refund' ? 'text-red-600 dark:text-red-450 bg-red-50 dark:bg-red-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'"
+                                            class="px-2.5 py-1 rounded-lg text-xs"
+                                        >
                                             {{ payment.type === 'refund' ? $t('payments.types.refund') : $t('payments.types.payment') }}
                                         </span>
                                     </td>

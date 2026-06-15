@@ -52,12 +52,14 @@ class SuppliersController extends Controller
         $supplier->loadCount('purchaseOrders');
         $supplier->load([
             'purchaseInvoices' => fn($q) => $q->latest(),
+            'returnInvoices' => fn($q) => $q->with('purchaseInvoice')->latest('return_date'),
             'payments' => fn($q) => $q->with(['receivedBy', 'purchaseInvoice'])->latest()
         ]);
         
         $counts = [
             'orders' => $supplier->purchase_orders_count,
             'invoices' => $supplier->purchaseInvoices->count(),
+            'returns' => $supplier->returnInvoices->count(),
             'payments' => $supplier->payments->count(),
         ];
 
@@ -75,6 +77,7 @@ class SuppliersController extends Controller
         return Inertia::render('Purchasing/Suppliers/Show', [
             'supplier' => $supplier,
             'purchaseInvoices' => $supplier->purchaseInvoices,
+            'returnInvoices' => $supplier->returnInvoices,
             'payments' => $supplier->payments,
             'counts' => $counts,
             'balance' => $balance,

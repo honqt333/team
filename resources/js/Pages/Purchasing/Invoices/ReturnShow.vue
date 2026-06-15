@@ -668,17 +668,14 @@ const formatDate = (dateStr) => {
 };
 
 const refundPayments = computed(() => {
-    const allRefunds = props.returnInvoice.purchase_invoice?.payments?.filter(p => p.type === 'refund' && p.payment_method !== 'debit_note') || [];
+    // Real cash refunds returned to the supplier (TYPE_REFUND only).
+    const allRefunds = props.returnInvoice.purchase_invoice?.payments?.filter(p => p.type === 'refund') || [];
     const codeMatch = allRefunds.filter(p => p.notes?.includes(props.returnInvoice.code));
     return codeMatch.length > 0 ? codeMatch : allRefunds;
 });
 
 const translateNote = (note) => {
     if (!note) return '—';
-    if (note.includes('Debit note registered for remaining refund of return:')) {
-        const code = note.replace('Debit note registered for remaining refund of return:', '').trim();
-        return t('payments.debit_note_registered_notes', { code });
-    }
     if (note.includes('Refund for return invoice:')) {
         const code = note.replace('Refund for return invoice:', '').trim();
         return t('payments.refund_for_return_notes', { code });
@@ -700,13 +697,15 @@ const refundedTax = computed(() => {
     return refundPaymentsTotal.value * (props.returnInvoice.tax_amount / props.returnInvoice.total);
 });
 
-const debitNotePayment = computed(() => {
-    const allRefunds = props.returnInvoice.purchase_invoice?.payments?.filter(p => p.type === 'refund' && p.payment_method === 'debit_note') || [];
-    return allRefunds.find(p => p.notes?.includes(props.returnInvoice.code)) || null;
-});
-
+// Debit note: this is a BOOKKEEPING note, not a payment.
+// It lives on the PurchaseReturnInvoice itself (create_debit_note flag +
+// debit_note_date), and the invoice balance has already been reduced by
+// the full return total when the return was recorded.
+// We display it as "the part of the return that was settled via debit
+// note (no cash movement)" so the supplier-accountant can see the split.
 const debitNoteAmount = computed(() => {
-    return debitNotePayment.value ? parseFloat(debitNotePayment.value.amount) || 0 : 0;
+    if (!props.returnInvoice.create_debit_note) return 0;
+    return Math.max(0, (props.returnInvoice.total || 0) - refundPaymentsTotal.value);
 });
 
 const debitNoteSubtotal = computed(() => {
@@ -720,7 +719,10 @@ const debitNoteTax = computed(() => {
 });
 
 const remainingTotal = computed(() => {
-    return Math.max(0, props.returnInvoice.total - refundPaymentsTotal.value - debitNoteAmount.value);
+    // Once the debit note is acknowledged, the full return total is
+    // considered "settled" (refunded in cash + covered by debit note),
+    // so nothing remains outstanding.
+    return 0;
 });
 
 const remainingSubtotal = computed(() => {
@@ -734,6 +736,8 @@ const remainingTax = computed(() => {
 });
 
 const remainingRefundToRecord = computed(() => {
+    // Cash refunds only — the debit-note portion is NOT a payment,
+    // so it must not block the user from recording remaining cash refunds.
     return Math.max(0, props.returnInvoice.total - refundPaymentsTotal.value);
 });
 

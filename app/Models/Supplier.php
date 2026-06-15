@@ -83,6 +83,24 @@ class Supplier extends Model
         return $this->hasMany(PurchaseInvoice::class);
     }
 
+    /**
+     * All purchase return invoices belonging to this supplier's invoices.
+     *
+     * Schema: purchase_return_invoices.purchase_invoice_id → purchase_invoices.id
+     *         purchase_invoices.supplier_id               → suppliers.id
+     */
+    public function returnInvoices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(
+            \App\Models\PurchaseReturnInvoice::class,
+            PurchaseInvoice::class,
+            'supplier_id',                  // FK on purchase_invoices table
+            'purchase_invoice_id',          // FK on purchase_return_invoices table
+            'id',                           // local key on suppliers
+            'id'                            // local key on purchase_invoices
+        );
+    }
+
     public function payments()
     {
         return $this->hasManyThrough(Payment::class, PurchaseInvoice::class);
@@ -92,36 +110,57 @@ class Supplier extends Model
     {
         $invoicesBalance = 0.0;
         $totalCredits = 0.0;
-        $totalDebitNotes = 0.0;
 
         foreach ($this->purchaseInvoices()->whereNotIn('status', [\App\Models\PurchaseInvoice::STATUS_DRAFT, \App\Models\PurchaseInvoice::STATUS_CANCELLED])->get() as $inv) {
             $invoicesBalance += (float) $inv->balance;
 
+            // Real payments (cash/bank/transfer) the buyer has handed to the supplier.
             $payments = (float) $inv->payments()
                 ->where('type', \App\Models\Payment::TYPE_PAYMENT)
-                ->where('payment_method', '!=', 'debit_note')
                 ->sum('amount');
 
             $returnsTotal = (float) $inv->returnInvoices()->sum('total');
 
+            // Sum of `create_debit_note` returns only — these are the returns
+            // where the supplier has NOT physically returned cash to us, so
+            // they represent credit we are owed by the supplier.
+            //
+            // A return WITHOUT `create_debit_note` is assumed to be a normal
+            // goods return (reduces invoice total) and is already absorbed
+            // into `invoice.balance` (the controller does
+            //     $invoice->update(['balance' => max(0, $balance - $return->total)])
+            // ), so it does NOT add to the credit total.
+            //
+            // A return WITH `create_debit_note` (and no cash refund) means:
+            //   - we already paid the supplier for these goods
+            //   - we sent the goods back
+            //   - the supplier owes us the amount back (or will offset it)
+            // → this amount must show up as a positive credit on the supplier.
+            $debitNoteTotal = (float) $inv->returnInvoices()
+                ->where('create_debit_note', true)
+                ->sum('total');
+
+            // Real cash refunds actually returned to the supplier (TYPE_REFUND).
+            // These offset any debit-note credit (the supplier paid us back in
+            // cash, so the credit is partially or fully settled).
             $cashRefunds = (float) $inv->payments()
                 ->where('type', \App\Models\Payment::TYPE_REFUND)
-                ->where('payment_method', '!=', 'debit_note')
                 ->sum('amount');
 
-            $debitNotes = (float) $inv->payments()
-                ->where('type', \App\Models\Payment::TYPE_REFUND)
-                ->where('payment_method', 'debit_note')
-                ->sum('amount');
-
-            $overpaid = max(0.0, $payments + $returnsTotal - (float) $inv->total);
-            $credit = max(0.0, $overpaid - $cashRefunds - $debitNotes);
+            // Overpayment credit = (debit notes still outstanding) - (cash refunds).
+            //
+            // We also include `payments - inv.total` (overpayment on the
+            // invoice itself, e.g. paid 1100 for a 1000 invoice) as credit
+            // — anything we paid above the invoice total is money the
+            // supplier owes us back.
+            $overpaidOnInvoice = max(0.0, $payments - (float) $inv->total);
+            $outstandingDebitNotes = max(0.0, $debitNoteTotal - $cashRefunds);
+            $credit = $overpaidOnInvoice + $outstandingDebitNotes;
 
             $totalCredits += $credit;
-            $totalDebitNotes += $debitNotes;
         }
 
-        $balance = round($invoicesBalance - $totalCredits - $totalDebitNotes, 2);
+        $balance = round($invoicesBalance - $totalCredits, 2);
         return $balance == 0.0 ? 0.0 : $balance;
     }
 

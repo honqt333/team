@@ -341,30 +341,18 @@ class PurchaseInvoicesController extends Controller
                 ]);
             }
 
-            // Calculate remaining amount for debit note
-            $invoiceBalance = (float) ($purchaseInvoice->balance ?? 0);
-            $debitNoteAmount = 0;
-            if ($total > $invoiceBalance) {
-                $debitNoteAmount = $total - $invoiceBalance - $refundPaymentsTotal;
-            }
-
-            // If create_debit_note is true and there is a remaining refund amount, record it as a debit_note payment!
-            if (($validated['create_debit_note'] ?? false) && $debitNoteAmount > 0.01) {
-                \App\Models\Payment::create([
-                    'tenant_id'           => $user->tenant_id,
-                    'center_id'           => $user->current_center_id,
-                    'purchase_invoice_id' => $purchaseInvoice->id,
-                    'amount'              => $debitNoteAmount,
-                    'payment_date'        => $validated['debit_note_date'] ?? $validated['return_date'] ?? now(),
-                    'payment_method'      => 'debit_note',
-                    'reference'           => $returnInvoice->code,
-                    'notes'               => 'Debit note registered for remaining refund of return: ' . $code,
-                    'received_by'         => $user->id,
-                    'type'                => \App\Models\Payment::TYPE_REFUND,
-                ]);
-            }
-            
-            // Deduct the returned total from the purchase invoice balance
+            // Debit note handling — NO `payments` row is created.
+            //
+            // A debit note is a bookkeeping note (the supplier owes us this
+            // amount back, or our payable to them is reduced). It is NOT an
+            // actual cash movement, so it has no business in the `payments`
+            // table — only the user's `create_debit_note` checkbox + the
+            // `debit_note_date` are stored on the PurchaseReturnInvoice itself
+            // (see the PurchaseReturnInvoice::create() call above).
+            //
+            // The full return total is then deducted from the invoice balance
+            // in the block below, which is what actually reduces the
+            // supplier's payable in our books:
             $newBalance = max(0, $purchaseInvoice->balance - $total);
             $newStatus = $purchaseInvoice->status;
             if ($newBalance <= 0.01 && $purchaseInvoice->status !== \App\Models\PurchaseInvoice::STATUS_PAID) {
@@ -441,10 +429,13 @@ class PurchaseInvoicesController extends Controller
 
         $purchaseInvoice = $purchaseReturnInvoice->purchaseInvoice;
 
-        // Calculate current remaining balance on this return invoice
+        // Calculate current remaining balance on this return invoice.
+        // We only consider actual REFUND payments (cash/card paid back to the supplier).
+        // Debit notes are excluded because they represent a credit/debt adjustment,
+        // not an actual cash outflow — the remaining refund is only what is still
+        // un-refunded in real money.
         $allRefunds = $purchaseInvoice->payments()
             ->where('type', \App\Models\Payment::TYPE_REFUND)
-            ->where('payment_method', '!=', 'debit_note')
             ->get();
         
         $code = $purchaseReturnInvoice->code;
