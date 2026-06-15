@@ -660,6 +660,11 @@ class WorkOrderController
     {
         $this->authorize('update', $work_order);
 
+        // Rule: Cannot delete item if the work order has payments (must cancel instead)
+        if ($work_order->payments()->exists()) {
+            return redirect()->back()->with('error', __('messages.cannot_delete_item_work_order_has_payments'));
+        }
+
         // Rule: Cannot delete item if it has parts or technicians
         if ($item->parts()->exists() || $item->technicians()->exists()) {
             return redirect()->back()->with('error', __('messages.cannot_delete_item_has_parts_or_technicians'));

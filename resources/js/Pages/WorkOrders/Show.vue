@@ -54,6 +54,7 @@
                             @remove-department="removeDepartment"
                             @add-service="openAddServiceModal"
                             @edit-item="openEditServiceModal"
+                            @assign-technician="openServiceTechniciansModal"
                             @delete-item="deleteServiceItem"
                             @print-department="handlePrintDepartment"
                         />

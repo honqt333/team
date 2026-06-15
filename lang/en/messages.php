@@ -23,6 +23,8 @@ return [
     'service_deleted' => 'Service deleted successfully',
     'item_status_updated' => 'Item status updated',
     'cannot_change_item_status' => 'Cannot change item status - has technicians or parts',
+    'cannot_delete_item_has_parts_or_technicians' => 'Cannot delete service until all spare parts and technicians are removed!',
+    'cannot_delete_item_work_order_has_payments' => 'Cannot delete service because there are payments registered on the work order! You can change its status to cancelled instead.',
     
     // Departments
     'department_added' => 'Department added successfully',

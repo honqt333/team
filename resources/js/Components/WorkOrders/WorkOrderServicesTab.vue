@@ -142,15 +142,28 @@
                                         </div>
 
                                         <!-- Technician (or "unassigned" prompt) -->
-                                        <div v-if="item.technicians && item.technicians.length"
-                                            class="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-full text-xs font-semibold">
+                                        <button v-if="item.technicians && item.technicians.length"
+                                            @click.stop="!isReadOnly && emit('assign-technician', item.id)"
+                                            type="button"
+                                            :disabled="isReadOnly"
+                                            class="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-full text-xs font-semibold"
+                                            :class="!isReadOnly ? 'hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors' : ''">
                                             <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                             <span>{{ item.technicians[0].name }}</span>
-                                        </div>
+                                        </button>
+                                        <button v-else-if="!isReadOnly"
+                                            @click.stop="emit('assign-technician', item.id)"
+                                            type="button"
+                                            class="inline-flex items-center gap-1.5 bg-rose-50/50 dark:bg-rose-950/10 text-rose-600 dark:text-rose-400 border border-dashed border-rose-200 dark:border-rose-900/40 px-3 py-1 rounded-full text-xs font-semibold animate-pulse hover:bg-rose-100/60 dark:hover:bg-rose-950/30 transition-all cursor-pointer">
+                                            <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                            </svg>
+                                            <span>{{ $t('work_orders.item.assign_technician') }}</span>
+                                        </button>
                                         <div v-else
-                                            class="inline-flex items-center gap-1.5 bg-rose-50/50 dark:bg-rose-950/10 text-rose-600 dark:text-rose-400 border border-dashed border-rose-200 dark:border-rose-900/40 px-3 py-1 rounded-full text-xs font-semibold animate-pulse">
+                                            class="inline-flex items-center gap-1.5 bg-rose-50/50 dark:bg-rose-950/10 text-rose-600 dark:text-rose-400 border border-dashed border-rose-200 dark:border-rose-900/40 px-3 py-1 rounded-full text-xs font-semibold">
                                             <svg class="w-3.5 h-3.5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                                             </svg>
@@ -266,7 +279,8 @@
                                                     d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </button>
-                                        <button @click.stop="emit('delete-item', item)"
+                                        <button v-if="!(item.technicians && item.technicians.length > 0) && !(item.parts && item.parts.length > 0) && !(item.parts_total > 0) && !(workOrder.payments && workOrder.payments.length > 0)"
+                                            @click.stop="emit('delete-item', item)"
                                             class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                                             :title="$t('common.delete')">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,6 +361,7 @@ const emit = defineEmits([
     'edit-item',
     'delete-item',
     'print-department',
+    'assign-technician',
 ]);
 
 // Sentinel key for the virtual "service packages" department bucket.

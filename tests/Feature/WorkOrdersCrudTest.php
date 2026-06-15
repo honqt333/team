@@ -302,4 +302,171 @@ class WorkOrdersCrudTest extends TestCase
             'action' => 'item_status_updated',
         ]);
     }
+
+    public function test_authorized_user_cannot_delete_item_if_it_has_parts_or_technicians(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.create',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create work order
+        $response = $this->actingAs($user)->postJson('/app/work-orders', [
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'items' => [
+                ['title' => 'Oil Change', 'qty' => 1, 'unit_price' => 100],
+            ],
+        ]);
+
+        $workOrderId = $response->json('id');
+        $workOrder = WorkOrder::withoutGlobalScopes()->find($workOrderId);
+        $item = $workOrder->items()->first();
+
+        // 1. Attaching a technician
+        $techUser = User::factory()->create(['tenant_id' => $user->tenant_id]);
+        $item->technicians()->attach($techUser->id);
+
+        // Attempt delete
+        $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
+        $deleteResponse->assertRedirect();
+        
+        // Assert item was NOT deleted
+        $this->assertDatabaseHas('work_order_items', ['id' => $item->id]);
+
+        // Detach technician
+        $item->technicians()->detach($techUser->id);
+
+        // 2. Attach a part
+        $warehouse = \App\Models\Warehouse::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name' => 'Main Warehouse',
+        ]);
+        $part = \App\Models\Part::create([
+            'tenant_id' => $user->tenant_id,
+            'sku' => 'PART123',
+            'name_ar' => 'قطعة غيار',
+            'name_en' => 'Spare Part',
+            'is_active' => true,
+        ]);
+        $itemPart = \App\Models\WorkOrderItemPart::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'work_order_item_id' => $item->id,
+            'part_id' => $part->id,
+            'warehouse_id' => $warehouse->id,
+            'name' => 'Spare Part',
+            'qty' => 1,
+            'unit_price' => 50,
+            'total' => 50,
+        ]);
+
+        // Attempt delete
+        $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
+        $deleteResponse->assertRedirect();
+
+        // Assert item was NOT deleted
+        $this->assertDatabaseHas('work_order_items', ['id' => $item->id]);
+
+        // Delete the part
+        $itemPart->delete();
+
+        // 3. Delete should succeed now that technicians and parts are gone
+        $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
+        $deleteResponse->assertRedirect();
+
+        // Assert item was deleted
+        $this->assertDatabaseMissing('work_order_items', ['id' => $item->id]);
+    }
+
+    public function test_authorized_user_cannot_delete_item_if_work_order_has_payments(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.create',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create work order
+        $response = $this->actingAs($user)->postJson('/app/work-orders', [
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'items' => [
+                ['title' => 'Oil Change', 'qty' => 1, 'unit_price' => 100],
+            ],
+        ]);
+
+        $workOrderId = $response->json('id');
+        $workOrder = WorkOrder::withoutGlobalScopes()->find($workOrderId);
+        $item = $workOrder->items()->first();
+
+        // 1. Create a payment on the work order
+        $payment = \App\Models\Payment::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'work_order_id' => $workOrder->id,
+            'amount' => 50,
+            'payment_method' => 'cash',
+            'payment_date' => now(),
+            'type' => 'payment',
+        ]);
+
+        // Attempt delete
+        $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
+        $deleteResponse->assertRedirect();
+
+        // Assert item was NOT deleted
+        $this->assertDatabaseHas('work_order_items', ['id' => $item->id]);
+
+        // Delete the payment
+        $payment->forceDelete(); // forceDelete to completely remove it from the DB query check
+
+        // 2. Delete should succeed now that payment is deleted
+        $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
+        $deleteResponse->assertRedirect();
+
+        // Assert item was deleted
+        $this->assertDatabaseMissing('work_order_items', ['id' => $item->id]);
+    }
+
+    public function test_authorized_user_can_reactivate_cancelled_item(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.create',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create work order
+        $response = $this->actingAs($user)->postJson('/app/work-orders', [
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'items' => [
+                ['title' => 'Oil Change', 'qty' => 1, 'unit_price' => 100],
+            ],
+        ]);
+
+        $workOrderId = $response->json('id');
+        $workOrder = WorkOrder::withoutGlobalScopes()->find($workOrderId);
+        $item = $workOrder->items()->first();
+
+        // 1. Set status to cancelled
+        $item->update(['status' => 'cancelled']);
+
+        // 2. Change status back to pending
+        $statusResponse = $this->actingAs($user)->patchJson("/app/work-orders/{$workOrder->id}/items/{$item->id}/status", [
+            'status' => 'pending',
+        ]);
+
+        $statusResponse->assertStatus(200);
+        $this->assertEquals('pending', $item->fresh()->status);
+    }
 }

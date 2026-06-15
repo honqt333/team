@@ -1060,6 +1060,13 @@ watch(() => props.item, (newItem) => {
     }
 }, { deep: true });
 
+// Watch for initialTab changes to sync activeTab
+watch(() => props.initialTab, (newTab) => {
+    if (newTab) {
+        activeTab.value = newTab;
+    }
+}, { immediate: true });
+
 // Reset form when modal opens
 watch(() => props.show, (isOpen) => {
     if (isOpen) {

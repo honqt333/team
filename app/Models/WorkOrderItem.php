@@ -204,11 +204,6 @@ class WorkOrderItem extends Model
      */
     public function canChangeStatusTo(string $newStatus): bool
     {
-        // Cannot change if already cancelled
-        if ($this->status === self::STATUS_CANCELLED) {
-            return false;
-        }
-
         // Cannot cancel if has technicians or parts
         if ($newStatus === self::STATUS_CANCELLED) {
             return $this->canBeCancelled();
