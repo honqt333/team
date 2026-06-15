@@ -469,4 +469,54 @@ class WorkOrdersCrudTest extends TestCase
         $statusResponse->assertStatus(200);
         $this->assertEquals('pending', $item->fresh()->status);
     }
+
+    public function test_authorized_user_can_add_item_under_packages_department(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.create',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create work order
+        $response = $this->actingAs($user)->postJson('/app/work-orders', [
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'items' => [],
+        ]);
+
+        $workOrderId = $response->json('id');
+        $workOrder = WorkOrder::withoutGlobalScopes()->find($workOrderId);
+
+        // Create a service of type package
+        $service = \App\Models\Service::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name_ar' => 'باقة خدمات',
+            'name_en' => 'Service Package',
+            'type' => 'package',
+            'base_price' => 150,
+            'min_price' => 100,
+            'is_active' => true,
+        ]);
+
+        // Attempt add item under 'packages' department
+        $addResponse = $this->actingAs($user)->postJson("/app/work-orders/{$workOrder->id}/items", [
+            'service_id' => $service->id,
+            'department_id' => 'packages',
+            'title' => 'Package Item',
+            'qty' => 1,
+            'unit_price' => 150,
+        ]);
+
+        $addResponse->assertRedirect();
+        
+        // Assert item was created with department_id null
+        $item = $workOrder->items()->first();
+        $this->assertNotNull($item);
+        $this->assertNull($item->department_id);
+        $this->assertEquals($service->id, $item->service_id);
+    }
 }

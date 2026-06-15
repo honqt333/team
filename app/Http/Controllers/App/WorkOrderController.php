@@ -487,6 +487,11 @@ class WorkOrderController
     {
         $this->authorize('update', $work_order);
 
+        // Pre-normalize virtual 'packages' department_id to null to prevent validation failure
+        if ($request->input('department_id') === 'packages') {
+            $request->merge(['department_id' => null]);
+        }
+
         $validated = $request->validate([
             'service_id' => 'nullable|exists:services,id',
             'department_id' => 'nullable|exists:departments,id',

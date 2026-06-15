@@ -8,10 +8,16 @@
       </div>
       <input
         type="text"
-        readonly
+        :readonly="!disabled"
+        :disabled="disabled"
         :value="formattedDate"
-        @click="isOpen = !isOpen"
-        class="w-full ps-10 pe-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all cursor-pointer"
+        @click="!disabled && (isOpen = !isOpen)"
+        :class="[
+            'w-full ps-10 pe-4 py-2.5 text-sm border rounded-xl placeholder-gray-400 transition-all',
+            disabled
+                ? 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500 cursor-not-allowed border-gray-200 dark:border-gray-800'
+                : 'bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 cursor-pointer border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent'
+        ]"
         :placeholder="placeholder"
       />
     </div>
@@ -75,6 +81,10 @@ const props = defineProps({
         default: 'DD/MM/YYYY'
     },
     alignRight: {
+        type: Boolean,
+        default: false
+    },
+    disabled: {
         type: Boolean,
         default: false
     }

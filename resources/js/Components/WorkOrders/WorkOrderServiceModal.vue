@@ -49,7 +49,7 @@
                                 {{ $t('quotes.service_modal.service') }}
                             </label>
                             <SearchableSelect
-                                v-if="!item && !props.readOnly"
+                                v-if="!item && !isReadOnly"
                                 v-model="form.service_id"
                                 :options="serviceOptions"
                                 option-label="label"
@@ -73,7 +73,7 @@
                             <textarea
                                 v-model="form.title"
                                 rows="1"
-                                :disabled="isDescriptionDisabled || props.readOnly"
+                                :disabled="isDescriptionDisabled || isReadOnly"
                                 class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                 :placeholder="$t('quotes.service_modal.description_placeholder')"
                             ></textarea>
@@ -89,7 +89,7 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     {{ $t('work_orders.service_modal.duration_value') }}
                                 </label>
-                                <input type="number" v-model="form.duration_value" :disabled="isDurationDisabled || props.readOnly" class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900" />
+                                <input type="number" v-model="form.duration_value" :disabled="isDurationDisabled || isReadOnly" class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900" />
                                 <p v-if="form.errors.duration_value" class="mt-1 text-xs text-red-500">{{ form.errors.duration_value }}</p>
                             </div>
                             <div>
@@ -101,7 +101,7 @@
                                     :options="durationUnitOptions"
                                     option-label="label"
                                     option-value="value"
-                                    :disabled="isDurationDisabled || props.readOnly"
+                                    :disabled="isDurationDisabled || isReadOnly"
                                     class="w-full"
                                 />
                             </div>
@@ -113,7 +113,7 @@
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     {{ $t('work_orders.service_modal.warranty_value') }}
                                 </label>
-                                <input type="number" v-model="form.warranty_value_snapshot" :disabled="isWarrantyDisabled || props.readOnly" class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900" />
+                                <input type="number" v-model="form.warranty_value_snapshot" :disabled="isWarrantyDisabled || isReadOnly" class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900" />
                                 <p v-if="form.errors.warranty_value_snapshot" class="mt-1 text-xs text-red-500">{{ form.errors.warranty_value_snapshot }}</p>
                             </div>
                             <div>
@@ -125,7 +125,7 @@
                                     :options="warrantyUnitOptions"
                                     option-label="label"
                                     option-value="value"
-                                    :disabled="isWarrantyDisabled || props.readOnly"
+                                    :disabled="isWarrantyDisabled || isReadOnly"
                                     class="w-full"
                                 />
                             </div>
@@ -146,7 +146,7 @@
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
                                     {{ $t('work_orders.service_modal.started_at') }}
                                 </label>
-                                <CustomDatePicker v-model="form.started_at" />
+                                <CustomDatePicker v-model="form.started_at" :disabled="isReadOnly" />
                                 <p v-if="form.errors.started_at" class="mt-1 text-xs text-red-500">{{ form.errors.started_at }}</p>
                             </div>
 
@@ -155,7 +155,7 @@
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
                                     {{ $t('work_orders.service_modal.due_date') }}
                                 </label>
-                                <CustomDatePicker v-model="form.due_date" />
+                                <CustomDatePicker v-model="form.due_date" :disabled="isReadOnly" />
                                 <p v-if="form.errors.due_date" class="mt-1 text-xs text-red-500">{{ form.errors.due_date }}</p>
                             </div>
 
@@ -185,9 +185,9 @@
                                 <div class="relative">
                                     <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
                                         @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                                        :disabled="isPriceLocked || props.readOnly" :class="[
+                                        :disabled="isPriceLocked || isReadOnly" :class="[
                                             'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right text-sm focus:ring-2 focus:border-indigo-500',
-                                            isPriceLocked || props.readOnly
+                                            isPriceLocked || isReadOnly
                                                 ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                                                 : isPriceBelowMinimum
                                                     ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
@@ -209,13 +209,13 @@
                                         {{ $t('quotes.service_modal.discount_method') }}
                                     </label>
                                     <div class="flex items-center gap-1">
-                                        <button type="button" @click="form.discount_type = 'none'" :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all', form.discount_type === 'none' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">
+                                        <button type="button" :disabled="isReadOnly" @click="form.discount_type = 'none'" :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all', form.discount_type === 'none' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700', isReadOnly ? 'opacity-70 cursor-not-allowed' : '']">
                                             {{ $t('quotes.service_modal.no_discount') }}
                                         </button>
-                                        <button type="button" @click="form.discount_type = 'fixed'" :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all', form.discount_type === 'fixed' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">
+                                        <button type="button" :disabled="isReadOnly" @click="form.discount_type = 'fixed'" :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all', form.discount_type === 'fixed' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700', isReadOnly ? 'opacity-70 cursor-not-allowed' : '']">
                                             {{ $t('quotes.service_modal.fixed') }}
                                         </button>
-                                        <button type="button" @click="form.discount_type = 'percentage'" :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all', form.discount_type === 'percentage' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">
+                                        <button type="button" :disabled="isReadOnly" @click="form.discount_type = 'percentage'" :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all', form.discount_type === 'percentage' ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700', isReadOnly ? 'opacity-70 cursor-not-allowed' : '']">
                                             %
                                         </button>
                                     </div>
@@ -224,8 +224,9 @@
                                 <!-- Discount Value Input -->
                                 <div v-if="form.discount_type !== 'none'">
                                     <input type="text" inputmode="decimal" v-model="form.discount_value" dir="ltr"
+                                        :disabled="isReadOnly"
                                         @input="form.discount_value = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                                        class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl font-mono text-end text-sm focus:ring-2 focus:ring-indigo-500" />
+                                        class="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl font-mono text-end text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900" />
                                 </div>
                             </div>
 
@@ -246,29 +247,7 @@
                         </div>
                     </div>
 
-                    <!-- Status Selection and actions (Row at the bottom) -->
-                    <div v-if="item && !props.readOnly" class="border-t border-gray-100 dark:border-gray-800 pt-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {{ $t('work_orders.item.status') }}
-                        </label>
-                        <div class="flex gap-2 flex-wrap">
-                            <button
-                                v-for="status in statuses"
-                                :key="status.value"
-                                type="button"
-                                @click="changeStatus(status.value)"
-                                    :class="[
-                                    'px-4 py-2 text-sm rounded-lg transition-all flex items-center gap-2 border',
-                                    form.status === status.value
-                                        ? status.activeClass
-                                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                                ]"
-                            >
-                                <span v-html="status.icon"></span>
-                                {{ status.label }}
-                            </button>
-                        </div>
-                    </div>
+
                 </form>
             </div>
 
@@ -279,7 +258,7 @@
                         <div class="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
                         {{ $t('quotes.show.tabs.linked_parts') }}
                     </h4>
-                    <button v-if="!isReadOnly && !props.readOnly" type="button" @click="openPartModal()"
+                    <button v-if="!isReadOnly" type="button" @click="openPartModal()"
                         class="px-3 py-1.5 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center gap-1 shadow-sm">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -289,7 +268,7 @@
                 </div>
                 <PartsDisplay 
                     :parts="allParts" 
-                    :read-only="props.readOnly" 
+                    :read-only="isReadOnly" 
                     :show-vat="workOrder.is_taxed" 
                     :show-service="false"
                     :compact-grid="true" 
@@ -331,7 +310,7 @@
 
             <!-- Technicians Tab -->
             <div v-show="activeTab === 'technicians'" class="space-y-4">
-                <div v-if="!props.readOnly" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <div v-if="!isReadOnly" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                     <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ $t('work_orders.item.assign_technician') }}</h4>
                     <div class="flex gap-2">
                         <SearchableSelect
@@ -350,7 +329,7 @@
                 <div class="space-y-2">
                     <div v-for="tech in (item ? localTechnicians : pendingTechnicians)" :key="tech.id || tech.user_id" class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                         <span class="text-sm text-gray-900 dark:text-white">{{ tech.name }}</span>
-                        <button v-if="!props.readOnly" type="button" @click="removeTechnician(tech)" class="text-red-500 hover:text-red-600">
+                        <button v-if="!isReadOnly" type="button" @click="removeTechnician(tech)" class="text-red-500 hover:text-red-600">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                         </button>
                     </div>
@@ -364,7 +343,7 @@
                         <div class="w-1.5 h-4 bg-indigo-500 rounded-full"></div>
                         {{ $t('work_orders.item.tab_notes') }}
                     </h4>
-                    <button v-if="!props.readOnly" type="button" @click="showAddNoteModal = true"
+                    <button v-if="!isReadOnly" type="button" @click="showAddNoteModal = true"
                         class="px-3 py-1.5 text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all flex items-center gap-1 shadow-sm">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -388,7 +367,7 @@
                                 </div>
                             </div>
                             <button
-                                v-if="!props.readOnly"
+                                v-if="!isReadOnly"
                                 type="button"
                                 @click="removeNote(note)"
                                 class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
@@ -412,7 +391,7 @@
                 {{ $t('common.close') }}
             </button>
             <button
-                v-if="!props.readOnly"
+                v-if="!isReadOnly"
                 type="button"
                 @click="submitForm"
                 :disabled="saving || isPriceBelowMinimum"
@@ -504,6 +483,13 @@ const { formatCurrency, toEnglish } = useNumberFormat();
 
 // State
 const activeTab = ref('service');
+const isReadOnly = computed(() => {
+    if (props.readOnly) return true;
+    if (props.item && !['pending', 'in_progress'].includes(props.item.status)) {
+        return true;
+    }
+    return false;
+});
 const saving = ref(false);
 const techniciansLoading = ref(false);
 const notesLoading = ref(false);
@@ -624,20 +610,20 @@ const isPriceLocked = computed(() => {
 });
 
 const isDescriptionDisabled = computed(() => {
-    if (props.readOnly) return true;
+    if (isReadOnly.value) return true;
     if (!selectedService.value) return false;
     return !!(getDescription(selectedService.value) || getName(selectedService.value));
 });
 
 const isDurationDisabled = computed(() => {
-    if (props.readOnly) return true;
+    if (isReadOnly.value) return true;
     if (!selectedService.value) return false;
     const val = selectedService.value.duration_value;
     return val !== undefined && val !== null && val !== '';
 });
 
 const isWarrantyDisabled = computed(() => {
-    if (props.readOnly) return true;
+    if (isReadOnly.value) return true;
     if (!selectedService.value) return false;
     const val = selectedService.value.warranty_value;
     return val !== undefined && val !== null && val !== '';

@@ -8,27 +8,16 @@
                     {{ $t('work_orders.show.tabs.services') }}
                 </h3>
 
-                <!-- Add Department Dropdown -->
+                <!-- Add Department Button -->
                 <div v-if="!isReadOnly" class="relative">
-                    <button @click="showDeptMenu = !showDeptMenu"
-                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none">
+                    <button @click="showDeptModal = true"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:from-indigo-850 active:to-purple-850 text-white text-xs font-bold rounded-xl transition-all shadow-md shadow-indigo-500/20 hover:-translate-y-0.5">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4v16m8-8H4" />
                         </svg>
                         {{ $t('quotes.show.add_department') }}
                     </button>
-                    <div v-if="showDeptMenu"
-                        class="absolute z-50 start-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-y-auto">
-                        <button v-for="dept in availableDepartments" :key="dept.id"
-                            @click="onAddDepartment(dept.id)"
-                            class="w-full px-4 py-2 text-start text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            {{ getName(dept) }}
-                        </button>
-                        <p v-if="availableDepartments.length === 0" class="px-4 py-2 text-sm text-gray-400">
-                            {{ $t('quotes.show.all_departments_added') }}
-                        </p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -327,6 +316,53 @@
             </div>
             <p v-else class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.show.no_services') }}</p>
         </div>
+
+        <!-- Add Department Modal -->
+        <BaseModal :show="showDeptModal" @close="showDeptModal = false" max-width="md">
+            <template #title>
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                    {{ $t('quotes.show.add_department') }}
+                </div>
+            </template>
+
+            <form @submit.prevent="submitAddDepartments" class="space-y-4">
+                <div class="space-y-3 max-h-96 overflow-y-auto p-1">
+                    <div v-if="availableDepartments.length === 0" class="text-center py-6 text-gray-500">
+                        {{ $t('quotes.show.all_departments_added') }}
+                    </div>
+
+                    <label v-for="dept in availableDepartments" :key="dept.id"
+                        class="flex items-center justify-between p-3 rounded-xl border border-gray-200 dark:border-gray-700 transition-all cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400"
+                        :class="{ 'bg-indigo-50 dark:bg-indigo-900/10 border-indigo-500 ring-1 ring-indigo-500': selectedDepts.includes(dept.id) }">
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-gray-900 dark:text-white">{{ getName(dept) }}</span>
+                        </div>
+                        <div class="relative flex items-center">
+                            <input type="checkbox" :value="dept.id" v-model="selectedDepts"
+                                class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 transition duration-150 ease-in-out" />
+                        </div>
+                    </label>
+                </div>
+            </form>
+
+            <template #footer>
+                <button type="button" @click="showDeptModal = false"
+                    class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    {{ $t('common.cancel') }}
+                </button>
+                <button type="button" @click="submitAddDepartments" :disabled="savingDepts || selectedDepts.length === 0"
+                    class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 transition-all shadow-md shadow-indigo-500/20">
+                    {{ savingDepts ? $t('common.loading') : $t('common.save') }}
+                </button>
+            </template>
+        </BaseModal>
     </div>
 </template>
 
@@ -340,6 +376,7 @@ import { useFormatters } from '@/Composables/useFormatters';
 import axios from 'axios';
 import { router } from '@inertiajs/vue3';
 import { useToast } from '@/Composables/useToast';
+import BaseModal from '@/Components/BaseModal.vue';
 
 const props = defineProps({
     workOrder: { type: Object, required: true },
@@ -379,8 +416,10 @@ function formatPrice(value) {
     return formatCurrency(value) + ' ' + t('common.currency');
 }
 
-// Local UI state for the "add department" dropdown.
-const showDeptMenu = ref(false);
+// Local UI state for the "add department" modal.
+const showDeptModal = ref(false);
+const selectedDepts = ref([]);
+const savingDepts = ref(false);
 
 const activeDropdownItemId = ref(null);
 const availableStatuses = ['pending', 'in_progress', 'ready_for_qc', 'on_hold', 'completed', 'cancelled'];
@@ -425,8 +464,23 @@ function getItemsForDept(deptId) {
     });
 }
 
-function onAddDepartment(deptId) {
-    emit('add-department', deptId);
-    showDeptMenu.value = false;
+async function submitAddDepartments() {
+    if (savingDepts.value || selectedDepts.value.length === 0) return;
+    savingDepts.value = true;
+    try {
+        for (const deptId of selectedDepts.value) {
+            await axios.post(route('work-orders.departments.store', props.workOrder.id), {
+                department_id: deptId
+            });
+        }
+        toastSuccess(t('messages.department_added') || 'تم إضافة القسم بنجاح');
+        selectedDepts.value = [];
+        showDeptModal.value = false;
+        router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+    } catch (e) {
+        toastError(t('common.error') || 'حدث خطأ ما');
+    } finally {
+        savingDepts.value = false;
+    }
 }
 </script>
