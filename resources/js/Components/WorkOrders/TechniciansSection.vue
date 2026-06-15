@@ -46,7 +46,7 @@
                                     v-else 
                                     class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs flex-shrink-0 border border-indigo-100 dark:border-indigo-900"
                                 >
-                                    {{ tech.name.charAt(0).toUpperCase() }}
+                                    {{ getInitials(tech.name) }}
                                 </div>
 
                                 <div class="flex flex-col min-w-0">
@@ -118,7 +118,7 @@
                                 v-else 
                                 class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-lg border-2 border-indigo-50 dark:border-indigo-950 flex-shrink-0"
                             >
-                                {{ tech.name.charAt(0).toUpperCase() }}
+                                {{ getInitials(tech.name) }}
                             </div>
                             
                             <!-- Name and Title -->
@@ -209,13 +209,16 @@
                         <div 
                             v-for="item in tech.items" 
                             :key="item.id"
-                            class="flex items-center justify-between py-2 px-3 bg-gray-50/70 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-800/80 text-xs text-gray-700 dark:text-gray-300 hover:bg-gray-100/60 dark:hover:bg-gray-900/70 transition-colors"
+                            class="group flex items-center justify-between py-2 px-3 bg-gray-50/70 dark:bg-gray-900/40 rounded-xl border border-gray-100 dark:border-gray-800/80 text-xs text-gray-700 dark:text-gray-300 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/20 hover:border-indigo-100 dark:hover:border-indigo-900/40 transition-colors"
                         >
                             <button 
                                 @click="$emit('click-service', item.id)"
-                                class="font-semibold text-gray-850 dark:text-gray-205 hover:text-indigo-600 dark:hover:text-indigo-400 truncate pr-2 text-start transition-colors"
+                                class="font-semibold text-gray-700 dark:text-gray-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate pr-2 text-start transition-colors"
                             >
                                 {{ getItemName(item) }}
+                                <span v-if="item.pivot_share !== undefined && parseFloat(item.pivot_share) < 100" class="ms-1 text-gray-400 group-hover:text-indigo-400 font-mono">
+                                    ({{ parseFloat(parseFloat(item.pivot_share).toFixed(2)) }}%)
+                                </span>
                             </button>
 
                             <!-- Delete Button (قمامة) on the far left -->
@@ -284,7 +287,7 @@
                                         v-else 
                                         class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs border border-indigo-100 dark:border-indigo-900"
                                     >
-                                        {{ tech.name.charAt(0).toUpperCase() }}
+                                        {{ getInitials(tech.name) }}
                                     </div>
                                     <span class="font-semibold text-gray-900 dark:text-gray-100 text-sm">
                                         {{ getTechName(tech) }}
@@ -308,6 +311,9 @@
                                     >
                                         <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
                                         {{ getItemName(item) }}
+                                        <span v-if="item.pivot_share !== undefined && parseFloat(item.pivot_share) < 100" class="ms-1 text-gray-450 dark:text-gray-400 font-mono">
+                                            ({{ parseFloat(parseFloat(item.pivot_share).toFixed(2)) }}%)
+                                        </span>
                                     </button>
                                     <span v-if="tech.items.length === 0" class="text-xs text-gray-450 italic">
                                         {{ labels.noServices }}
@@ -424,7 +430,10 @@ const assignedTechnicians = computed(() => {
                         items: []
                     });
                 }
-                techs.get(tech.id).items.push(item);
+                techs.get(tech.id).items.push({
+                    ...item,
+                    pivot_share: tech.pivot?.share
+                });
             });
         }
     });
@@ -514,6 +523,14 @@ const getTechJobTitle = (tech) => {
     if (tech.job_title_en) return tech.job_title_en;
     if (tech.job_title_ar) return tech.job_title_ar;
     return '';
+};
+
+// Helper: Get initials (first letter of first + last name)
+const getInitials = (name) => {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 };
 
 // Action: Local addition of technician card

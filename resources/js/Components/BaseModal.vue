@@ -33,7 +33,7 @@
                         </div>
 
                         <!-- Body -->
-                        <div :class="scrollEntire ? 'p-6' : 'p-6 overflow-y-auto flex-1'">
+                        <div :class="[scrollEntire ? 'p-6' : 'p-6 flex-1', !scrollEntire && !overflowVisible ? 'overflow-y-auto' : 'overflow-visible']">
                             <slot></slot>
                         </div>
 

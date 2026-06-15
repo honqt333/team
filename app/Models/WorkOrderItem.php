@@ -166,7 +166,7 @@ class WorkOrderItem extends Model
     public function technicians(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'work_order_item_technician')
-            ->withPivot(['assigned_at', 'completed_at', 'notes'])
+            ->withPivot(['assigned_at', 'completed_at', 'notes', 'share'])
             ->withTimestamps();
     }
 

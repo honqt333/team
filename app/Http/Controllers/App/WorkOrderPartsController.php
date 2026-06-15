@@ -149,6 +149,26 @@ class WorkOrderPartsController extends Controller
 
         $allowNegative = auth()->user()->can('inventory.override_negative_stock');
 
+        // Validate stock availability if increasing quantity for warehouse part
+        $source = $validated['source'] ?? $workOrderPart->source;
+        if ($source === 'warehouse' && !$allowNegative) {
+            $partId = $validated['part_id'] ?? $workOrderPart->part_id;
+            $warehouseId = $validated['warehouse_id'] ?? $workOrderPart->warehouse_id;
+            $oldQty = (float) $workOrderPart->qty;
+            $newQty = (float) ($validated['qty'] ?? $oldQty);
+            $delta = $newQty - $oldQty;
+
+            if ($delta > 0) {
+                $stock = $this->partsService->checkStock($warehouseId, $partId, $delta);
+                if (!$stock['sufficient']) {
+                    return back()->with('error', __('inventory.stock.insufficient', [
+                        'available' => $stock['on_hand'],
+                        'requested' => $delta,
+                    ]));
+                }
+            }
+        }
+
         try {
             $this->partsService->updatePart($workOrderPart, $validated, $allowNegative);
             return back()->with('success', __('common.updated'));

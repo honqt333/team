@@ -301,7 +301,8 @@ class WorkOrderController
             // and the Vue page does not read `workOrder.vehicle.customer`.
             'items.service.department',
             'items.technicians.employee.jobTitle',
-            'items.parts',
+            'items.parts.part',
+            'items.parts.warehouse',
             'items.itemNotes.user.roles',
             'generalNotes.user.roles',
             'generalNotes.workOrderItem.service.department',
@@ -519,6 +520,7 @@ class WorkOrderController
             // Pending technicians validation
             'pending_technicians' => ['nullable', 'array'],
             'pending_technicians.*.user_id' => ['required_with:pending_technicians', 'exists:users,id'],
+            'pending_technicians.*.share' => ['nullable', 'numeric', 'min:0', 'max:100'],
             // Pending notes validation
             'pending_notes' => ['nullable', 'array'],
             'pending_notes.*.content' => ['required_with:pending_notes', 'string'],
@@ -595,7 +597,8 @@ class WorkOrderController
         if (!empty($request->pending_technicians)) {
             foreach ($request->pending_technicians as $tech) {
                 $line->technicians()->attach($tech['user_id'], [
-                    'assigned_at' => now()
+                    'assigned_at' => now(),
+                    'share' => $tech['share'] ?? 100.00
                 ]);
             }
         }
@@ -634,9 +637,23 @@ class WorkOrderController
             'started_at' => 'nullable|date',
             'completed_at' => 'nullable|date',
             'due_date' => 'nullable|date',
+            'technicians' => 'nullable|array',
+            'technicians.*.user_id' => 'required_with:technicians|exists:users,id',
+            'technicians.*.share' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        $item->update($validated);
+        $item->update(collect($validated)->except(['technicians'])->toArray());
+
+        if ($request->has('technicians')) {
+            $syncData = [];
+            foreach ($request->input('technicians', []) as $tech) {
+                $syncData[$tech['user_id']] = [
+                    'assigned_at' => now(),
+                    'share' => $tech['share'] ?? 100.00
+                ];
+            }
+            $item->technicians()->sync($syncData);
+        }
 
         // Auto-extend expected_end_date of the work order if the item's dates exceed it
         $maxItemDate = null;
@@ -898,18 +915,22 @@ class WorkOrderController
         $item->technicians()->syncWithoutDetaching([
             $validated['user_id'] => [
                 'assigned_at' => now(),
-                'notes' => $validated['notes'] ?? null,
+                'notes'       => $validated['notes'] ?? null,
+                'share'       => 0, // temporary; rebalanced below
             ]
         ]);
 
+        // Rebalance shares equally
+        $this->rebalanceTechnicianShares($item);
+
         $work_order->logActivity('technician_assigned', __('work_orders.activities.actions.technician_assigned', [
-            'name' => \App\Models\User::find($validated['user_id'])->name,
+            'name'    => \App\Models\User::find($validated['user_id'])->name,
             'service' => $item->title
         ]));
 
         $message = __('messages.technician_assigned');
         return $request->expectsJson()
-            ? response()->json(['success' => $message, 'technicians' => $item->technicians])
+            ? response()->json(['success' => $message, 'technicians' => $item->technicians()->withPivot(['assigned_at', 'completed_at', 'notes', 'share'])->get()])
             : redirect()->back()->with('success', $message);
     }
 
@@ -923,8 +944,11 @@ class WorkOrderController
         $name = $user->name;
         $item->technicians()->detach($user->id);
 
+        // Rebalance shares equally after removal
+        $this->rebalanceTechnicianShares($item);
+
         $work_order->logActivity('technician_removed', __('work_orders.activities.actions.technician_removed', [
-            'name' => $name,
+            'name'    => $name,
             'service' => $item->title
         ]));
 
@@ -932,6 +956,36 @@ class WorkOrderController
         return request()->expectsJson()
             ? response()->json(['success' => $message])
             : redirect()->back()->with('success', $message);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Helper: Rebalance technician shares equally to sum to 100%
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Distribute shares equally among all technicians assigned to a work order item.
+     * The last technician gets any rounding remainder so the total is always exactly 100%.
+     */
+    private function rebalanceTechnicianShares(\App\Models\WorkOrderItem $item): void
+    {
+        $techIds = $item->technicians()->pluck('users.id')->toArray();
+        $count   = count($techIds);
+
+        if ($count === 0) return;
+
+        if ($count === 1) {
+            $item->technicians()->updateExistingPivot($techIds[0], ['share' => 100.00]);
+            return;
+        }
+
+        $base      = round(100 / $count, 2);
+        $allocated = $base * ($count - 1);
+        $last      = round(100 - $allocated, 2);
+
+        foreach ($techIds as $index => $techId) {
+            $share = ($index === $count - 1) ? $last : $base;
+            $item->technicians()->updateExistingPivot($techId, ['share' => $share]);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -1252,7 +1306,8 @@ class WorkOrderController
             'vehicle.make',
             'vehicle.model',
             'items.service.department',
-            'items.parts',
+            'items.parts.part',
+            'items.parts.warehouse',
             'center',
             'tenant',
         ]);

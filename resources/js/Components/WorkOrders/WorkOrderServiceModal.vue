@@ -1,5 +1,5 @@
 <template>
-    <BaseModal :show="show" @close="$emit('close')" size="lg">
+    <BaseModal :show="show" @close="$emit('close')" size="lg" :overflow-visible="true" scroll-entire>
         <template #title>
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center">
@@ -42,8 +42,8 @@
             <!-- Service Tab -->
             <div v-show="activeTab === 'service'" class="space-y-4">
                 <form @submit.prevent="submitForm" class="space-y-4">
-                    <!-- Service Select (Read-only for edit, editable for add) and Description Row -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Service Select (Read-only for edit, editable for add) and Description -->
+                    <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                 {{ $t('quotes.service_modal.service') }}
@@ -72,7 +72,7 @@
                             </label>
                             <textarea
                                 v-model="form.title"
-                                rows="1"
+                                rows="2"
                                 :disabled="isDescriptionDisabled || isReadOnly"
                                 class="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed dark:disabled:bg-gray-900"
                                 :placeholder="$t('quotes.service_modal.description_placeholder')"
@@ -146,7 +146,11 @@
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
                                     {{ $t('work_orders.service_modal.started_at') }}
                                 </label>
-                                <CustomDatePicker v-model="form.started_at" :disabled="isReadOnly" />
+                                <CustomDatePicker 
+                                    v-model="form.started_at" 
+                                    :disabled="isReadOnly" 
+                                    :min-date="workOrder?.entry_date"
+                                />
                                 <p v-if="form.errors.started_at" class="mt-1 text-xs text-red-500">{{ form.errors.started_at }}</p>
                             </div>
 
@@ -155,7 +159,11 @@
                                 <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">
                                     {{ $t('work_orders.service_modal.due_date') }}
                                 </label>
-                                <CustomDatePicker v-model="form.due_date" :disabled="isReadOnly" />
+                                <CustomDatePicker 
+                                    v-model="form.due_date" 
+                                    :disabled="isReadOnly" 
+                                    :min-date="form.started_at || workOrder?.entry_date"
+                                />
                                 <p v-if="form.errors.due_date" class="mt-1 text-xs text-red-500">{{ form.errors.due_date }}</p>
                             </div>
 
@@ -253,19 +261,6 @@
 
             <!-- Parts Tab -->
             <div v-show="activeTab === 'parts'" class="space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                        <div class="w-1.5 h-4 bg-emerald-500 rounded-full"></div>
-                        {{ $t('quotes.show.tabs.linked_parts') }}
-                    </h4>
-                    <button v-if="!isReadOnly" type="button" @click="openPartModal()"
-                        class="px-3 py-1.5 text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center gap-1 shadow-sm">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        {{ $t('work_orders.item.add_part') }}
-                    </button>
-                </div>
                 <PartsDisplay 
                     :parts="allParts" 
                     :read-only="isReadOnly" 
@@ -308,30 +303,93 @@
                 @saved="onPartSaved" 
             />
 
+            <!-- Issue More Modal -->
+            <WorkOrderIssueMoreModal 
+                :show="showIssueMoreModal" 
+                :workOrder="workOrder" 
+                :part="editingIssueMorePart" 
+                @close="closeIssueMoreModal" 
+                @saved="onPartSaved" 
+            />
+
+            <!-- Return Modal -->
+            <WorkOrderReturnModal 
+                :show="showReturnModal" 
+                :workOrder="workOrder" 
+                :part="editingReturnPart" 
+                @close="closeReturnModal" 
+                @saved="onPartSaved" 
+            />
+
             <!-- Technicians Tab -->
             <div v-show="activeTab === 'technicians'" class="space-y-4">
-                <div v-if="!isReadOnly" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">{{ $t('work_orders.item.assign_technician') }}</h4>
-                    <div class="flex gap-2">
-                        <SearchableSelect
-                            v-model="technicianForm.user_id"
-                            :options="availableTechnicians"
-                            option-label="name"
-                            option-value="id"
-                            :placeholder="$t('common.choose')"
-                            class="flex-1"
-                        />
-                        <button type="button" @click="assignTechnician" :disabled="techniciansLoading || !technicianForm.user_id" class="px-4 py-2 bg-indigo-500 text-white text-sm rounded-lg hover:bg-indigo-600 disabled:opacity-50 transition-colors">
-                            {{ $t('common.add') }}
-                        </button>
+                <div class="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">{{ $t('work_orders.item.assign_technician') }}</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[200px] overflow-y-auto pr-2">
+                        <div 
+                            v-for="tech in props.technicians" 
+                            :key="tech.id" 
+                            @click="toggleTechnician(tech)"
+                            class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 dark:hover:border-indigo-500 transition-all cursor-pointer select-none"
+                        >
+                            <div class="flex items-center gap-3">
+                                <input 
+                                    type="checkbox" 
+                                    :checked="isTechnicianSelected(tech.id)"
+                                    :disabled="isReadOnly"
+                                    class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50 cursor-pointer"
+                                    @click.stop="toggleTechnician(tech)"
+                                />
+                                <span class="text-sm font-medium text-gray-900 dark:text-white">{{ getTechnicianName(tech) }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <div v-for="tech in (item ? localTechnicians : pendingTechnicians)" :key="tech.id || tech.user_id" class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-                        <span class="text-sm text-gray-900 dark:text-white">{{ tech.name }}</span>
-                        <button v-if="!isReadOnly" type="button" @click="removeTechnician(tech)" class="text-red-500 hover:text-red-600">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                        </button>
+
+                <!-- Checked Technicians List with Share Inputs -->
+                <div v-if="selectedTechniciansList.length > 0" class="space-y-3">
+                    <h5 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        {{ $t('work_orders.item.assigned_technicians') }}
+                    </h5>
+                    
+                    <div class="space-y-2">
+                        <div 
+                            v-for="tech in selectedTechniciansList" 
+                            :key="tech.user_id" 
+                            class="flex items-center justify-between p-3.5 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm"
+                        >
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ getTechnicianName(tech) }}</span>
+                            
+                            <!-- Share input if count > 1 -->
+                            <div v-if="selectedTechniciansList.length > 1" class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500 dark:text-gray-400">{{ $t('work_orders.item.technician_share') }}:</span>
+                                <div class="relative w-24">
+                                    <input 
+                                        type="number" 
+                                        v-model.number="tech.share" 
+                                        :disabled="isReadOnly"
+                                        min="0"
+                                        max="100"
+                                        step="0.01"
+                                        class="w-full py-1.5 pl-3 pr-8 border border-gray-200 dark:border-gray-700 rounded-lg font-mono text-right text-xs focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white"
+                                    />
+                                    <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
+                                        <span class="text-[10px] text-gray-500">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sum warning if count > 1 and sum !== 100 -->
+                    <div v-if="selectedTechniciansList.length > 1 && Math.abs(techniciansShareSum - 100) > 0.01" class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center justify-between">
+                        <span class="text-xs text-red-600 dark:text-red-400 font-medium">
+                            {{ $t('work_orders.item.share_sum_warning') }}
+                        </span>
+                        <span class="text-xs font-mono font-bold text-red-600 dark:text-red-400">
+                            {{ parseFloat(techniciansShareSum.toFixed(2)) }}% / 100%
+                        </span>
                     </div>
                 </div>
             </div>
@@ -394,7 +452,7 @@
                 v-if="!isReadOnly"
                 type="button"
                 @click="submitForm"
-                :disabled="saving || isPriceBelowMinimum"
+                :disabled="saving || isPriceBelowMinimum || isTechniciansShareInvalid"
                 class="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 disabled:opacity-50 transition-all"
             >
                 {{ saving ? $t('common.loading') : $t('common.save') }}
@@ -446,6 +504,8 @@ import { useNumberFormat } from '@/Composables/useNumberFormat';
 import BaseModal from '@/Components/BaseModal.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
 import WorkOrderPartModal from '@/Components/WorkOrders/WorkOrderPartModal.vue';
+import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreModal.vue';
+import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
 import axios from 'axios';
@@ -467,8 +527,25 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'saved']);
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { getName, getDescription } = useLocalized();
+
+function getTechnicianName(tech) {
+    const userId = tech.user_id || tech.id;
+    const found = props.technicians?.find(t => t.id === userId);
+    if (found) {
+        return locale.value === 'ar' 
+            ? (found.name_ar || found.name_en || found.name) 
+            : (found.name_en || found.name_ar || found.name);
+    }
+    const assigned = props.item?.technicians?.find(t => t.id === userId);
+    if (assigned) {
+        return locale.value === 'ar' 
+            ? (assigned.employee?.name_ar || assigned.employee?.name_en || assigned.name) 
+            : (assigned.employee?.name_en || assigned.employee?.name_ar || assigned.name);
+    }
+    return tech.name;
+}
 
 function getPreferredTitle(service) {
     if (!service) return '';
@@ -507,6 +584,10 @@ const pendingNotes = ref([]);
 // Modals
 const showLinkedPartModal = ref(false);
 const editingLinkedPart = ref(null);
+const showIssueMoreModal = ref(false);
+const editingIssueMorePart = ref(null);
+const showReturnModal = ref(false);
+const editingReturnPart = ref(null);
 
 // Helper function to format date for input (YYYY-MM-DD)
 function formatDateForInput(dateStr) {
@@ -550,8 +631,68 @@ const form = useForm({
     due_date: props.item?.due_date ? formatDateForInput(props.item.due_date) : formatDateForInput(new Date()),
 });
 
-const technicianForm = ref({ user_id: '' });
 const noteForm = ref({ content: '' });
+
+// Technicians multi-select state and helpers
+const selectedTechniciansList = computed(() => {
+    return props.item ? localTechnicians.value : pendingTechnicians.value;
+});
+
+const techniciansShareSum = computed(() => {
+    return selectedTechniciansList.value.reduce((sum, t) => sum + (parseFloat(t.share) || 0), 0);
+});
+
+const isTechniciansShareInvalid = computed(() => {
+    const list = selectedTechniciansList.value;
+    if (list.length <= 1) return false;
+    return Math.abs(techniciansShareSum.value - 100) > 0.01;
+});
+
+function isTechnicianSelected(techId) {
+    return selectedTechniciansList.value.some(t => t.user_id === techId);
+}
+
+function toggleTechnician(tech) {
+    if (isReadOnly.value) return;
+    
+    const list = props.item ? localTechnicians.value : pendingTechnicians.value;
+    const index = list.findIndex(t => t.user_id === tech.id);
+    
+    if (index !== -1) {
+        list.splice(index, 1);
+    } else {
+        list.push({
+            user_id: tech.id,
+            name: locale.value === 'ar' 
+                ? (tech.name_ar || tech.name_en || tech.name) 
+                : (tech.name_en || tech.name_ar || tech.name),
+            share: 0
+        });
+    }
+    
+    recalculateShares(list);
+}
+
+function recalculateShares(list) {
+    const count = list.length;
+    if (count === 0) return;
+    
+    if (count === 1) {
+        list[0].share = 100;
+        return;
+    }
+    
+    const baseShare = Math.floor((100 / count) * 100) / 100;
+    let sum = 0;
+    list.forEach((t, i) => {
+        if (i === count - 1) {
+            t.share = parseFloat((100 - sum).toFixed(2));
+        } else {
+            t.share = baseShare;
+            sum += baseShare;
+        }
+    });
+}
 
 // Computed
 const allParts = computed(() => [...linkedParts.value, ...pendingParts.value]);
@@ -571,11 +712,6 @@ const statuses = computed(() => [
     { value: 'on_hold', label: t('work_orders.item.status_on_hold'), icon: '⏸️', activeClass: 'bg-amber-500 border-amber-600 text-white' },
     { value: 'cancelled', label: t('work_orders.item.status_cancelled'), icon: '❌', activeClass: 'bg-red-500 border-red-600 text-white' },
 ]);
-
-const availableTechnicians = computed(() => {
-    const assignedIds = (props.item ? localTechnicians.value : pendingTechnicians.value).map(t => t.id || t.user_id);
-    return props.technicians.filter(t => !assignedIds.includes(t.id));
-});
 
 const calculatedTotal = computed(() => {
     const price = effectivePrice.value;
@@ -791,6 +927,26 @@ function closePartModal() {
     setTimeout(() => { editingLinkedPart.value = null; }, 300);
 }
 
+function openIssueMoreModal(part = null) {
+    editingIssueMorePart.value = part;
+    showIssueMoreModal.value = true;
+}
+
+function closeIssueMoreModal() {
+    showIssueMoreModal.value = false;
+    setTimeout(() => { editingIssueMorePart.value = null; }, 300);
+}
+
+function openReturnModal(part = null) {
+    editingReturnPart.value = part;
+    showReturnModal.value = true;
+}
+
+function closeReturnModal() {
+    showReturnModal.value = false;
+    setTimeout(() => { editingReturnPart.value = null; }, 300);
+}
+
 function onPartSaved(savedPart, options = {}) {
     if (savedPart.isPending || !props.item) {
         if (savedPart.tempId) {
@@ -805,11 +961,19 @@ function onPartSaved(savedPart, options = {}) {
             pendingParts.value.push({ ...savedPart, total: calculatePartTotal(savedPart), tempId: newTempId });
         }
     } else {
-        if (editingLinkedPart.value && editingLinkedPart.value.id) {
+        if ((editingLinkedPart.value && editingLinkedPart.value.id) || (editingIssueMorePart.value && editingIssueMorePart.value.id) || (editingReturnPart.value && editingReturnPart.value.id)) {
             const index = linkedParts.value.findIndex(p => p.id === savedPart.id);
-            if (index !== -1) linkedParts.value[index] = savedPart;
+            if (index !== -1) {
+                if (savedPart.qty === 0 || savedPart.status === 'cancelled') {
+                    linkedParts.value.splice(index, 1);
+                } else {
+                    linkedParts.value[index] = savedPart;
+                }
+            }
         } else {
-            linkedParts.value.push(savedPart);
+            if (savedPart.qty !== 0 && savedPart.status !== 'cancelled') {
+                linkedParts.value.push(savedPart);
+            }
         }
         // In edit mode, we should refresh from backend to get fresh data
         router.reload({ only: ['workOrder', 'itemsByDepartment'] });
@@ -819,57 +983,41 @@ function onPartSaved(savedPart, options = {}) {
     
     if (options.close !== false) {
         closePartModal();
+        closeIssueMoreModal();
+        closeReturnModal();
     }
 }
 
-function handlePartEdit(part) { openPartModal(part); }
+function handlePartEdit(part) {
+    if (part.source === 'warehouse' && part.status === 'issued') {
+        openIssueMoreModal(part);
+    } else {
+        openPartModal(part);
+    }
+}
 
 function handlePartDelete(part) {
     if (!part.id) {
         pendingParts.value = pendingParts.value.filter(p => p.tempId !== part.tempId);
         return;
     }
-    if (confirm(t('common.confirm_delete'))) {
-        router.delete(route('work-orders.parts.destroy', { workOrderPart: part.id }), {
-            onSuccess: () => { 
-                linkedParts.value = linkedParts.value.filter(p => p.id !== part.id);
-                router.reload({ only: ['workOrder', 'itemsByDepartment'] });
-            }
-        });
+    if (part.source === 'warehouse' && part.status === 'issued') {
+        openReturnModal(part);
+    } else {
+        if (confirm(t('common.confirm_delete'))) {
+            router.delete(route('work-orders.parts.destroy', { workOrderPart: part.id }), {
+                onSuccess: () => { 
+                    linkedParts.value = linkedParts.value.filter(p => p.id !== part.id);
+                    router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+                }
+            });
+        }
     }
 }
 
 function changeStatus(newStatus) { form.status = newStatus; }
 
-async function assignTechnician() {
-    if (!technicianForm.value.user_id) return;
-    if (!props.item) {
-        const tech = props.technicians.find(t => t.id == technicianForm.value.user_id);
-        if (tech && !pendingTechnicians.value.find(t => t.user_id == tech.id)) {
-            pendingTechnicians.value.push({ user_id: tech.id, name: tech.name });
-        }
-        technicianForm.value.user_id = '';
-        return;
-    }
-    techniciansLoading.value = true;
-    try {
-        const response = await axios.post(route('work-orders.items.technicians.store', { work_order: props.workOrder.id, item: props.item.id }), technicianForm.value);
-        localTechnicians.value = response.data.technicians || [];
-        technicianForm.value.user_id = '';
-    } finally { techniciansLoading.value = false; }
-}
 
-async function removeTechnician(tech) {
-    if (!props.item) {
-        pendingTechnicians.value = pendingTechnicians.value.filter(t => t.user_id !== tech.user_id);
-        return;
-    }
-    techniciansLoading.value = true;
-    try {
-        await axios.delete(route('work-orders.items.technicians.destroy', { work_order: props.workOrder.id, item: props.item.id, user: tech.id }));
-        localTechnicians.value = localTechnicians.value.filter(t => t.id !== tech.id);
-    } finally { techniciansLoading.value = false; }
-}
 
 async function addNote() {
     if (!noteForm.value.content) return;
@@ -960,7 +1108,8 @@ function submitForm() {
         department_id: props.departmentId,
         pending_parts: pendingParts.value,
         pending_technicians: pendingTechnicians.value,
-        pending_notes: pendingNotes.value
+        pending_notes: pendingNotes.value,
+        technicians: localTechnicians.value
     };
 
     if (props.item) {
@@ -1041,7 +1190,13 @@ watch(() => props.item, (newItem) => {
         form.due_date = newItem.due_date ? formatDateForInput(newItem.due_date) : '';
         
         linkedParts.value = newItem.parts || [];
-        localTechnicians.value = newItem.technicians || [];
+        localTechnicians.value = (newItem.technicians || []).map(t => ({
+            user_id: t.id,
+            name: locale.value === 'ar' 
+                ? (t.employee?.name_ar || t.employee?.name_en || t.name) 
+                : (t.employee?.name_en || t.employee?.name_ar || t.name),
+            share: t.pivot?.share !== undefined ? parseFloat(t.pivot.share) : 100.00
+        }));
         localNotes.value = newItem.item_notes || [];
     }
 }, { deep: true });
@@ -1076,7 +1231,13 @@ watch(() => props.show, (isOpen) => {
             
             linkedParts.value = props.item.parts || [];
             pendingParts.value = [];
-            localTechnicians.value = props.item.technicians || [];
+            localTechnicians.value = (props.item.technicians || []).map(t => ({
+                user_id: t.id,
+                name: locale.value === 'ar' 
+                    ? (t.employee?.name_ar || t.employee?.name_en || t.name) 
+                    : (t.employee?.name_en || t.employee?.name_ar || t.name),
+                share: t.pivot?.share !== undefined ? parseFloat(t.pivot.share) : 100.00
+            }));
             localNotes.value = props.item.item_notes || [];
         } else {
             form.reset();

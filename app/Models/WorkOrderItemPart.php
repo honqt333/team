@@ -41,6 +41,8 @@ class WorkOrderItemPart extends Model
         'part_number',
         'source',
         'qty',
+        'issued_qty',
+        'returned_qty',
         'unit_price',
         'total',
         'notes',
@@ -65,6 +67,8 @@ class WorkOrderItemPart extends Model
 
     protected $casts = [
         'qty' => 'decimal:2',
+        'issued_qty' => 'decimal:2',
+        'returned_qty' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'total' => 'decimal:2',
         'cost_snapshot' => 'decimal:4',

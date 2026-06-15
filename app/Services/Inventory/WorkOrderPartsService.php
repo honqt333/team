@@ -41,6 +41,8 @@ class WorkOrderPartsService
                 'source' => $data['source'] ?? WorkOrderItemPart::SOURCE_WAREHOUSE,
                 'unit_id' => $data['unit_id'] ?? null,
                 'qty' => $data['qty'],
+                'issued_qty' => $data['qty'],
+                'returned_qty' => 0.00,
                 'unit_price' => $data['unit_price'],
                 'discount' => $data['discount'] ?? 0,
                 'include_in_package' => $data['include_in_package'] ?? false,
@@ -95,6 +97,12 @@ class WorkOrderPartsService
                 $this->handleQuantityDelta($partLine, $delta, $allowNegative);
             }
 
+            if ($delta > 0) {
+                $partLine->issued_qty += $delta;
+            } elseif ($delta < 0) {
+                $partLine->returned_qty += abs($delta);
+            }
+
             $partLine->qty = $newQty;
             $partLine->save();
 
@@ -127,6 +135,8 @@ class WorkOrderPartsService
                 'hide_on_print' => $data['hide_on_print'] ?? $partLine->hide_on_print,
                 'notes' => $data['notes'] ?? $partLine->notes,
                 'qty' => $data['qty'] ?? $partLine->qty,
+                'issued_qty' => $data['qty'] ?? $partLine->qty,
+                'returned_qty' => 0.00,
                 'unit_price' => $data['unit_price'] ?? $partLine->unit_price,
                 'status' => WorkOrderItemPart::STATUS_PENDING,
                 'inventory_move_id' => null,

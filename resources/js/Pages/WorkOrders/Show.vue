@@ -354,6 +354,24 @@
             :units="inventoryUnits" :warehouses="warehouses" :show-service-select="true"
             :workOrderItems="workOrder.items" @close="closeAddPartModal" @saved="handlePartSaved" />
 
+        <!-- Issue More Modal -->
+        <WorkOrderIssueMoreModal 
+            :show="showIssueMoreModal" 
+            :workOrder="workOrder" 
+            :part="editingIssueMorePart" 
+            @close="showIssueMoreModal = false; editingIssueMorePart = null" 
+            @saved="onPartSaved" 
+        />
+
+        <!-- Return Modal -->
+        <WorkOrderReturnModal 
+            :show="showReturnModal" 
+            :workOrder="workOrder" 
+            :part="editingReturnPart" 
+            @close="showReturnModal = false; editingReturnPart = null" 
+            @saved="onPartSaved" 
+        />
+
         <!-- Print Options Modal -->
         <PrintOptionsModal :show="showPrintModal" :work-order="workOrder" @close="showPrintModal = false"
             @print="handlePrint" />
@@ -432,6 +450,8 @@ import WorkOrderAttachmentModal from '@/Components/WorkOrders/WorkOrderAttachmen
 import InspectionChecklist from '@/Components/WorkOrders/InspectionChecklist.vue';
 import WorkOrderSignatures from '@/Components/WorkOrders/WorkOrderSignatures.vue';
 import PartsDisplay from '@/Components/Common/PartsDisplay.vue';
+import WorkOrderIssueMoreModal from '@/Components/WorkOrders/WorkOrderIssueMoreModal.vue';
+import WorkOrderReturnModal from '@/Components/WorkOrders/WorkOrderReturnModal.vue';
 import WorkOrderCustomerCard from '@/Components/WorkOrders/WorkOrderCustomerCard.vue';
 import WorkOrderFinancialSummary from '@/Components/WorkOrders/WorkOrderFinancialSummary.vue';
 import WorkOrderInfoCards from '@/Components/WorkOrders/WorkOrderInfoCards.vue';
@@ -508,6 +528,10 @@ const showPaymentsListModal = ref(false);
 const showPhotoModal = ref(false);
 const showAttachmentModal = ref(false);
 const selectedPartToEdit = ref(null);
+const showIssueMoreModal = ref(false);
+const editingIssueMorePart = ref(null);
+const showReturnModal = ref(false);
+const editingReturnPart = ref(null);
 
 function openAddPartModal() {
     selectedPartToEdit.value = null;
@@ -515,8 +539,13 @@ function openAddPartModal() {
 }
 
 function editWorkOrderPart(part) {
-    selectedPartToEdit.value = part;
-    showAddPartModal.value = true;
+    if (part.source === 'warehouse' && part.status === 'issued') {
+        editingIssueMorePart.value = part;
+        showIssueMoreModal.value = true;
+    } else {
+        selectedPartToEdit.value = part;
+        showAddPartModal.value = true;
+    }
 }
 
 function closeAddPartModal() {
@@ -831,19 +860,33 @@ function handlePrintDepartment(deptId) {
 
 // Delete work order part
 async function deleteWorkOrderPart(part) {
-    const confirmed = await confirm({
-        title: t('common.confirm_delete_title'),
-        message: t('common.confirm_delete_message'),
-        confirmText: t('common.delete'),
-        cancelText: t('common.cancel'),
-        type: 'danger',
-    });
-
-    if (confirmed) {
-        router.delete(route('work-orders.parts.destroy', part.id), {
-            onSuccess: () => success(t('common.deleted_success')),
+    if (part.source === 'warehouse' && part.status === 'issued') {
+        editingReturnPart.value = part;
+        showReturnModal.value = true;
+    } else {
+        const confirmed = await confirm({
+            title: t('common.confirm_delete_title'),
+            message: t('common.confirm_delete_message'),
+            confirmText: t('common.delete'),
+            cancelText: t('common.cancel'),
+            type: 'danger',
         });
+
+        if (confirmed) {
+            router.delete(route('work-orders.parts.destroy', part.id), {
+                onSuccess: () => success(t('common.deleted_success')),
+            });
+        }
     }
+}
+
+function onPartSaved() {
+    success(t('common.saved_success'));
+    router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+    showIssueMoreModal.value = false;
+    showReturnModal.value = false;
+    editingIssueMorePart.value = null;
+    editingReturnPart.value = null;
 }
 
 // Get departments that have items or are linked to work order

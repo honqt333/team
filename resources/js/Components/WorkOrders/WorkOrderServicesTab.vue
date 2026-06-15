@@ -70,7 +70,7 @@
                 <div class="p-4 space-y-2 bg-gray-50/50 dark:bg-gray-900/30 rounded-b-xl">
                     <div class="flex flex-col gap-3">
                         <div v-for="(item, index) in getItemsForDept(dept.id)" :key="item.id"
-                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 p-4 transition-shadow transition-colors duration-200 group relative"
+                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 p-4 transition-colors duration-200 group relative"
                             :class="{
                                 'border-s-gray-300 dark:border-s-gray-600': item.status === 'pending',
                                 'border-s-blue-500': item.status === 'in_progress',
@@ -78,7 +78,7 @@
                                 'border-s-emerald-500': item.status === 'completed',
                                 'border-s-amber-500': item.status === 'on_hold',
                                 'border-s-rose-500': item.status === 'cancelled',
-                                'hover:shadow-lg hover:shadow-indigo-500/5 hover:border-gray-200 dark:hover:border-gray-600': activeDropdownItemId !== item.id
+                                'hover:bg-indigo-50/30 dark:hover:bg-indigo-950/10 hover:border-indigo-100 dark:hover:border-indigo-900/30': activeDropdownItemId !== item.id
                             }">
                             <div class="flex items-start justify-between gap-4">
                                 <!-- Content (right side) -->
@@ -89,7 +89,7 @@
                                             <div class="flex items-center gap-2 flex-wrap mb-1">
                                                 <button v-if="!isReadOnly"
                                                     @click.stop="emit('edit-item', item)" type="button"
-                                                    class="font-bold text-gray-900 dark:text-white text-base hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-start leading-snug">
+                                                    class="font-bold text-gray-900 dark:text-white text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors text-start leading-snug">
                                                     {{ item.service ? getName(item.service) : item.title }}
                                                 </button>
                                                 <span v-else
@@ -130,17 +130,54 @@
                                             <span class="font-bold font-mono text-gray-900 dark:text-gray-100">{{ formatPrice(item.parts_total) }}</span>
                                         </div>
 
-                                        <!-- Technician (or "unassigned" prompt) -->
+                                        <!-- Technician Avatars Stack (or "unassigned" prompt) -->
                                         <button v-if="item.technicians && item.technicians.length"
                                             @click.stop="!isReadOnly && emit('assign-technician', item.id)"
                                             type="button"
                                             :disabled="isReadOnly"
-                                            class="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60 px-3 py-1 rounded-full text-xs font-semibold"
-                                            :class="!isReadOnly ? 'hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer transition-colors' : ''">
-                                            <svg class="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                            </svg>
-                                            <span>{{ item.technicians[0].name }}</span>
+                                            :class="!isReadOnly ? 'cursor-pointer' : 'cursor-default'"
+                                            class="inline-flex items-center"
+                                        >
+                                            <!-- Stacked Avatars -->
+                                            <div class="flex items-center">
+                                                <div
+                                                    v-for="(tech, tIdx) in item.technicians"
+                                                    :key="tech.id"
+                                                    class="relative group/tech"
+                                                    :style="{ marginLeft: tIdx > 0 ? '-8px' : '0', zIndex: item.technicians.length - tIdx }"
+                                                >
+                                                    <!-- Avatar -->
+                                                    <img
+                                                        v-if="tech.photo_url"
+                                                        :src="tech.photo_url"
+                                                        :alt="getTechName(tech)"
+                                                        class="w-7 h-7 rounded-full object-cover border-2 border-white dark:border-gray-800"
+                                                    />
+                                                    <div v-else
+                                                        class="w-7 h-7 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-[10px] font-bold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-400 select-none"
+                                                    >
+                                                        {{ getInitials(getTechName(tech)) }}
+                                                    </div>
+
+                                                    <!-- Status Dot -->
+                                                    <span
+                                                        class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full border-2 border-white dark:border-gray-800"
+                                                        :class="tech.pivot?.completed_at ? 'bg-emerald-500' : 'bg-blue-500'"
+                                                    ></span>
+
+                                                    <!-- Tooltip -->
+                                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/tech:flex flex-col items-center z-50 pointer-events-none">
+                                                        <div class="bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-[10px] font-semibold px-2.5 py-1 rounded-lg shadow-lg flex items-center gap-1.5 whitespace-nowrap">
+                                                            <span
+                                                                class="w-1.5 h-1.5 rounded-full flex-shrink-0 shrink-0"
+                                                                :class="tech.pivot?.completed_at ? 'bg-emerald-400' : 'bg-blue-400'"
+                                                            ></span>
+                                                            {{ getTechName(tech) }}
+                                                        </div>
+                                                        <div class="w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-gray-900 dark:border-t-gray-100"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </button>
                                         <button v-else-if="!isReadOnly"
                                             @click.stop="emit('assign-technician', item.id)"
@@ -405,7 +442,7 @@ const emit = defineEmits([
 // Kept in sync with Show.vue (PACKAGES_DEPT_KEY).
 const PACKAGES_DEPT_KEY = 'packages';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { getName } = useLocalized();
 const { formatCurrency } = useNumberFormat();
 const { formatDate } = useFormatters();
@@ -483,4 +520,24 @@ async function submitAddDepartments() {
         savingDepts.value = false;
     }
 }
+const getTechName = (tech) => {
+    if (!tech) return '';
+    if (tech.employee) {
+        return locale.value === 'ar' 
+            ? (tech.employee.name_ar || tech.employee.name_en || tech.name) 
+            : (tech.employee.name_en || tech.employee.name_ar || tech.name);
+    }
+    if (locale.value === 'ar' && tech.name_ar) return tech.name_ar;
+    if (tech.name_en) return tech.name_en;
+    if (tech.name_ar) return tech.name_ar;
+    return tech.name;
+};
+
+function getInitials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
 </script>

@@ -47,13 +47,13 @@
             v-for="(day, index) in calendarDays"
             :key="index"
             type="button"
-            @click="day.date && selectDate(day.date)"
-            :disabled="!day.date"
+            @click="day.date && !isDayDisabled(day.date) && selectDate(day.date)"
+            :disabled="!day.date || isDayDisabled(day.date)"
             :class="[
                 'w-8 h-8 flex items-center justify-center rounded-lg text-sm transition-colors mx-auto',
                 !day.date ? 'invisible' : '',
-                isSelected(day.date) ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
-                isToday(day.date) && !isSelected(day.date) ? 'border border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold' : ''
+                isDayDisabled(day.date) ? 'opacity-30 cursor-not-allowed text-gray-300 dark:text-gray-600' : (isSelected(day.date) ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'),
+                isToday(day.date) && !isSelected(day.date) && !isDayDisabled(day.date) ? 'border border-indigo-600 text-indigo-600 dark:text-indigo-400 font-bold' : ''
             ]"
         >
             {{ day.date ? day.date.getDate() : '' }}
@@ -87,6 +87,10 @@ const props = defineProps({
     disabled: {
         type: Boolean,
         default: false
+    },
+    minDate: {
+        type: [String, Date, null],
+        default: null
     }
 });
 
@@ -145,6 +149,19 @@ const formattedDate = computed(() => {
     
     return `${day}/${month}/${year}`;
 });
+
+const isDayDisabled = (date) => {
+    if (!date) return true;
+    if (!props.minDate) return false;
+    
+    const minD = new Date(props.minDate);
+    minD.setHours(0, 0, 0, 0);
+    
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    
+    return d.getTime() < minD.getTime();
+};
 
 const isSelected = (date) => {
     if (!date || !props.modelValue) return false;

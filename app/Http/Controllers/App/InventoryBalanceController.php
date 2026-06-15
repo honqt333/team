@@ -123,8 +123,15 @@ class InventoryBalanceController extends Controller
     {
         $this->authorize('viewAny', InventoryBalance::class);
 
-        $centerId = auth()->user()->current_center_id;
-        $warehouse = Warehouse::forCenter($centerId)->default()->first();
+        $tenantId = auth()->user()->tenant_id;
+        
+        $warehouseId = $request->query('warehouse_id');
+        if ($warehouseId) {
+            $warehouse = Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))->find($warehouseId);
+        } else {
+            $centerId = auth()->user()->current_center_id;
+            $warehouse = Warehouse::forCenter($centerId)->default()->first();
+        }
 
         if (!$warehouse) {
             return response()->json([

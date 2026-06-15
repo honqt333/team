@@ -93,7 +93,14 @@
                         </div>
                         <div class="p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
                             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('work_orders.item.qty') }}</p>
-                            <p class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">{{ formatQuantity(part.qty) }} <span class="text-[10px]">{{ getUnitName(part) }}</span></p>
+                            <p class="text-xs font-mono font-black text-emerald-600 dark:text-emerald-400">
+                                {{ formatQuantity(part.qty) }} <span class="text-[10px]">{{ getUnitName(part) }}</span>
+                            </p>
+                            <div v-if="part.source === 'warehouse' && (parseFloat(part.issued_qty) > 0 || parseFloat(part.returned_qty) > 0)" class="mt-1 flex flex-wrap gap-x-1.5 text-[8px] text-gray-400 font-bold leading-tight">
+                                <span>{{ $t('inventory.parts.issued_qty_short') || 'صرف:' }} {{ formatQuantity(part.issued_qty || part.qty) }}</span>
+                                <span class="opacity-50">|</span>
+                                <span>{{ $t('inventory.parts.returned_qty_short') || 'إرجاع:' }} {{ formatQuantity(part.returned_qty || 0) }}</span>
+                            </div>
                         </div>
                         <div class="p-2.5 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-800">
                             <p class="text-[8px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ $t('quotes.tax_summary.vat') }}</p>
@@ -199,7 +206,14 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-end font-mono text-xs font-bold text-gray-600 dark:text-gray-400">{{ formatCurrency(part.unit_price) }}</td>
-                            <td class="px-6 py-4 text-center font-mono text-xs font-black text-emerald-600 dark:text-emerald-400">{{ formatQuantity(part.qty) }}</td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="font-mono text-xs font-black text-emerald-600 dark:text-emerald-400 block">{{ formatQuantity(part.qty) }}</span>
+                                <div v-if="part.source === 'warehouse' && (parseFloat(part.issued_qty) > 0 || parseFloat(part.returned_qty) > 0)" class="text-[8px] text-gray-400 font-bold mt-1 flex items-center justify-center gap-1.5 leading-tight">
+                                    <span>{{ $t('inventory.parts.issued_qty_short') || 'صرف:' }} {{ formatQuantity(part.issued_qty || part.qty) }}</span>
+                                    <span class="opacity-50">|</span>
+                                    <span>{{ $t('inventory.parts.returned_qty_short') || 'إرجاع:' }} {{ formatQuantity(part.returned_qty || 0) }}</span>
+                                </div>
+                            </td>
                             <td class="px-6 py-4 text-end font-mono text-xs font-bold text-gray-900 dark:text-white">
                                 {{ formatCurrency((part.unit_price * part.qty) - (part.discount || 0)) }}
                             </td>
