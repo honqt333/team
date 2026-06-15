@@ -840,6 +840,14 @@ class WorkOrderController
 
         $item->update(['status' => $newStatus]);
 
+        $work_order->logActivity(
+            'item_status_updated',
+            __('work_orders.activities.actions.item_status_updated', [
+                'title' => $item->title,
+                'status' => __('work_orders.item_status.' . $newStatus)
+            ])
+        );
+
         $message = __('messages.item_status_updated');
         return $request->expectsJson()
             ? response()->json(['success' => $message, 'item' => $item->fresh()])

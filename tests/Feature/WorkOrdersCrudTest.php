@@ -263,4 +263,43 @@ class WorkOrdersCrudTest extends TestCase
         $this->assertCount(1, $items, 'Should have 1 item');
         $this->assertEquals(100.00, (float) $items[0]->total);
     }
+
+    public function test_authorized_user_can_update_item_status_and_activity_is_logged(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.create',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create work order
+        $response = $this->actingAs($user)->postJson('/app/work-orders', [
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'items' => [
+                ['title' => 'Oil Change', 'qty' => 1, 'unit_price' => 100],
+            ],
+        ]);
+
+        $response->assertStatus(201);
+        $workOrderId = $response->json('id');
+        $workOrder = WorkOrder::withoutGlobalScopes()->find($workOrderId);
+        $item = $workOrder->items()->first();
+
+        // Update item status
+        $statusResponse = $this->actingAs($user)->patchJson("/app/work-orders/{$workOrder->id}/items/{$item->id}/status", [
+            'status' => 'in_progress',
+        ]);
+
+        $statusResponse->assertStatus(200);
+        $this->assertEquals('in_progress', $item->fresh()->status);
+
+        // Assert activity logged
+        $this->assertDatabaseHas('work_order_activities', [
+            'work_order_id' => $workOrder->id,
+            'action' => 'item_status_updated',
+        ]);
+    }
 }

@@ -18,6 +18,7 @@ return [
             'technician_assigned' => 'تم تعيين فني: :name للخدمة :service',
             'technician_removed' => 'تم إزالة فني من الخدمة :service',
             'condition_updated' => 'تم تحديث تقرير حالة المركبة',
+            'item_status_updated' => 'تم تغيير حالة الخدمة ":title" إلى :status',
         ],
     ],
     'status' => [
@@ -28,5 +29,13 @@ return [
         'done' => 'مكتمل',
         'cancelled' => 'ملغي',
         'closed' => 'مغلق',
+    ],
+    'item_status' => [
+        'pending' => 'قيد الانتظار',
+        'in_progress' => 'جاري العمل',
+        'ready_for_qc' => 'فحص الجودة',
+        'on_hold' => 'معلق',
+        'completed' => 'مكتمل',
+        'cancelled' => 'ملغي',
     ],
 ];

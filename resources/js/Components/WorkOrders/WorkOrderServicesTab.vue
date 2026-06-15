@@ -36,10 +36,10 @@
         <!-- Departments list -->
         <div v-if="displayDepartments.length > 0" class="space-y-3">
             <div v-for="dept in displayDepartments" :key="dept.id"
-                class="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                class="border border-gray-200 dark:border-gray-700 rounded-xl">
                 <!-- Department header -->
                 <div
-                    class="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-transparent dark:from-gray-900/50 dark:to-transparent">
+                    class="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-transparent dark:from-gray-900/50 dark:to-transparent rounded-t-xl">
                     <div class="flex items-center gap-3 flex-1">
                         <div
                             class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
@@ -78,17 +78,18 @@
                 </div>
 
                 <!-- Services list (always visible — no accordion collapse) -->
-                <div class="p-4 space-y-2 bg-gray-50/50 dark:bg-gray-900/30">
+                <div class="p-4 space-y-2 bg-gray-50/50 dark:bg-gray-900/30 rounded-b-xl">
                     <div class="flex flex-col gap-3">
                         <div v-for="(item, index) in getItemsForDept(dept.id)" :key="item.id"
-                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 p-4 transition-all hover:shadow-lg hover:shadow-indigo-500/5 hover:border-gray-200 dark:hover:border-gray-600 group relative"
+                            class="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700/70 border-s-4 p-4 transition-shadow transition-colors duration-200 group relative"
                             :class="{
                                 'border-s-gray-300 dark:border-s-gray-600': item.status === 'pending',
                                 'border-s-blue-500': item.status === 'in_progress',
                                 'border-s-teal-500': item.status === 'ready_for_qc',
                                 'border-s-emerald-500': item.status === 'completed',
                                 'border-s-amber-500': item.status === 'on_hold',
-                                'border-s-rose-500': item.status === 'cancelled'
+                                'border-s-rose-500': item.status === 'cancelled',
+                                'hover:shadow-lg hover:shadow-indigo-500/5 hover:border-gray-200 dark:hover:border-gray-600': activeDropdownItemId !== item.id
                             }">
                             <div class="flex items-start justify-between gap-4">
                                 <!-- Content (right side) -->
@@ -106,85 +107,6 @@
                                                     class="font-bold text-gray-900 dark:text-white text-base text-start leading-snug">
                                                     {{ item.service ? getName(item.service) : item.title }}
                                                 </span>
-
-                                                <!-- Interactive Status Dropdown -->
-                                                <div class="relative inline-block shrink-0">
-                                                    <button
-                                                        v-if="!isReadOnly"
-                                                        @click.stop="activeDropdownItemId = activeDropdownItemId === item.id ? null : item.id"
-                                                        type="button"
-                                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none border transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
-                                                        :class="{
-                                                            'bg-gray-50 text-gray-500 border-gray-200 dark:bg-gray-800/40 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
-                                                            'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
-                                                            'bg-teal-50 text-teal-600 border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
-                                                            'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
-                                                            'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
-                                                            'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
-                                                        }"
-                                                    >
-                                                        <span class="w-1.5 h-1.5 rounded-full shrink-0"
-                                                            :class="{
-                                                                'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
-                                                                'bg-blue-500': item.status === 'in_progress',
-                                                                'bg-teal-500': item.status === 'ready_for_qc',
-                                                                'bg-emerald-500': item.status === 'completed',
-                                                                'bg-amber-500': item.status === 'on_hold',
-                                                                'bg-rose-500': item.status === 'cancelled'
-                                                            }"></span>
-                                                        <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
-                                                        <svg class="w-2.5 h-2.5 text-gray-400 dark:text-gray-500 ms-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-                                                        </svg>
-                                                    </button>
-                                                    <span v-else
-                                                        class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none border"
-                                                        :class="{
-                                                            'bg-gray-50 text-gray-500 border-gray-200/60 dark:bg-gray-700/30 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
-                                                            'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
-                                                            'bg-teal-50 text-teal-600 border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
-                                                            'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
-                                                            'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
-                                                            'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
-                                                        }"
-                                                    >
-                                                        <span class="w-1.5 h-1.5 rounded-full shrink-0"
-                                                            :class="{
-                                                                'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
-                                                                'bg-blue-500': item.status === 'in_progress',
-                                                                'bg-teal-500': item.status === 'ready_for_qc',
-                                                                'bg-emerald-500': item.status === 'completed',
-                                                                'bg-amber-500': item.status === 'on_hold',
-                                                                'bg-rose-500': item.status === 'cancelled'
-                                                            }"></span>
-                                                        <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
-                                                    </span>
-
-                                                    <!-- Dropdown Menu -->
-                                                    <div v-if="activeDropdownItemId === item.id"
-                                                        class="absolute z-30 start-0 mt-1.5 w-40 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-xl shadow-xl py-1 overflow-hidden"
-                                                    >
-                                                        <!-- Invisible overlay to close dropdown -->
-                                                        <div class="fixed inset-0 z-[-1]" @click.stop="activeDropdownItemId = null"></div>
-
-                                                        <button v-for="status in availableStatuses" :key="status"
-                                                            @click.stop="changeItemStatus(item, status)"
-                                                            class="w-full px-4 py-2 text-start text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2"
-                                                            :class="item.status === status ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/20' : 'text-gray-700 dark:text-gray-300'"
-                                                        >
-                                                            <span class="w-1.5 h-1.5 rounded-full shrink-0"
-                                                                :class="{
-                                                                    'bg-gray-400 dark:bg-gray-500': status === 'pending',
-                                                                    'bg-blue-500': status === 'in_progress',
-                                                                    'bg-teal-500': status === 'ready_for_qc',
-                                                                    'bg-emerald-500': status === 'completed',
-                                                                    'bg-amber-500': status === 'on_hold',
-                                                                    'bg-rose-500': status === 'cancelled'
-                                                                }"></span>
-                                                            {{ $t(`work_orders.item.status_${status}`) }}
-                                                        </button>
-                                                    </div>
-                                                </div>
                                             </div>
 
                                             <div v-if="item.service && item.title && item.title !== getName(item.service)"
@@ -254,25 +176,105 @@
                                     </div>
                                 </div>
 
-                                <!-- Per-item actions -->
-                                <div v-if="!isReadOnly"
-                                    class="flex items-center gap-1 border-s border-gray-100 dark:border-gray-700/70 ps-3 shrink-0 mt-0.5">
-                                    <button @click.stop="emit('edit-item', item)"
-                                        class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
-                                        :title="$t('common.edit')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                        </svg>
-                                    </button>
-                                    <button @click.stop="emit('delete-item', item)"
-                                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                                        :title="$t('common.delete')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
+                                <!-- Per-item actions & status -->
+                                <div class="flex items-center gap-1.5 border-s border-gray-100 dark:border-gray-700/70 ps-3 shrink-0 mt-0.5">
+                                    <!-- Interactive Status Dropdown -->
+                                    <div v-if="!isReadOnly" class="relative inline-block shrink-0">
+                                        <button
+                                            @click.stop="activeDropdownItemId = activeDropdownItemId === item.id ? null : item.id"
+                                            type="button"
+                                            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none border transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
+                                            :class="{
+                                                'bg-gray-50 text-gray-500 border-gray-200 dark:bg-gray-800/40 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
+                                                'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
+                                                'bg-teal-50 text-teal-600 border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
+                                                'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
+                                                'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
+                                                'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
+                                            }"
+                                        >
+                                            <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                :class="{
+                                                    'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
+                                                    'bg-blue-500': item.status === 'in_progress',
+                                                    'bg-teal-500': item.status === 'ready_for_qc',
+                                                    'bg-emerald-500': item.status === 'completed',
+                                                    'bg-amber-500': item.status === 'on_hold',
+                                                    'bg-rose-500': item.status === 'cancelled'
+                                                }"></span>
+                                            <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
+                                            <svg class="w-2.5 h-2.5 text-gray-400 dark:text-gray-500 ms-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+
+                                        <!-- Dropdown Menu -->
+                                        <div v-if="activeDropdownItemId === item.id"
+                                            class="absolute z-30 start-0 mt-1.5 w-40 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700 rounded-xl shadow-xl py-1 overflow-hidden"
+                                        >
+                                            <!-- Invisible overlay to close dropdown -->
+                                            <div class="fixed inset-0 z-[-1]" @click.stop="activeDropdownItemId = null"></div>
+
+                                            <button v-for="status in availableStatuses" :key="status"
+                                                @click.stop="changeItemStatus(item, status)"
+                                                class="w-full px-4 py-2 text-start text-xs font-semibold hover:bg-gray-50 dark:hover:bg-gray-700/50 flex items-center gap-2"
+                                                :class="item.status === status ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/20' : 'text-gray-700 dark:text-gray-300'"
+                                            >
+                                                <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                                    :class="{
+                                                        'bg-gray-400 dark:bg-gray-500': status === 'pending',
+                                                        'bg-blue-500': status === 'in_progress',
+                                                        'bg-teal-500': status === 'ready_for_qc',
+                                                        'bg-emerald-500': status === 'completed',
+                                                        'bg-amber-500': status === 'on_hold',
+                                                        'bg-rose-500': status === 'cancelled'
+                                                    }"></span>
+                                                {{ $t(`work_orders.item.status_${status}`) }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span v-else
+                                        class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold select-none border"
+                                        :class="{
+                                            'bg-gray-50 text-gray-500 border-gray-200/60 dark:bg-gray-700/30 dark:text-gray-400 dark:border-gray-600/50': item.status === 'pending',
+                                            'bg-blue-50 text-blue-600 border-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:border-blue-900/50': item.status === 'in_progress',
+                                            'bg-teal-50 text-teal-600 border-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-900/50': item.status === 'ready_for_qc',
+                                            'bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-900/50': item.status === 'completed',
+                                            'bg-amber-50 text-amber-600 border-amber-100 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-900/50': item.status === 'on_hold',
+                                            'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-950/30 dark:text-rose-400 dark:border-rose-900/50': item.status === 'cancelled'
+                                        }"
+                                    >
+                                        <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                                            :class="{
+                                                'bg-gray-400 dark:bg-gray-500': item.status === 'pending',
+                                                'bg-blue-500': item.status === 'in_progress',
+                                                'bg-teal-500': item.status === 'ready_for_qc',
+                                                'bg-emerald-500': item.status === 'completed',
+                                                'bg-amber-500': item.status === 'on_hold',
+                                                'bg-rose-500': item.status === 'cancelled'
+                                            }"></span>
+                                        <span>{{ $t(`work_orders.item.status_${item.status}`) }}</span>
+                                    </span>
+
+                                    <!-- Edit / Delete buttons -->
+                                    <template v-if="!isReadOnly">
+                                        <button @click.stop="emit('edit-item', item)"
+                                            class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors"
+                                            :title="$t('common.edit')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                        <button @click.stop="emit('delete-item', item)"
+                                            class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                                            :title="$t('common.delete')">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </template>
                                 </div>
                             </div>
                         </div>

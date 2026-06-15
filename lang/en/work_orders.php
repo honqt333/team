@@ -18,6 +18,7 @@ return [
             'technician_assigned' => 'Technician :name assigned to :service',
             'technician_removed' => 'Technician removed from :service',
             'condition_updated' => 'Vehicle condition report updated',
+            'item_status_updated' => 'Service ":title" status changed to :status',
         ],
     ],
     'status' => [
@@ -28,5 +29,13 @@ return [
         'done' => 'Done',
         'cancelled' => 'Cancelled',
         'closed' => 'Closed',
+    ],
+    'item_status' => [
+        'pending' => 'Pending',
+        'in_progress' => 'In Progress',
+        'ready_for_qc' => 'Ready for QC',
+        'on_hold' => 'On Hold',
+        'completed' => 'Completed',
+        'cancelled' => 'Cancelled',
     ],
 ];
