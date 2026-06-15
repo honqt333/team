@@ -18,6 +18,20 @@ class WorkOrder extends Model
     
     protected $appends = [];
 
+    /**
+     * Fields hidden from JSON serialization.
+     *
+     * tax_breakdown is computed/stored on the model but no current view
+     * (WorkOrders/Show.vue, printable templates, JSON API responses) reads
+     * it for work orders. It is also written only by TaxCalculator when
+     * generating invoices, not when persisting work orders. Hiding it cuts
+     * payload size on every WorkOrder show/index response until a feature
+     * actually needs it. Use ->makeVisible('tax_breakdown') if/when needed.
+     */
+    protected $hidden = [
+        'tax_breakdown',
+    ];
+
     protected static function booted()
     {
         static::saving(function ($workOrder) {

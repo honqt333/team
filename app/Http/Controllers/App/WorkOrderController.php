@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,39 +35,7 @@ class WorkOrderController
         $status = request("status");
         $subFilter = request("subFilter") ?: request("sub_filter");
 
-        $workOrders = WorkOrder::with(["customer", "vehicle.make"])
-            ->withCount('items')
-            ->when($status === 'open', function ($query) use ($subFilter) {
-                if ($subFilter === 'overdue') {
-                    $query->whereIn('status', self::ACTIVE_STATUSES)
-                        ->where('expected_end_date', '<', now()->startOfDay());
-                } elseif ($subFilter === 'draft') {
-                    $query->where('status', WorkOrder::STATUS_DRAFT);
-                } else {
-                    $query->whereIn('status', self::OPEN_STATUSES);
-                }
-            })
-            ->when($status === 'closed', function ($query) use ($subFilter) {
-                if ($subFilter === 'credit_invoices') {
-                    $query->where('status', WorkOrder::STATUS_DONE)->hasOutstandingBalance();
-                } elseif ($subFilter === 'cancelled') {
-                    $query->where('status', WorkOrder::STATUS_CANCELLED);
-                } else {
-                    $query->whereIn('status', self::CLOSED_STATUSES);
-                }
-            })
-            ->when(request("search"), function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where("id", "like", "%{$search}%")
-                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
-                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
-                });
-            })
-            ->when(request("date_from"), fn($query, $date) => $query->whereDate('created_at', '>=', $date))
-            ->when(request("date_to"), fn($query, $date) => $query->whereDate('created_at', '<=', $date))
-            ->when(request("customer_type"), function ($query, $type) {
-                $query->whereHas('customer', fn($c) => $c->where('type', $type));
-            })
+        $workOrders = $this->buildWorkOrderQuery($status, $subFilter)
             ->orderByDesc("created_at")
             ->paginate(15)
             ->withQueryString();
@@ -140,10 +109,10 @@ class WorkOrderController
     {
         // Single query to get counts for all statuses
         $baseQuery = WorkOrder::whereIn('status', $statuses);
-        
+
         // Get count in one query
         $count = (clone $baseQuery)->count();
-        
+
         if ($count === 0) {
             return ['count' => 0, 'balance' => 0];
         }
@@ -153,25 +122,30 @@ class WorkOrderController
             ->where('total_incl_tax', '>', 0)
             ->sum('total_incl_tax');
 
-        $statusList = implode(',', array_map(fn($s) => "'" . addslashes($s) . "'", $statuses));
-
-        // Single query for unstored orders totals from items and parts
-        $unstoredStats = (clone $baseQuery)
+        // Get unstored work order IDs (those with no total_incl_tax yet) using parameterized whereIn.
+        // CenterScoped trait already filters by tenant/center, so no correlated subquery needed.
+        $unstoredIds = (clone $baseQuery)
             ->where('total_incl_tax', '<=', 0)
-            ->selectRaw("
-                COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN ($statusList) AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as items_net,
-                COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id IN (SELECT id FROM work_orders WHERE status IN ($statusList) AND total_incl_tax <= 0 AND tenant_id = work_orders.tenant_id AND center_id = work_orders.center_id)), 0) as parts_net
-            ")
-            ->first();
+            ->pluck('id')
+            ->all();
 
-        $unstoredItems = (float) ($unstoredStats->items_net ?? 0);
-        $unstoredParts = (float) ($unstoredStats->parts_net ?? 0);
+        $unstoredItems = 0.0;
+        $unstoredParts = 0.0;
+        if (!empty($unstoredIds)) {
+            $unstoredItems = (float) DB::table('work_order_items')
+                ->whereIn('work_order_id', $unstoredIds)
+                ->sum(DB::raw('(unit_price * qty) - discount_amount'));
+
+            $unstoredParts = (float) DB::table('work_order_item_parts')
+                ->whereIn('work_order_id', $unstoredIds)
+                ->sum(DB::raw('(unit_price * qty) - discount'));
+        }
+
         $unstoredTotal = ($unstoredItems + $unstoredParts) * 1.15;
-        
         $totalRevenue = $storedTotal + $unstoredTotal;
 
         // Single query to get total payments for all orders in these statuses
-        $totalPaid = (float) \DB::table('payments')
+        $totalPaid = (float) DB::table('payments')
             ->whereIn('work_order_id', (clone $baseQuery)->select('id'))
             ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')
             ->value('paid');
@@ -320,17 +294,19 @@ class WorkOrderController
         $this->authorize('view', $workOrder);
 
         $workOrder->load([
-            'customer', 
-            'vehicle.make', 
-            'vehicle.customer', 
+            'customer',
+            'vehicle.make',
+            // Note: 'vehicle.customer' is intentionally not loaded — the
+            // top-level `customer` relation already exposes the same record
+            // and the Vue page does not read `workOrder.vehicle.customer`.
             'items.service.department',
             'items.technicians',
             'items.parts',
             'items.itemNotes.user.roles',
             'generalNotes.user.roles',
             'generalNotes.workOrderItem.service.department',
-            'damageMarks', 
-            'photos', 
+            'damageMarks',
+            'photos',
             'departments',
             'payments' => fn($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
             'parts.part' => fn($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
@@ -338,6 +314,14 @@ class WorkOrderController
             'activities.user',
             'inspections.performedBy',
         ]);
+
+        // TODO(refactor): the Vue page uses `v-if="activeTab === 'X'"` to
+        // lazy-render tab content, but the controller still eager-loads
+        // every tab's data (photos, attachments.user, activities.user,
+        // inspections.performedBy, parts.part.inventoryBalances...) on
+        // every page load. Move tab-specific relations to a partial-reload
+        // endpoint and have the page call `router.reload({ only: [...] })`
+        // when the active tab changes.
 
         // Group items by department_id for accordion display
         $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
