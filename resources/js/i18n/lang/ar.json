@@ -558,6 +558,8 @@
     "invoice_total": "الفاتورة",
     "paid": "المدفوع",
     "remaining": "المتبقي",
+    "pending_payment_badge": "مستحق الدفع",
+    "remaining_dues_alert": "المبالغ المستحقة للدفع",
     "has_open_work_order": "يوجد كرت عمل مفتوح",
     "go_to_work_order": "الانتقال للكرت",
     "filters": {
@@ -566,6 +568,7 @@
       "draft": "معلقة",
       "overdue": "متأخرة",
       "pending_payment": "مستحقة الدفع",
+      "completed": "مكتمل",
       "all_types": "كل الأنواع",
       "customer_type": "نوع العميل",
       "closed_cards": "كروت الصيانة المغلقة",
@@ -630,6 +633,7 @@
       "open": "مفتوح",
       "pending": "قيد الانتظار",
       "in_progress": "قيد التنفيذ",
+      "on_hold": "معلق",
       "ready_for_qc": "جاهز للفحص (QC)",
       "done": "مكتمل",
       "cancelled": "ملغي",
@@ -666,12 +670,28 @@
     },
     "actions": {
       "start_work": "بدء العمل",
-      "complete": "إنهاء الكرت",
-      "cancel": "إلغاء"
+      "put_on_hold": "تعليق الكرت",
+      "resume_work": "استئناف العمل",
+      "complete": "خروج المركبة",
+      "cancel": "إلغاء الكرت"
     },
     "messages": {
-      "confirm_status_change": "هل أنت متأكد من تغيير حالة الكرت؟"
+      "confirm_status_change": "هل أنت متأكد من تغيير حالة الكرت؟",
+      "confirm_start": "هل تريد بدء العمل على هذا الكرت وتحويل الخدمات إلى قيد التنفيذ؟",
+      "confirm_resume": "هل تريد استئناف العمل على هذا الكرت؟",
+      "confirm_complete": "هل تريد خروج المركبة وإغلاق كرت الصيانة بالكامل؟ تأكد من اكتمال جميع الخدمات وسداد المستحقات.",
+      "confirm_cancel": "هل تريد إلغاء هذا الكرت؟ لا يمكن التراجع عن هذا الإجراء.",
+      "hold_reason_prompt": "يرجى إدخال سبب تعليق الكرت."
     },
+    "hold_reason_label": "سبب التعليق",
+    "hold_reason_placeholder": "اكتب سبب التعليق...",
+    "exit_date_label": "تاريخ خروج المركبة",
+    "exit_notes_label": "ملاحظات الخروج",
+    "exit_notes_placeholder": "اكتب أي ملاحظات تتعلق بخروج المركبة...",
+    "confirm_exit_title": "تسجيل خروج المركبة وإصدار الفاتورة",
+    "outstanding_balance_warning": "تنبيه: يوجد مبلغ متبقي غير مسدد سيتم ترحيله للفاتورة الصادرة.",
+    "is_deferred_label": "إنشاء فاتورة آجلة",
+    "due_date_label": "تاريخ الدفع / الاستحقاق",
     "service_categories": {
       "maintenance": "الصيانة",
       "electrical": "الكهرباء",

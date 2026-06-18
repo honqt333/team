@@ -48,13 +48,26 @@ class WorkOrder extends Model
         if (!$this->relationLoaded('items')) $this->load('items');
         if (!$this->relationLoaded('parts')) $this->load('parts');
 
+        $activeItems = $this->items->reject(fn($item) => $item->status === WorkOrderItem::STATUS_CANCELLED);
+
         // Services totals
-        $servicesPrice = $this->items->sum(fn($l) => (float)$l->unit_price * (float)$l->qty);
-        $servicesDiscount = $this->items->sum('discount_amount');
+        $servicesPrice = $activeItems->sum(fn($l) => (float)$l->unit_price * (float)$l->qty);
+        $servicesDiscount = $activeItems->sum('discount_amount');
         
+        $activeItemIds = $activeItems->pluck('id')->all();
+        $activeParts = $this->parts->filter(function ($part) use ($activeItemIds) {
+            if (in_array($part->status, [WorkOrderItemPart::STATUS_CANCELLED, WorkOrderItemPart::STATUS_REVERSED])) {
+                return false;
+            }
+            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+                return false;
+            }
+            return true;
+        });
+
         // Parts totals
-        $partsPrice = $this->parts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
-        $partsDiscount = $this->parts->sum('discount');
+        $partsPrice = $activeParts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
+        $partsDiscount = $activeParts->sum('discount');
 
         $netTotal = ($servicesPrice - $servicesDiscount) + ($partsPrice - $partsDiscount);
         $this->total_excl_tax = $netTotal;
@@ -106,6 +119,7 @@ class WorkOrder extends Model
         'opened_at',
         'closed_at',
         'notes',
+        'hold_reason',
         // New fields
         'entry_date',
         'expected_end_date',
@@ -170,6 +184,11 @@ class WorkOrder extends Model
     public function quote(): BelongsTo
     {
         return $this->belongsTo(Quote::class);
+    }
+
+    public function invoice(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Invoice::class);
     }
 
     public function items(): HasMany
@@ -323,31 +342,34 @@ class WorkOrder extends Model
      */
     public function canBeOnHold(): bool
     {
-        return in_array($this->status, [
-            self::STATUS_OPEN,
-            self::STATUS_IN_PROGRESS,
-        ]);
+        return $this->status === self::STATUS_IN_PROGRESS;
     }
 
     /**
      * Put work order on hold.
      * Rule R7: Putting on hold suspends all items.
      */
-    public function putOnHold(): bool
+    public function putOnHold(?string $reason = null): bool
     {
         if (!$this->canBeOnHold()) {
             return false;
         }
 
-        // Suspend all pending/in-progress items
-        $this->items()
-            ->whereIn('status', [
-                WorkOrderItem::STATUS_PENDING,
-                WorkOrderItem::STATUS_IN_PROGRESS,
-            ])
-            ->update(['status' => WorkOrderItem::STATUS_ON_HOLD]);
+        // Store current status in suspended_status, then put on hold
+        foreach ($this->items()->whereIn('status', [
+            WorkOrderItem::STATUS_PENDING,
+            WorkOrderItem::STATUS_IN_PROGRESS,
+        ])->get() as $item) {
+            $item->update([
+                'suspended_status' => $item->status,
+                'status' => WorkOrderItem::STATUS_ON_HOLD,
+            ]);
+        }
 
-        $this->update(['status' => self::STATUS_ON_HOLD]);
+        $this->update([
+            'status' => self::STATUS_ON_HOLD,
+            'hold_reason' => $reason,
+        ]);
 
         return true;
     }
@@ -361,12 +383,19 @@ class WorkOrder extends Model
             return false;
         }
 
-        // Resume all on-hold items to pending
-        $this->items()
-            ->where('status', WorkOrderItem::STATUS_ON_HOLD)
-            ->update(['status' => WorkOrderItem::STATUS_PENDING]);
+        // Restore status from suspended_status, fallback to pending
+        foreach ($this->items()->where('status', WorkOrderItem::STATUS_ON_HOLD)->get() as $item) {
+            $originalStatus = $item->suspended_status ?: WorkOrderItem::STATUS_PENDING;
+            $item->update([
+                'status' => $originalStatus,
+                'suspended_status' => null,
+            ]);
+        }
 
-        $this->update(['status' => self::STATUS_IN_PROGRESS]);
+        $this->update([
+            'status' => self::STATUS_IN_PROGRESS,
+            'hold_reason' => null,
+        ]);
 
         return true;
     }
@@ -378,6 +407,12 @@ class WorkOrder extends Model
     public function allItemsCompleted(): bool
     {
         if ($this->items()->count() === 0) {
+            return false;
+        }
+
+        // Must have at least one completed service
+        $hasCompleted = $this->items()->where('status', WorkOrderItem::STATUS_COMPLETED)->exists();
+        if (!$hasCompleted) {
             return false;
         }
 
@@ -402,7 +437,7 @@ class WorkOrder extends Model
     /**
      * Mark vehicle as exited (done).
      */
-    public function markAsCompleted(): bool
+    public function markAsCompleted(?\Carbon\Carbon $exitDate = null, ?string $notes = null): bool
     {
         if (!$this->canVehicleExit()) {
             return false;
@@ -440,10 +475,16 @@ class WorkOrder extends Model
             $vehicle->update(['odometer' => $this->odometer]);
         }
 
-        $this->update([
+        $updateData = [
             'status' => self::STATUS_DONE,
-            'closed_at' => now(),
-        ]);
+            'closed_at' => $exitDate ?: now(),
+        ];
+
+        if ($notes !== null) {
+            $updateData['notes'] = $notes;
+        }
+
+        $this->update($updateData);
 
         return true;
     }
@@ -486,8 +527,22 @@ class WorkOrder extends Model
         }
 
         // Fast fallback calculation via direct DB queries
-        $servicesNet = (float) $this->items()->selectRaw('SUM((unit_price * qty) - discount_amount) as net')->value('net');
-        $partsNet = (float) $this->parts()->selectRaw('SUM((unit_price * qty) - discount) as net')->value('net');
+        $servicesNet = (float) $this->items()
+            ->where('status', '!=', WorkOrderItem::STATUS_CANCELLED)
+            ->selectRaw('SUM((unit_price * qty) - discount_amount) as net')
+            ->value('net');
+
+        $partsNet = (float) $this->parts()
+            ->where('status', '!=', WorkOrderItemPart::STATUS_CANCELLED)
+            ->where('status', '!=', WorkOrderItemPart::STATUS_REVERSED)
+            ->where(function ($query) {
+                $query->whereNull('work_order_item_id')
+                    ->orWhereHas('workOrderItem', function ($q) {
+                        $q->where('status', '!=', WorkOrderItem::STATUS_CANCELLED);
+                    });
+            })
+            ->selectRaw('SUM((unit_price * qty) - discount) as net')
+            ->value('net');
         
         $netTotal = $servicesNet + $partsNet;
 
@@ -555,6 +610,31 @@ class WorkOrder extends Model
     public function scopeHasOutstandingBalance($query): void
     {
         $query->whereRaw('(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))');
+    }
+
+    /**
+     * Scope to filter work orders that are ready for exit (all items completed but not yet done/closed).
+     */
+    public function scopeReadyForExit($query): void
+    {
+        $query->whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('work_order_items')
+                    ->whereColumn('work_order_id', 'work_orders.id');
+            })
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('work_order_items')
+                    ->whereColumn('work_order_id', 'work_orders.id')
+                    ->where('status', 'completed');
+            })
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('work_order_items')
+                    ->whereColumn('work_order_id', 'work_orders.id')
+                    ->whereNotIn('status', ['completed', 'cancelled']);
+            });
     }
 
     /**

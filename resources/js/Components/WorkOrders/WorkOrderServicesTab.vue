@@ -87,15 +87,11 @@
                                         <span class="text-gray-400 font-semibold font-mono text-sm mt-0.5 select-none">{{ index + 1 }}.</span>
                                         <div class="flex-1 min-w-0">
                                             <div class="flex items-center gap-2 flex-wrap mb-1">
-                                                <button v-if="!isReadOnly"
+                                                <button
                                                     @click.stop="emit('edit-item', item)" type="button"
                                                     class="font-bold text-gray-900 dark:text-white text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors text-start leading-snug">
                                                     {{ item.service ? getName(item.service) : item.title }}
                                                 </button>
-                                                <span v-else
-                                                    class="font-bold text-gray-900 dark:text-white text-base text-start leading-snug">
-                                                    {{ item.service ? getName(item.service) : item.title }}
-                                                </span>
                                             </div>
 
                                             <div v-if="item.service && item.title && item.title !== getName(item.service)"

@@ -12,6 +12,13 @@ class InvoiceObserver
             return; // Allow status transitions
         }
 
+        // Allow updates to payment-related fields (total_paid, payment_status)
+        $dirty = array_keys($invoice->getDirty());
+        $allowed = ['total_paid', 'payment_status'];
+        if (empty(array_diff($dirty, $allowed))) {
+            return;
+        }
+
         if ($invoice->getOriginal('status') !== 'draft') {
             // Allow only specific fields like 'zatca_uuid' if needed during reporting
             // But generally block user edits.

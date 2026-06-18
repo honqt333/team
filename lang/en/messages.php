@@ -16,6 +16,8 @@ return [
     'cannot_cancel_has_technicians_or_parts' => 'Cannot cancel work order - has assigned technicians or parts',
     'cannot_cancel_has_relations' => 'Cannot cancel work order - please delete all services, parts, technicians, and refund any payments first',
     'cannot_complete_items_pending' => 'Cannot complete work order - pending items exist',
+    'cannot_start_work_no_services' => 'Cannot start work because there are no services added yet',
+    'deferred_invoice_required' => 'A deferred invoice and due date are required because there is an outstanding balance',
     
     // Work Order Items
     'service_added' => 'Service added successfully',

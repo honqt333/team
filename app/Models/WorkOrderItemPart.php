@@ -96,6 +96,18 @@ class WorkOrderItemPart extends Model
             $part->total = bcsub($subtotal, $part->discount ?? 0, 2);
             if ($part->total < 0) $part->total = 0;
         });
+
+        static::saved(function (WorkOrderItemPart $part) {
+            if ($part->workOrder) {
+                $part->workOrder->save();
+            }
+        });
+
+        static::deleted(function (WorkOrderItemPart $part) {
+            if ($part->workOrder) {
+                $part->workOrder->save();
+            }
+        });
     }
 
     // ─────────────────────────────────────────────────────────────

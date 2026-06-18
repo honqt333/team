@@ -667,11 +667,14 @@
     "invoice_total": "Invoice",
     "paid": "Paid",
     "remaining": "Remaining",
+    "pending_payment_badge": "Pending Payment",
+    "remaining_dues_alert": "Outstanding Dues",
     "filters": {
       "open": "Open",
       "draft": "Hanging",
       "overdue": "Late",
       "pending_payment": "Payable",
+      "completed": "Completed",
       "all_types": "All types",
       "customer_type": "Client type"
     },
@@ -697,9 +700,11 @@
       "draft": "Draft",
       "open": "Open",
       "pending": "Pending",
-      "in_progress": "Under implementation",
-      "done": "Complete",
-      "cancelled": "Canceled",
+      "in_progress": "In Progress",
+      "on_hold": "On Hold",
+      "ready_for_qc": "Ready for QC",
+      "done": "Completed",
+      "cancelled": "Cancelled",
       "general_note": "General Note"
     },
     "show": {
@@ -756,13 +761,29 @@
       }
     },
     "actions": {
-      "start_work": "Start working",
-      "complete": "Finish the card",
-      "cancel": "Cancel"
+      "start_work": "Start Work",
+      "put_on_hold": "Put on Hold",
+      "resume_work": "Resume Work",
+      "complete": "Vehicle Exit",
+      "cancel": "Cancel Card"
     },
     "messages": {
-      "confirm_status_change": "Are you sure to change the card status?"
+      "confirm_status_change": "Are you sure you want to change the card status?",
+      "confirm_start": "Are you sure you want to start work on this card and move services to in progress?",
+      "confirm_resume": "Are you sure you want to resume work on this card?",
+      "confirm_complete": "Are you sure you want to exit the vehicle and close the work order? Make sure all services are done and dues are paid.",
+      "confirm_cancel": "Are you sure you want to cancel this card? This action cannot be undone.",
+      "hold_reason_prompt": "Please enter a reason for putting this card on hold."
     },
+    "hold_reason_label": "Hold Reason",
+    "hold_reason_placeholder": "Type the reason for holding...",
+    "exit_date_label": "Vehicle Exit Date",
+    "exit_notes_label": "Exit Notes",
+    "exit_notes_placeholder": "Type any notes related to vehicle exit...",
+    "confirm_exit_title": "Vehicle Exit & Issue Invoice",
+    "outstanding_balance_warning": "Warning: There is an outstanding balance that will be carried over to the issued invoice.",
+    "is_deferred_label": "Create Deferred Invoice",
+    "due_date_label": "Due Date / Payment Date",
     "service_categories": {
       "maintenance": "Maintenance",
       "electrical": "Electricity",

@@ -39,10 +39,11 @@
             </div>
 
             <!-- Status Change Buttons -->
-            <div v-if="!isReadOnly" class="flex items-center gap-2">
-                <template v-if="workOrder.status === 'open'">
-                    <button @click="emit('change-status', 'in_progress')"
-                        class="flex items-center gap-2 px-6 py-2.5 bg-amber-500 text-white rounded-2xl font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
+            <div v-if="!['done', 'cancelled'].includes(workOrder.status)" class="flex items-center gap-2">
+                <!-- Start Work button (Open -> In Progress) -->
+                <template v-if="workOrder.status === 'open' && (workOrder.items || []).length > 0">
+                    <button @click="emit('change-status', 'start')"
+                        class="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-2xl font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -50,9 +51,23 @@
                         <span>{{ $t('work_orders.actions.start_work') }}</span>
                     </button>
                 </template>
-                <template v-if="workOrder.status === 'in_progress'">
-                    <button @click="emit('change-status', 'done')"
-                        class="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
+
+                <!-- Resume Work button (On Hold -> Resume) -->
+                <template v-if="workOrder.status === 'on_hold'">
+                    <button @click="emit('change-status', 'resume')"
+                        class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18" />
+                        </svg>
+                        <span>{{ $t('work_orders.actions.resume_work') || 'استئناف العمل' }}</span>
+                    </button>
+                </template>
+
+                <!-- Complete / Exit button (In Progress -> Complete) -->
+                <template v-if="workOrder.status === 'in_progress' && allItemsCompleted">
+                    <button @click="emit('change-status', 'complete')"
+                        class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M5 13l4 4L19 7" />
@@ -60,8 +75,23 @@
                         <span>{{ $t('work_orders.actions.complete') }}</span>
                     </button>
                 </template>
-                <button v-if="workOrder.status !== 'done' && workOrder.status !== 'cancelled'"
-                    @click="emit('change-status', 'cancelled')"
+
+                <!-- Put on Hold button (In Progress -> On Hold) -->
+                <template v-if="workOrder.status === 'in_progress' && !allItemsCompleted">
+                    <button @click="emit('change-status', 'hold')"
+                        class="flex items-center gap-2 px-5 py-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-2xl font-bold shadow-lg shadow-gray-500/25 hover:shadow-gray-500/40 hover:-translate-y-0.5 transition-all"
+                        :title="$t('work_orders.actions.put_on_hold') || 'تعليق الكرت'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ $t('work_orders.actions.put_on_hold') || 'تعليق الكرت' }}</span>
+                    </button>
+                </template>
+
+                <!-- Cancel button (Not Done or Cancelled) -->
+                <button v-if="!['done', 'cancelled'].includes(workOrder.status)"
+                    @click="emit('change-status', 'cancel')"
                     class="p-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm"
                     :title="$t('work_orders.actions.cancel')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,6 +116,10 @@
                         </svg>
                     </div>
                 </div>
+                <!-- Hold reason display -->
+                <div v-if="workOrder.status === 'on_hold' && workOrder.hold_reason" class="text-xs text-red-500 dark:text-red-400 mt-1.5 font-bold">
+                    {{ $t('work_orders.hold_reason_label') || 'سبب التعليق:' }} {{ workOrder.hold_reason }}
+                </div>
             </div>
         </div>
     </div>
@@ -104,6 +138,17 @@ const props = defineProps({
 const emit = defineEmits(['print', 'payments', 'edit', 'change-status']);
 
 const { t } = useI18n();
+
+const allItemsCompleted = computed(() => {
+    const items = props.workOrder.items || [];
+    if (items.length === 0) return false;
+    
+    // Check if there is at least one completed item
+    const hasCompleted = items.some(item => item.status === 'completed');
+    if (!hasCompleted) return false;
+    
+    return items.every(item => ['completed', 'cancelled'].includes(item.status));
+});
 
 // Back URL: open work orders return to the open list, closed to the
 // closed list. Kept inside the header so the navigation concern lives
@@ -125,6 +170,7 @@ const statusBadgeClass = computed(() => {
         draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
         open: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
         in_progress: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+        on_hold: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
         ready_for_qc: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
         done: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
         cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',

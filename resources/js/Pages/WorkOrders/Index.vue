@@ -343,8 +343,13 @@
                                     {{ formatDate(order.entry_date) }}
                                 </div>
                             </div>
-                            <div :class="['px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm', getStatusClass(order.status)]">
-                                {{ $t(`work_orders.status.${order.status}`) }}
+                            <div class="flex items-center gap-1.5">
+                                <div v-if="order.status === 'done' && (order.balance || 0) > 0" class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300 animate-pulse border border-red-200 dark:border-red-800">
+                                    {{ $t('work_orders.pending_payment_badge') || 'مستحق الدفع' }}
+                                </div>
+                                <div :class="['px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm', getStatusClass(order.status)]">
+                                    {{ $t(`work_orders.status.${order.status}`) }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -362,6 +367,13 @@
                             
                             <!-- Saudi Plate -->
                             <SaudiPlateDisplay :plate-number="order.vehicle?.plate_number" size="sm" />
+                        </div>
+
+                        <!-- Outstanding Balance Notice -->
+                        <div v-if="order.status === 'done' && (order.balance || 0) > 0" class="mb-4 p-2 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-center shadow-sm">
+                            <span class="text-xs font-bold text-red-600 dark:text-red-400">
+                                {{ $t('work_orders.remaining_dues_alert') || 'المبالغ المستحقة للدفع' }}: {{ formatNumber(order.balance || 0) }}
+                            </span>
                         </div>
 
                         <!-- Vehicle Name & Customer -->
@@ -550,7 +562,17 @@
                                 </td>
                                 <!-- رقم الكرت -->
                                 <td class="px-4 py-3 align-middle">
-                                    <span class="font-mono font-semibold text-indigo-600 dark:text-indigo-400">#{{ toEnglish(order.code || order.id) }}</span>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="font-mono font-semibold text-indigo-600 dark:text-indigo-400">#{{ toEnglish(order.code || order.id) }}</span>
+                                        <div class="flex flex-wrap gap-1">
+                                            <span :class="['px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider', getStatusClass(order.status)]">
+                                                {{ $t(`work_orders.status.${order.status}`) }}
+                                            </span>
+                                            <span v-if="order.status === 'done' && (order.balance || 0) > 0" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
+                                                {{ $t('work_orders.pending_payment_badge') || 'مستحق الدفع' }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </td>
                                 <!-- تاريخ الانتهاء -->
                                 <td class="px-4 py-3 align-middle">
@@ -916,6 +938,16 @@ const filterTabs = computed(() => {
             gradientFrom: '#f59e0b',
             gradientTo: '#d97706',
             count: props.filterCounts.pending_payment || 0 
+        },
+        { 
+            key: 'completed', 
+            label: t('work_orders.filters.completed') || 'مكتمل', 
+            icon: IconDone, 
+            iconColor: 'text-emerald-500', 
+            bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+            gradientFrom: '#10b981',
+            gradientTo: '#059669',
+            count: props.filterCounts.completed || 0 
         },
     ];
 });

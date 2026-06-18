@@ -51,6 +51,7 @@ class WorkOrderItem extends Model
         'total',
         // New fields
         'status',
+        'suspended_status',
         'notes',
         'started_at',
         'completed_at',
@@ -141,6 +142,18 @@ class WorkOrderItem extends Model
                 }
             }
         });
+
+        static::saved(function (WorkOrderItem $item) {
+            if ($item->workOrder) {
+                $item->workOrder->save();
+            }
+        });
+
+        static::deleted(function (WorkOrderItem $item) {
+            if ($item->workOrder) {
+                $item->workOrder->save();
+            }
+        });
     }
 
     // ==================== Relationships ====================
@@ -207,6 +220,17 @@ class WorkOrderItem extends Model
         // Cannot cancel if has technicians or parts
         if ($newStatus === self::STATUS_CANCELLED) {
             return $this->canBeCancelled();
+        }
+
+        // Rule: Once work has started on the work order, an item cannot go back to pending
+        // if it has already transitioned to a non-pending status.
+        if ($newStatus === self::STATUS_PENDING) {
+            $parentStatus = $this->workOrder()->first()?->status;
+            if (in_array($parentStatus, [WorkOrder::STATUS_IN_PROGRESS, WorkOrder::STATUS_READY_FOR_QC, WorkOrder::STATUS_DONE])) {
+                if ($this->status !== self::STATUS_PENDING) {
+                    return false;
+                }
+            }
         }
 
         return true;

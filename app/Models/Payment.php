@@ -31,6 +31,33 @@ class Payment extends Model
         'payment_date' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        static::saved(function (Payment $payment) {
+            // If the payment belongs to a work order and doesn't have invoice_id,
+            // but the work order has an invoice, link it!
+            if ($payment->work_order_id && !$payment->invoice_id) {
+                $invoice = $payment->workOrder?->invoice;
+                if ($invoice) {
+                    $payment->invoice_id = $invoice->id;
+                    $payment->saveQuietly();
+                }
+            }
+
+            // Update invoice payment status if invoice_id is set
+            if ($payment->invoice_id) {
+                $payment->invoice?->updatePaymentStatus();
+            }
+        });
+
+        static::deleted(function (Payment $payment) {
+            // Update invoice payment status if invoice_id was set
+            if ($payment->invoice_id) {
+                $payment->invoice?->updatePaymentStatus();
+            }
+        });
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Constants
     // ─────────────────────────────────────────────────────────────

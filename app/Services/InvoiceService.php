@@ -99,6 +99,12 @@ class InvoiceService
                     'line_total_incl_tax' => $part->grand_total,
                 ]);
             }
+
+            // 4. Link existing work order payments to the new invoice
+            $workOrder->payments()->update(['invoice_id' => $invoice->id]);
+
+            // 5. Recalculate and sync invoice payment status
+            $invoice->updatePaymentStatus();
             
             return $invoice;
         });

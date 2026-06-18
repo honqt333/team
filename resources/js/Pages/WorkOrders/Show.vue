@@ -421,6 +421,118 @@
                 </button>
             </template>
         </BaseModal>
+
+        <!-- Hold Reason Modal -->
+        <BaseModal :show="showHoldModal" @close="cancelHold" size="md">
+            <template #title>
+                {{ $t('work_orders.actions.put_on_hold') || 'تعليق الكرت' }}
+            </template>
+
+            <div class="space-y-4 text-right">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ $t('work_orders.messages.hold_reason_prompt') || 'يرجى إدخال سبب تعليق الكرت.' }}
+                </p>
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        {{ $t('work_orders.hold_reason_label') || 'سبب التعليق' }}
+                    </label>
+                    <textarea v-model="holdReason" required rows="3"
+                        :placeholder="$t('work_orders.hold_reason_placeholder') || 'اكتب سبب التعليق...' "
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                    ></textarea>
+                </div>
+            </div>
+
+            <template #footer>
+                <button type="button" @click="cancelHold"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                    {{ $t('common.cancel') }}
+                </button>
+                <button type="button" @click="confirmHold" :disabled="!holdReason.trim()"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm">
+                    {{ $t('work_orders.actions.put_on_hold') || 'تعليق الكرت' }}
+                </button>
+            </template>
+        </BaseModal>
+
+        <!-- Vehicle Exit Modal -->
+        <BaseModal :show="showExitModal" @close="cancelExit" size="md">
+            <template #title>
+                {{ $t('work_orders.confirm_exit_title') || 'تسجيل خروج المركبة وإصدار الفاتورة' }}
+            </template>
+
+            <div class="space-y-4 text-right">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ $t('work_orders.messages.confirm_complete') }}
+                </p>
+
+                <!-- Exit Date -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        {{ $t('work_orders.exit_date_label') || 'تاريخ خروج المركبة' }}
+                    </label>
+                    <input type="date" v-model="exitDate" required
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    />
+                </div>
+
+                <!-- Remaining Balance -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        {{ $t('work_orders.balance') || 'المبلغ المتبقي' }}
+                    </label>
+                    <div class="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 font-mono font-bold">
+                        {{ formatPrice(workOrderBalance) }}
+                    </div>
+                    <p v-if="workOrderBalance > 0" class="text-xs text-amber-500 dark:text-amber-400 font-bold mt-1">
+                        {{ $t('work_orders.outstanding_balance_warning') || 'تنبيه: يوجد مبلغ متبقي غير مسدد سيتم ترحيله للفاتورة الصادرة.' }}
+                    </p>
+                </div>
+
+                <!-- Deferred Invoice (Credit) Options if balance > 0 -->
+                <div v-if="workOrderBalance > 0" class="space-y-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border border-amber-500/20 text-right">
+                    <label class="flex items-center gap-2 cursor-pointer select-none">
+                        <input type="checkbox" v-model="isDeferred"
+                            class="rounded border-gray-300 dark:border-gray-700 text-amber-500 focus:ring-amber-500 bg-white dark:bg-gray-900"
+                        />
+                        <span class="text-sm font-bold text-gray-700 dark:text-gray-300">
+                            {{ $t('work_orders.is_deferred_label') || 'إنشاء فاتورة آجلة' }}
+                        </span>
+                    </label>
+
+                    <div v-if="isDeferred" class="space-y-1">
+                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                            {{ $t('work_orders.due_date_label') || 'تاريخ الدفع / الاستحقاق' }}
+                        </label>
+                        <input type="date" v-model="dueDate" required :min="exitDate"
+                            class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        />
+                    </div>
+                </div>
+
+                <!-- Exit Notes -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        {{ $t('work_orders.exit_notes_label') || 'ملاحظات الخروج' }}
+                    </label>
+                    <textarea v-model="exitNotes" rows="3"
+                        :placeholder="$t('work_orders.exit_notes_placeholder') || 'اكتب ملاحظات الخروج...'"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+                    ></textarea>
+                </div>
+            </div>
+
+            <template #footer>
+                <button type="button" @click="cancelExit"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                    {{ $t('common.cancel') }}
+                </button>
+                <button type="button" @click="confirmExit" :disabled="!exitDate || (isDeferred && !dueDate)"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm">
+                    {{ $t('work_orders.actions.complete') }}
+                </button>
+            </template>
+        </BaseModal>
     </AppLayout>
 </template>
 
@@ -555,7 +667,7 @@ function closeAddPartModal() {
 
 // Read-only mode for closed work orders
 const isReadOnly = computed(() => {
-    const closedStatuses = ['done', 'cancelled', 'closed'];
+    const closedStatuses = ['done', 'cancelled', 'closed', 'on_hold'];
     return closedStatuses.includes(props.workOrder.status);
 });
 
@@ -992,6 +1104,7 @@ const departmentServices = computed(() => {
 
 // Open add service modal
 function openAddServiceModal(deptId) {
+    if (isReadOnly.value) return;
     selectedDepartmentId.value = deptId;
     selectedItemId.value = null;
     showServiceModal.value = true;
@@ -1211,32 +1324,123 @@ async function removeDepartment(deptId) {
     }
 }
 
-async function changeStatus(newStatus) {
-    const statusLabels = {
-        in_progress: t('work_orders.actions.start_work'),
-        done: t('work_orders.actions.complete'),
-        cancelled: t('work_orders.actions.cancel'),
+// ─── Vehicle Exit modal state ────────────────────────────────────────────────
+const showExitModal = ref(false);
+const exitDate = ref('');
+const exitNotes = ref('');
+const isDeferred = ref(false);
+const dueDate = ref('');
+
+function cancelExit() {
+    showExitModal.value = false;
+    exitDate.value = '';
+    exitNotes.value = '';
+    isDeferred.value = false;
+    dueDate.value = '';
+}
+
+function confirmExit() {
+    if (!exitDate.value) return;
+    if (isDeferred.value && !dueDate.value) return;
+    showExitModal.value = false;
+    router.post(route('work-orders.complete', props.workOrder.id), {
+        exit_date: exitDate.value,
+        notes: exitNotes.value,
+        is_deferred: isDeferred.value,
+        due_date: isDeferred.value ? dueDate.value : null,
+    }, {
+        onSuccess: () => {
+            success(t('common.saved_success'));
+            cancelExit();
+        },
+        onError: (err) => {
+            const msg = err.message || Object.values(err)[0] || t('common.error');
+            errorToast(msg);
+        },
+    });
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ─── Hold modal state ────────────────────────────────────────────────────────
+const showHoldModal = ref(false);
+const holdReason = ref('');
+
+function cancelHold() {
+    showHoldModal.value = false;
+    holdReason.value = '';
+}
+
+function confirmHold() {
+    if (!holdReason.value.trim()) return;
+    showHoldModal.value = false;
+    router.post(route('work-orders.hold', props.workOrder.id), {
+        reason: holdReason.value,
+    }, {
+        onSuccess: () => {
+            success(t('common.saved_success'));
+            holdReason.value = '';
+        },
+        onError: (err) => {
+            const msg = err.reason || Object.values(err)[0] || t('common.error');
+            errorToast(msg);
+        },
+    });
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function changeStatus(action) {
+    // Map header-emitted action names to route names and labels
+    const routeMap = {
+        start:    { routeName: 'work-orders.start',    type: 'success' },
+        resume:   { routeName: 'work-orders.resume',   type: 'success' },
+        complete: { routeName: 'work-orders.complete', type: 'success' },
+        cancel:   { routeName: 'work-orders.cancel',   type: 'danger'  },
     };
 
+    // "hold" needs a reason modal — open it and return; confirmHold() handles the POST
+    if (action === 'hold') {
+        holdReason.value = '';
+        showHoldModal.value = true;
+        return;
+    }
+
+    // "complete" needs vehicle exit modal — open it and return; confirmExit() handles the POST
+    if (action === 'complete') {
+        exitDate.value = new Date().toISOString().substring(0, 10);
+        exitNotes.value = '';
+        isDeferred.value = workOrderBalance.value > 0;
+        dueDate.value = '';
+        showExitModal.value = true;
+        return;
+    }
+
+    const config = routeMap[action];
+    if (!config) return;
+
+    const labelKey = {
+        start:    'work_orders.actions.start_work',
+        resume:   'work_orders.actions.resume_work',
+        complete: 'work_orders.actions.complete',
+        cancel:   'work_orders.actions.cancel',
+    }[action];
+
     const confirmed = await confirm({
-        title: statusLabels[newStatus],
+        title: t(labelKey) || action,
         message: t('work_orders.messages.confirm_status_change'),
         confirmText: t('common.confirm'),
         cancelText: t('common.cancel'),
-        type: newStatus === 'cancelled' ? 'danger' : 'success',
+        type: config.type,
     });
 
     if (confirmed) {
-        router.put(route('work-orders.update', props.workOrder.id), {
-            status: newStatus,
-        }, {
+        router.post(route(config.routeName, props.workOrder.id), {}, {
             onSuccess: () => {
                 success(t('common.saved_success'));
             },
             onError: (err) => {
-                const msg = err.status || Object.values(err)[0] || t('common.error');
+                const msg = err.message || Object.values(err)[0] || t('common.error');
                 errorToast(msg);
-            }
+            },
         });
     }
 }

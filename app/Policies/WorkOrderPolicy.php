@@ -74,4 +74,36 @@ class WorkOrderPolicy
         return $workOrder->tenant_id === $user->tenant_id
             && $workOrder->center_id === $user->current_center_id;
     }
+
+    /**
+     * Determine whether the user can resume the model.
+     */
+    public function resume(User $user, WorkOrder $workOrder): bool
+    {
+        if (!$user->hasPermissionTo('crm.work_orders.update')) {
+            return false;
+        }
+
+        return $workOrder->status === WorkOrder::STATUS_ON_HOLD
+            && $workOrder->tenant_id === $user->tenant_id
+            && $workOrder->center_id === $user->current_center_id;
+    }
+
+    /**
+     * Determine whether the user can cancel the model.
+     */
+    public function cancel(User $user, WorkOrder $workOrder): bool
+    {
+        if (!$user->hasPermissionTo('crm.work_orders.update')) {
+            return false;
+        }
+
+        return in_array($workOrder->status, [
+            WorkOrder::STATUS_OPEN,
+            WorkOrder::STATUS_IN_PROGRESS,
+            WorkOrder::STATUS_ON_HOLD,
+        ])
+            && $workOrder->tenant_id === $user->tenant_id
+            && $workOrder->center_id === $user->current_center_id;
+    }
 }

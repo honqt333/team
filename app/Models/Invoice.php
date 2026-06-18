@@ -22,6 +22,7 @@ class Invoice extends Model
         'invoice_number',
         'issue_date',
         'supply_date',
+        'due_date',
         'type', // invoice, credit_note, debit_note
         'subtype', // simplified, standard
         'status', // draft, valid, reported, cancelled
@@ -56,6 +57,7 @@ class Invoice extends Model
     protected $casts = [
         'issue_date' => 'datetime',
         'supply_date' => 'date',
+        'due_date' => 'date',
         'tax_enabled_snapshot' => 'boolean',
         'tax_rate_snapshot' => 'decimal:2',
         'total_excl_tax' => 'decimal:2',

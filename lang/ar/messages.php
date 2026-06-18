@@ -16,6 +16,8 @@ return [
     'cannot_cancel_has_technicians_or_parts' => 'لا يمكن إلغاء كرت العمل - يوجد فنيين أو قطع غيار مرتبطة',
     'cannot_cancel_has_relations' => 'لا يمكن إلغاء كرت العمل - يرجى حذف جميع الخدمات، القطع، الفنيين، وإعادة أي مدفوعات أولاً',
     'cannot_complete_items_pending' => 'لا يمكن إكمال كرت العمل - هناك خدمات غير مكتملة',
+    'cannot_start_work_no_services' => 'لا يمكن بدء العمل لعدم وجود خدمات مضافة بعد',
+    'deferred_invoice_required' => 'يجب إنشاء فاتورة آجلة وتحديد تاريخ الدفع لوجود مستحقات معلقة',
     
     // Work Order Items
     'service_added' => 'تمت إضافة الخدمة بنجاح',

@@ -202,7 +202,7 @@
                                 </Link>
                                 <span v-if="invoice.work_order?.vehicle" class="text-xs text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1.5">
                                     <span>🚗</span>
-                                    <span>{{ invoice.work_order.vehicle.make }} {{ invoice.work_order.vehicle.model }}</span>
+                                    <span>{{ invoice.work_order.vehicle.display_make }} {{ invoice.work_order.vehicle.display_model }}</span>
                                     <SaudiPlateDisplay :plate-number="invoice.work_order.vehicle.plate_number" size="sm" />
                                 </span>
                             </div>

@@ -64,16 +64,30 @@ class WorkOrderController
                     ->where('expected_end_date', '<', now()->startOfDay());
             } elseif ($subFilter === 'draft') {
                 $query->where('status', WorkOrder::STATUS_DRAFT);
+            } elseif ($subFilter === 'pending_payment') {
+                $query->where('status', WorkOrder::STATUS_DONE)
+                    ->hasOutstandingBalance()
+                    ->whereDoesntHave('invoice');
+            } elseif ($subFilter === 'completed') {
+                $query->readyForExit();
+            } elseif ($subFilter === 'in_progress') {
+                $query->whereIn('status', self::ACTIVE_STATUSES);
             } else {
-                $query->whereIn('status', self::OPEN_STATUSES);
+                $query->whereIn('status', self::ACTIVE_STATUSES);
             }
         } elseif ($status === 'closed') {
             if ($subFilter === 'credit_invoices') {
-                $query->where('status', WorkOrder::STATUS_DONE)->hasOutstandingBalance();
+                $query->where('status', WorkOrder::STATUS_DONE)
+                    ->hasOutstandingBalance()
+                    ->whereHas('invoice');
             } elseif ($subFilter === 'cancelled') {
                 $query->where('status', WorkOrder::STATUS_CANCELLED);
+            } elseif ($subFilter === 'closed') {
+                $query->where('status', WorkOrder::STATUS_DONE)
+                    ->whereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')');
             } else {
-                $query->whereIn('status', self::CLOSED_STATUSES);
+                $query->where('status', WorkOrder::STATUS_DONE)
+                    ->whereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')');
             }
         }
 
@@ -105,10 +119,31 @@ class WorkOrderController
      * Calculate stats for multiple statuses in a single efficient query.
      * Reduces N+1 by combining multiple queries into one.
      */
-    protected function getStatsForStatuses(array $statuses): array
+    protected function getStatsForStatuses(string $tabType): array
     {
-        // Single query to get counts for all statuses
-        $baseQuery = WorkOrder::whereIn('status', $statuses);
+        $baseQuery = WorkOrder::query();
+        if ($tabType === 'open') {
+            $baseQuery->where(function ($q) {
+                $q->whereIn('status', self::OPEN_STATUSES)
+                  ->orWhere(function ($sub) {
+                      $sub->where('status', WorkOrder::STATUS_DONE)
+                          ->hasOutstandingBalance()
+                          ->whereDoesntHave('invoice');
+                  });
+            });
+        } else {
+            $baseQuery->whereIn('status', self::CLOSED_STATUSES)
+                ->where(function ($q) {
+                    $q->where('status', '!=', WorkOrder::STATUS_DONE)
+                      ->orWhere(function ($sub) {
+                          $sub->where('status', WorkOrder::STATUS_DONE)
+                              ->where(function ($sub2) {
+                                  $sub2->whereHas('invoice')
+                                       ->orWhereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')');
+                              });
+                      });
+                });
+        }
 
         // Get count in one query
         $count = (clone $baseQuery)->count();
@@ -173,46 +208,39 @@ class WorkOrderController
             ->get()
             ->groupBy('make_id');
 
-        // Get counts for open and closed statuses in 2 queries (was ~14)
+        // Get counts for open and closed statuses
         $counts = [
-            'open' => $this->getStatsForStatuses(self::OPEN_STATUSES),
-            'closed' => $this->getStatsForStatuses(self::CLOSED_STATUSES),
+            'open' => $this->getStatsForStatuses('open'),
+            'closed' => $this->getStatsForStatuses('closed'),
         ];
 
-        // Filter tabs counts - optimized to use fewer queries
+        // Filter tabs counts
         $filterCounts = [];
         if ($status === 'open') {
-            // Use single query with conditional counts instead of multiple queries
-            $openCounts = WorkOrder::whereIn('status', self::ACTIVE_STATUSES)
-                ->selectRaw('
-                    COUNT(*) as total,
-                    SUM(CASE WHEN status != \'draft\' THEN 1 ELSE 0 END) as non_draft,
-                    SUM(CASE WHEN expected_end_date IS NOT NULL AND expected_end_date < NOW() THEN 1 ELSE 0 END) as overdue
-                ')
-                ->first();
-            
             $filterCounts = [
-                'open' => (int) ($openCounts->non_draft ?? 0),
+                'open' => WorkOrder::whereIn('status', self::ACTIVE_STATUSES)->count(),
                 'draft' => WorkOrder::where('status', WorkOrder::STATUS_DRAFT)->count(),
-                'overdue' => (int) ($openCounts->overdue ?? 0),
-                'pending_payment' => 0,
+                'overdue' => WorkOrder::whereIn('status', self::ACTIVE_STATUSES)
+                    ->whereNotNull('expected_end_date')
+                    ->where('expected_end_date', '<', now()->startOfDay())
+                    ->count(),
+                'pending_payment' => WorkOrder::where('status', WorkOrder::STATUS_DONE)
+                    ->hasOutstandingBalance()
+                    ->whereDoesntHave('invoice')
+                    ->count(),
+                'completed' => WorkOrder::readyForExit()->count(),
             ];
         } elseif ($status === 'closed') {
-            // Single query for closed counts
-            $closedCounts = WorkOrder::whereIn('status', self::CLOSED_STATUSES)
-                ->selectRaw('
-                    COUNT(*) as total,
-                    SUM(CASE WHEN status = \'cancelled\' THEN 1 ELSE 0 END) as cancelled
-                ')
-                ->first();
-            
             $filterCounts = [
-                'closed' => (int) ($closedCounts->total ?? 0),
+                'closed' => WorkOrder::where('status', WorkOrder::STATUS_DONE)
+                    ->whereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')')
+                    ->count(),
                 'credit_invoices' => WorkOrder::where('status', WorkOrder::STATUS_DONE)
                     ->hasOutstandingBalance()
+                    ->whereHas('invoice')
                     ->count(),
                 'bad_debts' => 0,
-                'cancelled' => (int) ($closedCounts->cancelled ?? 0),
+                'cancelled' => WorkOrder::where('status', WorkOrder::STATUS_CANCELLED)->count(),
             ];
         }
 
@@ -769,20 +797,54 @@ class WorkOrderController
     // ─────────────────────────────────────────────────────────────
 
     /**
+     * Start work on a work order.
+     * Transition pending services to in_progress.
+     */
+    public function startWork(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    {
+        $this->authorize('update', $work_order);
+
+        if ($work_order->status !== WorkOrder::STATUS_OPEN) {
+            return redirect()->back()->with('error', __('messages.cannot_start_work') ?? 'لا يمكن بدء العمل على كرت بهذه الحالة');
+        }
+
+        if ($work_order->items()->count() === 0) {
+            return redirect()->back()->with('error', __('messages.cannot_start_work_no_services'));
+        }
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($work_order) {
+            $work_order->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
+
+            // Transition all pending services to in_progress using Eloquent to trigger events
+            foreach ($work_order->items()->where('status', \App\Models\WorkOrderItem::STATUS_PENDING)->get() as $item) {
+                $item->update(['status' => \App\Models\WorkOrderItem::STATUS_IN_PROGRESS]);
+            }
+        });
+
+        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.in_progress')]));
+
+        return redirect()->back()->with('success', __('messages.work_order_started') ?? 'تم بدء العمل على كرت الصيانة بنجاح وتحويل الخدمات إلى جاري');
+    }
+
+    /**
      * Put work order on hold.
      * Rule R7: Suspends all items.
      */
-    public function putOnHold(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    public function putOnHold(Request $request, WorkOrder $work_order): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $work_order);
+
+        $validated = $request->validate([
+            'reason' => 'required|string|max:255',
+        ]);
 
         if (!$work_order->canBeOnHold()) {
             return redirect()->back()->with('error', __('messages.cannot_put_on_hold'));
         }
 
-        $work_order->putOnHold();
+        $work_order->putOnHold($validated['reason']);
 
-        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.on_hold')]));
+        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed_on_hold', ['reason' => $validated['reason']]) ?? ('تم تعليق كرت العمل بسبب: ' . $validated['reason']));
 
         return redirect()->back()->with('success', __('messages.work_order_on_hold'));
     }
@@ -792,13 +854,13 @@ class WorkOrderController
      */
     public function resume(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
     {
-        $this->authorize('update', $work_order);
+        $this->authorize('resume', $work_order);
 
         if (!$work_order->resume()) {
             return redirect()->back()->with('error', __('messages.cannot_resume'));
         }
 
-        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.open')]));
+        $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.in_progress')]));
 
         return redirect()->back()->with('success', __('messages.work_order_resumed'));
     }
@@ -809,7 +871,7 @@ class WorkOrderController
      */
     public function cancel(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
     {
-        $this->authorize('update', $work_order);
+        $this->authorize('cancel', $work_order);
 
         if (!$work_order->canBeCancelled()) {
             return redirect()->back()->with('error', __('messages.cannot_cancel_has_technicians_or_parts'));
@@ -824,17 +886,64 @@ class WorkOrderController
 
     /**
      * Mark as completed (vehicle exit).
-     * Rule R8: Only when all items completed.
+     * Rule R8: Only when all items completed and all dues are paid.
      */
-    public function complete(WorkOrder $work_order): \Illuminate\Http\RedirectResponse
+    public function complete(Request $request, WorkOrder $work_order): \Illuminate\Http\RedirectResponse
     {
         $this->authorize('update', $work_order);
 
-        if (!$work_order->markAsCompleted()) {
-            return redirect()->back()->with('error', __('messages.cannot_complete_items_pending'));
+        $validated = $request->validate([
+            'exit_date' => 'required|date',
+            'notes' => 'nullable|string|max:1000',
+            'is_deferred' => 'nullable|boolean',
+            'due_date' => 'required_if:is_deferred,true|nullable|date|after_or_equal:exit_date',
+        ]);
+
+        if (!$work_order->allItemsCompleted()) {
+            return redirect()->back()->with('error', __('messages.cannot_complete_items_pending') ?? 'لا يمكن إكمال العمل لوجود خدمات قيد الانتظار أو قيد التنفيذ');
+        }
+
+        $exitDate = \Carbon\Carbon::parse($validated['exit_date']);
+        $notes = $work_order->notes;
+        if (!empty($validated['notes'])) {
+            $notes = trim(($notes ? $notes . "\n" : '') . "ملاحظات الخروج: " . $validated['notes']);
+        }
+
+        if (!$work_order->markAsCompleted($exitDate, $notes)) {
+            return redirect()->back()->with('error', __('messages.cannot_complete_error') ?? 'حدث خطأ أثناء محاولة إكمال كرت العمل');
         }
 
         $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.done')]));
+
+        // Generate and issue invoice if not already exists AND (fully paid OR deferred invoice is requested)
+        if (!$work_order->invoice && ($work_order->balance <= 0 || $request->boolean('is_deferred'))) {
+            try {
+                $invoiceService = app(\App\Services\InvoiceService::class);
+                $invoice = $invoiceService->createFromWorkOrder($work_order, auth()->user());
+
+                if ($request->boolean('is_deferred') && $request->date('due_date')) {
+                    $invoice->due_date = $request->date('due_date');
+                    $invoice->save();
+                }
+
+                $invoiceService->issueInvoice($invoice);
+
+                // Notify owner about new invoice
+                \App\Services\NotificationService::notifyOwner(
+                    tenantId: auth()->user()->tenant_id,
+                    type: 'invoice.created',
+                    title: 'فاتورة جديدة #' . $invoice->invoice_number,
+                    body: 'تم إنشاء فاتورة من أمر العمل #' . ($work_order->code ?? $work_order->id),
+                    actionUrl: '/app/invoices/' . $invoice->id,
+                    actorId: auth()->id(),
+                );
+
+                return redirect()->route('app.invoices.show', $invoice->id)
+                    ->with('success', __('messages.work_order_completed_and_invoice_issued') ?? 'تم خروج المركبة بنجاح وإصدار الفاتورة');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', $e->getMessage());
+            }
+        }
 
         return redirect()->back()->with('success', __('messages.work_order_completed'));
     }

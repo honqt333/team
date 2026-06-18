@@ -127,6 +127,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::get('/api/work-order-parts/check-stock', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'checkStock'])->name('work-orders.parts.check-stock');
     
     // Work Order Status Management
+    Route::post('/work-orders/{work_order}/start', [WorkOrderController::class, 'startWork'])->name('work-orders.start');
     Route::post('/work-orders/{work_order}/hold', [WorkOrderController::class, 'putOnHold'])->name('work-orders.hold');
     Route::post('/work-orders/{work_order}/resume', [WorkOrderController::class, 'resume'])->name('work-orders.resume');
     Route::post('/work-orders/{work_order}/cancel', [WorkOrderController::class, 'cancel'])->name('work-orders.cancel');

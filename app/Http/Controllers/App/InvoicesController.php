@@ -33,7 +33,8 @@ class InvoicesController extends Controller
 
         $invoice->load([
             'customer',
-            'workOrder.vehicle',
+            'workOrder.vehicle.make',
+            'workOrder.vehicle.model',
             'workOrder.items',
             'workOrder.parts',
             'lines',
@@ -59,7 +60,7 @@ class InvoicesController extends Controller
         }
 
         // Check work order status
-        if (!in_array($workOrder->status, ['completed', 'delivered'])) {
+        if (!in_array($workOrder->status, ['completed', 'delivered', 'done'])) {
             return back()->with('error', __('invoices.work_order_not_completed'));
         }
 
@@ -93,7 +94,8 @@ class InvoicesController extends Controller
 
         $invoice->load([
             'customer',
-            'workOrder.vehicle',
+            'workOrder.vehicle.make',
+            'workOrder.vehicle.model',
             'lines',
             'center',
             'tenant.taxSettings',

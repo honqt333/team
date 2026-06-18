@@ -42,7 +42,7 @@ class WorkOrderInventoryTest extends TestCase
         $center = Center::factory()->create(['tenant_id' => $tenant->id]);
         
         $this->user = User::factory()->create(['tenant_id' => $tenant->id, 'current_center_id' => $center->id]);
-        $this->warehouse = Warehouse::factory()->create(['center_id' => $center->id, 'is_default' => true]);
+        $this->warehouse = Warehouse::getOrCreateDefault($center->id);
         $this->part = Part::factory()->create(['tenant_id' => $tenant->id, 'sku' => 'TEST-001']);
         
         // Create work order
