@@ -615,25 +615,31 @@ class WorkOrder extends Model
     /**
      * Scope to filter work orders that are ready for exit (all items completed but not yet done/closed).
      */
-    public function scopeReadyForExit($query): void
+    public function scopeReadyForExit($query)
     {
         $query->whereIn('status', ['open', 'in_progress', 'on_hold', 'ready_for_qc'])
+            // Must have at least one item belonging to this work order
             ->whereExists(function ($q) {
-                $q->select(DB::raw(1))
+                $q->select(\Illuminate\Support\Facades\DB::raw(1))
                     ->from('work_order_items')
-                    ->whereColumn('work_order_id', 'work_orders.id');
+                    ->whereColumn('work_order_items.work_order_id', 'work_orders.id')
+                    ->whereColumn('work_order_items.tenant_id', 'work_orders.tenant_id');
             })
+            // Must have at least one completed item
             ->whereExists(function ($q) {
-                $q->select(DB::raw(1))
+                $q->select(\Illuminate\Support\Facades\DB::raw(1))
                     ->from('work_order_items')
-                    ->whereColumn('work_order_id', 'work_orders.id')
-                    ->where('status', 'completed');
+                    ->whereColumn('work_order_items.work_order_id', 'work_orders.id')
+                    ->whereColumn('work_order_items.tenant_id', 'work_orders.tenant_id')
+                    ->where('work_order_items.status', 'completed');
             })
+            // Must NOT have any item that is not completed or cancelled
             ->whereNotExists(function ($q) {
-                $q->select(DB::raw(1))
+                $q->select(\Illuminate\Support\Facades\DB::raw(1))
                     ->from('work_order_items')
-                    ->whereColumn('work_order_id', 'work_orders.id')
-                    ->whereNotIn('status', ['completed', 'cancelled']);
+                    ->whereColumn('work_order_items.work_order_id', 'work_orders.id')
+                    ->whereColumn('work_order_items.tenant_id', 'work_orders.tenant_id')
+                    ->whereNotIn('work_order_items.status', ['completed', 'cancelled']);
             });
     }
 

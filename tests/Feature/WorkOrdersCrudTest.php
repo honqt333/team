@@ -735,16 +735,25 @@ class WorkOrdersCrudTest extends TestCase
             'crm.work_orders.update',
         ]);
 
-        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+        [$customer, $vehicleA] = $this->createCustomerAndVehicle($user);
+
+        // Create a second vehicle for the same customer
+        $vehicleB = \App\Models\Vehicle::create([
+            'tenant_id'    => $customer->tenant_id,
+            'center_id'    => $customer->center_id,
+            'customer_id'  => $customer->id,
+            'plate_number' => 'XYZ 9999',
+        ]);
 
         // 1. Work Order A: Completed services, exit pending
         $responseA = $this->actingAs($user)->postJson('/app/work-orders', [
             'customer_id' => $customer->id,
-            'vehicle_id' => $vehicle->id,
+            'vehicle_id' => $vehicleA->id,
             'items' => [
                 ['title' => 'Service A', 'qty' => 1, 'unit_price' => 100],
             ],
         ]);
+        $responseA->assertSuccessful();
         $workOrderA = WorkOrder::withoutGlobalScopes()->find($responseA->json('id'));
         $workOrderA->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
         \App\Models\WorkOrderItem::withoutGlobalScopes()
@@ -752,28 +761,27 @@ class WorkOrdersCrudTest extends TestCase
             ->first()
             ->update(['status' => \App\Models\WorkOrderItem::STATUS_COMPLETED]);
 
-        // 2. Work Order B: In progress service, not completed
+        // 2. Work Order B: In progress service, not completed (different vehicle)
         $responseB = $this->actingAs($user)->postJson('/app/work-orders', [
             'customer_id' => $customer->id,
-            'vehicle_id' => $vehicle->id,
+            'vehicle_id' => $vehicleB->id,
             'items' => [
                 ['title' => 'Service B', 'qty' => 1, 'unit_price' => 150],
             ],
         ]);
+        $responseB->assertSuccessful();
         $workOrderB = WorkOrder::withoutGlobalScopes()->find($responseB->json('id'));
         $workOrderB->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
 
-        // Request work orders with status=open and sub_filter=completed
-        $indexResponse = $this->actingAs($user)->get("/app/work-orders?status=open&sub_filter=completed");
+        // Request work orders with status=open and sub_filter=completed via JSON API
+        $indexResponse = $this->actingAs($user)->getJson("/app/api/work-orders-index?status=open&sub_filter=completed");
         $indexResponse->assertStatus(200);
-        
-        $workOrders = $indexResponse->viewData('workOrders');
-        $this->assertNotNull($workOrders);
-        
-        $ids = collect($workOrders->items())->pluck('id')->all();
+
+        $ids = collect($indexResponse->json('data'))->pluck('id')->all();
         $this->assertContains($workOrderA->id, $ids);
         $this->assertNotContains($workOrderB->id, $ids);
     }
+
 
     public function test_cannot_start_work_on_work_order_without_services(): void
     {
