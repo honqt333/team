@@ -1552,17 +1552,29 @@ class WorkOrderController
             'notes' => 'nullable|string|max:1000',
         ]);
 
+        // If the WO already has an invoice, link this payment to it as well
+        // so the running totals stay in sync on both sides. Without this,
+        // paying from the WO screen leaves the invoice total_paid stale and
+        // the next page load shows mismatched balances.
+        $linkedInvoiceId = $workOrder->invoice?->id;
+
         $workOrder->payments()->create([
-            'tenant_id' => $workOrder->tenant_id,
-            'center_id' => $workOrder->center_id,
-            'type' => $validated['type'],
+            'tenant_id'      => $workOrder->tenant_id,
+            'center_id'      => $workOrder->center_id,
+            'invoice_id'     => $linkedInvoiceId,
+            'type'           => $validated['type'],
             'payment_method' => $validated['payment_method'],
-            'amount' => $validated['amount'],
-            'payment_date' => $validated['payment_date'],
-            'reference' => $validated['reference'] ?? null,
-            'notes' => $validated['notes'] ?? null,
-            'received_by' => auth()->id(),
+            'amount'         => $validated['amount'],
+            'payment_date'   => $validated['payment_date'],
+            'reference'      => $validated['reference'] ?? null,
+            'notes'          => $validated['notes'] ?? null,
+            'received_by'    => auth()->id(),
         ]);
+
+        // Recalculate the invoice payment status if the WO is invoiced.
+        if ($linkedInvoiceId) {
+            $workOrder->invoice->updatePaymentStatus();
+        }
 
         $workOrder->logActivity('payment_added', __('work_orders.activities.actions.payment_added', ['amount' => $validated['amount']]));
 

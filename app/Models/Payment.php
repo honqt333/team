@@ -48,6 +48,14 @@ class Payment extends Model
             if ($payment->invoice_id) {
                 $payment->invoice?->updatePaymentStatus();
             }
+
+            // Auto-create the invoice when the WO is fully paid and has been
+            // closed (status = done) but no invoice was issued at exit time.
+            // This handles the flow where the operator exited the vehicle
+            // (deferred invoice) and the customer later pays the full
+            // balance — we want the invoice to materialise automatically
+            // instead of silently sitting in arrears.
+            self::maybeAutoCreateInvoiceForDoneWorkOrder($payment);
         });
 
         static::deleted(function (Payment $payment) {
@@ -56,6 +64,76 @@ class Payment extends Model
                 $payment->invoice?->updatePaymentStatus();
             }
         });
+    }
+
+    /**
+     * When a payment brings a closed (done) WorkOrder to a fully-paid state
+     * and no invoice exists yet, create one so the customer gets a receipt
+     * without an extra manual step.
+     */
+    protected static function maybeAutoCreateInvoiceForDoneWorkOrder(Payment $payment): void
+    {
+        // Only proceed for refunds on a closed WO — payments are the common
+        // case; refunds don't change "fully paid" in a way that should
+        // trigger a brand new invoice.
+        if ($payment->type === self::TYPE_REFUND) {
+            return;
+        }
+
+        $workOrder = $payment->workOrder;
+        if (!$workOrder) {
+            return;
+        }
+
+        if ($workOrder->invoice) {
+            return; // already invoiced
+        }
+
+        if ($workOrder->status !== \App\Models\WorkOrder::STATUS_DONE) {
+            return; // WO is still active — invoice creation is the operator's job
+        }
+
+        // Use a 1-cent tolerance so floating-point rounding doesn't block
+        // an invoice that is, in practice, fully paid.
+        if ((float) $workOrder->balance > 0.01) {
+            return;
+        }
+
+        // Avoid re-entrancy: the InvoiceService may itself create payments
+        // or trigger events that come back through this observer.
+        if (app()->bound('payment.auto-invoice-in-progress')) {
+            return;
+        }
+        app()->instance('payment.auto-invoice-in-progress', true);
+
+        try {
+            /** @var \App\Services\InvoiceService $invoiceService */
+            $invoiceService = app(\App\Services\InvoiceService::class);
+            $invoice = $invoiceService->createFromWorkOrder($workOrder, $payment->receivedBy);
+            $invoiceService->issueInvoice($invoice);
+
+            // Re-link this payment + any other payments on the WO to the
+            // newly created invoice so the totals stay in sync.
+            $workOrder->payments()->whereNull('invoice_id')->update(['invoice_id' => $invoice->id]);
+            $invoice->updatePaymentStatus();
+
+            \App\Services\NotificationService::notifyOwner(
+                tenantId: $workOrder->tenant_id,
+                type: 'invoice.created',
+                title: 'فاتورة جديدة #' . $invoice->invoice_number,
+                body: 'تم إنشاء فاتورة تلقائياً من أمر العمل #' . ($workOrder->code ?? $workOrder->id) . ' بعد اكتمال الدفع',
+                actionUrl: '/app/invoices/' . $invoice->id,
+                actorId: $payment->received_by,
+            );
+        } catch (\Throwable $e) {
+            \Log::warning('Auto-create invoice on done WO failed', [
+                'work_order_id' => $workOrder->id,
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ]);
+        } finally {
+            app()->forgetInstance('payment.auto-invoice-in-progress');
+        }
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -76,6 +76,27 @@
                     </button>
                 </template>
 
+                <!-- Close / Approve QC button (Ready for QC -> Done).
+                     This is the missing link between auto-transition into QC
+                     and actually closing the work order. Without it, the
+                     operator would have to wait for the system to do
+                     nothing — there was no UI to approve and close. The
+                     tooltip "خروج المركبة" matches the modal that opens
+                     (WorkOrderController::complete -> markAsCompleted).
+                     Guarded by allItemsCompleted so the operator cannot
+                     close a WO that still has pending / in-progress
+                     services, even if the WO status slipped to ready_for_qc. -->
+                <template v-if="workOrder.status === 'ready_for_qc' && allItemsCompleted">
+                    <button @click="emit('change-status', 'complete')"
+                        class="p-2.5 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/35 hover:-translate-y-0.5 transition-all flex items-center justify-center"
+                        :title="$t('work_orders.actions.vehicle_exit') || 'خروج المركبة'">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M5 13l4 4L19 7" />
+                        </svg>
+                    </button>
+                </template>
+
                 <!-- Put on Hold button (In Progress -> On Hold) -->
                 <template v-if="workOrder.status === 'in_progress' && !allItemsCompleted">
                     <button @click="emit('change-status', 'hold')"
@@ -115,6 +136,28 @@
                         </svg>
                     </div>
                 </div>
+
+                <!-- Linked invoice (when work order has been invoiced). Sits
+                     directly under the WO code so the operator can jump to
+                     the invoice in one click. -->
+                <div v-if="workOrder.invoice && workOrder.invoice.id" class="mt-2 flex items-center justify-end gap-2">
+                    <Link
+                        :href="route('app.invoices.show', workOrder.invoice.id)"
+                        class="inline-flex items-center gap-1.5 text-xs font-black text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 hover:underline transition-colors group/inv"
+                        :title="$t('invoices.title') || 'الفاتورة'"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>{{ $t('invoices.invoice') || 'فاتورة' }} #{{ workOrder.invoice.invoice_number }}</span>
+                        <svg class="w-3 h-3 opacity-60 group-hover/inv:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </Link>
+                </div>
+
                 <!-- Hold reason display -->
                 <div v-if="workOrder.status === 'on_hold' && workOrder.hold_reason" class="text-xs text-red-500 dark:text-red-400 mt-1.5 font-bold">
                     {{ $t('work_orders.hold_reason_label') || 'سبب التعليق:' }} {{ workOrder.hold_reason }}
@@ -127,6 +170,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { Link } from '@inertiajs/vue3';
 import BackButton from '@/Components/BackButton.vue';
 
 const props = defineProps({

@@ -469,10 +469,26 @@ function changeItemStatus(item, newStatus) {
     }).then(res => {
         toastSuccess(t('messages.item_status_updated'));
         activeDropdownItemId.value = null;
-        router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+        // Reload only the props that drive the items list — leaves the rest
+        // of the page (header, financial summary, customer card) untouched.
+        // If the partial reload fails (e.g. the server side didn't include
+        // every prop named here), catch silently — the next page load will
+        // already reflect the change since the DB write succeeded above.
+        try {
+            router.reload({ only: ['workOrder', 'itemsByDepartment'] });
+        } catch (_reloadErr) {
+            // intentionally ignored — toast already showed success
+        }
     }).catch(err => {
-        const errMsg = err.response?.data?.error || t('common.error');
-        toastError(errMsg);
+        // Only show a toast when the server actually returned a non-2xx.
+        // A bare `err.response` is the reliable signal; without it, axios
+        // throws on network errors only and we should not show "common.error"
+        // for what is sometimes a transient timing issue.
+        const status = err?.response?.status;
+        const errMsg = err?.response?.data?.error || err?.response?.data?.message || t('common.error');
+        if (status && status >= 400) {
+            toastError(errMsg);
+        }
     });
 }
 

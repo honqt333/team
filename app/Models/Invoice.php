@@ -131,16 +131,30 @@ class Invoice extends Model
     // ─────────────────────────────────────────────────────────────
 
     /**
-     * Recalculate payment status based on payments
+     * Recalculate payment status based on payments.
+     *
+     * Refunds are subtracted from the running total so `total_paid` and `balance`
+     * stay consistent with what the WorkOrder side already computes
+     * (see App\Models\WorkOrder::getTotalPaidAttribute).
      */
     public function updatePaymentStatus(): void
     {
-        $totalPaid = $this->payments()->sum('amount');
+        // Mirror WorkOrder::getTotalPaidAttribute — payments add, refunds subtract.
+        // type values come from Payment::TYPES: 'payment' / 'refund' (lowercase).
+        $totalPaid = (float) $this->payments()
+            ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE amount END) as paid')
+            ->value('paid');
+
         $this->total_paid = $totalPaid;
+
+        // Use a 1-cent tolerance so floating-point rounding (e.g. 1000 vs
+        // 1000.01 after VAT line aggregation) does not strand an invoice in
+        // "partial" forever even though the customer has paid every riyal.
+        $totalIncl = (float) $this->total_incl_tax;
 
         if ($totalPaid <= 0) {
             $this->payment_status = 'unpaid';
-        } elseif ($totalPaid >= $this->total_incl_tax) {
+        } elseif ($totalPaid >= $totalIncl - 0.01) {
             $this->payment_status = 'paid';
         } else {
             $this->payment_status = 'partial';

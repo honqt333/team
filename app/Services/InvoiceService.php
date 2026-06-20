@@ -23,6 +23,19 @@ class InvoiceService
     public function createFromWorkOrder(WorkOrder $workOrder, $user): Invoice
     {
         return DB::transaction(function () use ($workOrder, $user) {
+            // Re-fetch items + parts directly to avoid stale/empty relations
+            // (the caller's $workOrder may not have eager-loaded them).
+            $activeItems = \App\Models\WorkOrderItem::where('work_order_id', $workOrder->id)
+                ->where('status', '!=', \App\Models\WorkOrderItem::STATUS_CANCELLED)
+                ->get();
+            $activeParts = \App\Models\WorkOrderItemPart::where('work_order_id', $workOrder->id)
+                ->whereNotIn('status', [
+                    \App\Models\WorkOrderItemPart::STATUS_CANCELLED,
+                    \App\Models\WorkOrderItemPart::STATUS_REVERSED,
+                ])
+                ->get();
+            $activeItemIds = $activeItems->pluck('id')->all();
+
             $customer = $workOrder->customer;
             $customerAddress = null;
             if ($customer) {
@@ -67,7 +80,6 @@ class InvoiceService
             ]);
 
             // 2. Convert WO Items (Services) to Invoice Lines
-            $activeItems = $workOrder->items->where('status', '!=', \App\Models\WorkOrderItem::STATUS_CANCELLED);
             foreach ($activeItems as $item) {
                 $description = $item->title ?? $item->service->name;
                 
@@ -94,42 +106,84 @@ class InvoiceService
                     $description .= " - {$label} {$item->warranty_value_snapshot} {$unitLabel}";
                 }
 
+                // Compute line totals locally so we don't depend on stale
+                // WorkOrderItem.line_total_excl_tax / line_total_incl_tax columns
+                // (those have been observed as 0 on the WO side, which produced
+                // empty "amount" cells in the invoice cost box).
+                $qty          = (float) $item->qty;
+                $unitPrice    = (float) $item->unit_price;
+                $discountAmt  = (float) ($item->discount_amount ?? 0);
+                $taxRate      = (float) ($item->tax_rate_snapshot ?? 0);
+                $isInclusive  = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
+
+                $net = max(0, ($qty * $unitPrice) - $discountAmt);
+                if ($isInclusive) {
+                    $lineIncl = round($net, 2);
+                    $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
+                    $taxAmt   = round($lineIncl - $lineExcl, 2);
+                } else {
+                    $lineExcl = round($net, 2);
+                    $taxAmt   = round($lineExcl * ($taxRate / 100), 2);
+                    $lineIncl = round($lineExcl + $taxAmt, 2);
+                }
+
                 $invoice->lines()->create([
                     'is_part' => false,
                     'part_id' => null,
                     'description' => $description,
-                    'qty' => $item->qty,
-                    'unit_price' => $item->unit_price,
+                    'qty' => $qty,
+                    'unit_price' => $unitPrice,
+                    'discount_type' => $item->discount_type,
+                    'discount_value' => $item->discount_value,
+                    'discount_amount' => $discountAmt,
                     'is_taxable' => $item->is_taxable,
                     'tax_category_code' => $item->tax_category_code,
                     'tax_rate_snapshot' => $item->tax_rate_snapshot,
-                    'tax_amount' => $item->tax_amount,
-                    'line_total_excl_tax' => $item->line_total_excl_tax ?? $item->line_total,
-                    'line_total_incl_tax' => $item->line_total_incl_tax ?? $item->line_total,
+                    'tax_amount' => $taxAmt,
+                    'line_total_excl_tax' => $lineExcl,
+                    'line_total_incl_tax' => $lineIncl,
                 ]);
             }
 
             // 3. Convert WO Parts to Invoice Lines
-            $activeItemIds = $activeItems->pluck('id')->all();
-            foreach ($workOrder->parts as $part) {
-                if (in_array($part->status, [\App\Models\WorkOrderItemPart::STATUS_CANCELLED, \App\Models\WorkOrderItemPart::STATUS_REVERSED])) {
-                    continue;
-                }
+            foreach ($activeParts as $part) {
                 if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
                     continue;
                 }
+
+                // Same defensive recompute as services — don't trust WO part totals.
+                $qty         = (float) $part->qty;
+                $unitPrice   = (float) $part->unit_price;
+                $discountAmt = (float) ($part->discount ?? 0);
+                $taxRate     = (float) ($workOrder->tax_rate_snapshot ?? 15.00);
+                $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
+
+                $net = max(0, ($qty * $unitPrice) - $discountAmt);
+                if ($isInclusive) {
+                    $lineIncl = round($net, 2);
+                    $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
+                    $taxAmt   = round($lineIncl - $lineExcl, 2);
+                } else {
+                    $lineExcl = round($net, 2);
+                    $taxAmt   = round($lineExcl * ($taxRate / 100), 2);
+                    $lineIncl = round($lineExcl + $taxAmt, 2);
+                }
+
                 $invoice->lines()->create([
                     'is_part' => true,
                     'part_id' => $part->part_id,
                     'description' => $part->name,
-                    'qty' => $part->qty,
-                    'unit_price' => $part->unit_price,
+                    'qty' => $qty,
+                    'unit_price' => $unitPrice,
+                    'discount_type' => null,
+                    'discount_value' => null,
+                    'discount_amount' => $discountAmt,
                     'is_taxable' => $workOrder->tax_enabled_snapshot,
                     'tax_category_code' => null,
                     'tax_rate_snapshot' => $workOrder->tax_rate_snapshot ?? 15.00,
-                    'tax_amount' => $part->tax_amount,
-                    'line_total_excl_tax' => $part->total,
-                    'line_total_incl_tax' => $part->grand_total,
+                    'tax_amount' => $taxAmt,
+                    'line_total_excl_tax' => $lineExcl,
+                    'line_total_incl_tax' => $lineIncl,
                 ]);
             }
 

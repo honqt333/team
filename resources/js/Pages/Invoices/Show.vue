@@ -670,6 +670,15 @@ const getLineDiscount = (line, exclusive = true) => {
     const rate = Number(line.tax_rate_snapshot || 0) / 100;
     const isInclusive = props.invoice.pricing_mode_snapshot === 'inclusive';
 
+    // Prefer the stored discount_amount (carried over from WorkOrderItem on
+    // conversion). The stored value is always the user-entered discount
+    // amount, which sits on top of the unit price AS-IS regardless of the
+    // pricing mode — i.e. it is the same number in inclusive or exclusive
+    // displays. So we never divide it by (1+rate) here.
+    if (line.discount_amount !== undefined && line.discount_amount !== null && Number(line.discount_amount) > 0) {
+        return Number(line.discount_amount);
+    }
+
     if (isInclusive) {
         const inclusiveDiscount = Math.max(0, (qty * unitPrice) - Number(line.line_total_incl_tax || 0));
         return exclusive ? (inclusiveDiscount / (1 + rate)) : inclusiveDiscount;

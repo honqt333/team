@@ -509,21 +509,29 @@ class WorkOrder extends Model
     public static function generateCode(int $tenantId, int $centerId): string
     {
         return DB::transaction(function () use ($tenantId, $centerId) {
-            // Lock the table row to prevent race conditions
-            $lastOrder = static::withoutGlobalScopes()
+            // Find the highest numeric suffix currently in use for this tenant
+            // + center. orderByDesc('id')->first() is unsafe because the
+            // id and the code's numeric tail don't always agree (manually
+            // seeded fixtures, test rows, legacy data, etc.). Pull the max
+            // number from all matching codes in one pass instead.
+            $maxNumber = 0;
+            $rows = static::withoutGlobalScopes()
                 ->where('tenant_id', $tenantId)
                 ->where('center_id', $centerId)
+                ->where('code', 'like', 'WO-%')
                 ->lockForUpdate()
-                ->orderByDesc('id')
-                ->first();
+                ->pluck('code');
 
-            if ($lastOrder && preg_match('/WO-(\d+)/', $lastOrder->code, $matches)) {
-                $nextNumber = (int)$matches[1] + 1;
-            } else {
-                $nextNumber = 1;
+            foreach ($rows as $code) {
+                if (preg_match('/WO-(\d+)/', (string) $code, $matches)) {
+                    $n = (int) $matches[1];
+                    if ($n > $maxNumber) {
+                        $maxNumber = $n;
+                    }
+                }
             }
 
-            return 'WO-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            return 'WO-' . str_pad($maxNumber + 1, 6, '0', STR_PAD_LEFT);
         });
     }
 
