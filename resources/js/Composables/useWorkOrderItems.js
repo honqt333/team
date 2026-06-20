@@ -12,6 +12,9 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
     const { success } = useToast();
     const { confirm } = useConfirm();
 
+    const getWorkOrder = () => typeof workOrder === 'function' ? workOrder() : workOrder;
+    const getItemsByDepartment = () => typeof itemsByDepartment === 'function' ? itemsByDepartment() : itemsByDepartment;
+
     // ─── Local state ─────────────────────────────────────────────────────────
     const showDeptMenu = ref(false);
     const expandedDepartments = ref([]);
@@ -26,22 +29,22 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
         const deptIds = new Set();
 
         // Add departments that have items
-        Object.keys(itemsByDepartment).forEach(id => {
+        Object.keys(getItemsByDepartment()).forEach(id => {
             if (id !== UNASSIGNED_DEPT_KEY && id !== PACKAGES_DEPT_KEY) {
                 deptIds.add(parseInt(id));
             }
         });
 
         // Add work order's linked departments
-        workOrder.departments?.forEach(dept => deptIds.add(dept.id));
+        getWorkOrder().departments?.forEach(dept => deptIds.add(dept.id));
 
         // Get database departments matching active list
         const list = departments.filter(d => deptIds.has(d.id));
 
         // Virtual packages section — show if it has package items or the flag is active
-        const packageItems = itemsByDepartment[PACKAGES_DEPT_KEY];
+        const packageItems = getItemsByDepartment()[PACKAGES_DEPT_KEY];
         const hasPackageItems = packageItems && packageItems.length > 0;
-        const showPackagesSection = workOrder.show_packages_section;
+        const showPackagesSection = getWorkOrder().show_packages_section;
 
         if (hasPackageItems || showPackagesSection) {
             list.push({
@@ -78,7 +81,7 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
     function getDepartmentItems(deptId) {
-        return itemsByDepartment[deptId] || [];
+        return getItemsByDepartment()[deptId] || [];
     }
 
     function toggleDepartment(deptId) {
@@ -93,7 +96,7 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
     // ─── Actions ──────────────────────────────────────────────────────────────
     function addDepartment(deptId) {
         showDeptMenu.value = false;
-        router.post(route('work-orders.departments.store', workOrder.id), {
+        router.post(route('work-orders.departments.store', getWorkOrder().id), {
             department_id: deptId,
         }, {
             onSuccess: () => {
@@ -116,7 +119,7 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
 
         if (confirmed) {
             router.delete(
-                route('work-orders.departments.destroy', { work_order: workOrder.id, department_id: deptId }),
+                route('work-orders.departments.destroy', { work_order: getWorkOrder().id, department_id: deptId }),
                 { onSuccess: () => success(t('common.deleted_success')) }
             );
         }

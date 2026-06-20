@@ -9,10 +9,12 @@ export function useWorkOrderStatus({ workOrder, workOrderBalance }) {
     const { success, error: errorToast } = useToast();
     const { confirm } = useConfirm();
 
+    const getWorkOrder = () => typeof workOrder === 'function' ? workOrder() : workOrder;
+
     // ─── Read-only flag ───────────────────────────────────────────────────────
     const isReadOnly = computed(() => {
         const closedStatuses = ['done', 'cancelled', 'closed', 'on_hold'];
-        return closedStatuses.includes(workOrder.status);
+        return closedStatuses.includes(getWorkOrder().status);
     });
 
     // ─── Vehicle Exit modal ───────────────────────────────────────────────────
@@ -34,7 +36,7 @@ export function useWorkOrderStatus({ workOrder, workOrderBalance }) {
         if (!exitDate.value) return;
         if (isDeferred.value && !dueDate.value) return;
         showExitModal.value = false;
-        router.post(route('work-orders.complete', workOrder.id), {
+        router.post(route('work-orders.complete', getWorkOrder().id), {
             exit_date: exitDate.value,
             notes: exitNotes.value,
             is_deferred: isDeferred.value,
@@ -63,7 +65,7 @@ export function useWorkOrderStatus({ workOrder, workOrderBalance }) {
     function confirmHold() {
         if (!holdReason.value.trim()) return;
         showHoldModal.value = false;
-        router.post(route('work-orders.hold', workOrder.id), {
+        router.post(route('work-orders.hold', getWorkOrder().id), {
             reason: holdReason.value,
         }, {
             onSuccess: () => {
@@ -122,7 +124,7 @@ export function useWorkOrderStatus({ workOrder, workOrderBalance }) {
         });
 
         if (confirmed) {
-            router.post(route(config.routeName, workOrder.id), {}, {
+            router.post(route(config.routeName, getWorkOrder().id), {}, {
                 onSuccess: () => success(t('common.saved_success')),
                 onError: (err) => {
                     const msg = err.message || Object.values(err)[0] || t('common.error');

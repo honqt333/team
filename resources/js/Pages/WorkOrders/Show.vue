@@ -528,19 +528,19 @@ const workOrderBalance = computed(() => workOrderTotal.value - workOrderTotalPai
 
 // ─── Composable layer ──────────────────────────────────────────────────────────
 const items = useWorkOrderItems({
-    workOrder: props.workOrder,
-    itemsByDepartment: props.itemsByDepartment,
+    workOrder: () => props.workOrder,
+    itemsByDepartment: () => props.itemsByDepartment,
     departments: props.departments,
     services: props.services,
 });
 
 const status = useWorkOrderStatus({
-    workOrder: props.workOrder,
+    workOrder: () => props.workOrder,
     workOrderBalance,
 });
 
 const notes = useWorkOrderNotes({
-    workOrder: props.workOrder,
+    workOrder: () => props.workOrder,
     services: props.services,
 });
 

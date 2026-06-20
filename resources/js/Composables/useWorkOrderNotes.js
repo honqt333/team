@@ -22,6 +22,8 @@ export function useWorkOrderNotes({ workOrder, services }) {
     const { success } = useToast();
     const { confirm } = useConfirm();
 
+    const getWorkOrder = () => typeof workOrder === 'function' ? workOrder() : workOrder;
+
     // ─── State ────────────────────────────────────────────────────────────────
     const showAddNoteModal = ref(false);
     const newNoteContent = ref('');
@@ -41,7 +43,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
      * WorkOrderNotesTab handles them via the @open-service-notes event.
      */
     const allNotes = computed(() => {
-        const notes = workOrder?.general_notes || workOrder?.generalNotes || [];
+        const notes = getWorkOrder()?.general_notes || getWorkOrder()?.generalNotes || [];
         return notes
             .map(note => {
                 const serviceTitle = note.work_order_item
@@ -72,7 +74,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
 
     const selectedItem = computed(() => {
         if (!selectedItemId.value) return null;
-        return workOrder?.items?.find(i => i.id === selectedItemId.value) || null;
+        return getWorkOrder()?.items?.find(i => i.id === selectedItemId.value) || null;
     });
 
     // ─── Note Actions ────────────────────────────────────────────────────────
@@ -80,7 +82,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
         if (!newNoteContent.value.trim()) return;
 
         isSubmittingNote.value = true;
-        router.post(route('work-orders.notes.store', { work_order: workOrder.id }), {
+        router.post(route('work-orders.notes.store', { work_order: getWorkOrder().id }), {
             content: newNoteContent.value,
         }, {
             preserveScroll: true,
@@ -108,8 +110,8 @@ export function useWorkOrderNotes({ workOrder, services }) {
         if (!confirmed) return;
 
         const deleteRoute = itemId
-            ? route('work-orders.items.notes.destroy', { work_order: workOrder.id, item: itemId, note: noteId })
-            : route('work-orders.notes.destroy', { work_order: workOrder.id, note: noteId });
+            ? route('work-orders.items.notes.destroy', { work_order: getWorkOrder().id, item: itemId, note: noteId })
+            : route('work-orders.notes.destroy', { work_order: getWorkOrder().id, note: noteId });
 
         router.delete(deleteRoute, {
             preserveScroll: true,
@@ -132,7 +134,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
     }
 
     function openServiceNotesModal(itemId) {
-        const item = workOrder.items?.find(i => i.id === itemId);
+        const item = getWorkOrder().items?.find(i => i.id === itemId);
         if (item) {
             selectedItemId.value = itemId;
             serviceModalInitialTab.value = 'notes';
@@ -141,7 +143,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
     }
 
     function openServicePartsModal(itemId) {
-        const item = workOrder.items?.find(i => i.id === itemId);
+        const item = getWorkOrder().items?.find(i => i.id === itemId);
         if (item) {
             selectedItemId.value = itemId;
             serviceModalInitialTab.value = 'parts';
