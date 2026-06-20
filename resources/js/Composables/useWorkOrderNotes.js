@@ -74,7 +74,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
 
     const selectedItem = computed(() => {
         if (!selectedItemId.value) return null;
-        return getWorkOrder()?.items?.find(i => i.id === selectedItemId.value) || null;
+        return getWorkOrder()?.items?.find(i => i.id == selectedItemId.value) || null;
     });
 
     // ─── Note Actions ────────────────────────────────────────────────────────
@@ -133,8 +133,17 @@ export function useWorkOrderNotes({ workOrder, services }) {
         showItemModal.value = true;
     }
 
+    function openServiceModal(itemId) {
+        const item = getWorkOrder().items?.find(i => i.id == itemId);
+        if (item) {
+            selectedItemId.value = itemId;
+            serviceModalInitialTab.value = 'service';
+            showItemModal.value = true;
+        }
+    }
+
     function openServiceNotesModal(itemId) {
-        const item = getWorkOrder().items?.find(i => i.id === itemId);
+        const item = getWorkOrder().items?.find(i => i.id == itemId);
         if (item) {
             selectedItemId.value = itemId;
             serviceModalInitialTab.value = 'notes';
@@ -143,7 +152,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
     }
 
     function openServicePartsModal(itemId) {
-        const item = getWorkOrder().items?.find(i => i.id === itemId);
+        const item = getWorkOrder().items?.find(i => i.id == itemId);
         if (item) {
             selectedItemId.value = itemId;
             serviceModalInitialTab.value = 'parts';
@@ -152,7 +161,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
     }
 
     function openServiceTechniciansModal(itemId) {
-        const item = workOrder.items?.find(i => i.id === itemId);
+        const item = getWorkOrder().items?.find(i => i.id == itemId);
         if (item) {
             selectedItemId.value = itemId;
             serviceModalInitialTab.value = 'technicians';
@@ -208,6 +217,7 @@ export function useWorkOrderNotes({ workOrder, services }) {
         // modal plumbing
         openAddServiceModal,
         openEditServiceModal,
+        openServiceModal,
         openServiceNotesModal,
         openServicePartsModal,
         openServiceTechniciansModal,

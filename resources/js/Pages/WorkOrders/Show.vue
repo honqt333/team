@@ -88,7 +88,7 @@
                             :items-by-department="itemsByDepartment"
                             :technicians="technicians"
                             :read-only="isReadOnly"
-                            @click-service="openServiceTechniciansModal"
+                            @click-service="openServiceModal"
                         />
                     </div>
 
@@ -584,6 +584,7 @@ const {
     handleDeleteNote,
     openAddServiceModal,
     openEditServiceModal,
+    openServiceModal,
     openServiceNotesModal,
     openServicePartsModal,
     openServiceTechniciansModal,
