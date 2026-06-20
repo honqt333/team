@@ -897,10 +897,12 @@ const serviceOptions = computed(() => {
         value: s.id,
         label: getName(s)
     }));
-    list.push({
-        value: 'other',
-        label: t('common.other') || 'أخرى'
-    });
+    if (props.departmentId !== 'packages') {
+        list.push({
+            value: 'other',
+            label: t('common.other') || 'أخرى'
+        });
+    }
     return list;
 });
 

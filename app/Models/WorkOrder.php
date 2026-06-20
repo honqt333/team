@@ -36,6 +36,17 @@ class WorkOrder extends Model
     {
         static::saving(function ($workOrder) {
             $workOrder->recalculateTotals();
+
+            // Auto complete work order if all items are completed and status is not done/cancelled/on_hold
+            if (in_array($workOrder->status, [self::STATUS_OPEN, self::STATUS_IN_PROGRESS]) && $workOrder->allItemsCompleted()) {
+                $workOrder->status = self::STATUS_READY_FOR_QC;
+            }
+        });
+
+        static::saved(function ($workOrder) {
+            if ($workOrder->status === self::STATUS_DONE && $workOrder->wasChanged('status')) {
+                $workOrder->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.done')]));
+            }
         });
     }
 
@@ -568,7 +579,7 @@ class WorkOrder extends Model
      */
     public function canBeEdited(): bool
     {
-        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_OPEN, self::STATUS_IN_PROGRESS]);
+        return in_array($this->status, [self::STATUS_DRAFT, self::STATUS_OPEN, self::STATUS_IN_PROGRESS, self::STATUS_READY_FOR_QC]);
     }
 
     /**

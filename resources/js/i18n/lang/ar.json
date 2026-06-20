@@ -1,5 +1,15 @@
 {
   "common": {
+    "created_success": "تم الإنشاء بنجاح",
+    "updated_success": "تم التحديث بنجاح",
+    "error_loading_data": "خطأ في تحميل البيانات",
+    "error_saving_data": "خطأ في حفظ البيانات",
+    "import_success": "تم الاستيراد بنجاح",
+    "import_failed": "فشل الاستيراد",
+    "no_data_available": "لا توجد بيانات متاحة",
+    "no_results_found": "لم يتم العثور على نتائج",
+    "results": "النتائج",
+    "select_all": "تحديد الكل",
     "address": "العنوان",
     "deleting": "جاري الحذف...",
     "uploading": "جاري الرفع...",
@@ -8,7 +18,8 @@
     "confirm_delete": "تأكيد الحذف",
     "errors": {
       "file_size_exceeded": "الحجم الأقصى للملف هو 1 ميجابايت",
-      "invalid_file_type": "يسمح فقط بملفات pdf, jpg, png"
+      "invalid_file_type": "يسمح فقط بملفات pdf, jpg, png",
+      "file_too_large": "الحجم الأقصى للملف هو 1 ميجابايت"
     },
     "back": "رجوع",
     "building": "مبنى",
@@ -109,8 +120,8 @@
     "saved_success": "تم الحفظ بنجاح",
     "please_complete_required_fields": "يرجى إكمال الحقول الإجبارية وإضافة أصناف للحفظ",
     "vat_settings_updated": "تم تحديث إعدادات الضريبة بنجاح. يرجى تسجيل الدخول مرة أخرى.",
-    "vat": "ضريبة القيمة المضافة",
-    "vat_with_rate": "ضريبة القيمة المضافة ({rate}%)",
+    "vat": "VAT",
+    "vat_with_rate": "VAT ({rate}%)",
     "vat_included": "شامل الضريبة",
     "saving": "جاري الحفظ...",
     "loading_map": "جاري تحميل الخريطة...",
@@ -381,6 +392,7 @@
       "success": "تم استيراد {count} عميل بنجاح",
       "error": "حدث خطأ أثناء الاستيراد",
       "supported_formats": "xlsx, xls, csv",
+      "invalid_format": "صيغة الملف غير صالحة. يرجى استخدام xlsx أو xls أو csv.",
       "errors": "أخطاء الاستيراد",
       "start_import": "بدء الاستيراد",
       "importing": "جاري الاستيراد..."
@@ -1541,7 +1553,7 @@
     "tax_summary": {
       "title": "حساب الضريبة",
       "subtotal": "المجموع قبل الضريبة",
-      "vat": "ضريبة القيمة المضافة",
+      "vat": "VAT",
       "total_with_vat": "الإجمالي شامل الضريبة",
       "inclusive": "شامل الضريبة",
       "exclusive": "غير شامل الضريبة"
@@ -1830,7 +1842,7 @@
         "cost_amount": "مبلغ التكلفة",
         "discount": "الخصم",
         "subtotal": "المجموع الفرعي",
-        "vat": "ضريبة القيمة المضافة VAT",
+        "vat": "VAT",
         "total_amount": "المبلغ الإجمالي",
         "updated_at": "تاريخ التحديث"
       }
@@ -1996,7 +2008,10 @@
       "confirm_send_title": "تأكيد الإرسال",
       "confirm_send": "هل أنت متأكد من إرسال أمر الشراء للمورد؟",
       "confirm_cancel_title": "تأكيد الإلغاء",
-      "confirm_cancel": "هل أنت متأكد من إلغاء أمر الشراء؟"
+      "confirm_cancel": "هل أنت متأكد من إلغاء أمر الشراء؟",
+      "errors": {
+        "full_payment_required": "يجب سداد كامل المبلغ للأوامر النقدية أو تفعيل خيار الدفع الآجل."
+      }
     },
     "items": {
       "add": "إضافة صنف",
@@ -3028,6 +3043,15 @@
     "deleted_success": "تم الحذف بنجاح",
     "saved_success": "تم الحفظ بنجاح",
     "invalid_file_type": "نوع الملف غير صالح: {file}",
-    "file_too_large": "حجم الملف كبير جداً: {file} (الحد الأقصى {size})"
+    "file_too_large": "حجم الملف كبير جداً: {file} (الحد الأقصى {size})",
+    "cannot_cancel_has_technicians_or_parts": "لا يمكن إلغاء كرت العمل لوجود فنيين مسندين أو قطع غيار أو دفعات مسجلة عليه.",
+    "cannot_complete_excess_payments": "لا يمكن إغلاق كرت الصيانة بوجود مبالغ زائدة مدفوعة.",
+    "department_added": "تم إضافة القسم بنجاح",
+    "item_status_updated": "تم تحديث حالة الخدمة بنجاح"
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب",
+    "before_card_entry_date": "لا يمكن أن يكون التاريخ قبل تاريخ دخول كرت الصيانة",
+    "due_date_before_start": "تاريخ الاستحقاق لا يمكن أن يكون قبل تاريخ البداية"
   }
 }

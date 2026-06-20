@@ -16,7 +16,7 @@
                 </button>
 
                 <!-- Payments Button -->
-                <button v-if="!isReadOnly" @click="emit('payments')"
+                <button v-if="showPaymentsBtn" @click="emit('payments')"
                     class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all"
                     :title="$t('payments.title')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -40,59 +40,58 @@
 
             <!-- Status Change Buttons -->
             <div v-if="!['done', 'cancelled'].includes(workOrder.status)" class="flex items-center gap-2">
-                <!-- Start Work button (Open -> In Progress) -->
-                <template v-if="workOrder.status === 'open' && (workOrder.items || []).some(item => item.status === 'pending')">
+                <!-- Start Work button (Open/In Progress -> In Progress) -->
+                <template v-if="['open', 'in_progress'].includes(workOrder.status) && (workOrder.items || []).some(item => item.status === 'pending')">
                     <button @click="emit('change-status', 'start')"
-                        class="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-2xl font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
+                        class="p-2.5 bg-amber-500 text-white rounded-xl shadow-md shadow-amber-500/20 hover:shadow-amber-500/35 hover:-translate-y-0.5 transition-all flex items-center justify-center"
+                        :title="$t('work_orders.actions.start_work')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                         </svg>
-                        <span>{{ $t('work_orders.actions.start_work') }}</span>
                     </button>
                 </template>
 
                 <!-- Resume Work button (On Hold -> Resume) -->
                 <template v-if="workOrder.status === 'on_hold'">
                     <button @click="emit('change-status', 'resume')"
-                        class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5 transition-all">
+                        class="p-2.5 bg-indigo-600 text-white rounded-xl shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/35 hover:-translate-y-0.5 transition-all flex items-center justify-center"
+                        :title="$t('work_orders.actions.resume_work') || 'استئناف العمل'">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18" />
                         </svg>
-                        <span>{{ $t('work_orders.actions.resume_work') || 'استئناف العمل' }}</span>
                     </button>
                 </template>
 
                 <!-- Complete / Exit button (In Progress -> Complete) -->
                 <template v-if="workOrder.status === 'in_progress' && allItemsCompleted">
                     <button @click="emit('change-status', 'complete')"
-                        class="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all">
+                        class="p-2.5 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/35 hover:-translate-y-0.5 transition-all flex items-center justify-center"
+                        :title="$t('work_orders.actions.complete')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M5 13l4 4L19 7" />
                         </svg>
-                        <span>{{ $t('work_orders.actions.complete') }}</span>
                     </button>
                 </template>
 
                 <!-- Put on Hold button (In Progress -> On Hold) -->
                 <template v-if="workOrder.status === 'in_progress' && !allItemsCompleted">
                     <button @click="emit('change-status', 'hold')"
-                        class="flex items-center gap-2 px-5 py-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-2xl font-bold shadow-lg shadow-gray-500/25 hover:shadow-gray-500/40 hover:-translate-y-0.5 transition-all"
+                        class="p-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-xl shadow-md shadow-gray-500/20 hover:shadow-gray-500/35 hover:-translate-y-0.5 transition-all flex items-center justify-center"
                         :title="$t('work_orders.actions.put_on_hold') || 'تعليق الكرت'">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <span>{{ $t('work_orders.actions.put_on_hold') || 'تعليق الكرت' }}</span>
                     </button>
                 </template>
 
                 <!-- Cancel button (Not Done or Cancelled) -->
                 <button v-if="!['done', 'cancelled'].includes(workOrder.status)"
                     @click="emit('change-status', 'cancel')"
-                    class="p-2.5 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 transition-all shadow-sm"
+                    class="p-2.5 rounded-xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all shadow-sm flex items-center justify-center"
                     :title="$t('work_orders.actions.cancel')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -133,11 +132,26 @@ import BackButton from '@/Components/BackButton.vue';
 const props = defineProps({
     workOrder: { type: Object, required: true },
     isReadOnly: { type: Boolean, default: false },
+    balance: { type: Number, default: 0 },
 });
 
 const emit = defineEmits(['print', 'payments', 'edit', 'change-status']);
 
 const { t } = useI18n();
+
+const showPaymentsBtn = computed(() => {
+    if (!props.isReadOnly) {
+        return true;
+    }
+    const status = props.workOrder.status;
+    const allowedStatuses = ['done', 'in_progress', 'ready_for_qc'];
+    if (allowedStatuses.includes(status)) {
+        const hasUnpaid = props.balance > 0;
+        const hasDeferred = !!(props.workOrder.invoice && props.workOrder.invoice.due_date);
+        return hasUnpaid || hasDeferred;
+    }
+    return false;
+});
 
 const allItemsCompleted = computed(() => {
     const items = props.workOrder.items || [];

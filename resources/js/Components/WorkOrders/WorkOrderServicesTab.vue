@@ -301,7 +301,7 @@
                                                     d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                                             </svg>
                                         </button>
-                                        <button v-if="!(item.technicians && item.technicians.length > 0) && !(item.parts && item.parts.length > 0) && !(item.parts_total > 0) && !(workOrder.payments && workOrder.payments.length > 0)"
+                                        <button v-if="item.status === 'pending' && !(item.technicians && item.technicians.length > 0) && !(item.parts && item.parts.length > 0) && !(item.parts_total > 0) && !(workOrder.payments && workOrder.payments.length > 0)"
                                             @click.stop="emit('delete-item', item)"
                                             class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                                             :title="$t('common.delete')">
@@ -481,7 +481,7 @@ function printDepartment(deptId) {
 }
 
 function getItemsForDept(deptId) {
-    const items = props.itemsByDepartment[deptId] || [];
+    const items = (props.itemsByDepartment[deptId] || []).filter(item => item.status !== 'cancelled');
     const statusPriority = {
         'pending': 1,
         'in_progress': 2,

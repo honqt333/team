@@ -88,11 +88,27 @@ export function useWorkOrderStatus({ workOrder, workOrderBalance }) {
             return;
         }
 
+        if (action === 'cancel') {
+            const wo = getWorkOrder();
+            const hasPayments = (wo.payments && wo.payments.length > 0) || parseFloat(wo.total_paid || wo.totalPaid || 0) > 0;
+            const hasItems = wo.items && wo.items.length > 0;
+            const hasParts = wo.parts && wo.parts.length > 0;
+
+            if (hasPayments || hasItems || hasParts) {
+                errorToast(t('messages.cannot_cancel_has_technicians_or_parts'));
+                return;
+            }
+        }
+
         // "complete" opens the vehicle exit modal; confirmExit() fires the POST
         if (action === 'complete') {
+            if (workOrderBalance.value < -0.01) {
+                errorToast(t('messages.cannot_complete_excess_payments'));
+                return;
+            }
             exitDate.value = new Date().toISOString().substring(0, 10);
             exitNotes.value = '';
-            isDeferred.value = workOrderBalance.value > 0;
+            isDeferred.value = false;
             dueDate.value = '';
             showExitModal.value = true;
             return;

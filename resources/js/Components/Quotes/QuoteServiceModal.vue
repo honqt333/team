@@ -294,6 +294,7 @@ const props = defineProps({
     departmentId: [Number, String],
     services: Array,
     inventoryUnits: { type: Array, default: () => [] },
+    initialTab: { type: String, default: 'service' }, // 'service' or 'parts'
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -611,7 +612,7 @@ watch(() => form.service_id, (serviceId) => {
 watch([() => props.show, () => props.line], ([isOpen, line]) => {
     if (isOpen) {
         isPopulating.value = true;
-        activeTab.value = 'service';
+        activeTab.value = props.initialTab || 'service';
         pendingParts.value = []; // Reset pending parts
         
         if (line) {

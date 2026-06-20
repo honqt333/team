@@ -1,5 +1,5 @@
 <template>
-    <BaseModal :show="show" @close="$emit('close')" size="lg" :overflowVisible="true">
+    <BaseModal :show="show" @close="$emit('close')" size="lg" :overflow-visible="true" scroll-entire>
         <!-- Modern Header -->
         <template #title>
             <div class="flex items-center gap-4">

@@ -23,7 +23,7 @@ class QuoteConversionService
     public function convert(Quote $quote, User $user): WorkOrder
     {
         // Load missing relationships to ensure lines and parts collections are up-to-date
-        $quote->loadMissing(['lines', 'parts']);
+        $quote->loadMissing(['lines.service', 'parts']);
 
         // Validate quote can be converted
         if ($quote->isConverted()) {
@@ -60,22 +60,24 @@ class QuoteConversionService
             $lineIdMap = [];
             foreach ($quote->lines as $quoteLine) {
                 $workOrderItem = WorkOrderItem::create([
-                    'work_order_id' => $workOrder->id,
-                    'service_id' => $quoteLine->service_id,
-                    'tenant_id' => $quote->tenant_id,
-                    'center_id' => $quote->center_id,
-                    'title' => $quoteLine->title,
-                    'qty' => $quoteLine->qty,
-                    'unit_price' => $quoteLine->unit_price,
-                    'base_price_snapshot' => $quoteLine->base_price_snapshot,
-                    'min_price_snapshot' => $quoteLine->min_price_snapshot,
-                    'discount_type' => $quoteLine->discount_type,
-                    'discount_value' => $quoteLine->discount_value,
-                    'discount_amount' => $quoteLine->discount_amount,
-                    'final_unit_price' => $quoteLine->final_unit_price,
-                    'line_total' => $quoteLine->line_total,
-                    'price_locked' => true, // Lock prices from quote
-                    'total' => $quoteLine->line_total, // Legacy field
+                    'work_order_id'        => $workOrder->id,
+                    'service_id'           => $quoteLine->service_id,
+                    'department_id'        => $quoteLine->department_id
+                                             ?? $quoteLine->service?->department_id,
+                    'tenant_id'            => $quote->tenant_id,
+                    'center_id'            => $quote->center_id,
+                    'title'                => $quoteLine->title,
+                    'qty'                  => $quoteLine->qty,
+                    'unit_price'           => $quoteLine->unit_price,
+                    'base_price_snapshot'  => $quoteLine->base_price_snapshot,
+                    'min_price_snapshot'   => $quoteLine->min_price_snapshot,
+                    'discount_type'        => $quoteLine->discount_type,
+                    'discount_value'       => $quoteLine->discount_value,
+                    'discount_amount'      => $quoteLine->discount_amount,
+                    'final_unit_price'     => $quoteLine->final_unit_price,
+                    'line_total'           => $quoteLine->line_total,
+                    'price_locked'         => true, // Lock prices from quote
+                    'total'                => $quoteLine->line_total, // Legacy field
                 ]);
                 $lineIdMap[$quoteLine->id] = $workOrderItem->id;
             }

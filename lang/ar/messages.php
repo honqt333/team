@@ -27,6 +27,8 @@ return [
     'cannot_change_item_status' => 'لا يمكن تغيير حالة الخدمة - يوجد فنيين أو قطع غيار مرتبطة',
     'cannot_delete_item_has_parts_or_technicians' => 'لا يمكن إلغاء الخدمة حتى يتم إزالة جميع قطع الغيار والفنيين!',
     'cannot_delete_item_work_order_has_payments' => 'لا يمكن حذف الخدمة لوجود دفعات مسجلة على كرت العمل! يمكنك تغيير حالتها إلى ملغاة بدلاً من ذلك.',
+    'cannot_delete_item_status_changed' => 'لا يمكن حذف الخدمة بعد تغيير حالتها من قيد الانتظار!',
+    'cannot_complete_excess_payments' => 'لا يمكن تسجيل خروج المركبة لوجود مبالغ زائدة مدفوعة لم تسترجع! يرجى رد المبلغ الزائد أولاً.',
     
     // Departments
     'department_added' => 'تمت إضافة القسم بنجاح',

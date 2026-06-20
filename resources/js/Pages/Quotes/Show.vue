@@ -7,9 +7,10 @@
                 <div class="flex flex-wrap items-center gap-3">
                     <BackButton :href="route('app.quotes.index')" />
 
-                    <div class="flex items-center gap-1.5 p-1.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div v-if="quote.lines?.length > 0 || quote.status === 'draft' || quote.status === 'sent'"
+                        class="flex items-center gap-1.5 p-1.5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
                         <!-- Share -->
-                        <Tooltip :text="$t('common.share')">
+                        <Tooltip v-if="quote.lines?.length > 0" :text="$t('common.share')">
                             <button v-if="quote.status !== 'rejected'" @click="shareQuote"
                                 class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -20,7 +21,7 @@
                         </Tooltip>
 
                         <!-- Print -->
-                        <Tooltip :text="$t('common.print')">
+                        <Tooltip v-if="quote.lines?.length > 0" :text="$t('common.print')">
                             <button @click="printQuote"
                                 class="p-2.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -30,7 +31,8 @@
                             </button>
                         </Tooltip>
 
-                        <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                        <div v-if="quote.lines?.length > 0 && (quote.status === 'draft' || quote.status === 'sent')"
+                            class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                         <!-- Edit Quote -->
                         <Tooltip :text="$t('common.edit')">
@@ -339,14 +341,7 @@
                     </svg>
                     {{ $t('quotes.show.add_department') }}
                 </button>
-                <button v-if="activeTab === 'parts' && (quote.status === 'draft' || quote.status === 'sent')" @click="openPartModal()"
-                    class="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-medium">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    {{ $t('quotes.show.add_part') }}
-                </button>
+
             </div>
 
             <!-- Services Tab Content -->
@@ -482,7 +477,8 @@
             <div v-show="activeTab === 'parts'" id="parts-section" class="space-y-4">
                 <PartsDisplay :parts="quote.parts || []" :show-vat="hasTax" storage-key="quotes_parts_view_mode"
                     :read-only="quote.status !== 'draft' && quote.status !== 'sent'"
-                    @edit="openPartModal" @delete="deletePart" @add="openPartModal()" />
+                    @edit="openPartModal" @delete="deletePart" @add="openPartModal()"
+                    @click-service="editLineOnPartsTab" />
             </div>
 
         </div>
@@ -490,6 +486,7 @@
         <!-- Modals -->
         <QuoteServiceModal :show="showServiceModal" :quote="quote" :line="editingLine"
             :department-id="activeDepartmentId" :services="activeDepartmentServices" :inventory-units="inventoryUnits"
+            :initial-tab="serviceModalInitialTab"
             @close="closeServiceModal" @saved="onServiceSaved" />
 
         <QuoteDepartmentModal :show="showDepartmentModal" :quote="quote" :available-departments="departments"
@@ -592,6 +589,7 @@ const editingLine = ref(null);
 const editingPart = ref(null);
 const activeDepartmentId = ref(null);
 const activeTab = ref('services'); // 'services' or 'parts'
+const serviceModalInitialTab = ref('service'); // 'service' or 'parts'
 
 const { success: successToast, error: errorToast } = useToast();
 
@@ -836,6 +834,25 @@ function editLine(line) {
     }
 
     editingLine.value = line;
+    serviceModalInitialTab.value = 'service';
+    showServiceModal.value = true;
+}
+
+// Open the service modal directly on the parts tab (e.g., from clicking service name in parts list)
+function editLineOnPartsTab(part) {
+    // Find the quote line this part belongs to
+    const line = props.quote.lines?.find(l => l.id === part.quote_line_id);
+    if (!line) return;
+
+    const service = props.services.find(s => s.id === line.service_id);
+    if (service?.type === 'package') {
+        activeDepartmentId.value = 'packages';
+    } else {
+        activeDepartmentId.value = service?.department_id;
+    }
+
+    editingLine.value = line;
+    serviceModalInitialTab.value = 'parts';
     showServiceModal.value = true;
 }
 
@@ -843,6 +860,7 @@ function closeServiceModal() {
     showServiceModal.value = false;
     editingLine.value = null;
     activeDepartmentId.value = null;
+    serviceModalInitialTab.value = 'service'; // Reset to default
 }
 
 function onServiceSaved() {

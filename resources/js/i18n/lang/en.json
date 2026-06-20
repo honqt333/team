@@ -1,5 +1,15 @@
 {
   "common": {
+    "created_success": "Created successfully",
+    "updated_success": "Updated successfully",
+    "error_loading_data": "Error loading data",
+    "error_saving_data": "Error saving data",
+    "import_success": "Imported successfully",
+    "import_failed": "Import failed",
+    "no_data_available": "No data available",
+    "no_results_found": "No results found",
+    "results": "Results",
+    "select_all": "Select All",
     "address": "Address",
     "deleting": "Deleting...",
     "uploading": "Uploading...",
@@ -8,7 +18,8 @@
     "confirm_delete": "Confirm deletion",
     "errors": {
       "file_size_exceeded": "Maximum file size is 1 MB.",
-      "invalid_file_type": "Only PDF, JPG, PNG files are allowed."
+      "invalid_file_type": "Only PDF, JPG, PNG files are allowed.",
+      "file_too_large": "Maximum file size is 1 MB."
     },
     "back": "Back",
     "building": "Building",
@@ -1488,6 +1499,7 @@
       "success": "{count} client was successfully imported",
       "error": "An error occurred during import",
       "supported_formats": "Xlsx, xls, csv",
+      "invalid_format": "Invalid file format. Please use xlsx, xls or csv.",
       "errors": "Import errors",
       "start_import": "Start import",
       "importing": "Importing..."
@@ -2066,7 +2078,10 @@
       "confirm_send_title": "Confirm sending",
       "confirm_send": "Are you sure to send the purchase order to the supplier?",
       "confirm_cancel_title": "Confirm cancellation",
-      "confirm_cancel": "Are you sure to cancel the purchase order?"
+      "confirm_cancel": "Are you sure to cancel the purchase order?",
+      "errors": {
+        "full_payment_required": "Full payment is required for Cash orders."
+      }
     },
     "items": {
       "add": "Add Item",
@@ -2976,6 +2991,15 @@
     "deleted_success": "Deleted successfully",
     "saved_success": "Saved successfully",
     "invalid_file_type": "Invalid file type: {file}",
-    "file_too_large": "File is too large: {file} (max {size})"
+    "file_too_large": "File is too large: {file} (max {size})",
+    "cannot_cancel_has_technicians_or_parts": "Cannot cancel work order because it has assigned technicians, spare parts, or payments.",
+    "cannot_complete_excess_payments": "Cannot complete work order with excess payments.",
+    "department_added": "Department added successfully",
+    "item_status_updated": "Service status updated successfully"
+  },
+  "validation": {
+    "required": "This field is required",
+    "before_card_entry_date": "Date cannot be before the work order entry date",
+    "due_date_before_start": "Due date cannot be before the start date"
   }
 }

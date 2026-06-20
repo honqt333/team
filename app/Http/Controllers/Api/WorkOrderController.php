@@ -36,9 +36,18 @@ class WorkOrderController extends Controller
             return response()->json([]);
         }
 
-        $customers = Customer::where(function ($q) use ($query) {
+        $normalizedQuery = $this->normalizeArabic($query);
+        $phoneSuffix = $this->getCleanPhoneSuffix($query);
+
+        $customers = Customer::where(function ($q) use ($query, $normalizedQuery, $phoneSuffix) {
                 $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('phone', 'like', "%{$query}%");
+                  ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(name, 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ة', 'ه') LIKE ?", ["%{$normalizedQuery}%"]);
+                  
+                if ($phoneSuffix !== null) {
+                    $q->orWhere('phone', 'like', "%{$phoneSuffix}%");
+                } else {
+                    $q->orWhere('phone', 'like', "%{$query}%");
+                }
             })
             ->select('id', 'name', 'phone', 'type')
             ->limit(10)
@@ -76,13 +85,30 @@ class WorkOrderController extends Controller
             return response()->json([]);
         }
 
+        $normalizedQuery = $this->normalizeArabic($query);
+        $phoneSuffix = $this->getCleanPhoneSuffix($query);
+        $plateTerms = $this->getPlateSearchTerms($query);
+
         $vehicles = Vehicle::with(['customer', 'make', 'model'])
-            ->where(function ($q) use ($query) {
-                $q->where('plate_number', 'like', "%{$query}%")
-                  ->orWhereHas('customer', function ($customerQuery) use ($query) {
-                      $customerQuery->where('name', 'like', "%{$query}%")
-                                    ->orWhere('phone', 'like', "%{$query}%");
-                  });
+            ->where(function ($q) use ($query, $normalizedQuery, $phoneSuffix, $plateTerms) {
+                // Plate number search (strip spaces/hyphens on DB side and match terms)
+                $q->where(function ($pq) use ($plateTerms) {
+                    foreach ($plateTerms as $term) {
+                        $pq->orWhereRaw("REPLACE(REPLACE(plate_number, ' ', ''), '-', '') LIKE ?", ["%{$term}%"]);
+                    }
+                });
+
+                // Customer search
+                $q->orWhereHas('customer', function ($customerQuery) use ($query, $normalizedQuery, $phoneSuffix) {
+                    $customerQuery->where('name', 'like', "%{$query}%")
+                                  ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(name, 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ة', 'ه') LIKE ?", ["%{$normalizedQuery}%"]);
+                    
+                    if ($phoneSuffix !== null) {
+                        $customerQuery->orWhere('phone', 'like', "%{$phoneSuffix}%");
+                    } else {
+                        $customerQuery->orWhere('phone', 'like', "%{$query}%");
+                    }
+                });
             })
             ->limit(10)
             ->get();
@@ -98,5 +124,72 @@ class WorkOrderController extends Controller
         });
 
         return response()->json($vehicles);
+    }
+
+    // ==================== Helper Methods for Smart Search ====================
+
+    private function normalizeArabic(string $str): string
+    {
+        $str = str_replace(['أ', 'إ', 'آ'], 'ا', $str);
+        $str = str_replace('ة', 'ه', $str);
+        $str = str_replace('ى', 'ي', $str);
+        return trim($str);
+    }
+
+    private function getCleanPhoneSuffix(string $query): ?string
+    {
+        $digits = preg_replace('/\D/', '', $query);
+        if (strlen($digits) >= 5) {
+            $suffix = $digits;
+            if (str_starts_with($suffix, '966')) {
+                $suffix = substr($suffix, 3);
+            } elseif (str_starts_with($suffix, '00966')) {
+                $suffix = substr($suffix, 5);
+            }
+            return ltrim($suffix, '0');
+        }
+        return null;
+    }
+
+    private function getPlateSearchTerms(string $query): array
+    {
+        $cleanQuery = str_replace([' ', '-'], '', $query);
+        if (empty($cleanQuery)) {
+            return [];
+        }
+
+        $terms = [$cleanQuery];
+
+        // Mappings for Saudi letters and digits
+        $plateMapping = [
+            'أ' => 'A', 'ب' => 'B', 'ح' => 'J', 'د' => 'D', 'ر' => 'R',
+            'س' => 'S', 'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G',
+            'ك' => 'K', 'ل' => 'L', 'م' => 'Z', 'ن' => 'N', 'ه' => 'H',
+            'و' => 'U', 'ي' => 'V',
+            
+            'A' => 'أ', 'B' => 'ب', 'J' => 'ح', 'D' => 'د', 'R' => 'ر',
+            'S' => 'س', 'X' => 'ص', 'T' => 'ط', 'E' => 'ع', 'G' => 'ق',
+            'K' => 'ك', 'L' => 'ل', 'Z' => 'م', 'N' => 'ن', 'H' => 'ه',
+            'U' => 'و', 'V' => 'ي',
+            
+            // Hindi digits to English digits
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+        ];
+
+        // Convert string to array of chars
+        $chars = mb_str_split($cleanQuery);
+        $translatedChars = [];
+        foreach ($chars as $char) {
+            $upperChar = mb_strtoupper($char);
+            if (isset($plateMapping[$upperChar])) {
+                $translatedChars[] = $plateMapping[$upperChar];
+            } else {
+                $translatedChars[] = $char;
+            }
+        }
+        $terms[] = implode('', $translatedChars);
+
+        return array_unique($terms);
     }
 }

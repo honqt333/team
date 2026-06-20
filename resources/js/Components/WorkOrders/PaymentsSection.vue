@@ -44,13 +44,13 @@
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400">
-                        <th class="py-3 px-2 text-right font-medium">#</th>
-                        <th class="py-3 px-2 text-right font-medium">{{ $t('payments.form.method') }}</th>
-                        <th class="py-3 px-2 text-right font-medium">{{ $t('payments.form.type') }}</th>
-                        <th class="py-3 px-2 text-right font-medium">{{ $t('payments.form.date') }}</th>
-                        <th class="py-3 px-2 text-right font-medium">{{ $t('payments.form.notes') }}</th>
-                        <th class="py-3 px-2 text-right font-medium">{{ $t('payments.form.amount') }}</th>
-                        <th class="py-3 px-2 text-right font-medium">{{ $t('common.updated_by') }}</th>
+                        <th class="py-3 px-2 text-center font-medium">#</th>
+                        <th class="py-3 px-2 text-center font-medium">{{ $t('payments.form.method') }}</th>
+                        <th class="py-3 px-2 text-center font-medium">{{ $t('payments.form.type') }}</th>
+                        <th class="py-3 px-2 text-center font-medium">{{ $t('payments.form.date') }}</th>
+                        <th class="py-3 px-2 text-center font-medium">{{ $t('payments.form.notes') }}</th>
+                        <th class="py-3 px-2 text-center font-medium">{{ $t('payments.form.amount') }}</th>
+                        <th class="py-3 px-2 text-center font-medium">{{ $t('common.updated_by') }}</th>
                         <th class="py-3 px-2 text-center font-medium">{{ $t('common.actions') }}</th>
                     </tr>
                 </thead>
@@ -60,28 +60,28 @@
                         :key="payment.id"
                         class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                     >
-                        <td class="py-3 px-2 text-gray-500">{{ index + 1 }}</td>
-                        <td class="py-3 px-2">
+                        <td class="py-3 px-2 text-gray-500 text-center">{{ index + 1 }}</td>
+                        <td class="py-3 px-2 text-center">
                             <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getMethodBadgeClass(payment.payment_method)">
                                 {{ $t(`payments.methods.${payment.payment_method}`) }}
                             </span>
                         </td>
-                        <td class="py-3 px-2">
+                        <td class="py-3 px-2 text-center">
                              <span class="px-2 py-1 rounded-full text-xs font-medium" :class="getTypeBadgeClass(payment.type)">
                                 {{ $t(`payments.types.${payment.type || 'payment'}`) }}
                             </span>
                         </td>
-                        <td class="py-3 px-2 text-gray-600 dark:text-gray-300" dir="ltr">
+                        <td class="py-3 px-2 text-gray-600 dark:text-gray-300 text-center" dir="ltr">
                             {{ formatDate(payment.payment_date) }}
                         </td>
-                        <td class="py-3 px-2 text-gray-500 dark:text-gray-400 max-w-xs truncate">
+                        <td class="py-3 px-2 text-gray-500 dark:text-gray-400 max-w-xs truncate text-center">
                             {{ payment.notes || '-' }}
                         </td>
-                        <td class="py-3 px-2 font-bold text-gray-900 dark:text-white" dir="ltr">
+                        <td class="py-3 px-2 font-bold text-gray-900 dark:text-white text-center" dir="ltr">
                             {{ formatPrice(payment.amount) }}
                         </td>
-                        <td class="py-3 px-2">
-                            <div v-if="payment.received_by" class="flex items-center gap-2">
+                        <td class="py-3 px-2 text-center">
+                            <div v-if="payment.received_by" class="flex items-center justify-center gap-2 text-start">
                                 <img 
                                     v-if="payment.received_by?.avatar"
                                     :src="payment.received_by.avatar" 
@@ -124,7 +124,7 @@
 
         <!-- Summary -->
         <div v-if="payments.length > 0" class="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-            <div class="flex justify-end gap-8 text-sm">
+            <div class="flex justify-center gap-8 text-sm">
                 <div>
                     <span class="text-gray-500">{{ $t('work_orders.total') }}:</span>
                     <span class="font-bold text-gray-900 dark:text-white mr-2" dir="ltr">{{ formatPrice(grandTotal) }}</span>

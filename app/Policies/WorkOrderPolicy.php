@@ -48,7 +48,15 @@ class WorkOrderPolicy
 
         // Cannot edit closed/done/cancelled work orders
         if (!$workOrder->canBeEdited()) {
-            return false;
+            // Exception: allow recording payments on completed work order if unpaid or deferred invoice
+            $isPaymentRoute = request()->routeIs('work-orders.payments.*') || request()->routeIs('payments.*');
+            $hasUnpaidOrDeferred = ($workOrder->balance > 0) || ($workOrder->invoice && $workOrder->invoice->due_date !== null);
+            
+            if ($isPaymentRoute && $workOrder->status === WorkOrder::STATUS_DONE && $hasUnpaidOrDeferred) {
+                // Allow payment updates
+            } else {
+                return false;
+            }
         }
 
         // Defense in depth: enforce tenant/center ownership

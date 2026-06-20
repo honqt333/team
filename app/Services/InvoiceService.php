@@ -67,7 +67,8 @@ class InvoiceService
             ]);
 
             // 2. Convert WO Items (Services) to Invoice Lines
-            foreach ($workOrder->items as $item) {
+            $activeItems = $workOrder->items->where('status', '!=', \App\Models\WorkOrderItem::STATUS_CANCELLED);
+            foreach ($activeItems as $item) {
                 $invoice->lines()->create([
                     'is_part' => false,
                     'part_id' => null,
@@ -84,7 +85,14 @@ class InvoiceService
             }
 
             // 3. Convert WO Parts to Invoice Lines
+            $activeItemIds = $activeItems->pluck('id')->all();
             foreach ($workOrder->parts as $part) {
+                if (in_array($part->status, [\App\Models\WorkOrderItemPart::STATUS_CANCELLED, \App\Models\WorkOrderItemPart::STATUS_REVERSED])) {
+                    continue;
+                }
+                if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+                    continue;
+                }
                 $invoice->lines()->create([
                     'is_part' => true,
                     'part_id' => $part->part_id,
@@ -154,6 +162,10 @@ class InvoiceService
     public function getProformaData(WorkOrder $workOrder): array
     {
         $workOrder->load(['customer', 'items.service', 'center', 'vehicle']);
+
+        // Filter out cancelled items
+        $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== \App\Models\WorkOrderItem::STATUS_CANCELLED);
+        $workOrder->setRelation('items', $filteredItems->values());
         
         $tenant = $workOrder->tenant;
         $taxSettings = $tenant->taxSettings;

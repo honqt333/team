@@ -296,7 +296,7 @@ const isPending = (part) => props.pendingCheck ? props.pendingCheck(part) : !par
 
 const getUnitName = (part) => part.unit ? getName(part.unit) : '';
 
-const hasWoItem = (part) => !!(part.work_order_item_id || part.work_order_item || part.workOrderItem);
+const hasWoItem = (part) => !!(part.work_order_item_id || part.work_order_item || part.workOrderItem || part.quote_line_id || part.quote_line);
 
 function clickService(part) {
     emit('click-service', part);

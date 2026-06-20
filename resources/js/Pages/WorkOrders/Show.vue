@@ -5,6 +5,7 @@
             <WorkOrderHeader
                 :work-order="workOrder"
                 :is-read-only="isReadOnly"
+                :balance="workOrderBalance"
                 @print="showPrintModal = true"
                 @payments="showPaymentsListModal = true"
                 @edit="showEditModal = true"
@@ -88,7 +89,7 @@
                             :items-by-department="itemsByDepartment"
                             :technicians="technicians"
                             :read-only="isReadOnly"
-                            @click-service="openServiceModal"
+                            @click-service="openServiceTechniciansModal"
                         />
                     </div>
 
@@ -447,63 +448,79 @@ const totals = computed(() => {
     const taxFactor = 1 + (taxRate / 100);
     const taxEnabled = !!props.workOrder?.tax_enabled_snapshot;
 
+    const activeItemIds = props.workOrder?.items
+        ?.filter(line => line.status !== 'cancelled')
+        .map(line => line.id) || [];
+
     if (props.workOrder?.items && props.workOrder.items.length > 0) {
-        props.workOrder.items.forEach(line => {
-            const price = Number(line.unit_price || 0) * Number(line.qty || 1);
-            const discount = Number(line.discount_amount || 0);
-            let amount = price - discount;
-            let calculatedTax = Number(line.tax_amount || 0);
-            let total = Number(line.line_total || price);
+        props.workOrder.items
+            .filter(line => line.status !== 'cancelled')
+            .forEach(line => {
+                const price = Number(line.unit_price || 0) * Number(line.qty || 1);
+                const discount = Number(line.discount_amount || 0);
+                let amount = price - discount;
+                let calculatedTax = Number(line.tax_amount || 0);
+                let total = Number(line.line_total || price);
 
-            if (taxEnabled) {
-                if (isInclusive) {
-                    amount = (price - discount) / taxFactor;
-                    calculatedTax = (price - discount) - amount;
-                } else if (calculatedTax === 0) {
-                    calculatedTax = amount * (taxRate / 100);
-                    total = amount + calculatedTax;
+                if (taxEnabled) {
+                    if (isInclusive) {
+                        amount = (price - discount) / taxFactor;
+                        calculatedTax = (price - discount) - amount;
+                    } else if (calculatedTax === 0) {
+                        calculatedTax = amount * (taxRate / 100);
+                        total = amount + calculatedTax;
+                    }
                 }
-            }
 
-            if (!line.line_total) {
-                total = isInclusive ? (price - discount) : (amount + calculatedTax);
-            }
+                if (!line.line_total) {
+                    total = isInclusive ? (price - discount) : (amount + calculatedTax);
+                }
 
-            t.services.price += price;
-            t.services.discount += discount;
-            t.services.tax += calculatedTax;
-            t.services.total += total;
-            t.services.amount += amount;
-        });
+                t.services.price += price;
+                t.services.discount += discount;
+                t.services.tax += calculatedTax;
+                t.services.total += total;
+                t.services.amount += amount;
+            });
     }
 
     if (props.workOrder?.parts && props.workOrder.parts.length > 0) {
-        props.workOrder.parts.forEach(part => {
-            const partQty = Number(part.qty || 0);
-            const partUnitPrice = Number(part.unit_price || 0);
-            const partDiscount = Number(part.discount || 0);
-            const partPrice = partQty * partUnitPrice;
-            const partNet = partPrice - partDiscount;
-
-            t.parts.price += partPrice;
-            t.parts.discount += partDiscount;
-
-            let partAmount = partNet;
-            let partTax = 0;
-
-            if (taxEnabled) {
-                if (isInclusive) {
-                    partAmount = partNet / taxFactor;
-                    partTax = partNet - partAmount;
-                } else {
-                    partTax = partNet * (taxRate / 100);
+        props.workOrder.parts
+            .filter(part => {
+                if (['cancelled', 'reversed'].includes(part.status)) {
+                    return false;
                 }
-            }
+                if (part.work_order_item_id !== null && !activeItemIds.includes(part.work_order_item_id)) {
+                    return false;
+                }
+                return true;
+            })
+            .forEach(part => {
+                const partQty = Number(part.qty || 0);
+                const partUnitPrice = Number(part.unit_price || 0);
+                const partDiscount = Number(part.discount || 0);
+                const partPrice = partQty * partUnitPrice;
+                const partNet = partPrice - partDiscount;
 
-            t.parts.amount += partAmount;
-            t.parts.tax += partTax;
-            t.parts.total += partTax + partAmount;
-        });
+                t.parts.price += partPrice;
+                t.parts.discount += partDiscount;
+
+                let partAmount = partNet;
+                let partTax = 0;
+
+                if (taxEnabled) {
+                    if (isInclusive) {
+                        partAmount = partNet / taxFactor;
+                        partTax = partNet - partAmount;
+                    } else {
+                        partTax = partNet * (taxRate / 100);
+                    }
+                }
+
+                t.parts.amount += partAmount;
+                t.parts.tax += partTax;
+                t.parts.total += partTax + partAmount;
+            });
     }
 
     t.grand.price = t.services.price + t.parts.price;

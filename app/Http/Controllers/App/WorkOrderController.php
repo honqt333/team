@@ -343,6 +343,7 @@ class WorkOrderController
             'attachments.user',
             'activities.user',
             'inspections.performedBy',
+            'invoice',
         ]);
 
         // TODO(refactor): the Vue page uses `v-if="activeTab === 'X'"` to
@@ -715,6 +716,11 @@ class WorkOrderController
             return redirect()->back()->with('error', __('messages.cannot_delete_item_work_order_has_payments'));
         }
 
+        // Rule: Cannot delete item if status has changed from pending
+        if ($item->status !== \App\Models\WorkOrderItem::STATUS_PENDING) {
+            return redirect()->back()->with('error', __('messages.cannot_delete_item_status_changed') ?? 'لا يمكن حذف الخدمة بعد تغيير حالتها من قيد الانتظار!');
+        }
+
         // Rule: Cannot delete item if it has parts or technicians
         if ($item->parts()->exists() || $item->technicians()->exists()) {
             return redirect()->back()->with('error', __('messages.cannot_delete_item_has_parts_or_technicians'));
@@ -804,7 +810,7 @@ class WorkOrderController
     {
         $this->authorize('update', $work_order);
 
-        if ($work_order->status !== WorkOrder::STATUS_OPEN) {
+        if ($work_order->status !== WorkOrder::STATUS_OPEN && $work_order->status !== WorkOrder::STATUS_IN_PROGRESS) {
             return redirect()->back()->with('error', __('messages.cannot_start_work') ?? 'لا يمكن بدء العمل على كرت بهذه الحالة');
         }
 
@@ -901,6 +907,10 @@ class WorkOrderController
 
         if (!$work_order->allItemsCompleted()) {
             return redirect()->back()->with('error', __('messages.cannot_complete_items_pending') ?? 'لا يمكن إكمال العمل لوجود خدمات قيد الانتظار أو قيد التنفيذ');
+        }
+
+        if ($work_order->balance < -0.01) {
+            return redirect()->back()->with('error', __('messages.cannot_complete_excess_payments') ?? 'لا يمكن تسجيل خروج المركبة لوجود مبالغ زائدة مدفوعة لم تسترجع! يرجى رد المبلغ الزائد أولاً.');
         }
 
         $exitDate = \Carbon\Carbon::parse($validated['exit_date']);
@@ -1327,6 +1337,10 @@ class WorkOrderController
             'tenant',
         ]);
 
+        // Filter out cancelled items
+        $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== \App\Models\WorkOrderItem::STATUS_CANCELLED);
+        $workOrder->setRelation('items', $filteredItems->values());
+
         $departmentId = request('department_id');
         $printedDepartment = null;
 
@@ -1420,6 +1434,10 @@ class WorkOrderController
             'center',
             'tenant',
         ]);
+
+        // Filter out cancelled items
+        $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== \App\Models\WorkOrderItem::STATUS_CANCELLED);
+        $workOrder->setRelation('items', $filteredItems->values());
 
         // Calculate totals
         $servicesTotal = $workOrder->items->sum(function ($item) {

@@ -27,6 +27,8 @@ return [
     'cannot_change_item_status' => 'Cannot change item status - has technicians or parts',
     'cannot_delete_item_has_parts_or_technicians' => 'Cannot delete service until all spare parts and technicians are removed!',
     'cannot_delete_item_work_order_has_payments' => 'Cannot delete service because there are payments registered on the work order! You can change its status to cancelled instead.',
+    'cannot_delete_item_status_changed' => 'Cannot delete service after its status has changed from pending!',
+    'cannot_complete_excess_payments' => 'Cannot complete vehicle exit because there are excess payments that have not been refunded! Please refund the excess amount first.',
     
     // Departments
     'department_added' => 'Department added successfully',

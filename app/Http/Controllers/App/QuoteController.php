@@ -468,7 +468,7 @@ class QuoteController extends Controller
             'vehicle.model',
             'lines.service.department',
             'parts.part' => fn($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
-            'parts.quoteLine',
+            'parts.quoteLine.service',
             'departments',
             'createdByUser',
             'convertedWorkOrder:id,code',
