@@ -10,7 +10,7 @@
                 <img :src="centerData.logo" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <h2 class="text-sm font-bold text-gray-900 transition-all duration-300" :style="{ color: isSleek ? primaryColor : '#111827' }">{{ centerData.name || 'مركز خدمة برو' }}</h2>
-            <p v-if="centerData.tax_number" class="text-[10px] text-gray-500 mt-0.5">{{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}</p>
+            <p v-if="isTaxEnabled() && centerData.tax_number" class="text-[10px] text-gray-500 mt-0.5">{{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}</p>
             <p class="text-[9px] text-gray-400 mt-0.5">{{ centerData.address }}</p>
         </div>
 
@@ -42,7 +42,7 @@
                 <span>{{ $t('common.address') }}:</span>
                 <span class="text-gray-800 text-right">{{ data.customer.address }}</span>
             </div>
-            <div v-if="data.customer?.tax_number" class="flex justify-between">
+            <div v-if="isTaxEnabled() && data.customer?.tax_number" class="flex justify-between">
                 <span>{{ $t('company_profile.profile.vat_number') }}:</span>
                 <span class="text-gray-900 font-mono">{{ data.customer.tax_number }}</span>
             </div>
@@ -101,14 +101,14 @@
                     >
                         <div class="flex justify-between font-bold text-gray-900">
                             <span class="whitespace-pre-wrap">{{ index + 1 }}. {{ item.service_name || item.description }}</span>
-                            <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency((item.unit_price * (item.qty || 1)) - (item.discount || 0)) }}</span>
+                            <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency(lineSubtotalDisplay(item)) }}</span>
                         </div>
                         <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug whitespace-pre-wrap">
                              {{ item.description }}
                         </div>
                         <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
                             <span>{{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
-                            <span v-if="item.discount > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(item.discount) }}</span>
+                            <span v-if="lineDiscountDisplay(item) > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(lineDiscountDisplay(item)) }}</span>
                         </div>
                     </div>
                 </div>
@@ -125,14 +125,14 @@
                     >
                         <div class="flex justify-between font-bold text-gray-900">
                             <span class="whitespace-pre-wrap">{{ index + 1 }}. {{ item.service_name || item.description }}</span>
-                            <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency((item.unit_price * (item.qty || 1)) - (item.discount || 0)) }}</span>
+                            <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency(lineSubtotalDisplay(item)) }}</span>
                         </div>
                         <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug whitespace-pre-wrap">
                              {{ item.description }}
                         </div>
                         <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
                             <span>{{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
-                            <span v-if="item.discount > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(item.discount) }}</span>
+                            <span v-if="lineDiscountDisplay(item) > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(lineDiscountDisplay(item)) }}</span>
                         </div>
                     </div>
                 </div>
@@ -195,14 +195,14 @@
                 >
                     <div class="flex justify-between font-bold text-gray-900">
                         <span>{{ index + 1 }}. {{ item.service_name || item.description }}</span>
-                        <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency((item.unit_price * (item.qty || 1)) - (item.discount || 0)) }}</span>
+                        <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency(lineSubtotalDisplay(item)) }}</span>
                     </div>
                     <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug">
                          {{ item.description }}
                     </div>
                     <div v-if="showPricingColumns" class="text-[8px] text-gray-400 mt-0.5 flex justify-between">
-                            <span>{{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
-                            <span v-if="item.discount > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(item.discount) }}</span>
+                        <span>{{ $t('work_orders.print_view.calculation') }}: {{ item.qty || 1 }} × {{ formatCurrency(item.unit_price) }}</span>
+                        <span v-if="lineDiscountDisplay(item) > 0" class="text-red-500">{{ $t('common.discount') }}: -{{ formatCurrency(lineDiscountDisplay(item)) }}</span>
                     </div>
                     <div v-if="item.technician" class="text-[8px] text-indigo-600 font-semibold mt-0.5">
                         {{ $t('work_orders.print_view.technician') }}: {{ item.technician }}
@@ -300,6 +300,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePage } from '@inertiajs/vue3';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const { t, locale } = useI18n();
@@ -340,6 +341,43 @@ const showPricingColumns = computed(() => {
     const hiddenTypes = ['work_order', 'checklist', 'job_card', 'condition_report'];
     return !hiddenTypes.includes(props.documentType);
 });
+
+const showExclusive = computed(() => {
+    if (props.data.pricing_mode_snapshot !== 'inclusive') {
+        return true;
+    }
+    const page = usePage();
+    const taxSettings = page.props?.tenant?.tax_settings;
+    return taxSettings?.show_amount_before_vat ?? true;
+});
+
+function lineDiscountDisplay(item) {
+    // الخصم يُطبَّق على قيمة الخدمة الكاملة (شاملة الضريبة)
+    // لا يتغير بتغيير وضع عرض الضريبة — يبقى بقيمته الأصلية
+    return item.discount || 0;
+}
+
+function lineSubtotalDisplay(item) {
+    if (item.line_total_excl_tax !== undefined && item.line_total_excl_tax !== null && item.line_total_excl_tax !== 0) {
+        return showExclusive.value ? Number(item.line_total_excl_tax) : Number(item.line_total_incl_tax);
+    }
+    // Fallback for mock/preview data
+    const qty = item.qty || 1;
+    const price = item.unit_price || 0;
+    const discount = item.discount || 0;
+    const lineTotalIncl = Math.max(price * qty - discount, 0);
+    if (props.data.pricing_mode_snapshot === 'inclusive') {
+        if (showExclusive.value) {
+            const rate = isTaxEnabled() && item.is_taxable !== false ? (item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15) : 0;
+            const tax = lineTotalIncl - (lineTotalIncl / (1 + rate));
+            return lineTotalIncl - tax;
+        }
+        return lineTotalIncl;
+    } else {
+        return lineTotalIncl;
+    }
+}
+
 
 // Services and Parts computeds for Invoice separation
 const services = computed(() => {
@@ -477,53 +515,106 @@ const totals = computed(() => {
     if (props.data.total_incl_tax !== undefined && props.data.total_incl_tax !== null) {
         const total = Number(props.data.total_incl_tax || 0);
         const vat = Number(props.data.total_tax || 0);
-        const subtotalAfterDiscount = Number(props.data.total_excl_tax || 0);
         
         // Sum discount from items to show in the discount row if present, or use global discount if provided
-        let discount = Number(props.data.discount_amount || props.data.discount || 0);
-        if (discount === 0) {
+        let discountVal = Number(props.data.discount_amount || props.data.discount || 0);
+        if (discountVal === 0) {
             const items = props.data.items || [];
             items.forEach(item => {
-                discount += Number(item.discount || 0);
+                discountVal += Number(item.discount || 0);
             });
         }
 
-        const subtotal = subtotalAfterDiscount + discount;
+        const isInclusive = props.data.pricing_mode_snapshot === 'inclusive';
+        let discount = discountVal;
+        let subtotal = 0;
+
+        if (isInclusive) {
+            if (showExclusive.value) {
+                // الخصم يبقى بقيمته الكاملة (شامل الضريبة) — لا يُقسم على معامل الضريبة
+                discount = discountVal;
+                subtotal = Number(props.data.total_excl_tax || 0) + discountVal;
+            } else {
+                discount = discountVal;
+                subtotal = total - vat + discountVal;
+            }
+        } else {
+            discount = discountVal;
+            subtotal = Number(props.data.total_excl_tax || 0) + discount;
+        }
+
         const paid = Number(props.data.total_paid !== undefined ? props.data.total_paid : 0);
         const balance = Number(props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0));
 
-        return { subtotal, discount, vat, total, paid, balance };
+        return {
+            subtotal,
+            discount,
+            vat,
+            total,
+            paid,
+            balance
+        };
     }
 
     const items = props.data.items || dummyItems;
-    let subtotal = 0;
-    let discount = 0;
-    let vat = 0;
+    let grossSubtotal = 0;
+    let discountAmt = 0;
+    let taxAmt = 0;
+    let totalAmt = 0;
     
     const taxEnabled = isTaxEnabled();
+    const isInclusive = props.data.pricing_mode_snapshot === 'inclusive';
 
     items.forEach(item => {
         const itemQty = item.qty || 1;
         const itemPrice = item.unit_price || 0;
         const itemDiscount = item.discount || 0;
+        const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
 
-        subtotal += itemPrice * itemQty;
-        discount += itemDiscount;
+        let lineTotal = 0;
+        let lineTax = 0;
+        let lineExcl = 0;
+        let lineDisc = 0;
 
-        if (taxEnabled && item.is_taxable !== false) {
-            const lineExclTax = Math.max((itemPrice * itemQty) - itemDiscount, 0);
-            const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
-            vat += lineExclTax * rate;
+        if (isInclusive) {
+            lineTotal = Math.max(itemPrice * itemQty - itemDiscount, 0);
+            if (taxEnabled && item.is_taxable !== false) {
+                lineTax = lineTotal - (lineTotal / (1 + rate));
+            }
+            lineExcl = lineTotal - lineTax;
+            lineDisc = taxEnabled && item.is_taxable !== false ? (itemDiscount / (1 + rate)) : itemDiscount;
+        } else {
+            lineExcl = Math.max(itemPrice * itemQty - itemDiscount, 0);
+            if (taxEnabled && item.is_taxable !== false) {
+                lineTax = lineExcl * rate;
+            }
+            lineTotal = lineExcl + lineTax;
+            lineDisc = itemDiscount;
+        }
+
+        taxAmt += lineTax;
+        totalAmt += lineTotal;
+
+        if (showExclusive.value) {
+            grossSubtotal += lineExcl + lineDisc;
+            discountAmt += lineDisc;
+        } else {
+            grossSubtotal += (itemPrice * itemQty);
+            discountAmt += itemDiscount;
         }
     });
 
-    const subtotalAfterDiscount = Math.max(subtotal - discount, 0);
-    const total = subtotalAfterDiscount + vat;
-
     const paid = props.data.total_paid !== undefined ? props.data.total_paid : 0;
-    const balance = props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0);
+    const balance = props.data.balance !== undefined ? props.data.balance : Math.max(totalAmt - paid, 0);
 
-    return { subtotal, discount, vat, total, paid, balance };
+    return {
+        subtotal: grossSubtotal,
+        discount: discountAmt,
+        vat: taxAmt,
+        total: totalAmt,
+        paid,
+        balance
+    };
 });
 
 function isClientSignature(name) {

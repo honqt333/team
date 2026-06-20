@@ -500,8 +500,22 @@ function getItemsForDept(deptId) {
 async function submitAddDepartments() {
     if (savingDepts.value || selectedDepts.value.length === 0) return;
     savingDepts.value = true;
+
+    // Filter out departments already attached to work order
+    const existingDeptIds = new Set(
+        (props.workOrder.departments || []).map(d => d.id)
+    );
+    const newDepts = [...new Set(selectedDepts.value)].filter(id => !existingDeptIds.has(id));
+
+    if (newDepts.length === 0) {
+        selectedDepts.value = [];
+        showDeptModal.value = false;
+        savingDepts.value = false;
+        return;
+    }
+
     try {
-        for (const deptId of selectedDepts.value) {
+        for (const deptId of newDepts) {
             await axios.post(route('work-orders.departments.store', props.workOrder.id), {
                 department_id: deptId
             });

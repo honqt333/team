@@ -30,7 +30,7 @@ class InvoicingSecurityTest extends TestCase
     {
         $tenant = Tenant::create(['name' => 'T1', 'slug' => 't1']);
         $center = Center::create(['tenant_id' => $tenant->id, 'name' => 'C1', 'slug' => 'c1']);
-        $customer = Customer::create(['tenant_id' => $tenant->id, 'center_id' => $center->id, 'name' => 'Cust1']);
+        $customer = Customer::create(['tenant_id' => $tenant->id, 'center_id' => $center->id, 'name' => 'Cust1', 'phone' => '1234567890']);
         
         $invoice = Invoice::create([
             'tenant_id' => $tenant->id,

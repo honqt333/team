@@ -106,26 +106,30 @@ class PurchasingInvoicesController extends Controller
         $invoice = \Illuminate\Support\Facades\DB::transaction(function () use ($validated, $tenantId, $centerId, $userId) {
             $customer = \App\Models\Customer::find($validated['customer_id']);
 
-            // Calculate totals
-            $totalExclTax = 0;
-            $totalTax = 0;
-            $totalInclTax = 0;
-
-            foreach ($validated['items'] as $item) {
-                $totalExclTax += $item['total'];
-                $totalTax += $item['tax_amount'];
-                $totalInclTax += $item['grand_total'];
-            }
-
-            // Generate an invoice number
-            $invoiceNumber = 'INV-' . strtoupper(uniqid());
-
             // Get tax settings for snapshots
             $taxSetting = TenantTaxSetting::where('tenant_id', $tenantId)->first();
             $taxEnabled   = $taxSetting?->vat_enabled ?? true;
             $partsInclusive = $taxSetting?->parts_inclusive ?? false;
             $taxRate      = (float) ($taxSetting?->parts_vat_rate ?? $taxSetting?->vat_rate ?? 15);
             $pricingMode  = $partsInclusive ? 'inclusive' : 'exclusive';
+
+            // Calculate totals
+            $totalExclTax = 0;
+            $totalTax = 0;
+            $totalInclTax = 0;
+
+            foreach ($validated['items'] as $item) {
+                if ($pricingMode === 'inclusive' && $taxEnabled) {
+                    $totalExclTax += ($item['grand_total'] - $item['tax_amount']);
+                } else {
+                    $totalExclTax += $item['total'];
+                }
+                $totalTax += $item['tax_amount'];
+                $totalInclTax += $item['grand_total'];
+            }
+
+            // Generate an invoice number
+            $invoiceNumber = 'INV-' . strtoupper(uniqid());
 
             $addressParts = array_filter([
                 $customer->building_number ? __('common.building') . ' ' . $customer->building_number : null,
@@ -168,15 +172,22 @@ class PurchasingInvoicesController extends Controller
 
             // Create Invoice Lines
             foreach ($validated['items'] as $item) {
+                $lineTotalInclTax = $item['grand_total'];
+                $lineTotalExclTax = ($pricingMode === 'inclusive' && $taxEnabled)
+                    ? ($item['grand_total'] - $item['tax_amount'])
+                    : $item['total'];
+
                 $invoice->lines()->create([
+                    'is_part'           => true,
+                    'part_id'           => $item['part_id'] ?? null,
                     'description'       => $item['name'],
                     'qty'               => $item['qty'],
                     'unit_price'        => $item['unit_price'],
                     'is_taxable'        => $taxEnabled,
                     'tax_rate_snapshot' => $taxRate,
                     'tax_amount'        => $item['tax_amount'],
-                    'line_total_excl_tax' => $item['total'],
-                    'line_total_incl_tax' => $item['grand_total'],
+                    'line_total_excl_tax' => $lineTotalExclTax,
+                    'line_total_incl_tax' => $lineTotalInclTax,
                 ]);
             }
 

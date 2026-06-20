@@ -261,7 +261,7 @@
                         <!-- Row: Toggle + Total -->
                         <div class="space-y-3 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl border-2 border-gray-100 dark:border-gray-800">
                             <!-- Toggle switches -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div v-if="form.work_order_item_id || showToggles" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-bold text-gray-700 dark:text-gray-300">{{ $t('work_orders.item.include_in_package') }}</span>
                                     <button 
@@ -303,7 +303,7 @@
                             </div>
 
                             <!-- Total -->
-                            <div class="flex items-center gap-3 justify-between sm:justify-end pt-2 border-t border-gray-100 dark:border-gray-800">
+                            <div :class="['flex items-center gap-3 justify-between sm:justify-end', (form.work_order_item_id || showToggles) ? 'pt-2 border-t border-gray-100 dark:border-gray-800' : '']">
                                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $t('quotes.show.total') }}</span>
                                 <input type="text" readonly :value="formatCurrency(grandTotalValue)" dir="ltr"
                                     class="w-28 px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-center font-mono text-sm font-bold cursor-not-allowed" />

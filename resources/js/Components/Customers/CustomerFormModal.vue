@@ -837,8 +837,8 @@ function submitForm() {
         preserveScroll: true,
         onSuccess: (page) => {
             // Laravel sends the customer via with('customer', $customer)
-            // which Inertia makes available in page.props
-            const savedCustomer = page.props.customer || props.customer || form.data();
+            // which Inertia makes available in page.props or page.props.flash
+            const savedCustomer = page.props.customer || page.props.flash?.customer || props.customer || form.data();
             
             console.log('[CustomerFormModal] onSuccess page.props:', page.props);
             console.log('[CustomerFormModal] Customer saved successfully:', savedCustomer);

@@ -141,6 +141,7 @@
     "confirm": "Confirm",
     "deleted_success": "Deleted successfully",
     "saved_success": "Saved successfully",
+    "please_complete_required_fields": "Please complete required fields and add items to save",
     "vat_settings_updated": "Tax settings have been updated successfully. Please log in again.",
     "vat_included": "Tax included",
     "saving": "Saving...",
@@ -637,6 +638,7 @@
     "total": "Total",
     "balance": "Remaining",
     "cost_and_payment": "Cost and payment",
+    "services": "Services",
     "services_total": "Services",
     "parts_total": "Spare parts",
     "price": "Price",
@@ -670,7 +672,9 @@
     },
     "list": {
       "open_title": "Open maintenance cards",
+      "open_subtitle": "Follow active work orders and execution statuses in the workshop",
       "closed_title": "Closed maintenance cards",
+      "closed_subtitle": "Archive of completed and cancelled work orders for historical records",
       "all_title": "All business cards"
     },
     "due_date": "Entitlement",
@@ -682,12 +686,17 @@
     "remaining_dues_alert": "Outstanding Dues",
     "filters": {
       "open": "Open",
+      "closed": "Closed",
       "draft": "Hanging",
       "overdue": "Late",
       "pending_payment": "Payable",
       "completed": "Completed",
       "all_types": "All types",
-      "customer_type": "Client type"
+      "customer_type": "Client type",
+      "closed_cards": "Closed Work Orders",
+      "credit_invoices": "Credit Invoices",
+      "bad_debts": "Bad Debts",
+      "cancelled_cards": "Cancelled"
     },
     "create": {
       "title": "Create a business card"
@@ -818,6 +827,23 @@
         "scratch": "Scratch",
         "note": "Note"
       }
+    },
+    "systematic": {
+      "title": "Systematic Inspection",
+      "start_inspection": "Start New Inspection",
+      "select_template": "Select Inspection Template",
+      "performed_by": "Inspected By",
+      "performed_at": "Inspection Date",
+      "result_good": "Good",
+      "result_warning": "Needs Attention",
+      "result_danger": "Dangerous / Needs Replacement",
+      "result_na": "Not Applicable",
+      "save_inspection": "Save Inspection Results",
+      "no_inspections": "No systematic inspections performed yet",
+      "view_results": "View Results",
+      "template": "Template",
+      "category": "Category",
+      "item": "Item"
     },
     "photos": {
       "title": "Vehicle photos",
@@ -1547,6 +1573,7 @@
   },
   "services_management": {
     "title": "Services Management",
+    "subtitle": "Manage services, packages, and technical inspections",
     "add_department_first": "Please add a department first to be able to add services.",
     "inspections": "Systematic Inspections",
     "inspections_empty": "No inspections found",
@@ -2176,6 +2203,11 @@
     "invoice_number": "Invoice number",
     "issue_date": "Release date",
     "supply_date": "Date of supply",
+    "tax": "VAT",
+    "discount": "Discount",
+    "total": "Total",
+    "amount": "Invoice Amount",
+    "due_amount": "Due Amount",
     "create": "Create an invoice",
     "created": "The invoice was created successfully",
     "print": "Print the invoice",

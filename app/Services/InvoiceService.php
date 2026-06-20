@@ -69,10 +69,35 @@ class InvoiceService
             // 2. Convert WO Items (Services) to Invoice Lines
             $activeItems = $workOrder->items->where('status', '!=', \App\Models\WorkOrderItem::STATUS_CANCELLED);
             foreach ($activeItems as $item) {
+                $description = $item->title ?? $item->service->name;
+                
+                // Append warranty if exists
+                if ($item->warranty_value_snapshot && $item->warranty_unit_snapshot) {
+                    $locale = app()->getLocale();
+                    $units = [
+                        'ar' => [
+                            'days' => $item->warranty_value_snapshot >= 3 && $item->warranty_value_snapshot <= 10 ? 'أيام' : 'يوم',
+                            'weeks' => $item->warranty_value_snapshot >= 3 && $item->warranty_value_snapshot <= 10 ? 'أسابيع' : 'أسبوع',
+                            'months' => $item->warranty_value_snapshot >= 3 && $item->warranty_value_snapshot <= 10 ? 'أشهر' : 'شهر',
+                            'years' => $item->warranty_value_snapshot >= 3 && $item->warranty_value_snapshot <= 10 ? 'سنوات' : 'سنة',
+                        ],
+                        'en' => [
+                            'days' => $item->warranty_value_snapshot == 1 ? 'day' : 'days',
+                            'weeks' => $item->warranty_value_snapshot == 1 ? 'week' : 'weeks',
+                            'months' => $item->warranty_value_snapshot == 1 ? 'month' : 'months',
+                            'years' => $item->warranty_value_snapshot == 1 ? 'year' : 'years',
+                        ]
+                    ];
+                    
+                    $unitLabel = $units[$locale][$item->warranty_unit_snapshot] ?? $item->warranty_unit_snapshot;
+                    $label = $locale === 'ar' ? 'ضمان الخدمة' : 'Service Warranty';
+                    $description .= " - {$label} {$item->warranty_value_snapshot} {$unitLabel}";
+                }
+
                 $invoice->lines()->create([
                     'is_part' => false,
                     'part_id' => null,
-                    'description' => $item->title ?? $item->service->name,
+                    'description' => $description,
                     'qty' => $item->qty,
                     'unit_price' => $item->unit_price,
                     'is_taxable' => $item->is_taxable,

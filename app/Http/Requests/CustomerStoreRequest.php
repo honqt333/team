@@ -17,6 +17,70 @@ class CustomerStoreRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        $phone = $this->phone;
+        $whatsapp = $this->whatsapp;
+
+        if ($phone) {
+            $this->merge([
+                'phone' => $this->normalizePhoneNumber($phone),
+            ]);
+        }
+
+        if ($whatsapp) {
+            $this->merge([
+                'whatsapp' => $this->normalizePhoneNumber($whatsapp),
+            ]);
+        }
+    }
+
+    /**
+     * Normalize a phone number to standard format (+9665xxxxxxxx).
+     */
+    private function normalizePhoneNumber(?string $number): ?string
+    {
+        if (!$number) {
+            return null;
+        }
+
+        // Convert Arabic/Persian digits to English
+        $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+        $number = str_replace($arabic, $english, $number);
+        $number = str_replace($persian, $english, $number);
+
+        // Remove all non-numeric characters (except +)
+        $number = preg_replace('/[^\d+]/', '', $number);
+
+        // If it starts with 00966, convert to +966
+        if (str_starts_with($number, '00966')) {
+            $number = '+966' . substr($number, 5);
+        }
+
+        // If it starts with 05, convert to +9665
+        if (str_starts_with($number, '05') && strlen($number) === 10) {
+            $number = '+966' . substr($number, 1);
+        }
+
+        // If it starts with 5, convert to +9665
+        if (str_starts_with($number, '5') && strlen($number) === 9) {
+            $number = '+966' . $number;
+        }
+
+        // If it starts with 966 and doesn't start with +, add +
+        if (str_starts_with($number, '966') && !str_starts_with($number, '+')) {
+            $number = '+' . $number;
+        }
+
+        return $number;
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -31,6 +95,7 @@ class CustomerStoreRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'contact_name' => [
                 Rule::requiredIf(fn () => in_array($this->type, ['company', 'government'])),
+                'nullable',
                 'string',
                 'max:255'
             ],

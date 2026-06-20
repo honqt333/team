@@ -93,7 +93,9 @@ const mappedPrintData = computed(() => {
         is_taxable: line.is_taxable !== false,
         tax_rate_snapshot: Number(line.tax_rate_snapshot || 0),
         tax_amount: Number(line.tax_amount || 0),
-        total: Number(line.line_total || 0)
+        total: Number(line.line_total || 0),
+        line_total_excl_tax: Number(line.line_total_excl_tax || 0),
+        line_total_incl_tax: Number(line.line_total_incl_tax || 0)
     }));
 
     const parts = (props.quote.parts || [])
@@ -108,8 +110,11 @@ const mappedPrintData = computed(() => {
             is_taxable: part.is_taxable !== false,
             tax_rate_snapshot: Number(part.tax_rate_snapshot || 0),
             tax_amount: Number(part.tax_amount || 0),
-            total: Number(part.total_incl_tax || part.total || 0)
+            total: Number(part.total_incl_tax || part.total || 0),
+            line_total_excl_tax: Number(part.total_excl_tax || 0),
+            line_total_incl_tax: Number(part.total_incl_tax || 0)
         }));
+
 
     return {
         code: props.quote.code,

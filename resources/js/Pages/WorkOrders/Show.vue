@@ -348,7 +348,7 @@
 <script setup>
 import BackButton from '@/Components/BackButton.vue';
 import { ref, computed, watch } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -435,6 +435,14 @@ const editingIssueMorePart = ref(null);
 const showReturnModal = ref(false);
 const editingReturnPart = ref(null);
 
+const showExclusive = computed(() => {
+    if (props.workOrder?.pricing_mode_snapshot !== 'inclusive') {
+        return true;
+    }
+    const taxSettings = usePage().props.tenant?.tax_settings;
+    return taxSettings?.show_amount_before_vat ?? true;
+});
+
 // ─── Totals (moved up so composables can reference workOrderBalance) ──────────
 const totals = computed(() => {
     const t = {
@@ -457,23 +465,37 @@ const totals = computed(() => {
             .filter(line => line.status !== 'cancelled')
             .forEach(line => {
                 const price = Number(line.unit_price || 0) * Number(line.qty || 1);
-                const discount = Number(line.discount_amount || 0);
-                let amount = price - discount;
-                let calculatedTax = Number(line.tax_amount || 0);
-                let total = Number(line.line_total || price);
+                const discountVal = Number(line.discount_amount || 0);
+                
+                let amount = price - discountVal;
+                let discount = discountVal;
+                let calculatedTax = 0;
+                let total = price - discountVal;
 
                 if (taxEnabled) {
                     if (isInclusive) {
-                        amount = (price - discount) / taxFactor;
-                        calculatedTax = (price - discount) - amount;
-                    } else if (calculatedTax === 0) {
+                        if (showExclusive.value) {
+                            // الخصم يبقى بقيمته الكاملة (شامل الضريبة)
+                            // فقط عمود المبلغ يتغير ليعكس القيمة قبل الضريبة
+                            amount = (price - discountVal) / taxFactor;
+                            discount = discountVal;
+                            calculatedTax = (price - discountVal) - amount;
+                        } else {
+                            amount = price - discountVal;
+                            discount = discountVal;
+                            calculatedTax = (price - discountVal) - (price - discountVal) / taxFactor;
+                        }
+                        total = price - discountVal;
+                    } else {
+                        amount = price - discountVal;
+                        discount = discountVal;
                         calculatedTax = amount * (taxRate / 100);
                         total = amount + calculatedTax;
                     }
-                }
-
-                if (!line.line_total) {
-                    total = isInclusive ? (price - discount) : (amount + calculatedTax);
+                } else {
+                    amount = price - discountVal;
+                    discount = discountVal;
+                    total = price - discountVal;
                 }
 
                 t.services.price += price;
@@ -498,28 +520,45 @@ const totals = computed(() => {
             .forEach(part => {
                 const partQty = Number(part.qty || 0);
                 const partUnitPrice = Number(part.unit_price || 0);
-                const partDiscount = Number(part.discount || 0);
+                const partDiscountVal = Number(part.discount || 0);
                 const partPrice = partQty * partUnitPrice;
-                const partNet = partPrice - partDiscount;
-
-                t.parts.price += partPrice;
-                t.parts.discount += partDiscount;
+                const partNet = partPrice - partDiscountVal;
 
                 let partAmount = partNet;
+                let partDiscount = partDiscountVal;
                 let partTax = 0;
+                let partTotal = partNet;
 
                 if (taxEnabled) {
                     if (isInclusive) {
-                        partAmount = partNet / taxFactor;
-                        partTax = partNet - partAmount;
+                        if (showExclusive.value) {
+                            // الخصم يبقى بقيمته الكاملة (شامل الضريبة)
+                            partAmount = partNet / taxFactor;
+                            partDiscount = partDiscountVal;
+                            partTax = partNet - partAmount;
+                        } else {
+                            partAmount = partNet;
+                            partDiscount = partDiscountVal;
+                            partTax = partNet - (partNet / taxFactor);
+                        }
+                        partTotal = partNet;
                     } else {
+                        partAmount = partNet;
+                        partDiscount = partDiscountVal;
                         partTax = partNet * (taxRate / 100);
+                        partTotal = partNet + partTax;
                     }
+                } else {
+                    partAmount = partNet;
+                    partDiscount = partDiscountVal;
+                    partTotal = partNet;
                 }
 
-                t.parts.amount += partAmount;
+                t.parts.price += partPrice;
+                t.parts.discount += partDiscount;
                 t.parts.tax += partTax;
-                t.parts.total += partTax + partAmount;
+                t.parts.total += partTotal;
+                t.parts.amount += partAmount;
             });
     }
 

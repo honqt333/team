@@ -6,7 +6,7 @@
                 :title="`${$t('invoices.invoice')} #${invoice.invoice_number}`"
                 :subtitle="invoice.customer_name_snapshot || invoice.customer?.name"
                 :totalCount="formatCurrency(invoice.total_incl_tax)"
-                :countLabel="$t('invoices.grand_total')"
+                :countLabel="invoice.tax_enabled_snapshot ? $t('invoices.grand_total') : $t('invoices.total')"
                 gradientFrom="from-blue-600"
                 gradientTo="to-indigo-600"
                 glowFrom="from-blue-500"
@@ -64,82 +64,15 @@
                 </template>
             </PageHeader>
 
-            <!-- Top Cards Section: Center/Customer Info & Financial Cost Card -->
+            <!-- Top Cards Section: Customer Info & Financial Cost Card -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- 1. Right Card: Center & Customer Info -->
+                <!-- 1. Right Card: Customer & Invoice Details Info -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full relative group">
                     <!-- Card Decoration -->
                     <div class="absolute -top-12 -end-12 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors"></div>
 
-                    <!-- Center Name Header -->
-                    <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900/60 border-b border-gray-100 dark:border-gray-700 px-5 py-4">
-                        <div class="flex items-center gap-3 text-blue-600">
-                            <div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                            </div>
-                            <h3 class="text-xs font-black uppercase tracking-[0.15em]">{{ $t('common.center') }}</h3>
-                        </div>
-                        <span class="text-lg font-black text-gray-900 dark:text-white" dir="auto">
-                            {{ invoice.center?.name_ar || invoice.center?.name }}
-                        </span>
-                    </div>
-
-                    <!-- Middle Section: Center Address, Invoice Meta & Customer Info -->
-                    <div class="p-5 flex-1 flex flex-col justify-between gap-5 relative z-10">
-                        <!-- Center Address -->
-                        <div>
-                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('common.address') }}</p>
-                            <div class="flex items-start gap-2.5 text-gray-600 dark:text-gray-300">
-                                <svg class="w-5 h-5 text-gray-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span class="text-sm font-semibold leading-relaxed" dir="auto">
-                                    {{ getCenterAddress(invoice.center) || $t('common.na') }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Divider line -->
-                        <div class="border-t border-gray-100 dark:border-gray-700/65"></div>
-
-                        <!-- Invoice Dates & ZATCA QR Code -->
-                        <div>
-                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('invoices.details') }}</p>
-                            <div class="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-100/50 dark:border-gray-700/30">
-                                <div class="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
-                                    <div>
-                                        <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ $t('invoices.date') }}</p>
-                                        <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
-                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <span class="text-sm font-bold font-mono">{{ formatDate(invoice.issue_date) }}</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ $t('invoices.supply_date') }}</p>
-                                        <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
-                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            <span class="text-sm font-bold font-mono">{{ formatDate(invoice.supply_date) }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- QR Code block for ZATCA E-Invoice -->
-                                <div v-if="invoice.zatca_qr_tlv" class="shrink-0 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow transition-all group-hover:scale-105 duration-300">
-                                    <img :src="generateQRCode(invoice.zatca_qr_tlv)" alt="ZATCA QR" class="w-14 h-14 object-contain" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Divider line -->
-                        <div class="border-t border-gray-100 dark:border-gray-700/65"></div>
-
+                    <!-- Main Content Container with Customer Info at Top, followed by Invoice Details -->
+                    <div class="p-5 flex-1 flex flex-col gap-5 relative z-10">
                         <!-- Customer Info -->
                         <div>
                             <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('customers.customer') }}</p>
@@ -165,7 +98,7 @@
                                         <span v-if="invoice.customer?.phone" class="font-mono flex items-center gap-1">
                                             <span>📞</span> <span dir="ltr">{{ invoice.customer.phone }}</span>
                                         </span>
-                                        <span v-if="invoice.customer_vat_snapshot || invoice.customer?.tax_number" class="font-mono flex items-center gap-1">
+                                        <span v-if="(invoice.customer_vat_snapshot || invoice.customer?.tax_number) && invoice.tax_enabled_snapshot" class="font-mono flex items-center gap-1">
                                             <span>📋</span> <span>{{ $t('customers.tax_number') }}: {{ invoice.customer_vat_snapshot || invoice.customer?.tax_number }}</span>
                                         </span>
                                     </div>
@@ -183,6 +116,41 @@
                                     <p class="font-semibold leading-relaxed" dir="auto">
                                         {{ invoice.customer_address_snapshot || getCustomerAddress(invoice.customer) || $t('customers.no_address') }}
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Divider line -->
+                        <div class="border-t border-gray-100 dark:border-gray-700/65"></div>
+
+                        <!-- Invoice Dates & ZATCA QR Code -->
+                        <div>
+                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('invoices.details') }}</p>
+                            <div class="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-150/50 dark:border-gray-700/30">
+                                <div class="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
+                                    <div>
+                                        <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ $t('invoices.date') }}</p>
+                                        <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span class="text-sm font-bold font-mono">{{ formatDate(invoice.issue_date) }}</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ $t('invoices.supply_date') }}</p>
+                                        <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="text-sm font-bold font-mono">{{ formatDate(invoice.supply_date) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- QR Code block for ZATCA E-Invoice -->
+                                <div v-if="invoice.tax_enabled_snapshot && invoice.zatca_qr_tlv" class="shrink-0 p-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm hover:shadow transition-all group-hover:scale-105 duration-300">
+                                    <img :src="generateQRCode(invoice.zatca_qr_tlv)" alt="ZATCA QR" class="w-14 h-14 object-contain" />
                                 </div>
                             </div>
                         </div>
@@ -225,7 +193,7 @@
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('common.unit_price') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-red-500 italic align-middle">{{ $t('common.discount') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider align-middle">{{ $t('common.amount') }}</th>
-                                    <th class="pb-2 text-center font-bold uppercase tracking-wider italic align-middle">{{ $t('common.vat') }}</th>
+                                    <th v-if="invoice.tax_enabled_snapshot" class="pb-2 text-center font-bold uppercase tracking-wider italic align-middle">{{ $t('common.vat') }}</th>
                                     <th class="pb-2 text-center font-bold uppercase tracking-wider text-gray-900 dark:text-white align-middle">{{ $t('common.total') }}</th>
                                 </tr>
                             </thead>
@@ -236,7 +204,7 @@
                                     <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(servicesGross) }}</td>
                                     <td class="py-2.5 text-center font-mono text-red-500 italic align-middle">{{ servicesDiscount > 0 ? '-' + formatCurrency(servicesDiscount) : '—' }}</td>
                                     <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(servicesSubtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(servicesTax) }}</td>
+                                    <td v-if="invoice.tax_enabled_snapshot" class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(servicesTax) }}</td>
                                     <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(servicesTotal) }}</td>
                                 </tr>
 
@@ -246,7 +214,7 @@
                                     <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(partsGross) }}</td>
                                     <td class="py-2.5 text-center font-mono text-red-500 italic align-middle">{{ partsDiscountAmt > 0 ? '-' + formatCurrency(partsDiscountAmt) : '—' }}</td>
                                     <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(partsSubtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(partsTax) }}</td>
+                                    <td v-if="invoice.tax_enabled_snapshot" class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(partsTax) }}</td>
                                     <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(partsTotal) }}</td>
                                 </tr>
 
@@ -256,32 +224,32 @@
                                     <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(grossTotal) }}</td>
                                     <td class="py-2.5 text-center font-mono text-red-500 italic align-middle">{{ discount > 0 ? '-' + formatCurrency(discount) : '—' }}</td>
                                     <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
+                                    <td v-if="invoice.tax_enabled_snapshot" class="py-2.5 text-center font-mono text-gray-500 align-middle">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
                                     <td class="py-2.5 text-center font-black text-gray-900 dark:text-white font-mono text-base align-middle">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
+                                </tr>
+
+                                <!-- Grand Total Summary Row -->
+                                <tr class="bg-blue-50 dark:bg-blue-900/10 font-black border-t-2 border-blue-200 dark:border-blue-800">
+                                    <td class="py-2.5 text-center text-blue-900 dark:text-blue-400 font-black uppercase align-middle">{{ invoice.tax_enabled_snapshot ? $t('invoices.grand_total') : $t('invoices.total') }}</td>
+                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(grossTotal) }}</td>
+                                    <td class="py-2.5 text-center font-mono text-red-600 italic align-middle">{{ discount > 0 ? '-' + formatCurrency(discount) : '—' }}</td>
+                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
+                                    <td v-if="invoice.tax_enabled_snapshot" class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
+                                    <td class="py-2.5 text-center font-black text-blue-600 dark:text-blue-400 font-mono text-xl align-middle">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
                                 </tr>
 
                                 <!-- Paid Row -->
                                 <tr class="group text-emerald-600 dark:text-emerald-400">
                                     <td class="py-2.5 text-center font-bold align-middle">{{ $t('invoices.paid') }}</td>
-                                    <td colspan="4" class="py-2.5 align-middle"></td>
+                                    <td :colspan="invoice.tax_enabled_snapshot ? 4 : 3" class="py-2.5 align-middle"></td>
                                     <td class="py-2.5 text-center font-black font-mono text-base align-middle">{{ formatCurrency(invoice.total_paid) }}</td>
                                 </tr>
 
                                 <!-- Balance Row -->
                                 <tr class="group" :class="balance > 0.01 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'">
                                     <td class="py-2.5 text-center font-bold align-middle">{{ $t('invoices.balance') }}</td>
-                                    <td colspan="4" class="py-2.5 align-middle"></td>
+                                    <td :colspan="invoice.tax_enabled_snapshot ? 4 : 3" class="py-2.5 align-middle"></td>
                                     <td class="py-2.5 text-center font-black font-mono text-base align-middle">{{ formatCurrency(balance) }}</td>
-                                </tr>
-
-                                <!-- Grand Total Summary Row -->
-                                <tr class="bg-blue-50 dark:bg-blue-900/10 font-black border-t-2 border-blue-200 dark:border-blue-800">
-                                    <td class="py-2.5 text-center text-blue-900 dark:text-blue-400 font-black uppercase align-middle">{{ $t('invoices.grand_total') }}</td>
-                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(grossTotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-red-600 italic align-middle">{{ discount > 0 ? '-' + formatCurrency(discount) : '—' }}</td>
-                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(calculatedInvoiceSubtotal) }}</td>
-                                    <td class="py-2.5 text-center font-mono text-blue-700 dark:text-blue-300 align-middle">{{ formatCurrency(calculatedInvoiceTaxAmount) }}</td>
-                                    <td class="py-2.5 text-center font-black text-blue-600 dark:text-blue-400 font-mono text-xl align-middle">{{ formatCurrency(calculatedInvoiceTotal) }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -349,39 +317,51 @@
                     <table class="w-full">
                         <thead>
                             <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50">
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">#</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.description') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.qty') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.unit_price') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('invoices.subtotal') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic align-middle">{{ $t('common.vat') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-red-500 italic align-middle">{{ $t('common.discount') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.qty') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.amount') }}</th>
+                                <th v-if="invoice.tax_enabled_snapshot" class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic align-middle">{{ $t('common.vat') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-gray-900 dark:text-white align-middle">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                            <tr v-for="line in invoice.lines" :key="line.id" class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
+                            <tr v-for="(line, index) in invoice.lines" :key="line.id" class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
+                                <!-- Index -->
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-sm font-black text-gray-500 dark:text-gray-400 font-mono">{{ toEnglish(index + 1) }}</span>
+                                </td>
+
                                 <!-- Line description -->
                                 <td class="px-6 py-5 text-center align-middle">
                                     <span class="text-sm font-black text-gray-950 dark:text-white">{{ line.description }}</span>
-                                </td>
-                                
-                                <!-- Qty -->
-                                <td class="px-6 py-5 text-center align-middle">
-                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ toEnglish(line.qty) }}</span>
                                 </td>
                                 
                                 <!-- Unit Price -->
                                 <td class="px-6 py-5 text-center align-middle">
                                     <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ formatCurrency(line.unit_price) }}</span>
                                 </td>
+
+                                <!-- Discount -->
+                                <td class="px-6 py-5 text-center text-red-500 font-mono align-middle">
+                                    {{ getLineDiscount(line, showExclusive) > 0.01 ? '-' + formatCurrency(getLineDiscount(line, showExclusive)) : '—' }}
+                                </td>
+
+                                <!-- Qty -->
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ toEnglish(line.qty) }}</span>
+                                </td>
                                 
                                 <!-- Subtotal -->
                                 <td class="px-6 py-5 text-center align-middle">
-                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ formatCurrency(line.qty * line.unit_price) }}</span>
+                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ formatCurrency(showExclusive ? line.line_total_excl_tax : line.line_total_incl_tax) }}</span>
                                 </td>
                                 
                                 <!-- VAT -->
-                                <td class="px-6 py-5 text-center text-xs text-sky-600 dark:text-sky-400 font-mono align-middle">
-                                    {{ formatCurrency(line.line_total_incl_tax - (line.qty * line.unit_price)) }}
+                                <td v-if="invoice.tax_enabled_snapshot" class="px-6 py-5 text-center text-xs text-sky-600 dark:text-sky-400 font-mono align-middle">
+                                    {{ formatCurrency(line.tax_amount) }}
                                 </td>
                                 
                                 <!-- Total -->
@@ -502,7 +482,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { Link, router, useForm } from '@inertiajs/vue3';
+import { Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
@@ -535,8 +515,18 @@ const balance = computed(() => {
     return Math.max(0, Number(props.invoice.total_incl_tax || 0) - Number(props.invoice.total_paid || 0));
 });
 
+const showExclusive = computed(() => {
+    if (props.invoice.pricing_mode_snapshot !== 'inclusive') {
+        return true;
+    }
+    const taxSettings = usePage().props.tenant?.tax_settings;
+    return taxSettings?.show_amount_before_vat ?? true;
+});
+
 const calculatedInvoiceSubtotal = computed(() => {
-    return Number(props.invoice?.total_excl_tax || 0);
+    const excl = Number(props.invoice?.total_excl_tax || 0);
+    const incl = Number(props.invoice?.total_incl_tax || 0);
+    return showExclusive.value ? excl : incl;
 });
 
 const calculatedInvoiceTaxAmount = computed(() => {
@@ -548,59 +538,111 @@ const calculatedInvoiceTotal = computed(() => {
 });
 
 const discount = computed(() => {
-    if (!props.invoice.work_order) return 0;
-    const itemsDiscount = props.invoice.work_order.items?.reduce((sum, item) => sum + Number(item.discount_amount || 0), 0) || 0;
-    const partsDiscount = props.invoice.work_order.parts?.reduce((sum, part) => sum + Number(part.discount || 0), 0) || 0;
-    return itemsDiscount + partsDiscount;
+    return (props.invoice.lines || [])
+        .reduce((sum, l) => sum + getLineDiscount(l, showExclusive.value), 0);
 });
 
 const grossTotal = computed(() => {
-    return calculatedInvoiceSubtotal.value + discount.value;
+    const isInclusive = props.invoice.pricing_mode_snapshot === 'inclusive';
+    if (isInclusive) {
+        const discountIncl = (props.invoice.lines || [])
+            .reduce((sum, l) => sum + getLineDiscount(l, false), 0);
+        return calculatedInvoiceTotal.value + discountIncl;
+    } else {
+        return calculatedInvoiceSubtotal.value + discount.value;
+    }
 });
 
 // ── Services breakdown ──────────────────────────────────────
 const servicesDiscount = computed(() => {
-    if (!props.invoice.work_order) return 0;
-    return props.invoice.work_order.items?.reduce((sum, item) => sum + Number(item.discount_amount || 0), 0) || 0;
+    if (!props.invoice.work_order_id) return 0;
+    return (props.invoice.lines || [])
+        .filter(l => !l.is_part)
+        .reduce((sum, l) => sum + getLineDiscount(l, showExclusive.value), 0);
 });
 
 const servicesSubtotal = computed(() => {
-    return (props.invoice.lines || [])
+    if (!props.invoice.work_order_id) return 0;
+    const excl = (props.invoice.lines || [])
         .filter(l => !l.is_part)
         .reduce((sum, l) => sum + Number(l.line_total_excl_tax || 0), 0);
+    const incl = (props.invoice.lines || [])
+        .filter(l => !l.is_part)
+        .reduce((sum, l) => sum + Number(l.line_total_incl_tax || 0), 0);
+    return showExclusive.value ? excl : incl;
 });
 
-const servicesGross = computed(() => servicesSubtotal.value + servicesDiscount.value);
+const servicesGross = computed(() => {
+    const isInclusive = props.invoice.pricing_mode_snapshot === 'inclusive';
+    if (isInclusive) {
+        const discountIncl = (props.invoice.lines || [])
+            .filter(l => !l.is_part)
+            .reduce((sum, l) => sum + getLineDiscount(l, false), 0);
+        return servicesTotal.value + discountIncl;
+    } else {
+        return servicesSubtotal.value + servicesDiscount.value;
+    }
+});
 
 const servicesTax = computed(() => {
+    if (!props.invoice.work_order_id) return 0;
     return (props.invoice.lines || [])
         .filter(l => !l.is_part)
         .reduce((sum, l) => sum + Number(l.tax_amount || 0), 0);
 });
 
-const servicesTotal = computed(() => servicesSubtotal.value + servicesTax.value);
+const servicesTotal = computed(() => {
+    if (!props.invoice.work_order_id) return 0;
+    return (props.invoice.lines || [])
+        .filter(l => !l.is_part)
+        .reduce((sum, l) => sum + Number(l.line_total_incl_tax || 0), 0);
+});
 
 // ── Spare Parts breakdown ───────────────────────────────────
 const partsDiscountAmt = computed(() => {
-    if (!props.invoice.work_order) return 0;
-    return props.invoice.work_order.parts?.reduce((sum, part) => sum + Number(part.discount || 0), 0) || 0;
+    const filterFn = props.invoice.work_order_id ? (l => l.is_part) : (l => true);
+    return (props.invoice.lines || [])
+        .filter(filterFn)
+        .reduce((sum, l) => sum + getLineDiscount(l, showExclusive.value), 0);
 });
 
 const partsSubtotal = computed(() => {
-    return (props.invoice.lines || [])
-        .filter(l => l.is_part)
+    const filterFn = props.invoice.work_order_id ? (l => l.is_part) : (l => true);
+    const excl = (props.invoice.lines || [])
+        .filter(filterFn)
         .reduce((sum, l) => sum + Number(l.line_total_excl_tax || 0), 0);
+    const incl = (props.invoice.lines || [])
+        .filter(filterFn)
+        .reduce((sum, l) => sum + Number(l.line_total_incl_tax || 0), 0);
+    return showExclusive.value ? excl : incl;
 });
 
-const partsGross = computed(() => partsSubtotal.value + partsDiscountAmt.value);
+const partsGross = computed(() => {
+    const isInclusive = props.invoice.pricing_mode_snapshot === 'inclusive';
+    if (isInclusive) {
+        const filterFn = props.invoice.work_order_id ? (l => l.is_part) : (l => true);
+        const discountIncl = (props.invoice.lines || [])
+            .filter(filterFn)
+            .reduce((sum, l) => sum + getLineDiscount(l, false), 0);
+        return partsTotal.value + discountIncl;
+    } else {
+        return partsSubtotal.value + partsDiscountAmt.value;
+    }
+});
 
 const partsTax = computed(() => {
+    const filterFn = props.invoice.work_order_id ? (l => l.is_part) : (l => true);
     return (props.invoice.lines || [])
-        .filter(l => l.is_part)
+        .filter(filterFn)
         .reduce((sum, l) => sum + Number(l.tax_amount || 0), 0);
 });
 
-const partsTotal = computed(() => partsSubtotal.value + partsTax.value);
+const partsTotal = computed(() => {
+    const filterFn = props.invoice.work_order_id ? (l => l.is_part) : (l => true);
+    return (props.invoice.lines || [])
+        .filter(filterFn)
+        .reduce((sum, l) => sum + Number(l.line_total_incl_tax || 0), 0);
+});
 
 
 const onPaymentSaved = (paymentData) => {
@@ -621,6 +663,23 @@ const formatDate = (date) => {
 const generateQRCode = (base64Data) => {
     return `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(base64Data)}`;
 };
+
+const getLineDiscount = (line, exclusive = true) => {
+    const qty = Number(line.qty || 0);
+    const unitPrice = Number(line.unit_price || 0);
+    const rate = Number(line.tax_rate_snapshot || 0) / 100;
+    const isInclusive = props.invoice.pricing_mode_snapshot === 'inclusive';
+
+    if (isInclusive) {
+        const inclusiveDiscount = Math.max(0, (qty * unitPrice) - Number(line.line_total_incl_tax || 0));
+        return exclusive ? (inclusiveDiscount / (1 + rate)) : inclusiveDiscount;
+    } else {
+        const exclusiveDiscount = Math.max(0, (qty * unitPrice) - Number(line.line_total_excl_tax || 0));
+        return exclusiveDiscount;
+    }
+};
+
+
 
 const getCustomerAddress = (customer) => {
     if (!customer) return '';

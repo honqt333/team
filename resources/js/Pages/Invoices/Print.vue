@@ -76,12 +76,19 @@ const mappedData = computed(() => {
         discount: Number(line.discount || 0),
         is_part: line.is_part || false,
         is_taxable: line.is_taxable !== false,
-        tax_rate_snapshot: line.tax_rate_snapshot
+        tax_rate_snapshot: line.tax_rate_snapshot,
+        line_total_excl_tax: Number(line.line_total_excl_tax || 0),
+        line_total_incl_tax: Number(line.line_total_incl_tax || 0),
+        tax_amount: Number(line.tax_amount || 0)
     }));
+
 
     const qrUrl = props.invoice.zatca_qr_tlv 
         ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(props.invoice.zatca_qr_tlv)}` 
         : '';
+
+    const tenant = props.invoice.tenant || page.props.tenant || {};
+    const isVatEnabled = tenant.tax_settings?.vat_enabled ?? tenant.taxSettings?.vat_enabled ?? true;
 
     return {
         code: props.invoice.invoice_number,
@@ -103,7 +110,7 @@ const mappedData = computed(() => {
             plate: props.invoice.work_order?.vehicle?.plate_number,
             color: props.invoice.work_order?.vehicle?.color,
         },
-        tax_enabled_snapshot: props.invoice.tax_enabled_snapshot,
+        tax_enabled_snapshot: props.invoice.tax_enabled_snapshot && isVatEnabled,
         pricing_mode_snapshot: props.invoice.pricing_mode_snapshot || props.invoice.work_order?.pricing_mode_snapshot,
         total_excl_tax: props.invoice.total_excl_tax,
         total_tax: props.invoice.total_tax,

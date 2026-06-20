@@ -7,7 +7,7 @@
         <div class="flex justify-between items-start pb-4 mb-6 border-b-2" :class="isModern ? 'border-dashed border-gray-300' : 'border-gray-800'">
             <div class="w-1/3">
                 <h1 class="text-2xl font-bold text-gray-900 mb-1">{{ centerData.name || 'مركز اور كارز' }}</h1>
-                <p v-if="centerData.tax_number" class="text-sm text-gray-600">
+                <p v-if="isTaxEnabled() && centerData.tax_number" class="text-sm text-gray-600">
                     {{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}
                 </p>
                 <p v-if="centerData.cr_number" class="text-sm text-gray-600">
@@ -72,7 +72,7 @@
                     <p><span class="text-gray-500">{{ $t('common.name') }}:</span> {{ data.customer?.name || (isRtl ? 'احمد الزهراني' : 'Ahmad Alzahrani') }}</p>
                     <p><span class="text-gray-500">{{ $t('common.phone') }}:</span> <span dir="ltr">{{ data.customer?.phone || '+966 555 785 658' }}</span></p>
                     <p v-if="documentSettings.show_customer_address !== false && data.customer?.address" class="col-span-2"><span class="text-gray-500">{{ $t('common.address') }}:</span> {{ data.customer.address }}</p>
-                    <p v-if="data.customer?.tax_number" class="col-span-2"><span class="text-gray-500">{{ $t('company_profile.profile.vat_number') }}:</span> {{ data.customer.tax_number }}</p>
+                    <p v-if="isTaxEnabled() && data.customer?.tax_number" class="col-span-2"><span class="text-gray-500">{{ $t('company_profile.profile.vat_number') }}:</span> {{ data.customer.tax_number }}</p>
                 </div>
             </div>
             
@@ -154,15 +154,15 @@
                                 </td>
                                 <!-- Unit Price -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
-                                    {{ formatRawPrice(lineUnitPriceExclTax(item)) }}
+                                    {{ formatRawPrice(item.unit_price || 0) }}
                                 </td>
                                 <!-- Discount -->
                                 <td class="p-2 border border-gray-200 text-center font-mono text-red-600">
-                                    {{ lineDiscountExclTax(item) > 0 ? '- ' + formatRawPrice(lineDiscountExclTax(item)) : '-' }}
+                                    {{ lineDiscountDisplay(item) > 0 ? '- ' + formatRawPrice(lineDiscountDisplay(item)) : '-' }}
                                 </td>
-                                <!-- Amount (before VAT) -->
+                                <!-- Amount -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
-                                    {{ formatRawPrice(srvLineExclTax(item)) }}
+                                    {{ formatRawPrice(showExclusive ? srvLineExclTax(item) : srvLineTotal(item)) }}
                                 </td>
                                 <!-- VAT -->
                                 <td v-if="hasServicesVat" class="p-2 border border-gray-200 text-center font-mono text-gray-500">
@@ -205,7 +205,7 @@
                                 <th class="p-2 border border-gray-700 w-20 text-center">
                                     {{ isRtl ? (['purchase_invoice', 'purchase_return'].includes(documentType) ? 'الكمية المستلمة' : 'الكمية') : (['purchase_invoice', 'purchase_return'].includes(documentType) ? 'Received Qty' : 'Qty') }}
                                 </th>
-                                <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المجموع الفرعي' : 'Subtotal' }}</th>
+                                <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المبلغ' : 'Amount' }}</th>
                                 <th v-if="hasPartsVat" class="p-2 border border-gray-700 w-20 text-center">{{ isRtl ? 'ضريبة (VAT)' : 'VAT' }}</th>
                                 <th class="p-2 border border-gray-700 w-22 text-center">{{ isRtl ? 'المجموع' : 'Total' }}</th>
                             </tr>
@@ -219,15 +219,15 @@
                                 </td>
                                 <!-- Unit Price -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
-                                    {{ formatRawPrice(lineUnitPriceExclTax(item)) }}
+                                    {{ formatRawPrice(item.unit_price || 0) }}
                                 </td>
                                 <!-- Discount -->
                                 <td class="p-2 border border-gray-200 text-center font-mono text-red-600">
-                                    {{ lineDiscountExclTax(item) > 0 ? '- ' + formatRawPrice(lineDiscountExclTax(item)) : '-' }}
+                                    {{ lineDiscountDisplay(item) > 0 ? '- ' + formatRawPrice(lineDiscountDisplay(item)) : '-' }}
                                 </td>
                                 <!-- Net Unit Price (Optional Column) -->
                                 <td v-if="['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(documentType)" class="p-2 border border-gray-200 text-center font-mono">
-                                    {{ formatRawPrice(lineUnitPriceExclTax(item) - (lineDiscountExclTax(item) / (item.qty || 1))) }}
+                                    {{ formatRawPrice(lineSubtotalDisplay(item) / (item.qty || 1)) }}
                                 </td>
                                 <!-- Qty -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
@@ -235,7 +235,7 @@
                                 </td>
                                 <!-- Subtotal (excl. VAT) -->
                                 <td class="p-2 border border-gray-200 text-center font-mono">
-                                    {{ formatRawPrice(partLineExclTax(item)) }}
+                                    {{ formatRawPrice(showExclusive ? partLineExclTax(item) : partLineTotal(item)) }}
                                 </td>
                                 <!-- VAT -->
                                 <td v-if="hasPartsVat" class="p-2 border border-gray-200 text-center font-mono text-gray-500">
@@ -580,6 +580,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { usePage } from '@inertiajs/vue3';
 import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
 
 const { locale } = useI18n();
@@ -617,6 +618,22 @@ const showPricingColumns = computed(() => {
     const hiddenTypes = ['work_order', 'checklist', 'job_card', 'condition_report'];
     return !hiddenTypes.includes(props.documentType);
 });
+
+const showExclusive = computed(() => {
+    if (props.data.pricing_mode_snapshot !== 'inclusive') {
+        return true;
+    }
+    const page = usePage();
+    const taxSettings = page.props?.tenant?.tax_settings;
+    return taxSettings?.show_amount_before_vat ?? true;
+});
+
+function lineDiscountDisplay(item) {
+    // الخصم يُطبَّق على قيمة الخدمة الكاملة (شاملة الضريبة)
+    // لا يتغير بتغيير وضع عرض الضريبة — يبقى بقيمته الأصلية
+    return item.discount || 0;
+}
+
 
 // Status label map
 function getStatusLabel(status) {
@@ -708,6 +725,9 @@ function lineDiscountExclTax(item) {
 
 // Services (qty is always 1 for labor lines)
 function srvLineTotal(item) {
+    if (item.line_total_incl_tax !== undefined && item.line_total_incl_tax !== null) {
+        return Number(item.line_total_incl_tax);
+    }
     const qty = 1;
     const price = item.unit_price || 0;
     const discount = item.discount || 0;
@@ -722,6 +742,9 @@ function srvLineTotal(item) {
 }
 
 function srvLineVat(item) {
+    if (item.tax_amount !== undefined && item.tax_amount !== null) {
+        return Number(item.tax_amount);
+    }
     if (!isTaxEnabled() || item.is_taxable === false) return 0;
     const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
     
@@ -734,6 +757,9 @@ function srvLineVat(item) {
 }
 
 function srvLineExclTax(item) {
+    if (item.line_total_excl_tax !== undefined && item.line_total_excl_tax !== null) {
+        return Number(item.line_total_excl_tax);
+    }
     if (props.data.pricing_mode_snapshot === 'inclusive') {
         return srvLineTotal(item) - srvLineVat(item);
     } else {
@@ -745,6 +771,9 @@ function srvLineExclTax(item) {
 
 // Parts (qty can be > 1)
 function partLineTotal(item) {
+    if (item.line_total_incl_tax !== undefined && item.line_total_incl_tax !== null) {
+        return Number(item.line_total_incl_tax);
+    }
     const qty = item.qty || 1;
     const price = item.unit_price || 0;
     const discount = item.discount || 0;
@@ -759,6 +788,9 @@ function partLineTotal(item) {
 }
 
 function partLineVat(item) {
+    if (item.tax_amount !== undefined && item.tax_amount !== null) {
+        return Number(item.tax_amount);
+    }
     if (!isTaxEnabled() || item.is_taxable === false) return 0;
     const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
     
@@ -771,6 +803,9 @@ function partLineVat(item) {
 }
 
 function partLineExclTax(item) {
+    if (item.line_total_excl_tax !== undefined && item.line_total_excl_tax !== null) {
+        return Number(item.line_total_excl_tax);
+    }
     if (props.data.pricing_mode_snapshot === 'inclusive') {
         return partLineTotal(item) - partLineVat(item);
     } else {
@@ -901,18 +936,34 @@ const totals = computed(() => {
     if (props.data.total_incl_tax !== undefined && props.data.total_incl_tax !== null) {
         const total = Number(props.data.total_incl_tax || 0);
         const vat = Number(props.data.total_tax || 0);
-        const subtotalAfterDiscount = Number(props.data.total_excl_tax || 0);
         
         // Sum discount from items to show in the discount row if present, or use global discount if provided
-        let discount = Number(props.data.discount_amount || props.data.discount || 0);
-        if (discount === 0) {
+        let discountVal = Number(props.data.discount_amount || props.data.discount || 0);
+        if (discountVal === 0) {
             const items = props.data.items || [];
             items.forEach(item => {
-                discount += Number(item.discount || 0);
+                discountVal += Number(item.discount || 0);
             });
         }
 
-        const subtotal = subtotalAfterDiscount + discount;
+        const isInclusive = props.data.pricing_mode_snapshot === 'inclusive';
+        let discount = discountVal;
+        let subtotal = 0;
+
+        if (isInclusive) {
+            if (showExclusive.value) {
+                // الخصم يبقى بقيمته الكاملة (شامل الضريبة) — لا يُقسم على معامل الضريبة
+                discount = discountVal;
+                subtotal = Number(props.data.total_excl_tax || 0) + discountVal;
+            } else {
+                discount = discountVal;
+                subtotal = total - vat + discountVal;
+            }
+        } else {
+            discount = discountVal;
+            subtotal = Number(props.data.total_excl_tax || 0) + discount;
+        }
+
         const paid = Number(props.data.total_paid !== undefined ? props.data.total_paid : 0);
         const balance = Number(props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0));
 
@@ -927,38 +978,61 @@ const totals = computed(() => {
     }
 
     const items = props.data.items || dummyItems;
-    let subtotal = 0;
-    let discount = 0;
-    let vat = 0;
+    let grossSubtotal = 0;
+    let discountAmt = 0;
+    let taxAmt = 0;
+    let totalAmt = 0;
     
     const taxEnabled = isTaxEnabled();
+    const isInclusive = props.data.pricing_mode_snapshot === 'inclusive';
 
     items.forEach(item => {
         const itemQty = item.qty || 1;
         const itemPrice = item.unit_price || 0;
         const itemDiscount = item.discount || 0;
+        const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
 
-        subtotal += itemPrice * itemQty;
-        discount += itemDiscount;
+        let lineTotal = 0;
+        let lineTax = 0;
+        let lineExcl = 0;
+        let lineDisc = 0;
 
-        if (taxEnabled && item.is_taxable !== false) {
-            const lineExclTax = Math.max((itemPrice * itemQty) - itemDiscount, 0);
-            const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
-            vat += lineExclTax * rate;
+        if (isInclusive) {
+            lineTotal = Math.max(itemPrice * itemQty - itemDiscount, 0);
+            if (taxEnabled && item.is_taxable !== false) {
+                lineTax = lineTotal - (lineTotal / (1 + rate));
+            }
+            lineExcl = lineTotal - lineTax;
+            lineDisc = taxEnabled && item.is_taxable !== false ? (itemDiscount / (1 + rate)) : itemDiscount;
+        } else {
+            lineExcl = Math.max(itemPrice * itemQty - itemDiscount, 0);
+            if (taxEnabled && item.is_taxable !== false) {
+                lineTax = lineExcl * rate;
+            }
+            lineTotal = lineExcl + lineTax;
+            lineDisc = itemDiscount;
+        }
+
+        taxAmt += lineTax;
+        totalAmt += lineTotal;
+
+        if (showExclusive.value) {
+            grossSubtotal += lineExcl + lineDisc;
+            discountAmt += lineDisc;
+        } else {
+            grossSubtotal += (itemPrice * itemQty);
+            discountAmt += itemDiscount;
         }
     });
 
-    const subtotalAfterDiscount = Math.max(subtotal - discount, 0);
-    const total = subtotalAfterDiscount + vat;
-
     const paid = props.data.total_paid !== undefined ? props.data.total_paid : 0;
-    const balance = props.data.balance !== undefined ? props.data.balance : Math.max(total - paid, 0);
+    const balance = props.data.balance !== undefined ? props.data.balance : Math.max(totalAmt - paid, 0);
 
     return {
-        subtotal,
-        discount,
-        vat,
-        total,
+        subtotal: grossSubtotal,
+        discount: discountAmt,
+        vat: taxAmt,
+        total: totalAmt,
         paid,
         balance
     };

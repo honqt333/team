@@ -755,8 +755,14 @@ class WorkOrderController
             'department_id' => 'exists:departments,id',
         ]);
 
-        // Sync without detaching
-        $work_order->departments()->syncWithoutDetaching([$validated['department_id']]);
+        // Check if already attached to avoid unique constraint violation
+        $alreadyAttached = $work_order->departments()
+            ->where('department_id', $validated['department_id'])
+            ->exists();
+
+        if (!$alreadyAttached) {
+            $work_order->departments()->attach($validated['department_id']);
+        }
 
         return redirect()->back()->with('success', __('messages.department_added'));
     }

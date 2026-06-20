@@ -54,7 +54,7 @@
                                     <th class="px-4 py-3">{{ $t('inventory.parts.unit_price') }}</th>
                                     <th class="px-4 py-3">{{ $t('quotes.service_modal.discount') }}</th>
                                     <th class="px-4 py-3">{{ $t('work_orders.item.qty') }}</th>
-                                    <th class="px-4 py-3">{{ $t('quotes.service_modal.total_cost') }}</th>
+                                    <th class="px-4 py-3">{{ $t('common.amount') }}</th>
                                     <th class="px-4 py-3">{{ $t('common.vat') }}</th>
                                     <th class="px-4 py-3 w-16">{{ $t('common.actions') }}</th>
                                 </tr>
@@ -67,9 +67,9 @@
                                         <div class="text-xs text-gray-500 font-mono">{{ item.part_number }}</div>
                                     </td>
                                     <td class="px-4 py-3 font-mono">{{ formatCurrency(item.unit_price) }}</td>
-                                    <td class="px-4 py-3 font-mono text-red-500">{{ formatCurrency(item.discount) }}</td>
+                                    <td class="px-4 py-3 font-mono text-red-500">{{ formatCurrency(getItemDiscountToShow(item)) }}</td>
                                     <td class="px-4 py-3 font-mono">{{ item.qty }}</td>
-                                    <td class="px-4 py-3 font-mono font-bold">{{ formatCurrency(item.total) }}</td>
+                                    <td class="px-4 py-3 font-mono font-bold">{{ formatCurrency(getItemTotalToShow(item)) }}</td>
                                     <td class="px-4 py-3 font-mono">{{ formatCurrency(item.tax_amount) }}</td>
                                     <td class="px-4 py-3">
                                         <Tooltip :content="$t('common.delete')">
@@ -154,8 +154,8 @@
                                 <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.subtotal') }}</span>
                                 <span class="font-mono font-bold dark:text-white">{{ formatCurrency(totals.subtotal) }}</span>
                             </div>
-                            <div v-if="totals.tax > 0" class="flex justify-between text-sm">
-                                <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.tax') }} ({{ $page.props.settings?.tax_rate || 15 }}%)</span>
+                            <div v-if="settings.vat_enabled && totals.tax > 0" class="flex justify-between text-sm">
+                                <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.tax') }} ({{ settings.parts_vat_rate ?? settings.vat_rate ?? 15 }}%)</span>
                                 <span class="font-mono font-bold text-red-500">{{ formatCurrency(totals.tax) }}</span>
                             </div>
                             <div class="pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between">
@@ -255,15 +255,15 @@ const showPaymentModal = ref(false);
 const localCustomers = ref([...props.customers]);
 
 // Ensure settings exist and fallback to sane defaults
-const settings = computed(() => page.props.settings || {});
+const settings = computed(() => page.props.tenant?.tax_settings || {});
 
 // Create a mock workOrder to pass to the PartModal so it uses correct tax settings
 const mockWorkOrderForTax = computed(() => {
     return {
         id: 0,
-        tax_enabled_snapshot: settings.value.tax_enabled ?? true,
-        pricing_mode_snapshot: settings.value.prices_include_tax ? 'inclusive' : 'exclusive',
-        tax_rate_snapshot: settings.value.tax_rate ?? 15,
+        tax_enabled_snapshot: settings.value.vat_enabled ?? true,
+        pricing_mode_snapshot: settings.value.parts_inclusive ? 'inclusive' : 'exclusive',
+        tax_rate_snapshot: Number(settings.value.parts_vat_rate ?? settings.value.vat_rate ?? 15),
         status: 'draft'
     };
 });
@@ -283,6 +283,32 @@ const customerOptions = computed(() => {
     }));
 });
 
+const showExclusive = computed(() => {
+    const isInclusive = settings.value.parts_inclusive ?? false;
+    return !isInclusive || (settings.value.show_amount_before_vat ?? true);
+});
+
+const getItemDiscountToShow = (item) => {
+    const disc = parseFloat(item.discount) || 0;
+    const isInclusive = settings.value.parts_inclusive ?? false;
+    const rate = Number(settings.value.parts_vat_rate ?? settings.value.vat_rate ?? 15) / 100;
+    
+    if (isInclusive && showExclusive.value) {
+        return disc / (1 + rate);
+    }
+    return disc;
+};
+
+const getItemTotalToShow = (item) => {
+    const isInclusive = settings.value.parts_inclusive ?? false;
+    if (isInclusive && showExclusive.value) {
+        const itemGrandTotal = parseFloat(item.grand_total) || 0;
+        const itemTax = parseFloat(item.tax_amount) || 0;
+        return itemGrandTotal - itemTax;
+    }
+    return parseFloat(item.total) || 0;
+};
+
 // Totals Calculation
 const totals = computed(() => {
     let subtotal = 0;
@@ -291,7 +317,7 @@ const totals = computed(() => {
     let paid = 0;
 
     form.items.forEach(item => {
-        subtotal += parseFloat(item.total) || 0;
+        subtotal += getItemTotalToShow(item);
         tax += parseFloat(item.tax_amount) || 0;
         grandTotal += parseFloat(item.grand_total) || 0;
     });

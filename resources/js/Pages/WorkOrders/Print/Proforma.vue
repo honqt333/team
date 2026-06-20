@@ -57,7 +57,7 @@ const props = defineProps({
 });
 
 const page = usePage();
-const { locale } = useI18n();
+const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
 const goBack = () => window.history.back();
@@ -80,14 +80,38 @@ const mappedData = computed(() => {
     const vehicleStr = `${make} ${model}`.trim() || '-';
 
     // Map services
-    const services = (props.workOrder.items || []).map(item => ({
-        service_name: item.title || item.service?.name_ar || item.service?.name_en || '',
-        description: item.description || '',
-        qty: item.qty || 1,
-        unit_price: item.unit_price || 0,
-        discount: getDiscount(item),
-        is_part: false
-    }));
+    const services = (props.workOrder.items || []).map(item => {
+        let serviceName = item.title || item.service?.name_ar || item.service?.name_en || '';
+        if (item.warranty_value_snapshot && item.warranty_unit_snapshot) {
+            const warrantyLabel = t('services_management.columns.warranty');
+            let unitLabel = t(`services_management.warranty_units.${item.warranty_unit_snapshot}`);
+            const val = item.warranty_value_snapshot;
+            if (isRtl.value) {
+                if (val >= 3 && val <= 10) {
+                    if (item.warranty_unit_snapshot === 'days') unitLabel = 'أيام';
+                    if (item.warranty_unit_snapshot === 'weeks') unitLabel = 'أسابيع';
+                    if (item.warranty_unit_snapshot === 'months') unitLabel = 'أشهر';
+                    if (item.warranty_unit_snapshot === 'years') unitLabel = 'سنوات';
+                }
+            } else {
+                if (val > 1) {
+                    if (item.warranty_unit_snapshot === 'days') unitLabel = 'days';
+                    if (item.warranty_unit_snapshot === 'weeks') unitLabel = 'weeks';
+                    if (item.warranty_unit_snapshot === 'months') unitLabel = 'months';
+                    if (item.warranty_unit_snapshot === 'years') unitLabel = 'years';
+                }
+            }
+            serviceName += ` - ${warrantyLabel} ${item.warranty_value_snapshot} ${unitLabel}`;
+        }
+        return {
+            service_name: serviceName,
+            description: item.description || '',
+            qty: item.qty || 1,
+            unit_price: item.unit_price || 0,
+            discount: getDiscount(item),
+            is_part: false
+        };
+    });
 
     // Map parts
     const parts = (props.allParts || [])
@@ -122,7 +146,7 @@ const mappedData = computed(() => {
             plate: props.workOrder.vehicle?.plate_number,
             color: props.workOrder.vehicle?.color,
         },
-        tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot,
+        tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot && (props.taxSettings?.vat_enabled ?? true),
         total_excl_tax: props.grandTotal ?? 0,
         total_tax: 0,
         total_incl_tax: props.grandTotal ?? 0,

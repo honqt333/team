@@ -47,9 +47,10 @@ class CreateWorkOrderAction
                 }
             }
 
-            // Attach departments
+            // Attach departments (syncWithoutDetaching prevents duplicates)
             if (!empty($data['departments'])) {
-                $workOrder->departments()->attach($data['departments']);
+                $uniqueDepts = array_values(array_unique($data['departments']));
+                $workOrder->departments()->syncWithoutDetaching($uniqueDepts);
             }
 
             // Create damage marks
