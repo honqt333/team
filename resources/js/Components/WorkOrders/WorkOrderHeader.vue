@@ -41,7 +41,7 @@
             <!-- Status Change Buttons -->
             <div v-if="!['done', 'cancelled'].includes(workOrder.status)" class="flex items-center gap-2">
                 <!-- Start Work button (Open -> In Progress) -->
-                <template v-if="workOrder.status === 'open' && (workOrder.items || []).length > 0">
+                <template v-if="workOrder.status === 'open' && (workOrder.items || []).some(item => item.status === 'pending')">
                     <button @click="emit('change-status', 'start')"
                         class="flex items-center gap-2 px-5 py-2.5 bg-amber-500 text-white rounded-2xl font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

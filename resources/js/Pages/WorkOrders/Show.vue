@@ -106,220 +106,28 @@
                     </div>
 
                     <!-- Photos Tab -->
-                    <div v-if="activeTab === 'photos'" key="tab-photos" class="space-y-4">
-                        <!-- Toolbar: Title & Add Button next to it -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                            <div class="flex items-center gap-4">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <span class="text-xl">📸</span>
-                                    {{ $t('work_orders.show.tabs.photos') }}
-                                </h3>
-
-                                <button v-if="!isReadOnly" @click="showPhotoModal = true"
-                                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    {{ $t('common.add') }}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div v-if="workOrder.photos?.length" class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div v-for="photo in workOrder.photos" :key="photo.id"
-                                class="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
-                                <img :src="`/storage/${photo.path}`" class="w-full h-full object-cover" />
-
-                                <!-- Hover Overlay with Actions -->
-                                <div
-                                    class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-3">
-                                    <!-- View Button -->
-                                    <a :href="`/storage/${photo.path}`" target="_blank"
-                                        class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-all"
-                                        :title="$t('common.view')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </a>
-                                    <!-- Download Button -->
-                                    <a :href="`/storage/${photo.path}`" :download="photo.path.split('/').pop()"
-                                        class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center text-white transition-all"
-                                        :title="$t('common.download')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                                        </svg>
-                                    </a>
-                                    <!-- Delete Button -->
-                                    <button v-if="!isReadOnly" type="button" @click="deletePhoto(photo)"
-                                        class="w-10 h-10 rounded-full bg-red-500/80 hover:bg-red-600 flex items-center justify-center text-white transition-all"
-                                        :title="$t('common.delete')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Photo Info Overlay -->
-                                <div
-                                    class="absolute inset-x-0 bottom-0 bg-black/60 p-2 text-white text-xs backdrop-blur-sm">
-                                    <p class="font-bold uppercase">{{ $t(`work_orders.photos.types.${photo.type}`) }}
-                                    </p>
-                                    <p v-if="photo.caption" class="truncate">{{ photo.caption }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                                <span class="text-2xl">📸</span>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.photos.no_photos') }}</p>
-                        </div>
+                    <div v-if="activeTab === 'photos'" key="tab-photos">
+                        <WorkOrderPhotosTab
+                            :photos="workOrder.photos || []"
+                            :is-read-only="isReadOnly"
+                            @add="showPhotoModal = true"
+                            @delete="deletePhoto"
+                        />
                     </div>
 
                     <!-- Activities Tab -->
-                    <div v-if="activeTab === 'activities'" key="tab-activities" class="space-y-6">
-                        <div v-if="workOrder.activities?.length" class="relative">
-                            <!-- Timeline Line -->
-                            <div class="absolute start-8 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700"></div>
-
-                            <div class="space-y-8 relative">
-                                <div v-for="activity in workOrder.activities" :key="activity.id" class="flex gap-4">
-                                    <!-- Icon/Marker -->
-                                    <div class="w-16 flex justify-center flex-shrink-0 relative">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-white dark:bg-gray-800 border-2 border-indigo-500 flex items-center justify-center z-10 shadow-sm">
-                                            <span v-if="activity.action === 'created'">🆕</span>
-                                            <span v-else-if="activity.action === 'status_changed'">🔄</span>
-                                            <span v-else-if="activity.action === 'item_added'">🔧</span>
-                                            <span v-else-if="activity.action === 'item_updated'">📝</span>
-                                            <span v-else-if="activity.action === 'item_deleted'">🗑️</span>
-                                            <span v-else-if="activity.action === 'payment_added'">💰</span>
-                                            <span v-else-if="activity.action === 'condition_updated'">🚗</span>
-                                            <span v-else-if="activity.action === 'photos_uploaded'">📸</span>
-                                            <span v-else-if="activity.action === 'attachments_uploaded'">📎</span>
-                                            <span v-else-if="activity.action.includes('part')">🔩</span>
-                                            <span v-else-if="activity.action.includes('technician')">👷</span>
-                                            <span v-else>📝</span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Content -->
-                                    <div
-                                        class="flex-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
-                                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-                                            <h4 class="text-sm font-bold text-gray-900 dark:text-white">
-                                                {{ getActivityDescription(activity) }}
-                                            </h4>
-                                            <span class="text-xs text-gray-400 font-medium">{{
-                                                formatDateTime(activity.created_at)
-                                                }}</span>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <div
-                                                class="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-[10px] font-bold">
-                                                {{ activity.user?.name?.charAt(0) }}
-                                            </div>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">
-                                                {{ activity.user?.name || $t('common.system') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                                <span class="text-2xl">📋</span>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('work_orders.activities.no_activities') }}
-                            </p>
-                        </div>
+                    <div v-if="activeTab === 'activities'" key="tab-activities">
+                        <WorkOrderActivitiesTab :activities="workOrder.activities || []" />
                     </div>
 
                     <!-- Attachments Tab -->
-                    <div v-if="activeTab === 'attachments'" key="tab-attachments" class="space-y-4">
-                        <!-- Toolbar: Title & Add Button next to it -->
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                            <div class="flex items-center gap-4">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                                    <span class="text-xl">📎</span>
-                                    {{ $t('work_orders.show.tabs.attachments') }}
-                                </h3>
-
-                                <button v-if="!isReadOnly" @click="showAttachmentModal = true"
-                                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-indigo-100 dark:shadow-none">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    {{ $t('common.add') }}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div v-if="workOrder.attachments?.length"
-                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <div v-for="attachment in workOrder.attachments" :key="attachment.id"
-                                class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div
-                                        class="w-12 h-12 rounded-lg bg-gray-50 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
-                                        <svg v-if="attachment.file_type === 'pdf'" class="w-6 h-6 text-red-500"
-                                            fill="currentColor" viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5z" />
-                                        </svg>
-                                        <svg v-else class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                        </svg>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <p class="text-sm font-bold text-gray-900 dark:text-white truncate"
-                                            :title="attachment.file_name">{{ attachment.file_name }}</p>
-                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                                            {{ formatFileSize(attachment.file_size) }} • {{ attachment.user?.name }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-1">
-                                    <a :href="`/storage/${attachment.path}`" target="_blank"
-                                        class="p-2 text-gray-400 hover:text-indigo-500 transition-colors"
-                                        :title="$t('common.view')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </a>
-                                    <button v-if="!isReadOnly" type="button" @click="deleteAttachment(attachment)"
-                                        class="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                                        :title="$t('common.delete')">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div v-else class="text-center py-12">
-                            <div
-                                class="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                                <span class="text-2xl">📎</span>
-                            </div>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.no_data') }}</p>
-                        </div>
+                    <div v-if="activeTab === 'attachments'" key="tab-attachments">
+                        <WorkOrderAttachmentsTab
+                            :attachments="workOrder.attachments || []"
+                            :is-read-only="isReadOnly"
+                            @add="showAttachmentModal = true"
+                            @delete="deleteAttachment"
+                        />
                     </div>
 
                     <div v-if="activeTab === 'inspections'" key="tab-inspections">
@@ -571,7 +379,13 @@ import WorkOrderComplaintAssessment from '@/Components/WorkOrders/WorkOrderCompl
 import WorkOrderTabsContainer from '@/Components/WorkOrders/WorkOrderTabsContainer.vue';
 import WorkOrderServicesTab from '@/Components/WorkOrders/WorkOrderServicesTab.vue';
 import WorkOrderNotesTab from '@/Components/WorkOrders/WorkOrderNotesTab.vue';
+import WorkOrderPhotosTab from '@/Components/WorkOrders/WorkOrderPhotosTab.vue';
+import WorkOrderActivitiesTab from '@/Components/WorkOrders/WorkOrderActivitiesTab.vue';
+import WorkOrderAttachmentsTab from '@/Components/WorkOrders/WorkOrderAttachmentsTab.vue';
 import BaseModal from '@/Components/BaseModal.vue';
+import { PACKAGES_DEPT_KEY, useWorkOrderItems } from '@/Composables/useWorkOrderItems';
+import { useWorkOrderStatus } from '@/Composables/useWorkOrderStatus';
+import { useWorkOrderNotes } from '@/Composables/useWorkOrderNotes';
 
 const props = defineProps({
     workOrder: Object,
@@ -589,13 +403,10 @@ const props = defineProps({
     enableSystematicInspections: { type: Boolean, default: true },
 });
 
-const { t, te } = useI18n();
-const { getName } = useLocalized();
+const { t } = useI18n();
 const { formatNumber, formatCurrency } = useNumberFormat();
 const {
     formatDate,
-    formatDateTime,
-    formatFileSize,
     getUserRoleName,
     getNoteDate,
     getNoteTime,
@@ -610,30 +421,8 @@ function formatPrice(value) {
     return formatCurrency(value) + ' ' + t('common.currency');
 }
 
-function getActivityDescription(activity) {
-    const key = `work_orders.activities.actions.${activity.action}`;
-    if (!te(key)) {
-        return activity.description;
-    }
-    const translation = t(key);
-    if (translation.includes(':') || translation.includes('{')) {
-        return activity.description;
-    }
-    return translation;
-}
-
-// Sentinel keys used inside the `itemsByDepartment` map. The controller
-// groups items either by department id (positive int) or by these two
-// virtual buckets: "packages" (service bundles) and "0" (legacy/unassigned).
-// Centralizing them prevents typos when reading the map and when comparing
-// to the same key in the template.
-const PACKAGES_DEPT_KEY = 'packages';
-const UNASSIGNED_DEPT_KEY = '0';
-
 const showEditModal = ref(false);
 const activeTab = ref('services');
-const showDeptMenu = ref(false);
-const expandedDepartments = ref([]);
 const showAddPartModal = ref(false);
 const showPrintModal = ref(false);
 const showPaymentsListModal = ref(false);
@@ -644,6 +433,167 @@ const showIssueMoreModal = ref(false);
 const editingIssueMorePart = ref(null);
 const showReturnModal = ref(false);
 const editingReturnPart = ref(null);
+
+// ─── Totals (moved up so composables can reference workOrderBalance) ──────────
+const totals = computed(() => {
+    const t = {
+        services: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
+        parts: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
+        grand: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
+    };
+
+    const isInclusive = props.workOrder?.pricing_mode_snapshot === 'inclusive';
+    const taxRate = Number(props.workOrder?.tax_rate_snapshot || 15);
+    const taxFactor = 1 + (taxRate / 100);
+    const taxEnabled = !!props.workOrder?.tax_enabled_snapshot;
+
+    if (props.workOrder?.items && props.workOrder.items.length > 0) {
+        props.workOrder.items.forEach(line => {
+            const price = Number(line.unit_price || 0) * Number(line.qty || 1);
+            const discount = Number(line.discount_amount || 0);
+            let amount = price - discount;
+            let calculatedTax = Number(line.tax_amount || 0);
+            let total = Number(line.line_total || price);
+
+            if (taxEnabled) {
+                if (isInclusive) {
+                    amount = (price - discount) / taxFactor;
+                    calculatedTax = (price - discount) - amount;
+                } else if (calculatedTax === 0) {
+                    calculatedTax = amount * (taxRate / 100);
+                    total = amount + calculatedTax;
+                }
+            }
+
+            if (!line.line_total) {
+                total = isInclusive ? (price - discount) : (amount + calculatedTax);
+            }
+
+            t.services.price += price;
+            t.services.discount += discount;
+            t.services.tax += calculatedTax;
+            t.services.total += total;
+            t.services.amount += amount;
+        });
+    }
+
+    if (props.workOrder?.parts && props.workOrder.parts.length > 0) {
+        props.workOrder.parts.forEach(part => {
+            const partQty = Number(part.qty || 0);
+            const partUnitPrice = Number(part.unit_price || 0);
+            const partDiscount = Number(part.discount || 0);
+            const partPrice = partQty * partUnitPrice;
+            const partNet = partPrice - partDiscount;
+
+            t.parts.price += partPrice;
+            t.parts.discount += partDiscount;
+
+            let partAmount = partNet;
+            let partTax = 0;
+
+            if (taxEnabled) {
+                if (isInclusive) {
+                    partAmount = partNet / taxFactor;
+                    partTax = partNet - partAmount;
+                } else {
+                    partTax = partNet * (taxRate / 100);
+                }
+            }
+
+            t.parts.amount += partAmount;
+            t.parts.tax += partTax;
+            t.parts.total += partTax + partAmount;
+        });
+    }
+
+    t.grand.price = t.services.price + t.parts.price;
+    t.grand.discount = t.services.discount + t.parts.discount;
+    t.grand.amount = t.services.amount + t.parts.amount;
+    t.grand.tax = t.services.tax + t.parts.tax;
+    t.grand.total = t.services.total + t.parts.total;
+
+    return t;
+});
+
+const workOrderTotal = computed(() => totals.value.grand.total);
+
+const workOrderTotalPaid = computed(() => {
+    return props.workOrder.payments?.reduce((sum, p) => {
+        const amount = parseFloat(p.amount || 0);
+        return p.type === 'refund' ? sum - amount : sum + amount;
+    }, 0) || 0;
+});
+
+const workOrderBalance = computed(() => workOrderTotal.value - workOrderTotalPaid.value);
+
+// ─── Composable layer ──────────────────────────────────────────────────────────
+const items = useWorkOrderItems({
+    workOrder: props.workOrder,
+    itemsByDepartment: props.itemsByDepartment,
+    departments: props.departments,
+    services: props.services,
+});
+
+const status = useWorkOrderStatus({
+    workOrder: props.workOrder,
+    workOrderBalance,
+});
+
+const notes = useWorkOrderNotes({
+    workOrder: props.workOrder,
+    services: props.services,
+});
+
+// Re-export for template (Vue auto-unwraps top-level refs/computeds)
+const {
+    isReadOnly,
+    showExitModal,
+    exitDate,
+    exitNotes,
+    isDeferred,
+    dueDate,
+    cancelExit,
+    confirmExit,
+    showHoldModal,
+    holdReason,
+    cancelHold,
+    confirmHold,
+    changeStatus,
+} = status;
+
+const {
+    displayDepartments,
+    availableDepartments,
+    addDepartment,
+    removeDepartment,
+} = items;
+
+const {
+    showAddNoteModal,
+    newNoteContent,
+    isSubmittingNote,
+    showServiceModal,
+    showItemModal,
+    selectedItemId,
+    selectedDepartmentId,
+    serviceModalInitialTab,
+    selectedItem,
+    departmentServices,
+    allNotes,
+    handleAddNote,
+    handleDeleteNote,
+    openAddServiceModal,
+    openEditServiceModal,
+    openServiceNotesModal,
+    openServicePartsModal,
+    openServiceTechniciansModal,
+    handlePartServiceClick,
+    closeServiceModal,
+    closeItemModal,
+    handleServiceSaved,
+    handleItemSaved,
+} = notes;
+// ─────────────────────────────────────────────────────────────────────────────
 
 function openAddPartModal() {
     selectedPartToEdit.value = null;
@@ -664,12 +614,6 @@ function closeAddPartModal() {
     showAddPartModal.value = false;
     selectedPartToEdit.value = null;
 }
-
-// Read-only mode for closed work orders
-const isReadOnly = computed(() => {
-    const closedStatuses = ['done', 'cancelled', 'closed', 'on_hold'];
-    return closedStatuses.includes(props.workOrder.status);
-});
 
 // All parts from the work order (using the loaded relationship)
 const allWorkOrderParts = computed(() => {
@@ -718,108 +662,7 @@ const hasTax = computed(() => {
     return !!props.workOrder?.tax_enabled_snapshot;
 });
 
-const totals = computed(() => {
-    const t = {
-        services: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
-        parts: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
-        grand: { price: 0, discount: 0, amount: 0, tax: 0, total: 0 },
-    };
-
-    const isInclusive = props.workOrder?.pricing_mode_snapshot === 'inclusive';
-    const taxRate = Number(props.workOrder?.tax_rate_snapshot || 15);
-    const taxFactor = 1 + (taxRate / 100);
-    const taxEnabled = !!props.workOrder?.tax_enabled_snapshot;
-
-    // Services calculation
-    if (props.workOrder?.items && props.workOrder.items.length > 0) {
-        props.workOrder.items.forEach(line => {
-            const price = Number(line.unit_price || 0) * Number(line.qty || 1);
-            const discount = Number(line.discount_amount || 0);
-
-            let amount = price - discount;
-            let calculatedTax = Number(line.tax_amount || 0);
-            let total = Number(line.line_total || price);
-
-            // Compute frontend tax correctly if missing or for inclusive view separation
-            if (taxEnabled) {
-                if (isInclusive) {
-                    amount = (price - discount) / taxFactor;
-                    calculatedTax = (price - discount) - amount;
-                } else if (calculatedTax === 0) {
-                    calculatedTax = amount * (taxRate / 100);
-                    total = amount + calculatedTax;
-                }
-            }
-
-            // Always trust line_total if provided directly, otherwise compute
-            if (!line.line_total) {
-                total = isInclusive ? (price - discount) : (amount + calculatedTax);
-            }
-
-            t.services.price += price;
-            t.services.discount += discount;
-            t.services.tax += calculatedTax;
-            t.services.total += total;
-            t.services.amount += amount;
-        });
-    }
-
-    // Parts calculation (using unified parts relationship)
-    if (props.workOrder?.parts && props.workOrder.parts.length > 0) {
-        props.workOrder.parts.forEach(part => {
-            const partQty = Number(part.qty || 0);
-            const partUnitPrice = Number(part.unit_price || 0);
-            const partDiscount = Number(part.discount || 0);
-
-            const partPrice = partQty * partUnitPrice;
-            const partNet = partPrice - partDiscount;
-
-            t.parts.price += partPrice;
-            t.parts.discount += partDiscount;
-
-            let partAmount = partNet;
-            let partTax = 0;
-
-            if (taxEnabled) {
-                if (isInclusive) {
-                    partAmount = partNet / taxFactor;
-                    partTax = partNet - partAmount;
-                } else {
-                    partTax = partNet * (taxRate / 100);
-                }
-            }
-
-            t.parts.amount += partAmount;
-            t.parts.tax += partTax;
-            t.parts.total += partTax + partAmount;
-        });
-    }
-
-    t.grand.price = t.services.price + t.parts.price;
-    t.grand.discount = t.services.discount + t.parts.discount;
-    t.grand.amount = t.services.amount + t.parts.amount;
-    t.grand.tax = t.services.tax + t.parts.tax;
-    t.grand.total = t.services.total + t.parts.total;
-
-    return t;
-});
-
-const servicesTotal = computed(() => totals.value.services.total);
-const partsTotal = computed(() => totals.value.parts.total);
-const workOrderTotal = computed(() => totals.value.grand.total);
-
-const workOrderTotalPaid = computed(() => {
-    return props.workOrder.payments?.reduce((sum, p) => {
-        const amount = parseFloat(p.amount || 0);
-        return p.type === 'refund' ? sum - amount : sum + amount;
-    }, 0) || 0;
-});
-
-const workOrderBalance = computed(() => {
-    return workOrderTotal.value - workOrderTotalPaid.value;
-});
-
-// Refresh work order data
+// Refresh work order data// Refresh work order data
 function refreshWorkOrder() {
     router.reload({ only: ['workOrder'] });
 }
@@ -1001,188 +844,6 @@ function onPartSaved() {
     editingReturnPart.value = null;
 }
 
-// Get departments that have items or are linked to work order
-const displayDepartments = computed(() => {
-    const deptIds = new Set();
-
-    // Add departments with items
-    Object.keys(props.itemsByDepartment).forEach(id => {
-        if (id !== UNASSIGNED_DEPT_KEY && id !== PACKAGES_DEPT_KEY) deptIds.add(parseInt(id));
-    });
-
-    // Add work order's linked departments
-    props.workOrder.departments?.forEach(dept => deptIds.add(dept.id));
-
-    // Get database departments matching active list
-    const list = props.departments.filter(d => deptIds.has(d.id));
-
-    // Virtual packages section - only show if it has package items or show_packages_section is active
-    const packageItems = props.itemsByDepartment[PACKAGES_DEPT_KEY];
-    const hasPackageItems = packageItems && packageItems.length > 0;
-    const showPackagesSection = props.workOrder.show_packages_section;
-
-    if (hasPackageItems || showPackagesSection) {
-        list.push({
-            id: PACKAGES_DEPT_KEY,
-            name_ar: 'باقات الخدمات',
-            name_en: 'Service Packages',
-            is_virtual: true
-        });
-    }
-
-    return list;
-});
-
-// Departments that can still be added
-const availableDepartments = computed(() => {
-    const usedIds = displayDepartments.value.map(d => d.id);
-    const list = props.departments.filter(d => !usedIds.includes(d.id));
-
-    // Append virtual packages department if not added and available
-    const canEdit = !isReadOnly.value;
-    const hasAvailablePackages = props.services?.some(s => s.type === 'package');
-    if (canEdit && hasAvailablePackages && !usedIds.includes(PACKAGES_DEPT_KEY)) {
-        list.push({
-            id: PACKAGES_DEPT_KEY,
-            name_ar: 'باقات الخدمات',
-            name_en: 'Service Packages',
-            name: 'Service Packages'
-        });
-    }
-
-    return list;
-});
-
-// Get items for a specific department
-function getDepartmentItems(deptId) {
-    return props.itemsByDepartment[deptId] || [];
-}
-
-// Toggle department expansion
-function toggleDepartment(deptId) {
-    const idx = expandedDepartments.value.indexOf(deptId);
-    if (idx > -1) {
-        expandedDepartments.value.splice(idx, 1);
-    } else {
-        expandedDepartments.value.push(deptId);
-    }
-}
-
-// Add department to work order
-function addDepartment(deptId) {
-    showDeptMenu.value = false;
-    router.post(route('work-orders.departments.store', props.workOrder.id), {
-        department_id: deptId,
-    }, {
-        onSuccess: () => {
-            success(t('common.saved_success'));
-            if (!expandedDepartments.value.includes(deptId)) {
-                expandedDepartments.value.push(deptId);
-            }
-        },
-    });
-}
-
-// Service modal state
-const showServiceModal = ref(false);
-const selectedItemId = ref(null);
-const selectedDepartmentId = ref(null);
-
-const selectedItem = computed(() => {
-    if (!selectedItemId.value) return null;
-    return props.workOrder?.items?.find(i => i.id === selectedItemId.value) || null;
-});
-
-// Services filtered by department
-const departmentServices = computed(() => {
-    if (!selectedDepartmentId.value) return [];
-    if (selectedDepartmentId.value === PACKAGES_DEPT_KEY) {
-        return props.services.filter(s => s.type === 'package');
-    }
-    return props.services.filter(s => s.department_id === selectedDepartmentId.value && s.type !== 'package');
-});
-
-// Open add service modal
-function openAddServiceModal(deptId) {
-    if (isReadOnly.value) return;
-    selectedDepartmentId.value = deptId;
-    selectedItemId.value = null;
-    showServiceModal.value = true;
-}
-
-// Open edit service modal (advanced modal with tabs)
-function openEditServiceModal(item) {
-    selectedItemId.value = item.id;
-    serviceModalInitialTab.value = 'service';
-    showItemModal.value = true;
-}
-
-const serviceModalInitialTab = ref('service');
-
-function openServiceNotesModal(itemId) {
-    const item = props.workOrder.items.find(i => i.id === itemId);
-    if (item) {
-        selectedItemId.value = itemId;
-        serviceModalInitialTab.value = 'notes';
-        showItemModal.value = true;
-    }
-}
-
-function openServicePartsModal(itemId) {
-    const item = props.workOrder.items.find(i => i.id === itemId);
-    if (item) {
-        selectedItemId.value = itemId;
-        serviceModalInitialTab.value = 'parts';
-        showItemModal.value = true;
-    }
-}
-
-function openServiceTechniciansModal(itemId) {
-    const item = props.workOrder.items.find(i => i.id === itemId);
-    if (item) {
-        selectedItemId.value = itemId;
-        serviceModalInitialTab.value = 'technicians';
-        showItemModal.value = true;
-    }
-}
-
-function handlePartServiceClick(part) {
-    const itemId = part.work_order_item_id || part.work_order_item?.id || part.workOrderItem?.id;
-    if (itemId) {
-        openServicePartsModal(itemId);
-    }
-}
-
-// Close service modal
-function closeServiceModal() {
-    showServiceModal.value = false;
-    selectedItemId.value = null;
-    selectedDepartmentId.value = null;
-    serviceModalInitialTab.value = 'service';
-}
-
-// Handle service saved
-function handleServiceSaved() {
-    closeServiceModal();
-    success(t('common.saved_success'));
-    router.reload({ only: ['workOrder', 'itemsByDepartment'] });
-}
-
-// Item Modal state
-const showItemModal = ref(false);
-
-// Close item modal
-function closeItemModal() {
-    showItemModal.value = false;
-    selectedItemId.value = null;
-    serviceModalInitialTab.value = 'service';
-}
-
-// Handle item saved
-function handleItemSaved() {
-    router.reload({ only: ['workOrder', 'itemsByDepartment'] });
-}
-
 // Delete service item
 async function deleteServiceItem(item) {
     const confirmed = await confirm({
@@ -1199,83 +860,6 @@ async function deleteServiceItem(item) {
         });
     }
 }
-
-const showAddNoteModal = ref(false);
-const newNoteContent = ref('');
-const isSubmittingNote = ref(false);
-
-// Collect only general notes from work order general_notes relation (notes from services are not shown here)
-const allNotes = computed(() => {
-    const notes = props.workOrder?.general_notes || props.workOrder?.generalNotes || [];
-    return notes
-        .map(note => {
-            const serviceTitle = note.work_order_item
-                ? (getName(note.work_order_item.service) || note.work_order_item.title)
-                : '';
-            return {
-                id: note.id,
-                content: note.content,
-                created_at: note.created_at,
-                user: note.user,
-                item_id: note.work_order_item_id || null,
-                service_title_formatted: serviceTitle || t('work_orders.general_note'),
-            };
-        })
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-});
-// Filtering of notes by search query now lives inside WorkOrderNotesTab
-// (the tab owns its own `viewMode` + `searchQuery` state). Show.vue
-// still owns `allNotes` because it derives the `service_title_formatted`
-// field from the work-order tree, which is data the tab shouldn't touch.
-
-// Add a note (General Note)
-function handleAddNote() {
-    if (!newNoteContent.value.trim()) return;
-    
-    isSubmittingNote.value = true;
-    router.post(route('work-orders.notes.store', { 
-        work_order: props.workOrder.id
-    }), {
-        content: newNoteContent.value
-    }, {
-        preserveScroll: true,
-        preserveState: true,
-        onSuccess: () => {
-            newNoteContent.value = '';
-            showAddNoteModal.value = false;
-            success(t('common.saved_success'));
-        },
-        onFinish: () => {
-            isSubmittingNote.value = false;
-        }
-    });
-}
-
-// Delete a note
-async function handleDeleteNote(itemId, noteId) {
-    const confirmed = await confirm({
-        title: t('common.confirm_delete_title'),
-        message: t('common.confirm_delete_message'),
-        confirmText: t('common.delete'),
-        cancelText: t('common.cancel'),
-        type: 'danger',
-    });
-
-    if (confirmed) {
-        const deleteRoute = itemId 
-            ? route('work-orders.items.notes.destroy', { work_order: props.workOrder.id, item: itemId, note: noteId })
-            : route('work-orders.notes.destroy', { work_order: props.workOrder.id, note: noteId });
-
-        router.delete(deleteRoute, {
-            preserveScroll: true,
-            preserveState: true,
-            onSuccess: () => {
-                success(t('common.deleted_success'));
-            }
-        });
-    }
-}
-
 
 const tabs = computed(() => {
     const allTabs = [
@@ -1305,143 +889,5 @@ function handleSaved() {
     router.reload();
 }
 
-// Remove department
-async function removeDepartment(deptId) {
-    const confirmed = await confirm({
-        title: t('common.confirm_delete_title'),
-        message: t('common.confirm_delete_message'),
-        confirmText: t('common.delete'),
-        cancelText: t('common.cancel'),
-        type: 'danger',
-    });
-
-    if (confirmed) {
-        router.delete(route('work-orders.departments.destroy', { work_order: props.workOrder.id, department_id: deptId }), {
-            onSuccess: () => {
-                success(t('common.deleted_success'));
-            },
-        });
-    }
-}
-
-// ─── Vehicle Exit modal state ────────────────────────────────────────────────
-const showExitModal = ref(false);
-const exitDate = ref('');
-const exitNotes = ref('');
-const isDeferred = ref(false);
-const dueDate = ref('');
-
-function cancelExit() {
-    showExitModal.value = false;
-    exitDate.value = '';
-    exitNotes.value = '';
-    isDeferred.value = false;
-    dueDate.value = '';
-}
-
-function confirmExit() {
-    if (!exitDate.value) return;
-    if (isDeferred.value && !dueDate.value) return;
-    showExitModal.value = false;
-    router.post(route('work-orders.complete', props.workOrder.id), {
-        exit_date: exitDate.value,
-        notes: exitNotes.value,
-        is_deferred: isDeferred.value,
-        due_date: isDeferred.value ? dueDate.value : null,
-    }, {
-        onSuccess: () => {
-            success(t('common.saved_success'));
-            cancelExit();
-        },
-        onError: (err) => {
-            const msg = err.message || Object.values(err)[0] || t('common.error');
-            errorToast(msg);
-        },
-    });
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ─── Hold modal state ────────────────────────────────────────────────────────
-const showHoldModal = ref(false);
-const holdReason = ref('');
-
-function cancelHold() {
-    showHoldModal.value = false;
-    holdReason.value = '';
-}
-
-function confirmHold() {
-    if (!holdReason.value.trim()) return;
-    showHoldModal.value = false;
-    router.post(route('work-orders.hold', props.workOrder.id), {
-        reason: holdReason.value,
-    }, {
-        onSuccess: () => {
-            success(t('common.saved_success'));
-            holdReason.value = '';
-        },
-        onError: (err) => {
-            const msg = err.reason || Object.values(err)[0] || t('common.error');
-            errorToast(msg);
-        },
-    });
-}
-// ─────────────────────────────────────────────────────────────────────────────
-
-async function changeStatus(action) {
-    // Map header-emitted action names to route names and labels
-    const routeMap = {
-        start:    { routeName: 'work-orders.start',    type: 'success' },
-        resume:   { routeName: 'work-orders.resume',   type: 'success' },
-        complete: { routeName: 'work-orders.complete', type: 'success' },
-        cancel:   { routeName: 'work-orders.cancel',   type: 'danger'  },
-    };
-
-    // "hold" needs a reason modal — open it and return; confirmHold() handles the POST
-    if (action === 'hold') {
-        holdReason.value = '';
-        showHoldModal.value = true;
-        return;
-    }
-
-    // "complete" needs vehicle exit modal — open it and return; confirmExit() handles the POST
-    if (action === 'complete') {
-        exitDate.value = new Date().toISOString().substring(0, 10);
-        exitNotes.value = '';
-        isDeferred.value = workOrderBalance.value > 0;
-        dueDate.value = '';
-        showExitModal.value = true;
-        return;
-    }
-
-    const config = routeMap[action];
-    if (!config) return;
-
-    const labelKey = {
-        start:    'work_orders.actions.start_work',
-        resume:   'work_orders.actions.resume_work',
-        complete: 'work_orders.actions.complete',
-        cancel:   'work_orders.actions.cancel',
-    }[action];
-
-    const confirmed = await confirm({
-        title: t(labelKey) || action,
-        message: t('work_orders.messages.confirm_status_change'),
-        confirmText: t('common.confirm'),
-        cancelText: t('common.cancel'),
-        type: config.type,
-    });
-
-    if (confirmed) {
-        router.post(route(config.routeName, props.workOrder.id), {}, {
-            onSuccess: () => {
-                success(t('common.saved_success'));
-            },
-            onError: (err) => {
-                const msg = err.message || Object.values(err)[0] || t('common.error');
-                errorToast(msg);
-            },
-        });
-    }
-}
+// changeStatus, exit/hold modals live in useWorkOrderStatus composable
 </script>

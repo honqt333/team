@@ -46,10 +46,58 @@ carag-v2/
 - **Features:** استيراد/تصدير XLSX، merge customers، تتبع المركبات
 
 ### 2. أوامر العمل (Work Orders)
-- **Controller:** `WorkOrderController` (1200+ lines - needs refactor)
+- **Controller:** `WorkOrderController`
 - **Models:** `WorkOrder`, `WorkOrderItem`, `WorkOrderPhoto`, `WorkOrderInspection`
 - **Services:** `WorkOrderPartsService`
 - **Features:** إدارة الخدمات، القطع، الفحوصات، التوقيع، الصور
+- **Composables:** `useWorkOrderItems`, `useWorkOrderStatus`, `useWorkOrderNotes`
+
+#### WorkOrders Page Architecture
+
+**File:** `resources/js/Pages/WorkOrders/Show.vue` (~893 lines)
+
+Show.vue هو الصفحة الرئيسية لأمر العمل. أُنشئ كـ composable-first refactor:
+
+**الـ Components المستخرجة (`Components/WorkOrders/`):**
+
+| Component | يحتوي |
+|---|---|
+| `WorkOrderHeader.vue` | Status buttons, print, edit, back URL, status badge |
+| `WorkOrderCustomerCard.vue` | Plate, customer, WhatsApp, VIN, odometer, getColorHex |
+| `WorkOrderFinancialSummary.vue` | Services/parts/grand totals + paid + balance |
+| `WorkOrderInfoCards.vue` | Entry / expected end / duration, with overdue detection |
+| `WorkOrderComplaintAssessment.vue` | Customer complaint + initial assessment |
+| `WorkOrderTabsContainer.vue` | Tab bar + v-model dispatcher |
+| `WorkOrderServicesTab.vue` | Departments accordion + service items + add/remove/edit |
+| `WorkOrderNotesTab.vue` | Notes list/grid with search + add/delete |
+| `WorkOrderPhotosTab.vue` | Photos grid with hover overlay + view/download/delete |
+| `WorkOrderActivitiesTab.vue` | Activity timeline with icons |
+| `WorkOrderAttachmentsTab.vue` | File grid with size + view/delete |
+
+**الـ Composables (`Composables/`):**
+
+| Composable | يحتوي |
+|---|---|
+| `useWorkOrderItems.js` | `displayDepartments`, `availableDepartments`, `addDepartment`, `removeDepartment`, `toggleDepartment`, `getDepartmentItems` |
+| `useWorkOrderStatus.js` | `isReadOnly`, `changeStatus`, `showExitModal`, `showHoldModal`, exit/hold handlers |
+| `useWorkOrderNotes.js` | `allNotes`, `showServiceModal`, `showItemModal`, service modal plumbing, `handleAddNote`, `handleDeleteNote` |
+
+**Magic Strings (sentinel keys):**
+```javascript
+import { PACKAGES_DEPT_KEY, UNASSIGNED_DEPT_KEY } from '@/Composables/useWorkOrderItems';
+// PACKAGES_DEPT_KEY = 'packages'    // virtual bucket for service bundles
+// UNASSIGNED_DEPT_KEY = '0'         // legacy/unassigned items
+```
+
+**Contract Pattern:**
+- Components تستقبل data كـ Props
+- Components ت发射 events للخارج
+- Composables تحتفظ بالـ reactive state و business logic
+- Show.vue يستدعي composables ويستخدم القيم مباشرة في الـ template
+
+**TODO:**
+- [ ] استكمال partial reloads (الأصناف اللي تحتاج `only: ['workOrder', 'itemsByDepartment']`)
+- [ ] WorkOrderController refactor (1200+ lines)
 
 ### 3. عروض الأسعار (Quotes)
 - **Controller:** `QuoteController`, `QuoteApprovalController`
@@ -174,7 +222,7 @@ class CreateExampleAction
 ## الاختبارات
 
 - **Location:** `tests/Feature/` و `tests/Unit/`
-- **Coverage الحالي:** ~15% ( يحتاج تحسين )
+- **Test Results:** 106 passed / 11 pre-existing failed (TaxCalculationTest rounding)
 - **Test Database:** SQLite
 
 ## Environment Variables
@@ -197,4 +245,4 @@ QUEUE_CONNECTION=redis
 
 ---
 
-*آخر تحديث: 2026-05-31*
+*آخر تحديث: 2026-06-18*
