@@ -72,13 +72,21 @@ class WorkOrderStoreRequest extends FormRequest
             'entry_date' => ['nullable', 'date'],
             'expected_end_date' => ['nullable', 'date', 'after_or_equal:entry_date'],
             
-            // Departments
             'departments' => ['nullable', 'array'],
             'departments.*' => [
-                'integer',
-                Rule::exists('departments', 'id')
-                    ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId),
+                'required',
+                function ($attribute, $value, $fail) use ($tenantId, $centerId) {
+                    if ($value === 'packages') {
+                        return;
+                    }
+                    $exists = \App\Models\Department::where('id', $value)
+                        ->where('tenant_id', $tenantId)
+                        ->where('center_id', $centerId)
+                        ->exists();
+                    if (!$exists) {
+                        $fail(__('validation.exists', ['attribute' => $attribute]));
+                    }
+                }
             ],
             
             // Items (Services)

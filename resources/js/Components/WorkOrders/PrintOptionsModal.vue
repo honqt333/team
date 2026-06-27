@@ -54,23 +54,37 @@
                     </svg>
                 </button>
 
-                <!-- Proforma Invoice -->
+                <!-- Proforma / Final Invoice -->
                 <button
                     @click="printOption('proforma')"
-                    class="w-full flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-green-300 dark:hover:border-green-600 transition-all group"
+                    :class="[
+                        'w-full flex items-center gap-4 p-4 rounded-xl border transition-all group',
+                        hasInvoice
+                            ? 'border-emerald-200 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 hover:border-emerald-300 dark:hover:border-emerald-600'
+                            : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-green-300 dark:hover:border-green-600'
+                    ]"
                 >
-                    <div class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center flex-shrink-0">
+                    <div :class="[
+                        'w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0',
+                        hasInvoice ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-green-100 dark:bg-green-900/30'
+                    ]">
                         <span class="text-2xl">🧾</span>
                     </div>
                     <div class="flex-1 text-start">
-                        <p class="font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">
-                            {{ $t('print.proforma_invoice') }}
+                        <p :class="[
+                            'font-semibold text-gray-900 dark:text-white',
+                            hasInvoice ? 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400' : 'group-hover:text-green-600 dark:group-hover:text-green-400'
+                        ]">
+                            {{ hasInvoice ? (isTaxEnabled ? $t('print.final_tax_invoice') : $t('print.final_invoice')) : $t('print.proforma_invoice') }}
                         </p>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ $t('print.proforma_invoice_desc') }}
+                            {{ hasInvoice ? (isTaxEnabled ? $t('print.final_tax_invoice_desc') : $t('print.final_invoice_desc')) : $t('print.proforma_invoice_desc') }}
                         </p>
                     </div>
-                    <svg class="w-5 h-5 text-gray-400 group-hover:text-green-500 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg :class="[
+                        'w-5 h-5 rtl:rotate-180 transition-colors',
+                        hasInvoice ? 'text-gray-400 group-hover:text-emerald-500' : 'text-gray-400 group-hover:text-green-500'
+                    ]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
                     </svg>
                 </button>
@@ -131,6 +145,17 @@ const canPrintWorkOrder = computed(() => {
 // Show payments option only if there are payments
 const hasPayments = computed(() => {
     return props.workOrder.total_paid > 0 || (props.workOrder.payments?.length > 0);
+});
+
+const hasInvoice = computed(() => {
+    return !!(props.workOrder.invoice && props.workOrder.invoice.id);
+});
+
+const isTaxEnabled = computed(() => {
+    if (hasInvoice.value) {
+        return !!props.workOrder.invoice.tax_enabled_snapshot;
+    }
+    return !!props.workOrder.tax_enabled_snapshot;
 });
 
 function printOption(type) {

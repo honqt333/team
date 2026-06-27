@@ -51,10 +51,17 @@ class QuoteConversionService
                 'customer_complaint' => $quote->customer_complaint,
                 'initial_assessment' => $quote->initial_assessment,
                 'mileage' => $quote->odometer,
+                'show_packages_section' => (bool) ($quote->show_packages_section ?? false),
                 'opened_at' => now(),
                 'entry_date' => now()->toDateString(),
                 'expected_end_date' => now()->toDateString(),
             ]);
+
+            // Sync departments from quote
+            $quoteDepartments = $quote->departments()->pluck('departments.id')->toArray();
+            if (!empty($quoteDepartments)) {
+                $workOrder->departments()->sync($quoteDepartments);
+            }
 
             // Copy quote lines to work order items
             $lineIdMap = [];

@@ -1541,6 +1541,10 @@
     "work_order_desc": "List of required services",
     "proforma_invoice": "Proforma invoice",
     "proforma_invoice_desc": "Detailed invoice without an official number",
+    "final_invoice": "Final invoice",
+    "final_invoice_desc": "Print the final invoice for the vehicle",
+    "final_tax_invoice": "Final tax invoice",
+    "final_tax_invoice_desc": "Print the final tax invoice for the vehicle",
     "payments_receipt": "Payment voucher",
     "payments_receipt_desc": "All payments recorded on this card"
   },
@@ -1886,14 +1890,15 @@
     }
   },
   "system_settings": {
-    "title": "Vehicle settings",
+    "title": "System settings",
     "sections": {
       "makes": "Brands",
       "models": "Models",
       "colors": "Colors",
       "service_types": "Types of services",
       "condition_items": "Vehicle condition form",
-      "payment_methods": "Payment methods"
+      "payment_methods": "Payment methods",
+      "income_categories": "Income Categories"
     },
     "makes": {
       "subtitle": "Car brand management",
@@ -1911,25 +1916,34 @@
       "add": "Add color",
       "edit": "Color adjustment"
     },
+    "income_categories": {
+      "subtitle": "Income Account Categories",
+      "add": "Add Income Category",
+      "edit": "Edit Income Category"
+    },
     "columns": {
-      "name_ar": "The name is in Arabic",
+      "name_ar": "Name in Arabic",
       "name_en": "Name in English",
       "is_active": "Status",
       "updated_at": "Latest update",
       "updated_by": "Last modified by",
       "make": "Brand",
       "color": "Color",
-      "logo": "Logo"
+      "logo": "Logo",
+      "transaction_type": "Transaction Type"
     },
     "form": {
-      "name_ar": "The name is in Arabic",
-      "name_ar_placeholder": "Enter the name in Arabic",
+      "name_ar": "Name in Arabic",
+      "name_ar_placeholder": "Enter name in Arabic",
       "name_en": "Name in English",
       "name_en_placeholder": "Enter name in English",
       "make": "Brand",
       "hex_code": "Color code",
       "logo": "Brand logo",
-      "is_active": "Effective"
+      "is_active": "Active",
+      "transaction_type": "Transaction Type",
+      "transaction_type_revenue": "Revenue",
+      "transaction_type_expense": "Expense"
     },
     "condition_items": {
       "title": "Vehicle condition form",

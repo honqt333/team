@@ -127,7 +127,7 @@
                         <div>
                             <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('invoices.details') }}</p>
                             <div class="flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/30 p-3 rounded-xl border border-gray-150/50 dark:border-gray-700/30">
-                                <div class="grid grid-cols-2 gap-x-6 gap-y-3 flex-1">
+                                <div class="grid gap-x-6 gap-y-3 flex-1" :class="invoice.work_order_id ? 'grid-cols-1' : 'grid-cols-2'">
                                     <div>
                                         <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ $t('invoices.date') }}</p>
                                         <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
@@ -137,7 +137,8 @@
                                             <span class="text-sm font-bold font-mono">{{ formatDate(invoice.issue_date) }}</span>
                                         </div>
                                     </div>
-                                    <div>
+                                    <!-- Supply date only for non-WO invoices -->
+                                    <div v-if="!invoice.work_order_id">
                                         <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{{ $t('invoices.supply_date') }}</p>
                                         <div class="flex items-center gap-1.5 text-gray-700 dark:text-gray-300">
                                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,6 +273,7 @@
 
             <!-- Tabs Section Selector -->
             <div class="flex items-center bg-white dark:bg-gray-800 p-2 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm gap-1 w-fit">
+                <!-- Services Tab -->
                 <button
                     @click="activeTab = 'invoice_items'"
                     :class="[
@@ -284,17 +286,44 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span>{{ $t('common.details') }}</span>
+                    <span>{{ invoice.work_order_id ? $t('work_orders.services') : $t('common.details') }}</span>
                     <span
                         :class="[
                             'px-2 py-0.5 text-xs rounded-full font-bold',
                             activeTab === 'invoice_items' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
                         ]"
                     >
-                        {{ invoice.lines?.length || 0 }}
+                        {{ serviceLines.length }}
                     </span>
                 </button>
 
+                <!-- Spare Parts Tab (only for WO invoices that have parts) -->
+                <button
+                    v-if="invoice.work_order_id && partsLines.length > 0"
+                    @click="activeTab = 'parts'"
+                    :class="[
+                        'px-5 py-2.5 text-sm font-black rounded-xl transition-all flex items-center gap-2',
+                        activeTab === 'parts'
+                            ? 'bg-amber-500 text-white shadow-md shadow-amber-400/20'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                    ]"
+                >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>{{ $t('quotes.show.tabs.spare_parts') }}</span>
+                    <span
+                        :class="[
+                            'px-2 py-0.5 text-xs rounded-full font-bold',
+                            activeTab === 'parts' ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
+                        ]"
+                    >
+                        {{ partsLines.length }}
+                    </span>
+                </button>
+
+                <!-- Payments Tab -->
                 <button
                     @click="activeTab = 'payments'"
                     :class="[
@@ -311,7 +340,7 @@
                 </button>
             </div>
 
-            <!-- Elements Sold Tab -->
+            <!-- Services / Details Tab -->
             <div v-show="activeTab === 'invoice_items'" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -321,14 +350,15 @@
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.description') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.unit_price') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-red-500 italic align-middle">{{ $t('common.discount') }}</th>
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.qty') }}</th>
+                                <!-- Qty hidden for WO invoices (services have qty=1 always) -->
+                                <th v-if="!invoice.work_order_id" class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.qty') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.amount') }}</th>
                                 <th v-if="invoice.tax_enabled_snapshot" class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest italic align-middle">{{ $t('common.vat') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-gray-900 dark:text-white align-middle">{{ $t('common.total') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
-                            <tr v-for="(line, index) in invoice.lines" :key="line.id" class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
+                            <tr v-for="(line, index) in serviceLines" :key="line.id" class="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
                                 <!-- Index -->
                                 <td class="px-6 py-5 text-center align-middle">
                                     <span class="text-sm font-black text-gray-500 dark:text-gray-400 font-mono">{{ toEnglish(index + 1) }}</span>
@@ -349,8 +379,8 @@
                                     {{ getLineDiscount(line, showExclusive) > 0.01 ? '-' + formatCurrency(getLineDiscount(line, showExclusive)) : '—' }}
                                 </td>
 
-                                <!-- Qty -->
-                                <td class="px-6 py-5 text-center align-middle">
+                                <!-- Qty (hidden for WO invoices) -->
+                                <td v-if="!invoice.work_order_id" class="px-6 py-5 text-center align-middle">
                                     <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ toEnglish(line.qty) }}</span>
                                 </td>
                                 
@@ -365,6 +395,58 @@
                                 </td>
                                 
                                 <!-- Total -->
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-base font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(line.line_total_incl_tax) }}</span>
+                                </td>
+                            </tr>
+                            <!-- Empty state -->
+                            <tr v-if="serviceLines.length === 0">
+                                <td :colspan="invoice.work_order_id ? (invoice.tax_enabled_snapshot ? 6 : 5) : (invoice.tax_enabled_snapshot ? 7 : 6)" class="py-10 text-center text-sm text-gray-400">—</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Spare Parts Tab -->
+            <div v-show="activeTab === 'parts'" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700/50 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-amber-50/50 dark:bg-amber-900/10 border-b border-amber-100 dark:border-amber-800/30">
+                                <th class="px-6 py-4 text-center text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest align-middle">#</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest align-middle">{{ $t('common.description') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest align-middle">{{ $t('common.unit_price') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-red-400 italic uppercase tracking-widest align-middle">{{ $t('common.discount') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest align-middle">{{ $t('common.qty') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest align-middle">{{ $t('common.amount') }}</th>
+                                <th v-if="invoice.tax_enabled_snapshot" class="px-6 py-4 text-center text-xs font-bold text-amber-500 dark:text-amber-400 italic uppercase tracking-widest align-middle">{{ $t('common.vat') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-amber-600 dark:text-amber-300 uppercase tracking-widest align-middle">{{ $t('common.total') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700/50">
+                            <tr v-for="(line, index) in partsLines" :key="line.id" class="group hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-colors">
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-sm font-black text-gray-500 dark:text-gray-400 font-mono">{{ toEnglish(index + 1) }}</span>
+                                </td>
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-sm font-black text-gray-950 dark:text-white">{{ line.description }}</span>
+                                </td>
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ formatCurrency(line.unit_price) }}</span>
+                                </td>
+                                <td class="px-6 py-5 text-center text-red-500 font-mono align-middle">
+                                    {{ getLineDiscount(line, showExclusive) > 0.01 ? '-' + formatCurrency(getLineDiscount(line, showExclusive)) : '—' }}
+                                </td>
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ toEnglish(line.qty) }}</span>
+                                </td>
+                                <td class="px-6 py-5 text-center align-middle">
+                                    <span class="text-sm font-black text-gray-600 dark:text-gray-400 font-mono">{{ formatCurrency(showExclusive ? line.line_total_excl_tax : line.line_total_incl_tax) }}</span>
+                                </td>
+                                <td v-if="invoice.tax_enabled_snapshot" class="px-6 py-5 text-center text-xs text-sky-600 dark:text-sky-400 font-mono align-middle">
+                                    {{ formatCurrency(line.tax_amount) }}
+                                </td>
                                 <td class="px-6 py-5 text-center align-middle">
                                     <span class="text-base font-black text-gray-900 dark:text-white font-mono">{{ formatCurrency(line.line_total_incl_tax) }}</span>
                                 </td>
@@ -508,14 +590,21 @@ const formatCurrencyEnglish = (amount) => {
     }) + ' ' + t('common.currency_sar');
 };
 
-const activeTab = ref('invoice_items'); // 'invoice_items', 'payments'
+const activeTab = ref('invoice_items'); // 'invoice_items', 'parts', 'payments'
 const showPaymentModal = ref(false);
+
+// Split lines into services vs spare parts
+const serviceLines = computed(() => (props.invoice.lines || []).filter(l => !l.is_part));
+const partsLines   = computed(() => (props.invoice.lines || []).filter(l =>  l.is_part));
 
 const balance = computed(() => {
     return Math.max(0, Number(props.invoice.total_incl_tax || 0) - Number(props.invoice.total_paid || 0));
 });
 
 const showExclusive = computed(() => {
+    if (!props.invoice.tax_enabled_snapshot) {
+        return false;
+    }
     if (props.invoice.pricing_mode_snapshot !== 'inclusive') {
         return true;
     }
@@ -667,7 +756,6 @@ const generateQRCode = (base64Data) => {
 const getLineDiscount = (line, exclusive = true) => {
     const qty = Number(line.qty || 0);
     const unitPrice = Number(line.unit_price || 0);
-    const rate = Number(line.tax_rate_snapshot || 0) / 100;
     const isInclusive = props.invoice.pricing_mode_snapshot === 'inclusive';
 
     // Prefer the stored discount_amount (carried over from WorkOrderItem on
@@ -679,12 +767,13 @@ const getLineDiscount = (line, exclusive = true) => {
         return Number(line.discount_amount);
     }
 
+    // Fallback: derive from line total. Always return the inclusive discount amount.
+    // The discount is applied to the full service value and does not change
+    // with the display mode (exclusive vs inclusive).
     if (isInclusive) {
-        const inclusiveDiscount = Math.max(0, (qty * unitPrice) - Number(line.line_total_incl_tax || 0));
-        return exclusive ? (inclusiveDiscount / (1 + rate)) : inclusiveDiscount;
+        return Math.max(0, (qty * unitPrice) - Number(line.line_total_incl_tax || 0));
     } else {
-        const exclusiveDiscount = Math.max(0, (qty * unitPrice) - Number(line.line_total_excl_tax || 0));
-        return exclusiveDiscount;
+        return Math.max(0, (qty * unitPrice) - Number(line.line_total_excl_tax || 0));
     }
 };
 

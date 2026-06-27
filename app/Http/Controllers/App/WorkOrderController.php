@@ -912,11 +912,11 @@ class WorkOrderController
         ]);
 
         if (!$work_order->allItemsCompleted()) {
-            return redirect()->back()->with('error', __('messages.cannot_complete_items_pending') ?? 'لا يمكن إكمال العمل لوجود خدمات قيد الانتظار أو قيد التنفيذ');
+            return redirect()->route('work-orders.show', $work_order->id)->with('error', __('messages.cannot_complete_items_pending') ?? 'لا يمكن إكمال العمل لوجود خدمات قيد الانتظار أو قيد التنفيذ');
         }
 
         if ($work_order->balance < -0.01) {
-            return redirect()->back()->with('error', __('messages.cannot_complete_excess_payments') ?? 'لا يمكن تسجيل خروج المركبة لوجود مبالغ زائدة مدفوعة لم تسترجع! يرجى رد المبلغ الزائد أولاً.');
+            return redirect()->route('work-orders.show', $work_order->id)->with('error', __('messages.cannot_complete_excess_payments') ?? 'لا يمكن تسجيل خروج المركبة لوجود مبالغ زائدة مدفوعة لم تسترجع! يرجى رد المبلغ الزائد أولاً.');
         }
 
         $exitDate = \Carbon\Carbon::parse($validated['exit_date']);
@@ -926,10 +926,14 @@ class WorkOrderController
         }
 
         if (!$work_order->markAsCompleted($exitDate, $notes)) {
-            return redirect()->back()->with('error', __('messages.cannot_complete_error') ?? 'حدث خطأ أثناء محاولة إكمال كرت العمل');
+            return redirect()->route('work-orders.show', $work_order->id)->with('error', __('messages.cannot_complete_error') ?? 'حدث خطأ أثناء محاولة إكمال كرت العمل');
         }
 
         $work_order->logActivity('status_changed', __('work_orders.activities.actions.status_changed', ['status' => __('work_orders.status.done')]));
+
+        // Refresh from DB to get up-to-date totals, payments, and invoice state
+        // (markAsCompleted triggers saving() which may reset cached attributes).
+        $work_order = $work_order->fresh(['payments', 'invoice', 'items', 'parts']);
 
         // Generate and issue invoice if not already exists AND (fully paid OR deferred invoice is requested)
         if (!$work_order->invoice && ($work_order->balance <= 0 || $request->boolean('is_deferred'))) {
@@ -961,7 +965,8 @@ class WorkOrderController
             }
         }
 
-        return redirect()->back()->with('success', __('messages.work_order_completed'));
+        // No invoice created: stay on the work order page (with done status)
+        return redirect()->route('work-orders.show', $work_order->id)->with('success', __('messages.work_order_completed'));
     }
 
     // ─────────────────────────────────────────────────────────────

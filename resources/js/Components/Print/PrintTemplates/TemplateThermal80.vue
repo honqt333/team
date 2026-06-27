@@ -513,8 +513,9 @@ function getMethodLabel(method) {
 const totals = computed(() => {
     // Prioritize database-stored totals (from work order or invoice) to avoid line-item calculation mismatches
     if (props.data.total_incl_tax !== undefined && props.data.total_incl_tax !== null) {
-        const total = Number(props.data.total_incl_tax || 0);
-        const vat = Number(props.data.total_tax || 0);
+        const taxEnabled = isTaxEnabled();
+        const total = taxEnabled ? Number(props.data.total_incl_tax || 0) : Number(props.data.total_excl_tax || props.data.total_incl_tax || 0);
+        const vat = taxEnabled ? Number(props.data.total_tax || 0) : 0;
         
         // Sum discount from items to show in the discount row if present, or use global discount if provided
         let discountVal = Number(props.data.discount_amount || props.data.discount || 0);
@@ -536,7 +537,7 @@ const totals = computed(() => {
                 subtotal = Number(props.data.total_excl_tax || 0) + discountVal;
             } else {
                 discount = discountVal;
-                subtotal = total - vat + discountVal;
+                subtotal = total + discountVal;
             }
         } else {
             discount = discountVal;

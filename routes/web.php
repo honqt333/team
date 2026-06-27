@@ -265,6 +265,13 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::delete('/settings/colors/{color}', [\App\Http\Controllers\App\VehicleColorController::class, 'destroy'])->name('settings.colors.destroy');
     Route::patch('/settings/colors/{color}/toggle-active', [\App\Http\Controllers\App\VehicleColorController::class, 'toggleActive'])->name('settings.colors.toggle');
 
+    // Income Categories
+    Route::get('/settings/income-categories', [\App\Http\Controllers\App\IncomeCategoryController::class, 'index'])->name('settings.income-categories.index');
+    Route::post('/settings/income-categories', [\App\Http\Controllers\App\IncomeCategoryController::class, 'store'])->name('settings.income-categories.store');
+    Route::put('/settings/income-categories/{incomeCategory}', [\App\Http\Controllers\App\IncomeCategoryController::class, 'update'])->name('settings.income-categories.update');
+    Route::delete('/settings/income-categories/{incomeCategory}', [\App\Http\Controllers\App\IncomeCategoryController::class, 'destroy'])->name('settings.income-categories.destroy');
+    Route::patch('/settings/income-categories/{incomeCategory}/toggle-active', [\App\Http\Controllers\App\IncomeCategoryController::class, 'toggleActive'])->name('settings.income-categories.toggle');
+
     // Vehicle Condition Items
     Route::get('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'index'])->name('app.condition-items.index');
     Route::post('/settings/condition-items', [\App\Http\Controllers\App\VehicleConditionItemController::class, 'store'])->name('app.condition-items.store');

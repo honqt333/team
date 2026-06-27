@@ -40,7 +40,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const props = defineProps({
@@ -51,7 +51,18 @@ const page = usePage();
 const { t, locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
-const goBack = () => window.history.back();
+const goBack = () => {
+    if (window.history.length <= 1) {
+        window.close();
+        setTimeout(() => {
+            if (props.invoice?.id) {
+                router.visit(route('app.invoices.purchases.show', props.invoice.id));
+            }
+        }, 100);
+    } else {
+        window.history.back();
+    }
+};
 const printPage = () => window.print();
 
 onMounted(() => {

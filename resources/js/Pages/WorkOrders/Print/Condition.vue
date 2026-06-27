@@ -40,7 +40,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, router } from '@inertiajs/vue3';
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
 
 const props = defineProps({ workOrder: Object });
@@ -49,7 +49,18 @@ const page = usePage();
 const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
-const goBack = () => window.history.back();
+const goBack = () => {
+    if (window.history.length <= 1) {
+        window.close();
+        setTimeout(() => {
+            if (props.workOrder?.id) {
+                router.visit(route('work-orders.show', props.workOrder.id));
+            }
+        }, 100);
+    } else {
+        window.history.back();
+    }
+};
 const printPage = () => window.print();
 
 const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);

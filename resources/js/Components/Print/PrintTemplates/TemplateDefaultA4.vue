@@ -742,10 +742,10 @@ function srvLineTotal(item) {
 }
 
 function srvLineVat(item) {
+    if (!isTaxEnabled() || item.is_taxable === false) return 0;
     if (item.tax_amount !== undefined && item.tax_amount !== null) {
         return Number(item.tax_amount);
     }
-    if (!isTaxEnabled() || item.is_taxable === false) return 0;
     const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
     
     if (props.data.pricing_mode_snapshot === 'inclusive') {
@@ -788,10 +788,10 @@ function partLineTotal(item) {
 }
 
 function partLineVat(item) {
+    if (!isTaxEnabled() || item.is_taxable === false) return 0;
     if (item.tax_amount !== undefined && item.tax_amount !== null) {
         return Number(item.tax_amount);
     }
-    if (!isTaxEnabled() || item.is_taxable === false) return 0;
     const rate = item.tax_rate_snapshot != null ? item.tax_rate_snapshot / 100 : 0.15;
     
     if (props.data.pricing_mode_snapshot === 'inclusive') {
@@ -934,8 +934,9 @@ const defaultSignatures = [
 const totals = computed(() => {
     // Prioritize database-stored totals (from work order or invoice) to avoid line-item calculation mismatches
     if (props.data.total_incl_tax !== undefined && props.data.total_incl_tax !== null) {
-        const total = Number(props.data.total_incl_tax || 0);
-        const vat = Number(props.data.total_tax || 0);
+        const taxEnabled = isTaxEnabled();
+        const total = taxEnabled ? Number(props.data.total_incl_tax || 0) : Number(props.data.total_excl_tax || props.data.total_incl_tax || 0);
+        const vat = taxEnabled ? Number(props.data.total_tax || 0) : 0;
         
         // Sum discount from items to show in the discount row if present, or use global discount if provided
         let discountVal = Number(props.data.discount_amount || props.data.discount || 0);
@@ -957,7 +958,7 @@ const totals = computed(() => {
                 subtotal = Number(props.data.total_excl_tax || 0) + discountVal;
             } else {
                 discount = discountVal;
-                subtotal = total - vat + discountVal;
+                subtotal = total + discountVal;
             }
         } else {
             discount = discountVal;

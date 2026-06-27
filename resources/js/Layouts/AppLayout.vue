@@ -1072,10 +1072,24 @@ import ConfirmModal from '@/Components/ConfirmModal.vue';
 import SystemAnnouncementBanner from '@/Components/SystemAnnouncementBanner.vue';
 import NotificationBell from '@/Components/NotificationBell.vue';
 import { usePermission } from '@/Composables/usePermission';
+import { useToast } from '@/Composables/useToast';
 
 const { locale } = useI18n();
 const page = usePage();
 const { can, hasRole, isAnyAdmin } = usePermission();
+const { success: toastSuccess, error: toastError } = useToast();
+
+// ─── Global Flash Handler ─────────────────────────────────────────────────────
+// Automatically display server flash messages as toasts on every Inertia
+// navigation (including redirects from the backend after form submissions).
+watch(
+    () => page.props.flash,
+    (flash) => {
+        if (flash?.success) toastSuccess(flash.success);
+        if (flash?.error)   toastError(flash.error);
+    },
+    { deep: true }
+);
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);

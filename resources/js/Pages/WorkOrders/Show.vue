@@ -852,7 +852,11 @@ function handlePrint(type) {
             url = route('work-orders.print.services', woId);
             break;
         case 'proforma':
-            url = route('work-orders.print.proforma', woId);
+            if (props.workOrder.invoice && props.workOrder.invoice.id) {
+                url = route('app.invoices.print', props.workOrder.invoice.id);
+            } else {
+                url = route('work-orders.print.proforma', woId);
+            }
             break;
         case 'payments':
             url = route('work-orders.print.payments', woId);

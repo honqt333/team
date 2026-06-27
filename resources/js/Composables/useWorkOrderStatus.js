@@ -42,11 +42,15 @@ export function useWorkOrderStatus({ workOrder, workOrderBalance }) {
             is_deferred: isDeferred.value,
             due_date: isDeferred.value ? dueDate.value : null,
         }, {
+            // Inertia follows the server redirect automatically:
+            //   - to the invoice page when one is issued
+            //   - to the work order page when done without invoice
+            // The flash message from the server is shown by the global handler.
             onSuccess: () => {
-                success(t('common.saved_success'));
                 cancelExit();
             },
             onError: (err) => {
+                showExitModal.value = true; // reopen modal on error
                 const msg = err.message || Object.values(err)[0] || t('common.error');
                 errorToast(msg);
             },

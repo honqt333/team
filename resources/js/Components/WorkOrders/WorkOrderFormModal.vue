@@ -322,7 +322,7 @@
                             {{ $t('quotes.form_tabs.select_departments') }}
                         </label>
                         <div class="space-y-2">
-                            <label v-for="(dept, index) in departments" :key="dept.id"
+                            <label v-for="(dept, index) in availableDepartmentsList" :key="dept.id"
                                 class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
                                 <input type="checkbox" v-model="form.departments" :value="dept.id"
                                     class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
@@ -438,7 +438,6 @@ const showVehicleModal = ref(false);
 const showMileageModal = ref(false);
 const lastVehicleOdometer = ref(0);
 
-// Form
 const form = useForm({
     customer_id: props.workOrder?.customer_id || props.vehicle?.customer_id || '',
     vehicle_id: props.workOrder?.vehicle_id || props.vehicle?.id || '',
@@ -455,6 +454,17 @@ const form = useForm({
     fuel_level: props.workOrder?.fuel_level ?? 50,
     photos: [],
     notes: props.workOrder?.notes || '',
+});
+
+const availableDepartmentsList = computed(() => {
+    const list = [...(props.departments || [])];
+    list.push({
+        id: 'packages',
+        name_ar: 'باقات الخدمات',
+        name_en: 'Service Packages',
+        name: 'Service Packages'
+    });
+    return list;
 });
 
 // Watch for modal opening to reinitialize form values (for edit mode)

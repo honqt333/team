@@ -49,8 +49,22 @@ class CreateWorkOrderAction
 
             // Attach departments (syncWithoutDetaching prevents duplicates)
             if (!empty($data['departments'])) {
-                $uniqueDepts = array_values(array_unique($data['departments']));
-                $workOrder->departments()->syncWithoutDetaching($uniqueDepts);
+                $departments = $data['departments'];
+                $showPackages = false;
+                if (($key = array_search('packages', $departments)) !== false) {
+                    $showPackages = true;
+                    unset($departments[$key]);
+                    $departments = array_values($departments);
+                }
+                
+                if ($showPackages) {
+                    $workOrder->update(['show_packages_section' => true]);
+                }
+                
+                $uniqueDepts = array_values(array_unique($departments));
+                if (!empty($uniqueDepts)) {
+                    $workOrder->departments()->syncWithoutDetaching($uniqueDepts);
+                }
             }
 
             // Create damage marks

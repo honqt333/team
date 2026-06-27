@@ -113,17 +113,18 @@ class InvoiceService
                 $qty          = (float) $item->qty;
                 $unitPrice    = (float) $item->unit_price;
                 $discountAmt  = (float) ($item->discount_amount ?? 0);
-                $taxRate      = (float) ($item->tax_rate_snapshot ?? 0);
+                $taxEnabled   = (bool) ($workOrder->tax_enabled_snapshot ?? false);
+                $taxRate      = $taxEnabled ? (float) ($item->tax_rate_snapshot ?? 0) : 0.0;
                 $isInclusive  = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
 
                 $net = max(0, ($qty * $unitPrice) - $discountAmt);
-                if ($isInclusive) {
+                if ($isInclusive && $taxEnabled) {
                     $lineIncl = round($net, 2);
                     $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
                     $taxAmt   = round($lineIncl - $lineExcl, 2);
                 } else {
                     $lineExcl = round($net, 2);
-                    $taxAmt   = round($lineExcl * ($taxRate / 100), 2);
+                    $taxAmt   = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
                     $lineIncl = round($lineExcl + $taxAmt, 2);
                 }
 
@@ -136,9 +137,9 @@ class InvoiceService
                     'discount_type' => $item->discount_type,
                     'discount_value' => $item->discount_value,
                     'discount_amount' => $discountAmt,
-                    'is_taxable' => $item->is_taxable,
+                    'is_taxable' => $taxEnabled && ($item->is_taxable !== false),
                     'tax_category_code' => $item->tax_category_code,
-                    'tax_rate_snapshot' => $item->tax_rate_snapshot,
+                    'tax_rate_snapshot' => $taxRate,
                     'tax_amount' => $taxAmt,
                     'line_total_excl_tax' => $lineExcl,
                     'line_total_incl_tax' => $lineIncl,
@@ -155,17 +156,18 @@ class InvoiceService
                 $qty         = (float) $part->qty;
                 $unitPrice   = (float) $part->unit_price;
                 $discountAmt = (float) ($part->discount ?? 0);
-                $taxRate     = (float) ($workOrder->tax_rate_snapshot ?? 15.00);
+                $taxEnabled  = (bool) ($workOrder->tax_enabled_snapshot ?? false);
+                $taxRate     = $taxEnabled ? (float) ($workOrder->tax_rate_snapshot ?? 15.00) : 0.0;
                 $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
 
                 $net = max(0, ($qty * $unitPrice) - $discountAmt);
-                if ($isInclusive) {
+                if ($isInclusive && $taxEnabled) {
                     $lineIncl = round($net, 2);
                     $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
                     $taxAmt   = round($lineIncl - $lineExcl, 2);
                 } else {
                     $lineExcl = round($net, 2);
-                    $taxAmt   = round($lineExcl * ($taxRate / 100), 2);
+                    $taxAmt   = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
                     $lineIncl = round($lineExcl + $taxAmt, 2);
                 }
 
@@ -178,9 +180,9 @@ class InvoiceService
                     'discount_type' => null,
                     'discount_value' => null,
                     'discount_amount' => $discountAmt,
-                    'is_taxable' => $workOrder->tax_enabled_snapshot,
-                    'tax_category_code' => null,
-                    'tax_rate_snapshot' => $workOrder->tax_rate_snapshot ?? 15.00,
+                    'is_taxable' => $taxEnabled,
+                    'tax_category_code' => 'S', // Standard — parts don't have a category code on the WO side
+                    'tax_rate_snapshot' => $taxRate,
                     'tax_amount' => $taxAmt,
                     'line_total_excl_tax' => $lineExcl,
                     'line_total_incl_tax' => $lineIncl,
@@ -190,7 +192,23 @@ class InvoiceService
             // 4. Link existing work order payments to the new invoice
             $workOrder->payments()->update(['invoice_id' => $invoice->id]);
 
-            // 5. Recalculate and sync invoice payment status
+            // 5. Recalculate invoice totals from actual line sums (not WO snapshot)
+            // This prevents stale WorkOrder totals from propagating to the invoice.
+            $invoice->refresh();
+            $lines = $invoice->lines()->get();
+            $sumExcl = $lines->sum('line_total_excl_tax');
+            $sumIncl = $lines->sum('line_total_incl_tax');
+            $sumTax  = $lines->sum('tax_amount');
+
+            $invoice->update([
+                'total_excl_tax'      => round($sumExcl, 2),
+                'total_tax'           => round($sumTax, 2),
+                'total_incl_tax'      => round($sumIncl, 2),
+                'total_taxable_amount'=> round($sumExcl, 2),
+            ]);
+
+            // 6. Recalculate and sync invoice payment status
+            $invoice->refresh();
             $invoice->updatePaymentStatus();
             
             return $invoice;

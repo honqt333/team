@@ -25,7 +25,7 @@
 
                 <template #filters>
                     <nav class="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
-                        <button v-for="section in ['makes', 'models', 'colors', 'condition-items']" :key="section"
+                        <button v-for="section in ['makes', 'models', 'colors', 'condition-items', 'income-categories']" :key="section"
                             @click="navigateToSection(section)"
                             class="flex items-center gap-2 px-4 py-2 text-xs font-black uppercase tracking-widest transition-all relative group shrink-0"
                             :class="activeSection === section ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-400 hover:text-gray-600 dark:text-gray-500'"
@@ -34,6 +34,9 @@
                             <svg v-if="section === 'models'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
                             <svg v-if="section === 'colors'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
                             <svg v-if="section === 'condition-items'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <svg v-if="section === 'income-categories'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             {{ $t(`system_settings.sections.${section.replace('-', '_')}`) }}
                             <div v-if="activeSection === section" class="absolute bottom-0 left-0 w-full h-1 bg-indigo-600 dark:bg-indigo-400 rounded-t-full shadow-[0_-2px_8px_rgba(79,70,229,0.4)]"></div>
                         </button>
@@ -54,8 +57,8 @@
             </PageHeader>
 
 
-            <!-- Makes/Models/Colors/Condition Items Section -->
-            <div v-if="['makes', 'models', 'colors', 'condition-items'].includes(activeSection)" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <!-- Makes/Models/Colors/Condition Items/Income Categories Section -->
+            <div v-if="['makes', 'models', 'colors', 'condition-items', 'income-categories'].includes(activeSection)" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
                 <!-- Toolbar -->
                 <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -77,6 +80,13 @@
                             <SearchableSelect v-model="selectedMake" :options="makeOptions" option-label="label"
                                 option-value="value" :placeholder="$t('system_settings.models.all_makes')" :label="''"
                                 @change="handleMakeFilter" :compact="true" />
+                        </div>
+
+                        <!-- Transaction Type Filter (for income categories only) -->
+                        <div v-if="activeSection === 'income-categories'" class="w-64">
+                            <SearchableSelect v-model="selectedType" :options="typeOptions" option-label="label"
+                                option-value="value" :placeholder="$t('system_settings.form.transaction_type')" :label="''"
+                                @change="handleTypeFilter" :compact="true" />
                         </div>
                     </div>
                 </div>
@@ -492,6 +502,100 @@
                     </table>
                 </div>
 
+                <!-- Income Categories Table -->
+                <div v-if="activeSection === 'income-categories'" class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-700/50">
+                            <tr>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">#</th>
+                                <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
+                                    {{ $t('system_settings.columns.name_ar') }}
+                                </th>
+                                <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
+                                    {{ $t('system_settings.columns.name_en') }}
+                                </th>
+                                <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
+                                    {{ $t('system_settings.columns.transaction_type') }}
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
+                                    {{ $t('system_settings.columns.is_active') }}
+                                </th>
+                                <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
+                                    {{ $t('system_settings.columns.updated_by') }}
+                                </th>
+                                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle">
+                                    {{ $t('common.actions') }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr v-for="(item, index) in incomeCategoriesData" :key="item.id"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 text-center align-middle">
+                                    {{ (currentPagination.current_page - 1) * currentPagination.per_page + index + 1 }}
+                                </td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white align-middle">
+                                    {{ item.name_ar }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle">
+                                    {{ item.name_en || '—' }}
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle">
+                                    <span :class="[
+                                        'px-2.5 py-1 text-xs font-black rounded-lg',
+                                        item.transaction_type === 'revenue' 
+                                            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300' 
+                                            : 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'
+                                    ]">
+                                        {{ item.transaction_type === 'revenue' ? $t('system_settings.form.transaction_type_revenue') : $t('system_settings.form.transaction_type_expense') }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-center align-middle">
+                                    <button @click="toggleActive('income-categories', item)" :class="[
+                                        'px-3 py-1 text-xs font-medium rounded-full transition-colors',
+                                        item.is_active
+                                            ? 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'
+                                            : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'
+                                    ]">
+                                        {{ item.is_active ? $t('common.active') : $t('common.inactive') }}
+                                    </button>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">
+                                    <div class="flex flex-col">
+                                        <span>{{ item.updated_by ? item.updated_by.name : '—' }}</span>
+                                        <span v-if="item.updated_at" class="text-xs text-gray-400">
+                                            {{ new Date(item.updated_at).toLocaleDateString('ar-SA-u-nu-latn') }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-center align-middle">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button @click="openEditModal('income_category', item)"
+                                            class="p-2 text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button @click="handleDelete('income-categories', item)"
+                                            class="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr v-if="!incomeCategoriesData?.length">
+                                <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400 align-middle">
+                                    {{ $t('common.no_data') }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <!-- Pagination -->
                 <div v-if="currentPagination?.links" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700">
                     <div class="flex justify-center gap-1">
@@ -519,6 +623,9 @@
 
         <ConditionItemFormModal v-if="showConditionItemModal" :condition-item="editingConditionItem"
             @close="closeConditionItemModal" @saved="handleSaved" />
+
+        <IncomeCategoryFormModal v-if="showIncomeCategoryModal" :income-category="editingIncomeCategory"
+            @close="closeIncomeCategoryModal" @saved="handleSaved" />
     </AppLayout>
 </template>
 
@@ -533,6 +640,7 @@ import MakeFormModal from './Modals/MakeFormModal.vue';
 import ModelFormModal from './Modals/ModelFormModal.vue';
 import ColorFormModal from './Modals/ColorFormModal.vue';
 import ConditionItemFormModal from './Modals/ConditionItemFormModal.vue';
+import IncomeCategoryFormModal from './Modals/IncomeCategoryFormModal.vue';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import { useLocalized } from '@/Composables/useLocalized';
@@ -548,6 +656,7 @@ const props = defineProps({
     models: Object,
     colors: Object,
     condition_items: Object,
+    income_categories: Object,
     settings: Object,
     global_sms_enabled: Boolean,
 
@@ -580,12 +689,15 @@ const editingModel = ref(null);
 const editingColor = ref(null);
 const showConditionItemModal = ref(false);
 const editingConditionItem = ref(null);
+const showIncomeCategoryModal = ref(false);
+const editingIncomeCategory = ref(null);
 
 // Computed data
 const makesData = computed(() => props.makes?.data || props.makes || []);
 const modelsData = computed(() => props.models?.data || []);
 const colorsData = computed(() => props.colors?.data || []);
 const conditionItemsData = computed(() => props.condition_items?.data || []);
+const incomeCategoriesData = computed(() => props.income_categories?.data || []);
 const makesForFilter = computed(() => props.makes?.data || props.makes || []);
 
 const makeOptions = computed(() => {
@@ -602,6 +714,7 @@ const currentSectionTitle = computed(() => {
     // Mapping for general
     if (section === 'general') return 'الإعدادات العامة';
     if (section === 'condition-items') return t('system_settings.sections.condition_items');
+    if (section === 'income-categories') return t('system_settings.income_categories.subtitle');
     return t(`system_settings.${section}.subtitle`) || t(`system_settings.sections.${section}`);
 });
 
@@ -609,11 +722,23 @@ const currentPagination = computed(() => {
     if (props.activeSection === 'models') return props.models;
     if (props.activeSection === 'colors') return props.colors;
     if (props.activeSection === 'condition-items') return props.condition_items;
+    if (props.activeSection === 'income-categories') return props.income_categories;
     return props.makes;
 });
 
 // Handlers
 
+
+const selectedType = ref(props.filters?.transaction_type || '');
+const typeOptions = computed(() => [
+    { value: '', label: 'كل أنواع المعاملات' },
+    { value: 'revenue', label: t('system_settings.form.transaction_type_revenue') },
+    { value: 'expense', label: t('system_settings.form.transaction_type_expense') }
+]);
+
+function handleTypeFilter() {
+    handleSearch();
+}
 
 function handleSearch() {
     const params = {
@@ -621,6 +746,9 @@ function handleSearch() {
     };
     if (props.activeSection === 'models') {
         params.make_id = selectedMake.value || undefined;
+    }
+    if (props.activeSection === 'income-categories') {
+        params.transaction_type = selectedType.value || undefined;
     }
     router.get(`/app/settings/${props.activeSection}`, params, { preserveState: true });
 }
@@ -646,6 +774,9 @@ function openAddModal() {
     } else if (props.activeSection === 'condition-items') {
         editingConditionItem.value = null;
         showConditionItemModal.value = true;
+    } else if (props.activeSection === 'income-categories') {
+        editingIncomeCategory.value = null;
+        showIncomeCategoryModal.value = true;
     }
 }
 
@@ -662,6 +793,9 @@ function openEditModal(type, item) {
     } else if (type === 'condition_item') {
         editingConditionItem.value = item;
         showConditionItemModal.value = true;
+    } else if (type === 'income_category') {
+        editingIncomeCategory.value = item;
+        showIncomeCategoryModal.value = true;
     }
 }
 
@@ -685,11 +819,17 @@ function closeConditionItemModal() {
     editingConditionItem.value = null;
 }
 
+function closeIncomeCategoryModal() {
+    showIncomeCategoryModal.value = false;
+    editingIncomeCategory.value = null;
+}
+
 function handleSaved() {
     closeMakeModal();
     closeModelModal();
     closeColorModal();
     closeConditionItemModal();
+    closeIncomeCategoryModal();
     success(t('common.saved_success'));
     router.reload();
 }

@@ -476,6 +476,10 @@
     "work_order_desc": "قائمة الخدمات المطلوبة",
     "proforma_invoice": "فاتورة أولية",
     "proforma_invoice_desc": "فاتورة تفصيلية بدون رقم رسمي",
+    "final_invoice": "فاتورة نهائية",
+    "final_invoice_desc": "طباعة الفاتورة النهائية للمركبة",
+    "final_tax_invoice": "فاتورة ضريبية نهائية",
+    "final_tax_invoice_desc": "طباعة الفاتورة الضريبية النهائية للمركبة",
     "payments_receipt": "سند المدفوعات",
     "payments_receipt_desc": "جميع المدفوعات المسجلة على هذا الكرت"
   },
@@ -1196,14 +1200,15 @@
     }
   },
   "system_settings": {
-    "title": "إعدادات المركبات",
+    "title": "إعدادات النظام",
     "sections": {
       "makes": "الماركات",
       "models": "الموديلات",
       "colors": "الألوان",
       "service_types": "أنواع الخدمات",
       "condition_items": "نموذج حالة المركبة",
-      "payment_methods": "طرق الدفع"
+      "payment_methods": "طرق الدفع",
+      "income_categories": "فئات حساب الدخل"
     },
     "makes": {
       "subtitle": "إدارة ماركات السيارات",
@@ -1221,6 +1226,11 @@
       "add": "إضافة لون",
       "edit": "تعديل اللون"
     },
+    "income_categories": {
+      "subtitle": "إدارة فئات حساب الدخل",
+      "add": "إضافة فئة حساب الدخل",
+      "edit": "تعديل فئة حساب الدخل"
+    },
     "columns": {
       "name_ar": "الاسم بالعربية",
       "name_en": "الاسم بالإنجليزية",
@@ -1229,7 +1239,8 @@
       "updated_by": "آخر تعديل بواسطة",
       "make": "الماركة",
       "color": "اللون",
-      "logo": "الشعار"
+      "logo": "الشعار",
+      "transaction_type": "نوع المعاملة"
     },
     "form": {
       "name_ar": "الاسم بالعربية",
@@ -1239,7 +1250,10 @@
       "make": "الماركة",
       "hex_code": "كود اللون",
       "logo": "شعار الماركة",
-      "is_active": "فعّال"
+      "is_active": "فعّال",
+      "transaction_type": "نوع المعاملة",
+      "transaction_type_revenue": "الإيرادات",
+      "transaction_type_expense": "النفقات"
     },
     "condition_items": {
       "title": "نموذج حالة المركبة",
