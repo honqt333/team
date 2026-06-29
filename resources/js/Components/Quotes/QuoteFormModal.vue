@@ -309,7 +309,7 @@
                             {{ $t('quotes.form_tabs.select_departments') }}
                         </label>
                         <div class="space-y-2">
-                            <label v-for="(dept, index) in departments" :key="dept.id"
+                            <label v-for="(dept, index) in availableDepartmentsList" :key="dept.id"
                                 class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors">
                                 <input type="checkbox" v-model="form.departments" :value="dept.id"
                                     class="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
@@ -412,6 +412,17 @@ const tabs = computed(() => {
 
 const activeTab = ref('main_info');
 
+const availableDepartmentsList = computed(() => {
+    const list = [...(props.departments || [])];
+    list.push({
+        id: 'packages',
+        name_ar: 'باقات الخدمات',
+        name_en: 'Service Packages',
+        name: 'Service Packages'
+    });
+    return list;
+});
+
 // Search
 const searchQuery = ref('');
 const searchResults = ref([]);
@@ -433,7 +444,13 @@ const form = useForm({
     initial_assessment: props.quote?.initial_assessment || '',
     odometer: props.quote?.odometer || '',
     allow_lower_odometer: false,
-    departments: props.quote?.departments?.map(d => d.id) || [],
+    departments: (() => {
+        const depts = props.quote?.departments?.map(d => d.id) || [];
+        if (props.quote?.show_packages_section) {
+            depts.push('packages');
+        }
+        return depts;
+    })(),
     notes: props.quote?.notes || '',
     lines: [],
 });
@@ -448,7 +465,11 @@ watch(() => props.show, (newVal) => {
         form.initial_assessment = props.quote.initial_assessment || '';
         form.odometer = props.quote.odometer || '';
         form.allow_lower_odometer = false;
-        form.departments = props.quote.departments?.map(d => d.id) || [];
+        const depts = props.quote.departments?.map(d => d.id) || [];
+        if (props.quote.show_packages_section) {
+            depts.push('packages');
+        }
+        form.departments = depts;
         form.notes = props.quote.notes || '';
         form.lines = [];
 

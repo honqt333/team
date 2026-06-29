@@ -27,7 +27,7 @@
         </div>
 
         <PrintEngine 
-            :documentType="invoice.work_order_id ? 'invoice' : 'parts_invoice'"
+            :documentType="invoice.work_order_id || invoice.company_transaction ? 'invoice' : 'parts_invoice'"
             :data="mappedData"
             :centerData="mappedCenterData"
             :documentSettings="documentSettings"
@@ -130,22 +130,24 @@ const mappedData = computed(() => {
         total_incl_tax: props.invoice.total_incl_tax,
         total_paid: props.invoice.total_paid !== undefined ? props.invoice.total_paid : 0,
         balance: props.invoice.balance !== undefined ? props.invoice.balance : 0,
+        is_company: !!props.invoice.company_transaction,
         items: lines
     };
 });
 
 const mappedCenterData = computed(() => {
-    const center = props.invoice.center || {};
+    const isCompany = !!props.invoice.company_transaction;
+    const center = isCompany ? {} : (props.invoice.center || {});
     const tenant = props.invoice.tenant || page.props.tenant || {};
     return {
-        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
-        tax_number: center.vat_number || tenant.vat_number,
+        name: isRtl.value ? (tenant.trade_name || tenant.legal_name || tenant.name || center.name_ar || center.name) : (tenant.trade_name || tenant.legal_name || tenant.name || center.name_en || center.name),
+        tax_number: tenant.vat_number || center.vat_number,
         cr_number: tenant.cr_number,
-        phone: center.phone || tenant.phone,
-        logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
+        phone: tenant.phone || center.phone,
+        logo: tenant.logo_url || center.logo_invoice_url || center.logo_light_url || '',
         iban: tenant.iban || '',
-        address: center.address || tenant.address || '',
-        stamp_url: center.stamp_url || '',
+        address: tenant.address || center.address || '',
+        stamp_url: isCompany ? '' : (center.stamp_url || ''),
     };
 });
 

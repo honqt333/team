@@ -46,6 +46,10 @@ class Tenant extends Model
         'print_settings',
     ];
     
+    protected $appends = [
+        'logo_url',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -55,6 +59,11 @@ class Tenant extends Model
             'sms_2fa_enabled' => 'boolean',
             'print_settings' => 'array',
         ];
+    }
+
+    public function getLogoUrlAttribute(): string
+    {
+        return $this->logo_path ? \Illuminate\Support\Facades\Storage::url($this->logo_path) : asset('images/logo.png');
     }
 
     public function centers(): HasMany

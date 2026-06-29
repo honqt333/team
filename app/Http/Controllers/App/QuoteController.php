@@ -261,6 +261,7 @@ class QuoteController extends Controller
                 $departments = array_values($departments);
             }
             $quote->show_packages_section = $showPackages;
+            $quote->save();
             $quote->departments()->sync($departments);
         }
 
@@ -533,6 +534,11 @@ class QuoteController extends Controller
         // Layer 2 Defense: Explicit immutability check
         if (!$quote->canBeEdited()) {
             abort(403, 'Cannot add services to a converted quote.');
+        }
+
+        // Pre-normalize virtual 'packages' department_id to null to prevent validation failure
+        if ($request->input('department_id') === 'packages') {
+            $request->merge(['department_id' => null]);
         }
 
         $validated = $request->validate([

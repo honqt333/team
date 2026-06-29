@@ -10,6 +10,7 @@ use App\Services\InvoiceService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Supplier;
 use App\Models\Warehouse;
@@ -40,6 +41,7 @@ class InvoicesController extends Controller
             'lines',
             'payments.receivedBy',
             'center',
+            'companyTransaction',
         ]);
 
         return Inertia::render('Invoices/Show', [
@@ -99,6 +101,7 @@ class InvoicesController extends Controller
             'lines',
             'center',
             'tenant.taxSettings',
+            'companyTransaction',
         ]);
 
         $template = \App\Models\InvoiceTemplate::getDefault($invoice->tenant_id, 'tax_invoice');
@@ -137,10 +140,20 @@ class InvoicesController extends Controller
 
         $salesCount = Invoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('company_transactions')
+                  ->whereColumn('company_transactions.invoice_id', 'invoices.id');
+            })
             ->count();
 
         $purchasesCount = \App\Models\PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('company_transactions')
+                  ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
+            })
             ->count();
 
         return Inertia::render('Invoices/Hub', [
@@ -159,6 +172,11 @@ class InvoicesController extends Controller
 
         $query = Invoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('company_transactions')
+                  ->whereColumn('company_transactions.invoice_id', 'invoices.id');
+            })
             ->with(['customer', 'workOrder.items', 'workOrder.parts'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
@@ -189,6 +207,11 @@ class InvoicesController extends Controller
 
         $query = \App\Models\PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('company_transactions')
+                  ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
+            })
             ->with(['supplier', 'purchaseOrder'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
@@ -206,6 +229,13 @@ class InvoicesController extends Controller
 
         $returns = \App\Models\PurchaseReturnInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
+            ->whereHas('purchaseInvoice', function ($q) {
+                $q->whereNotExists(function ($sub) {
+                    $sub->select(DB::raw(1))
+                        ->from('company_transactions')
+                        ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
+                });
+            })
             ->with(['purchaseInvoice.supplier', 'purchaseInvoice.payments'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {

@@ -27,7 +27,18 @@ class QuoteRequest extends FormRequest
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
             'departments' => ['nullable', 'array'],
-            'departments.*' => ['exists:departments,id'],
+            'departments.*' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    if ($value === 'packages') {
+                        return;
+                    }
+                    $exists = \App\Models\Department::where('id', $value)->exists();
+                    if (!$exists) {
+                        $fail(__('validation.exists', ['attribute' => $attribute]));
+                    }
+                }
+            ],
             'lines' => ['nullable', 'array'],
             'lines.*.service_id' => ['nullable', 'exists:services,id'],
             'lines.*.description' => ['required_with:lines', 'string', 'max:255'],

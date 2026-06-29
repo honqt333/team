@@ -4,7 +4,7 @@
             <!-- Premium Glassmorphic Header -->
             <PageHeader
                 :title="`${$t('invoices.purchases.invoice')} #${invoice.code}`"
-                :subtitle="invoice.supplier?.name"
+                :subtitle="invoice.company_transaction ? invoice.company_transaction.title : invoice.supplier?.name"
                 :totalCount="formatCurrency(invoice.total)"
                 :countLabel="$t('invoices.grand_total')"
                 gradientFrom="from-amber-600"
@@ -16,7 +16,7 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <BackButton :href="route('app.invoices.purchases.index')" />
+                    <BackButton :href="invoice.company_transaction ? (route('settings.company') + '?tab=invoices') : route('app.invoices.purchases.index')" />
                 </template>
 
                 <template #icon>
@@ -100,7 +100,7 @@
                             <h3 class="text-xs font-black uppercase tracking-[0.15em]">{{ $t('common.center') }}</h3>
                         </div>
                         <span class="text-lg font-black text-gray-900 dark:text-white" dir="auto">
-                            {{ invoice.center?.name_ar || invoice.center?.name }}
+                            {{ isCompany ? (tenant.trade_name || tenant.legal_name || tenant.name) : (invoice.center?.name_ar || invoice.center?.name) }}
                         </span>
                     </div>
 
@@ -115,7 +115,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 <span class="text-sm font-semibold leading-relaxed" dir="auto">
-                                    {{ getCenterAddress(invoice.center) || $t('common.na') }}
+                                    {{ isCompany ? (tenant.address || 'المكتب الرئيسي للشركة') : (getCenterAddress(invoice.center) || $t('common.na')) }}
                                 </span>
                             </div>
                         </div>
@@ -1129,6 +1129,9 @@ const page = usePage();
 const isRtl = computed(() => locale.value === 'ar');
 const { toEnglish, formatCurrency } = useNumberFormat();
 
+const tenant = computed(() => props.invoice.tenant || page.props.tenant || {});
+const isCompany = computed(() => !!props.invoice.company_transaction);
+
 const formatCurrencyEnglish = (amount) => {
     return Number(amount).toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -1190,6 +1193,7 @@ const getAvailableQty = (line) => {
 };
 
 const hasReturnableItems = computed(() => {
+    if (props.invoice.company_transaction) return false;
     if (!props.invoice?.lines) return false;
     return props.invoice.lines.some(line => getAvailableQty(line) > 0.001);
 });

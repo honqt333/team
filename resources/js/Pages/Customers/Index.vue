@@ -340,7 +340,6 @@
                                             'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30': customer.type === 'individual',
                                             'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30': customer.type === 'company',
                                             'bg-purple-50 text-purple-700 border-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:border-purple-800/30': customer.type === 'government',
-                                            'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30': customer.type === 'vip',
                                         }">
                                         {{ $t(`customers.type.${customer.type}`) }}
                                     </span>
@@ -492,7 +491,6 @@ const typeOptions = computed(() => [
     { value: 'individual', label: t('customers.type.individual') },
     { value: 'company', label: t('customers.type.company') },
     { value: 'government', label: t('customers.type.government') },
-    { value: 'vip', label: t('customers.type.vip') },
 ]);
 
 const showModal = ref(false);

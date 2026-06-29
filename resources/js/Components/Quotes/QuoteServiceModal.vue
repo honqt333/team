@@ -229,13 +229,6 @@
                 <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {{ $t('quotes.show.tabs.linked_parts') }}
                 </h4>
-                <button v-if="!isReadOnly" type="button" @click="openPartModal()"
-                    class="px-3 py-1.5 text-sm bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center gap-1">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    {{ $t('work_orders.item.add_part') }}
-                </button>
             </div>
 
             <!-- Parts Display Component -->

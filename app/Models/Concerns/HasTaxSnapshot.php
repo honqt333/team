@@ -36,4 +36,20 @@ trait HasTaxSnapshot
             }
         });
     }
+
+    public function refreshTaxSnapshot(): void
+    {
+        $tenantId = $this->tenant_id ?? TenancyContext::tenantId();
+
+        if ($tenantId) {
+            $settings = TenantTaxSetting::where('tenant_id', $tenantId)->first();
+
+            if ($settings) {
+                $this->tax_enabled_snapshot = $settings->vat_enabled;
+                $this->pricing_mode_snapshot = $settings->services_inclusive ? 'inclusive' : 'exclusive';
+                $this->tax_rate_snapshot = $settings->vat_rate;
+                $this->currency_code = $settings->currency_code;
+            }
+        }
+    }
 }

@@ -38,6 +38,7 @@ class PurchaseInvoice extends Model
     public function center()        { return $this->belongsTo(Center::class); }
     public function payments()      { return $this->hasMany(Payment::class, 'purchase_invoice_id'); }
     public function returnInvoices() { return $this->hasMany(PurchaseReturnInvoice::class); }
+    public function companyTransaction() { return $this->hasOne(CompanyTransaction::class, 'purchase_invoice_id'); }
 
     // Status helpers
     public function isDraft()     { return $this->status === self::STATUS_DRAFT; }

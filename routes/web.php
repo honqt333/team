@@ -219,6 +219,11 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::put('/settings/company/admin-user', [\App\Http\Controllers\App\CompanyProfileController::class, 'updateAdminUser'])->name('settings.company.admin-user');
     Route::post('/settings/company/logo', [\App\Http\Controllers\App\CompanyProfileController::class, 'uploadLogo'])->name('settings.company.logo.upload');
     Route::delete('/settings/company/logo', [\App\Http\Controllers\App\CompanyProfileController::class, 'deleteLogo'])->name('settings.company.logo.delete');
+
+    // Company Transactions Settings
+    Route::get('/settings/company/contacts/search', [\App\Http\Controllers\App\CompanyTransactionController::class, 'searchContacts'])->name('settings.company.contacts.search');
+    Route::resource('/settings/company/transactions', \App\Http\Controllers\App\CompanyTransactionController::class)->names('settings.company.transactions');
+    Route::post('/settings/company/transactions/{transaction}/approve', [\App\Http\Controllers\App\CompanyTransactionController::class, 'approve'])->name('settings.company.transactions.approve');
     
     // Branches Settings
     Route::get('/settings/branches', [\App\Http\Controllers\App\BranchesController::class, 'index'])->name('settings.branches');

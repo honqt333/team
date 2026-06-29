@@ -114,9 +114,12 @@ const calculatedInvoiceTotal = computed(() => {
 });
 
 const mappedPrintData = computed(() => {
+    const isCompany = !!props.invoice.company_transaction;
+    const companyTitle = props.invoice.company_transaction?.title;
+
     const lines = (props.invoice.lines || []).map(line => ({
-        service_name: line.part?.name || '—',
-        description: line.part?.sku || 'NO-SKU',
+        service_name: isCompany && companyTitle ? companyTitle : (line.part?.name || '—'),
+        description: isCompany && companyTitle ? '' : (line.part?.sku || 'NO-SKU'),
         qty: Number(line.qty || 1),
         unit_price: Number(line.unit_cost || 0),
         discount: 0,
@@ -145,22 +148,24 @@ const mappedPrintData = computed(() => {
             address: getSupplierAddress(props.invoice.supplier),
             tax_number: props.invoice.supplier?.tax_number || '',
         },
+        is_company: isCompany,
         items: lines
     };
 });
 
 const mappedCenterData = computed(() => {
-    const center = props.invoice.center || {};
+    const isCompany = !!props.invoice.company_transaction;
+    const center = isCompany ? {} : (props.invoice.center || {});
     const tenant = props.invoice.tenant || page.props?.tenant || {};
     return {
-        name: isRtl.value ? (center.name_ar || center.name || tenant.name) : (center.name_en || center.name || tenant.name),
-        tax_number: center.vat_number || tenant.vat_number,
+        name: isRtl.value ? (tenant.trade_name || tenant.legal_name || tenant.name || center.name_ar || center.name) : (tenant.trade_name || tenant.legal_name || tenant.name || center.name_en || center.name),
+        tax_number: tenant.vat_number || center.vat_number,
         cr_number: tenant.cr_number,
-        phone: center.phone || tenant.phone,
-        logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
+        phone: tenant.phone || center.phone,
+        logo: tenant.logo_url || center.logo_invoice_url || center.logo_light_url || '',
         iban: tenant.iban || '',
-        address: getCenterAddress(center) || tenant.address || '',
-        stamp_url: center.stamp_url || '',
+        address: tenant.address || getCenterAddress(center) || '',
+        stamp_url: isCompany ? '' : (center.stamp_url || ''),
     };
 });
 

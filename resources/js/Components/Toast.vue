@@ -1,5 +1,5 @@
 <template>
-    <Teleport to="body">
+    <Teleport to="body" v-if="isPrimary">
         <TransitionGroup
             tag="div"
             name="toast"
@@ -53,10 +53,26 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useToast } from '@/Composables/useToast';
 
-const { toasts, removeToast } = useToast();
+const { toasts, removeToast, registerContainer, unregisterContainer, activeContainers } = useToast();
+
+const containerId = ref(null);
+
+onMounted(() => {
+    containerId.value = registerContainer();
+});
+
+onUnmounted(() => {
+    if (containerId.value) {
+        unregisterContainer(containerId.value);
+    }
+});
+
+const isPrimary = computed(() => {
+    return activeContainers.value[activeContainers.value.length - 1] === containerId.value;
+});
 
 const isRtl = computed(() => document.documentElement.dir === 'rtl');
 

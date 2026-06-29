@@ -42,7 +42,7 @@ class CustomersImport implements ToModel, WithStartRow
         }
 
         // Validate type
-        if (!in_array($type, ['individual', 'company', 'government', 'vip'])) {
+        if (!in_array($type, ['individual', 'company', 'government'])) {
             $type = 'individual';
         }
 

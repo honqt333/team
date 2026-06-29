@@ -4,7 +4,7 @@
             <!-- Premium Glassmorphic Header -->
             <PageHeader
                 :title="`${$t('invoices.invoice')} #${invoice.invoice_number}`"
-                :subtitle="invoice.customer_name_snapshot || invoice.customer?.name"
+                :subtitle="invoice.company_transaction ? invoice.company_transaction.title : (invoice.customer_name_snapshot || invoice.customer?.name)"
                 :totalCount="formatCurrency(invoice.total_incl_tax)"
                 :countLabel="invoice.tax_enabled_snapshot ? $t('invoices.grand_total') : $t('invoices.total')"
                 gradientFrom="from-blue-600"
@@ -16,7 +16,7 @@
                 badgeDot="bg-blue-500"
             >
                 <template #back>
-                    <BackButton :href="route('app.invoices.sales.index')" />
+                    <BackButton :href="invoice.company_transaction ? (route('settings.company') + '?tab=invoices') : route('app.invoices.sales.index')" />
                 </template>
 
                 <template #icon>

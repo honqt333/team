@@ -24,7 +24,7 @@
 
         <form @submit.prevent="submitForm" class="space-y-6">
             <!-- Part Source -->
-            <div v-if="!part && !pendingMode" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div v-if="!part" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button type="button" 
                     :disabled="isReadOnly"
                     @click="form.source = 'warehouse'" :class="[

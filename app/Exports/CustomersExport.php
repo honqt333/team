@@ -32,7 +32,6 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, Shoul
             'individual' => 'فرد',
             'company' => 'شركة',
             'government' => 'جهة حكومية',
-            'vip' => 'VIP',
         ];
 
         return $query->withCount('vehicles')->orderBy('name')->get()->map(function ($customer) use ($typeNames) {

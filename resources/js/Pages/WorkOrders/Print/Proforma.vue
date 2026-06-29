@@ -157,13 +157,14 @@ const mappedData = computed(() => {
             plate: props.workOrder.vehicle?.plate_number,
             color: props.workOrder.vehicle?.color,
         },
-        tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot && (props.taxSettings?.vat_enabled ?? true),
-        total_excl_tax: props.grandTotal ?? 0,
-        total_tax: 0,
-        total_incl_tax: props.grandTotal ?? 0,
-        discount_amount: 0,
+        tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot !== false && (props.taxSettings?.vat_enabled ?? true),
+        pricing_mode_snapshot: props.workOrder.pricing_mode_snapshot || 'exclusive',
+        total_excl_tax: Number(props.workOrder.total_excl_tax || 0),
+        total_tax: Number(props.workOrder.total_tax || 0),
+        total_incl_tax: Number(props.workOrder.total_incl_tax || 0),
+        discount_amount: Number(props.workOrder.total_discount || 0),
         total_paid: props.totalPaid ?? 0,
-        balance: props.balance ?? 0,
+        balance: Number(props.workOrder.total || 0) - Number(props.totalPaid || 0),
         items: [...services, ...parts]
     };
 });

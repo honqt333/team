@@ -1734,7 +1734,61 @@
       "admin_user": "Main user",
       "subscription": "Subscribe",
       "subscription_history": "Sign up",
-      "revenue_expenses": "Income and expenses"
+      "revenue_expenses": "Income and expenses",
+      "invoices": "Invoices"
+    },
+    "transactions": {
+      "add": "Add Transaction",
+      "edit": "Edit Transaction",
+      "approve_confirm": "Are you sure you want to approve this transaction? It cannot be updated or undone, and an official tax invoice will be issued.",
+      "form": {
+        "title": "Title",
+        "title_placeholder": "e.g., HQ Office Rent, Electricity bill...",
+        "date": "Transaction Date",
+        "type": "Transaction Type",
+        "type_revenue": "Revenue (Administrative Sale)",
+        "type_expense": "Expense (Administrative Cost)",
+        "category": "Income Account Category",
+        "linked_to": "Linked To (Customers / Suppliers)",
+        "linked_to_placeholder": "Search customer or supplier by name or phone...",
+        "amount": "Value (excl. VAT)",
+        "is_taxable": "Is Taxable?",
+        "vat_amount": "VAT Amount",
+        "total_amount": "Total Amount",
+        "sales_invoice_notice": "Note! A sales invoice will be created when performing and approving this transaction.",
+        "purchase_invoice_notice": "Note! A purchase invoice will be created when performing and approving this transaction.",
+        "notes": "Notes"
+      },
+      "table": {
+        "title": "Title",
+        "date": "Transaction Date",
+        "category": "Category",
+        "amount": "Amount",
+        "vat": "VAT",
+        "total": "Total Amount",
+        "updated_by": "Updated By",
+        "approved_by": "Approved By",
+        "actions": "Action"
+      },
+      "actions": {
+        "approve": "Approve Transaction"
+      }
+    },
+    "invoices_tab": {
+      "sales_title": "Admin Sales Invoices",
+      "purchases_title": "Admin Purchase Invoices",
+      "table": {
+        "number": "Invoice Number",
+        "type": "Type",
+        "type_sales": "Sales Invoice",
+        "type_purchase": "Purchase Invoice",
+        "party": "Party",
+        "date": "Issue Date",
+        "amount": "Amount excl. Tax",
+        "vat": "VAT",
+        "total": "Total Amount",
+        "actions": "Action"
+      }
     },
     "branches": {
       "title": "Branches",

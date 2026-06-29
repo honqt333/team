@@ -227,6 +227,23 @@ class Quote extends Model
      */
     public function recalculateTotals(): void
     {
+        // For draft/editable quotes, refresh the tax snapshot from current settings to keep it synced
+        if ($this->canBeEdited()) {
+            $this->refreshTaxSnapshot();
+
+            // Load relationships if not loaded to ensure we can iterate them
+            if (!$this->relationLoaded('lines')) $this->load('lines');
+            if (!$this->relationLoaded('parts')) $this->load('parts');
+
+            // Re-save all lines and parts so they recalculate with the new tax snapshot
+            foreach ($this->lines as $line) {
+                $line->save();
+            }
+            foreach ($this->parts as $part) {
+                $part->save();
+            }
+        }
+
         // Load relationships if not loaded to ensure all items are summed
         if (!$this->relationLoaded('lines')) $this->load('lines');
         if (!$this->relationLoaded('parts')) $this->load('parts');

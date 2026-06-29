@@ -62,7 +62,7 @@ class CustomersTemplateExport implements FromArray, WithHeadings, WithStyles, Sh
         ]);
 
         // Add instructions comment
-        $sheet->getComment('A1')->getText()->createTextRun('القيم المسموحة: individual, company, government, vip');
+        $sheet->getComment('A1')->getText()->createTextRun('القيم المسموحة: individual, company, government');
         $sheet->getComment('E1')->getText()->createTextRun('رقم الهاتف مطلوب ويجب أن يكون فريداً');
 
         return [];

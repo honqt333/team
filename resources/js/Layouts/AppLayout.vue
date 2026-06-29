@@ -1085,8 +1085,8 @@ const { success: toastSuccess, error: toastError } = useToast();
 watch(
     () => page.props.flash,
     (flash) => {
-        if (flash?.success) toastSuccess(flash.success);
-        if (flash?.error)   toastError(flash.error);
+        if (flash?.success) toastSuccess(flash.success, { fromFlash: true });
+        if (flash?.error)   toastError(flash.error, { fromFlash: true });
     },
     { deep: true }
 );

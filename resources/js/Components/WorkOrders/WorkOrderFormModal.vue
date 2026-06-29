@@ -449,7 +449,13 @@ const form = useForm({
     contact_phone: props.workOrder?.contact_phone || '',
     entry_date: props.workOrder?.entry_date || new Date().toISOString().split('T')[0],
     expected_end_date: props.workOrder?.expected_end_date || new Date().toISOString().split('T')[0],
-    departments: props.workOrder?.departments?.map(d => d.id) || [],
+    departments: (() => {
+        const depts = props.workOrder?.departments?.map(d => d.id) || [];
+        if (props.workOrder?.show_packages_section) {
+            depts.push('packages');
+        }
+        return depts;
+    })(),
     damage_marks: props.workOrder?.damage_marks || [],
     fuel_level: props.workOrder?.fuel_level ?? 50,
     photos: [],
@@ -480,7 +486,11 @@ watch(() => props.show, (newVal) => {
         form.contact_phone = props.workOrder.contact_phone || '';
         form.entry_date = formatDateForInput(props.workOrder.entry_date);
         form.expected_end_date = formatDateForInput(props.workOrder.expected_end_date);
-        form.departments = props.workOrder.departments?.map(d => d.id) || [];
+        const depts = props.workOrder.departments?.map(d => d.id) || [];
+        if (props.workOrder.show_packages_section) {
+            depts.push('packages');
+        }
+        form.departments = depts;
         form.damage_marks = props.workOrder.damage_marks || [];
         form.fuel_level = props.workOrder.fuel_level ?? 50;
         form.photos = props.workOrder.photos?.map(photo => ({

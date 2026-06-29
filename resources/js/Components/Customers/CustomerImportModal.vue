@@ -52,7 +52,7 @@
                         <p><strong>{{ $t('customers.columns.phone') }}</strong> - {{ $t('customers.import.required_unique') }}</p>
                     </div>
                     <div class="mt-3 text-xs text-amber-700 dark:text-amber-300">
-                        <strong>{{ $t('customers.columns.type') }}:</strong> individual, company, government, vip
+                        <strong>{{ $t('customers.columns.type') }}:</strong> individual, company, government
                     </div>
                 </div>
 

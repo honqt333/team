@@ -418,7 +418,6 @@ const typeOptions = computed(() => [
     { value: 'individual', label: t('customers.type.individual') },
     { value: 'company', label: t('customers.type.company') },
     { value: 'government', label: t('customers.type.government') },
-    { value: 'vip', label: t('customers.type.vip') },
 ]);
 
 // Initialize form when customer prop changes (for edit mode)

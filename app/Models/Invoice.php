@@ -102,6 +102,11 @@ class Invoice extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function companyTransaction(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(CompanyTransaction::class, 'invoice_id');
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Accessors
     // ─────────────────────────────────────────────────────────────

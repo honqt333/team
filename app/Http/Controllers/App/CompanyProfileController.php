@@ -81,6 +81,24 @@ class CompanyProfileController extends Controller
                 'email' => $adminUser->email,
             ],
             'branches' => $tenant->centers()->select('id', 'name', 'slug', 'is_active', 'created_at')->get(),
+            'company_transactions' => \App\Models\CompanyTransaction::with(['incomeCategory', 'approvedBy', 'updatedBy'])
+                ->latest('transaction_date')
+                ->get(),
+            'income_categories' => \App\Models\IncomeCategory::active()
+                ->get()
+                ->map(fn($cat) => [
+                    'id' => $cat->id,
+                    'name' => $cat->name,
+                    'transaction_type' => $cat->transaction_type
+                ]),
+            'company_invoices' => [
+                'sales' => \App\Models\Invoice::whereIn('id', function($query) {
+                    $query->select('invoice_id')->from('company_transactions')->whereNotNull('invoice_id');
+                })->with(['customer', 'center'])->latest()->get(),
+                'purchases' => \App\Models\PurchaseInvoice::whereIn('id', function($query) {
+                    $query->select('purchase_invoice_id')->from('company_transactions')->whereNotNull('purchase_invoice_id');
+                })->with(['supplier', 'center'])->latest()->get(),
+            ],
         ]);
     }
 

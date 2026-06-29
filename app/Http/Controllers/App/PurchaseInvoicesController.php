@@ -107,7 +107,8 @@ class PurchaseInvoicesController extends Controller
             'lines.returnLines', 
             'center.address', 
             'payments.receivedBy',
-            'returnInvoices.lines.part'
+            'returnInvoices.lines.part',
+            'companyTransaction'
         ]);
 
         return Inertia::render('Purchasing/Invoices/Show', [
@@ -490,7 +491,9 @@ class PurchaseInvoicesController extends Controller
             'purchaseOrder', 
             'lines.part', 
             'center.address', 
-            'payments.receivedBy'
+            'payments.receivedBy',
+            'tenant',
+            'companyTransaction',
         ]);
 
         return Inertia::render('Purchasing/Invoices/Print', [

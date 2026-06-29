@@ -91,7 +91,7 @@ class CustomerStoreRequest extends FormRequest
         $centerId = TenancyContext::centerId();
 
         return [
-            'type' => ['required', 'string', Rule::in(['individual', 'company', 'government', 'vip'])],
+            'type' => ['required', 'string', Rule::in(['individual', 'company', 'government'])],
             'name' => ['required', 'string', 'max:255'],
             'contact_name' => [
                 Rule::requiredIf(fn () => in_array($this->type, ['company', 'government'])),

@@ -55,6 +55,11 @@ class QuoteConversionService
                 'opened_at' => now(),
                 'entry_date' => now()->toDateString(),
                 'expected_end_date' => now()->toDateString(),
+                // Copy tax snapshot from quote
+                'tax_enabled_snapshot' => $quote->tax_enabled_snapshot,
+                'pricing_mode_snapshot' => $quote->pricing_mode_snapshot,
+                'tax_rate_snapshot' => $quote->tax_rate_snapshot,
+                'currency_code' => $quote->currency_code,
             ]);
 
             // Sync departments from quote

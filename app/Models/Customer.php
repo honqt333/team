@@ -17,13 +17,11 @@ class Customer extends Model
     public const TYPE_INDIVIDUAL = 'individual';
     public const TYPE_COMPANY = 'company';
     public const TYPE_GOVERNMENT = 'government';
-    public const TYPE_VIP = 'vip';
 
     public const TYPES = [
         self::TYPE_INDIVIDUAL,
         self::TYPE_COMPANY,
         self::TYPE_GOVERNMENT,
-        self::TYPE_VIP,
     ];
 
     protected $fillable = [

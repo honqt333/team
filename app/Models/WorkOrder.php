@@ -55,6 +55,11 @@ class WorkOrder extends Model
      */
     public function recalculateTotals(): void
     {
+        // For open/editable work orders, refresh the tax snapshot from current settings to keep it synced
+        if ($this->canBeEdited()) {
+            $this->refreshTaxSnapshot();
+        }
+
         // Load relationships if not loaded to ensure all items are summed
         if (!$this->relationLoaded('items')) $this->load('items');
         if (!$this->relationLoaded('parts')) $this->load('parts');
