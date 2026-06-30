@@ -151,11 +151,12 @@
                     :style="{ backgroundColor: getColorValue(mark.color) }"
                 >{{ index + 1 }}</span>
                 <input
-                    v-model="mark.description"
+                    :value="mark.description"
                     type="text"
                     :disabled="readonly"
                     :placeholder="$t('work_orders.condition_report.description_placeholder')"
                     class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-1 focus:ring-indigo-500 disabled:opacity-60 disabled:bg-gray-50 dark:disabled:bg-gray-900"
+                    @input="updateDescription(index, $event.target.value)"
                 />
                 <button
                     v-if="!readonly"
@@ -244,15 +245,26 @@ function addMark(event) {
     const x = ((event.clientX - rect.left) / rect.width) * viewBox.width;
     const y = ((event.clientY - rect.top) / rect.height) * viewBox.height;
     
-    damageMarks.value.push({
-        x: Math.round(x),
-        y: Math.round(y),
-        color: selectedColor.value,
-        description: '',
-    });
+    damageMarks.value = [
+        ...damageMarks.value,
+        {
+            x: Math.round(x),
+            y: Math.round(y),
+            color: selectedColor.value,
+            description: '',
+        },
+    ];
+}
+
+function updateDescription(index, value) {
+    // Replace the entire array to trigger reactivity in the parent watcher.
+    const updated = damageMarks.value.map((m, i) =>
+        i === index ? { ...m, description: value } : { ...m }
+    );
+    damageMarks.value = updated;
 }
 
 function removeMark(index) {
-    damageMarks.value.splice(index, 1);
+    damageMarks.value = damageMarks.value.filter((_, i) => i !== index);
 }
 </script>

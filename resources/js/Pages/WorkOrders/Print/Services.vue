@@ -76,22 +76,37 @@ const mappedData = computed(() => {
     const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
     const vehicleStr = `${make} ${model}`.trim() || '-';
 
-    const items = (props.workOrder.items || []).map(item => ({
-        service_name: item.title || item.service?.name_ar || item.service?.name_en || '',
-        description: item.description || '',
-        technicians: (item.technicians || []).map(t => {
-            if (t.employee) {
-                return locale.value === 'ar' 
-                    ? (t.employee.name_ar || t.employee.name_en || t.name) 
-                    : (t.employee.name_en || t.employee.name_ar || t.name);
-            }
-            return t.name;
-        }).filter(Boolean),
-        status: item.status || null,
-        started_at: item.started_at || null,
-        due_date: item.due_date || null,
-        is_part: false
-    }));
+    const items = (props.workOrder.items || []).map(item => {
+        let serviceName = '';
+        const isStandard = item.service && 
+            item.service.name_ar?.trim() !== 'أخرى' && 
+            item.service.name_en?.trim().toLowerCase() !== 'other';
+            
+        if (isStandard) {
+            serviceName = locale.value === 'ar' 
+                ? (item.service.name_ar || item.title) 
+                : (item.service.name_en || item.service.name_ar || item.title);
+        } else {
+            serviceName = item.title || '';
+        }
+
+        return {
+            service_name: serviceName,
+            description: '',
+            technicians: (item.technicians || []).map(t => {
+                if (t.employee) {
+                    return locale.value === 'ar' 
+                        ? (t.employee.name_ar || t.employee.name_en || t.name) 
+                        : (t.employee.name_en || t.employee.name_ar || t.name);
+                }
+                return t.name;
+            }).filter(Boolean),
+            status: item.status || null,
+            started_at: item.started_at || null,
+            due_date: item.due_date || null,
+            is_part: false
+        };
+    });
 
     return {
         code: props.workOrder.code,

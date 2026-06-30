@@ -28,10 +28,12 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
     const displayDepartments = computed(() => {
         const deptIds = new Set();
 
-        // Add departments that have items
-        Object.keys(getItemsByDepartment()).forEach(id => {
+        // Add departments that have items (active or cancelled)
+        Object.entries(getItemsByDepartment()).forEach(([id, items]) => {
             if (id !== UNASSIGNED_DEPT_KEY && id !== PACKAGES_DEPT_KEY) {
-                deptIds.add(parseInt(id));
+                if (items.length > 0) {
+                    deptIds.add(parseInt(id));
+                }
             }
         });
 

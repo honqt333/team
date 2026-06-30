@@ -658,6 +658,7 @@
       "general_note": "ملاحظة عامة"
     },
     "show": {
+      "code": "رقم كرت الصيانة",
       "no_services": "لا توجد خدمات",
       "no_parts": "لا توجد قطع غيار",
       "tabs": {
@@ -913,6 +914,16 @@
     "empty_hint": "ابدأ بإضافة أول خدمة.",
     "coming_soon": "قريباً",
     "warranty": "الضمان",
+    "warranty_expiry_date": "تاريخ انتهاء الضمان",
+    "remaining_duration": "المدة المتبقية",
+    "days_count": "يوم",
+    "active_warranty_detected": "تم اكتشاف ضمان نشط لهذه الخدمة للمركبة الحالية!",
+    "apply_warranty_to_service": "تطبيق الضمان على هذه الخدمة (مجاناً)",
+    "service_under_warranty": "خدمة تحت ضمان",
+    "branch": "الفرع",
+    "service_price": "مبلغ الخدمة",
+    "service_date": "تاريخ الخدمة",
+    "previous_warranty_claims": "استبيانات الضمان السابقة",
     "types": {
       "internal": "خدمة داخلية",
       "external": "خدمة خارجية"

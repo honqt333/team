@@ -1082,11 +1082,18 @@ const { success: toastSuccess, error: toastError } = useToast();
 // ─── Global Flash Handler ─────────────────────────────────────────────────────
 // Automatically display server flash messages as toasts on every Inertia
 // navigation (including redirects from the backend after form submissions).
+// We defer by one event-loop turn (setTimeout 0) so that any onSuccess/onFinish
+// callbacks fired synchronously by the Inertia router (which update
+// lastFrontendToastAt) always run *before* we try to show the flash toast.
+// This prevents duplicate toasts when Inertia v2 updates page.props before
+// invoking the router's onSuccess callback.
 watch(
     () => page.props.flash,
     (flash) => {
-        if (flash?.success) toastSuccess(flash.success, { fromFlash: true });
-        if (flash?.error)   toastError(flash.error, { fromFlash: true });
+        setTimeout(() => {
+            if (flash?.success) toastSuccess(flash.success, { fromFlash: true });
+            if (flash?.error)   toastError(flash.error, { fromFlash: true });
+        }, 0);
     },
     { deep: true }
 );

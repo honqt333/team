@@ -189,12 +189,12 @@
             <!-- Scenario 5: Standard Item List (work order, etc.) -->
             <div v-else class="space-y-3">
                 <div 
-                    v-for="(item, index) in data.items || dummyItems" 
+                    v-for="(item, index) in filteredItems" 
                     :key="index" 
                     class="flex flex-col text-[10px] pb-2 border-b border-gray-50 last:border-0"
                 >
                     <div class="flex justify-between font-bold text-gray-900">
-                        <span>{{ index + 1 }}. {{ item.service_name || item.description }}</span>
+                        <span class="whitespace-pre-wrap">{{ index + 1 }}. {{ item.service_name || item.description }}</span>
                         <span v-if="showPricingColumns" dir="ltr">{{ formatCurrency(lineSubtotalDisplay(item)) }}</span>
                     </div>
                     <div v-if="item.description && item.service_name" class="text-[9px] text-gray-500 mt-0.5 max-w-[70mm] leading-snug">
@@ -380,16 +380,21 @@ function lineSubtotalDisplay(item) {
 
 
 // Services and Parts computeds for Invoice separation
+const filteredItems = computed(() => {
+    const items = props.data.items || dummyItems;
+    return items.filter(item => item.status !== 'cancelled');
+});
+
 const services = computed(() => {
     if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return [];
-    const items = props.data.items || dummyItems;
-    return items.filter(item => !item.is_part);
+    return filteredItems.value.filter(item => !item.is_part);
 });
 
 const parts = computed(() => {
-    const items = props.data.items || dummyItems;
-    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return items;
-    return items.filter(item => item.is_part);
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) {
+        return filteredItems.value;
+    }
+    return filteredItems.value.filter(item => item.is_part);
 });
 
 const isSleek = computed(() => props.visualSettings.active_template === 'TemplateSleekThermal');
@@ -557,7 +562,7 @@ const totals = computed(() => {
         };
     }
 
-    const items = props.data.items || dummyItems;
+    const items = (props.data.items || dummyItems).filter(item => item.status !== 'cancelled');
     let grossSubtotal = 0;
     let discountAmt = 0;
     let taxAmt = 0;

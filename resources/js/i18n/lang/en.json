@@ -728,6 +728,7 @@
       "general_note": "General Note"
     },
     "show": {
+      "code": "Work Order Code",
       "no_services": "There are no services",
       "no_parts": "There are no spare parts",
       "tabs": {
@@ -1603,6 +1604,16 @@
     "empty_hint": "Start by adding the first service.",
     "coming_soon": "Soon",
     "warranty": "Warranty",
+    "warranty_expiry_date": "Warranty Expiry Date",
+    "remaining_duration": "Remaining Duration",
+    "days_count": "days",
+    "active_warranty_detected": "Active warranty detected for this service on the current vehicle!",
+    "apply_warranty_to_service": "Apply warranty to this service (Free)",
+    "service_under_warranty": "Service under warranty",
+    "branch": "Branch",
+    "service_price": "Service Price",
+    "service_date": "Service Date",
+    "previous_warranty_claims": "Previous Warranty Inquiries",
     "types": {
       "internal": "Internal service",
       "external": "External service"

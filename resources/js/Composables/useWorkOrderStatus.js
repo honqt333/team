@@ -94,9 +94,19 @@ export function useWorkOrderStatus({ workOrder, workOrderBalance }) {
 
         if (action === 'cancel') {
             const wo = getWorkOrder();
-            const hasPayments = (wo.payments && wo.payments.length > 0) || parseFloat(wo.total_paid || wo.totalPaid || 0) > 0;
-            const hasItems = wo.items && wo.items.length > 0;
-            const hasParts = wo.parts && wo.parts.length > 0;
+            const totalPaid = parseFloat(wo.total_paid || wo.totalPaid || 0);
+            const hasPayments = totalPaid > 0;
+
+            // Cancelled items are treated as if they were removed — only active
+            // (non-cancelled) items should block work-order cancellation.
+            const activeItems = (wo.items || []).filter(i => i.status !== 'cancelled');
+            const hasItems = activeItems.length > 0;
+
+            // Cancelled and reversed parts are treated as removed.
+            const activeParts = (wo.parts || []).filter(
+                p => !['cancelled', 'reversed'].includes(p.status)
+            );
+            const hasParts = activeParts.length > 0;
 
             if (hasPayments || hasItems || hasParts) {
                 errorToast(t('messages.cannot_cancel_has_technicians_or_parts'));

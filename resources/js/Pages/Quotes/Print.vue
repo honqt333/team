@@ -94,20 +94,35 @@ const mappedPrintData = computed(() => {
         vehicleStr = `${make} ${model}`.trim() || '-';
     }
 
-    const services = (props.quote.lines || []).map(line => ({
-        service_name: line.service?.name || line.description || '—',
-        description: (line.service && line.description !== line.service.name) ? line.description : '',
-        qty: Number(line.qty || 1),
-        unit_price: Number(line.unit_price || 0),
-        discount: Number(line.discount_amount || 0),
-        is_part: false,
-        is_taxable: line.is_taxable !== false,
-        tax_rate_snapshot: Number(line.tax_rate_snapshot || 0),
-        tax_amount: Number(line.tax_amount || 0),
-        total: Number(line.line_total || 0),
-        line_total_excl_tax: Number(line.line_total_excl_tax || 0),
-        line_total_incl_tax: Number(line.line_total_incl_tax || 0)
-    }));
+    const services = (props.quote.lines || []).map(line => {
+        let serviceName = '';
+        const isStandard = line.service && 
+            line.service.name_ar?.trim() !== 'أخرى' && 
+            line.service.name_en?.trim().toLowerCase() !== 'other';
+            
+        if (isStandard) {
+            serviceName = locale.value === 'ar' 
+                ? (line.service.name_ar || line.description) 
+                : (line.service.name_en || line.service.name_ar || line.description);
+        } else {
+            serviceName = line.description || '';
+        }
+
+        return {
+            service_name: serviceName,
+            description: '',
+            qty: Number(line.qty || 1),
+            unit_price: Number(line.unit_price || 0),
+            discount: Number(line.discount_amount || 0),
+            is_part: false,
+            is_taxable: line.is_taxable !== false,
+            tax_rate_snapshot: Number(line.tax_rate_snapshot || 0),
+            tax_amount: Number(line.tax_amount || 0),
+            total: Number(line.line_total || 0),
+            line_total_excl_tax: Number(line.line_total_excl_tax || 0),
+            line_total_incl_tax: Number(line.line_total_incl_tax || 0)
+        };
+    });
 
     const parts = (props.quote.parts || [])
         .filter(part => !part.hide_on_print)

@@ -157,7 +157,9 @@ class Invoice extends Model
         // "partial" forever even though the customer has paid every riyal.
         $totalIncl = (float) $this->total_incl_tax;
 
-        if ($totalPaid <= 0) {
+        if ($totalIncl <= 0.01) {
+            $this->payment_status = 'paid';
+        } elseif ($totalPaid <= 0) {
             $this->payment_status = 'unpaid';
         } elseif ($totalPaid >= $totalIncl - 0.01) {
             $this->payment_status = 'paid';

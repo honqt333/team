@@ -63,6 +63,94 @@
                             >
                                 {{ getName(item?.service) }}
                             </div>
+
+                            <!-- Active Warranty Alert Box & Toggle -->
+                            <div v-if="activeWarrantyForSelectedService" class="mt-3 p-4 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-xl space-y-3">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="text-xl">🛡️</span>
+                                    <div class="text-sm w-full">
+                                        <p class="font-bold text-emerald-800 dark:text-emerald-300">
+                                            {{ $t('services_management.active_warranty_detected') || 'تم اكتشاف ضمان نشط لهذه الخدمة للمركبة الحالية!' }}
+                                        </p>
+                                        
+                                        <div class="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-emerald-700 dark:text-emerald-400">
+                                            <div class="bg-white/50 dark:bg-black/10 p-2 rounded-lg border border-emerald-100/50 dark:border-emerald-900/30">
+                                                <span class="font-bold block text-[10px] uppercase text-emerald-600 dark:text-emerald-500 mb-0.5">{{ $t('services_management.warranty_expiry_date') }}:</span>
+                                                {{ formatDate(activeWarrantyForSelectedService.warranty_expires_at) }}
+                                                <span class="text-emerald-600/60 dark:text-emerald-500/60 mx-1">|</span>
+                                                <span class="font-semibold">{{ getRemainingDays(activeWarrantyForSelectedService.warranty_expires_at) }} {{ $t('services_management.days_count') }}</span>
+                                            </div>
+                                            
+                                            <div class="bg-white/50 dark:bg-black/10 p-2 rounded-lg border border-emerald-100/50 dark:border-emerald-900/30">
+                                                <span class="font-bold block text-[10px] uppercase text-emerald-600 dark:text-emerald-500 mb-0.5">{{ $t('work_orders.show.code') }}:</span>
+                                                <Link 
+                                                    :href="route('work-orders.show', activeWarrantyForSelectedService.work_order_id)"
+                                                    class="text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-800 dark:hover:text-indigo-300 font-bold"
+                                                >
+                                                    #{{ activeWarrantyForSelectedService.work_order_code }}
+                                                </Link>
+                                                <span class="text-emerald-600/60 dark:text-emerald-500/60 mx-1">|</span>
+                                                <span>{{ $i18n.locale === 'ar' ? activeWarrantyForSelectedService.center_name_ar : activeWarrantyForSelectedService.center_name_en }}</span>
+                                            </div>
+
+                                            <div class="bg-white/50 dark:bg-black/10 p-2 rounded-lg border border-emerald-100/50 dark:border-emerald-900/30 sm:col-span-2">
+                                                <div class="flex justify-between items-center">
+                                                    <div>
+                                                        <span class="font-bold block text-[10px] uppercase text-emerald-600 dark:text-emerald-500 mb-0.5">{{ $t('services_management.service_price') }}:</span>
+                                                        {{ formatCurrency(activeWarrantyForSelectedService.final_unit_price) }}
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <span class="font-bold block text-[10px] uppercase text-emerald-600 dark:text-emerald-500 mb-0.5">{{ $t('services_management.service_date') }}:</span>
+                                                        {{ activeWarrantyForSelectedService.service_date }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="pt-2 border-t border-emerald-100 dark:border-emerald-900/60 flex items-center justify-between">
+                                    <span class="text-xs font-semibold text-emerald-800 dark:text-emerald-300">
+                                        {{ $t('services_management.apply_warranty_to_service') || 'تطبيق الضمان على هذه الخدمة (مجاناً)' }}
+                                    </span>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" v-model="form.is_warranty" class="sr-only peer" />
+                                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Previous Warranty Claims (استبيانات الضمان السابقة) -->
+                            <div v-if="activeWarrantyForSelectedService && activeWarrantyForSelectedService.claims && activeWarrantyForSelectedService.claims.length > 0" class="mt-2.5 p-4 bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/80 dark:border-amber-900/40 rounded-xl space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">📋</span>
+                                    <p class="font-bold text-sm text-amber-800 dark:text-amber-300">
+                                        {{ $t('services_management.previous_warranty_claims') || 'استبيانات الضمان السابقة' }}
+                                    </p>
+                                </div>
+                                <div class="divide-y divide-amber-100/50 dark:divide-amber-900/30 max-h-32 overflow-y-auto pr-1">
+                                    <div v-for="(claim, idx) in activeWarrantyForSelectedService.claims" :key="idx" class="py-2 first:pt-0 last:pb-0 text-xs text-amber-700 dark:text-amber-400">
+                                        <div class="flex justify-between items-center flex-wrap gap-2">
+                                            <div>
+                                                <span class="font-bold">{{ $t('work_orders.show.code') }}:</span>
+                                                <Link 
+                                                    :href="route('work-orders.show', claim.work_order_id)"
+                                                    class="text-indigo-600 dark:text-indigo-400 underline hover:text-indigo-800 dark:hover:text-indigo-300 font-bold"
+                                                >
+                                                    #{{ claim.work_order_code }}
+                                                </Link>
+                                                <span class="text-amber-600/40 dark:text-amber-500/40 mx-1.5">|</span>
+                                                <span class="font-bold">{{ $t('services_management.branch') }}:</span>
+                                                {{ $i18n.locale === 'ar' ? claim.center_name_ar : claim.center_name_en }}
+                                            </div>
+                                            <div>
+                                                <span class="font-bold">{{ $t('services_management.service_date') }}:</span>
+                                                {{ claim.service_date }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Description/Title -->
@@ -108,7 +196,7 @@
                         </div>
 
                         <!-- Service Warranty -->
-                        <div class="grid grid-cols-2 gap-2">
+                        <div v-if="!form.is_warranty" class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                     {{ $t('work_orders.service_modal.warranty_value') }}
@@ -193,9 +281,9 @@
                                 <div class="relative">
                                     <input type="text" inputmode="decimal" v-model="form.unit_price" dir="ltr"
                                         @input="form.unit_price = toEnglish($event.target.value).replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1')"
-                                        :disabled="isPriceLocked || isReadOnly" :class="[
+                                        :disabled="isPriceLocked || isReadOnly || form.is_warranty" :class="[
                                             'w-full py-2.5 pl-4 pr-16 border rounded-xl font-mono text-right text-sm focus:ring-2 focus:border-indigo-500',
-                                            isPriceLocked || isReadOnly
+                                            isPriceLocked || isReadOnly || form.is_warranty
                                                 ? 'bg-gray-100 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed border-gray-200 dark:border-gray-700'
                                                 : isPriceBelowMinimum
                                                     ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-red-300 dark:border-red-700 focus:ring-red-500'
@@ -496,8 +584,8 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
-import { router, useForm } from '@inertiajs/vue3';
+import { ref, computed, watch, onMounted } from 'vue';
+import { router, useForm, Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useLocalized } from '@/Composables/useLocalized';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
@@ -626,9 +714,73 @@ const form = useForm({
     duration_unit: props.item ? (props.item.duration_unit || props.item.service?.duration_unit || 'minutes') : 'minutes',
     warranty_value_snapshot: props.item ? (props.item.warranty_value_snapshot !== undefined && props.item.warranty_value_snapshot !== null && props.item.warranty_value_snapshot !== '' ? props.item.warranty_value_snapshot : (props.item.service?.warranty_value || '')) : '',
     warranty_unit_snapshot: props.item ? (props.item.warranty_unit_snapshot || props.item.service?.warranty_unit || 'days') : 'days',
+    is_warranty: props.item ? !!props.item.is_warranty : false,
     started_at: props.item?.started_at ? formatDateForInput(props.item.started_at) : formatDateForInput(new Date()),
     completed_at: props.item?.completed_at ? formatDateForInput(props.item.completed_at) : '',
-    due_date: props.item?.due_date ? formatDateForInput(props.item.due_date) : formatDateForInput(new Date()),
+});
+
+const activeWarranties = ref([]);
+const previousUnitPrice = ref(0);
+
+const loadActiveWarranties = () => {
+    if (props.workOrder?.vehicle_id) {
+        axios.get(route('vehicles.active-warranties', props.workOrder.vehicle_id))
+            .then(res => {
+                activeWarranties.value = res.data.active_warranties || [];
+            })
+            .catch(err => {
+                console.error("Error fetching active warranties:", err);
+            });
+    }
+};
+
+onMounted(() => {
+    loadActiveWarranties();
+});
+
+const activeWarrantyForSelectedService = computed(() => {
+    if (!form.service_id) return null;
+    
+    if (form.service_id === 'other') {
+        const titleTrimmed = form.title?.trim().toLowerCase();
+        if (!titleTrimmed) return null;
+        return activeWarranties.value.find(w => {
+            return !w.service_id && w.title?.trim().toLowerCase() === titleTrimmed;
+        });
+    }
+    
+    return activeWarranties.value.find(w => w.service_id == form.service_id);
+});
+
+const getRemainingDays = (expiryDateStr) => {
+    if (!expiryDateStr) return 0;
+    const expiry = new Date(expiryDateStr);
+    const now = new Date();
+    expiry.setHours(0,0,0,0);
+    now.setHours(0,0,0,0);
+    const diffTime = expiry.getTime() - now.getTime();
+    if (diffTime <= 0) return 0;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+watch(() => form.is_warranty, (isWarranty) => {
+    if (isWarranty) {
+        previousUnitPrice.value = form.unit_price;
+        form.unit_price = 0;
+        form.discount_type = 'none';
+        form.discount_value = 0;
+        form.warranty_value_snapshot = '';
+        form.warranty_unit_snapshot = 'days';
+    } else {
+        if (form.service_id && form.service_id !== 'other') {
+            const service = props.services.find(s => s.id == form.service_id);
+            form.unit_price = previousUnitPrice.value || (service ? service.base_price : 0) || 0;
+            form.warranty_value_snapshot = service ? (service.warranty_value || '') : '';
+            form.warranty_unit_snapshot = service ? (service.warranty_unit || 'days') : 'days';
+        } else {
+            form.unit_price = previousUnitPrice.value || 0;
+        }
+    }
 });
 
 const noteForm = ref({ content: '' });
@@ -1141,6 +1293,23 @@ function submitForm() {
 
 // Watch for service selection to auto-fill price and other fields
 watch(() => form.service_id, (serviceId) => {
+    // If the selected service changes, check if it has an active warranty.
+    // If it doesn't, automatically set form.is_warranty to false.
+    if (serviceId !== 'other') {
+        const activeWarranty = activeWarranties.value.find(w => w.service_id == serviceId);
+        if (!activeWarranty) {
+            form.is_warranty = false;
+        }
+    } else {
+        const titleTrimmed = form.title?.trim().toLowerCase();
+        const activeWarranty = activeWarranties.value.find(w => {
+            return !w.service_id && w.title?.trim().toLowerCase() === titleTrimmed;
+        });
+        if (!activeWarranty) {
+            form.is_warranty = false;
+        }
+    }
+
     if (serviceId && !props.item) {
         if (serviceId === 'other') {
             form.unit_price = 0;
@@ -1168,6 +1337,18 @@ watch(() => form.service_id, (serviceId) => {
             
             // Auto-calculate due date
             form.due_date = calculateDueDate(form.started_at, form.duration_value, form.duration_unit);
+        }
+    }
+});
+
+watch(() => form.title, (newTitle) => {
+    if (form.service_id === 'other') {
+        const titleTrimmed = newTitle?.trim().toLowerCase();
+        const activeWarranty = activeWarranties.value.find(w => {
+            return !w.service_id && w.title?.trim().toLowerCase() === titleTrimmed;
+        });
+        if (!activeWarranty) {
+            form.is_warranty = false;
         }
     }
 });

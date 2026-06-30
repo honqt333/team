@@ -462,8 +462,12 @@ class WorkOrderController
         }
 
         $validated = $request->validate([
-            'fuel_level' => 'nullable|numeric|min:0|max:100',
-            'damage_marks' => 'nullable|array',
+            'fuel_level'               => 'nullable|numeric|min:0|max:100',
+            'damage_marks'             => 'nullable|array',
+            'damage_marks.*.x'         => 'required|numeric',
+            'damage_marks.*.y'         => 'required|numeric',
+            'damage_marks.*.color'     => 'required|string|in:red,blue,gray',
+            'damage_marks.*.description' => 'nullable|string|max:500',
         ]);
 
         $hasChanges = false;
@@ -477,11 +481,21 @@ class WorkOrderController
 
         // Update damage marks through relationship
         if (isset($validated['damage_marks'])) {
-            // Simplified change detection: Compare counts or content
-            // For now, let's just compare the count and maybe a simple hash/string representation
-            $oldMarks = $workOrder->damageMarks->map(fn($m) => (float)$m->x . "," . (float)$m->y . "," . $m->color)->sort()->values()->toArray();
-            $newMarks = collect($validated['damage_marks'])->map(fn($m) => (float)($m['x'] ?? 0) . "," . (float)($m['y'] ?? 0) . "," . ($m['color'] ?? 'red'))->sort()->values()->toArray();
-            
+            // Compare including description so description-only edits are saved
+            $oldMarks = $workOrder->damageMarks->map(fn($m) => [
+                'x' => round((float)$m->x, 2),
+                'y' => round((float)$m->y, 2),
+                'color' => $m->color,
+                'description' => $m->description ?? '',
+            ])->values()->toArray();
+
+            $newMarks = collect($validated['damage_marks'])->map(fn($m) => [
+                'x' => round((float)($m['x'] ?? 0), 2),
+                'y' => round((float)($m['y'] ?? 0), 2),
+                'color' => $m['color'] ?? 'red',
+                'description' => $m['description'] ?? '',
+            ])->values()->toArray();
+
             if ($oldMarks !== $newMarks) {
                 $hasChanges = true;
                 $workOrder->damageMarks()->delete();
@@ -534,6 +548,7 @@ class WorkOrderController
             'duration_unit' => 'nullable|string|max:50',
             'warranty_value_snapshot' => 'nullable|integer|min:0',
             'warranty_unit_snapshot' => 'nullable|string|max:50',
+            'is_warranty' => 'nullable|boolean',
             'started_at' => 'nullable|date',
             'completed_at' => 'nullable|date',
             'due_date' => 'nullable|date',
@@ -573,6 +588,7 @@ class WorkOrderController
             'duration_unit' => $validated['duration_unit'] ?? null,
             'warranty_value_snapshot' => $validated['warranty_value_snapshot'] ?? null,
             'warranty_unit_snapshot' => $validated['warranty_unit_snapshot'] ?? null,
+            'is_warranty' => $validated['is_warranty'] ?? false,
             'started_at' => $validated['started_at'] ?? null,
             'completed_at' => $validated['completed_at'] ?? null,
             'due_date' => $validated['due_date'] ?? null,
@@ -663,6 +679,7 @@ class WorkOrderController
             'duration_unit' => 'nullable|string|max:50',
             'warranty_value_snapshot' => 'nullable|integer|min:0',
             'warranty_unit_snapshot' => 'nullable|string|max:50',
+            'is_warranty' => 'nullable|boolean',
             'started_at' => 'nullable|date',
             'completed_at' => 'nullable|date',
             'due_date' => 'nullable|date',
@@ -711,27 +728,31 @@ class WorkOrderController
     {
         $this->authorize('update', $work_order);
 
-        // Rule: Cannot delete item if the work order has payments (must cancel instead)
-        if ($work_order->payments()->exists()) {
-            return redirect()->back()->with('error', __('messages.cannot_delete_item_work_order_has_payments'));
-        }
+        // Rule: Cannot delete/cancel item if it has active parts or technicians.
+        // Active parts exclude cancelled or reversed parts.
+        $hasActiveParts = $item->parts()
+            ->whereNotIn('status', [
+                \App\Models\WorkOrderItemPart::STATUS_CANCELLED,
+                \App\Models\WorkOrderItemPart::STATUS_REVERSED
+            ])
+            ->exists();
 
-        // Rule: Cannot delete item if status has changed from pending
-        if ($item->status !== \App\Models\WorkOrderItem::STATUS_PENDING) {
-            return redirect()->back()->with('error', __('messages.cannot_delete_item_status_changed') ?? 'لا يمكن حذف الخدمة بعد تغيير حالتها من قيد الانتظار!');
-        }
-
-        // Rule: Cannot delete item if it has parts or technicians
-        if ($item->parts()->exists() || $item->technicians()->exists()) {
+        if ($item->technicians()->exists() || $hasActiveParts) {
             return redirect()->back()->with('error', __('messages.cannot_delete_item_has_parts_or_technicians'));
         }
 
-        $title = $item->title;
-        $item->delete();
+        // Update status to cancelled instead of physical deletion
+        $item->update(['status' => \App\Models\WorkOrderItem::STATUS_CANCELLED]);
 
-        $work_order->logActivity('item_deleted', __('work_orders.activities.actions.item_deleted', ['title' => $title]));
+        $work_order->logActivity(
+            'item_status_updated',
+            __('work_orders.activities.actions.item_status_updated', [
+                'title' => $item->title,
+                'status' => __('work_orders.item_status.cancelled')
+            ])
+        );
 
-        return redirect()->back()->with('success', __('messages.service_deleted'));
+        return redirect()->back()->with('success', __('messages.item_status_updated'));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -790,9 +811,9 @@ class WorkOrderController
         }
         $departmentId = (int) $department_id;
 
-        // Rule R11: Can only remove department if no items belong to it
+        // Rule R11: Can only remove department if no items belong to it (even cancelled ones)
         $hasItems = $work_order->items()
-            ->whereHas('service', fn($q) => $q->where('department_id', $departmentId))
+            ->where('department_id', $departmentId)
             ->exists();
 
         if ($hasItems) {
@@ -1728,5 +1749,69 @@ class WorkOrderController
         $attachment->delete();
 
         return back()->with('success', __('messages.attachment_deleted'));
+    }
+
+    /**
+     * Get active warranties for a specific vehicle.
+     */
+    public function activeWarranties($vehicle_id): \Illuminate\Http\JsonResponse
+    {
+        // Find all completed work order items for this vehicle where warranty is still active
+        $activeWarranties = \App\Models\WorkOrderItem::whereHas('workOrder', function ($q) use ($vehicle_id) {
+                $q->where('vehicle_id', $vehicle_id)
+                  ->where('status', 'done'); // completed work orders
+            })
+            ->where('status', \App\Models\WorkOrderItem::STATUS_COMPLETED)
+            ->whereNotNull('warranty_expires_at')
+            ->where('warranty_expires_at', '>', now())
+            ->get()
+            ->map(function ($item) use ($vehicle_id) {
+                // Find previous cards for this vehicle where this service was done under warranty
+                $claims = \App\Models\WorkOrderItem::whereHas('workOrder', function ($q) use ($vehicle_id) {
+                        $q->where('vehicle_id', $vehicle_id)
+                          ->where('status', 'done');
+                    })
+                    ->where('is_warranty', true)
+                    ->where(function ($query) use ($item) {
+                        if ($item->service_id) {
+                            $query->where('service_id', $item->service_id);
+                        } else {
+                            $query->where('title', $item->title);
+                        }
+                    })
+                    ->get()
+                    ->map(function ($claim) {
+                        return [
+                            'work_order_code' => $claim->workOrder?->code,
+                            'work_order_id' => $claim->work_order_id,
+                            'service_date' => $claim->workOrder?->created_at?->format('Y-m-d'),
+                            'center_name_ar' => $claim->workOrder?->center?->name_ar,
+                            'center_name_en' => $claim->workOrder?->center?->name_en,
+                        ];
+                    });
+
+                return [
+                    'id' => $item->id,
+                    'service_id' => $item->service_id,
+                    'service_name_ar' => $item->service?->name_ar ?? $item->title,
+                    'service_name_en' => $item->service?->name_en ?? $item->title,
+                    'title' => $item->title,
+                    'warranty_expires_at' => $item->warranty_expires_at->toIso8601String(),
+                    'warranty_value_snapshot' => $item->warranty_value_snapshot,
+                    'warranty_unit_snapshot' => $item->warranty_unit_snapshot,
+                    'work_order_code' => $item->workOrder?->code,
+                    'work_order_id' => $item->work_order_id,
+                    'unit_price' => $item->unit_price,
+                    'final_unit_price' => $item->final_unit_price,
+                    'service_date' => $item->workOrder?->created_at?->format('Y-m-d'),
+                    'center_name_ar' => $item->workOrder?->center?->name_ar,
+                    'center_name_en' => $item->workOrder?->center?->name_en,
+                    'claims' => $claims,
+                ];
+            });
+
+        return response()->json([
+            'active_warranties' => $activeWarranties
+        ]);
     }
 }

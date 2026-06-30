@@ -81,7 +81,15 @@ class InvoiceService
 
             // 2. Convert WO Items (Services) to Invoice Lines
             foreach ($activeItems as $item) {
-                $description = $item->title ?? $item->service->name;
+                $isStandard = $item->service && 
+                    trim($item->service->name_ar) !== 'أخرى' && 
+                    strtolower(trim($item->service->name_en)) !== 'other';
+                
+                if ($isStandard) {
+                    $description = $item->service->name;
+                } else {
+                    $description = $item->title;
+                }
                 
                 // Append warranty if exists
                 if ($item->warranty_value_snapshot && $item->warranty_unit_snapshot) {
@@ -104,6 +112,12 @@ class InvoiceService
                     $unitLabel = $units[$locale][$item->warranty_unit_snapshot] ?? $item->warranty_unit_snapshot;
                     $label = $locale === 'ar' ? 'ضمان الخدمة' : 'Service Warranty';
                     $description .= " - {$label} {$item->warranty_value_snapshot} {$unitLabel}";
+                }
+
+                if ($item->is_warranty) {
+                    $locale = app()->getLocale();
+                    $label = $locale === 'ar' ? 'تحت الضمان' : 'Under Warranty';
+                    $description .= " ({$label})";
                 }
 
                 // Compute line totals locally so we don't depend on stale
@@ -143,6 +157,7 @@ class InvoiceService
                     'tax_amount' => $taxAmt,
                     'line_total_excl_tax' => $lineExcl,
                     'line_total_incl_tax' => $lineIncl,
+                    'is_warranty' => (bool) $item->is_warranty,
                 ]);
             }
 

@@ -92,7 +92,19 @@ const mappedData = computed(() => {
 
     // Map services
     const services = (props.workOrder.items || []).map(item => {
-        let serviceName = item.title || item.service?.name_ar || item.service?.name_en || '';
+        let serviceName = '';
+        const isStandard = item.service && 
+            item.service.name_ar?.trim() !== 'أخرى' && 
+            item.service.name_en?.trim().toLowerCase() !== 'other';
+            
+        if (isStandard) {
+            serviceName = isRtl.value 
+                ? (item.service.name_ar || item.title) 
+                : (item.service.name_en || item.service.name_ar || item.title);
+        } else {
+            serviceName = item.title || '';
+        }
+
         if (item.warranty_value_snapshot && item.warranty_unit_snapshot) {
             const warrantyLabel = t('services_management.columns.warranty');
             let unitLabel = t(`services_management.warranty_units.${item.warranty_unit_snapshot}`);
@@ -116,7 +128,7 @@ const mappedData = computed(() => {
         }
         return {
             service_name: serviceName,
-            description: item.description || '',
+            description: '',
             qty: item.qty || 1,
             unit_price: item.unit_price || 0,
             discount: getDiscount(item),

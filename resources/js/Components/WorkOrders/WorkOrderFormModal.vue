@@ -233,8 +233,8 @@
                             </div>
                         </div>
                         <div class="relative">
-                            <input v-model="form.mileage" type="text" inputmode="numeric"
-                                @input="form.mileage = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
+                            <input v-model="form.odometer" type="text" inputmode="numeric"
+                                @input="form.odometer = toEnglish($event.target.value).replace(/[^0-9]/g, '')"
                                 :placeholder="$t('work_orders.form.odometer_placeholder')"
                                 class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
                             <div class="absolute inset-y-0 end-0 pe-3 flex items-center pointer-events-none">
@@ -443,7 +443,7 @@ const form = useForm({
     vehicle_id: props.workOrder?.vehicle_id || props.vehicle?.id || '',
     customer_complaint: props.workOrder?.customer_complaint || '',
     initial_assessment: props.workOrder?.initial_assessment || '',
-    mileage: props.workOrder?.mileage || '',
+    odometer: props.workOrder?.odometer || props.workOrder?.mileage || '',
     allow_lower_odometer: false,
     contact_name: props.workOrder?.contact_name || '',
     contact_phone: props.workOrder?.contact_phone || '',
@@ -480,7 +480,7 @@ watch(() => props.show, (newVal) => {
         form.vehicle_id = props.workOrder.vehicle_id || '';
         form.customer_complaint = props.workOrder.customer_complaint || '';
         form.initial_assessment = props.workOrder.initial_assessment || '';
-        form.mileage = props.workOrder.mileage || '';
+        form.odometer = props.workOrder.odometer || props.workOrder.mileage || '';
         form.allow_lower_odometer = false;
         form.contact_name = props.workOrder.contact_name || '';
         form.contact_phone = props.workOrder.contact_phone || '';
@@ -519,7 +519,7 @@ watch(() => props.vehicle, (val) => {
         selectedVehicle.value = val;
         form.vehicle_id = val.id;
         form.customer_id = val.customer_id;
-        form.mileage = val.odometer || '';
+        form.odometer = val.odometer || '';
         lastVehicleOdometer.value = val.odometer || 0;
     }
 }, { immediate: true });
@@ -612,7 +612,7 @@ function selectVehicle(vehicle) {
     selectedVehicle.value = vehicle;
     form.customer_id = vehicle.customer_id || (vehicle.customer ? vehicle.customer.id : '');
     form.vehicle_id = vehicle.id;
-    form.mileage = vehicle.odometer || '';
+    form.odometer = vehicle.odometer || '';
     lastVehicleOdometer.value = vehicle.odometer || 0;
 
     // Auto-fill contact info from customer if available
@@ -654,7 +654,7 @@ function submitForm() {
 
     // Set odometer on vehicle object for warning check
     if (selectedVehicle.value) {
-        selectedVehicle.value.odometer = form.mileage;
+        selectedVehicle.value.odometer = form.odometer;
     }
 
     const options = {
@@ -683,7 +683,7 @@ function resetForm() {
     form.vehicle_id = '';
     form.customer_complaint = '';
     form.initial_assessment = '';
-    form.mileage = '';
+    form.odometer = '';
     form.contact_name = '';
     form.contact_phone = '';
     form.entry_date = today;
@@ -710,8 +710,8 @@ watch(() => props.show, (isOpen) => {
 });
 
 const showOdometerWarning = computed(() => {
-    if (!selectedVehicle.value || !form.mileage || lastVehicleOdometer.value <= 0) return false;
-    return Number(form.mileage) < lastVehicleOdometer.value;
+    if (!selectedVehicle.value || !form.odometer || lastVehicleOdometer.value <= 0) return false;
+    return Number(form.odometer) < lastVehicleOdometer.value;
 });
 
 function getVehicleDisplay(vehicle) {

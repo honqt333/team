@@ -379,8 +379,11 @@ class WorkOrdersCrudTest extends TestCase
         $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
         $deleteResponse->assertRedirect();
 
-        // Assert item was deleted
-        $this->assertDatabaseMissing('work_order_items', ['id' => $item->id]);
+        // Assert item was cancelled (not deleted physically)
+        $this->assertDatabaseHas('work_order_items', [
+            'id' => $item->id,
+            'status' => 'cancelled',
+        ]);
     }
 
     public function test_authorized_user_cannot_delete_item_if_work_order_has_payments(): void
@@ -431,8 +434,11 @@ class WorkOrdersCrudTest extends TestCase
         $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
         $deleteResponse->assertRedirect();
 
-        // Assert item was deleted
-        $this->assertDatabaseMissing('work_order_items', ['id' => $item->id]);
+        // Assert item was cancelled (not deleted physically)
+        $this->assertDatabaseHas('work_order_items', [
+            'id' => $item->id,
+            'status' => 'cancelled',
+        ]);
     }
 
     public function test_authorized_user_can_reactivate_cancelled_item(): void
@@ -1007,5 +1013,230 @@ class WorkOrdersCrudTest extends TestCase
         $invoice->refresh();
         $this->assertEquals(100.00, (float)$invoice->total_paid);
         $this->assertEquals('paid', $invoice->payment_status);
+    }
+
+    public function test_cancellation_of_work_order_ignores_cancelled_items_and_parts(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create work order
+        $workOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-CANCEL-TEST',
+            'status' => WorkOrder::STATUS_OPEN,
+        ]);
+
+        // Add a cancelled item
+        $item = $workOrder->items()->create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'title' => 'Service A',
+            'qty' => 1,
+            'unit_price' => 100,
+            'status' => 'cancelled',
+        ]);
+
+        // Add a cancelled part
+        $part = $workOrder->parts()->create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'work_order_item_id' => $item->id,
+            'name' => 'Part A',
+            'part_number' => 'SKU-A',
+            'source' => 'warehouse',
+            'qty' => 1,
+            'unit_price' => 50,
+            'status' => 'cancelled',
+        ]);
+
+        // Ensure the work order can be cancelled because active items/parts are 0
+        $this->assertTrue($workOrder->canBeCancelled());
+
+        // Call the cancel endpoint
+        $response = $this->actingAs($user)->post("/app/work-orders/{$workOrder->id}/cancel");
+        $response->assertRedirect();
+
+        $workOrder->refresh();
+        $this->assertEquals(WorkOrder::STATUS_CANCELLED, $workOrder->status);
+    }
+
+    public function test_delete_item_converts_to_cancelled_if_payments_exist(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create work order
+        $workOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-DELETE-TEST',
+            'status' => WorkOrder::STATUS_OPEN,
+        ]);
+
+        // Add an item
+        $item = $workOrder->items()->create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'title' => 'Service A',
+            'qty' => 1,
+            'unit_price' => 100,
+            'status' => 'pending',
+        ]);
+
+        // Create a payment record (making physical deletion impossible)
+        $payment = \App\Models\Payment::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'work_order_id' => $workOrder->id,
+            'amount' => 100,
+            'payment_method' => 'cash',
+            'payment_date' => now(),
+            'type' => 'payment',
+        ]);
+
+        // Call delete endpoint on the item
+        $response = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
+        $response->assertRedirect();
+
+        // The item should NOT be physically deleted, but instead converted to cancelled status
+        $this->assertDatabaseHas('work_order_items', [
+            'id' => $item->id,
+            'status' => 'cancelled',
+        ]);
+    }
+
+    public function test_can_retrieve_active_warranties_for_vehicle(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create completed work order
+        $workOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-WARR-TEST-1',
+            'status' => WorkOrder::STATUS_DONE,
+        ]);
+
+        $service = \App\Models\Service::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'name_ar' => 'خدمة اختبار الضمان',
+            'name_en' => 'Warranty Test Service',
+            'base_price' => 100,
+            'warranty_value' => 30,
+            'warranty_unit' => 'days',
+            'type' => \App\Models\Service::TYPE_INTERNAL,
+        ]);
+
+        // Add a completed item to start warranty
+        $item = $workOrder->items()->create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'service_id' => $service->id,
+            'title' => 'Warranty Test Service',
+            'qty' => 1,
+            'unit_price' => 100,
+            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'completed_at' => now(),
+            'warranty_value_snapshot' => 30,
+            'warranty_unit_snapshot' => 'days',
+            'warranty_expires_at' => now()->addDays(30),
+        ]);
+
+        // Create a second completed work order representing a warranty claim
+        $workOrderClaim = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-WARR-CLAIM-1',
+            'status' => WorkOrder::STATUS_DONE,
+        ]);
+
+        $itemClaim = $workOrderClaim->items()->create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'service_id' => $service->id,
+            'title' => 'Warranty Test Service',
+            'qty' => 1,
+            'unit_price' => 100,
+            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'completed_at' => now(),
+            'is_warranty' => true,
+        ]);
+
+        // Retrieve active warranties via API
+        $response = $this->actingAs($user)->get("/app/api/vehicles/{$vehicle->id}/active-warranties");
+        $response->assertStatus(200);
+        $response->assertJsonCount(1, 'active_warranties');
+        $response->assertJsonPath('active_warranties.0.service_id', $service->id);
+        $response->assertJsonPath('active_warranties.0.unit_price', '100.00');
+        $response->assertJsonCount(1, 'active_warranties.0.claims');
+        $response->assertJsonPath('active_warranties.0.claims.0.work_order_code', 'WO-WARR-CLAIM-1');
+    }
+
+    public function test_can_retrieve_active_warranties_for_custom_written_service_on_vehicle(): void
+    {
+        $user = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.update',
+        ]);
+
+        [$customer, $vehicle] = $this->createCustomerAndVehicle($user);
+
+        // Create completed work order
+        $workOrder = WorkOrder::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-WARR-TEST-2',
+            'status' => WorkOrder::STATUS_DONE,
+        ]);
+
+        // Add a completed item with service_id = null (custom "other" service)
+        $item = $workOrder->items()->create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'service_id' => null,
+            'title' => 'Custom Manual Service',
+            'qty' => 1,
+            'unit_price' => 120,
+            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'completed_at' => now(),
+            'warranty_value_snapshot' => 60,
+            'warranty_unit_snapshot' => 'days',
+            'warranty_expires_at' => now()->addDays(60),
+        ]);
+
+        // Retrieve active warranties via API
+        $response = $this->actingAs($user)->get("/app/api/vehicles/{$vehicle->id}/active-warranties");
+        $response->assertStatus(200);
+        
+        // Should find the warranty with title 'Custom Manual Service' and null service_id
+        $response->assertJsonCount(1, 'active_warranties');
+        $response->assertJsonPath('active_warranties.0.service_id', null);
+        $response->assertJsonPath('active_warranties.0.title', 'Custom Manual Service');
     }
 }

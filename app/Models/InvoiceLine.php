@@ -26,6 +26,7 @@ class InvoiceLine extends Model
         'tax_amount',
         'line_total_excl_tax',
         'line_total_incl_tax',
+        'is_warranty',
     ];
 
     protected $casts = [
@@ -39,6 +40,7 @@ class InvoiceLine extends Model
         'tax_amount' => 'decimal:2',
         'line_total_excl_tax' => 'decimal:2',
         'line_total_incl_tax' => 'decimal:2',
+        'is_warranty' => 'boolean',
     ];
 
     public function invoice(): BelongsTo

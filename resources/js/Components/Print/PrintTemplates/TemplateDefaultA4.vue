@@ -385,12 +385,12 @@
                             </tr>
                         </thead>
                         <tbody class="text-gray-800">
-                            <tr v-for="(item, index) in data.items || dummyItems" :key="index" class="border-b border-gray-200">
+                            <tr v-for="(item, index) in filteredItems" :key="index" class="border-b border-gray-200">
                                 <!-- # -->
                                 <td class="p-2 border border-gray-200 text-center text-gray-500">{{ index + 1 }}</td>
                                 <!-- Description -->
                                 <td class="p-2 border border-gray-200 font-medium">
-                                    <span>{{ item.service_name || item.description }}</span>
+                                    <span class="whitespace-pre-wrap">{{ item.service_name || item.description }}</span>
                                     <span v-if="item.description && item.service_name" class="block text-xs text-gray-500 mt-0.5 font-normal">{{ item.description }}</span>
                                     <!-- All technicians, one per line -->
                                     <template v-if="Array.isArray(item.technicians) && item.technicians.length">
@@ -838,16 +838,21 @@ function partLineExclTax(item) {
 }
 
 // Services and Parts computeds for Invoice separation
+const filteredItems = computed(() => {
+    const items = props.data.items || dummyItems;
+    return items.filter(item => item.status !== 'cancelled');
+});
+
 const services = computed(() => {
     if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return [];
-    const items = props.data.items || dummyItems;
-    return items.filter(item => !item.is_part);
+    return filteredItems.value.filter(item => !item.is_part);
 });
 
 const parts = computed(() => {
-    const items = props.data.items || dummyItems;
-    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) return items;
-    return items.filter(item => item.is_part);
+    if (['parts_invoice', 'purchase_invoice', 'purchase_return'].includes(props.documentType)) {
+        return filteredItems.value;
+    }
+    return filteredItems.value.filter(item => item.is_part);
 });
 
 // Show VAT column only when at least one item has VAT
@@ -999,7 +1004,7 @@ const totals = computed(() => {
         };
     }
 
-    const items = props.data.items || dummyItems;
+    const items = (props.data.items || dummyItems).filter(item => item.status !== 'cancelled');
     let grossSubtotal = 0;
     let discountAmt = 0;
     let taxAmt = 0;

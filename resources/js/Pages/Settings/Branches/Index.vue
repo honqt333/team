@@ -179,14 +179,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed } from 'vue';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import BackButton from '@/Components/BackButton.vue';
-import { Link, usePage } from '@inertiajs/vue3';
+import { Link } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BranchFormModal from './BranchFormModal.vue';
-import { useToast } from '@/Composables/useToast';
 
 const props = defineProps({
     branches: Array,
@@ -194,20 +193,11 @@ const props = defineProps({
 
 const showCreateModal = ref(false);
 const { t } = useI18n();
-const { success } = useToast();
 
 // Theme detection
 const isDark = computed(() => {
     return document.documentElement.classList.contains('dark');
 });
 
-// Flash message handling
-const page = usePage();
-const showFlash = (flash) => {
-    if (flash?.success) {
-        success(flash.success);
-    }
-};
-onMounted(() => showFlash(page.props.flash));
-watch(() => page.props.flash, showFlash);
+// Flash messages are handled globally by AppLayout.vue
 </script>

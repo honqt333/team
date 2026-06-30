@@ -125,6 +125,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::delete('/work-order-parts/{workOrderPart}', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'destroy'])->name('work-orders.parts.destroy');
     Route::post('/work-order-parts/{workOrderPart}/reverse', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'reverse'])->name('work-orders.parts.reverse');
     Route::get('/api/work-order-parts/check-stock', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'checkStock'])->name('work-orders.parts.check-stock');
+    Route::get('/api/vehicles/{vehicle_id}/active-warranties', [WorkOrderController::class, 'activeWarranties'])->name('vehicles.active-warranties');
     
     // Work Order Status Management
     Route::post('/work-orders/{work_order}/start', [WorkOrderController::class, 'startWork'])->name('work-orders.start');

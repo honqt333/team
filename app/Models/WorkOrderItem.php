@@ -68,6 +68,7 @@ class WorkOrderItem extends Model
         'warranty_expires_at',
         'warranty_value_snapshot',
         'warranty_unit_snapshot',
+        'is_warranty',
     ];
 
     protected $appends = [
@@ -95,6 +96,8 @@ class WorkOrderItem extends Model
         'line_total_excl_tax' => 'decimal:2',
         'line_total_incl_tax' => 'decimal:2',
         'is_taxable' => 'boolean',
+        'is_warranty' => 'boolean',
+        'warranty_expires_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -111,7 +114,7 @@ class WorkOrderItem extends Model
                 $item->discount_type ?? 'none',
                 $item->discount_value,
                 (float) $item->qty,
-                (float) $item->min_price_snapshot
+                $item->is_warranty ? 0 : (float) $item->min_price_snapshot
             );
 
             $item->discount_amount = $computed['discount_amount'];
@@ -129,15 +132,20 @@ class WorkOrderItem extends Model
                 if ($item->status === self::STATUS_COMPLETED && !$item->completed_at) {
                     $item->completed_at = now();
 
-                    // Calculate warranty if service has warranty defined
-                    if ($item->service && $item->service->warranty_value > 0) {
-                        $item->warranty_value_snapshot = $item->service->warranty_value;
-                        $item->warranty_unit_snapshot = $item->service->warranty_unit;
-                        
-                        $unit = $item->service->warranty_unit; // days, weeks, months, years
-                        $value = $item->service->warranty_value;
-                        
-                        $item->warranty_expires_at = now()->add($value, $unit);
+                    if ($item->is_warranty) {
+                        $item->warranty_expires_at = null;
+                        $item->warranty_value_snapshot = null;
+                        $item->warranty_unit_snapshot = null;
+                    } else {
+                        // Use snapshotted values if defined (which might be user-customized)
+                        $value = $item->warranty_value_snapshot ?? ($item->service ? $item->service->warranty_value : 0);
+                        $unit = $item->warranty_unit_snapshot ?? ($item->service ? $item->service->warranty_unit : null);
+
+                        if ($value > 0 && $unit) {
+                            $item->warranty_value_snapshot = $value;
+                            $item->warranty_unit_snapshot = $unit;
+                            $item->warranty_expires_at = now()->add($value, $unit);
+                        }
                     }
                 }
             }

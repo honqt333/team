@@ -37,6 +37,15 @@ class WorkOrder extends Model
         static::saving(function ($workOrder) {
             $workOrder->recalculateTotals();
 
+            // Synchronize odometer and mileage columns to maintain compatibility
+            if ($workOrder->isDirty('odometer') && !$workOrder->isDirty('mileage')) {
+                $workOrder->mileage = $workOrder->odometer;
+            } elseif ($workOrder->isDirty('mileage') && !$workOrder->isDirty('odometer')) {
+                $workOrder->odometer = $workOrder->mileage;
+            } elseif ($workOrder->odometer !== $workOrder->mileage) {
+                $workOrder->mileage = $workOrder->odometer;
+            }
+
             // Auto complete work order if all items are completed and status is not done/cancelled/on_hold
             if (in_array($workOrder->status, [self::STATUS_OPEN, self::STATUS_IN_PROGRESS]) && $workOrder->allItemsCompleted()) {
                 $workOrder->status = self::STATUS_READY_FOR_QC;
@@ -330,8 +339,11 @@ class WorkOrder extends Model
 
     /**
      * Check if work order can be cancelled.
-     * Rule R5: Cannot cancel if any item has technicians
-     * Rule R6: Cannot cancel if any item has parts
+     * Rule R5: Cannot cancel if any *active* (non-cancelled) item has technicians
+     * Rule R6: Cannot cancel if any *active* (non-cancelled/non-reversed) part exists
+     *
+     * Cancelled items/parts are treated as if they were deleted, so they do NOT
+     * block cancellation of the parent work order.
      */
     public function canBeCancelled(): bool
     {
@@ -340,13 +352,17 @@ class WorkOrder extends Model
             return false;
         }
 
-        // Check if has items (services) or technicians
-        if ($this->items()->exists()) {
+        // Only non-cancelled items block cancellation.
+        // Items converted to 'cancelled' are treated as if they were removed.
+        if ($this->items()->where('status', '!=', WorkOrderItem::STATUS_CANCELLED)->exists()) {
             return false;
         }
 
-        // Check if has any parts
-        if ($this->parts()->exists()) {
+        // Only active parts (not cancelled or reversed) block cancellation.
+        if ($this->parts()->whereNotIn('status', [
+            WorkOrderItemPart::STATUS_CANCELLED,
+            WorkOrderItemPart::STATUS_REVERSED,
+        ])->exists()) {
             return false;
         }
 

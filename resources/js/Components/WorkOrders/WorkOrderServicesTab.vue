@@ -92,6 +92,9 @@
                                                     class="font-bold text-gray-900 dark:text-white text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors text-start leading-snug">
                                                     {{ item.service ? getName(item.service) : item.title }}
                                                 </button>
+                                                <span v-if="item.is_warranty" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                                    🛡️ {{ $t('services_management.service_under_warranty') || 'خدمة تحت ضمان' }}
+                                                </span>
                                             </div>
 
                                             <div v-if="item.service && item.title && item.title !== getName(item.service)"
@@ -198,7 +201,12 @@
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                                             </svg>
-                                            <span>{{ $t('services_management.warranty') }}: {{ formatDate(item.warranty_expires_at) }}</span>
+                                            <span v-if="showDetailedWarranty(item)">
+                                                {{ $t('services_management.warranty_expiry_date') }}: {{ formatDate(item.warranty_expires_at) }} - {{ $t('services_management.remaining_duration') }}: {{ getRemainingDays(item.warranty_expires_at) }} {{ $t('services_management.days_count') }}
+                                            </span>
+                                            <span v-else>
+                                                {{ $t('services_management.warranty') }}: {{ formatDate(item.warranty_expires_at) }}
+                                            </span>
                                         </div>
 
                                         <!-- Date created -->
@@ -449,6 +457,21 @@ function formatPrice(value) {
     return formatCurrency(value) + ' ' + t('common.currency');
 }
 
+const showDetailedWarranty = (item) => {
+    return props.workOrder?.status === 'done' && props.workOrder?.invoice?.id && item.warranty_expires_at;
+};
+
+const getRemainingDays = (expiryDateStr) => {
+    if (!expiryDateStr) return 0;
+    const expiry = new Date(expiryDateStr);
+    const now = new Date();
+    expiry.setHours(0,0,0,0);
+    now.setHours(0,0,0,0);
+    const diffTime = expiry.getTime() - now.getTime();
+    if (diffTime <= 0) return 0;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
 // Local UI state for the "add department" modal.
 const showDeptModal = ref(false);
 const selectedDepts = ref([]);
@@ -497,7 +520,7 @@ function printDepartment(deptId) {
 }
 
 function getItemsForDept(deptId) {
-    const items = (props.itemsByDepartment[deptId] || []).filter(item => item.status !== 'cancelled');
+    const items = props.itemsByDepartment[deptId] || [];
     const statusPriority = {
         'pending': 1,
         'in_progress': 2,
