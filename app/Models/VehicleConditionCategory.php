@@ -68,6 +68,9 @@ class VehicleConditionCategory extends Model
 
     public function scopeOrderedBySource($query)
     {
+        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+            return $query->orderByRaw("case source when 'center' then 1 when 'tenant' then 2 when 'system' then 3 else 4 end");
+        }
         return $query->orderByRaw("FIELD(source, 'center', 'tenant', 'system')");
     }
 }

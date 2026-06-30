@@ -98,6 +98,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     // Vehicle export/print routes
     Route::get('/vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
     Route::get('/vehicles/print', [VehicleController::class, 'print'])->name('vehicles.print');
+    Route::get('/vehicles/check-plate', [VehicleController::class, 'checkPlate'])->name('vehicles.check-plate');
     Route::apiResource('vehicles', VehicleController::class);
     Route::get('/vehicles/{vehicle}/mileage-logs', [\App\Http\Controllers\App\VehicleMileageController::class, 'index'])->name('vehicles.mileage-logs.index');
     Route::delete('/vehicles/{vehicle}/mileage-logs/{log}', [\App\Http\Controllers\App\VehicleMileageController::class, 'destroy'])->name('vehicles.mileage-logs.destroy');

@@ -25,15 +25,13 @@ class WorkOrderStoreRequest extends FormRequest
                 'integer',
                 Rule::exists('customers', 'id')
                     ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId)
                     ->whereNull('deleted_at'),
             ],
             'vehicle_id' => [
                 'required',
                 'integer',
                 Rule::exists('vehicles', 'id')
-                    ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId),
+                    ->where('tenant_id', $tenantId),
                 // Vehicle must belong to selected customer
                 function ($attribute, $value, $fail) {
                     if ($value && $this->customer_id) {

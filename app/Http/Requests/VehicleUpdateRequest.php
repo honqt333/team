@@ -24,8 +24,7 @@ class VehicleUpdateRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::exists('customers', 'id')
-                    ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId),
+                    ->where('tenant_id', $tenantId),
             ],
             'plate_number' => [
                 'required',
@@ -33,7 +32,6 @@ class VehicleUpdateRequest extends FormRequest
                 'max:20',
                 Rule::unique('vehicles')
                     ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId)
                     ->ignore($vehicleId),
             ],
             'make_id' => ['nullable', 'integer', 'exists:vehicle_makes,id'],

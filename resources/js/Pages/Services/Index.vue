@@ -883,9 +883,26 @@
         </div>
     </div>
 
-    <!-- Service Form Modal -->
-        <ServiceFormModal :show="showModal" :service="selectedService" :departments="departments" @close="closeModal"
-            @saved="handleSaved" />
+    <!-- Service Form Modal (Catalog link or Edit) -->
+        <ServiceFormModal
+            :show="showModal"
+            :service="selectedService"
+            :departments="departments"
+            :current-department="currentDepartment"
+            :other-branches-services="otherBranchesServices"
+            :pending-catalog-service-id="pendingCatalogServiceId"
+            @close="closeModal"
+            @saved="handleSaved"
+            @open-new-definition="openNewDefinitionModal"
+        />
+
+        <!-- New Service Definition Modal (separate, for permission gating later) -->
+        <NewServiceDefinitionModal
+            :show="showNewDefinitionModal"
+            :department-id="newDefinitionDepartmentId"
+            @close="closeNewDefinitionModal"
+            @saved="handleNewDefinitionSaved"
+        />
 
         <!-- Department Form Modal -->
         <DepartmentFormModal :show="showDepartmentModal" :department="selectedDepartment"
@@ -927,6 +944,7 @@ import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PageHeader from '@/Components/PageHeader.vue';
 import ServiceFormModal from '@/Components/ServiceFormModal.vue';
+import NewServiceDefinitionModal from '@/Components/NewServiceDefinitionModal.vue';
 import PackageFormModal from '@/Components/PackageFormModal.vue';
 import ServiceQuickEditModal from '@/Components/ServiceQuickEditModal.vue';
 import DepartmentFormModal from '@/Components/DepartmentFormModal.vue';
@@ -964,6 +982,10 @@ const props = defineProps({
         type: Boolean,
         default: true,
     },
+    otherBranchesServices: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'services');
@@ -975,7 +997,13 @@ watch(activeTab, (newTab) => {
 });
 const showModal = ref(false);
 const selectedService = ref(null);
+const currentDepartment = ref(null);
+const pendingCatalogServiceId = ref(null); // auto-selects newly created service in ServiceFormModal
 const searchQuery = ref('');
+
+// New Service Definition modal state (separate modal for permission gating)
+const showNewDefinitionModal = ref(false);
+const newDefinitionDepartmentId = ref(null);
 const collapsedDepts = ref(new Set());
 
 // Department modal state
@@ -1176,6 +1204,7 @@ function openCreateModalForDepartment(dept) {
         error(t('services_management.add_department_first'));
         return;
     }
+    currentDepartment.value = dept;
     selectedService.value = {
         department_id: dept.id
     };
@@ -1190,14 +1219,70 @@ function openEditModal(service) {
 function closeModal() {
     showModal.value = false;
     selectedService.value = null;
+    currentDepartment.value = null;
+    pendingCatalogServiceId.value = null;
 }
 
 function handleSaved() {
-    closeModal();
-    success(t('common.saved_success'));
+    pendingCatalogServiceId.value = null;
     closeModal();
     success(t('common.saved_success'));
     router.reload({ only: ['departments', 'unassignedServices', 'packages'] });
+}
+
+// Helper to find a service by ID in the reloaded props
+function findServiceById(id) {
+    if (!id) return null;
+    // Search in departments
+    for (const dept of props.departments) {
+        if (dept.services) {
+            const found = dept.services.find(s => s.id === Number(id) || s.id === String(id));
+            if (found) return found;
+        }
+    }
+    // Search in unassigned
+    return props.unassignedServices.find(s => s.id === Number(id) || s.id === String(id)) || null;
+}
+
+// New definition modal handlers
+function openNewDefinitionModal() {
+    // Keep department ID context
+    newDefinitionDepartmentId.value = currentDepartment.value?.id || selectedService.value?.department_id || null;
+    // Close the pricing/catalog modal so they don't overlap
+    showModal.value = false;
+    showNewDefinitionModal.value = true;
+}
+
+function closeNewDefinitionModal() {
+    showNewDefinitionModal.value = false;
+    newDefinitionDepartmentId.value = null;
+    // Re-open the pricing/catalog modal so the user doesn't lose context
+    showModal.value = true;
+}
+
+function handleNewDefinitionSaved(newServiceId) {
+    showNewDefinitionModal.value = false;
+    newDefinitionDepartmentId.value = null;
+
+    // Reload the services data to include the newly created service
+    router.reload({
+        only: ['departments', 'unassignedServices', 'otherBranchesServices'],
+        onSuccess: () => {
+            if (newServiceId) {
+                const foundService = findServiceById(newServiceId);
+                if (foundService) {
+                    // Open ServiceFormModal in edit mode to complete the pricing
+                    selectedService.value = foundService;
+                    showModal.value = true;
+                } else {
+                    showModal.value = true;
+                }
+            } else {
+                showModal.value = true;
+            }
+            success(t('common.saved_success'));
+        },
+    });
 }
 
 function toggleServiceActive(service) {

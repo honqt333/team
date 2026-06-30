@@ -121,6 +121,7 @@
                         class="w-full px-3 py-1.5 text-sm text-center border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-1 focus:ring-blue-500"
                         :class="error && !plateNumbers ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
                         @input="onNumbersInput($event)"
+                        @blur="$emit('blur')"
                     />
                 </div>
             </div>
@@ -139,6 +140,7 @@
                 class="w-full px-3 py-2 text-center font-semibold border rounded-lg bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-blue-500"
                 :class="error && !freeTextPlate ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-gray-600'"
                 @input="onFreeTextInput($event)"
+                @blur="$emit('blur')"
             />
         </div>
     </div>
@@ -160,7 +162,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'blur']);
 const { toEnglish } = useNumberFormat();
 
 // Saudi plate valid letters

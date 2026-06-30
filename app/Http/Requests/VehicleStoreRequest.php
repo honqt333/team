@@ -23,16 +23,14 @@ class VehicleStoreRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::exists('customers', 'id')
-                    ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId),
+                    ->where('tenant_id', $tenantId),
             ],
             'plate_number' => [
                 'required',
                 'string',
                 'max:20',
                 Rule::unique('vehicles')
-                    ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId),
+                    ->where('tenant_id', $tenantId),
             ],
             'make_id' => [
                 'nullable',

@@ -15,8 +15,7 @@ class VehiclePolicy
     public function view(User $user, Vehicle $vehicle): bool
     {
         return $user->can('crm.vehicles.view')
-            && $vehicle->tenant_id === $user->tenant_id
-            && $vehicle->center_id === $user->current_center_id;
+            && $vehicle->tenant_id === $user->tenant_id;
     }
 
     public function create(User $user): bool
@@ -27,14 +26,12 @@ class VehiclePolicy
     public function update(User $user, Vehicle $vehicle): bool
     {
         return $user->can('crm.vehicles.update')
-            && $vehicle->tenant_id === $user->tenant_id
-            && $vehicle->center_id === $user->current_center_id;
+            && $vehicle->tenant_id === $user->tenant_id;
     }
 
     public function delete(User $user, Vehicle $vehicle): bool
     {
         return $user->can('crm.vehicles.delete')
-            && $vehicle->tenant_id === $user->tenant_id
-            && $vehicle->center_id === $user->current_center_id;
+            && $vehicle->tenant_id === $user->tenant_id;
     }
 }

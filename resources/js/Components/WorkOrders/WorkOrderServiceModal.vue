@@ -749,7 +749,14 @@ const activeWarrantyForSelectedService = computed(() => {
         });
     }
     
-    return activeWarranties.value.find(w => w.service_id == form.service_id);
+    const currentService = props.services.find(s => s.id == form.service_id);
+    return activeWarranties.value.find(w => {
+        return w.service_id == form.service_id || 
+            (currentService && (
+                (w.service_name_ar && w.service_name_ar === currentService.name_ar) ||
+                (w.service_name_en && w.service_name_en === currentService.name_en)
+            ));
+    });
 });
 
 const getRemainingDays = (expiryDateStr) => {
@@ -1296,7 +1303,14 @@ watch(() => form.service_id, (serviceId) => {
     // If the selected service changes, check if it has an active warranty.
     // If it doesn't, automatically set form.is_warranty to false.
     if (serviceId !== 'other') {
-        const activeWarranty = activeWarranties.value.find(w => w.service_id == serviceId);
+        const currentService = props.services.find(s => s.id == serviceId);
+        const activeWarranty = activeWarranties.value.find(w => {
+            return w.service_id == serviceId || 
+                (currentService && (
+                    (w.service_name_ar && w.service_name_ar === currentService.name_ar) ||
+                    (w.service_name_en && w.service_name_en === currentService.name_en)
+                ));
+        });
         if (!activeWarranty) {
             form.is_warranty = false;
         }

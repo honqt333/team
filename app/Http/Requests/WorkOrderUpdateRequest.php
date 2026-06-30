@@ -25,15 +25,13 @@ class WorkOrderUpdateRequest extends FormRequest
                 'integer',
                 Rule::exists('customers', 'id')
                     ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId)
                     ->whereNull('deleted_at'),
             ],
             'vehicle_id' => [
                 'sometimes',
                 'integer',
                 Rule::exists('vehicles', 'id')
-                    ->where('tenant_id', $tenantId)
-                    ->where('center_id', $centerId),
+                    ->where('tenant_id', $tenantId),
                 function ($attribute, $value, $fail) {
                     $workOrder = $this->route('workOrder') ?? $this->route('work_order');
                     $customerId = $this->customer_id ?? ($workOrder ? $workOrder->customer_id : null);

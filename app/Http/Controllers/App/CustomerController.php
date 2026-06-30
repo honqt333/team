@@ -119,8 +119,9 @@ class CustomerController
         // Fix: Using $customer->vehicles directly (already loaded above)
         $vehicles = $customer->vehicles;
         
-        // Get work orders with all needed relationships in single query
+        // Get work orders with all needed relationships in single query (bypassing center_scoped to show tenant-wide history)
         $workOrders = $customer->workOrders()
+            ->withoutGlobalScope('center_scoped')
             ->with([
                 'vehicle.make',
                 'vehicle.model',
@@ -132,13 +133,14 @@ class CustomerController
         
         // Get quotes with vehicle relationships
         $quotes = $customer->quotes()
+            ->withoutGlobalScope('center_scoped')
             ->with(['vehicle.make', 'vehicle.model'])
             ->latest()
             ->get();
 
         // Get all payments from customer's work orders - optimized single query
         $payments = \App\Models\Payment::whereHas('workOrder', function($q) use ($customer) {
-                $q->where('customer_id', $customer->id);
+                $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
             })
             ->with(['receivedBy', 'workOrder'])
             ->latest('payment_date')
@@ -223,9 +225,8 @@ class CustomerController
     {
         $this->authorize('update', $customer);
 
-        // Secure Query: Only same center, same type
+        // Secure Query: Same tenant (handled by TenantScoped), same type
         $query = Customer::where('id', '!=', $customer->id)
-            ->where('center_id', $customer->center_id)
             ->where('type', $customer->type)
             ->withCount(['vehicles', 'quotes', 'workOrders'])
             ->orderBy('name');

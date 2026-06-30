@@ -22,30 +22,72 @@ class ServiceController
     {
         $this->authorize('viewAny', Service::class);
 
-        // Get departments with their services (accordion view)
+        $centerId = auth()->user()->current_center_id;
+        $tenantId = auth()->user()->tenant_id;
+
+        // Get departments with their services (accordion view) - scoped to this center
         // Exclude packages from regular departments view
-        $departments = Department::with(['services' => function ($query) {
-            $query->where('type', '!=', Service::TYPE_PACKAGE)
+        $departments = Department::with(['services' => function ($query) use ($centerId) {
+            $query->where('center_id', $centerId)
+                ->where('type', '!=', Service::TYPE_PACKAGE)
                 ->with('updater:id,name')
                 ->ordered();
         }])
-            ->withCount('services')
+            ->withCount(['services' => function ($query) use ($centerId) {
+                $query->where('center_id', $centerId);
+            }])
             ->ordered()
             ->get();
 
-        // Get services without department
+        // Get services without department - scoped to this center
         // Exclude packages from unassigned services
         $unassignedServices = Service::with('updater:id,name')
+            ->where('center_id', $centerId)
             ->whereNull('department_id')
             ->where('type', '!=', Service::TYPE_PACKAGE)
             ->ordered()
             ->get();
 
-        // Get packages
+        // Get packages - scoped to this center
         $packages = Service::with(['updater:id,name', 'items'])
+            ->where('center_id', $centerId)
             ->where('type', Service::TYPE_PACKAGE)
             ->ordered()
             ->get();
+
+        // Get all local service names in the current center to exclude them from the catalog dropdown
+        $localServiceNames = Service::where('center_id', $centerId)
+            ->pluck('name_ar')
+            ->filter()
+            ->toArray();
+
+        // Get services from other branches under the same tenant for the catalog dropdown.
+        // Grouped unique per (name_ar + department) — keeps one representative per service-department pair.
+        $otherBranchesServices = Service::with(['department' => function ($query) {
+                $query->withoutGlobalScope('center_scoped');
+            }])
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', '!=', $centerId)
+            ->whereNotIn('name_ar', $localServiceNames)
+            ->where('type', '!=', Service::TYPE_PACKAGE)
+            ->get()
+            ->unique(fn($s) => $s->name_ar . '|' . $s->name_en . '|' . ($s->department_id ?? 'null'))
+            ->values()
+            ->map(fn($s) => [
+                'id'                 => $s->id,
+                'name_ar'            => $s->name_ar,
+                'name_en'            => $s->name_en,
+                'description_ar'     => $s->description_ar,
+                'description_en'     => $s->description_en,
+                'duration_value'     => $s->duration_value,
+                'duration_unit'      => $s->duration_unit,
+                'warranty_value'     => $s->warranty_value,
+                'warranty_unit'      => $s->warranty_unit,
+                'type'               => $s->type,
+                'department_id'      => $s->department_id,
+                'department_name_ar' => $s->department?->name_ar,
+                'department_name_en' => $s->department?->name_en,
+            ]);
 
         // Get inspection condition items
         $conditionCategories = \App\Models\VehicleConditionCategory::with(['items.updatedBy:id,name', 'updatedBy:id,name'])
@@ -63,6 +105,7 @@ class ServiceController
             'packages' => $packages,
             'conditionCategories' => $conditionCategories,
             'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
+            'otherBranchesServices' => $otherBranchesServices,
         ]);
     }
 
@@ -92,7 +135,7 @@ class ServiceController
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('services')->where(fn ($query) => $query->where('center_id', $centerId)),
+                Rule::unique('services')->where(fn ($query) => $query->where('center_id', $centerId)->whereNull('deleted_at')),
             ],
             'name_en' => 'required|string|max:255',
             'description_ar' => 'nullable|string|max:1000',
@@ -105,7 +148,6 @@ class ServiceController
             'duration_value' => 'nullable|integer|min:1',
             'duration_unit' => 'nullable|in:minutes,hours,days,weeks',
             'warranty_value' => 'nullable|integer|min:1',
-            'warranty_unit' => 'nullable|in:days,weeks,months,years',
             'warranty_unit' => 'nullable|in:days,weeks,months,years',
             'type' => 'required|in:internal,external,package',
             'items' => 'required_if:type,package|array|min:1',
@@ -122,9 +164,21 @@ class ServiceController
         
         \Illuminate\Support\Facades\Log::info('Creating service/package', $validated);
 
-        $service = Service::create($validated);
-        
-        \Illuminate\Support\Facades\Log::info('Service created', ['id' => $service->id, 'type' => $service->type]);
+        // Check if there is a soft-deleted service with the same name in this center
+        $existingTrashed = Service::onlyTrashed()
+            ->where('center_id', $centerId)
+            ->where('name_ar', $validated['name_ar'])
+            ->first();
+
+        if ($existingTrashed) {
+            $existingTrashed->restore();
+            $existingTrashed->update($validated);
+            $service = $existingTrashed;
+            \Illuminate\Support\Facades\Log::info('Service restored and updated from trash', ['id' => $service->id]);
+        } else {
+            $service = Service::create($validated);
+            \Illuminate\Support\Facades\Log::info('Service created', ['id' => $service->id, 'type' => $service->type]);
+        }
 
         if ($validated['type'] === Service::TYPE_PACKAGE && !empty($validated['items'])) {
             $items = collect($validated['items'])->mapWithKeys(function ($item) {
@@ -134,7 +188,7 @@ class ServiceController
             \Illuminate\Support\Facades\Log::info('Package items synced', ['items' => $items]);
         }
 
-        return back();
+        return back()->with('new_service_id', $service->id);
     }
 
     public function update(Request $request, Service $service): RedirectResponse
@@ -149,7 +203,7 @@ class ServiceController
                 'string',
                 'max:255',
                 Rule::unique('services')
-                    ->where(fn ($query) => $query->where('center_id', $service->center_id))
+                    ->where(fn ($query) => $query->where('center_id', $service->center_id)->whereNull('deleted_at'))
                     ->ignore($service->id),
             ],
             'name_en' => 'required|string|max:255',
@@ -163,7 +217,6 @@ class ServiceController
             'duration_value' => 'nullable|integer|min:1',
             'duration_unit' => 'nullable|in:minutes,hours,days,weeks',
             'warranty_value' => 'nullable|integer|min:1',
-            'warranty_unit' => 'nullable|in:days,weeks,months,years',
             'warranty_unit' => 'nullable|in:days,weeks,months,years',
             'type' => 'sometimes|required|in:internal,external,package',
             'items' => 'required_if:type,package|array|min:1',

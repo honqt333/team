@@ -193,4 +193,15 @@ class Invoice extends Model
     {
         return $query->whereIn('payment_status', ['unpaid', 'partial']);
     }
+
+    /**
+     * Retrieve the model for a bound value.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->withoutGlobalScope('center_scoped')
+            ->where($field ?? $this->getRouteKeyName(), $value)
+            ->where('tenant_id', \App\Support\TenancyContext::tenantId())
+            ->first();
+    }
 }

@@ -481,6 +481,12 @@
     }
   },
   "vehicles": {
+    "validation": {
+      "plate_taken": "This plate number is already registered!",
+      "plate_taken_title": "Plate number already exists!",
+      "plate_taken_desc": "The vehicle with this plate number is already registered. You can click on the card below to go directly to its profile:"
+    },
+    "view_details": "View Details",
     "title": "Vehicle management",
     "subtitle": "Manage vehicles and registered data in the system",
     "columns": {
@@ -1593,6 +1599,12 @@
     "enable_inspections_desc": "When disabled, the systematic inspections tab will be completely hidden from the Work Order show page.",
     "active_hint": "Enable or disable this inspection in the system",
     "add": "Add a service",
+    "select_from_other_branches": "Service (Other Branches Catalog)",
+    "select_service_placeholder": "Select service from other branches...",
+    "back_to_catalog": "Back to catalog selection",
+    "add_new_definition": "Add New Service Definition",
+    "definition_price_notice": "The service will be saved without a price. Pricing can be configured later once permissions are granted.",
+    "no_services_in_dept": "No services found for this department in other branches. You can add a new definition.",
     "edit": "Modify service",
     "search": "Search services...",
     "total_count": "Service",

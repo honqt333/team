@@ -1239,4 +1239,94 @@ class WorkOrdersCrudTest extends TestCase
         $response->assertJsonPath('active_warranties.0.service_id', null);
         $response->assertJsonPath('active_warranties.0.title', 'Custom Manual Service');
     }
+
+    public function test_cross_branch_data_sharing_and_policies(): void
+    {
+        $userBranchA = $this->createUserWithPermissions([
+            'crm.work_orders.view',
+            'crm.work_orders.create',
+            'crm.work_orders.update',
+        ]);
+
+        // Create a second branch (center) under same tenant
+        $branchB = \App\Models\Center::create([
+            'tenant_id' => $userBranchA->tenant_id,
+            'name' => 'Branch B',
+            'slug' => 'branch-b',
+            'is_active' => true,
+        ]);
+
+        // Log in user to branch A to set context, create customer, vehicle, and service
+        $this->actingAs($userBranchA);
+
+        $customer = Customer::create([
+            'type' => Customer::TYPE_INDIVIDUAL,
+            'name' => 'Cross Branch Customer',
+            'phone' => '0555555555',
+        ]);
+
+        $vehicle = Vehicle::create([
+            'customer_id' => $customer->id,
+            'plate_number' => 'ABC-123',
+            'vin' => '1234567890',
+            'odometer' => 10000,
+        ]);
+
+        $service = \App\Models\Service::create([
+            'name_ar' => 'خدمة مشتركة',
+            'name_en' => 'Shared Service',
+            'base_price' => 200,
+            'type' => \App\Models\Service::TYPE_INTERNAL,
+            'is_active' => true,
+        ]);
+
+        // Create a work order in Branch A
+        $workOrderBranchA = WorkOrder::create([
+            'tenant_id' => $userBranchA->tenant_id,
+            'center_id' => $userBranchA->current_center_id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-BRANCH-A',
+            'status' => WorkOrder::STATUS_DONE,
+        ]);
+
+        $workOrderBranchA->items()->create([
+            'tenant_id' => $userBranchA->tenant_id,
+            'center_id' => $userBranchA->current_center_id,
+            'service_id' => $service->id,
+            'title' => 'Shared Service',
+            'qty' => 1,
+            'unit_price' => 200,
+            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'completed_at' => now(),
+            'warranty_value_snapshot' => 30,
+            'warranty_unit_snapshot' => 'days',
+            'warranty_expires_at' => now()->addDays(30),
+        ]);
+
+        // Now, assign user to Branch B in pivot and switch session
+        $userBranchA->centers()->attach($branchB->id, ['tenant_id' => $userBranchA->tenant_id]);
+        $userBranchA->update(['current_center_id' => $branchB->id]);
+        $userBranchA->refresh();
+        $this->actingAs($userBranchA);
+
+        // 1. Verify customer is shared & queryable from Branch B
+        $this->assertNotNull(Customer::find($customer->id));
+
+        // 2. Verify vehicle is shared & queryable from Branch B
+        $this->assertNotNull(Vehicle::find($vehicle->id));
+
+        // 3. Verify service is shared & queryable from Branch B
+        $this->assertNotNull(\App\Models\Service::find($service->id));
+
+        // 4. Verify user can VIEW Branch A's work order (cross-branch read access)
+        $responseView = $this->actingAs($userBranchA)->get("/app/work-orders/{$workOrderBranchA->id}");
+        $responseView->assertStatus(200);
+
+        // 5. Verify user CANNOT edit/update Branch A's work order (restricted write access)
+        $responseUpdate = $this->actingAs($userBranchA)->put("/app/work-orders/{$workOrderBranchA->id}", [
+            'status' => 'in_progress'
+        ]);
+        $responseUpdate->assertStatus(403);
+    }
 }

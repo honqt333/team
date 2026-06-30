@@ -6,11 +6,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use App\Models\Concerns\CenterScoped;
+use App\Models\Concerns\TenantScoped;
 
 class Vehicle extends Model
 {
-    use HasFactory, CenterScoped;
+    use HasFactory, TenantScoped;
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Model $model) {
+            if (empty($model->center_id) && $centerId = \App\Support\TenancyContext::centerId()) {
+                $model->center_id = $centerId;
+            }
+        });
+    }
 
     protected $fillable = [
         'tenant_id',

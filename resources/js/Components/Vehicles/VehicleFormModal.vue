@@ -23,6 +23,7 @@
                     ref="plateInput"
                     v-model="form.plate_number" 
                     :error="form.errors.plate_number"
+                    @blur="checkPlateExistence"
                 />
                 <p v-if="form.errors.plate_number" class="mt-2 text-sm text-red-600 dark:text-red-400 text-center">{{ form.errors.plate_number }}</p>
             </div>
@@ -242,6 +243,102 @@
             @close="showCustomerModal = false"
             @saved="handleCustomerSaved"
         />
+
+        <!-- Duplicate Plate Alert Modal -->
+        <BaseModal :show="showDuplicateModal" @close="showDuplicateModal = false" size="md">
+            <template #title>
+                <div class="flex items-center gap-3 text-amber-600 dark:text-amber-400">
+                    <span class="text-2xl">⚠️</span>
+                    <span>{{ $t('vehicles.validation.plate_taken_title') || 'رقم اللوحة موجود مسبقاً!' }}</span>
+                </div>
+            </template>
+
+            <div class="space-y-4 p-1">
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                    {{ $t('vehicles.validation.plate_taken_desc') || 'المركبة التي تحمل رقم اللوحة هذا مسجلة مسبقاً بالنظام. يمكنك الضغط على بطاقة المركبة أدناه للانتقال لملفها مباشرة:' }}
+                </p>
+
+                <div v-if="duplicateVehicle" 
+                    @click="navigateToDuplicateVehicle"
+                    class="group relative bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden"
+                >
+                    <!-- Card Content -->
+                    <div class="relative z-10 flex flex-col h-full">
+                        <!-- Header: Plate -->
+                        <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50 flex items-center justify-between bg-gradient-to-r from-gray-50/50 to-transparent dark:from-gray-900/50">
+                            <SaudiPlateDisplay :plate-number="duplicateVehicle.plate_number" size="sm" />
+                        </div>
+
+                        <!-- Body -->
+                        <div class="p-4 flex-1 flex flex-col justify-between">
+                            <div class="mb-3">
+                                <div class="flex items-baseline justify-between mb-1 gap-1">
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
+                                        {{ duplicateVehicle.make_name || $t('common.na') }}
+                                    </h3>
+                                    <span v-if="duplicateVehicle.year" class="px-1.5 py-0.5 text-[10px] font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-md">
+                                        {{ duplicateVehicle.year }}
+                                    </span>
+                                </div>
+                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">
+                                    {{ duplicateVehicle.model_name }}
+                                </p>
+                            </div>
+
+                            <!-- Customer -->
+                            <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700/50 flex items-center gap-2.5">
+                                <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 text-indigo-600 dark:text-indigo-400">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                    </svg>
+                                </div>
+                                <div class="flex flex-col truncate">
+                                    <span class="text-xs font-bold text-gray-700 dark:text-gray-300 truncate">
+                                        {{ duplicateVehicle.customer_name || $t('common.unknown') }}
+                                    </span>
+                                    <span v-if="duplicateVehicle.customer_phone" class="text-[10px] text-gray-400 font-mono">
+                                        {{ duplicateVehicle.customer_phone }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- VIN / Color -->
+                            <div class="text-[10px] text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700/50 flex flex-col gap-1.5 mt-3">
+                                <div v-if="duplicateVehicle.color" class="flex items-center gap-1.5">
+                                    <span class="w-3 h-3 rounded-full border border-white dark:border-gray-700 shadow-sm" :style="{ backgroundColor: getColorHex(duplicateVehicle.color) }"></span>
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ duplicateVehicle.color }}</span>
+                                </div>
+                                <div v-if="duplicateVehicle.vin" class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    <span class="font-mono text-[9px] truncate max-w-[150px]">{{ duplicateVehicle.vin }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <template #footer>
+                <div class="flex justify-end gap-2">
+                    <button 
+                        type="button" 
+                        @click="showDuplicateModal = false"
+                        class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all"
+                    >
+                        {{ $t('common.cancel') }}
+                    </button>
+                    <button 
+                        type="button" 
+                        @click="navigateToDuplicateVehicle"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow"
+                    >
+                        {{ $t('vehicles.view_details') || 'عرض التفاصيل' }}
+                    </button>
+                </div>
+            </template>
+        </BaseModal>
     </BaseModal>
 </template>
 
@@ -255,6 +352,8 @@ import SearchableSelect from '@/Components/SearchableSelect.vue';
 import Tooltip from '@/Components/Tooltip.vue';
 import CustomerFormModal from '@/Components/Customers/CustomerFormModal.vue';
 import SaudiPlateInput from '@/Components/Vehicles/SaudiPlateInput.vue';
+import SaudiPlateDisplay from '@/Components/Vehicles/SaudiPlateDisplay.vue';
+import axios from 'axios';
 
 // Convert Arabic numerals to English
 function normalizeArabicNumerals(value) {
@@ -302,6 +401,48 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved', 'customer-created']);
 
 const showCustomerModal = ref(false);
+const duplicateVehicle = ref(null);
+const showDuplicateModal = ref(false);
+const checkingPlate = ref(false);
+
+const checkPlateExistence = async () => {
+    if (props.vehicle || !form.plate_number?.trim()) {
+        return;
+    }
+    
+    checkingPlate.value = true;
+    try {
+        const response = await axios.get(route('vehicles.check-plate', { plate_number: form.plate_number }));
+        if (response.data.exists) {
+            duplicateVehicle.value = response.data.vehicle;
+            showDuplicateModal.value = true;
+            form.errors.plate_number = t('vehicles.validation.plate_taken') || 'رقم اللوحة هذا مسجل مسبقاً!';
+        } else {
+            duplicateVehicle.value = null;
+            if (form.errors.plate_number === (t('vehicles.validation.plate_taken') || 'رقم اللوحة هذا مسجل مسبقاً!')) {
+                form.errors.plate_number = null;
+            }
+        }
+    } catch (err) {
+        console.error("Error checking plate existence:", err);
+    } finally {
+        checkingPlate.value = false;
+    }
+};
+
+const navigateToDuplicateVehicle = () => {
+    if (duplicateVehicle.value) {
+        showDuplicateModal.value = false;
+        emit('close');
+        router.visit(route('vehicles.show', duplicateVehicle.value.id));
+    }
+};
+
+const getColorHex = (colorName) => {
+    if (!colorName) return null;
+    const found = props.colors?.find(c => c.name_ar === colorName || c.name_en === colorName || c.name === colorName);
+    return found ? found.hex_code : null;
+};
 const localCustomers = computed(() => props.customers || []);
 const selectedCustomer = computed(() => {
     if (props.defaultCustomerId) {

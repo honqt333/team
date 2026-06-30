@@ -324,26 +324,27 @@ class WorkOrderController
         $workOrder->load([
             'customer',
             'vehicle.make',
-            // Note: 'vehicle.customer' is intentionally not loaded — the
-            // top-level `customer` relation already exposes the same record
-            // and the Vue page does not read `workOrder.vehicle.customer`.
-            'items.service.department',
-            'items.technicians.employee.jobTitle',
-            'items.parts.part',
-            'items.parts.warehouse',
-            'items.itemNotes.user.roles',
+            // Load items without center_scoped to support cross-branch viewing
+            'items' => fn($q) => $q->withoutGlobalScope('center_scoped')->with([
+                'service' => fn($q) => $q->withoutGlobalScope('center_scoped')->with(['department' => fn($q) => $q->withoutGlobalScope('center_scoped')]),
+                'technicians.employee.jobTitle',
+                'parts' => fn($q) => $q->withoutGlobalScope('center_scoped')->with(['part', 'warehouse']),
+                'itemNotes.user.roles',
+            ]),
             'generalNotes.user.roles',
-            'generalNotes.workOrderItem.service.department',
+            'generalNotes.workOrderItem.service.department' => fn($q) => $q->withoutGlobalScope('center_scoped'),
             'damageMarks',
             'photos',
-            'departments',
+            'departments' => fn($q) => $q->withoutGlobalScope('center_scoped'),
             'payments' => fn($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
-            'parts.part' => fn($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
-            'parts.workOrderItem.service',
+            'parts' => fn($q) => $q->withoutGlobalScope('center_scoped')->with([
+                'part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
+                'workOrderItem.service'
+            ]),
             'attachments.user',
             'activities.user',
-            'inspections.performedBy',
-            'invoice',
+            'inspections' => fn($q) => $q->withoutGlobalScope('center_scoped')->with('performedBy'),
+            'invoice' => fn($q) => $q->withoutGlobalScope('center_scoped'),
         ]);
 
         // TODO(refactor): the Vue page uses `v-if="activeTab === 'X'"` to
@@ -363,10 +364,30 @@ class WorkOrderController
         });
 
         $customers = \App\Models\Customer::select('id', 'name', 'phone')->get();
-        $makes = \App\Models\VehicleMake::ordered()->get();
-        $colors = \App\Models\VehicleColor::active()->ordered()->get();
-        $departments = \App\Models\Department::active()->ordered()->get();
-        $services = \App\Models\Service::active()->ordered()->get();
+        
+        // Scope makes, colors, departments, and services to the work order's center to ensure correct labels and dropdown matching
+        $makes = \App\Models\VehicleMake::withoutGlobalScope('center_scoped')
+            ->where('center_id', $workOrder->center_id)
+            ->ordered()
+            ->get();
+            
+        $colors = \App\Models\VehicleColor::withoutGlobalScope('center_scoped')
+            ->where('center_id', $workOrder->center_id)
+            ->active()
+            ->ordered()
+            ->get();
+            
+        $departments = \App\Models\Department::withoutGlobalScope('center_scoped')
+            ->where('center_id', $workOrder->center_id)
+            ->active()
+            ->ordered()
+            ->get();
+            
+        $services = \App\Models\Service::withoutGlobalScope('center_scoped')
+            ->where('center_id', $workOrder->center_id)
+            ->active()
+            ->ordered()
+            ->get();
         
         // Get technicians (employees with linked users belonging to the work order's center)
         $technicians = \App\Models\HR\Employee::where('center_id', $workOrder->center_id)
@@ -1756,29 +1777,39 @@ class WorkOrderController
      */
     public function activeWarranties($vehicle_id): \Illuminate\Http\JsonResponse
     {
-        // Find all completed work order items for this vehicle where warranty is still active
-        $activeWarranties = \App\Models\WorkOrderItem::whereHas('workOrder', function ($q) use ($vehicle_id) {
-                $q->where('vehicle_id', $vehicle_id)
+        $tenantId = \App\Support\TenancyContext::tenantId();
+
+        // Find all completed work order items for this vehicle where warranty is still active (across all branches under same tenant)
+        $activeWarranties = \App\Models\WorkOrderItem::withoutGlobalScope('center_scoped')
+            ->with(['service', 'workOrder' => function ($q) {
+                $q->withoutGlobalScope('center_scoped')->with('center');
+            }])
+            ->where('tenant_id', $tenantId)
+            ->whereHas('workOrder', function ($q) use ($vehicle_id, $tenantId) {
+                $q->withoutGlobalScope('center_scoped')
+                  ->where('tenant_id', $tenantId)
+                  ->where('vehicle_id', $vehicle_id)
                   ->where('status', 'done'); // completed work orders
             })
             ->where('status', \App\Models\WorkOrderItem::STATUS_COMPLETED)
             ->whereNotNull('warranty_expires_at')
             ->where('warranty_expires_at', '>', now())
             ->get()
-            ->map(function ($item) use ($vehicle_id) {
-                // Find previous cards for this vehicle where this service was done under warranty
-                $claims = \App\Models\WorkOrderItem::whereHas('workOrder', function ($q) use ($vehicle_id) {
-                        $q->where('vehicle_id', $vehicle_id)
+            ->map(function ($item) use ($vehicle_id, $tenantId) {
+                // Find previous cards for this vehicle where this service was done under warranty (across all branches under same tenant)
+                $claims = \App\Models\WorkOrderItem::withoutGlobalScope('center_scoped')
+                    ->with(['workOrder' => function ($q) {
+                        $q->withoutGlobalScope('center_scoped')->with('center');
+                    }])
+                    ->where('tenant_id', $tenantId)
+                    ->whereHas('workOrder', function ($q) use ($vehicle_id, $tenantId) {
+                        $q->withoutGlobalScope('center_scoped')
+                          ->where('tenant_id', $tenantId)
+                          ->where('vehicle_id', $vehicle_id)
                           ->where('status', 'done');
                     })
                     ->where('is_warranty', true)
-                    ->where(function ($query) use ($item) {
-                        if ($item->service_id) {
-                            $query->where('service_id', $item->service_id);
-                        } else {
-                            $query->where('title', $item->title);
-                        }
-                    })
+                    ->where('title', $item->title)
                     ->get()
                     ->map(function ($claim) {
                         return [

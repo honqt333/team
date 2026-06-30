@@ -24,9 +24,8 @@ class WorkOrderPolicy
             return false;
         }
 
-        // Defense in depth: enforce tenant/center ownership
-        return $workOrder->tenant_id === $user->tenant_id
-            && $workOrder->center_id === $user->current_center_id;
+        // Defense in depth: enforce tenant ownership
+        return $workOrder->tenant_id === $user->tenant_id;
     }
 
     /**

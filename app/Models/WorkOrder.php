@@ -691,4 +691,15 @@ class WorkOrder extends Model
     {
         return '(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))';
     }
+
+    /**
+     * Retrieve the model for a bound value.
+     */
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->withoutGlobalScope('center_scoped')
+            ->where($field ?? $this->getRouteKeyName(), $value)
+            ->where('tenant_id', \App\Support\TenancyContext::tenantId())
+            ->first();
+    }
 }

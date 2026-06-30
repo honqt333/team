@@ -58,7 +58,6 @@ class VehicleController
         
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
-            ->where('center_id', $user->current_center_id)
             ->with(['customer', 'make', 'model'])
             ->when($request->search, function ($query, $search) {
                 $arabicToEnglish = [
@@ -94,7 +93,6 @@ class VehicleController
         
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
-            ->where('center_id', $user->current_center_id)
             ->with(['customer', 'make', 'model'])
             ->when($request->search, function ($query, $search) {
                 $arabicToEnglish = [
@@ -122,7 +120,6 @@ class VehicleController
         // Get customers for the dropdown
         $customers = Customer::query()
             ->where('tenant_id', $user->tenant_id)
-            ->where('center_id', $user->current_center_id)
             ->select('id', 'name', 'phone', 'whatsapp')
             ->orderBy('name')
             ->get();
@@ -200,13 +197,24 @@ class VehicleController
             'mileageLogs' => fn($q) => $q->with('creator')->latest()
         ]);
 
-        // Get all related data
-        $workOrders = $vehicle->workOrders()->with(['vehicle.make', 'vehicle.model', 'items.service', 'parts', 'generalNotes.user'])->latest()->get();
+        // Get all related data (bypassing center_scoped to support tenant-wide vehicle history)
+        $workOrders = $vehicle->workOrders()
+            ->withoutGlobalScope('center_scoped')
+            ->with(['vehicle.make', 'vehicle.model', 'items.service', 'parts', 'generalNotes.user'])
+            ->latest()
+            ->get();
+            
         $workOrders->each->append(['total', 'total_paid', 'balance']);
-        $quotes = $vehicle->quotes()->with(['vehicle.make', 'vehicle.model'])->latest()->get();
+        
+        $quotes = $vehicle->quotes()
+            ->withoutGlobalScope('center_scoped')
+            ->with(['vehicle.make', 'vehicle.model'])
+            ->latest()
+            ->get();
         
         // Fetch invoices via work orders
-        $invoices = \App\Models\Invoice::whereIn('work_order_id', $workOrders->pluck('id'))
+        $invoices = \App\Models\Invoice::withoutGlobalScope('center_scoped')
+            ->whereIn('work_order_id', $workOrders->pluck('id'))
             ->latest()
             ->get();
 
@@ -280,6 +288,45 @@ class VehicleController
         }
 
         return back()->with('success', 'Vehicle updated successfully.');
+    }
+
+    public function checkPlate(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $plateNumber = $request->query('plate_number');
+
+        if (!$plateNumber) {
+            return response()->json(['exists' => false]);
+        }
+
+        // Clean plate number (remove spaces)
+        $normalizedPlate = str_replace(' ', '', $plateNumber);
+
+        // Find the vehicle under the same tenant by comparing plate_number (ignoring spaces)
+        $vehicle = Vehicle::withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $tenantId)
+            ->whereRaw("REPLACE(plate_number, ' ', '') = ?", [$normalizedPlate])
+            ->with(['customer', 'make', 'model'])
+            ->first();
+
+        if ($vehicle) {
+            return response()->json([
+                'exists' => true,
+                'vehicle' => [
+                    'id' => $vehicle->id,
+                    'plate_number' => $vehicle->plate_number,
+                    'customer_name' => $vehicle->customer?->name,
+                    'customer_phone' => $vehicle->customer?->phone,
+                    'make_name' => $vehicle->make?->name_ar ?? $vehicle->make?->name_en ?? $vehicle->make_other,
+                    'model_name' => $vehicle->model?->name_ar ?? $vehicle->model?->name_en ?? $vehicle->model_other,
+                    'year' => $vehicle->year,
+                    'vin' => $vehicle->vin,
+                    'color' => $vehicle->color_name_ar ?? $vehicle->color_name_en,
+                ]
+            ]);
+        }
+
+        return response()->json(['exists' => false]);
     }
 
     public function destroy(Vehicle $vehicle)

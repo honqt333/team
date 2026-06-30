@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\CenterScoped;
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +10,18 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Service extends Model
 {
-    use HasFactory, CenterScoped, SoftDeletes;
+    use HasFactory, TenantScoped, SoftDeletes;
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Model $model) {
+            if (empty($model->center_id) && $centerId = \App\Support\TenancyContext::centerId()) {
+                $model->center_id = $centerId;
+            }
+        });
+    }
 
     // Service types
     public const TYPE_INTERNAL = 'internal';

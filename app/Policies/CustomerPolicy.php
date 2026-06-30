@@ -25,9 +25,8 @@ class CustomerPolicy
             return false;
         }
 
-        // Defense in depth: enforce tenant/center ownership
-        return $customer->tenant_id === $user->tenant_id
-            && $customer->center_id === $user->current_center_id;
+        // Defense in depth: enforce tenant ownership
+        return $customer->tenant_id === $user->tenant_id;
     }
 
     /**
@@ -48,9 +47,8 @@ class CustomerPolicy
             return false;
         }
 
-        // Defense in depth: enforce tenant/center ownership
-        return $customer->tenant_id === $user->tenant_id
-            && $customer->center_id === $user->current_center_id;
+        // Defense in depth: enforce tenant ownership
+        return $customer->tenant_id === $user->tenant_id;
     }
 
     /**
@@ -63,8 +61,7 @@ class CustomerPolicy
             return false;
         }
 
-        // Defense in depth: enforce tenant/center ownership
-        return $customer->tenant_id === $user->tenant_id
-            && $customer->center_id === $user->current_center_id;
+        // Defense in depth: enforce tenant ownership
+        return $customer->tenant_id === $user->tenant_id;
     }
 }
