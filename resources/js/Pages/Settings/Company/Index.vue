@@ -330,73 +330,80 @@
                                 </button>
                             </div>
 
-                            <!-- Street Name -->
-                            <div class="mb-4">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{
-                                    $t('company_profile.address.street') }}</label>
-                                <input v-model="form.address.street" type="text"
-                                    :placeholder="$t('company_profile.address.address_placeholder')"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                            <!-- City and District Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- City -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{
+                                        $t('company_profile.profile.city') }}</label>
+                                    <input v-model="form.address.city" type="text"
+                                        :placeholder="$t('company_profile.address.city_placeholder')"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                </div>
+
+                                <!-- District -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{
+                                        $t('company_profile.profile.district') }}</label>
+                                    <input v-model="form.address.district" type="text"
+                                        :placeholder="$t('company_profile.address.district_placeholder')"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                </div>
                             </div>
 
-                            <!-- Address Line -->
+                            <!-- Street and Building Number Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- Street Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{
+                                        $t('company_profile.address.street') }}</label>
+                                    <input v-model="form.address.street" type="text"
+                                        :placeholder="$t('company_profile.address.address_placeholder')"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                </div>
+
+                                <!-- Building Number -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{
+                                        $t('company_profile.profile.building_number') }}</label>
+                                    <input v-model="form.address.building_number" type="text" placeholder="8545"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                </div>
+                            </div>
+
+                            <!-- Postal Code and Country Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <!-- Postal Code -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{
+                                        $t('company_profile.profile.postal_code') }}</label>
+                                    <input v-model="form.address.postal_code" type="text" placeholder="23455"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                </div>
+
+                                <!-- Country (Locked - Saudi Arabia) -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1.5">{{
+                                        $t('company_profile.profile.country') }}</label>
+                                    <div
+                                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-600 h-[46px]">
+                                        <span class="text-lg">🇸🇦</span>
+                                        <span>{{ $t('company_profile.profile.saudi_arabia') }}</span>
+                                        <svg class="w-4 h-4 ms-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Address Line (تفاصيل العنوان - Moved to Last Field) -->
                             <div class="mb-4">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{
                                     $t('company_profile.profile.address_line') }}</label>
                                 <input v-model="form.address.address_line" type="text"
                                     :placeholder="$t('company_profile.address.address_placeholder')"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-                            </div>
-
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                <!-- Postal Code -->
-                                <div>
-                                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                        $t('company_profile.profile.postal_code') }}</label>
-                                    <input v-model="form.address.postal_code" type="text" placeholder="23455"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm" />
-                                </div>
-
-                                <!-- Building Number -->
-                                <div>
-                                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                        $t('company_profile.profile.building_number') }}</label>
-                                    <input v-model="form.address.building_number" type="text" placeholder="8545"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm" />
-                                </div>
-
-                                <!-- City -->
-                                <div>
-                                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                        $t('company_profile.profile.city') }}</label>
-                                    <input v-model="form.address.city" type="text"
-                                        :placeholder="$t('company_profile.address.city_placeholder')"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm" />
-                                </div>
-
-                                <!-- District -->
-                                <div>
-                                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                        $t('company_profile.profile.district') }}</label>
-                                    <input v-model="form.address.district" type="text"
-                                        :placeholder="$t('company_profile.address.district_placeholder')"
-                                        class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-sm" />
-                                </div>
-                            </div>
-
-                            <!-- Country (Locked - Saudi Arabia) -->
-                            <div class="mb-4">
-                                <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">{{
-                                    $t('company_profile.profile.country') }}</label>
-                                <div
-                                    class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400">
-                                    <span class="text-lg">🇸🇦</span>
-                                    <span>{{ $t('company_profile.profile.saudi_arabia') }}</span>
-                                    <svg class="w-4 h-4 ms-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                    </svg>
-                                </div>
+                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium" />
                             </div>
 
                             <!-- Map Container -->
@@ -451,11 +458,15 @@
                         <div v-if="form.vat.vat_enabled" class="space-y-6">
                             <!-- ZATCA Tax Number -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                    $t('company_profile.vat.zatca_number') }}</label>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {{ $t('company_profile.vat.zatca_number') }} <span class="text-red-500">*</span>
+                                </label>
                                 <input v-model="form.vat.vat_number" type="text" maxlength="15"
                                     @input="form.vat.vat_number = form.vat.vat_number.replace(/[^0-9]/g, '')"
-                                    class="w-full px-4 py-2.5 rounded-lg border border-emerald-500 dark:border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                    :class="['w-full px-4 py-2.5 rounded-lg border bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent', fieldErrors.vat_number ? 'border-red-500' : 'border-emerald-500 dark:border-emerald-500']" />
+                                <p v-if="fieldErrors.vat_number" class="mt-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+                                    {{ Array.isArray(fieldErrors.vat_number) ? fieldErrors.vat_number[0] : fieldErrors.vat_number }}
+                                </p>
                             </div>
 
                             <!-- Two Columns: Services & Parts -->
@@ -463,15 +474,23 @@
                                 <!-- Services Column -->
                                 <div class="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                                     <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                                $t('company_profile.vat.services_vat_rate') }}</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {{ $t('company_profile.vat.services_vat_rate') }}
+                                            </label>
+                                            <span v-if="props.profile?.country === 'SA'" class="flex items-center gap-1 text-[11px] text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded font-medium">
+                                                <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                                {{ locale === 'ar' ? 'ثابت للنظام السعودي' : 'Fixed for Saudi Arabia' }}
+                                            </span>
+                                        </div>
                                         <div class="relative">
                                             <input v-model.number="form.vat.services_vat_rate" type="number" min="0"
                                                 max="100" step="0.01"
-                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-                                            <span
-                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                                :disabled="props.profile?.country === 'SA'"
+                                                :class="['w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent', props.profile?.country === 'SA' ? 'border-gray-250 dark:border-gray-650 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white']" />
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">%</span>
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between">
@@ -490,15 +509,23 @@
                                 <!-- Parts Column -->
                                 <div class="space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                                     <div>
-                                        <label
-                                            class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{
-                                                $t('company_profile.vat.parts_vat_rate') }}</label>
+                                        <div class="flex items-center justify-between mb-1">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                {{ $t('company_profile.vat.parts_vat_rate') }}
+                                            </label>
+                                            <span v-if="props.profile?.country === 'SA'" class="flex items-center gap-1 text-[11px] text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded font-medium">
+                                                <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                                </svg>
+                                                {{ locale === 'ar' ? 'ثابت للنظام السعودي' : 'Fixed for Saudi Arabia' }}
+                                            </span>
+                                        </div>
                                         <div class="relative">
                                             <input v-model.number="form.vat.parts_vat_rate" type="number" min="0"
                                                 max="100" step="0.01"
-                                                class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-                                            <span
-                                                class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+                                                :disabled="props.profile?.country === 'SA'"
+                                                :class="['w-full px-4 py-2.5 rounded-lg border focus:ring-2 focus:ring-emerald-500 focus:border-transparent', props.profile?.country === 'SA' ? 'border-gray-250 dark:border-gray-650 bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed opacity-75' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white']" />
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">%</span>
                                         </div>
                                     </div>
                                     <div class="flex items-center justify-between">
@@ -777,68 +804,97 @@
                             <h3 class="text-lg font-semibold">{{ $t('company_profile.admin_user.title') }}</h3>
                         </div>
 
-                        <!-- Admin Name (Display Only) -->
+                        <!-- Admin Name (Display Only) & Edit Gear Button -->
                         <div
                             class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-lg">
-                                    {{ (props.admin_user?.name || 'U').charAt(0).toUpperCase() }}
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-lg">
+                                        {{ (props.admin_user?.name || 'U').charAt(0).toUpperCase() }}
+                                    </div>
+                                    <div>
+                                        <p class="font-medium text-gray-900 dark:text-white">{{ props.admin_user?.name }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 font-mono select-all">{{ props.admin_user?.email }}</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-550 font-medium mt-1">{{
+                                            $t('company_profile.admin_user.admin_label') }}</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-900 dark:text-white">{{ props.admin_user?.name }}
-                                    </p>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{
-                                        $t('company_profile.admin_user.admin_label') }}</p>
-                                </div>
+                                <!-- Edit Gear Button -->
+                                <button
+                                    v-if="!isEditingAdmin"
+                                    type="button"
+                                    @click="triggerAdminEdit()"
+                                    class="p-2 rounded-xl text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                                    :title="$t('common.edit')"
+                                >
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </button>
+                                <!-- Cancel Edit Button -->
+                                <button
+                                    v-else
+                                    type="button"
+                                    @click="isEditingAdmin = false"
+                                    class="px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
+                                >
+                                    {{ locale === 'ar' ? 'إلغاء التعديل' : 'Cancel Edit' }}
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Email Update -->
-                        <div class="space-y-4">
-                            <h4 class="font-medium text-gray-900 dark:text-white">{{
-                                $t('company_profile.admin_user.change_email') }}</h4>
-                            <div>
-                                <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                    $t('company_profile.admin_user.email') }}</label>
-                                <input v-model="form.admin_user.email" type="email" dir="ltr"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-                            </div>
-                        </div>
-
-                        <!-- Password Change -->
-                        <div class="pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
-                            <h4 class="font-medium text-gray-900 dark:text-white">{{
-                                $t('company_profile.admin_user.change_password') }}</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Editable Fields (Email & Password - Shown after verification) -->
+                        <div v-if="isEditingAdmin" class="space-y-6 pt-4">
+                            <!-- Email Update -->
+                            <div class="space-y-4">
+                                <h4 class="font-medium text-gray-900 dark:text-white">{{
+                                    $t('company_profile.admin_user.change_email') }}</h4>
                                 <div>
                                     <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                        $t('company_profile.admin_user.current_password') }}</label>
-                                    <input v-model="form.admin_user.current_password" type="password"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                        $t('company_profile.admin_user.new_password') }}</label>
-                                    <input v-model="form.admin_user.new_password" type="password"
-                                        class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
-                                </div>
-                                <div>
-                                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
-                                        $t('company_profile.admin_user.confirm_password') }}</label>
-                                    <input v-model="form.admin_user.new_password_confirmation" type="password"
+                                        $t('company_profile.admin_user.email') }}</label>
+                                    <input v-model="form.admin_user.email" type="email" dir="ltr"
                                         class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{
-                                $t('company_profile.admin_user.password_hint') }}</p>
-                        </div>
 
-                        <div class="flex justify-end pt-4">
-                            <button @click="saveAdminUser()" :disabled="saving"
-                                class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
-                                {{ saving ? $t('common.loading') : $t('common.save') }}
-                            </button>
+                            <!-- Password Change -->
+                            <div class="pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                                <h4 class="font-medium text-gray-900 dark:text-white">{{
+                                    $t('company_profile.admin_user.change_password') }}</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
+                                            $t('company_profile.admin_user.current_password') }}</label>
+                                        <input v-model="form.admin_user.current_password" type="password"
+                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
+                                            $t('company_profile.admin_user.new_password') }}</label>
+                                        <input v-model="form.admin_user.new_password" type="password"
+                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">{{
+                                            $t('company_profile.admin_user.confirm_password') }}</label>
+                                        <input v-model="form.admin_user.new_password_confirmation" type="password"
+                                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{
+                                    $t('company_profile.admin_user.password_hint') }}</p>
+                            </div>
+
+                            <div class="flex justify-end pt-4">
+                                <button @click="saveAdminUser()" :disabled="saving"
+                                    class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                                    {{ saving ? $t('common.loading') : $t('common.save') }}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -1210,6 +1266,70 @@
                 </div>
             </div>
         </div>
+        <!-- Password Check Modal -->
+        <Teleport to="body">
+            <div v-if="showPasswordCheckModal"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+                @click.self="showPasswordCheckModal = false">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                    <!-- Modal Header -->
+                    <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-750 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white">
+                        <h3 class="text-base font-semibold">
+                            {{ locale === 'ar' ? 'تعديل بيانات المستخدم الرئيسي' : 'Edit Admin User Profile' }}
+                        </h3>
+                        <button @click="showPasswordCheckModal = false"
+                            class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Modal Content -->
+                    <form @submit.prevent="handlePasswordConfirm" class="p-6 space-y-4">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                            {{ locale === 'ar' ? 'يرجى إدخال كلمة المرور الحالية للمتابعة:' : 'Please enter your current password to proceed:' }}
+                        </p>
+                        <div>
+                            <input
+                                v-model="checkPasswordInput"
+                                type="password"
+                                autofocus
+                                :placeholder="locale === 'ar' ? 'كلمة المرور الحالية' : 'Current Password'"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent font-medium"
+                                :class="[checkPasswordError ? 'border-red-500 font-medium' : '']"
+                            />
+                            <p v-if="checkPasswordError" class="mt-1.5 text-xs text-red-650 dark:text-red-400 font-medium">
+                                {{ checkPasswordError }}
+                            </p>
+                        </div>
+
+                        <!-- Modal Action Buttons -->
+                        <div class="flex justify-end gap-3 pt-2">
+                            <button
+                                type="button"
+                                @click="showPasswordCheckModal = false"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-150 dark:hover:bg-gray-750 rounded-lg transition-colors"
+                            >
+                                {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
+                            </button>
+                            <button
+                                type="submit"
+                                :disabled="checkingPassword"
+                                class="px-5 py-2 text-sm font-medium bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                            >
+                                <svg v-if="checkingPassword" class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ locale === 'ar' ? 'تأكيد' : 'Confirm' }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </Teleport>
+
         <ConfirmModal />
     </AppLayout>
 </template>
@@ -1228,6 +1348,7 @@ import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import axios from 'axios';
 
 // Fix Leaflet default marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -1354,6 +1475,26 @@ watch(() => form.value.vat.parts_inclusive, (newVal) => {
     form.value.vat.services_inclusive = newVal;
 });
 
+// Watch address inputs (city, district, street, building_number) to auto-compile into address_line
+watch(
+    () => [
+        form.value.address.city,
+        form.value.address.district,
+        form.value.address.street,
+        form.value.address.building_number
+    ],
+    () => {
+        const city = form.value.address.city?.trim() || '';
+        const district = form.value.address.district?.trim() || '';
+        const street = form.value.address.street?.trim() || '';
+        const building = form.value.address.building_number?.trim() || '';
+        
+        // Filter out empty strings and join with a hyphen
+        const parts = [city, district, street, building].filter(Boolean);
+        form.value.address.address_line = parts.join(' - ');
+    }
+);
+
 const formatExample = computed(() => {
     let example = form.value.numbering.invoice_number_format;
     const now = new Date();
@@ -1417,6 +1558,45 @@ function saveContactAndAddress() {
     });
 }
 
+// Admin user edit access states
+const isEditingAdmin = ref(false);
+const showPasswordCheckModal = ref(false);
+const checkPasswordInput = ref('');
+const checkPasswordError = ref('');
+const checkingPassword = ref(false);
+
+function triggerAdminEdit() {
+    checkPasswordInput.value = '';
+    checkPasswordError.value = '';
+    showPasswordCheckModal.value = true;
+}
+
+function handlePasswordConfirm() {
+    if (!checkPasswordInput.value) {
+        checkPasswordError.value = t('company_profile.admin_user.current_password_wrong');
+        return;
+    }
+
+    checkingPassword.value = true;
+    checkPasswordError.value = '';
+
+    axios.post('/app/settings/company/verify-password', {
+        password: checkPasswordInput.value
+    })
+    .then(response => {
+        if (response.data.success) {
+            isEditingAdmin.value = true;
+            showPasswordCheckModal.value = false;
+        }
+    })
+    .catch(err => {
+        checkPasswordError.value = err.response?.data?.message || t('company_profile.admin_user.current_password_wrong');
+    })
+    .finally(() => {
+        checkingPassword.value = false;
+    });
+}
+
 function saveAdminUser() {
     saving.value = true;
 
@@ -1439,6 +1619,7 @@ function saveAdminUser() {
             form.value.admin_user.current_password = '';
             form.value.admin_user.new_password = '';
             form.value.admin_user.new_password_confirmation = '';
+            isEditingAdmin.value = false; // Lock fields back
         },
         onError: (errors) => {
             error(Object.values(errors).flat().join(', '));
@@ -1527,8 +1708,8 @@ async function handleLogoDelete() {
 function initMap() {
     if (!mapContainer.value || map) return;
 
-    const startLat = form.value.address.lat || defaultLat;
-    const startLng = form.value.address.lng || defaultLng;
+    const startLat = form.value.address.latitude || defaultLat;
+    const startLng = form.value.address.longitude || defaultLng;
 
     map = L.map(mapContainer.value).setView([startLat, startLng], 13);
 
@@ -1593,12 +1774,7 @@ async function reverseGeocode(lat, lng) {
     try {
         const lang = locale.value === 'ar' ? 'ar' : 'en';
         const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`,
-            {
-                headers: {
-                    'User-Agent': 'Carag-App/1.0'
-                }
-            }
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${lang}`
         );
 
         if (!response.ok) throw new Error('Geocoding failed');

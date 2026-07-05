@@ -89,6 +89,44 @@ class ServiceController
                 'department_name_en' => $s->department?->name_en,
             ]);
 
+        // Get all local package names in the current center to exclude them from the catalog dropdown
+        $localPackageNames = Service::where('center_id', $centerId)
+            ->where('type', Service::TYPE_PACKAGE)
+            ->pluck('name_ar')
+            ->filter()
+            ->toArray();
+
+        // Get packages from other branches under the same tenant for the catalog dropdown
+        $otherBranchesPackages = Service::with(['items'])
+            ->where('tenant_id', $tenantId)
+            ->where('center_id', '!=', $centerId)
+            ->where('type', Service::TYPE_PACKAGE)
+            ->whereNotIn('name_ar', $localPackageNames)
+            ->get()
+            ->unique(fn($s) => $s->name_ar . '|' . $s->name_en)
+            ->values()
+            ->map(fn($s) => [
+                'id'                 => $s->id,
+                'name_ar'            => $s->name_ar,
+                'name_en'            => $s->name_en,
+                'description_ar'     => $s->description_ar,
+                'description_en'     => $s->description_en,
+                'base_price'         => 0,
+                'min_price'          => 0,
+                'default_discount_type' => 'none',
+                'default_discount_value' => null,
+                'allow_price_override' => $s->allow_price_override,
+                'type'               => $s->type,
+                'is_active'          => true,
+                'items'              => $s->items->map(fn($item) => [
+                    'id' => $item->id,
+                    'name_ar' => $item->name_ar,
+                    'name_en' => $item->name_en,
+                    'quantity' => $item->pivot->quantity,
+                    'base_price' => $item->base_price,
+                ]),
+            ]);
+
         // Get inspection condition items
         $conditionCategories = \App\Models\VehicleConditionCategory::with(['items.updatedBy:id,name', 'updatedBy:id,name'])
             ->orderedBySource()
@@ -106,6 +144,7 @@ class ServiceController
             'conditionCategories' => $conditionCategories,
             'enableSystematicInspections' => filter_var($enableSystematicInspections, FILTER_VALIDATE_BOOLEAN),
             'otherBranchesServices' => $otherBranchesServices,
+            'otherBranchesPackages' => $otherBranchesPackages,
         ]);
     }
 

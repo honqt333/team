@@ -125,33 +125,70 @@
 
                         <!-- Supplier Info -->
                         <div>
-                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ $t('common.supplier') }}</p>
+                            <p class="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
+                                {{ isCompany ? (invoice.company_transaction?.contact_type === 'customer' ? (locale === 'ar' ? 'العميل' : 'Customer') : $t('common.supplier')) : $t('common.supplier') }}
+                            </p>
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-950/20 text-orange-600 flex items-center justify-center shrink-0">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg v-if="isCompany && invoice.company_transaction?.contact_type === 'customer'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <Link
-                                        v-if="invoice.supplier_id"
-                                        :href="route('app.purchasing.suppliers.show', invoice.supplier_id)"
-                                        class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
-                                    >
-                                        <span>{{ invoice.supplier?.name }}</span>
-                                        <svg class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                    </Link>
-                                    <h4 v-else class="text-base font-bold text-gray-900 dark:text-white">—</h4>
-                                    <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                        <span v-if="invoice.supplier?.phone" class="font-mono flex items-center gap-1">
-                                            <span>📞</span> <span dir="ltr">{{ invoice.supplier.phone }}</span>
-                                        </span>
-                                        <span v-if="invoice.supplier?.tax_number" class="font-mono flex items-center gap-1">
-                                            <span>📋</span> <span>{{ $t('suppliers.tax_number') }}: {{ invoice.supplier.tax_number }}</span>
-                                        </span>
-                                    </div>
+                                    <template v-if="isCompany && invoice.company_transaction?.contact">
+                                        <Link
+                                            v-if="invoice.company_transaction.contact_type === 'supplier'"
+                                            :href="route('app.purchasing.suppliers.show', invoice.company_transaction.contact.id)"
+                                            class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
+                                        >
+                                            <span>{{ invoice.company_transaction.contact.name }}</span>
+                                            <svg class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </Link>
+                                        <Link
+                                            v-else-if="invoice.company_transaction.contact_type === 'customer'"
+                                            :href="route('app.customers.show', invoice.company_transaction.contact.id)"
+                                            class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
+                                        >
+                                            <span>{{ invoice.company_transaction.contact.name }}</span>
+                                            <svg class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </Link>
+                                        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            <span v-if="invoice.company_transaction.contact.phone" class="font-mono flex items-center gap-1">
+                                                <span>📞</span> <span dir="ltr">{{ invoice.company_transaction.contact.phone }}</span>
+                                            </span>
+                                            <span v-if="invoice.company_transaction.contact.tax_number" class="font-mono flex items-center gap-1">
+                                                <span>📋</span> <span>{{ $t('suppliers.tax_number') }}: {{ invoice.company_transaction.contact.tax_number }}</span>
+                                            </span>
+                                        </div>
+                                    </template>
+                                    <template v-else>
+                                        <Link
+                                            v-if="invoice.supplier_id"
+                                            :href="route('app.purchasing.suppliers.show', invoice.supplier_id)"
+                                            class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
+                                        >
+                                            <span>{{ invoice.supplier?.name }}</span>
+                                            <svg class="w-4 h-4 opacity-60 group-hover/sup:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                            </svg>
+                                        </Link>
+                                        <h4 v-else class="text-base font-bold text-gray-900 dark:text-white">—</h4>
+                                        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            <span v-if="invoice.supplier?.phone" class="font-mono flex items-center gap-1">
+                                                <span>📞</span> <span dir="ltr">{{ invoice.supplier.phone }}</span>
+                                            </span>
+                                            <span v-if="invoice.supplier?.tax_number" class="font-mono flex items-center gap-1">
+                                                <span>📋</span> <span>{{ $t('suppliers.tax_number') }}: {{ invoice.supplier.tax_number }}</span>
+                                            </span>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -324,7 +361,9 @@
                     <table class="w-full min-w-[980px]">
                         <thead>
                             <tr class="bg-gray-50/50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700/50">
-                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('inventory.parts.title_singular') }}</th>
+                                <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">
+                                    {{ isCompany ? (locale === 'ar' ? 'البند' : 'Item') : $t('inventory.parts.title_singular') }}
+                                </th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('common.unit_price') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest text-red-500 italic align-middle">{{ $t('common.discount') }}</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest align-middle">{{ $t('invoices.net_unit_price') }}</th>
@@ -341,16 +380,18 @@
                                     <div class="flex flex-col items-center justify-center">
                                         <Link
                                             v-if="line.part_id"
-                                            :href="route('app.inventory.parts.show', line.part_id)"
+                                            :href="isCompany ? (route('settings.company') + '?tab=transactions') : route('app.inventory.parts.show', line.part_id)"
                                             class="text-sm font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/link"
                                         >
-                                            <span>{{ line.part?.name || '—' }}</span>
+                                            <span v-if="isCompany">{{ invoice.company_transaction?.income_category ? (locale === 'ar' ? invoice.company_transaction.income_category.name_ar : invoice.company_transaction.income_category.name_en) : (invoice.company_transaction?.title || '—') }}</span>
+                                            <span v-else>{{ line.part?.name || '—' }}</span>
                                             <svg class="w-3.5 h-3.5 opacity-60 group-hover/link:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                             </svg>
                                         </Link>
                                         <span v-else class="text-sm font-bold text-gray-950 dark:text-white">—</span>
-                                        <span class="text-[10px] text-gray-400 font-mono mt-1 uppercase tracking-wider">{{ line.part?.sku || 'NO-SKU' }}</span>
+                                        <span v-if="isCompany" class="text-[11px] text-gray-400 font-semibold mt-1">{{ invoice.company_transaction?.title }}</span>
+                                        <span v-else class="text-[10px] text-gray-400 font-mono mt-1 uppercase tracking-wider">{{ line.part?.sku || 'NO-SKU' }}</span>
                                     </div>
                                 </td>
                                 

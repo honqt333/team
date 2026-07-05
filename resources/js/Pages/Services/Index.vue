@@ -914,8 +914,25 @@
             @close="closeQuickEditModal" @saved="handleQuickEditSaved" />
 
         <!-- Package Form Modal -->
-        <PackageFormModal :show="showPackageModal" :service="selectedPackage" :departments="departments"
-            :available-services="availableServices" @close="closePackageModal" @saved="handlePackageSaved" />
+        <PackageFormModal
+            :show="showPackageModal"
+            :service="selectedPackage"
+            :departments="departments"
+            :available-services="availableServices"
+            :other-branches-packages="otherBranchesPackages"
+            :pending-catalog-package-id="pendingCatalogPackageId"
+            @close="closePackageModal"
+            @saved="handlePackageSaved"
+            @open-new-definition="handleOpenNewPackageDefinition"
+        />
+
+        <!-- New Package Definition Modal -->
+        <NewPackageDefinitionModal
+            :show="showNewPackageDefinitionModal"
+            :available-services="availableServices"
+            @close="showNewPackageDefinitionModal = false"
+            @saved="handleNewPackageDefinitionSaved"
+        />
 
         <!-- Condition Category Form Modal -->
         <ConditionCategoryFormModal 
@@ -946,6 +963,7 @@ import PageHeader from '@/Components/PageHeader.vue';
 import ServiceFormModal from '@/Components/ServiceFormModal.vue';
 import NewServiceDefinitionModal from '@/Components/NewServiceDefinitionModal.vue';
 import PackageFormModal from '@/Components/PackageFormModal.vue';
+import NewPackageDefinitionModal from '@/Components/NewPackageDefinitionModal.vue';
 import ServiceQuickEditModal from '@/Components/ServiceQuickEditModal.vue';
 import DepartmentFormModal from '@/Components/DepartmentFormModal.vue';
 import ConditionItemFormModal from '@/Components/ConditionItemFormModal.vue';
@@ -986,6 +1004,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    otherBranchesPackages: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const activeTab = ref(new URLSearchParams(window.location.search).get('tab') || 'services');
@@ -1017,6 +1039,8 @@ const selectedServiceForQuickEdit = ref(null);
 // Package modal state
 const showPackageModal = ref(false);
 const selectedPackage = ref(null);
+const showNewPackageDefinitionModal = ref(false);
+const pendingCatalogPackageId = ref(null);
 
 // Inspection modal state
 const showInspectionModal = ref(false);
@@ -1387,6 +1411,7 @@ function handleQuickEditSaved() {
 // Package handlers
 function openCreatePackageModal() {
     selectedPackage.value = null;
+    pendingCatalogPackageId.value = null;
     showPackageModal.value = true;
 }
 
@@ -1398,13 +1423,43 @@ function openEditPackageModal(pkg) {
 function closePackageModal() {
     showPackageModal.value = false;
     selectedPackage.value = null;
+    pendingCatalogPackageId.value = null;
 }
 
 function handlePackageSaved() {
     closePackageModal();
     success(t('common.saved_success'));
     activeTab.value = 'packages';
-    router.reload({ only: ['departments', 'unassignedServices', 'packages'] });
+    router.reload({ only: ['departments', 'unassignedServices', 'packages', 'otherBranchesPackages'] });
+}
+
+function handleOpenNewPackageDefinition() {
+    showPackageModal.value = false;
+    showNewPackageDefinitionModal.value = true;
+}
+
+function handleNewPackageDefinitionSaved(newPackageId) {
+    showNewPackageDefinitionModal.value = false;
+    
+    // Reload the services and packages list to include the new definition
+    router.reload({
+        only: ['departments', 'unassignedServices', 'packages', 'otherBranchesPackages'],
+        onSuccess: () => {
+            if (newPackageId) {
+                const foundPackage = props.packages.find(p => p.id === Number(newPackageId) || p.id === String(newPackageId));
+                if (foundPackage) {
+                    // Open PackageFormModal in edit mode to complete the pricing
+                    selectedPackage.value = foundPackage;
+                    showPackageModal.value = true;
+                } else {
+                    showPackageModal.value = true;
+                }
+            } else {
+                showPackageModal.value = true;
+            }
+            success(t('common.saved_success'));
+        }
+    });
 }
 // Inspection Methods
 const toggleInspectionsSetting = () => {

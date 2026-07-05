@@ -76,6 +76,7 @@
                     <vue-tel-input
                         v-model="form.phone"
                         @on-input="(value) => onPhoneInput('phone', value)"
+                        @blur="checkPhoneExistence"
                         :inputOptions="{ placeholder: '05xxxxxxxx' }"
                         mode="international"
                         :validCharactersOnly="false"
@@ -338,11 +339,69 @@
             </button>
         </template>
     </BaseModal>
+
+    <!-- Duplicate Customer Alert Modal -->
+    <BaseModal :show="showDuplicateModal" @close="showDuplicateModal = false" size="md">
+        <template #title>
+            <div class="flex items-center gap-3 text-amber-600 dark:text-amber-400">
+                <span class="text-2xl">⚠️</span>
+                <span>{{ $t('customers.validation.phone_taken_title') || 'العميل موجود مسبقاً!' }}</span>
+            </div>
+        </template>
+
+        <div class="space-y-4 p-1">
+            <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                {{ $t('customers.validation.phone_taken_desc') || 'العميل الذي يحمل رقم الهاتف هذا مسجل مسبقاً بالنظام. يمكنك الضغط على بطاقة العميل أدناه للانتقال لملفه مباشرة:' }}
+            </p>
+
+            <div v-if="duplicateCustomer" 
+                @click="navigateToDuplicateCustomer"
+                class="group relative bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-xl hover:-translate-y-1 cursor-pointer transition-all duration-300 overflow-hidden p-4"
+            >
+                <!-- Card Content -->
+                <div class="relative z-10 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-base font-bold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                            {{ duplicateCustomer.name }}
+                        </h4>
+                        <div class="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="font-mono" dir="ltr">📞 {{ duplicateCustomer.phone }}</span>
+                            <span v-if="duplicateCustomer.email">✉️ {{ duplicateCustomer.email }}</span>
+                            <span v-if="duplicateCustomer.tax_number">📋 {{ $t('customers.form.tax_number') }}: {{ duplicateCustomer.tax_number }}</span>
+                        </div>
+                    </div>
+                    <div class="text-indigo-600 dark:text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <template #footer>
+            <div class="flex justify-end">
+                <button
+                    type="button"
+                    @click="showDuplicateModal = false"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors"
+                >
+                    {{ $t('common.cancel') }}
+                </button>
+            </div>
+        </template>
+    </BaseModal>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
+import axios from 'axios';
 import { useI18n } from 'vue-i18n';
 import { useConfirm } from '@/Composables/useConfirm';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -372,6 +431,10 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved']);
 const { t, locale } = useI18n(); // Access t function and current locale
 const page = usePage();
+
+const duplicateCustomer = ref(null);
+const showDuplicateModal = ref(false);
+const checkingPhone = ref(false);
 
 const mapContainer = ref(null);
 const mapReady = ref(false);
@@ -508,6 +571,8 @@ async function fetchLocation() {
 // Handle modal open/close
 watch(() => props.show, async (open) => {
     if (open) {
+        duplicateCustomer.value = null;
+        showDuplicateModal.value = false;
         if (!props.customer) {
             form.reset();
             fetchLocation();
@@ -825,7 +890,45 @@ function clearAddressFields() {
     }
 }
 
+const checkPhoneExistence = async () => {
+    if (props.customer || !form.phone?.trim()) {
+        return;
+    }
+
+    checkingPhone.value = true;
+    try {
+        const response = await axios.get(route('customers.check-phone', { phone: form.phone }));
+        if (response.data.exists) {
+            duplicateCustomer.value = response.data.customer;
+            showDuplicateModal.value = true;
+            form.errors.phone = t('customers.validation.phone_taken') || 'رقم الهاتف هذا مسجل مسبقاً!';
+        } else {
+            duplicateCustomer.value = null;
+            if (form.errors.phone === (t('customers.validation.phone_taken') || 'رقم الهاتف هذا مسجل مسبقاً!')) {
+                form.errors.phone = null;
+            }
+        }
+    } catch (err) {
+        console.error("Error checking phone existence:", err);
+    } finally {
+        checkingPhone.value = false;
+    }
+};
+
+const navigateToDuplicateCustomer = () => {
+    if (duplicateCustomer.value) {
+        showDuplicateModal.value = false;
+        emit('close');
+        router.visit(route('customers.show', duplicateCustomer.value.id));
+    }
+};
+
 function submitForm() {
+    if (!props.customer && duplicateCustomer.value) {
+        showDuplicateModal.value = true;
+        return;
+    }
+
     const url = props.customer 
         ? `/app/customers/${props.customer.id}` 
         : '/app/customers';

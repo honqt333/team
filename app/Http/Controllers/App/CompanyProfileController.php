@@ -212,12 +212,20 @@ class CompanyProfileController extends Controller
                 break;
 
             case 'vat':
+                // Enforce 15% VAT rate for Saudi Arabia ('SA')
+                $servicesVatRate = $data['services_vat_rate'] ?? 15;
+                $partsVatRate = $data['parts_vat_rate'] ?? 15;
+
+                // Currently SA is the only supported country, so we lock to 15
+                $servicesVatRate = 15;
+                $partsVatRate = 15;
+
                 TenantTaxSetting::updateOrCreate(
                     ['tenant_id' => $tenant->id],
                     [
                         'vat_enabled' => $data['vat_enabled'] ?? false,
-                        'services_vat_rate' => $data['services_vat_rate'] ?? 15,
-                        'parts_vat_rate' => $data['parts_vat_rate'] ?? 15,
+                        'services_vat_rate' => $servicesVatRate,
+                        'parts_vat_rate' => $partsVatRate,
                         'services_inclusive' => $data['services_inclusive'] ?? false,
                         'parts_inclusive' => $data['parts_inclusive'] ?? false,
                         'show_amount_before_vat' => $data['show_amount_before_vat'] ?? true,
@@ -289,12 +297,17 @@ class CompanyProfileController extends Controller
                     'services_inclusive' => 'boolean',
                     'parts_inclusive' => 'boolean',
                     'show_amount_before_vat' => 'boolean',
-                    'vat_number' => 'nullable|string|max:20',
+                    'vat_number' => 'nullable|string',
                 ];
                 
-                // If VAT is enabled, VAT number is required and must be numeric up to 15 digits
+                // If VAT is enabled, VAT number is required and must be exactly 15 digits starting and ending with 3 (ZATCA Rule)
                 if ($data['vat_enabled'] ?? false) {
-                     $rules['vat_number'] = ['required', 'string', 'max:15', 'regex:/^[0-9]+$/'];
+                     $rules['vat_number'] = ['required', 'string', 'size:15', 'regex:/^3[0-9]{13}3$/'];
+                     $messages = [
+                         'vat_number.required' => __('validation.required', ['attribute' => __('purchasing.tax_number')]),
+                         'vat_number.size' => __('validation.tax_number_invalid'),
+                         'vat_number.regex' => __('validation.tax_number_invalid'),
+                     ];
                 }
                 break;
 
@@ -370,5 +383,24 @@ class CompanyProfileController extends Controller
         $user->save();
 
         return back()->with('success', __('common.saved_success'));
+    }
+
+    /**
+     * Verify the current admin user's password.
+     */
+    public function verifyPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|string',
+        ]);
+
+        if (Hash::check($request->password, auth()->user()->password)) {
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => __('company_profile.admin_user.current_password_wrong')
+        ], 422);
     }
 }

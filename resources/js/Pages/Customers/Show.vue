@@ -83,7 +83,6 @@
                                             {{ $t(`customers.type.${customer.type}`) }}
                                         </div>
                                     </div>
-                                    <p class="text-sm font-bold text-indigo-500/80 dark:text-indigo-400/80 mb-4">{{ $t('customers.subtitle') }}</p>
                                     
                                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
                                         <span v-if="(customer.type === 'company' || customer.type === 'government') && customer.contact_name"

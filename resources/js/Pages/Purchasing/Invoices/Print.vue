@@ -72,6 +72,20 @@ onMounted(() => {
     }, 500);
 });
 
+// Helper to format detailed address objects
+const getFormattedAddress = (addr) => {
+    if (!addr) return '';
+    const parts = [
+        addr.building_number ? `${t('common.building') || 'مبنى'} ${addr.building_number}` : '',
+        addr.street ? `${t('common.street') || 'شارع'} ${addr.street}` : '',
+        addr.district ? `${t('common.district') || 'حي'} ${addr.district}` : '',
+        addr.city ? addr.city : '',
+        addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
+        addr.address_line ? addr.address_line : '',
+    ].filter(Boolean);
+    return parts.join('، ');
+};
+
 // Helper for Supplier Address
 const getSupplierAddress = (supplier) => {
     if (!supplier) return '';
@@ -81,7 +95,7 @@ const getSupplierAddress = (supplier) => {
         supplier.district ? `${t('common.district') || 'حي'} ${supplier.district}` : '',
         supplier.city ? supplier.city : '',
         supplier.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${supplier.postal_code}` : '',
-        supplier.address ? supplier.address : '',
+        supplier.address ? supplier.address : (supplier.address_line ? supplier.address_line : ''),
     ].filter(Boolean);
     return parts.join('، ');
 };
@@ -89,15 +103,16 @@ const getSupplierAddress = (supplier) => {
 // Helper for Center Address
 const getCenterAddress = (center) => {
     if (!center || !center.address) return '';
-    const addr = center.address;
-    const parts = [
-        addr.building_number ? `${t('common.building') || 'مبنى'} ${addr.building_number}` : '',
-        addr.street ? `${t('common.street') || 'شارع'} ${addr.street}` : '',
-        addr.district ? `${t('common.district') || 'حي'} ${addr.district}` : '',
-        addr.city ? addr.city : '',
-        addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
-    ].filter(Boolean);
-    return parts.join('، ');
+    return getFormattedAddress(center.address);
+};
+
+// Helper for Tenant Address
+const getTenantAddress = (tenant) => {
+    if (!tenant) return '';
+    if (tenant.address && typeof tenant.address === 'object') {
+        return getFormattedAddress(tenant.address);
+    }
+    return tenant.address || '';
 };
 
 // Subtotal calculation (cost excl. tax before line discounts)
@@ -118,8 +133,14 @@ const mappedPrintData = computed(() => {
     const companyTitle = props.invoice.company_transaction?.title;
 
     const lines = (props.invoice.lines || []).map(line => ({
-        service_name: isCompany && companyTitle ? companyTitle : (line.part?.name || '—'),
-        description: isCompany && companyTitle ? '' : (line.part?.sku || 'NO-SKU'),
+        service_name: isCompany 
+            ? (props.invoice.company_transaction?.income_category 
+                ? (locale.value === 'ar' ? props.invoice.company_transaction.income_category.name_ar : props.invoice.company_transaction.income_category.name_en) 
+                : (companyTitle || '—')) 
+            : (line.part?.name || '—'),
+        description: isCompany 
+            ? (props.invoice.company_transaction?.income_category ? companyTitle : '') 
+            : (line.part?.sku || 'NO-SKU'),
         qty: Number(line.qty || 1),
         unit_price: Number(line.unit_cost || 0),
         discount: 0,
@@ -143,10 +164,10 @@ const mappedPrintData = computed(() => {
         balance: Number(props.invoice.balance || 0),
         discount_amount: Number(props.invoice.discount_amount || 0),
         customer: {
-            name: props.invoice.supplier?.name || '—',
-            phone: props.invoice.supplier?.phone || '',
-            address: getSupplierAddress(props.invoice.supplier),
-            tax_number: props.invoice.supplier?.tax_number || '',
+            name: (isCompany ? (props.invoice.company_transaction?.contact?.name || props.invoice.supplier?.name) : props.invoice.supplier?.name) || '—',
+            phone: (isCompany ? (props.invoice.company_transaction?.contact?.phone || props.invoice.supplier?.phone) : props.invoice.supplier?.phone) || '',
+            address: getSupplierAddress(isCompany ? (props.invoice.company_transaction?.contact || props.invoice.supplier) : props.invoice.supplier),
+            tax_number: (isCompany ? (props.invoice.company_transaction?.contact?.tax_number || props.invoice.supplier?.tax_number) : props.invoice.supplier?.tax_number) || '',
         },
         is_company: isCompany,
         items: lines
@@ -164,7 +185,7 @@ const mappedCenterData = computed(() => {
         phone: tenant.phone || center.phone,
         logo: tenant.logo_url || center.logo_invoice_url || center.logo_light_url || '',
         iban: tenant.iban || '',
-        address: tenant.address || getCenterAddress(center) || '',
+        address: isCompany ? getTenantAddress(tenant) : (getTenantAddress(tenant) || getCenterAddress(center) || ''),
         stamp_url: isCompany ? '' : (center.stamp_url || ''),
     };
 });

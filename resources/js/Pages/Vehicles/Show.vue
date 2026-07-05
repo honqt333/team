@@ -84,13 +84,12 @@
                                 </div>
 
                                 <div class="flex-1">
-                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-1">
+                                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-4">
                                         <h1 class="text-4xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">
                                             {{ getVehicleName(vehicle) }}
                                         </h1>
                                         <SaudiPlateDisplay :plate-number="vehicle.plate_number" size="md" class="ms-2 shadow-lg" />
                                     </div>
-                                    <p class="text-sm font-bold text-indigo-500/80 dark:text-indigo-400/80 mb-4">{{ $t('vehicles.subtitle') }}</p>
                                     
                                     <div class="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm font-bold text-gray-500 dark:text-gray-400">
                                         <Link v-if="vehicle.customer" :href="route('customers.show', vehicle.customer.id)"

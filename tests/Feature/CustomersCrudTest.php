@@ -175,4 +175,46 @@ class CustomersCrudTest extends TestCase
         ]);
         $response->assertRedirect();
     }
+
+    public function test_check_phone_endpoint_detects_duplicates(): void
+    {
+        $user = $this->createUserWithPermissions(['crm.customers.view']);
+
+        // Create a customer with standard phone number format
+        $customer = Customer::create([
+            'tenant_id' => $user->tenant_id,
+            'center_id' => $user->current_center_id,
+            'type' => 'individual',
+            'name' => 'Existing Customer',
+            'phone' => '+966501234567',
+        ]);
+
+        // 1. Check a phone number that doesn't exist
+        $response1 = $this->actingAs($user)->getJson('/app/customers/check-phone?phone=0509999999');
+        $response1->assertOk();
+        $response1->assertJson(['exists' => false]);
+
+        // 2. Check the existing phone number (in standard format)
+        $response2 = $this->actingAs($user)->getJson('/app/customers/check-phone?phone=+966501234567');
+        $response2->assertOk();
+        $response2->assertJson([
+            'exists' => true,
+            'customer' => [
+                'id' => $customer->id,
+                'name' => 'Existing Customer',
+                'phone' => '+966501234567',
+            ]
+        ]);
+
+        // 3. Check the existing phone number with local formatting (unnormalized 0501234567)
+        $response3 = $this->actingAs($user)->getJson('/app/customers/check-phone?phone=0501234567');
+        $response3->assertOk();
+        $response3->assertJson([
+            'exists' => true,
+            'customer' => [
+                'id' => $customer->id,
+                'name' => 'Existing Customer',
+            ]
+        ]);
+    }
 }

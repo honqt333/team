@@ -139,6 +139,18 @@
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('services_management.form.is_active') }}</span>
             </div>
 
+            <!-- Allow Price Override Toggle -->
+            <div class="flex items-start gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <label class="relative inline-flex items-center cursor-pointer mt-0.5">
+                    <input type="checkbox" v-model="form.allow_price_override" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                </label>
+                <div>
+                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pricing.allow_price_override') }}</span>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $t('pricing.allow_price_override_hint') }}</p>
+                </div>
+            </div>
+
             <!-- Notice: Price will be set separately -->
             <div class="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/10 rounded-xl border border-amber-200/50 dark:border-amber-700/30">
                 <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

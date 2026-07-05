@@ -232,7 +232,8 @@ class CompanyTransactionController extends Controller
                         }
 
                         if (!$supplier) {
-                            $supplier = Supplier::where('name', 'مورد إداري عام')
+                            $supplier = Supplier::withoutGlobalScope('center_scoped')
+                                ->where('name', 'مورد إداري عام')
                                 ->where('tenant_id', $transaction->tenant_id)
                                 ->first();
 

@@ -334,4 +334,68 @@ class CustomerController
             ], 500);
         }
     }
+
+    public function checkPhone(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    {
+        $tenantId = auth()->user()->tenant_id;
+        $phone = $request->query('phone');
+
+        if (!$phone) {
+            return response()->json(['exists' => false]);
+        }
+
+        // Normalize phone number
+        $arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        $persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        $english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+
+        $phone = str_replace($arabic, $english, $phone);
+        $phone = str_replace($persian, $english, $phone);
+
+        // Remove all non-numeric characters (except +)
+        $phone = preg_replace('/[^\d+]/', '', $phone);
+
+        // If it starts with 00966, convert to +966
+        if (str_starts_with($phone, '00966')) {
+            $phone = '+966' . substr($phone, 5);
+        }
+
+        // If it starts with 05, convert to +9665
+        if (str_starts_with($phone, '05') && strlen($phone) === 10) {
+            $phone = '+966' . substr($phone, 1);
+        }
+
+        // If it starts with 5, convert to +9665
+        if (str_starts_with($phone, '5') && strlen($phone) === 9) {
+            $phone = '+966' . $phone;
+        }
+
+        // If it starts with 966 and doesn't start with +, add +
+        if (str_starts_with($phone, '966') && !str_starts_with($phone, '+')) {
+            $phone = '+' . $phone;
+        }
+
+        // Find customer under same tenant
+        $customer = Customer::withoutGlobalScope('center_scoped')
+            ->where('tenant_id', $tenantId)
+            ->where('phone', $phone)
+            ->first();
+
+        if ($customer) {
+            return response()->json([
+                'exists' => true,
+                'customer' => [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'phone' => $customer->phone,
+                    'email' => $customer->email,
+                    'type' => $customer->type,
+                    'tax_number' => $customer->tax_number,
+                    'address_line' => $customer->address_line,
+                ]
+            ]);
+        }
+
+        return response()->json(['exists' => false]);
+    }
 }

@@ -1401,6 +1401,11 @@
     "dark": "Dark"
   },
   "customers": {
+    "validation": {
+      "phone_taken": "This phone number is already registered!",
+      "phone_taken_title": "Customer already exists!",
+      "phone_taken_desc": "The customer with this phone number is already registered in the system. You can click the customer card below to visit their profile directly:"
+    },
     "address": "Address",
     "no_address": "No address provided",
     "title": "Customer management",
@@ -2073,7 +2078,12 @@
     "select_service": "Choose a service",
     "quantity": "Quantity",
     "calculate_total": "Calculate the total price",
-    "empty": "No services have been added to this package yet."
+    "empty": "No services have been added to this package yet.",
+    "select_from_catalog": "Select package from catalog",
+    "select_package_placeholder": "Choose package...",
+    "definition_price_notice": "Note: Package pricing details, discount, and minimum sales price are set separately for each branch after saving the definition.",
+    "add_new_definition": "Add new package definition",
+    "empty_items_hint": "No services have been added to the package yet."
   },
   "purchasing": {
     "title": "Store",

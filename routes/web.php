@@ -90,6 +90,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::get('/customers/import/template', [CustomerController::class, 'downloadTemplate'])->name('customers.import.template');
     Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
     
+    Route::get('/customers/check-phone', [CustomerController::class, 'checkPhone'])->name('customers.check-phone');
     Route::resource('customers', CustomerController::class);
     // Customer merge routes
     Route::get('/customers/{customer}/merge', [CustomerController::class, 'mergeData'])->name('customers.merge-data');
@@ -219,6 +220,7 @@ Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \Ap
     Route::get('/settings/company', [\App\Http\Controllers\App\CompanyProfileController::class, 'index'])->name('settings.company');
     Route::put('/settings/company', [\App\Http\Controllers\App\CompanyProfileController::class, 'update'])->name('settings.company.update');
     Route::put('/settings/company/admin-user', [\App\Http\Controllers\App\CompanyProfileController::class, 'updateAdminUser'])->name('settings.company.admin-user');
+    Route::post('/settings/company/verify-password', [\App\Http\Controllers\App\CompanyProfileController::class, 'verifyPassword'])->name('settings.company.verify-password');
     Route::post('/settings/company/logo', [\App\Http\Controllers\App\CompanyProfileController::class, 'uploadLogo'])->name('settings.company.logo.upload');
     Route::delete('/settings/company/logo', [\App\Http\Controllers\App\CompanyProfileController::class, 'deleteLogo'])->name('settings.company.logo.delete');
 
