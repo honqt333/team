@@ -2,6 +2,7 @@
 
 namespace App\Models\HR;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class OtherPayment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TenantScoped;
 
     protected $table = 'hr_other_payments';
 

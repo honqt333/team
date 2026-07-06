@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, TenantScoped;
 
     protected $fillable = [
         'tenant_id',
@@ -240,7 +241,10 @@ class Payment extends Model
             'tamara' => __('payments.methods.tamara'),
             'credit' => __('payments.methods.credit'),
             'other' => __('payments.methods.other'),
-            default => $this->payment_method,
+            // payment_method can be null on a freshly created
+            // payment record that hasn't been finalised yet.
+            null, '' => '',
+            default => (string) $this->payment_method,
         };
     }
 }

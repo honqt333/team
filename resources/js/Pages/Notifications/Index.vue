@@ -103,8 +103,8 @@
                             :class="link.active
                                 ? 'bg-indigo-600 text-white font-medium'
                                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'"
-                            v-html="link.label" />
-                        <span v-else class="px-3 py-1.5 text-sm text-gray-300 dark:text-gray-600" v-html="link.label" />
+                            v-safe-html="link.label" />
+                        <span v-else class="px-3 py-1.5 text-sm text-gray-300 dark:text-gray-600" v-safe-html="link.label" />
                     </template>
                 </nav>
             </div>

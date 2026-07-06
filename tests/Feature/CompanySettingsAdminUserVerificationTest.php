@@ -37,7 +37,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
 
         app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
-        $superAdminRole = \Spatie\Permission\Models\Role::firstOrCreate([
+        $superAdminRole = \App\Models\Role::firstOrCreate([
             'tenant_id' => $this->tenant->id,
             'name' => 'super_admin',
             'guard_name' => 'web',

@@ -2,12 +2,15 @@
 
 namespace App\Models\HR;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmployeeShift extends Model
 {
+    use TenantScoped;
+
     protected $table = 'hr_employee_shifts';
 
     protected $fillable = [

@@ -49,7 +49,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Make SmtpConfigService a singleton so we look up the default email
+        // integration once per request and reuse the resolved config.
+        $this->app->singleton(\App\Services\Email\SmtpConfigService::class);
     }
 
     /**
@@ -58,6 +60,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+
+        // Apply SMTP from the default email integration (DB-driven) before
+        // any notification or email gets a chance to read mail.* config.
+        // Both development and production read the same source of truth,
+        // configured under /system/integrations.
+        app(\App\Services\Email\SmtpConfigService::class)->apply();
 
         // Defensive: invalidate spatie permission cache on every boot
         // so a stale cache (left over from before adding/removing permissions
@@ -95,16 +103,26 @@ class AppServiceProvider extends ServiceProvider
         Center::observe(\App\Observers\CenterObserver::class);
 
         // Super Admin Bypass
+        //
         // Two auth models: User (web guard, spatie/permission) and
-        // AdminUser (admin guard, role column). Both must be honored here —
-        // AdminUser doesn't have HasRoles trait, so $user->hasRole() would
-        // throw BadMethodCallException and break the gate entirely.
+        // AdminUser (admin guard, role column).
+        //
+        // SECURITY: We never bypass on the tenant-level `super_admin`
+        // role — that role is granted to every new signup in
+        // RegisteredUserController and a Gate::before bypass would be
+        // a privilege-escalation vector. Real system admins still
+        // bypass:
+        //   - AdminUser with is_super_admin = true
+        //   - User with is_system_admin = true
+        // Tenant owners have all permissions through the role itself
+        // (see TenantSetupService::getDefaultRoles), so a policy
+        // bypass is unnecessary for their day-to-day work.
         Gate::before(function ($user, $ability) {
             if ($user instanceof AdminUser) {
                 return $user->isSuperAdmin() ? true : null;
             }
-            if ($user instanceof User) {
-                return $user->hasRole('super_admin') ? true : null;
+            if ($user instanceof User && $user->is_system_admin) {
+                return true;
             }
             return null;
         });

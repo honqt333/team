@@ -3,6 +3,7 @@
 namespace App\Models\HR;
 
 use App\Models\Center;
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,7 @@ use Illuminate\Support\Str;
 
 class BiometricDevice extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, TenantScoped;
 
     protected $table = 'biometric_devices';
 

@@ -28,8 +28,12 @@ class InventoryMoveController extends Controller
             $warehouse = Warehouse::getOrCreateDefault($centerId);
         }
 
-        $sort = $request->input('sort', 'posted_at');
-        $order = $request->input('order', 'desc');
+        // Whitelist allowed sort columns and order directions to prevent SQL injection.
+        $allowedSorts = ['posted_at', 'part_id', 'qty', 'created_at', 'sku'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true)
+            ? $request->input('sort')
+            : 'posted_at';
+        $order = strtolower($request->input('order')) === 'asc' ? 'asc' : 'desc';
 
         $query = InventoryMove::forWarehouse($warehouse->id)
             ->with([
@@ -38,7 +42,7 @@ class InventoryMoveController extends Controller
             ])
             ->posted()
             ->when($request->input('search'), function ($q, $search) {
-                $q->whereHas('part', fn($pq) => 
+                $q->whereHas('part', fn($pq) =>
                     $pq->where('sku', 'like', "%{$search}%")
                        ->orWhere('name_ar', 'like', "%{$search}%")
                 );
@@ -48,13 +52,13 @@ class InventoryMoveController extends Controller
             ->when($request->input('date_from'), fn($q, $date) => $q->whereDate('posted_at', '>=', $date))
             ->when($request->input('date_to'), fn($q, $date) => $q->whereDate('posted_at', '<=', $date));
 
-        // Apply Sorting
+        // Apply Sorting (sort is whitelisted above; order is forced to asc/desc)
         if ($sort === 'sku') {
             $query->join('parts', 'inventory_moves.part_id', '=', 'parts.id')
                   ->orderBy('parts.sku', $order)
                   ->select('inventory_moves.*');
         } else {
-            $query->orderBy($sort, $order);
+            $query->orderBy("inventory_moves.{$sort}", $order);
         }
 
         $moves = $query->paginate(50)->withQueryString();

@@ -130,7 +130,11 @@ class Invoice extends Model
             'unpaid' => __('invoices.status.unpaid'),
             'partial' => __('invoices.status.partial'),
             'paid' => __('invoices.status.paid'),
-            default => $this->payment_status,
+            // payment_status can be null on freshly created invoices
+            // that have not yet been finalized — render an empty
+            // label rather than throwing a TypeError.
+            null, '' => '',
+            default => (string) $this->payment_status,
         };
     }
 

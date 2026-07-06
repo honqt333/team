@@ -2,6 +2,7 @@
 
 namespace App\Models\HR;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class EmployeeContract extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, TenantScoped;
 
     protected $table = 'hr_employee_contracts';
 

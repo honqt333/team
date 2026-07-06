@@ -107,7 +107,8 @@ class TwoFactorService
      */
     public function sendCodeViaEmail(\App\Models\User|\App\Models\AdminUser $user): void
     {
-        $this->configureMailer();
+        \App\Services\Email\SmtpConfigService::class;
+        app(\App\Services\Email\SmtpConfigService::class)->apply();
         $code = (string) rand(100000, 999999);
         // Cache code for verification
         \Illuminate\Support\Facades\Cache::put('2fa_login_' . $user->id, $code, now()->addMinutes(10));
@@ -183,7 +184,7 @@ class TwoFactorService
 
     public function sendCodeWithTemplate(\App\Models\User|\App\Models\AdminUser $user, string $code): void
     {
-        $this->configureMailer();
+        app(\App\Services\Email\SmtpConfigService::class)->apply();
 
         // Get Template
         $template = \App\Models\CommunicationTemplate::getByCode('2fa_verification');
@@ -208,35 +209,5 @@ class TwoFactorService
         );
 
         \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\TemplateMail($subject, $content));
-    }
-
-   /**
-     * Configure mailer from database settings.
-     */
-    protected function configureMailer(): void
-    {
-        $integration = \App\Models\Integration\Integration::where('type', 'email')
-            ->where('is_active', true)
-            ->where('is_default', true)
-            ->first();
-
-        if (!$integration || !$integration->isConfigured()) {
-            return;
-        }
-
-        $config = $integration->config;
-
-        if ($integration->provider === 'smtp') {
-            config([
-                'mail.default' => 'smtp',
-                'mail.mailers.smtp.host' => $config['host'],
-                'mail.mailers.smtp.port' => $config['port'],
-                'mail.mailers.smtp.username' => $config['username'],
-                'mail.mailers.smtp.password' => $config['password'],
-                'mail.mailers.smtp.encryption' => $config['encryption'] ?? 'tls',
-                'mail.from.address' => $config['from_address'],
-                'mail.from.name' => $config['from_name'],
-            ]);
-        }
     }
 }

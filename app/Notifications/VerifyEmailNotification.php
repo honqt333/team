@@ -4,10 +4,10 @@ namespace App\Notifications;
 
 use App\Mail\TemplateMail;
 use App\Models\CommunicationTemplate;
-use App\Models\Integration\Integration;
+use App\Services\Email\SmtpConfigService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Carbon;
@@ -18,47 +18,20 @@ class VerifyEmailNotification extends Notification
 
     /**
      * Get the notification's delivery channels.
+     *
+     * The SMTP mailer is configured once per request from the default
+     * email integration (see SmtpConfigService + AppServiceProvider::boot),
+     * so by the time this notification runs the runtime mail config is
+     * already correct. We just hand the message to Mail::send here.
      */
     public function via($notifiable): array
     {
-        // We handle email sending manually in toMail, so return empty
         $this->sendVerificationEmail($notifiable);
         return [];
     }
 
     /**
-     * Configure mailer from database integration.
-     */
-    protected function configureMailer(): void
-    {
-        $integration = Integration::where('type', 'email')
-            ->where('is_active', true)
-            ->where('is_default', true)
-            ->first();
-
-        if ($integration && $integration->isConfigured()) {
-            $config = $integration->config;
-            
-            Config::set('mail.default', 'smtp');
-            Config::set('mail.mailers.smtp', [
-                'transport' => 'smtp',
-                'host' => $config['host'] ?? 'smtp.gmail.com',
-                'port' => $config['port'] ?? 587,
-                'encryption' => $config['encryption'] ?? 'tls',
-                'username' => $config['username'] ?? '',
-                'password' => $config['password'] ?? '',
-                'timeout' => null,
-            ]);
-
-            if (!empty($config['from_address'])) {
-                Config::set('mail.from.address', $config['from_address']);
-                Config::set('mail.from.name', $config['from_name'] ?? config('app.name'));
-            }
-        }
-    }
-
-    /**
-     * Generate verification URL.
+     * Generate the signed verification URL.
      */
     protected function verificationUrl($notifiable): string
     {
@@ -77,9 +50,12 @@ class VerifyEmailNotification extends Notification
      */
     protected function sendVerificationEmail($notifiable): void
     {
-        // Configure mailer from database
-        $this->configureMailer();
-        
+        // Make sure the SMTP config from the default email integration is
+        // applied even if a notification gets dispatched before the
+        // AppServiceProvider boot path runs (e.g. during tests or queued
+        // jobs that boot a fresh app).
+        app(SmtpConfigService::class)->apply();
+
         $verificationUrl = $this->verificationUrl($notifiable);
 
         $template = CommunicationTemplate::getByCode('email_verification');
@@ -100,7 +76,7 @@ class VerifyEmailNotification extends Notification
             try {
                 Mail::to($notifiable->email)->send(new TemplateMail($subject, $content));
             } catch (\Exception $e) {
-                \Log::error('Email verification failed: ' . $e->getMessage());
+                Log::error('Email verification failed: ' . $e->getMessage());
             }
         } else {
             // Fallback: send simple email
@@ -114,7 +90,7 @@ class VerifyEmailNotification extends Notification
                     </div>'
                 ));
             } catch (\Exception $e) {
-                \Log::error('Email verification fallback failed: ' . $e->getMessage());
+                Log::error('Email verification fallback failed: ' . $e->getMessage());
             }
         }
     }

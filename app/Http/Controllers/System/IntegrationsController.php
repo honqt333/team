@@ -121,15 +121,16 @@ class IntegrationsController extends Controller
         $integration->update([
             'config' => $newConfig,
             'is_active' => $validated['is_active'] ?? false,
+            'is_default' => $validated['is_default'] ?? false,
             'purpose' => $validated['purpose'] ?? 'all',
         ]);
 
-        // If setting as default, unset other defaults of same type
-        if ($request->is_default) {
+        // If setting as default, unset other defaults of same type so
+        // only one integration is the default per channel.
+        if ($validated['is_default'] ?? false) {
             Integration::where('type', $integration->type)
                 ->where('id', '!=', $integration->id)
                 ->update(['is_default' => false]);
-            $integration->update(['is_default' => true]);
         }
 
         return back()->with('success', 'تم حفظ الإعدادات بنجاح');

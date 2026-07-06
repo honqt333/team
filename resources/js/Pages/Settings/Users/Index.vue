@@ -281,7 +281,7 @@ const toggleUserActive = (user) => {
                                             :is="link.url ? 'Link' : 'span'"
                                             v-if="link.url || link.label === '...'"
                                             :href="link.url"
-                                            v-html="link.label"
+                                            v-safe-html="link.label"
                                             class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
                                             :class="[
                                                 link.active 

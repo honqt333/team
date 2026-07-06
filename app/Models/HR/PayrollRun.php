@@ -3,6 +3,7 @@
 namespace App\Models\HR;
 
 use App\Models\Center;
+use App\Models\Concerns\TenantScoped;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PayrollRun extends Model
 {
+    use TenantScoped;
+
     use HasFactory, SoftDeletes;
 
     protected $table = 'hr_payroll_runs';

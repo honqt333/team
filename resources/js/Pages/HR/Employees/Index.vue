@@ -307,7 +307,7 @@
                                 ? 'bg-violet-600 text-white'
                                 : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700',
                             !link.url && 'opacity-50 cursor-not-allowed'
-                        ]" v-html="link.label" />
+                        ]" v-safe-html="link.label" />
                     </nav>
                 </div>
             </div>

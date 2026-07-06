@@ -27,8 +27,8 @@
             
             <!-- Actions -->
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button 
-                    @click="goBack" 
+                <button
+                    @click="goBack"
                     class="px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                 >
                     <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,13 +36,13 @@
                     </svg>
                     {{ $t('common.back') }}
                 </button>
-                
-                <Link 
-                    :href="route('app.dashboard')" 
+
+                <Link
+                    :href="homeHref"
                     class="px-6 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                 >
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                     </svg>
                     {{ $t('common.home') }}
                 </Link>
@@ -57,12 +57,43 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
+const page = usePage();
+
+/**
+ * Pick the right "Home" target for whoever landed on this 403.
+ *
+ *   - System admin (is_system_admin = true) → /system dashboard
+ *   - Authenticated tenant user              → /app/dashboard
+ *   - Guest                                  → / (login / public home)
+ *
+ * Hard-coding `app.dashboard` causes a redirect loop when a
+ * tenant owner (or guest) hits a 403 — the link itself would
+ * 403 again, sending them straight back here.
+ */
+const homeHref = computed(() => {
+    const user = page.props?.auth?.user;
+    if (user?.is_system_admin) {
+        return '/system';
+    }
+    if (user) {
+        return route('app.dashboard');
+    }
+    return '/';
+});
 
 function goBack() {
-    window.history.back();
+    // history.back() can land the user on the same 403 if the
+    // previous page was a redirect to this error. Use referrer
+    // as a fallback; otherwise send them to the smart home.
+    if (document.referrer && document.referrer !== window.location.href) {
+        window.history.back();
+    } else {
+        window.location.href = homeHref.value;
+    }
 }
 </script>

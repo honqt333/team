@@ -2,6 +2,7 @@
 
 namespace App\Models\HR;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmployeeType extends Model
 {
+    use TenantScoped;
+
     protected $table = 'hr_employee_types';
 
     protected $fillable = [

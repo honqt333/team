@@ -83,7 +83,7 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureTenantActive::
 });
 
 // App routes (authenticated + tenancy)
-Route::prefix('app')->middleware(['auth', 'tenant.active', 'center.context', \App\Http\Middleware\EnsureTwoFactorEnabled::class])->group(function () {
+Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.context', \App\Http\Middleware\EnsureTwoFactorEnabled::class])->group(function () {
     // Customer export/import routes (must be before resource routes)
     Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
     Route::get('/customers/print', [CustomerController::class, 'print'])->name('customers.print');

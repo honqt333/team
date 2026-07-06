@@ -11,7 +11,16 @@ class EnsureSystemAdmin
 {
     /**
      * Handle an incoming request.
-     * Only allow users with system_admin role to access system panel.
+     *
+     * Only true system administrators may reach the /system/* panel.
+     * The `super_admin` role that every tenant owner is auto-assigned
+     * during registration is a tenant-scope role and must NOT grant
+     * access here — otherwise any new signup could see and modify
+     * every other tenant in the system (privilege escalation).
+     *
+     * Allowed identities:
+     *   - AdminUser (the dedicated system-admin guard)
+     *   - User with the explicit is_system_admin flag
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -26,23 +35,15 @@ class EnsureSystemAdmin
             return $next($request);
         }
 
-        // 2. If user is User instance -> Allow if either:
-        //    a) The dedicated is_system_admin flag is set, OR
-        //    b) The user has the super_admin role (system-wide admin via spatie/permission)
-        //    Without this second check, the super_admin user cannot reach the
-        //    system panel even though Gate::before lets them bypass other policies.
-        if ($user instanceof User) {
-            if ($user->is_system_admin) {
-                return $next($request);
-            }
-
-            if (method_exists($user, 'hasRole') && $user->hasRole('super_admin')) {
-                return $next($request);
-            }
-
-            abort(403, 'غير مصرح لك بالوصول للوحة النظام');
+        // 2. User with the explicit is_system_admin flag -> Allow
+        //    NOTE: do NOT accept the tenant-level `super_admin` role
+        //    here. That role is granted to every new tenant owner
+        //    (see RegisteredUserController::store) and only authorises
+        //    actions within the tenant scope.
+        if ($user instanceof User && $user->is_system_admin) {
+            return $next($request);
         }
 
-        return $next($request);
+        abort(403, 'غير مصرح لك بالوصول للوحة النظام');
     }
 }

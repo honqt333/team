@@ -136,7 +136,7 @@ const closeMessage = () => {
                             <div class="flex space-x-1 rtl:space-x-reverse">
                                 <Link v-for="(link, i) in messages.links" :key="i"
                                     :href="link.url || '#'"
-                                    v-html="link.label"
+                                    v-safe-html="link.label"
                                     class="px-4 py-2 border rounded-md text-sm transition-all"
                                     :class="[
                                         link.active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',

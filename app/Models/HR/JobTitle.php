@@ -2,6 +2,7 @@
 
 namespace App\Models\HR;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Department;
 use App\Models\Tenant;
 use App\Models\User;
@@ -11,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobTitle extends Model
 {
+    use TenantScoped;
+
     protected $table = 'hr_job_titles';
 
     protected $fillable = [

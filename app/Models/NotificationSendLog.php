@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NotificationSendLog extends Model
 {
+    use TenantScoped;
+
     protected $fillable = [
         'system_announcement_id',
         'tenant_id',

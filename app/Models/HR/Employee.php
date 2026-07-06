@@ -3,6 +3,7 @@
 namespace App\Models\HR;
 
 use App\Models\Center;
+use App\Models\Concerns\TenantScoped;
 use App\Models\Department;
 use App\Models\Nationality;
 use App\Models\Tenant;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, TenantScoped;
 
     protected $table = 'hr_employees';
 

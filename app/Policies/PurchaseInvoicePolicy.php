@@ -79,3 +79,4 @@ class PurchaseInvoicePolicy
             && $user->tenant_id === $return->tenant_id;
     }
 }
+

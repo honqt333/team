@@ -24,13 +24,15 @@ class InitialSystemSeeder extends Seeder
             ['slug' => 'khidmh'],
             [
                 'name' => 'Khidmh Pro',
-                'is_active' => true,
             ]
         );
 
-        // 2. Create Main Center
+        // 2. Create Main Center. We use a tenant-scoped unique
+        // slug so the seeder is safe to re-run and idempotent
+        // even when other tenants already have a "main" slug.
+        $centerSlug = "main-{$tenant->id}";
         $center = Center::firstOrCreate(
-            ['slug' => 'main', 'tenant_id' => $tenant->id],
+            ['slug' => $centerSlug],
             [
                 'tenant_id' => $tenant->id,
                 'name' => 'المركز الرئيسي',
@@ -47,8 +49,22 @@ class InitialSystemSeeder extends Seeder
                 'current_center_id' => $center->id,
                 'password' => Hash::make('11223344'),
                 'email_verified_at' => now(),
+                // The main admin must be a real system admin so they
+                // can reach /system/* (system-wide management panel).
+                // The tenant-scope `super_admin` role is NOT enough
+                // after the 2026-07-06 security hardening.
+                'is_system_admin' => true,
             ]
         );
+
+        // Backfill the is_system_admin flag on the row if it was
+        // created by an older version of this seeder that did not
+        // set it. Without this, the existing main admin can no
+        // longer reach /system/* after the 2026-07-06 security
+        // hardening.
+        if (! $user->is_system_admin) {
+            $user->forceFill(['is_system_admin' => true])->save();
+        }
 
         // 4. Attach User to Center
         if (!$user->centers()->where('center_id', $center->id)->exists()) {

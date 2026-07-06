@@ -44,12 +44,22 @@ export function usePermission() {
     }
 
     /**
-     * Check if user is system admin or tenant admin
-     * @returns {boolean}
+     * Check if the user can reach the /system/* management panel.
+     *
+     * This MUST mirror the server-side check in
+     * `App\Http\Middleware\EnsureSystemAdmin` — otherwise a tenant
+     * owner (with the `super_admin` role) would see a button that
+     * leads to a 403. Only the following identities can see the
+     * button:
+     *   - User with is_system_admin = true
+     *
+     * The tenant-scope `super_admin` role grants full permissions
+     * within that tenant; it does NOT grant cross-tenant / system
+     * access.
      */
     function isAnyAdmin() {
         const user = usePage().props.auth.user;
-        return user?.is_system_admin || hasRole('admin') || hasRole('super_admin') || hasRole('super-admin');
+        return Boolean(user?.is_system_admin);
     }
 
     return {

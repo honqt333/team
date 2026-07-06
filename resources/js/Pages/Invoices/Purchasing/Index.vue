@@ -337,7 +337,7 @@
                                         link.url ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600' :
                                         'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700'
                                     ]"
-                                    v-html="link.label"
+                                    v-safe-html="link.label"
                                 />
                             </div>
                         </div>
@@ -491,7 +491,7 @@
                                         link.url ? 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600' :
                                         'bg-gray-50 dark:bg-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed border border-gray-100 dark:border-gray-700'
                                     ]"
-                                    v-html="link.label"
+                                    v-safe-html="link.label"
                                 />
                             </div>
                         </div>

@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class InternalNotification extends Model
 {
+    use TenantScoped;
+
     public $incrementing = false;
     protected $keyType = 'string';
 

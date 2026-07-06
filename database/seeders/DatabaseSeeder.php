@@ -27,10 +27,15 @@ class DatabaseSeeder extends Seeder
         $this->call(ServiceSeeder::class);
         $this->call(VehicleConditionSeeder::class);
 
-        // 4. Create Test Data (Optional, but useful for now)
+        // 4. Create Communication Templates (email/sms)
+        // Without these, /system/communication/templates is empty and
+        // notifications fall back to hard-coded HTML in their notifier.
+        $this->call(CommunicationTemplateSeeder::class);
+
+        // 5. Create Test Data (Optional, but useful for now)
         $this->call(TestDataSeeder::class);
 
-        // 5. Keep Nationalities
+        // 6. Keep Nationalities
         $this->call(NationalitiesSeeder::class);
     }
 }

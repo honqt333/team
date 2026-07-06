@@ -114,7 +114,7 @@
                                 ? 'bg-emerald-600 text-white'
                                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700',
                             !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                        ]" v-html="link.label" />
+                        ]" v-safe-html="link.label" />
                 </div>
             </div>
         </div>

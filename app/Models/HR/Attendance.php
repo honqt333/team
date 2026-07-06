@@ -3,6 +3,7 @@
 namespace App\Models\HR;
 
 use App\Models\Center;
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Attendance extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, TenantScoped;
 
     protected $table = 'hr_attendances';
 

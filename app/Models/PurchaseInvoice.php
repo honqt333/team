@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PurchaseInvoice extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, TenantScoped;
 
     const STATUS_DRAFT     = 'draft';
     const STATUS_OPEN      = 'open';

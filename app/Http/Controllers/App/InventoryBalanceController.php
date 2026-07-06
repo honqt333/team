@@ -52,13 +52,17 @@ class InventoryBalanceController extends Controller
              $warehouse = Warehouse::find($warehouse->id);
         }
 
-        $sort = $request->input('sort', 'qty_on_hand');
-        $order = $request->input('order', 'desc');
-        
+        // Whitelist allowed sort columns and order directions to prevent SQL injection.
+        $allowedSorts = ['qty_on_hand', 'min_stock', 'created_at', 'sku', 'name'];
+        $sort = in_array($request->input('sort'), $allowedSorts, true)
+            ? $request->input('sort')
+            : 'qty_on_hand';
+        $order = strtolower($request->input('order')) === 'asc' ? 'asc' : 'desc';
+
         $query = InventoryBalance::forWarehouse($warehouse->id)
             ->with(['part' => fn($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'description')->with(['category', 'unit'])])
             ->when($request->input('search'), function ($q, $search) {
-                $q->whereHas('part', fn($pq) => 
+                $q->whereHas('part', fn($pq) =>
                     $pq->where('sku', 'like', "%{$search}%")
                        ->orWhere('name_ar', 'like', "%{$search}%")
                        ->orWhere('name_en', 'like', "%{$search}%")
@@ -71,7 +75,7 @@ class InventoryBalanceController extends Controller
             ->when($request->input('stock_status') === 'low_stock', fn($q) => $q->lowStock())
             ->when($request->input('stock_status') === 'out_of_stock', fn($q) => $q->where('qty_on_hand', '<=', 0));
 
-        // Apply Sorting
+        // Apply Sorting (sort is whitelisted above; order is forced to asc/desc)
         if ($sort === 'sku') {
             $query->join('parts', 'inventory_balances.part_id', '=', 'parts.id')
                   ->orderBy('parts.sku', $order)
@@ -81,7 +85,7 @@ class InventoryBalanceController extends Controller
                   ->orderBy(app()->getLocale() === 'ar' ? 'parts.name_ar' : 'parts.name_en', $order)
                   ->select('inventory_balances.*');
         } else {
-            $query->orderBy($sort, $order);
+            $query->orderBy("inventory_balances.{$sort}", $order);
         }
 
         $balances = $query->paginate(25)->withQueryString();

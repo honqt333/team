@@ -8,6 +8,7 @@ import { ZiggyVue } from 'ziggy-js';
 import i18n from './i18n';
 import { getInitialTheme, applyTheme } from './theme';
 import { ArabicNumeralsPlugin } from './Plugins/arabicNumerals';
+import { SafeHtmlPlugin } from './Plugins/safeHtml';
 
 import VueTelInput from 'vue-tel-input';
 import 'vue-tel-input/vue-tel-input.css';
@@ -32,6 +33,7 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(i18n)
             .use(ArabicNumeralsPlugin)
+            .use(SafeHtmlPlugin)
             .use(VueTelInput, {
                 defaultCountry: 'SA',
                 mode: 'international',

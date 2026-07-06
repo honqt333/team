@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkOrderActivity extends Model
 {
+    use TenantScoped;
     protected $fillable = [
         'tenant_id',
         'work_order_id',
