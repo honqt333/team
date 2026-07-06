@@ -34,4 +34,11 @@ return [
     // Validation
     'amount_exceeds_balance' => 'The amount cannot exceed the remaining balance',
     'auto_payment_notes' => 'Automatic payment recorded upon receipt of invoice',
+    
+    // Types
+    'types' => [
+        'payment' => 'Payment',
+        'refund' => 'Refund',
+        'bad_debt' => 'Bad Debt',
+    ],
 ];

@@ -206,6 +206,10 @@
                                             <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.balance') }}</span>
                                             <span :class="invoice.balance > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'" class="font-bold" dir="ltr">{{ formatCurrency(invoice.balance) }}</span>
                                         </div>
+                                        <div v-if="(invoice.bad_debt || 0) > 0" class="flex justify-between items-center text-xs">
+                                             <span class="text-amber-600 dark:text-amber-400 font-medium">{{ $t('payments.types.bad_debt') || 'ديون معدومة' }}</span>
+                                             <span class="font-bold text-amber-600 dark:text-amber-400" dir="ltr">{{ formatCurrency(invoice.bad_debt) }}</span>
+                                         </div>
                                         <div class="flex justify-between items-center text-xs">
                                             <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.issue_date') }}</span>
                                             <span class="text-gray-600 dark:text-gray-300">{{ formatDate(invoice.issue_date) }}</span>
@@ -292,7 +296,10 @@
                                             
                                             <!-- الباقي -->
                                             <td class="px-4 py-4 text-center text-sm font-bold font-mono align-middle" dir="ltr" :class="invoice.balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'">
-                                                {{ formatCurrency(invoice.balance) }}
+                                                <div>{{ formatCurrency(invoice.balance) }}</div>
+                                                <div v-if="(invoice.bad_debt || 0) > 0" class="text-[10px] text-amber-600 dark:text-amber-400 font-sans font-semibold mt-0.5">
+                                                    {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatCurrency(invoice.bad_debt) }}
+                                                </div>
                                             </td>
                                             
                                             <!-- الحالة -->

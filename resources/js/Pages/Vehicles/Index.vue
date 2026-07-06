@@ -616,10 +616,14 @@ function closeModal() {
     selectedVehicle.value = null;
 }
 
-function handleSaved() {
+function handleSaved(vehicle) {
     closeModal();
     success(t("common.saved_success"));
-    router.reload({ only: ["vehicles"] });
+    if (!selectedVehicle.value && vehicle && vehicle.id) {
+        router.visit(route("vehicles.show", vehicle.id));
+    } else {
+        router.reload({ only: ["vehicles"] });
+    }
 }
 
 function handleCustomerCreated(customer) {

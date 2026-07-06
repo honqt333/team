@@ -265,6 +265,21 @@
                                     <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ toEnglish(order.code) }}</span>
                                     <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
                                 </div>
+                                <div v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="mb-3 p-1.5 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-center">
+                                    <span class="text-[10px] font-bold text-red-600 dark:text-red-400">
+                                        {{ $t('work_orders.remaining_dues_alert') || 'المبالغ المستحقة للدفع' }}: {{ formatCurrency(order.balance || 0) }}
+                                    </span>
+                                </div>
+                                <div v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="mb-3 p-1.5 rounded-lg bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900/50 text-center">
+                                    <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400">
+                                        {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}: {{ formatCurrency(order.balance || 0) }}
+                                    </span>
+                                </div>
+                                <div v-if="(order.bad_debt || 0) > 0" class="mb-3 p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 text-center">
+                                    <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                                        {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatCurrency(order.bad_debt || 0) }}
+                                    </span>
+                                </div>
                                 <!-- Financial Metrics Grid -->
                                 <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
                                     <!-- Total -->
@@ -275,7 +290,7 @@
                                     <!-- Paid -->
                                     <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
                                         <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.columns.paid') }}</span>
-                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatCurrency(order.total_paid || 0) }}</span>
+                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatCurrency((order.total_paid || 0) - (order.bad_debt || 0)) }}</span>
                                     </div>
                                     <!-- Balance -->
                                     <div class="flex flex-col items-center justify-center py-0.5">
@@ -308,10 +323,21 @@
                                     <tr v-for="order in filteredWorkOrders" :key="order.id" @click="router.visit(route('work-orders.show', order.id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
                                         <td class="px-4 py-3 text-center font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap align-middle">{{ toEnglish(order.code) }}</td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
-                                            <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
+                                            <div class="flex flex-col items-center gap-1">
+                                                <span :class="getStatusClass(order.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">{{ $t(`work_orders.status.${order.status}`) }}</span>
+                                                <span v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
+                                                    {{ $t('work_orders.pending_payment_badge') || 'مستحق الدفع' }}
+                                                </span>
+                                                <span v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
+                                                    {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}
+                                                </span>
+                                                <span v-if="(order.bad_debt || 0) > 0" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+                                                    {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatCurrency(order.bad_debt || 0) }}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 text-center font-semibold text-gray-900 dark:text-white whitespace-nowrap align-middle">{{ formatCurrency(order.total || 0) }}</td>
-                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap align-middle">{{ formatCurrency(order.total_paid || 0) }}</td>
+                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap align-middle">{{ formatCurrency((order.total_paid || 0) - (order.bad_debt || 0)) }}</td>
                                         <td class="px-4 py-3 text-center font-bold whitespace-nowrap align-middle" :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">{{ formatCurrency(order.balance || 0) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap align-middle">{{ formatDate(order.created_at) }}</td>
                                     </tr>
@@ -426,17 +452,46 @@
                     <!-- ========== INVOICES TAB ========== -->
                     <div v-if="activeTab === 'invoices'" class="space-y-4">
                         <div v-if="invoices.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            <Link v-for="invoice in invoices" :key="invoice.id" :href="route('invoices.show', invoice.id)"
-                                class="group bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-500 hover:shadow-lg transition-all">
-                                <div class="flex items-center justify-between mb-3">
-                                    <span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">{{ toEnglish(invoice.invoice_number) }}</span>
-                                    <span class="px-2 py-0.5 text-xs font-medium rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{{ $t(`invoices.status.${invoice.status}`) }}</span>
-                                </div>
-                                <div class="text-lg font-black text-gray-900 dark:text-white mb-3">
-                                    {{ formatCurrency(invoice.total_incl_tax) }}
-                                </div>
-                                <div class="text-xs text-gray-400 pt-3 border-t border-gray-100 dark:border-gray-700">
-                                    {{ formatDate(invoice.issue_date) }}
+                            <Link
+                                v-for="invoice in invoices"
+                                :key="invoice.id"
+                                :href="route('app.invoices.show', invoice.id)"
+                                class="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-[0_20px_40px_-10px_rgba(59,130,246,0.2)] transition-all duration-300 cursor-pointer overflow-hidden"
+                            >
+                                <!-- Top gradient stripe -->
+                                <div class="h-1 w-full" :class="stripeClass(invoice.payment_status)"/>
+
+                                <div class="p-5">
+                                    <!-- Number + Status -->
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div>
+                                            <span class="text-xs font-black text-blue-600 dark:text-blue-400 tracking-wide">#{{ toEnglish(invoice.invoice_number) }}</span>
+                                            <p class="mt-1 text-sm font-bold text-gray-900 dark:text-white truncate max-w-[140px]">{{ invoice.customer?.name || vehicle.customer?.name || '—' }}</p>
+                                        </div>
+                                        <span :class="statusClass(invoice.payment_status)" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold">
+                                            {{ $t(`invoices.status.${invoice.payment_status}`) }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Financials -->
+                                    <div class="space-y-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                        <div class="flex justify-between items-center text-xs">
+                                            <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.total') }}</span>
+                                            <span class="font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatCurrency(invoice.total_incl_tax || 0) }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center text-xs">
+                                            <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.balance') }}</span>
+                                            <span :class="(invoice.balance || 0) > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'" class="font-bold" dir="ltr">{{ formatCurrency(invoice.balance || 0) }}</span>
+                                        </div>
+                                        <div v-if="(invoice.bad_debt || 0) > 0" class="flex justify-between items-center text-xs">
+                                            <span class="text-amber-600 dark:text-amber-400 font-medium">{{ $t('payments.types.bad_debt') || 'ديون معدومة' }}</span>
+                                            <span class="font-bold text-amber-600 dark:text-amber-400" dir="ltr">{{ formatCurrency(invoice.bad_debt || 0) }}</span>
+                                        </div>
+                                        <div class="flex justify-between items-center text-xs">
+                                            <span class="text-gray-500 dark:text-gray-400">{{ $t('invoices.issue_date') }}</span>
+                                            <span class="text-gray-600 dark:text-gray-300">{{ formatDate(invoice.issue_date) }}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </Link>
                         </div>
@@ -450,7 +505,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ $t('work_orders.services_total') }}</h3>
                         </div>
-                        <div v-if="services.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto">
+                        <div v-if="workOrderServices.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm overflow-x-auto">
                             <table class="min-w-full">
                                 <thead>
                                     <tr class="bg-gray-100 dark:bg-gray-800">
@@ -463,12 +518,12 @@
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr v-for="item in services" :key="item.id" @click="router.visit(route('work-orders.show', item.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                    <tr v-for="item in workOrderServices" :key="item.id" @click="router.visit(route('work-orders.show', item.work_order_id))" class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
                                         <td class="px-4 py-3 text-start font-bold text-gray-900 dark:text-white align-middle">{{ isRtl ? item.name_ar : item.name_en }}</td>
                                         <td class="px-4 py-3 text-center text-indigo-600 dark:text-indigo-400 font-mono font-bold align-middle">{{ toEnglish(item.work_order_code) }}</td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 text-sm align-middle">{{ formatDate(item.created_at) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ formatCurrency(item.price) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black align-middle">{{ formatCurrency(item.total) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ formatCurrency(item.price || 0) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black align-middle">{{ formatCurrency(item.total || 0) }}</td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
                                             <span :class="getStatusClass(item.status)" class="px-2 py-0.5 text-xs font-medium rounded-full">
                                                 {{ $t(`work_orders.status.${item.status}`) || item.status }}
@@ -515,8 +570,8 @@
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ toEnglish(part.qty) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ formatCurrency(part.price) }}</td>
-                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black align-middle">{{ formatCurrency(part.total) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 font-semibold align-middle">{{ formatCurrency(part.price || 0) }}</td>
+                                        <td class="px-4 py-3 text-center text-gray-900 dark:text-white font-black align-middle">{{ formatCurrency(part.total || 0) }}</td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
                                             <span class="px-2 py-0.5 text-xs font-semibold rounded-full" :class="part.status === 'issued' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : part.status === 'reversed' ? 'bg-red-100 text-red-700 dark:bg-red-900/30' : 'bg-gray-100 text-gray-700 dark:bg-gray-700'">
                                                 {{ part.status === 'issued' ? $t('inventory.parts.statuses.issued') : part.status === 'reversed' ? $t('inventory.parts.statuses.reversed') : part.status === 'cancelled' ? $t('common.status_cancelled') : $t('inventory.parts.statuses.pending') }}
@@ -681,7 +736,7 @@ const WrenchIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 
 const CogIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z' }), h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })]);
 const DocumentTextIcon = () => h('svg', { class: 'w-4.5 h-4.5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2.5', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })]);
 
-const services = computed(() => {
+const workOrderServices = computed(() => {
     const list = [];
     props.workOrders.forEach(order => {
         if (order.items) {
@@ -751,7 +806,7 @@ const tabs = computed(() => [
     { key: 'workOrders', label: t('customers.work_orders'), count: props.counts.workOrders, icon: ClipboardIcon },
     { key: 'ratings', label: t('quotes.title'), count: props.counts.quotes, icon: StarIcon },
     { key: 'invoices', label: t('invoices.title'), count: props.counts.invoices, icon: ReceiptIcon },
-    { key: 'services', label: t('work_orders.item.tab_service'), count: services.value.length, icon: WrenchIcon },
+    { key: 'services', label: t('work_orders.item.tab_service'), count: workOrderServices.value.length, icon: WrenchIcon },
     { key: 'parts', label: t('work_orders.item.tab_parts'), count: parts.value.length, icon: CogIcon },
     { key: 'notes', label: t('work_orders.item.tab_notes'), count: workOrderNotes.value.length, icon: DocumentTextIcon },
     { key: 'mileage', label: t('vehicles.mileage.history'), count: props.vehicle.mileage_logs?.length || 0, icon: MapIcon },
@@ -806,6 +861,14 @@ function formatDate(dateStr) {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-US');
 }
+function isInvoiceOverdue(order) {
+    if (!order.invoice?.due_date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(order.invoice.due_date.split('T')[0]);
+    dueDate.setHours(0, 0, 0, 0);
+    return today >= dueDate;
+}
 function formatCurrency(amount) {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'SAR' }).format(amount);
 }
@@ -816,6 +879,22 @@ function getStatusClass(status) {
 function getQuoteStatusClass(status) {
     const classes = { draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300', pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', converted: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' };
     return classes[status] || classes.draft;
+}
+function statusClass(status) {
+    const map = {
+        paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+        partial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        unpaid: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+    };
+    return map[status] || 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+}
+function stripeClass(status) {
+    const map = {
+        paid: 'bg-emerald-500',
+        partial: 'bg-amber-400',
+        unpaid: 'bg-red-500',
+    };
+    return map[status] || 'bg-gray-200 dark:bg-gray-700';
 }
 function getColorHex(colorName) {
     if (!colorName) return '#gray';

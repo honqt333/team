@@ -142,10 +142,12 @@ class Payment extends Model
 
     public const TYPE_PAYMENT = 'payment';
     public const TYPE_REFUND = 'refund';
+    public const TYPE_BAD_DEBT = 'bad_debt';
 
     public const TYPES = [
         self::TYPE_PAYMENT,
         self::TYPE_REFUND,
+        self::TYPE_BAD_DEBT,
     ];
 
     public const METHODS = [

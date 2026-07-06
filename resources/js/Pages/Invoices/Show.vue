@@ -243,7 +243,14 @@
                                 <tr class="group text-emerald-600 dark:text-emerald-400">
                                     <td class="py-2.5 text-center font-bold align-middle">{{ $t('invoices.paid') }}</td>
                                     <td :colspan="invoice.tax_enabled_snapshot ? 4 : 3" class="py-2.5 align-middle"></td>
-                                    <td class="py-2.5 text-center font-black font-mono text-base align-middle">{{ formatCurrency(invoice.total_paid) }}</td>
+                                    <td class="py-2.5 text-center font-black font-mono text-base align-middle">{{ formatCurrency(invoiceActualPaid) }}</td>
+                                </tr>
+
+                                <!-- Bad Debt Row -->
+                                <tr v-if="invoiceBadDebt > 0" class="group text-amber-600 dark:text-amber-400">
+                                    <td class="py-2.5 text-center font-bold align-middle">{{ $t('payments.types.bad_debt') || 'الديون المعدومة' }}</td>
+                                    <td :colspan="invoice.tax_enabled_snapshot ? 4 : 3" class="py-2.5 align-middle"></td>
+                                    <td class="py-2.5 text-center font-black font-mono text-base align-middle">{{ formatCurrency(invoiceBadDebt) }}</td>
                                 </tr>
 
                                 <!-- Balance Row -->
@@ -494,14 +501,38 @@
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-700/30">
                             <!-- Show payment details -->
                             <template v-if="invoice.payments && invoice.payments.length > 0">
-                                <tr v-for="(payment, index) in invoice.payments" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <tr
+                                    v-for="(payment, index) in invoice.payments"
+                                    :key="payment.id"
+                                    class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
+                                    :class="payment.type === 'bad_debt' ? 'bg-amber-50/40 dark:bg-amber-950/10' : ''"
+                                >
                                     <td class="py-4 px-4 text-center text-gray-500 font-bold font-mono align-middle">{{ toEnglish(index + 1) }}</td>
-                                    <td class="py-4 px-4 text-center font-bold text-gray-700 dark:text-gray-300 align-middle">
-                                        {{ $t(`payments.methods.${payment.payment_method}`) || payment.payment_method }}
+                                    <td class="py-4 px-4 text-center font-bold align-middle"
+                                        :class="payment.type === 'bad_debt' ? 'text-amber-700 dark:text-amber-400' : 'text-gray-700 dark:text-gray-300'">
+                                        <template v-if="payment.type === 'bad_debt'">—</template>
+                                        <template v-else>
+                                            {{ $t(`payments.methods.${payment.payment_method}`) || payment.payment_method }}
+                                        </template>
                                     </td>
                                     <td class="py-4 px-4 text-center font-bold align-middle">
-                                        <span :class="payment.type === 'refund' ? 'text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30' : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'" class="px-2.5 py-1 rounded-lg text-xs font-bold">
-                                            {{ payment.type === 'refund' ? $t('payments.types.refund') : $t('payments.types.payment') }}
+                                        <span
+                                            class="px-2.5 py-1 rounded-lg text-xs font-bold"
+                                            :class="
+                                                payment.type === 'bad_debt'
+                                                    ? 'text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/40'
+                                                    : payment.type === 'refund'
+                                                        ? 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+                                                        : 'text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'
+                                            "
+                                        >
+                                            {{
+                                                payment.type === 'bad_debt'
+                                                    ? ($t('payments.types.bad_debt') || 'دين معدوم')
+                                                    : payment.type === 'refund'
+                                                        ? $t('payments.types.refund')
+                                                        : $t('payments.types.payment')
+                                            }}
                                         </span>
                                     </td>
                                     <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-mono align-middle" dir="ltr">
@@ -510,7 +541,8 @@
                                     <td class="py-4 px-4 text-center text-gray-500 dark:text-gray-400 max-w-xs truncate align-middle" :title="payment.notes || payment.reference">
                                         {{ payment.notes || payment.reference || '—' }}
                                     </td>
-                                    <td class="py-4 px-4 text-center font-black text-gray-900 dark:text-white font-mono align-middle" dir="ltr">
+                                    <td class="py-4 px-4 text-center font-black font-mono align-middle" dir="ltr"
+                                        :class="payment.type === 'bad_debt' ? 'text-amber-700 dark:text-amber-400' : 'text-gray-900 dark:text-white'">
                                         {{ formatCurrencyEnglish(payment.amount) }}
                                     </td>
                                     <td class="py-4 px-4 text-center text-gray-600 dark:text-gray-300 font-semibold align-middle">
@@ -596,6 +628,16 @@ const showPaymentModal = ref(false);
 // Split lines into services vs spare parts
 const serviceLines = computed(() => (props.invoice.lines || []).filter(l => !l.is_part));
 const partsLines   = computed(() => (props.invoice.lines || []).filter(l =>  l.is_part));
+
+const invoiceBadDebt = computed(() => {
+    return (props.invoice.payments || []).reduce((sum, p) => {
+        return p.type === 'bad_debt' ? sum + Number(p.amount || 0) : sum;
+    }, 0);
+});
+
+const invoiceActualPaid = computed(() => {
+    return Math.max(0, Number(props.invoice.total_paid || 0) - invoiceBadDebt.value);
+});
 
 const balance = computed(() => {
     return Math.max(0, Number(props.invoice.total_incl_tax || 0) - Number(props.invoice.total_paid || 0));

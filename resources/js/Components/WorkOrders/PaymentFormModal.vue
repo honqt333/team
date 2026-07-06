@@ -23,7 +23,7 @@
             <div class="p-6 max-h-[80vh] overflow-y-auto">
                 <form @submit.prevent="submitForm" class="space-y-4">
                     <!-- Operation Type -->
-                    <div v-if="allowRefund">
+                    <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {{ $t('payments.form.type') }} <span class="text-red-500">*</span>
                         </label>
@@ -34,17 +34,23 @@
                                     {{ $t('payments.types.payment') }}
                                 </span>
                             </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
+                            <label v-if="allowRefund" class="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" v-model="form.type" value="refund" class="text-red-600 focus:ring-red-500 rounded-full" />
                                 <span class="text-sm font-medium" :class="form.type === 'refund' ? 'text-red-700 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'">
                                     {{ $t('payments.types.refund') }}
+                                </span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" v-model="form.type" value="bad_debt" class="text-amber-600 focus:ring-amber-500 rounded-full" />
+                                <span class="text-sm font-medium" :class="form.type === 'bad_debt' ? 'text-amber-700 dark:text-amber-400' : 'text-gray-600 dark:text-gray-400'">
+                                    {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}
                                 </span>
                             </label>
                         </div>
                     </div>
 
                     <!-- Payment Method -->
-                    <div>
+                    <div v-if="form.type !== 'bad_debt'">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             {{ $t('payments.form.method') }} <span class="text-red-500">*</span>
                         </label>
@@ -274,7 +280,7 @@ watch(() => props.show, (newVal) => {
 function validate() {
     errors.value = {};
     
-    if (!form.value.payment_method) {
+    if (form.value.type !== 'bad_debt' && !form.value.payment_method) {
         errors.value.payment_method = t('common.validation.required', { field: t('payments.form.method') });
     }
     
@@ -294,6 +300,10 @@ function validate() {
 }
 
 function submitForm() {
+    if (form.value.type === 'bad_debt') {
+        form.value.payment_method = 'credit';
+    }
+
     if (!validate()) return;
     
     loading.value = true;

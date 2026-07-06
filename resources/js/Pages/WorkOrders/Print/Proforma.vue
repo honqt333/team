@@ -144,7 +144,7 @@ const mappedData = computed(() => {
             description: part.description || '',
             qty: part.qty || 1,
             unit_price: part.unit_price || 0,
-            discount: 0,
+            discount: Number(part.discount || 0),
             is_part: true
         }));
 

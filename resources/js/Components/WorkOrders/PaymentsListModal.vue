@@ -27,6 +27,10 @@
                         <span class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('work_orders.paid') }}:</span>
                         <span class="font-bold text-gray-900 dark:text-white" dir="ltr">{{ formatPrice(totalPaid) }}</span>
                     </div>
+                    <div v-if="badDebt > 0" class="flex items-center gap-2">
+                        <span class="text-amber-600 dark:text-amber-500 font-semibold">{{ $t('payments.types.bad_debt') || 'ديون معدومة' }}:</span>
+                        <span class="font-bold text-amber-600 dark:text-amber-500" dir="ltr">{{ formatPrice(badDebt) }}</span>
+                    </div>
                     <div class="flex items-center gap-2">
                         <span class="text-gray-500 dark:text-gray-400 font-medium">{{ $t('work_orders.balance') }}:</span>
                         <span class="font-bold" :class="balance > 0 ? 'text-red-600' : 'text-green-600'" dir="ltr">{{ formatPrice(balance) }}</span>
@@ -142,7 +146,7 @@
             :show="showAddModal"
             :work-order-id="workOrderId"
             :balance="balance"
-            :allow-refund="payments.length > 0"
+            :allow-refund="payments.length > 0 && !hasInvoice && balance <= 0.01 && status !== 'done'"
             :total-paid="totalPaid"
             @close="showAddModal = false"
             @saved="onPaymentSaved"
@@ -162,7 +166,10 @@ const props = defineProps({
     payments: { type: Array, default: () => [] },
     grandTotal: { type: Number, default: 0 },
     totalPaid: { type: Number, default: 0 },
+    badDebt: { type: Number, default: 0 },
     balance: { type: Number, default: 0 },
+    hasInvoice: { type: Boolean, default: false },
+    status: { type: String, default: '' },
 });
 
 const emit = defineEmits(['close', 'refresh']);

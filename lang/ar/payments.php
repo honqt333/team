@@ -34,4 +34,11 @@ return [
     // Validation
     'amount_exceeds_balance' => 'المبلغ لا يمكن أن يتجاوز المتبقي',
     'auto_payment_notes' => 'تسجيل دفعة تلقائية عند استلام الفاتورة',
+    
+    // Types
+    'types' => [
+        'payment' => 'دفعة',
+        'refund' => 'استرجاع',
+        'bad_debt' => 'ديون معدومة',
+    ],
 ];

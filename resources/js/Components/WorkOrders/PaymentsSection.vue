@@ -10,7 +10,7 @@
 
                 <!-- Add Button (بجانب اسم المدفوعات) -->
                 <button
-                    v-if="!readOnly"
+                    v-if="!readOnly || (status === 'done' && balance > 0.01)"
                     @click="showPaymentModal = true"
                     class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-green-100 dark:shadow-none"
                 >
@@ -18,6 +18,18 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                     </svg>
                     {{ $t('payments.add_payment') }}
+                </button>
+
+                <!-- Create Credit Invoice Button -->
+                <button
+                    v-if="(status !== 'cancelled' && status !== 'on_hold') && balance > 0.01 && !hasInvoice"
+                    @click="showCreditInvoiceModal = true"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shadow-amber-100 dark:shadow-none"
+                >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    {{ $t('invoices.create_credit_invoice') || 'إنشاء فاتورة آجلة' }}
                 </button>
             </div>
 
@@ -124,7 +136,7 @@
 
         <!-- Summary -->
         <div v-if="payments.length > 0" class="mt-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl">
-            <div class="flex justify-center gap-8 text-sm">
+            <div class="flex justify-center flex-wrap gap-8 text-sm">
                 <div>
                     <span class="text-gray-500">{{ $t('work_orders.total') }}:</span>
                     <span class="font-bold text-gray-900 dark:text-white mr-2" dir="ltr">{{ formatPrice(grandTotal) }}</span>
@@ -132,6 +144,10 @@
                 <div>
                     <span class="text-gray-500">{{ $t('work_orders.paid') }}:</span>
                     <span class="font-bold text-green-600 mr-2" dir="ltr">{{ formatPrice(totalPaid) }}</span>
+                </div>
+                <div v-if="badDebt > 0">
+                    <span class="text-amber-600 dark:text-amber-500 font-semibold">{{ $t('payments.types.bad_debt') || 'ديون معدومة' }}:</span>
+                    <span class="font-bold text-amber-600 mr-2" dir="ltr">{{ formatPrice(badDebt) }}</span>
                 </div>
                 <div>
                     <span class="text-gray-500">{{ $t('work_orders.balance') }}:</span>
@@ -145,12 +161,93 @@
             :show="showPaymentModal"
             :work-order-id="workOrderId"
             :balance="balance"
-            :allow-refund="payments.length > 0"
+            :allow-refund="payments.length > 0 && !hasInvoice && balance <= 0.01 && status !== 'done'"
             :total-paid="totalPaid"
             :payment="editingPayment"
             @close="closePaymentModal"
             @saved="onPaymentSaved"
         />
+
+        <!-- Credit Invoice Modal -->
+        <Modal :show="showCreditInvoiceModal" @close="showCreditInvoiceModal = false" max-width="md">
+            <div class="p-6">
+                <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700 mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        <span>📝</span>
+                        {{ $t('invoices.create_credit_invoice') || 'إنشاء فاتورة آجلة' }}
+                    </h3>
+                    <button @click="showCreditInvoiceModal = false" class="text-gray-400 hover:text-gray-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <form @submit.prevent="submitCreditInvoice">
+                    <div class="space-y-4">
+                        <!-- Remaining Balance (Read Only) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                {{ $t('work_orders.balance') }} (الباقي)
+                            </label>
+                            <div class="w-full px-4 py-2.5 text-base border rounded-xl bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold font-mono" dir="ltr">
+                                {{ formatPrice(balance) }} SAR
+                            </div>
+                        </div>
+
+                        <!-- Due Date -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ $t('invoices.due_date') || 'التاريخ المحدد للدفع' }} <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                v-model="creditInvoiceForm.due_date"
+                                required
+                                :min="todayDate"
+                                dir="ltr"
+                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 text-left font-mono"
+                            />
+                        </div>
+
+                        <!-- Notes -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                {{ $t('payments.form.notes') || 'ملاحظات' }}
+                            </label>
+                            <textarea
+                                v-model="creditInvoiceForm.notes"
+                                rows="3"
+                                class="w-full px-4 py-2.5 text-sm border rounded-xl bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 placeholder-gray-400 dark:placeholder-gray-500"
+                                :placeholder="$t('payments.form.notes_placeholder') || 'أدخل ملاحظات الفاتورة الآجلة...'"
+                            ></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700 mt-6">
+                        <button
+                            type="button"
+                            @click="showCreditInvoiceModal = false"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700"
+                        >
+                            {{ $t('common.cancel') }}
+                        </button>
+                        <button
+                            type="submit"
+                            :disabled="submittingCreditInvoice"
+                            class="px-4 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <svg v-if="submittingCreditInvoice" class="inline-block w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            {{ submittingCreditInvoice ? $t('common.loading') : ($t('common.create') || 'إنشاء') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
 
         <!-- Delete Confirmation removed - using useConfirm instead -->
     </div>
@@ -161,6 +258,7 @@ import { ref, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import PaymentFormModal from './PaymentFormModal.vue';
+import Modal from '@/Components/Modal.vue';
 import { useConfirm } from '@/Composables/useConfirm';
 
 const props = defineProps({
@@ -168,8 +266,11 @@ const props = defineProps({
     payments: { type: Array, default: () => [] },
     grandTotal: { type: Number, default: 0 },
     totalPaid: { type: Number, default: 0 },
+    badDebt: { type: Number, default: 0 },
     balance: { type: Number, default: 0 },
     readOnly: { type: Boolean, default: false },
+    hasInvoice: { type: Boolean, default: false },
+    status: { type: String, default: '' },
 });
 
 const emit = defineEmits(['refresh']);
@@ -232,9 +333,12 @@ const getMethodBadgeClass = (method) => {
 };
 
 const getTypeBadgeClass = (type) => {
-    return type === 'refund' 
-        ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-        : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+    if (type === 'refund') {
+        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+    } else if (type === 'bad_debt') {
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+    }
+    return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
 };
 
 const closePaymentModal = () => {
@@ -246,6 +350,28 @@ const onPaymentSaved = () => {
     emit('refresh');
 };
 
+// Credit Invoice Form & Action
+const showCreditInvoiceModal = ref(false);
+const submittingCreditInvoice = ref(false);
+const creditInvoiceForm = ref({
+    due_date: '',
+    notes: '',
+});
+const todayDate = new Date().toISOString().split('T')[0];
 
-
+const submitCreditInvoice = () => {
+    submittingCreditInvoice.value = true;
+    router.post(route('app.work-orders.invoice', props.workOrderId), creditInvoiceForm.value, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showCreditInvoiceModal.value = false;
+            submittingCreditInvoice.value = false;
+            creditInvoiceForm.value = { due_date: '', notes: '' };
+            emit('refresh');
+        },
+        onError: () => {
+            submittingCreditInvoice.value = false;
+        }
+    });
+};
 </script>

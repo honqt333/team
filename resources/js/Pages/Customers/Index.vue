@@ -684,10 +684,14 @@ function closeModal() {
     selectedCustomer.value = null;
 }
 
-function handleSaved() {
+function handleSaved(customer) {
     closeModal();
     success(t('common.saved_success'));
-    router.reload({ only: ['customers'] });
+    if (!selectedCustomer.value && customer && customer.id) {
+        router.visit(route('customers.show', customer.id));
+    } else {
+        router.reload({ only: ['customers'] });
+    }
 }
 
 function getWhatsAppNumber(customer) {

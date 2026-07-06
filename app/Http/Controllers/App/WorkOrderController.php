@@ -41,7 +41,7 @@ class WorkOrderController
             ->withQueryString();
 
         if ($workOrders) {
-            $workOrders->getCollection()->each->append(['total', 'total_paid', 'balance']);
+            $workOrders->getCollection()->each->append(['total', 'total_paid', 'balance', 'bad_debt']);
         }
 
         return response()->json($workOrders);
@@ -54,7 +54,7 @@ class WorkOrderController
     protected function buildWorkOrderQuery(?string $status = null, ?string $subFilter = null): Builder
     {
         $query = WorkOrder::query()
-            ->with(["customer", "vehicle.make"])
+            ->with(["customer", "vehicle.make", "invoice"])
             ->withCount('items');
 
         if ($status === 'open') {
@@ -80,6 +80,8 @@ class WorkOrderController
                 $query->where('status', WorkOrder::STATUS_DONE)
                     ->hasOutstandingBalance()
                     ->whereHas('invoice');
+            } elseif ($subFilter === 'bad_debts') {
+                $query->whereHas('payments', fn($p) => $p->where('type', 'bad_debt'));
             } elseif ($subFilter === 'cancelled') {
                 $query->where('status', WorkOrder::STATUS_CANCELLED);
             } elseif ($subFilter === 'closed') {
@@ -239,7 +241,7 @@ class WorkOrderController
                     ->hasOutstandingBalance()
                     ->whereHas('invoice')
                     ->count(),
-                'bad_debts' => 0,
+                'bad_debts' => WorkOrder::whereHas('payments', fn($p) => $p->where('type', 'bad_debt'))->count(),
                 'cancelled' => WorkOrder::where('status', WorkOrder::STATUS_CANCELLED)->count(),
             ];
         }
@@ -251,7 +253,7 @@ class WorkOrderController
                 ->withQueryString();
 
             if ($workOrders) {
-                $workOrders->getCollection()->each->append(['total', 'total_paid', 'balance']);
+                $workOrders->getCollection()->each->append(['total', 'total_paid', 'balance', 'bad_debt']);
             }
         } else {
             $workOrders = null;
@@ -1492,6 +1494,8 @@ class WorkOrderController
         $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== \App\Models\WorkOrderItem::STATUS_CANCELLED);
         $workOrder->setRelation('items', $filteredItems->values());
 
+        $workOrder->append(['total', 'total_discount']);
+
         // Calculate totals
         $servicesTotal = $workOrder->items->sum(function ($item) {
             return $item->line_total ?? ($item->qty * $item->unit_price);
@@ -1569,15 +1573,17 @@ class WorkOrderController
         });
 
         $grandTotal = $servicesTotal + $partsTotal;
-        $totalPaid = $payments->sum('amount');
-        $balance = $grandTotal - $totalPaid;
+        $badDebt    = $payments->where('type', 'bad_debt')->sum('amount');
+        $totalPaid  = $payments->sum('amount');
+        $balance    = $grandTotal - $totalPaid;
 
         return Inertia::render('WorkOrders/Print/Payments', [
-            'workOrder' => $workOrder,
-            'payments' => $payments,
+            'workOrder'  => $workOrder,
+            'payments'   => $payments,
             'grandTotal' => $grandTotal,
-            'totalPaid' => $totalPaid,
-            'balance' => $balance,
+            'totalPaid'  => $totalPaid,
+            'badDebt'    => $badDebt,
+            'balance'    => $balance,
         ]);
     }
 
@@ -1598,6 +1604,10 @@ class WorkOrderController
             'reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        if ($validated['type'] === 'refund' && $workOrder->status === WorkOrder::STATUS_DONE) {
+            return back()->with('error', __('payments.refund_not_allowed_for_exited'));
+        }
 
         // If the WO already has an invoice, link this payment to it as well
         // so the running totals stay in sync on both sides. Without this,
@@ -1648,6 +1658,10 @@ class WorkOrderController
             'reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        if ($validated['type'] === 'refund' && $workOrder->status === WorkOrder::STATUS_DONE) {
+            return back()->with('error', __('payments.refund_not_allowed_for_exited'));
+        }
 
         $payment->update($validated);
 

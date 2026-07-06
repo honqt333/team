@@ -25,6 +25,19 @@
                     </svg>
                 </button>
 
+                <!-- Deferred Invoice Button (Done + no invoice + balance > 0) -->
+                <button
+                    v-if="showDeferredInvoiceBtn"
+                    @click="emit('create-deferred-invoice')"
+                    class="p-2.5 text-violet-600 hover:text-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/20 rounded-xl transition-all"
+                    :title="$t('invoices.create_deferred') || 'إنشاء فاتورة آجلة'"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </button>
+
                 <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
 
                 <!-- Edit Button -->
@@ -179,9 +192,19 @@ const props = defineProps({
     balance: { type: Number, default: 0 },
 });
 
-const emit = defineEmits(['print', 'payments', 'edit', 'change-status']);
+const emit = defineEmits(['print', 'payments', 'edit', 'change-status', 'create-deferred-invoice']);
 
 const { t } = useI18n();
+
+// Show deferred invoice button when:
+// - WO is done
+// - No invoice has been issued yet
+// - There is an outstanding balance
+const showDeferredInvoiceBtn = computed(() => {
+    return props.workOrder.status === 'done'
+        && !props.workOrder.invoice
+        && props.balance > 0.01;
+});
 
 const showPaymentsBtn = computed(() => {
     if (!props.isReadOnly) {
@@ -213,6 +236,12 @@ const allItemsCompleted = computed(() => {
 // next to the rest of the header state.
 const backUrl = computed(() => {
     const status = props.workOrder.status;
+    
+    // If completed ('done') but has outstanding balance and no invoice, it belongs to the open list (pending_payment subfilter)
+    if (status === 'done' && props.balance > 0 && (!props.workOrder.invoice || !props.workOrder.invoice.id)) {
+        return route('work-orders.index', { status: 'open', sub_filter: 'pending_payment' });
+    }
+    
     if (['done', 'cancelled'].includes(status)) {
         return route('work-orders.index', { status: 'closed' });
     }

@@ -370,9 +370,23 @@
                         </div>
 
                         <!-- Outstanding Balance Notice -->
-                        <div v-if="order.status === 'done' && (order.balance || 0) > 0" class="mb-4 p-2 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-center shadow-sm">
+                        <div v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="mb-4 p-2 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-center shadow-sm">
                             <span class="text-xs font-bold text-red-600 dark:text-red-400">
                                 {{ $t('work_orders.remaining_dues_alert') || 'المبالغ المستحقة للدفع' }}: {{ formatNumber(order.balance || 0) }}
+                            </span>
+                        </div>
+
+                        <!-- Deferred Invoice Notice -->
+                        <div v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="mb-4 p-2 rounded-xl bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900/50 text-center shadow-sm">
+                            <span class="text-xs font-bold text-violet-600 dark:text-violet-400">
+                                {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}: {{ formatNumber(order.balance || 0) }}
+                            </span>
+                        </div>
+
+                        <!-- Bad Debt Notice -->
+                        <div v-if="(order.bad_debt || 0) > 0" class="mb-4 p-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 text-center shadow-sm">
+                            <span class="text-xs font-bold text-amber-600 dark:text-amber-400">
+                                {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatNumber(order.bad_debt || 0) }}
                             </span>
                         </div>
 
@@ -419,7 +433,7 @@
                                 <Tooltip :text="$t('work_orders.paid')" class="flex-1">
                                     <div class="group/stat flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 cursor-pointer transition-colors hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-lg py-1 w-full h-full">
                                         <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.paid') }}</span>
-                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatNumber(order.total_paid || 0) }}</span>
+                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatNumber((order.total_paid || 0) - (order.bad_debt || 0)) }}</span>
                                     </div>
                                 </Tooltip>
                                 <!-- Balance -->
@@ -568,8 +582,14 @@
                                             <span :class="['px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider', getStatusClass(order.status)]">
                                                 {{ $t(`work_orders.status.${order.status}`) }}
                                             </span>
-                                            <span v-if="order.status === 'done' && (order.balance || 0) > 0" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
+                                            <span v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
                                                 {{ $t('work_orders.pending_payment_badge') || 'مستحق الدفع' }}
+                                            </span>
+                                            <span v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
+                                                {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}
+                                            </span>
+                                            <span v-if="(order.bad_debt || 0) > 0" class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+                                                {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatNumber(order.bad_debt) }}
                                             </span>
                                         </div>
                                     </div>
@@ -611,7 +631,7 @@
                                 </td>
                                 <!-- المدفوع -->
                                 <td class="px-4 py-3 text-end font-medium text-green-600 dark:text-green-400 align-middle">
-                                    {{ formatNumber(order.total_paid || 0) }}
+                                    {{ formatNumber((order.total_paid || 0) - (order.bad_debt || 0)) }}
                                 </td>
                                 <!-- الباقي -->
                                 <td class="px-4 py-3 text-end font-bold align-middle" :class="getBalanceColor(order)">
@@ -1132,6 +1152,15 @@ function isOverdue(order) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return dueDate < today;
+}
+
+function isInvoiceOverdue(order) {
+    if (!order.invoice?.due_date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(order.invoice.due_date.split('T')[0]);
+    dueDate.setHours(0, 0, 0, 0);
+    return today >= dueDate;
 }
 
 // Get date to display: closed_at for closed orders, expected_end_date for open

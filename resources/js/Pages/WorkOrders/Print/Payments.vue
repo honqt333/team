@@ -48,6 +48,7 @@ const props = defineProps({
     payments: Array,
     grandTotal: Number,
     totalPaid: Number,
+    badDebt: { type: Number, default: 0 },
     balance: Number,
 });
 
@@ -97,6 +98,7 @@ const mappedData = computed(() => {
         total_incl_tax: props.grandTotal,
         total_tax: 0,
         total_excl_tax: props.grandTotal,
+        bad_debt: props.badDebt || (props.payments || []).reduce((s, p) => p.type === 'bad_debt' ? s + Number(p.amount || 0) : s, 0),
         total_paid: props.totalPaid,
         balance: props.balance,
         payments: props.payments || []

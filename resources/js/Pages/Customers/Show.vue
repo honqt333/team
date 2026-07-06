@@ -508,6 +508,21 @@
                                     <span class="text-gray-400 mx-0.5">•</span>
                                     <span class="truncate">{{ getVehicleName(order.vehicle) }}</span>
                                 </div>
+                                <div v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="mb-3 p-1.5 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/50 text-center">
+                                    <span class="text-[10px] font-bold text-red-600 dark:text-red-400">
+                                        {{ $t('work_orders.remaining_dues_alert') || 'المبالغ المستحقة للدفع' }}: {{ formatPrice(order.balance || 0) }}
+                                    </span>
+                                </div>
+                                <div v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="mb-3 p-1.5 rounded-lg bg-violet-50 dark:bg-violet-950/20 border border-violet-100 dark:border-violet-900/50 text-center">
+                                    <span class="text-[10px] font-bold text-violet-600 dark:text-violet-400">
+                                        {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}: {{ formatPrice(order.balance || 0) }}
+                                    </span>
+                                </div>
+                                <div v-if="(order.bad_debt || 0) > 0" class="mb-3 p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-100 dark:border-amber-900/50 text-center">
+                                    <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                                        {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatPrice(order.bad_debt || 0) }}
+                                    </span>
+                                </div>
                                 <!-- Financial Metrics Grid -->
                                 <div class="grid grid-cols-3 gap-1 py-2 border-y border-gray-50 dark:border-gray-700/50 my-3 text-center">
                                     <!-- Total -->
@@ -518,7 +533,7 @@
                                     <!-- Paid -->
                                     <div class="flex flex-col items-center justify-center border-e border-gray-100 dark:border-gray-700/50 py-0.5">
                                         <span class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">{{ $t('work_orders.columns.paid') }}</span>
-                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatPrice(order.total_paid || 0) }}</span>
+                                        <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400">{{ formatPrice((order.total_paid || 0) - (order.bad_debt || 0)) }}</span>
                                     </div>
                                     <!-- Balance -->
                                     <div class="flex flex-col items-center justify-center py-0.5">
@@ -579,9 +594,20 @@
                                             </div>
                                         </td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
-                                            <span :class="getStatusClass(order.status)"
-                                                class="px-2 py-0.5 text-xs font-medium rounded-full">{{
-                                                $t(`work_orders.status.${order.status}`) }}</span>
+                                            <div class="flex flex-col items-center gap-1">
+                                                <span :class="getStatusClass(order.status)"
+                                                    class="px-2 py-0.5 text-xs font-medium rounded-full">{{
+                                                    $t(`work_orders.status.${order.status}`) }}</span>
+                                                <span v-if="order.status === 'done' && (order.balance || 0) > 0 && (!order.invoice || isInvoiceOverdue(order))" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300">
+                                                    {{ $t('work_orders.pending_payment_badge') || 'مستحق الدفع' }}
+                                                </span>
+                                                <span v-if="order.status === 'done' && (order.balance || 0) > 0 && order.invoice && !isInvoiceOverdue(order)" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300">
+                                                    {{ $t('invoices.deferred_invoice') || 'فاتورة آجلة' }}
+                                                </span>
+                                                <span v-if="(order.bad_debt || 0) > 0" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+                                                    {{ $t('payments.types.bad_debt') || 'ديون معدومة' }}: {{ formatPrice(order.bad_debt || 0) }}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap align-middle">{{
                                             formatDate(order.created_at) }}</td>
@@ -589,7 +615,7 @@
                                             {{ formatPrice(order.total || 0) }}
                                         </td>
                                         <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap align-middle">
-                                            {{ formatPrice(order.total_paid || 0) }}
+                                            {{ formatPrice((order.total_paid || 0) - (order.bad_debt || 0)) }}
                                         </td>
                                         <td class="px-4 py-3 text-center font-bold whitespace-nowrap align-middle"
                                             :class="(order.balance || 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'">
@@ -865,7 +891,7 @@
                                             {{ payment.notes === 'payments.auto_payment_notes' ? ($t('payments.auto_payment_notes')) : (payment.notes || '-') }}
                                         </td>
                                         <td class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white whitespace-nowrap align-middle">
-                                            <span dir="ltr" class="inline-block">{{ formatPrice(payment.amount)
+                                            <span dir="ltr" class="inline-block">{{ formatPrice(payment.amount || 0)
                                                 }}</span>
                                         </td>
                                         <td
@@ -1068,6 +1094,15 @@ function getVehicleName(vehicle) {
 function formatDate(dateStr) {
     if (!dateStr) return '';
     return new Date(dateStr).toLocaleDateString('en-US');
+}
+
+function isInvoiceOverdue(order) {
+    if (!order.invoice?.due_date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(order.invoice.due_date.split('T')[0]);
+    dueDate.setHours(0, 0, 0, 0);
+    return today >= dueDate;
 }
 
 function getWhatsAppNumber(customer) {

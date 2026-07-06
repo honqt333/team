@@ -231,7 +231,11 @@
             </div>
             <div v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="flex justify-between text-gray-500 text-[10px]">
                 <span>{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</span>
-                <span dir="ltr">{{ formatCurrency(totals.paid) }}</span>
+                <span dir="ltr">{{ formatCurrency(totals.paid - (data.bad_debt || 0)) }}</span>
+            </div>
+            <div v-if="!['quotation', 'proforma_invoice'].includes(documentType) && (data.bad_debt || 0) > 0" class="flex justify-between text-amber-600 text-[10px]">
+                <span>{{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}</span>
+                <span dir="ltr">{{ formatCurrency(data.bad_debt) }}</span>
             </div>
             <div v-if="!['quotation', 'proforma_invoice'].includes(documentType)" class="flex justify-between font-bold text-gray-800 text-[10px] bg-gray-50/50 p-1 rounded">
                 <span>{{ isRtl ? 'الباقي:' : 'Remaining:' }}</span>

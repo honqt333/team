@@ -44,4 +44,9 @@ return [
     'date_from' => 'From Date',
     'date_to' => 'To Date',
     'payments_history' => 'Payments History',
+    'create_deferred' => 'Create Deferred Invoice',
+    'deferred_invoice' => 'Deferred Invoice',
+    'remaining_amount' => 'Remaining Amount',
+    'due_date' => 'Due Date',
+    'deferred_notes_placeholder' => 'Notes for deferred invoice...',
 ];

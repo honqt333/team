@@ -317,14 +317,51 @@ class WorkOrder extends Model
     {
         // Use relationship sum to avoid loading all payment objects
         if ($this->relationLoaded('payments')) {
-            return (float) $this->payments->sum(fn($p) => ($p->type === 'payment' || $p->type === 'Payment') ? $p->amount : -$p->amount);
+            return (float) $this->payments->sum(fn($p) => ($p->type === 'payment' || $p->type === 'Payment' || $p->type === 'bad_debt' || $p->type === 'Bad_debt') ? $p->amount : -$p->amount);
         }
-        return (float) $this->payments()->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')->value('paid');
+        return (float) $this->payments()->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment", "bad_debt", "Bad_debt") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')->value('paid');
+    }
+
+    /**
+     * Get total bad debt amount.
+     */
+    public function getBadDebtAttribute(): float
+    {
+        if ($this->relationLoaded('payments')) {
+            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === 'Bad_debt') ? $p->amount : 0);
+        }
+        return (float) $this->payments()->whereIn('type', ['bad_debt', 'Bad_debt'])->sum('amount');
     }
 
     public function getBalanceAttribute(): float
     {
         return $this->total - $this->total_paid;
+    }
+
+    /**
+     * Get total discount.
+     */
+    public function getTotalDiscountAttribute(): float
+    {
+        if (!$this->relationLoaded('items')) $this->load('items');
+        if (!$this->relationLoaded('parts')) $this->load('parts');
+
+        $activeItems = $this->items->reject(fn($item) => $item->status === WorkOrderItem::STATUS_CANCELLED);
+        $servicesDiscount = (float) $activeItems->sum('discount_amount');
+
+        $activeItemIds = $activeItems->pluck('id')->all();
+        $activeParts = $this->parts->filter(function ($part) use ($activeItemIds) {
+            if (in_array($part->status, [WorkOrderItemPart::STATUS_CANCELLED, WorkOrderItemPart::STATUS_REVERSED])) {
+                return false;
+            }
+            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+                return false;
+            }
+            return true;
+        });
+        $partsDiscount = (float) $activeParts->sum('discount');
+
+        return $servicesDiscount + $partsDiscount;
     }
 
     /**

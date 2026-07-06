@@ -10,6 +10,7 @@
                 @payments="showPaymentsListModal = true"
                 @edit="showEditModal = true"
                 @change-status="changeStatus"
+                @create-deferred-invoice="showDeferredInvoiceModal = true"
             />
 
             <!-- Top Section: Financial Summary & Customer Info -->
@@ -19,10 +20,12 @@
 
                 <!-- 2. Left Card: Financial Summary (extracted to WorkOrderFinancialSummary) -->
                 <WorkOrderFinancialSummary
+                    :work-order="workOrder"
                     :totals="totals"
                     :has-tax="hasTax"
                     :tax-rate="workOrder.tax_rate_snapshot || 15"
                     :total-paid="workOrderTotalPaid"
+                    :bad-debt="workOrderBadDebt"
                     :balance="workOrderBalance"
                 />
             </div>
@@ -96,8 +99,8 @@
                     <!-- Payments Tab -->
                     <div v-if="activeTab === 'payments'" key="tab-payments">
                         <PaymentsSection :work-order-id="workOrder.id" :payments="workOrder.payments || []"
-                            :grand-total="workOrderTotal" :total-paid="workOrderTotalPaid" :balance="workOrderBalance"
-                            :read-only="isReadOnly" @refresh="refreshWorkOrder" />
+                            :grand-total="workOrderTotal" :total-paid="workOrderTotalPaid" :bad-debt="workOrderBadDebt" :balance="workOrderBalance"
+                            :read-only="isReadOnly" :has-invoice="!!workOrder.invoice" :status="workOrder.status" @refresh="refreshWorkOrder" />
                     </div>
 
                     <!-- Condition Report Tab -->
@@ -187,8 +190,8 @@
 
         <!-- Payments List Modal (New) -->
         <PaymentsListModal :show="showPaymentsListModal" :work-order-id="workOrder.id"
-            :payments="workOrder.payments || []" :grand-total="workOrderTotal" :total-paid="workOrderTotalPaid"
-            :balance="workOrderBalance" @close="showPaymentsListModal = false" @refresh="refreshWorkOrder" />
+            :payments="workOrder.payments || []" :grand-total="workOrderTotal" :total-paid="workOrderTotalPaid" :bad-debt="workOrderBadDebt"
+            :balance="workOrderBalance" :has-invoice="!!workOrder.invoice" :status="workOrder.status" @close="showPaymentsListModal = false" @refresh="refreshWorkOrder" />
         <WorkOrderPhotoModal v-if="showPhotoModal" :show="showPhotoModal" :work-order="workOrder"
             @close="showPhotoModal = false" @saved="refreshWorkOrder" />
 
@@ -342,6 +345,78 @@
                 </button>
             </template>
         </BaseModal>
+
+        <!-- Deferred Invoice Modal -->
+        <BaseModal :show="showDeferredInvoiceModal" @close="closeDeferredInvoiceModal" size="md">
+            <template #title>
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    {{ $t('invoices.create_deferred') || 'إنشاء فاتورة آجلة' }}
+                </div>
+            </template>
+
+            <form @submit.prevent="confirmDeferredInvoice" class="space-y-5 text-right" dir="rtl">
+                <!-- Balance (read-only) -->
+                <div class="bg-violet-50 dark:bg-violet-950/20 rounded-xl p-4 flex items-center justify-between">
+                    <span class="text-sm font-bold text-violet-700 dark:text-violet-400">
+                        {{ $t('invoices.remaining_amount') || 'المبلغ المتبقي' }}
+                    </span>
+                    <span class="text-lg font-black text-violet-700 dark:text-violet-300 font-mono" dir="ltr">
+                        {{ formatCurrency(workOrderBalance) }}
+                    </span>
+                </div>
+
+                <!-- Due Date -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        {{ $t('invoices.due_date') || 'تاريخ الاستحقاق' }}
+                        <span class="text-red-500 ms-0.5">*</span>
+                    </label>
+                    <input
+                        v-model="deferredDueDate"
+                        type="date"
+                        required
+                        :min="todayDate"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors"
+                    />
+                </div>
+
+                <!-- Notes -->
+                <div class="space-y-1">
+                    <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        {{ $t('common.notes') || 'ملاحظات' }}
+                    </label>
+                    <textarea
+                        v-model="deferredNotes"
+                        rows="3"
+                        :placeholder="$t('invoices.deferred_notes_placeholder') || 'ملاحظات على الفاتورة الآجلة...'"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none transition-colors"
+                    ></textarea>
+                </div>
+            </form>
+
+            <template #footer>
+                <button type="button" @click="closeDeferredInvoiceModal"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                    {{ $t('common.cancel') }}
+                </button>
+                <button type="button" @click="confirmDeferredInvoice"
+                    :disabled="!deferredDueDate || isDeferredSubmitting"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2">
+                    <svg v-if="isDeferredSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4z"/>
+                    </svg>
+                    {{ $t('invoices.create_deferred') || 'إصدار فاتورة آجلة' }}
+                </button>
+            </template>
+        </BaseModal>
+
     </AppLayout>
 </template>
 
@@ -576,11 +651,19 @@ const workOrderTotal = computed(() => totals.value.grand.total);
 const workOrderTotalPaid = computed(() => {
     return props.workOrder.payments?.reduce((sum, p) => {
         const amount = parseFloat(p.amount || 0);
+        if (p.type === 'bad_debt') return sum;
         return p.type === 'refund' ? sum - amount : sum + amount;
     }, 0) || 0;
 });
 
-const workOrderBalance = computed(() => workOrderTotal.value - workOrderTotalPaid.value);
+const workOrderBadDebt = computed(() => {
+    return props.workOrder.payments?.reduce((sum, p) => {
+        const amount = parseFloat(p.amount || 0);
+        return p.type === 'bad_debt' ? sum + amount : sum;
+    }, 0) || 0;
+});
+
+const workOrderBalance = computed(() => workOrderTotal.value - workOrderTotalPaid.value - workOrderBadDebt.value);
 
 // ─── Composable layer ──────────────────────────────────────────────────────────
 const items = useWorkOrderItems({
@@ -949,6 +1032,45 @@ function handleSaved() {
     success(t('common.saved_success'));
     router.reload();
 }
+
+// ─── Deferred Invoice ────────────────────────────────────────────────────────
+const showDeferredInvoiceModal = ref(false);
+const deferredDueDate = ref('');
+const deferredNotes = ref('');
+const isDeferredSubmitting = ref(false);
+
+const todayDate = computed(() => new Date().toISOString().split('T')[0]);
+
+function closeDeferredInvoiceModal() {
+    showDeferredInvoiceModal.value = false;
+    deferredDueDate.value = '';
+    deferredNotes.value = '';
+    isDeferredSubmitting.value = false;
+}
+
+function confirmDeferredInvoice() {
+    if (!deferredDueDate.value || isDeferredSubmitting.value) return;
+    isDeferredSubmitting.value = true;
+    router.post(
+        route('app.work-orders.invoice', props.workOrder.id),
+        {
+            due_date: deferredDueDate.value,
+            notes: deferredNotes.value || null,
+        },
+        {
+            onSuccess: () => {
+                closeDeferredInvoiceModal();
+            },
+            onError: () => {
+                isDeferredSubmitting.value = false;
+            },
+            onFinish: () => {
+                isDeferredSubmitting.value = false;
+            },
+        }
+    );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 // changeStatus, exit/hold modals live in useWorkOrderStatus composable
 </script>

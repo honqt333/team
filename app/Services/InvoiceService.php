@@ -20,9 +20,9 @@ class InvoiceService
     /**
      * Create a Draft Invoice from a Work Order.
      */
-    public function createFromWorkOrder(WorkOrder $workOrder, $user): Invoice
+    public function createFromWorkOrder(WorkOrder $workOrder, $user, array $additionalData = []): Invoice
     {
-        return DB::transaction(function () use ($workOrder, $user) {
+        return DB::transaction(function () use ($workOrder, $user, $additionalData) {
             // Re-fetch items + parts directly to avoid stale/empty relations
             // (the caller's $workOrder may not have eager-loaded them).
             $activeItems = \App\Models\WorkOrderItem::where('work_order_id', $workOrder->id)
@@ -58,6 +58,8 @@ class InvoiceService
                 'invoice_number' => 'DRAFT-' . $workOrder->code, // Temporary
                 'issue_date' => now(),
                 'supply_date' => now(),
+                'due_date' => $additionalData['due_date'] ?? null,
+                'notes' => $additionalData['notes'] ?? null,
                 'status' => 'draft',
                 'payment_status' => 'unpaid',
                 // Snapshots
@@ -164,6 +166,10 @@ class InvoiceService
             // 3. Convert WO Parts to Invoice Lines
             foreach ($activeParts as $part) {
                 if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+                    continue;
+                }
+
+                if ($part->hide_on_print) {
                     continue;
                 }
 

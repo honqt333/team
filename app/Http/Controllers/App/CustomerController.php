@@ -125,11 +125,12 @@ class CustomerController
             ->with([
                 'vehicle.make',
                 'vehicle.model',
-                'payments.receivedBy'
+                'payments.receivedBy',
+                'invoice'
             ])
             ->latest()
             ->get();
-        $workOrders->each->append(['total', 'total_paid', 'balance']);
+        $workOrders->each->append(['total', 'total_paid', 'balance', 'bad_debt']);
         
         // Get quotes with vehicle relationships
         $quotes = $customer->quotes()

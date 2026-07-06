@@ -14,6 +14,8 @@ class Invoice extends Model
 {
     use HasFactory, SoftDeletes, CenterScoped, HasTaxSnapshot;
 
+    protected $appends = ['balance', 'is_paid', 'payment_status_label', 'bad_debt'];
+
     protected $fillable = [
         'tenant_id',
         'center_id',
@@ -23,6 +25,7 @@ class Invoice extends Model
         'issue_date',
         'supply_date',
         'due_date',
+        'notes',
         'type', // invoice, credit_note, debit_note
         'subtype', // simplified, standard
         'status', // draft, valid, reported, cancelled
@@ -131,6 +134,14 @@ class Invoice extends Model
         };
     }
 
+    public function getBadDebtAttribute(): float
+    {
+        if ($this->relationLoaded('payments')) {
+            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === 'Bad_debt') ? $p->amount : 0);
+        }
+        return (float) $this->payments()->whereIn('type', ['bad_debt', 'Bad_debt'])->sum('amount');
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Helpers
     // ─────────────────────────────────────────────────────────────
@@ -147,7 +158,7 @@ class Invoice extends Model
         // Mirror WorkOrder::getTotalPaidAttribute — payments add, refunds subtract.
         // type values come from Payment::TYPES: 'payment' / 'refund' (lowercase).
         $totalPaid = (float) $this->payments()
-            ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE amount END) as paid')
+            ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment", "bad_debt", "Bad_debt") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')
             ->value('paid');
 
         $this->total_paid = $totalPaid;

@@ -2233,6 +2233,12 @@
     "proforma": "فاتورة أولية",
     "tax_invoice": "فاتورة ضريبية",
     "already_exists": "الفاتورة موجودة بالفعل لهذا الأمر",
+    "create_credit_invoice": "إنشاء فاتورة آجلة",
+    "due_date": "التاريخ المحدد للدفع",
+    "create_deferred": "إنشاء فاتورة آجلة",
+    "deferred_invoice": "فاتورة آجلة",
+    "remaining_amount": "المبلغ المتبقي",
+    "deferred_notes_placeholder": "ملاحظات على الفاتورة الآجلة...",
     "work_order_not_completed": "أمر العمل غير مكتمل",
     "hub": {
       "title": "الفواتير",
@@ -2339,9 +2345,11 @@
     },
     "types": {
       "payment": "دفع",
-      "refund": "استرجاع"
+      "refund": "استرجاع",
+      "bad_debt": "ديون معدومة"
     },
     "amount_exceeds_paid": "المبلغ يتجاوز القيمة المدفوعة",
+    "refund_not_allowed_for_exited": "الاسترجاع غير مسموح به لكروت العمل التي تم عمل خروج لها",
     "methods": {
       "cash": "نقداً",
       "mada": "مدى",

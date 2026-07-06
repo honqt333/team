@@ -2315,6 +2315,12 @@
     "proforma": "Proforma invoice",
     "tax_invoice": "Tax invoice",
     "already_exists": "The bill already exists for this",
+    "create_credit_invoice": "Create Credit Invoice",
+    "due_date": "Due Date",
+    "create_deferred": "Create Deferred Invoice",
+    "deferred_invoice": "Deferred Invoice",
+    "remaining_amount": "Remaining Amount",
+    "deferred_notes_placeholder": "Notes for deferred invoice...",
     "work_order_not_completed": "The work order is incomplete",
     "hub": {
       "title": "Invoices",
@@ -2423,9 +2429,11 @@
     },
     "types": {
       "payment": "Pay",
-      "refund": "Recovery"
+      "refund": "Recovery",
+      "bad_debt": "Bad Debt"
     },
     "amount_exceeds_paid": "The amount exceeds the paid value",
+    "refund_not_allowed_for_exited": "Refund is not allowed for exited work orders",
     "methods": {
       "cash": "In cash",
       "mada": "Range",

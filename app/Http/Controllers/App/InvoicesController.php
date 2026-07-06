@@ -67,7 +67,12 @@ class InvoicesController extends Controller
         }
 
         try {
-            $invoice = $this->invoiceService->createFromWorkOrder($workOrder, auth()->user());
+            $data = $request->validate([
+                'due_date' => 'nullable|date|after_or_equal:today',
+                'notes' => 'nullable|string',
+            ]);
+
+            $invoice = $this->invoiceService->createFromWorkOrder($workOrder, auth()->user(), $data);
             $this->invoiceService->issueInvoice($invoice);
 
             // Notify owner about new invoice
@@ -99,6 +104,7 @@ class InvoicesController extends Controller
             'workOrder.vehicle.make',
             'workOrder.vehicle.model',
             'lines',
+            'payments',
             'center',
             'tenant.taxSettings',
             'companyTransaction',
@@ -110,6 +116,8 @@ class InvoicesController extends Controller
         if ($invoice->tenant->invoice_title) {
             $labels['document_title'] = $invoice->tenant->invoice_title;
         }
+
+        $invoice->append(['balance', 'is_paid', 'payment_status_label']);
 
         return Inertia::render('Invoices/Print', [
             'invoice' => $invoice,

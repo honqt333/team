@@ -44,4 +44,9 @@ return [
     'date_from' => 'من تاريخ',
     'date_to' => 'إلى تاريخ',
     'payments_history' => 'سجل الدفعات',
+    'create_deferred' => 'إنشاء فاتورة آجلة',
+    'deferred_invoice' => 'فاتورة آجلة',
+    'remaining_amount' => 'المبلغ المتبقي',
+    'due_date' => 'تاريخ الاستحقاق',
+    'deferred_notes_placeholder' => 'ملاحظات على الفاتورة الآجلة...',
 ];

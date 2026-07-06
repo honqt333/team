@@ -200,11 +200,11 @@ class VehicleController
         // Get all related data (bypassing center_scoped to support tenant-wide vehicle history)
         $workOrders = $vehicle->workOrders()
             ->withoutGlobalScope('center_scoped')
-            ->with(['vehicle.make', 'vehicle.model', 'items.service', 'parts', 'generalNotes.user'])
+            ->with(['vehicle.make', 'vehicle.model', 'items.service', 'parts', 'generalNotes.user', 'invoice'])
             ->latest()
             ->get();
             
-        $workOrders->each->append(['total', 'total_paid', 'balance']);
+        $workOrders->each->append(['total', 'total_paid', 'balance', 'bad_debt']);
         
         $quotes = $vehicle->quotes()
             ->withoutGlobalScope('center_scoped')
@@ -215,6 +215,7 @@ class VehicleController
         // Fetch invoices via work orders
         $invoices = \App\Models\Invoice::withoutGlobalScope('center_scoped')
             ->whereIn('work_order_id', $workOrders->pluck('id'))
+            ->with('customer')
             ->latest()
             ->get();
 

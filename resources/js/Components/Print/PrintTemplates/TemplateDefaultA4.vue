@@ -278,13 +278,17 @@
                             </tr>
                         </thead>
                         <tbody class="text-gray-800">
-                            <tr v-for="(payment, index) in data.payments" :key="payment.id" class="border-b border-gray-100 hover:bg-gray-50/50">
+                            <tr v-for="(payment, index) in data.payments" :key="payment.id"
+                                class="border-b border-gray-100 hover:bg-gray-50/50"
+                                :class="payment.type === 'bad_debt' ? 'bg-amber-50/60' : ''">
                                 <td class="p-2 border border-gray-200 text-center text-gray-500">{{ index + 1 }}</td>
                                 <td class="p-2 border border-gray-200 font-mono">{{ formatDate(payment.payment_date) }}</td>
-                                <td class="p-2 border border-gray-200 font-bold">{{ getMethodLabel(payment.payment_method) }}</td>
+                                <td class="p-2 border border-gray-200 font-bold" :class="payment.type === 'bad_debt' ? 'text-amber-700' : ''">
+                                    {{ payment.type === 'bad_debt' ? (isRtl ? 'ديون معدومة' : 'Bad Debt') : getMethodLabel(payment.payment_method) }}
+                                </td>
                                 <td class="p-2 border border-gray-200 font-mono" dir="ltr">{{ payment.reference || '-' }}</td>
                                 <td class="p-2 border border-gray-200 text-gray-600">{{ payment.notes || '-' }}</td>
-                                <td class="p-2 border border-gray-200 text-center font-bold font-mono">{{ formatCurrency(payment.amount) }}</td>
+                                <td class="p-2 border border-gray-200 text-center font-bold font-mono" :class="payment.type === 'bad_debt' ? 'text-amber-700' : ''">{{ formatCurrency(payment.amount) }}</td>
                             </tr>
                             <tr v-if="data.payments && data.payments.length > 0" class="font-bold bg-gray-50 border-t border-gray-300">
                                 <td colspan="5" class="p-2 border border-gray-200 text-center">{{ isRtl ? 'إجمالي المدفوعات:' : 'Total Payments:' }}</td>
@@ -516,7 +520,11 @@
                     </tr>
                     <tr v-if="!['quotation'].includes(documentType)" class="text-gray-500 border-b border-gray-200">
                         <td class="py-1 px-2 font-bold">{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</td>
-                        <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(totals.paid) }}</td>
+                        <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(totals.paid - (data.bad_debt || 0)) }}</td>
+                    </tr>
+                    <tr v-if="!['quotation'].includes(documentType) && (data.bad_debt || 0) > 0" class="text-amber-600 border-b border-gray-200">
+                        <td class="py-1 px-2 font-bold">{{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}</td>
+                        <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(data.bad_debt) }}</td>
                     </tr>
                     <tr v-if="!['quotation'].includes(documentType)" class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
                         <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
