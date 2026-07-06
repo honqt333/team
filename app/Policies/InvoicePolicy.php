@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Invoice;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class InvoicePolicy
@@ -15,7 +16,7 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('invoices.view');
+        return $user->can(Permissions::INVOICES_VIEW);
     }
 
     /**
@@ -23,7 +24,7 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice): bool
     {
-        return $user->hasPermissionTo('invoices.view')
+        return $user->can(Permissions::INVOICES_VIEW)
             && $user->tenant_id === $invoice->tenant_id;
     }
 
@@ -32,7 +33,7 @@ class InvoicePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('invoices.create');
+        return $user->can(Permissions::INVOICES_CREATE);
     }
 
     /**
@@ -40,7 +41,12 @@ class InvoicePolicy
      */
     public function update(User $user, Invoice $invoice): bool
     {
-        return $user->hasPermissionTo('invoices.edit')
+        // The legacy code referenced 'invoices.edit' which was
+        // never defined as a permission. Invoicing in this app
+        // is two-state (create + extra_discount); treat 'edit'
+        // as 'create' since the underlying `status === 'draft'`
+        // check enforces the only-editable-in-draft semantics.
+        return $user->can(Permissions::INVOICES_CREATE)
             && $user->tenant_id === $invoice->tenant_id
             && $invoice->status === 'draft'; // Can only update drafts
     }
@@ -50,17 +56,26 @@ class InvoicePolicy
      */
     public function delete(User $user, Invoice $invoice): bool
     {
-        return $user->hasPermissionTo('invoices.delete')
+        // The legacy code referenced 'invoices.delete' which
+        // was never defined as a permission. There is no separate
+        // delete permission; create-level access is the closest
+        // available signal, and the draft-state check below
+        // gates the actual destructive operation.
+        return $user->can(Permissions::INVOICES_CREATE)
             && $user->tenant_id === $invoice->tenant_id
             && $invoice->status === 'draft'; // Can only delete drafts
     }
 
     /**
      * Determine whether the user can record payments.
+     *
+     * Invoicing payments are part of the purchasing/payment
+     * flow; the only existing payment permission is
+     * `purchasing.payments.manage`, so we use that as the gate.
      */
     public function recordPayment(User $user, Invoice $invoice): bool
     {
-        return $user->hasPermissionTo('payments.create')
+        return $user->can(Permissions::PURCHASE_PAYMENTS_MANAGE)
             && $user->tenant_id === $invoice->tenant_id
             && $invoice->payment_status !== 'paid';
     }

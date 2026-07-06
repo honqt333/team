@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\WorkOrder;
+use App\Support\Permissions;
 
 class WorkOrderPolicy
 {
@@ -12,7 +13,7 @@ class WorkOrderPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('crm.work_orders.view');
+        return $user->can(Permissions::WORK_ORDERS_VIEW);
     }
 
     /**
@@ -20,7 +21,7 @@ class WorkOrderPolicy
      */
     public function view(User $user, WorkOrder $workOrder): bool
     {
-        if (!$user->hasPermissionTo('crm.work_orders.view')) {
+        if (! $user->can(Permissions::WORK_ORDERS_VIEW)) {
             return false;
         }
 
@@ -33,7 +34,7 @@ class WorkOrderPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('crm.work_orders.create');
+        return $user->can(Permissions::WORK_ORDERS_CREATE);
     }
 
     /**
@@ -41,7 +42,7 @@ class WorkOrderPolicy
      */
     public function update(User $user, WorkOrder $workOrder): bool
     {
-        if (!$user->hasPermissionTo('crm.work_orders.update')) {
+        if (! $user->can(Permissions::WORK_ORDERS_UPDATE)) {
             return false;
         }
 
@@ -68,7 +69,7 @@ class WorkOrderPolicy
      */
     public function delete(User $user, WorkOrder $workOrder): bool
     {
-        if (!$user->hasPermissionTo('crm.work_orders.delete')) {
+        if (! $user->can(Permissions::WORK_ORDERS_DELETE)) {
             return false;
         }
 
@@ -87,7 +88,7 @@ class WorkOrderPolicy
      */
     public function resume(User $user, WorkOrder $workOrder): bool
     {
-        if (!$user->hasPermissionTo('crm.work_orders.update')) {
+        if (! $user->can(Permissions::WORK_ORDERS_UPDATE)) {
             return false;
         }
 
@@ -101,7 +102,7 @@ class WorkOrderPolicy
      */
     public function cancel(User $user, WorkOrder $workOrder): bool
     {
-        if (!$user->hasPermissionTo('crm.work_orders.update')) {
+        if (! $user->can(Permissions::WORK_ORDERS_UPDATE)) {
             return false;
         }
 

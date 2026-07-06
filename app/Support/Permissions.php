@@ -278,6 +278,9 @@ class Permissions
                 self::WORK_ORDERS_UPDATE,
                 self::WORK_ORDERS_DELETE,
                 self::WORK_ORDERS_INSPECT,
+                self::WORK_ORDERS_PRINT,
+                self::WORK_ORDERS_EXPORT,
+                self::WORK_ORDERS_IMPORT,
             ],
             'quotes' => [
                 self::QUOTES_VIEW,

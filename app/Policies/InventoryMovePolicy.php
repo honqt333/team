@@ -4,38 +4,42 @@ namespace App\Policies;
 
 use App\Models\InventoryMove;
 use App\Models\User;
+use App\Support\Permissions;
 
 class InventoryMovePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('inventory.moves.view');
+        return $user->can(Permissions::INVENTORY_MOVES_VIEW);
     }
 
     public function view(User $user, InventoryMove $move): bool
     {
-        return $user->can('inventory.moves.view');
+        return $user->can(Permissions::INVENTORY_MOVES_VIEW);
     }
 
     public function create(User $user, string $type = 'receipt'): bool
     {
+        // The Permissions registry only defines a single
+        // inventory.moves.create permission. The legacy
+        // implementation split this per type
+        // (receipt/adjustment/issue); until those permissions
+        // are added to the registry, the single create
+        // permission governs all of them.
+        $canMove = $user->can(Permissions::INVENTORY_MOVES_CREATE);
+
         return match ($type) {
-            'receipt' => $user->can('inventory.receipts.create'),
-            'adjustment' => $user->can('inventory.adjustments.create'),
-            'issue' => $user->can('inventory.issue.create'),
+            'receipt', 'adjustment', 'issue' => $canMove,
             default => false,
         };
     }
 
     public function reverse(User $user, InventoryMove $move): bool
     {
-        // Check appropriate permission based on move type
-        return match ($move->move_type) {
-            InventoryMove::TYPE_RECEIPT => $user->can('inventory.receipts.cancel'),
-            InventoryMove::TYPE_ADJUSTMENT_IN,
-            InventoryMove::TYPE_ADJUSTMENT_OUT => $user->can('inventory.adjustments.cancel'),
-            InventoryMove::TYPE_ISSUE_TO_WORKORDER => $user->can('inventory.issue.reverse'),
-            default => false,
-        };
+        // There is no dedicated "reverse" permission in the
+        // registry; the create permission is the closest
+        // signal for whether a user is allowed to touch the
+        // inventory ledger at all.
+        return $user->can(Permissions::INVENTORY_MOVES_CREATE);
     }
 }

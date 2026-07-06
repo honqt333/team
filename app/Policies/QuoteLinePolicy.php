@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Policies;
 
 use App\Models\QuoteLine;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+use App\Support\Permissions;
 class QuoteLinePolicy
 {
     use HandlesAuthorization;
@@ -27,7 +27,7 @@ class QuoteLinePolicy
         }
 
         // User must have update permission and quote must be editable
-        return $user->can('quotes.update') && $line->quote?->canBeEdited();
+        return $user->can(Permissions::QUOTES_UPDATE) && $line->quote?->canBeEdited();
     }
 
     /**
@@ -47,6 +47,6 @@ class QuoteLinePolicy
         }
 
         // User must have update permission and quote must be editable
-        return $user->can('quotes.update') && $line->quote?->canBeEdited();
+        return $user->can(Permissions::QUOTES_UPDATE) && $line->quote?->canBeEdited();
     }
 }

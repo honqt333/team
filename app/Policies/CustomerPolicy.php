@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Support\Permissions;
 
 class CustomerPolicy
 {
@@ -12,7 +13,7 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('crm.customers.view');
+        return $user->can(Permissions::CUSTOMERS_VIEW);
     }
 
     /**
@@ -21,7 +22,7 @@ class CustomerPolicy
     public function view(User $user, Customer $customer): bool
     {
         // Check permission
-        if (!$user->hasPermissionTo('crm.customers.view')) {
+        if (! $user->can(Permissions::CUSTOMERS_VIEW)) {
             return false;
         }
 
@@ -34,7 +35,7 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('crm.customers.create');
+        return $user->can(Permissions::CUSTOMERS_CREATE);
     }
 
     /**
@@ -43,7 +44,7 @@ class CustomerPolicy
     public function update(User $user, Customer $customer): bool
     {
         // Check permission
-        if (!$user->hasPermissionTo('crm.customers.update')) {
+        if (! $user->can(Permissions::CUSTOMERS_UPDATE)) {
             return false;
         }
 
@@ -57,7 +58,7 @@ class CustomerPolicy
     public function delete(User $user, Customer $customer): bool
     {
         // Check permission
-        if (!$user->hasPermissionTo('crm.customers.delete')) {
+        if (! $user->can(Permissions::CUSTOMERS_DELETE)) {
             return false;
         }
 

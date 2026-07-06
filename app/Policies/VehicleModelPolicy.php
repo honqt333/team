@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\VehicleModel;
+use App\Support\Permissions;
 
 class VehicleModelPolicy
 {
@@ -12,8 +13,8 @@ class VehicleModelPolicy
      */
     public function update(User $user, VehicleModel $model): bool
     {
-        // Cannot modify system-level data
-        return $model->source !== 'system';
+        return $user->can(Permissions::VEHICLE_SETTINGS_MANAGE)
+            && $model->source !== 'system';
     }
 
     /**
@@ -21,8 +22,8 @@ class VehicleModelPolicy
      */
     public function delete(User $user, VehicleModel $model): bool
     {
-        // Cannot delete system-level data
-        return $model->source !== 'system';
+        return $user->can(Permissions::VEHICLE_SETTINGS_MANAGE)
+            && $model->source !== 'system';
     }
 
     /**
@@ -30,7 +31,7 @@ class VehicleModelPolicy
      */
     public function toggleActive(User $user, VehicleModel $model): bool
     {
-        // Cannot toggle system-level data
-        return $model->source !== 'system';
+        return $user->can(Permissions::VEHICLE_SETTINGS_MANAGE)
+            && $model->source !== 'system';
     }
 }

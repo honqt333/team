@@ -200,12 +200,19 @@ class TenantSetupService
 
     /**
      * Get default roles definitions.
-     * 
-     * @return array
+     *
+     * Every role's `permissions` array is deduplicated on the way out
+     * to prevent pastes like `Permissions::HR_LEAVES_VIEW` showing up
+     * twice (which would have caused Spatie to call
+     * `syncPermissions()` with the same permission twice and spam
+     * the pivot table). The authoritative list of permissions is
+     * still in `App\Support\Permissions`.
+     *
+     * @return array<string, array{label_ar:string,label_en:string,description:string,permissions:array<int,string>}>
      */
     public function getDefaultRoles(): array
     {
-        return [
+        $raw = [
             'super_admin' => [
                 'label_ar' => 'مدير عام',
                 'label_en' => 'Super Admin',
@@ -247,17 +254,16 @@ class TenantSetupService
                     Permissions::HR_ATTENDANCE_VIEW,
                     Permissions::HR_LEAVES_VIEW,
                     Permissions::HR_LEAVES_APPROVE,
-                    Permissions::HR_LEAVES_VIEW,
-                    Permissions::HR_LEAVES_APPROVE,
                     // Payroll & Payments
+                    // NOTE: branch_manager is operational, not admin,
+                    // so DELETE on payroll/payments is intentionally
+                    // omitted. The hr role keeps full delete rights.
                     Permissions::HR_PAYROLL_VIEW,
                     Permissions::HR_PAYROLL_CREATE,
                     Permissions::HR_PAYROLL_UPDATE,
-                    Permissions::HR_PAYROLL_DELETE,
                     Permissions::HR_PAYMENTS_VIEW,
                     Permissions::HR_PAYMENTS_CREATE,
                     Permissions::HR_PAYMENTS_UPDATE,
-                    Permissions::HR_PAYMENTS_DELETE,
                     Permissions::HR_PAYMENTS_APPROVE,
                 ],
             ],
@@ -320,9 +326,6 @@ class TenantSetupService
                     Permissions::SUPPLIERS_CREATE,
                     Permissions::SUPPLIERS_UPDATE,
                     Permissions::SUPPLIERS_DESTROY,
-                    Permissions::SUPPLIERS_CREATE,
-                    Permissions::SUPPLIERS_UPDATE,
-                    Permissions::SUPPLIERS_DESTROY,
                     // Payroll & Payments (Financials)
                     Permissions::HR_PAYROLL_VIEW,
                     Permissions::HR_PAYMENTS_VIEW,
@@ -344,7 +347,6 @@ class TenantSetupService
                     Permissions::HR_ATTENDANCE_MANAGE,
                     Permissions::HR_LEAVES_VIEW,
                     Permissions::HR_LEAVES_MANAGE,
-                    Permissions::HR_LEAVES_APPROVE,
                     Permissions::HR_LEAVES_APPROVE,
                     // Payroll & Payments
                     Permissions::HR_PAYROLL_VIEW,
@@ -372,5 +374,14 @@ class TenantSetupService
                 ],
             ],
         ];
+
+        // Deduplicate each role's permission list. Past edits left
+        // duplicates in branch_manager / accountant / hr, which
+        // would have produced duplicate pivot rows.
+        foreach ($raw as $name => $data) {
+            $raw[$name]['permissions'] = array_values(array_unique($data['permissions']));
+        }
+
+        return $raw;
     }
 }

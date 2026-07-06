@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Policies;
 
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+use App\Support\Permissions;
 class ServicePolicy
 {
     use HandlesAuthorization;
@@ -15,7 +15,7 @@ class ServicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('services.view');
+        return $user->can(Permissions::SERVICES_VIEW);
     }
 
     /**
@@ -23,7 +23,7 @@ class ServicePolicy
      */
     public function view(User $user, Service $service): bool
     {
-        if (!$user->can('services.view')) {
+        if (!$user->can(Permissions::SERVICES_VIEW)) {
             return false;
         }
 
@@ -36,7 +36,7 @@ class ServicePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('services.create');
+        return $user->can(Permissions::SERVICES_CREATE);
     }
 
     /**
@@ -44,7 +44,7 @@ class ServicePolicy
      */
     public function update(User $user, Service $service): bool
     {
-        if (!$user->can('services.update')) {
+        if (!$user->can(Permissions::SERVICES_UPDATE)) {
             return false;
         }
 
@@ -57,7 +57,7 @@ class ServicePolicy
      */
     public function delete(User $user, Service $service): bool
     {
-        if (!$user->can('services.delete')) {
+        if (!$user->can(Permissions::SERVICES_DELETE)) {
             return false;
         }
 

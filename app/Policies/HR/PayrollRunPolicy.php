@@ -4,6 +4,7 @@ namespace App\Policies\HR;
 
 use App\Models\HR\PayrollRun;
 use App\Models\User;
+use App\Support\Permissions;
 use App\Support\TenancyContext;
 
 class PayrollRunPolicy
@@ -13,7 +14,7 @@ class PayrollRunPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasPermissionTo('hr.payroll.view');
+        return $user->can(Permissions::HR_PAYROLL_VIEW);
     }
 
     /**
@@ -25,7 +26,7 @@ class PayrollRunPolicy
             return false;
         }
 
-        return $user->hasPermissionTo('hr.payroll.view');
+        return $user->can(Permissions::HR_PAYROLL_VIEW);
     }
 
     /**
@@ -33,7 +34,7 @@ class PayrollRunPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasPermissionTo('hr.payroll.create');
+        return $user->can(Permissions::HR_PAYROLL_CREATE);
     }
 
     /**
@@ -45,7 +46,7 @@ class PayrollRunPolicy
             return false;
         }
 
-        return $user->hasPermissionTo('hr.payroll.update');
+        return $user->can(Permissions::HR_PAYROLL_UPDATE);
     }
 
     /**
@@ -62,6 +63,6 @@ class PayrollRunPolicy
             return false;
         }
 
-        return $user->hasPermissionTo('hr.payroll.delete');
+        return $user->can(Permissions::HR_PAYROLL_DELETE);
     }
 }

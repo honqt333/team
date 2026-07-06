@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\VehicleColor;
+use App\Support\Permissions;
 
 class VehicleColorPolicy
 {
@@ -12,8 +13,9 @@ class VehicleColorPolicy
      */
     public function update(User $user, VehicleColor $color): bool
     {
-        // Cannot modify system-level data
-        return $color->source !== 'system';
+        // Must have manage permission AND cannot modify system-level data
+        return $user->can(Permissions::VEHICLE_SETTINGS_MANAGE)
+            && $color->source !== 'system';
     }
 
     /**
@@ -21,8 +23,9 @@ class VehicleColorPolicy
      */
     public function delete(User $user, VehicleColor $color): bool
     {
-        // Cannot delete system-level data
-        return $color->source !== 'system';
+        // Must have manage permission AND cannot delete system-level data
+        return $user->can(Permissions::VEHICLE_SETTINGS_MANAGE)
+            && $color->source !== 'system';
     }
 
     /**
@@ -30,7 +33,8 @@ class VehicleColorPolicy
      */
     public function toggleActive(User $user, VehicleColor $color): bool
     {
-        // Cannot toggle system-level data
-        return $color->source !== 'system';
+        // Must have manage permission AND cannot toggle system-level data
+        return $user->can(Permissions::VEHICLE_SETTINGS_MANAGE)
+            && $color->source !== 'system';
     }
 }

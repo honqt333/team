@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Policies;
 
 use App\Models\Quote;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
+use App\Support\Permissions;
 class QuotePolicy
 {
     use HandlesAuthorization;
@@ -15,7 +15,7 @@ class QuotePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('quotes.view');
+        return $user->can(Permissions::QUOTES_VIEW);
     }
 
     /**
@@ -23,7 +23,7 @@ class QuotePolicy
      */
     public function view(User $user, Quote $quote): bool
     {
-        return $user->can('quotes.view');
+        return $user->can(Permissions::QUOTES_VIEW);
     }
 
     /**
@@ -31,7 +31,7 @@ class QuotePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('quotes.create');
+        return $user->can(Permissions::QUOTES_CREATE);
     }
 
     /**
@@ -39,7 +39,7 @@ class QuotePolicy
      */
     public function update(User $user, Quote $quote): bool
     {
-        if (!$user->can('quotes.update')) {
+        if (!$user->can(Permissions::QUOTES_UPDATE)) {
             return false;
         }
 
@@ -52,7 +52,7 @@ class QuotePolicy
      */
     public function delete(User $user, Quote $quote): bool
     {
-        if (!$user->can('quotes.delete')) {
+        if (!$user->can(Permissions::QUOTES_DELETE)) {
             return false;
         }
 
@@ -65,7 +65,7 @@ class QuotePolicy
      */
     public function approve(User $user, Quote $quote): bool
     {
-        if (!$user->can('quotes.approve')) {
+        if (!$user->can(Permissions::QUOTES_APPROVE)) {
             return false;
         }
 
@@ -77,7 +77,7 @@ class QuotePolicy
      */
     public function reject(User $user, Quote $quote): bool
     {
-        if (!$user->can('quotes.approve')) {
+        if (!$user->can(Permissions::QUOTES_APPROVE)) {
             return false;
         }
 
