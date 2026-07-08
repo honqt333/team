@@ -498,38 +498,40 @@
             
             <div class="w-1/2 lg:w-1/3">
                 <table class="w-full text-sm">
-                    <tr v-if="documentType !== 'payments'" class="text-gray-500 border-b border-gray-200">
-                        <td class="py-1 px-2">{{ $t('quotes.form.subtotal') }}:</td>
-                        <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.subtotal) }}</td>
-                    </tr>
-                    <tr v-if="documentType !== 'payments' && totals.discount > 0" class="text-red-500 border-b border-gray-200">
-                        <td class="py-1 px-2">{{ $t('quotes.form.total_discount') }}:</td>
-                        <td class="py-1 px-2 text-left font-mono">-{{ formatCurrency(totals.discount) }}</td>
-                    </tr>
-                    <tr v-if="documentType !== 'payments' && totals.vat > 0" class="text-gray-500 border-b border-gray-200">
-                        <td class="py-1 px-2">{{ $t('common.vat') }}:</td>
-                        <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.vat) }}</td>
-                    </tr>
-                    <tr 
-                        class="font-bold text-lg border-b-2 transition-all duration-300"
-                        :class="isModern ? 'bg-slate-50 border-slate-900' : 'bg-gray-100 border-gray-800'"
-                        :style="isModern ? { borderBottomColor: primaryColor } : {}"
-                    >
-                        <td class="py-2 px-2 text-gray-900">{{ documentType === 'payments' ? (isRtl ? 'إجمالي الفاتورة:' : 'Invoice Total:') : (isRtl ? 'المبلغ الإجمالي:' : 'Total Amount:') }}</td>
-                        <td class="py-2 px-2 text-left text-gray-900 font-mono">{{ formatCurrency(totals.total) }}</td>
-                    </tr>
-                    <tr v-if="!['quotation'].includes(documentType)" class="text-gray-500 border-b border-gray-200">
-                        <td class="py-1 px-2 font-bold">{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</td>
-                        <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(totals.paid - (data.bad_debt || 0)) }}</td>
-                    </tr>
-                    <tr v-if="!['quotation'].includes(documentType) && (data.bad_debt || 0) > 0" class="text-amber-600 border-b border-gray-200">
-                        <td class="py-1 px-2 font-bold">{{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}</td>
-                        <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(data.bad_debt) }}</td>
-                    </tr>
-                    <tr v-if="!['quotation'].includes(documentType)" class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
-                        <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
-                        <td class="py-1.5 px-2 text-left font-mono">{{ formatCurrency(totals.balance) }}</td>
-                    </tr>
+                    <tbody>
+                        <tr v-if="documentType !== 'payments'" class="text-gray-500 border-b border-gray-200">
+                            <td class="py-1 px-2">{{ $t('quotes.form.subtotal') }}:</td>
+                            <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.subtotal) }}</td>
+                        </tr>
+                        <tr v-if="documentType !== 'payments' && totals.discount > 0" class="text-red-500 border-b border-gray-200">
+                            <td class="py-1 px-2">{{ $t('quotes.form.total_discount') }}:</td>
+                            <td class="py-1 px-2 text-left font-mono">-{{ formatCurrency(totals.discount) }}</td>
+                        </tr>
+                        <tr v-if="documentType !== 'payments' && totals.vat > 0" class="text-gray-500 border-b border-gray-200">
+                            <td class="py-1 px-2">{{ $t('common.vat') }}:</td>
+                            <td class="py-1 px-2 text-left font-mono">{{ formatCurrency(totals.vat) }}</td>
+                        </tr>
+                        <tr 
+                            class="font-bold text-lg border-b-2 transition-all duration-300"
+                            :class="isModern ? 'bg-slate-50 border-slate-900' : 'bg-gray-100 border-gray-800'"
+                            :style="isModern ? { borderBottomColor: primaryColor } : {}"
+                        >
+                            <td class="py-2 px-2 text-gray-900">{{ documentType === 'payments' ? (isRtl ? 'إجمالي الفاتورة:' : 'Invoice Total:') : (isRtl ? 'المبلغ الإجمالي:' : 'Total Amount:') }}</td>
+                            <td class="py-2 px-2 text-left text-gray-900 font-mono">{{ formatCurrency(totals.total) }}</td>
+                        </tr>
+                        <tr v-if="!['quotation'].includes(documentType)" class="text-gray-500 border-b border-gray-200">
+                            <td class="py-1 px-2 font-bold">{{ isRtl ? 'المبلغ المدفوع:' : 'Paid Amount:' }}</td>
+                            <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(totals.paid - (data.bad_debt || 0)) }}</td>
+                        </tr>
+                        <tr v-if="!['quotation'].includes(documentType) && (data.bad_debt || 0) > 0" class="text-amber-600 border-b border-gray-200">
+                            <td class="py-1 px-2 font-bold">{{ isRtl ? 'الديون المعدومة:' : 'Bad Debt:' }}</td>
+                            <td class="py-1 px-2 text-left font-mono font-bold">{{ formatCurrency(data.bad_debt) }}</td>
+                        </tr>
+                        <tr v-if="!['quotation'].includes(documentType)" class="text-gray-700 border-b border-gray-200 bg-gray-50/50 font-black">
+                            <td class="py-1.5 px-2">{{ isRtl ? 'الباقي:' : 'Remaining:' }}</td>
+                            <td class="py-1.5 px-2 text-left font-mono">{{ formatCurrency(totals.balance) }}</td>
+                        </tr>
+                    </tbody>
                 </table>
                 <div v-if="centerData.iban && documentSettings.show_iban" class="bg-gray-50 p-2 rounded border border-gray-200 mt-2 text-[9px] text-gray-500 leading-normal font-mono">
                     <span class="block font-bold text-gray-600">{{ $t('company_profile.profile.iban') }}:</span>

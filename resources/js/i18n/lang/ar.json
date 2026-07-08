@@ -2811,7 +2811,8 @@
     "work_orders": {
         "actions": {
             "cancel": "إلغاء الكرت",
-            "complete": "خروج المركبة",
+            "complete": "إغلاق الكرت",
+            "vehicle_exit": "خروج المركبة",
             "put_on_hold": "تعليق الكرت",
             "resume_work": "استئناف العمل",
             "start_work": "بدء العمل"
@@ -3015,7 +3016,7 @@
         },
         "no_technicians_assigned": "لا يوجد فنيين مسندين لخدمات في كرت العمل هذا",
         "of": "من",
-        "outstanding_balance_warning": "تنبيه: يوجد مبلغ متبقي غير مسدد سيتم ترحيله للفاتورة الصادرة.",
+        "outstanding_balance_warning": "تنبيه: يوجد مبلغ متبقي غير مسدد ",
         "overdue_days": "متأخر {days} يوم",
         "paid": "المدفوع",
         "parts_total": "قطع الغيار",

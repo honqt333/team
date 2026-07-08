@@ -2811,7 +2811,8 @@
     "work_orders": {
         "actions": {
             "cancel": "Cancel Card",
-            "complete": "Vehicle Exit",
+            "complete": "Close Card",
+            "vehicle_exit": "Vehicle Exit",
             "put_on_hold": "Put on Hold",
             "resume_work": "Resume Work",
             "start_work": "Start Work"
