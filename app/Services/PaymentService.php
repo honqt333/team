@@ -33,6 +33,7 @@ class PaymentService
                 'reference'      => $data['reference'] ?? null,
                 'notes'          => $data['notes'] ?? null,
                 'received_by'    => $data['received_by'] ?? auth()->id(),
+                'type'           => $data['type'] ?? 'payment',
             ]);
 
             // Update invoice payment status

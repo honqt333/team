@@ -16,7 +16,7 @@
                 badgeDot="bg-blue-500"
             >
                 <template #back>
-                    <BackButton :href="invoice.company_transaction ? (route('settings.company') + '?tab=invoices') : route('app.invoices.sales.index')" />
+                    <BackButton :href="backUrl" />
                 </template>
 
                 <template #icon>
@@ -586,6 +586,7 @@
                 :show="showPaymentModal"
                 :balance="balance"
                 default-type="payment"
+                :allow-bad-debt="true"
                 @close="showPaymentModal = false"
                 @saved="onPaymentSaved"
             />
@@ -641,6 +642,27 @@ const invoiceActualPaid = computed(() => {
 
 const balance = computed(() => {
     return Math.max(0, Number(props.invoice.total_incl_tax || 0) - Number(props.invoice.total_paid || 0));
+});
+
+const backUrl = computed(() => {
+    if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const from = params.get('from');
+        if (from === 'center' && props.invoice.center_id) {
+            return route('settings.centers.show', props.invoice.center_id) + '?tab=invoices';
+        }
+        if (from === 'company') {
+            return route('settings.company') + '?tab=invoices';
+        }
+    }
+    
+    if (props.invoice.company_transaction) {
+        if (props.invoice.center_id) {
+            return route('settings.centers.show', props.invoice.center_id) + '?tab=invoices';
+        }
+        return route('settings.company') + '?tab=invoices';
+    }
+    return route('app.invoices.sales.index');
 });
 
 const showExclusive = computed(() => {

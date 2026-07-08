@@ -100,6 +100,41 @@ const getCenterAddress = (center) => {
     return parts.join('، ');
 };
 
+// Helper for Tenant Address
+const getTenantAddress = (tenant) => {
+    if (!tenant) return '';
+    const addr = tenant.address;
+    if (!addr) return '';
+    if (typeof addr === 'object') {
+        if (addr.address_line) return addr.address_line;
+        const parts = [
+            addr.building_number ? `مبنى ${addr.building_number}` : '',
+            addr.street ? `شارع ${addr.street}` : '',
+            addr.district ? `حي ${addr.district}` : '',
+            addr.city ? addr.city : '',
+            addr.postal_code ? `الرمز البريدي ${addr.postal_code}` : '',
+        ].filter(Boolean);
+        return parts.join('، ');
+    }
+    if (typeof addr === 'string' && addr.startsWith('{')) {
+        try {
+            const parsed = JSON.parse(addr);
+            if (parsed.address_line) return parsed.address_line;
+            const parts = [
+                parsed.building_number ? `مبنى ${parsed.building_number}` : '',
+                parsed.street ? `شارع ${parsed.street}` : '',
+                parsed.district ? `حي ${parsed.district}` : '',
+                parsed.city ? parsed.city : '',
+                parsed.postal_code ? `الرمز البريدي ${parsed.postal_code}` : '',
+            ].filter(Boolean);
+            return parts.join('، ');
+        } catch (e) {
+            return addr;
+        }
+    }
+    return addr || '';
+};
+
 const mappedPrintData = computed(() => {
     const lines = (props.returnInvoice.lines || []).map(line => ({
         service_name: line.part?.name || '—',
@@ -146,7 +181,7 @@ const mappedCenterData = computed(() => {
         phone: center.phone || tenant.phone,
         logo: center.logo_invoice_url || center.logo_light_url || tenant.logo_url || '',
         iban: tenant.iban || '',
-        address: getCenterAddress(center) || tenant.address || '',
+        address: getCenterAddress(center) || getTenantAddress(tenant) || '',
         stamp_url: center.stamp_url || '',
     };
 });

@@ -47,11 +47,12 @@ class CompanyTransactionController extends Controller
             'contact_type' => 'nullable|string|in:customer,supplier',
             'contact_id' => 'nullable|integer',
             'notes' => 'nullable|string',
+            'center_id' => 'nullable|exists:centers,id',
         ]);
 
         $user = auth()->user();
         $validated['tenant_id'] = $user->tenant_id;
-        $validated['center_id'] = $user->current_center_id;
+        $validated['center_id'] = $validated['center_id'] ?? $user->current_center_id;
         $validated['updated_by'] = $user->id;
         $validated['status'] = 'draft';
 
@@ -87,6 +88,7 @@ class CompanyTransactionController extends Controller
             'contact_type' => 'nullable|string|in:customer,supplier',
             'contact_id' => 'nullable|integer',
             'notes' => 'nullable|string',
+            'center_id' => 'nullable|exists:centers,id',
         ]);
 
         $validated['updated_by'] = auth()->id();

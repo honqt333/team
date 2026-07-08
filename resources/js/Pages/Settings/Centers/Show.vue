@@ -348,9 +348,349 @@
                             </button>
                         </div>
                     </div>
+
+                    <!-- Center Revenues & Expenses Tab -->
+                    <div v-if="activeTab === 'revenue_expenses'" class="space-y-6">
+                        <div class="flex items-center justify-between border-b border-gray-150 dark:border-gray-700/50 pb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('company_profile.tabs.revenue_expenses') }}</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">إدارة الإيرادات والمصروفات الخاصة بمركز الصيانة</p>
+                            </div>
+                            <button
+                                @click="openAddTransactionModal"
+                                class="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                </svg>
+                                <span>{{ $t('company_profile.transactions.add') }}</span>
+                            </button>
+                        </div>
+
+                        <!-- Filters -->
+                        <div class="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl w-fit">
+                            <button
+                                type="button"
+                                @click="transactionFilter = 'all'"
+                                :class="[
+                                    'px-4 py-1.5 text-xs font-bold rounded-lg transition-all',
+                                    transactionFilter === 'all' 
+                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
+                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                                ]"
+                            >
+                                الكل
+                            </button>
+                            <button
+                                type="button"
+                                @click="transactionFilter = 'revenue'"
+                                :class="[
+                                    'px-4 py-1.5 text-xs font-bold rounded-lg transition-all',
+                                    transactionFilter === 'revenue' 
+                                        ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm' 
+                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                                ]"
+                            >
+                                {{ $t('company_profile.transactions.form.type_revenue') }}
+                            </button>
+                            <button
+                                type="button"
+                                @click="transactionFilter = 'expense'"
+                                :class="[
+                                    'px-4 py-1.5 text-xs font-bold rounded-lg transition-all',
+                                    transactionFilter === 'expense' 
+                                        ? 'bg-white dark:bg-gray-700 text-rose-600 dark:text-rose-400 shadow-sm' 
+                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                                ]"
+                            >
+                                {{ $t('company_profile.transactions.form.type_expense') }}
+                            </button>
+                        </div>
+
+                        <!-- Transactions Table -->
+                        <div class="bg-white dark:bg-gray-850 rounded-2xl border border-gray-200 dark:border-gray-700/60 overflow-hidden shadow-sm">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-700">
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">#</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.title') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.date') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.category') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.transactions.table.amount') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.transactions.table.vat') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.transactions.table.total') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.updated_by') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.approved_by') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">{{ $t('company_profile.transactions.table.actions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-150 dark:divide-gray-770/50">
+                                        <tr v-for="(trans, index) in filteredTransactions" :key="trans.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                                            <td class="px-6 py-4 text-sm font-mono">{{ index + 1 }}</td>
+                                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                                                <div>
+                                                    <span>{{ trans.title }}</span>
+                                                    <span 
+                                                        v-if="trans.contact" 
+                                                        class="block text-[10px] text-gray-400 font-semibold mt-0.5"
+                                                    >
+                                                        👤 {{ trans.contact.name }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">{{ trans.transaction_date }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                                                <span class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                                                    {{ trans.income_category?.name }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300">{{ formatCurrency(trans.amount) }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">
+                                                <span v-if="trans.is_taxable" class="text-emerald-600 font-bold">{{ formatCurrency(trans.tax_amount) }}</span>
+                                                <span v-else class="text-gray-400 italic">غير خاضع</span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white">{{ formatCurrency(trans.total_amount) }}</td>
+                                            <td class="px-6 py-4 text-xs text-gray-500">
+                                                <div class="flex items-center gap-1.5">
+                                                    <div class="w-5 h-5 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-[9px] uppercase">
+                                                        {{ trans.updated_by?.name?.substring(0,2) }}
+                                                    </div>
+                                                    <span>{{ trans.updated_by?.name }}</span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm">
+                                                <span 
+                                                    v-if="trans.status === 'approved'"
+                                                    class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"
+                                                >
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                    {{ trans.approved_by?.name }}
+                                                </span>
+                                                <span 
+                                                    v-else
+                                                    class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/10 text-amber-500 uppercase tracking-wider"
+                                                >
+                                                    مسودة
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <!-- Approve/Post Button -->
+                                                    <button
+                                                        v-if="trans.status === 'draft'"
+                                                        @click="approveTransaction(trans)"
+                                                        class="px-2.5 py-1 text-xs font-bold text-emerald-650 dark:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors border border-emerald-500/20"
+                                                    >
+                                                        اعتماد
+                                                    </button>
+                                                    
+                                                    <!-- Edit Button -->
+                                                    <button
+                                                        v-if="trans.status === 'draft'"
+                                                        @click="openEditTransactionModal(trans)"
+                                                        class="p-1 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                    >
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                        </svg>
+                                                    </button>
+
+                                                    <!-- Delete Button -->
+                                                    <button
+                                                        v-if="trans.status === 'draft'"
+                                                        @click="deleteTransaction(trans)"
+                                                        class="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                    >
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                    
+                                                    <!-- Locked state when approved -->
+                                                    <span v-if="trans.status === 'approved'" class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 font-semibold">
+                                                        🔒 معتمدة
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="filteredTransactions.length === 0">
+                                            <td colspan="10" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                                لا توجد معاملات مالية مسجلة حالياً للمركز
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Modal Component -->
+                        <CompanyTransactionModal
+                            :show="showTransactionModal"
+                            :transaction="selectedTransaction"
+                            :income-categories="income_categories"
+                            :vat-enabled="vat.vat_enabled"
+                            :center-id="props.center.id"
+                            @close="closeTransactionModal"
+                            @saved="onTransactionSaved"
+                        />
+                    </div>
+
+                    <!-- Center Invoices Tab -->
+                    <div v-if="activeTab === 'invoices'" class="space-y-6">
+                        <div class="flex items-center justify-between border-b border-gray-150 dark:border-gray-700/50 pb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">فواتير المركز</h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">عرض وتحميل الفواتير الضريبية الصادرة من معاملات الإيرادات والمصروفات الخاصة بهذا المركز</p>
+                            </div>
+                        </div>
+
+                        <!-- Sub Tab Toggle for Sales vs Purchases -->
+                        <div class="flex items-center gap-2 border-b border-gray-150 dark:border-gray-750">
+                            <button
+                                type="button"
+                                @click="subInvoiceTab = 'sales'"
+                                :class="[
+                                    'px-5 py-3 text-sm font-bold border-b-2 transition-all',
+                                    subInvoiceTab === 'sales'
+                                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                        : 'border-transparent text-gray-400 hover:text-gray-600'
+                                ]"
+                            >
+                                {{ $t('company_profile.invoices_tab.sales_title') }}
+                                <span class="ms-1.5 px-2 py-0.5 text-xs font-mono rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
+                                    {{ props.center_invoices.sales?.length || 0 }}
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                @click="subInvoiceTab = 'purchases'"
+                                :class="[
+                                    'px-5 py-3 text-sm font-bold border-b-2 transition-all',
+                                    subInvoiceTab === 'purchases'
+                                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                                        : 'border-transparent text-gray-400 hover:text-gray-600'
+                                ]"
+                            >
+                                {{ $t('company_profile.invoices_tab.purchases_title') }}
+                                <span class="ms-1.5 px-2 py-0.5 text-xs font-mono rounded-full bg-rose-50 dark:bg-rose-955 text-rose-600 dark:text-rose-400">
+                                    {{ props.center_invoices.purchases?.length || 0 }}
+                                </span>
+                            </button>
+                        </div>
+
+                        <!-- Sub-tab contents -->
+                        <div class="bg-white dark:bg-gray-855 border border-gray-155 dark:border-gray-750 rounded-2xl overflow-hidden shadow-sm">
+                            <!-- 1. Sales Invoices -->
+                            <div v-if="subInvoiceTab === 'sales'" class="overflow-x-auto">
+                                <table class="w-full text-right border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-750">
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">#</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.number') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.party') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.date') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.amount') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.vat') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.total') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">{{ $t('company_profile.invoices_tab.table.actions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750/50">
+                                        <tr v-for="(inv, index) in props.center_invoices.sales" :key="inv.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                                            <td class="px-6 py-4 text-sm font-mono">{{ index + 1 }}</td>
+                                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white font-mono">{{ inv.invoice_number }}</td>
+                                            <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ inv.customer?.name || inv.customer_name_snapshot }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">{{ inv.supply_date ? inv.supply_date.substring(0, 10) : '' }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300">{{ formatCurrency(inv.total_excl_tax) }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold">{{ formatCurrency(inv.total_tax) }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white">{{ formatCurrency(inv.total_incl_tax) }}</td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex items-center justify-center gap-3">
+                                                    <Link 
+                                                        :href="route('app.invoices.show', inv.id) + '?from=center'"
+                                                        class="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1"
+                                                    >
+                                                        👁️ عرض الفاتورة
+                                                    </Link>
+                                                    <a 
+                                                        :href="route('app.invoices.print', inv.id)"
+                                                        target="_blank"
+                                                        class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
+                                                    >
+                                                        🖨️ طباعة
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="props.center_invoices.sales.length === 0">
+                                            <td colspan="10" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                                لا توجد فواتير مبيعات صادرة للمركز حالياً
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 2. Purchase Invoices -->
+                            <div v-if="subInvoiceTab === 'purchases'" class="overflow-x-auto">
+                                <table class="w-full text-right border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-155 dark:border-gray-750">
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">#</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.number') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.party') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.date') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.amount') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.vat') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.total') }}</th>
+                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">{{ $t('company_profile.invoices_tab.table.actions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750/50">
+                                        <tr v-for="(inv, index) in props.center_invoices.purchases" :key="inv.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
+                                            <td class="px-6 py-4 text-sm font-mono">{{ index + 1 }}</td>
+                                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white font-mono">{{ inv.invoice_number || inv.code }}</td>
+                                            <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ inv.supplier?.name || '—' }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">{{ inv.issue_date ? inv.issue_date.substring(0, 10) : '' }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300">{{ formatCurrency(inv.subtotal) }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold">{{ formatCurrency(inv.tax_amount) }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white">{{ formatCurrency(inv.total) }}</td>
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex items-center justify-center gap-3">
+                                                    <Link 
+                                                        :href="route('app.invoices.purchases.show', inv.id) + '?from=center'"
+                                                        class="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1"
+                                                    >
+                                                        👁️ عرض الفاتورة
+                                                    </Link>
+                                                    <a 
+                                                        :href="route('app.invoices.purchases.print', inv.id)"
+                                                        target="_blank"
+                                                        class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
+                                                    >
+                                                        🖨️ طباعة
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="props.center_invoices.purchases.length === 0">
+                                            <td colspan="10" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                                لا توجد فواتير مشتريات صادرة للمركز حالياً
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <ConfirmModal />
     </AppLayout>
 </template>
 
@@ -365,6 +705,10 @@ import { useToast } from '@/Composables/useToast';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+import ConfirmModal from '@/Components/ConfirmModal.vue';
+import { useConfirm } from '@/Composables/useConfirm';
+import CompanyTransactionModal from '../Company/Modals/CompanyTransactionModal.vue';
+
 // Fix Leaflet marker icon issue
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -377,8 +721,9 @@ L.Icon.Default.mergeOptions({
     shadowUrl: markerShadow,
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const { success, error } = useToast();
+const { confirm } = useConfirm();
 
 const props = defineProps({
     center: Object,
@@ -387,6 +732,22 @@ const props = defineProps({
     address: Object,
     branding: Object,
     working_hours: Array,
+    center_transactions: {
+        type: Array,
+        default: () => []
+    },
+    income_categories: {
+        type: Array,
+        default: () => []
+    },
+    center_invoices: {
+        type: Object,
+        default: () => ({ sales: [], purchases: [] })
+    },
+    vat: {
+        type: Object,
+        default: () => ({ vat_enabled: false })
+    }
 });
 
 const activeTab = ref('profile');
@@ -405,6 +766,8 @@ const tabs = computed(() => [
     { id: 'contact', label: t('center_settings.tabs.contact') },
     { id: 'branding', label: t('center_settings.tabs.branding') },
     { id: 'working_hours', label: t('center_settings.tabs.working_hours') },
+    { id: 'revenue_expenses', label: t('company_profile.tabs.revenue_expenses') },
+    { id: 'invoices', label: locale.value === 'ar' ? 'فواتير المركز' : 'Center Invoices' },
 ]);
 
 const form = ref({
@@ -783,6 +1146,13 @@ watch(activeTab, async (newTab) => {
 });
 
 onMounted(() => {
+    // Handle tab query param
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab && tabs.value.find(t => t.id === tab)) {
+        activeTab.value = tab;
+    }
+
     if (activeTab.value === 'contact') {
         setTimeout(() => {
             initMap();
@@ -795,5 +1165,88 @@ onMounted(() => {
 
 onUnmounted(() => {
     destroyMap();
+});
+
+// Center Transactions & Invoices Logic
+const showTransactionModal = ref(false);
+const selectedTransaction = ref(null);
+const transactionFilter = ref('all');
+const subInvoiceTab = ref('sales');
+
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'decimal',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value) + ' SAR';
+};
+
+const openAddTransactionModal = () => {
+    selectedTransaction.value = null;
+    showTransactionModal.value = true;
+};
+
+const openEditTransactionModal = (transaction) => {
+    selectedTransaction.value = transaction;
+    showTransactionModal.value = true;
+};
+
+const closeTransactionModal = () => {
+    showTransactionModal.value = false;
+    selectedTransaction.value = null;
+};
+
+const onTransactionSaved = () => {
+    closeTransactionModal();
+    success(t('common.saved_success'));
+};
+
+const deleteTransaction = async (transaction) => {
+    const confirmed = await confirm({
+        title: 'حذف المعاملة المالية',
+        message: 'هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.',
+        confirmText: 'حذف',
+        cancelText: 'إلغاء',
+        type: 'danger'
+    });
+
+    if (confirmed) {
+        router.delete(`/app/settings/company/transactions/${transaction.id}`, {
+            onSuccess: () => {
+                success(t('common.saved_success'));
+            },
+            onError: (errors) => {
+                error(errors.message || 'حدث خطأ أثناء الحذف');
+            }
+        });
+    }
+};
+
+const approveTransaction = async (transaction) => {
+    const confirmed = await confirm({
+        title: 'اعتماد المعاملة المالية',
+        message: t('company_profile.transactions.approve_confirm'),
+        confirmText: 'اعتماد وإصدار الفاتورة',
+        cancelText: 'إلغاء',
+        type: 'success'
+    });
+
+    if (confirmed) {
+        router.post(`/app/settings/company/transactions/${transaction.id}/approve`, {}, {
+            onSuccess: () => {
+                success('تم اعتماد المعاملة بنجاح');
+            },
+            onError: (errors) => {
+                error(errors.message || 'حدث خطأ أثناء الاعتماد');
+            }
+        });
+    }
+};
+
+const filteredTransactions = computed(() => {
+    if (transactionFilter.value === 'all') {
+        return props.center_transactions;
+    }
+    return props.center_transactions.filter(t => t.transaction_type === transactionFilter.value);
 });
 </script>

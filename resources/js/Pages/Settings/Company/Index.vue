@@ -1187,7 +1187,7 @@
                                             <td class="px-6 py-4 text-center">
                                                 <div class="flex items-center justify-center gap-3">
                                                     <Link 
-                                                        :href="route('app.invoices.show', inv.id)"
+                                                        :href="route('app.invoices.show', inv.id) + '?from=company'"
                                                         class="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
                                                         👁️ عرض الفاتورة

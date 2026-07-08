@@ -250,18 +250,32 @@
                 </div>
 
                 <!-- Discount -->
-                <div class="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ $t('pricing.discount_type') }}</label>
-                        <SearchableSelect
-                            v-model="form.default_discount_type"
-                            :options="[
-                                {id:'none',       name: $t('pricing.discount_types.none')},
-                                {id:'percentage', name: $t('pricing.discount_types.percentage')},
-                                {id:'fixed',      name: $t('pricing.discount_types.fixed')},
-                            ]"
-                            option-label="name" option-value="id" label="" placeholder=""
-                        />
+                <div class="pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pricing.discount_type') }}</label>
+                        <div class="flex items-center gap-1">
+                            <button type="button" @click="form.default_discount_type = 'none'"
+                                :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all',
+                                    form.default_discount_type === 'none'
+                                        ? 'bg-teal-600 border-teal-600 text-white shadow-sm'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">
+                                {{ $t('pricing.discount_types.none') }}
+                            </button>
+                            <button type="button" @click="form.default_discount_type = 'fixed'"
+                                :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all',
+                                    form.default_discount_type === 'fixed'
+                                        ? 'bg-teal-600 border-teal-600 text-white shadow-sm'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">
+                                {{ $t('pricing.discount_types.fixed') }}
+                            </button>
+                            <button type="button" @click="form.default_discount_type = 'percentage'"
+                                :class="['px-2.5 py-1 text-xs font-bold rounded-lg border transition-all',
+                                    form.default_discount_type === 'percentage'
+                                        ? 'bg-teal-600 border-teal-600 text-white shadow-sm'
+                                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700']">
+                                %
+                            </button>
+                        </div>
                     </div>
                     <div v-if="form.default_discount_type !== 'none'">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">{{ $t('pricing.discount_value') }}</label>
@@ -276,29 +290,14 @@
 
                 <!-- Min Price -->
                 <div class="space-y-2 pt-3 border-t border-gray-200 dark:border-gray-700">
-                    <div class="flex items-center justify-between">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pricing.min_price') }}</label>
-                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span>{{ $t('pricing.fixed_amount') }}</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="minPriceAsPercentage" class="sr-only peer">
-                                <div class="w-9 h-5 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-teal-600"></div>
-                            </label>
-                            <span>%</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="relative">
-                            <input type="number" v-model.number="minPriceInput" inputmode="decimal" lang="en" step="0.01" min="0"
-                                :max="minPriceAsPercentage ? 100 : form.base_price"
-                                class="w-full px-4 py-2.5 pe-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
-                                :class="{ 'border-red-500': form.errors.min_price }"
-                            />
-                            <span class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{{ minPriceAsPercentage ? '%' : 'ر.س' }}</span>
-                        </div>
-                        <div v-if="minPriceAsPercentage" class="flex items-center gap-2 px-3 py-2 bg-teal-50 dark:bg-teal-900/20 rounded-xl border border-teal-200 dark:border-teal-800 text-sm">
-                            <span class="text-teal-600 dark:text-teal-400 text-xs">= {{ calculatedMinPrice.toFixed(2) }} ر.س</span>
-                        </div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ $t('pricing.min_price') }}</label>
+                    <div class="relative">
+                        <input type="number" v-model.number="form.min_price" inputmode="decimal" lang="en" step="0.01" min="0"
+                            :max="form.base_price"
+                            class="w-full px-4 py-2.5 pe-12 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                            :class="{ 'border-red-500': form.errors.min_price || minPriceValidationError }"
+                        />
+                        <span class="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">ر.س</span>
                     </div>
                     <p class="text-xs text-gray-400 dark:text-gray-500">{{ $t('pricing.min_price_hint') }}</p>
                     <p v-if="minPriceValidationError" class="text-xs text-red-600 dark:text-red-400">{{ minPriceValidationError }}</p>
@@ -335,7 +334,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed, nextTick } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import BaseModal from '@/Components/BaseModal.vue';
@@ -415,9 +414,6 @@ watch(selectedCatalogServiceId, id => {
 });
 
 // ─── Min Price ────────────────────────────────────────────────────────────────
-const minPriceAsPercentage    = ref(false);
-const minPricePercentageValue = ref(0);
-
 const form = useForm({
     department_id: '',
     name_ar: '', name_en: '',
@@ -430,45 +426,36 @@ const form = useForm({
     type: 'internal', is_active: true,
 });
 
-const minPriceInput = computed({
-    get: () => minPriceAsPercentage.value ? minPricePercentageValue.value : form.min_price,
-    set: val => {
-        if (minPriceAsPercentage.value) {
-            minPricePercentageValue.value = val;
-            form.min_price = form.base_price > 0 ? form.base_price * (100 - val) / 100 : 0;
-        } else {
-            form.min_price = val;
-        }
-    },
-});
-
-const calculatedMinPrice = computed(() =>
-    minPriceAsPercentage.value && form.base_price > 0
-        ? form.base_price * (100 - minPricePercentageValue.value) / 100
-        : (form.min_price || 0)
-);
-
 const minPriceValidationError = computed(() => {
-    if (!minPriceAsPercentage.value && form.min_price > 0 && form.base_price > 0 && form.min_price > form.base_price)
+    if (form.min_price > 0 && form.base_price > 0 && form.min_price > form.base_price)
         return t('pricing.errors.min_price_exceeds_base', { price: form.base_price, currency: t('common.currency_sar') });
-    if (minPriceAsPercentage.value && minPricePercentageValue.value > 100)
-        return t('pricing.errors.percentage_invalid');
     return null;
 });
 
-watch(() => form.base_price, val => {
-    if (minPriceAsPercentage.value && val > 0)
-        form.min_price = val * (100 - minPricePercentageValue.value) / 100;
-});
-watch(minPriceAsPercentage, isP => {
-    minPricePercentageValue.value = (isP && form.base_price > 0 && form.min_price > 0)
-        ? Math.round((1 - form.min_price / form.base_price) * 100)
-        : 0;
-});
+const isInitializing = ref(false);
 
-// ─── Edit mode: populate form ─────────────────────────────────────────────────
+// Automatically calculate min_price based on base_price and discount
+watch(
+    () => [form.base_price, form.default_discount_type, form.default_discount_value],
+    ([basePrice, discountType, discountValue]) => {
+        if (isInitializing.value) return;
+
+        const bp = parseFloat(basePrice) || 0;
+        const dv = parseFloat(discountValue) || 0;
+
+        if (discountType === 'none') {
+            form.min_price = bp;
+        } else if (discountType === 'fixed') {
+            form.min_price = Math.max(0, bp - dv);
+        } else if (discountType === 'percentage') {
+            form.min_price = Math.max(0, bp - (bp * dv / 100));
+        }
+    }
+);
+
 watch(() => props.service, svc => {
     if (!svc) return;
+    isInitializing.value = true;
     Object.assign(form, {
         department_id:         svc.department_id          || '',
         name_ar:               svc.name_ar                || '',
@@ -487,13 +474,14 @@ watch(() => props.service, svc => {
         type:                  svc.type           || 'internal',
         is_active:             svc.is_active      ?? true,
     });
-    minPriceAsPercentage.value    = false;
-    minPricePercentageValue.value = 0;
+    nextTick(() => {
+        isInitializing.value = false;
+    });
 }, { immediate: true });
 
-// ─── Create mode: reset on open ──────────────────────────────────────────────
 watch(() => props.show, open => {
     if (open && !props.service?.id) {
+        isInitializing.value = true;
         form.reset();
         form.department_id    = props.service?.department_id ?? '';
         form.is_active        = true;
@@ -501,9 +489,10 @@ watch(() => props.show, open => {
         form.duration_unit    = 'minutes';
         form.warranty_unit    = 'months';
         form.allow_price_override = false;
-        minPriceAsPercentage.value    = false;
-        minPricePercentageValue.value = 0;
         selectedCatalogServiceId.value = '';
+        nextTick(() => {
+            isInitializing.value = false;
+        });
     }
 });
 

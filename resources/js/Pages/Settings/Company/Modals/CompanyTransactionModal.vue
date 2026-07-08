@@ -225,7 +225,8 @@ const props = defineProps({
     show: Boolean,
     transaction: Object,
     incomeCategories: Array,
-    vatEnabled: Boolean
+    vatEnabled: Boolean,
+    centerId: [Number, String]
 });
 
 const emit = defineEmits(['close', 'saved']);
@@ -245,6 +246,7 @@ const form = useForm({
     contact_type: null,
     contact_id: null,
     notes: '',
+    center_id: null,
 });
 
 const transactionTypeOptions = [
@@ -279,6 +281,7 @@ watch(() => props.show, (newVal) => {
             form.contact_type = props.transaction.contact_type;
             form.contact_id = props.transaction.contact_id;
             form.notes = props.transaction.notes || '';
+            form.center_id = props.transaction.center_id || props.centerId || null;
 
             if (props.transaction.contact) {
                 const contact = props.transaction.contact;
@@ -299,6 +302,7 @@ watch(() => props.show, (newVal) => {
         } else {
             form.reset();
             form.transaction_date = new Date().toISOString().substr(0, 10);
+            form.center_id = props.centerId || null;
             selectedContactKey.value = null;
             searchResults.value = [];
         }

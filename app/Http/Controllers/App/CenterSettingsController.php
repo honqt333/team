@@ -75,6 +75,38 @@ class CenterSettingsController extends Controller
                 'open_time' => $wh->open_time,
                 'close_time' => $wh->close_time,
             ]),
+            'center_transactions' => \App\Models\CompanyTransaction::where('center_id', $center->id)
+                ->with(['incomeCategory', 'approvedBy', 'updatedBy'])
+                ->latest('transaction_date')
+                ->get(),
+            'income_categories' => \App\Models\IncomeCategory::active()
+                ->get()
+                ->map(fn($cat) => [
+                    'id' => $cat->id,
+                    'name' => $cat->name,
+                    'transaction_type' => $cat->transaction_type
+                ]),
+            'center_invoices' => [
+                'sales' => \App\Models\Invoice::where('center_id', $center->id)
+                    ->whereIn('id', function($query) use ($center) {
+                        $query->select('invoice_id')
+                            ->from('company_transactions')
+                            ->where('center_id', $center->id)
+                            ->whereNotNull('invoice_id');
+                    })->with(['customer', 'center'])->latest()->get(),
+                'purchases' => \App\Models\PurchaseInvoice::where('center_id', $center->id)
+                    ->whereIn('id', function($query) use ($center) {
+                        $query->select('purchase_invoice_id')
+                            ->from('company_transactions')
+                            ->where('center_id', $center->id)
+                            ->whereNotNull('purchase_invoice_id');
+                    })->with(['supplier', 'center'])->latest()->get(),
+            ],
+            'vat' => $center->tenant->taxSettings ? [
+                'vat_enabled' => $center->tenant->taxSettings->vat_enabled,
+            ] : [
+                'vat_enabled' => false,
+            ],
         ]);
     }
 

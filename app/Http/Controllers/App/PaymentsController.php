@@ -17,21 +17,23 @@ class PaymentsController extends Controller
         $this->paymentService = $paymentService;
     }
 
-    /**
-     * Record a new payment
-     */
     public function store(Request $request, Invoice $invoice)
     {
         $this->authorize('update', $invoice);
 
         $validated = $request->validate([
+            'type' => 'nullable|in:' . implode(',', \App\Models\Payment::TYPES),
             'amount' => 'required|numeric|min:0.01|max:' . $invoice->balance,
-            'payment_method' => 'required|in:cash,card,transfer,credit',
+            'payment_method' => 'required_unless:type,bad_debt|nullable|in:' . implode(',', \App\Models\Payment::METHODS),
             'payment_date' => 'nullable|date',
             'reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
         ]);
 
+        $validated['type'] = $validated['type'] ?? 'payment';
+        if ($validated['type'] === 'bad_debt') {
+            $validated['payment_method'] = $validated['payment_method'] ?? 'cash';
+        }
         $validated['received_by'] = auth()->id();
 
         try {
@@ -67,7 +69,7 @@ class PaymentsController extends Controller
         $this->authorize('update', $invoice);
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:cash,card,transfer,credit',
+            'payment_method' => 'required|in:' . implode(',', \App\Models\Payment::METHODS),
             'reference' => 'nullable|string|max:100',
         ]);
 

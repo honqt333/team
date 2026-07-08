@@ -16,7 +16,7 @@
                 badgeDot="bg-amber-500"
             >
                 <template #back>
-                    <BackButton :href="invoice.company_transaction ? (route('settings.company') + '?tab=invoices') : route('app.invoices.purchases.index')" />
+                    <BackButton :href="backUrl" />
                 </template>
 
                 <template #icon>
@@ -115,7 +115,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 <span class="text-sm font-semibold leading-relaxed" dir="auto">
-                                    {{ isCompany ? (tenant.address || 'المكتب الرئيسي للشركة') : (getCenterAddress(invoice.center) || $t('common.na')) }}
+                                    {{ isCompany ? (getTenantAddress(tenant) || 'المكتب الرئيسي للشركة') : (getCenterAddress(invoice.center) || $t('common.na')) }}
                                 </span>
                             </div>
                         </div>
@@ -151,7 +151,7 @@
                                         </Link>
                                         <Link
                                             v-else-if="invoice.company_transaction.contact_type === 'customer'"
-                                            :href="route('app.customers.show', invoice.company_transaction.contact.id)"
+                                            :href="route('customers.show', invoice.company_transaction.contact.id)"
                                             class="text-base font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/sup"
                                         >
                                             <span>{{ invoice.company_transaction.contact.name }}</span>
@@ -377,21 +377,30 @@
                             <tr v-for="line in invoice.lines" :key="line.id" class="group hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-colors">
                                 <!-- Part Name (Clickable Link) -->
                                 <td class="px-6 py-5 text-center align-middle">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <Link
-                                            v-if="line.part_id"
-                                            :href="isCompany ? (route('settings.company') + '?tab=transactions') : route('app.inventory.parts.show', line.part_id)"
-                                            class="text-sm font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/link"
-                                        >
-                                            <span v-if="isCompany">{{ invoice.company_transaction?.income_category ? (locale === 'ar' ? invoice.company_transaction.income_category.name_ar : invoice.company_transaction.income_category.name_en) : (invoice.company_transaction?.title || '—') }}</span>
-                                            <span v-else>{{ line.part?.name || '—' }}</span>
-                                            <svg class="w-3.5 h-3.5 opacity-60 group-hover/link:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                            </svg>
-                                        </Link>
-                                        <span v-else class="text-sm font-bold text-gray-950 dark:text-white">—</span>
-                                        <span v-if="isCompany" class="text-[11px] text-gray-400 font-semibold mt-1">{{ invoice.company_transaction?.title }}</span>
-                                        <span v-else class="text-[10px] text-gray-400 font-mono mt-1 uppercase tracking-wider">{{ line.part?.sku || 'NO-SKU' }}</span>
+                                    <div class="flex flex-col items-center justify-center gap-1">
+                                        <!-- For Company Transactions -->
+                                        <template v-if="isCompany">
+                                            <div class="text-sm font-black text-gray-900 dark:text-white flex items-center justify-center gap-1.5 w-fit">
+                                                <span>{{ invoice.company_transaction?.income_category ? (locale === 'ar' ? invoice.company_transaction.income_category.name_ar : invoice.company_transaction.income_category.name_en) : (invoice.company_transaction?.title || '—') }}</span>
+                                            </div>
+                                            <span v-if="invoice.company_transaction?.income_category" class="text-[11px] text-gray-400 font-semibold">{{ invoice.company_transaction?.title }}</span>
+                                        </template>
+
+                                        <!-- For Standard Purchase Invoices (Inventory parts) -->
+                                        <template v-else>
+                                            <Link
+                                                v-if="line.part_id"
+                                                :href="route('app.inventory.parts.show', line.part_id)"
+                                                class="text-sm font-black text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 hover:underline transition-colors flex items-center gap-1.5 w-fit group/link"
+                                            >
+                                                <span>{{ line.part?.name || '—' }}</span>
+                                                <svg class="w-3.5 h-3.5 opacity-60 group-hover/link:opacity-100 transition-opacity shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                                </svg>
+                                            </Link>
+                                            <span v-else class="text-sm font-bold text-gray-950 dark:text-white">—</span>
+                                            <span class="text-[10px] text-gray-400 font-mono mt-1 uppercase tracking-wider">{{ line.part?.sku || 'NO-SKU' }}</span>
+                                        </template>
                                     </div>
                                 </td>
                                 
@@ -1173,6 +1182,27 @@ const { toEnglish, formatCurrency } = useNumberFormat();
 const tenant = computed(() => props.invoice.tenant || page.props.tenant || {});
 const isCompany = computed(() => !!props.invoice.company_transaction);
 
+const backUrl = computed(() => {
+    if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const from = params.get('from');
+        if (from === 'center' && props.invoice.center_id) {
+            return route('settings.centers.show', props.invoice.center_id) + '?tab=invoices';
+        }
+        if (from === 'company') {
+            return route('settings.company') + '?tab=invoices';
+        }
+    }
+    
+    if (props.invoice.company_transaction) {
+        if (props.invoice.center_id) {
+            return route('settings.centers.show', props.invoice.center_id) + '?tab=invoices';
+        }
+        return route('settings.company') + '?tab=invoices';
+    }
+    return route('app.invoices.purchases.index');
+});
+
 const formatCurrencyEnglish = (amount) => {
     return Number(amount).toLocaleString('en-US', {
         minimumFractionDigits: 2,
@@ -1480,6 +1510,41 @@ const getCenterAddress = (center) => {
         addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
     ].filter(Boolean);
     return parts.join('، ');
+};
+
+const getTenantAddress = (tenant) => {
+    if (!tenant) return '';
+    const addr = tenant.address;
+    if (!addr) return '';
+    if (typeof addr === 'object') {
+        if (addr.address_line) return addr.address_line;
+        const parts = [
+            addr.building_number ? `${t('common.building') || 'مبنى'} ${addr.building_number}` : '',
+            addr.street ? `${t('common.street') || 'شارع'} ${addr.street}` : '',
+            addr.district ? `${t('common.district') || 'حي'} ${addr.district}` : '',
+            addr.city ? addr.city : '',
+            addr.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${addr.postal_code}` : '',
+        ].filter(Boolean);
+        return parts.join('، ');
+    }
+    // Safe JSON parse fallback if DB returns stringified JSON
+    if (typeof addr === 'string' && addr.startsWith('{')) {
+        try {
+            const parsed = JSON.parse(addr);
+            if (parsed.address_line) return parsed.address_line;
+            const parts = [
+                parsed.building_number ? `${t('common.building') || 'مبنى'} ${parsed.building_number}` : '',
+                parsed.street ? `${t('common.street') || 'شارع'} ${parsed.street}` : '',
+                parsed.district ? `${t('common.district') || 'حي'} ${parsed.district}` : '',
+                parsed.city ? parsed.city : '',
+                parsed.postal_code ? `${t('common.postal_code') || 'الرمز البريدي'} ${parsed.postal_code}` : '',
+            ].filter(Boolean);
+            return parts.join('، ');
+        } catch (e) {
+            return addr;
+        }
+    }
+    return addr || '';
 };
 
 const statusClass = (status) => {
