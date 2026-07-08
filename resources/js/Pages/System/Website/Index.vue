@@ -52,7 +52,11 @@ const addItem = (listKey, defaults) => { form.settings[listKey].push({ ...defaul
 const removeItem = (listKey, index) => { form.settings[listKey].splice(index, 1); };
 
 const submit = () => {
-  form.put(route('system.settings.website.update'), {
+  form.transform(data => ({
+    ...data,
+    _method: 'PUT',
+  })).post(route('system.settings.website.update'), {
+    forceFormData: true,
     preserveScroll: true,
     onSuccess: () => success('تم حفظ التغييرات بنجاح'),
   });
