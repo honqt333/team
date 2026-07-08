@@ -34,18 +34,11 @@ Route::prefix('view')->name('public.')->group(function () {
     Route::post('/quote/{uuid}/reject', [PublicQuoteController::class, 'reject'])->name('quotes.reject');
 });
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
+Route::get('/', [\App\Http\Controllers\Public\PublicLandingController::class, 'preview'])->name('home');
 
 Route::get('/landing-preview', [\App\Http\Controllers\Public\PublicLandingController::class, 'preview'])->name('public.landing.preview');
 Route::post('/landing-preview/contact', [\App\Http\Controllers\Public\PublicLandingController::class, 'submitContact'])->name('public.landing.contact');
+
 
 // Phone Verification (Registration)
 Route::post('/phone/send-otp', [\App\Http\Controllers\Auth\PhoneVerificationController::class, 'sendOtp'])->name('phone.send-otp');
