@@ -139,7 +139,7 @@ const emit = defineEmits(['close', 'print']);
 
 // Show work order option only if status is open or in_progress
 const canPrintWorkOrder = computed(() => {
-    return ['open', 'in_progress'].includes(props.workOrder.status);
+    return !['cancelled'].includes(props.workOrder.status);
 });
 
 // Show payments option only if there are payments
