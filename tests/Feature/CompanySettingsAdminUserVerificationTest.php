@@ -25,6 +25,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\PermissionsSeeder::class);
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
         
