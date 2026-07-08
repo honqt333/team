@@ -38,7 +38,7 @@
                         </button>
                         <!-- Receipt Button -->
                         <button
-                            v-if="can('inventory.receipts.create') || isAnyAdmin()"
+                            v-if="can('inventory.moves.create') || isAnyAdmin()"
                             @click="showReceiptModal = true"
                             class="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-green-700 dark:text-green-400 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group/receipt border border-green-50 dark:border-green-900/30"
                         >
@@ -52,7 +52,7 @@
 
                         <!-- Adjustment Button -->
                         <button
-                            v-if="can('inventory.adjustments.create') || isAnyAdmin()"
+                            v-if="can('inventory.moves.create') || isAnyAdmin()"
                             @click="showAdjustmentModal = true"
                             class="flex items-center justify-center gap-2 px-5 py-2.5 bg-white dark:bg-gray-800 text-yellow-700 dark:text-yellow-400 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all group/adjust border border-yellow-50 dark:border-yellow-900/30"
                         >
