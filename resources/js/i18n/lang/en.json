@@ -3147,6 +3147,7 @@
         "showing": "Show",
         "status": {
             "cancelled": "Cancelled",
+            "completed": "Completed",
             "done": "Completed",
             "draft": "Draft",
             "general_note": "General Note",

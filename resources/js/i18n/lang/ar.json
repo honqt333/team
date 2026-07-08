@@ -3147,6 +3147,7 @@
         "showing": "عرض",
         "status": {
             "cancelled": "ملغي",
+            "completed": "مكتمل",
             "done": "مكتمل",
             "draft": "مسودة",
             "general_note": "ملاحظة عامة",
