@@ -33,7 +33,7 @@ class InventoryMoveController extends Controller
         $sort = in_array($request->input('sort'), $allowedSorts, true)
             ? $request->input('sort')
             : 'posted_at';
-        $order = strtolower($request->input('order')) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower($request->input('order') ?? '') === 'asc' ? 'asc' : 'desc';
 
         $query = InventoryMove::forWarehouse($warehouse->id)
             ->with([
