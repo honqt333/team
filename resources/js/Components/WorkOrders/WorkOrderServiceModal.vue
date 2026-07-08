@@ -717,6 +717,7 @@ const form = useForm({
     is_warranty: props.item ? !!props.item.is_warranty : false,
     started_at: props.item?.started_at ? formatDateForInput(props.item.started_at) : formatDateForInput(new Date()),
     completed_at: props.item?.completed_at ? formatDateForInput(props.item.completed_at) : '',
+    due_date: props.item?.due_date ? formatDateForInput(props.item.due_date) : '',
 });
 
 const activeWarranties = ref([]);

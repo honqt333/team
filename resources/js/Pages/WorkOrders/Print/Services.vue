@@ -71,6 +71,26 @@ const printPage = () => window.print();
 
 const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
 
+const calculateItemDueDate = (item, fallbackStart) => {
+    if (item.due_date) return item.due_date;
+    const start = item.started_at || fallbackStart;
+    if (!start) return null;
+    const startDate = new Date(start);
+    if (isNaN(startDate.getTime())) return null;
+    const val = parseInt(item.duration_value);
+    if (isNaN(val) || val <= 0) return start;
+    
+    const unit = item.duration_unit || 'minutes';
+    if (unit === 'days') startDate.setDate(startDate.getDate() + val);
+    else if (unit === 'weeks') startDate.setDate(startDate.getDate() + (val * 7));
+    else if (unit === 'months') startDate.setMonth(startDate.getMonth() + val);
+    else if (unit === 'years') startDate.setFullYear(startDate.getFullYear() + val);
+    else {
+        startDate.setMinutes(startDate.getMinutes() + val);
+    }
+    return startDate.toISOString();
+};
+
 const mappedData = computed(() => {
     const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
     const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
@@ -103,7 +123,7 @@ const mappedData = computed(() => {
             }).filter(Boolean),
             status: item.status || null,
             started_at: item.started_at || null,
-            due_date: item.due_date || null,
+            due_date: calculateItemDueDate(item, props.workOrder.entry_date || props.workOrder.created_at),
             is_part: false
         };
     });
