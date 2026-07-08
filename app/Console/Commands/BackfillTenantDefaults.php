@@ -18,7 +18,7 @@ class BackfillTenantDefaults extends Command
                             {--tenant= : Process only this tenant ID}
                             {--dry-run : Report what would happen without writing}';
 
-    protected $description = 'Seed default lookup data (units, employee types, job titles) for existing tenants.';
+    protected $description = 'Seed default roles, permissions, and lookup data (units, employee types, job titles) for existing tenants.';
 
     public function handle(): int
     {
@@ -56,6 +56,7 @@ class BackfillTenantDefaults extends Command
             }
 
             try {
+                $service->seedRolesForTenant($tenant->id);
                 $service->seedDefaultsForTenant($tenant->id);
                 $processed++;
             } catch (\Throwable $e) {

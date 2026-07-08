@@ -19,6 +19,9 @@ class TenantSetupService
      */
     public function seedRolesForTenant(int $tenantId): void
     {
+        // Clear Spatie permissions cache to ensure newly migrated permissions are available
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
         // Define default roles with their permissions
         $roles = $this->getDefaultRoles();
 

@@ -96,6 +96,10 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
             ]);
 
+            // Set Spatie permissions team context for the new tenant
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+            app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+
             // 3. Create User (Super Admin)
             $user = User::create([
                 'tenant_id' => $tenant->id,
