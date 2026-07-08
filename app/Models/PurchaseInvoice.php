@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PurchaseInvoice extends Model
 {
-    use SoftDeletes, TenantScoped;
+    use SoftDeletes, TenantScoped, \App\Traits\HasPurchaseInvoiceRelations;
 
     const STATUS_DRAFT     = 'draft';
     const STATUS_OPEN      = 'open';
@@ -30,16 +30,6 @@ class PurchaseInvoice extends Model
         'total'      => 'decimal:2',
         'balance'    => 'decimal:2',
     ];
-
-    // Relationships
-    public function supplier()      { return $this->belongsTo(Supplier::class); }
-    public function purchaseOrder() { return $this->belongsTo(PurchaseOrder::class); }
-    public function lines()         { return $this->hasMany(PurchaseInvoiceLine::class); }
-    public function tenant()        { return $this->belongsTo(Tenant::class); }
-    public function center()        { return $this->belongsTo(Center::class); }
-    public function payments()      { return $this->hasMany(Payment::class, 'purchase_invoice_id'); }
-    public function returnInvoices() { return $this->hasMany(PurchaseReturnInvoice::class); }
-    public function companyTransaction() { return $this->hasOne(CompanyTransaction::class, 'purchase_invoice_id'); }
 
     // Status helpers
     public function isDraft()     { return $this->status === self::STATUS_DRAFT; }

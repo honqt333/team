@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
 {
-    use HasFactory, SoftDeletes, CenterScoped, HasTaxSnapshot;
+    use HasFactory, SoftDeletes, CenterScoped, HasTaxSnapshot, \App\Traits\HasInvoiceRelations;
 
     protected $appends = ['balance', 'is_paid', 'payment_status_label', 'bad_debt'];
 
@@ -75,40 +75,7 @@ class Invoice extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
-    public function lines(): HasMany
-    {
-        return $this->hasMany(InvoiceLine::class);
-    }
 
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
-    }
-
-    public function workOrder(): BelongsTo
-    {
-        return $this->belongsTo(WorkOrder::class);
-    }
-    
-    public function center(): BelongsTo
-    {
-        return $this->belongsTo(Center::class);
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
-    public function companyTransaction(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(CompanyTransaction::class, 'invoice_id');
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Accessors

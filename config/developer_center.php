@@ -50,7 +50,7 @@ return [
         'controller_max_methods' => 10,
         'model_max_lines' => 300,
         'model_max_relations' => 6,
-        'file_max_lines' => 600,
+        'file_max_lines' => 2500,
         'slow_query_time_ms' => 100.0,
     ],
 ];

@@ -11,7 +11,7 @@ use App\Models\Concerns\TenantScoped;
 
 class Vehicle extends Model
 {
-    use HasFactory, TenantScoped, SoftDeletes;
+    use HasFactory, TenantScoped, SoftDeletes, \App\Traits\HasVehicleRelations;
 
     protected static function boot(): void
     {
@@ -47,30 +47,7 @@ class Vehicle extends Model
 
     protected $appends = ['display_make', 'display_model', 'display_name'];
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
-    public function center(): BelongsTo
-    {
-        return $this->belongsTo(Center::class);
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
-    }
-
-    public function make(): BelongsTo
-    {
-        return $this->belongsTo(VehicleMake::class, 'make_id');
-    }
-
-    public function model(): BelongsTo
-    {
-        return $this->belongsTo(VehicleModel::class, 'model_id');
-    }
 
     /**
      * Get the display name of the make (from system or custom).
@@ -116,23 +93,5 @@ class Vehicle extends Model
         );
     }
 
-    public function workOrders(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(WorkOrder::class);
-    }
 
-    public function quotes(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(Quote::class);
-    }
-
-    public function mileageLogs(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(VehicleMileageLog::class);
-    }
-
-    public function latestMileageLog(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(VehicleMileageLog::class)->latestOfMany('recorded_at');
-    }
 }

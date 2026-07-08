@@ -2,9 +2,22 @@
 
 use App\Http\Controllers\App\CustomerController;
 use App\Http\Controllers\App\QuoteApprovalController;
-use App\Http\Controllers\App\QuoteController;
+use App\Http\Controllers\App\Quotes\QuoteController;
+use App\Http\Controllers\App\Quotes\QuoteServiceController;
+use App\Http\Controllers\App\Quotes\QuotePartsController;
+use App\Http\Controllers\App\Quotes\QuotePrintController;
 use App\Http\Controllers\App\VehicleController;
-use App\Http\Controllers\App\WorkOrderController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderItemController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderStatusController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderTechnicianController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderPartsController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderNotesController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderPrintController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderPaymentController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderMediaController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderWarrantiesController;
+use App\Http\Controllers\App\PurchaseReturnsController;
 use App\Http\Controllers\App\SettingsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\PublicQuoteController;
@@ -85,16 +98,16 @@ Route::middleware(['auth', 'verified', \App\Http\Middleware\EnsureTenantActive::
 // App routes (authenticated + tenancy)
 Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.context', \App\Http\Middleware\EnsureTwoFactorEnabled::class])->group(function () {
     // Customer export/import routes (must be before resource routes)
-    Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
+    Route::get('/customers/export', [\App\Http\Controllers\App\CustomerImportExportController::class, 'export'])->name('customers.export');
     Route::get('/customers/print', [CustomerController::class, 'print'])->name('customers.print');
-    Route::get('/customers/import/template', [CustomerController::class, 'downloadTemplate'])->name('customers.import.template');
-    Route::post('/customers/import', [CustomerController::class, 'import'])->name('customers.import');
+    Route::get('/customers/import/template', [\App\Http\Controllers\App\CustomerImportExportController::class, 'downloadTemplate'])->name('customers.import.template');
+    Route::post('/customers/import', [\App\Http\Controllers\App\CustomerImportExportController::class, 'import'])->name('customers.import');
     
     Route::get('/customers/check-phone', [CustomerController::class, 'checkPhone'])->name('customers.check-phone');
     Route::resource('customers', CustomerController::class);
     // Customer merge routes
-    Route::get('/customers/{customer}/merge', [CustomerController::class, 'mergeData'])->name('customers.merge-data');
-    Route::post('/customers/{source}/merge/{target}', [CustomerController::class, 'executeMerge'])->name('customers.execute-merge');
+    Route::get('/customers/{customer}/merge', [\App\Http\Controllers\App\CustomerMergeController::class, 'mergeData'])->name('customers.merge-data');
+    Route::post('/customers/{source}/merge/{target}', [\App\Http\Controllers\App\CustomerMergeController::class, 'executeMerge'])->name('customers.execute-merge');
 
     // Vehicle export/print routes
     Route::get('/vehicles/export', [VehicleController::class, 'export'])->name('vehicles.export');
@@ -113,13 +126,13 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::delete('/work-orders/{workOrder}', [WorkOrderController::class, 'destroy'])->name('work-orders.destroy');
     
     // Work Order Items (Services)
-    Route::post('/work-orders/{work_order}/items', [WorkOrderController::class, 'addItem'])->name('work-orders.items.store');
-    Route::put('/work-orders/{work_order}/items/{item}', [WorkOrderController::class, 'updateItem'])->name('work-orders.items.update');
-    Route::delete('/work-orders/{work_order}/items/{item}', [WorkOrderController::class, 'deleteItem'])->name('work-orders.items.destroy');
+    Route::post('/work-orders/{work_order}/items', [WorkOrderItemController::class, 'addItem'])->name('work-orders.items.store');
+    Route::put('/work-orders/{work_order}/items/{item}', [WorkOrderItemController::class, 'updateItem'])->name('work-orders.items.update');
+    Route::delete('/work-orders/{work_order}/items/{item}', [WorkOrderItemController::class, 'deleteItem'])->name('work-orders.items.destroy');
     
     // Work Order Departments
-    Route::post('/work-orders/{work_order}/departments', [WorkOrderController::class, 'addDepartment'])->name('work-orders.departments.store');
-    Route::delete('/work-orders/{work_order}/departments/{department_id}', [WorkOrderController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
+    Route::post('/work-orders/{work_order}/departments', [WorkOrderItemController::class, 'addDepartment'])->name('work-orders.departments.store');
+    Route::delete('/work-orders/{work_order}/departments/{department_id}', [WorkOrderItemController::class, 'removeDepartment'])->name('work-orders.departments.destroy');
     
     // Work Order Parts (Inventory Integration)
     Route::post('/work-orders/{workOrder}/parts', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'store'])->name('work-orders.parts.store');
@@ -127,14 +140,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::delete('/work-order-parts/{workOrderPart}', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'destroy'])->name('work-orders.parts.destroy');
     Route::post('/work-order-parts/{workOrderPart}/reverse', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'reverse'])->name('work-orders.parts.reverse');
     Route::get('/api/work-order-parts/check-stock', [\App\Http\Controllers\App\WorkOrderPartsController::class, 'checkStock'])->name('work-orders.parts.check-stock');
-    Route::get('/api/vehicles/{vehicle_id}/active-warranties', [WorkOrderController::class, 'activeWarranties'])->name('vehicles.active-warranties');
+    Route::get('/api/vehicles/{vehicle_id}/active-warranties', [WorkOrderWarrantiesController::class, 'activeWarranties'])->name('vehicles.active-warranties');
     
     // Work Order Status Management
-    Route::post('/work-orders/{work_order}/start', [WorkOrderController::class, 'startWork'])->name('work-orders.start');
-    Route::post('/work-orders/{work_order}/hold', [WorkOrderController::class, 'putOnHold'])->name('work-orders.hold');
-    Route::post('/work-orders/{work_order}/resume', [WorkOrderController::class, 'resume'])->name('work-orders.resume');
-    Route::post('/work-orders/{work_order}/cancel', [WorkOrderController::class, 'cancel'])->name('work-orders.cancel');
-    Route::post('/work-orders/{work_order}/complete', [WorkOrderController::class, 'complete'])->name('work-orders.complete');
+    Route::post('/work-orders/{work_order}/start', [WorkOrderStatusController::class, 'startWork'])->name('work-orders.start');
+    Route::post('/work-orders/{work_order}/hold', [WorkOrderStatusController::class, 'putOnHold'])->name('work-orders.hold');
+    Route::post('/work-orders/{work_order}/resume', [WorkOrderStatusController::class, 'resume'])->name('work-orders.resume');
+    Route::post('/work-orders/{work_order}/cancel', [WorkOrderStatusController::class, 'cancel'])->name('work-orders.cancel');
+    Route::post('/work-orders/{work_order}/complete', [WorkOrderStatusController::class, 'complete'])->name('work-orders.complete');
     
     // Work Order Inspections
     Route::get('/work-orders/{workOrder}/inspections/templates', [\App\Http\Controllers\App\WorkOrderInspectionController::class, 'getTemplates'])->name('work-orders.inspections.templates');
@@ -145,45 +158,46 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::post('/work-orders/{workOrder}/signatures', [\App\Http\Controllers\App\WorkOrderSignatureController::class, 'store'])->name('work-orders.signatures.store');
     
     // Work Order Print Routes
-    Route::get('/work-orders/{workOrder}/print/condition', [WorkOrderController::class, 'printCondition'])->name('work-orders.print.condition');
-    Route::get('/work-orders/{workOrder}/print/services', [WorkOrderController::class, 'printServices'])->name('work-orders.print.services');
-    Route::get('/work-orders/{workOrder}/print/proforma', [WorkOrderController::class, 'printProforma'])->name('work-orders.print.proforma');
-    Route::get('/work-orders/{workOrder}/print/payments', [WorkOrderController::class, 'printPayments'])->name('work-orders.print.payments');
+    Route::get('/work-orders/{workOrder}/print/condition', [WorkOrderPrintController::class, 'printCondition'])->name('work-orders.print.condition');
+    Route::get('/work-orders/{workOrder}/print/services', [WorkOrderPrintController::class, 'printServices'])->name('work-orders.print.services');
+    Route::get('/work-orders/{workOrder}/print/proforma', [WorkOrderPrintController::class, 'printProforma'])->name('work-orders.print.proforma');
+    Route::get('/work-orders/{workOrder}/print/payments', [WorkOrderPrintController::class, 'printPayments'])->name('work-orders.print.payments');
     
     // Work Order Payments
-    Route::post('/work-orders/{workOrder}/payments', [WorkOrderController::class, 'storePayment'])->name('work-orders.payments.store');
-    Route::put('/work-orders/{workOrder}/payments/{payment}', [WorkOrderController::class, 'updatePayment'])->name('work-orders.payments.update');
-    Route::delete('/work-orders/{workOrder}/payments/{payment}', [WorkOrderController::class, 'destroyPayment'])->name('work-orders.payments.destroy');
+    Route::post('/work-orders/{workOrder}/payments', [WorkOrderPaymentController::class, 'storePayment'])->name('work-orders.payments.store');
+    Route::put('/work-orders/{workOrder}/payments/{payment}', [WorkOrderPaymentController::class, 'updatePayment'])->name('work-orders.payments.update');
+    Route::delete('/work-orders/{workOrder}/payments/{payment}', [WorkOrderPaymentController::class, 'destroyPayment'])->name('work-orders.payments.destroy');
     
     // Work Order Condition Report (Fuel Level & Damage Marks)
-    Route::put('/work-orders/{workOrder}/condition', [WorkOrderController::class, 'updateCondition'])->name('app.work-orders.update-condition');
+    Route::put('/work-orders/{workOrder}/condition', [WorkOrderStatusController::class, 'updateCondition'])->name('app.work-orders.update-condition');
     
     // Work Order Item Status
-    Route::patch('/work-orders/{work_order}/items/{item}/status', [WorkOrderController::class, 'updateItemStatus'])->name('work-orders.items.status');
+    Route::patch('/work-orders/{work_order}/items/{item}/status', [WorkOrderTechnicianController::class, 'updateItemStatus'])->name('work-orders.items.status');
     
     // Work Order Item Technicians
-    Route::post('/work-orders/{work_order}/items/{item}/technicians', [WorkOrderController::class, 'assignTechnician'])->name('work-orders.items.technicians.store');
-    Route::delete('/work-orders/{work_order}/items/{item}/technicians/{user}', [WorkOrderController::class, 'removeTechnician'])->name('work-orders.items.technicians.destroy');
+    Route::post('/work-orders/{work_order}/items/{item}/technicians', [WorkOrderTechnicianController::class, 'assignTechnician'])->name('work-orders.items.technicians.store');
+    Route::delete('/work-orders/{work_order}/items/{item}/technicians/{user}', [WorkOrderTechnicianController::class, 'removeTechnician'])->name('work-orders.items.technicians.destroy');
     
     // Work Order Item Parts
-    Route::post('/work-orders/{work_order}/items/{item}/parts', [WorkOrderController::class, 'addPart'])->name('work-orders.items.parts.store');
-    Route::put('/work-orders/{work_order}/items/{item}/parts/{part}', [WorkOrderController::class, 'updatePart'])->name('work-orders.items.parts.update');
-    Route::delete('/work-orders/{work_order}/items/{item}/parts/{part}', [WorkOrderController::class, 'deletePart'])->name('work-orders.items.parts.destroy');
+    Route::post('/work-orders/{work_order}/items/{item}/parts', [WorkOrderPartsController::class, 'addPart'])->name('work-orders.items.parts.store');
+    Route::put('/work-orders/{work_order}/items/{item}/parts/{part}', [WorkOrderPartsController::class, 'updatePart'])->name('work-orders.items.parts.update');
+    Route::delete('/work-orders/{work_order}/items/{item}/parts/{part}', [WorkOrderPartsController::class, 'deletePart'])->name('work-orders.items.parts.destroy');
     
     // Work Order Item Notes
-    Route::post('/work-orders/{work_order}/items/{item}/notes', [WorkOrderController::class, 'addNote'])->name('work-orders.items.notes.store');
-    Route::delete('/work-orders/{work_order}/items/{item}/notes/{note}', [WorkOrderController::class, 'deleteNote'])->name('work-orders.items.notes.destroy');
+    Route::post('/work-orders/{work_order}/items/{item}/notes', [WorkOrderNotesController::class, 'addNote'])->name('work-orders.items.notes.store');
+    Route::delete('/work-orders/{work_order}/items/{item}/notes/{note}', [WorkOrderNotesController::class, 'deleteNote'])->name('work-orders.items.notes.destroy');
     
     // Work Order General Notes
-    Route::post('/work-orders/{work_order}/notes', [WorkOrderController::class, 'addGeneralNote'])->name('work-orders.notes.store');
-    Route::delete('/work-orders/{work_order}/notes/{note}', [WorkOrderController::class, 'deleteGeneralNote'])->name('work-orders.notes.destroy');
+    Route::post('/work-orders/{work_order}/notes', [WorkOrderNotesController::class, 'addGeneralNote'])->name('work-orders.notes.store');
+    Route::delete('/work-orders/{work_order}/notes/{note}', [WorkOrderNotesController::class, 'deleteGeneralNote'])->name('work-orders.notes.destroy');
     
     // Work Order Photos
-    Route::post('/work-orders/{workOrder}/photos', [WorkOrderController::class, 'uploadPhotos'])->name('work-orders.photos.store');
-    Route::delete('/work-orders/{workOrder}/photos/{photo}', [WorkOrderController::class, 'deletePhoto'])->name('work-orders.photos.destroy');
+    Route::post('/work-orders/{workOrder}/photos', [WorkOrderMediaController::class, 'uploadPhotos'])->name('work-orders.photos.store');
+    Route::delete('/work-orders/{workOrder}/photos/{photo}', [WorkOrderMediaController::class, 'deletePhoto'])->name('work-orders.photos.destroy');
 
-    Route::post('/work-orders/{workOrder}/attachments', [WorkOrderController::class, 'uploadAttachments'])->name('work-orders.attachments.store');
-    Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderController::class, 'destroyAttachment'])->name('work-orders.attachments.destroy');
+    Route::post('/work-orders/{workOrder}/attachments', [WorkOrderMediaController::class, 'uploadAttachments'])->name('work-orders.attachments.store');
+    Route::delete('/work-orders/{workOrder}/attachments/{attachment}', [WorkOrderMediaController::class, 'destroyAttachment'])->name('work-orders.attachments.destroy');
+
     
     // Quotes
     Route::get('/quotes', [QuoteController::class, 'index'])->name('app.quotes.index');
@@ -194,17 +208,17 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::post('/quotes/{quote}/reject', [QuoteApprovalController::class, 'reject'])->name('app.quotes.reject');
     Route::get('/quotes/search', [QuoteController::class, 'search'])->name('app.quotes.search');
     Route::get('/quotes/{quote}', [QuoteController::class, 'show'])->name('app.quotes.show');
-    Route::get('/quotes/{quote}/print', [QuoteController::class, 'print'])->name('app.quotes.print');
-    Route::post('/quotes/{quote}/services', [QuoteController::class, 'addService'])->name('app.quotes.services.store');
-    Route::put('/quotes/{quote}/services/{line}', [QuoteController::class, 'updateService'])->name('app.quotes.services.update');
-    Route::delete('/quotes/{quote}/services/{line}', [QuoteController::class, 'deleteService'])->name('app.quotes.services.destroy');
-    Route::post('/quotes/{quote}/departments', [QuoteController::class, 'addDepartment'])->name('app.quotes.departments.store');
-    Route::delete('/quotes/{quote}/departments/{department_id}', [QuoteController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
+    Route::get('/quotes/{quote}/print', [QuotePrintController::class, 'print'])->name('app.quotes.print');
+    Route::post('/quotes/{quote}/services', [QuoteServiceController::class, 'addService'])->name('app.quotes.services.store');
+    Route::put('/quotes/{quote}/services/{line}', [QuoteServiceController::class, 'updateService'])->name('app.quotes.services.update');
+    Route::delete('/quotes/{quote}/services/{line}', [QuoteServiceController::class, 'deleteService'])->name('app.quotes.services.destroy');
+    Route::post('/quotes/{quote}/departments', [QuoteServiceController::class, 'addDepartment'])->name('app.quotes.departments.store');
+    Route::delete('/quotes/{quote}/departments/{department_id}', [QuoteServiceController::class, 'removeDepartment'])->name('app.quotes.departments.destroy');
     
     // Quote Parts
-    Route::post('/quotes/{quote}/parts', [QuoteController::class, 'addPart'])->name('app.quotes.parts.store');
-    Route::put('/quotes/{quote}/parts/{quotePart}', [QuoteController::class, 'updatePart'])->name('app.quotes.parts.update');
-    Route::delete('/quotes/{quote}/parts/{quotePart}', [QuoteController::class, 'deletePart'])->name('app.quotes.parts.destroy');
+    Route::post('/quotes/{quote}/parts', [QuotePartsController::class, 'addPart'])->name('app.quotes.parts.store');
+    Route::put('/quotes/{quote}/parts/{quotePart}', [QuotePartsController::class, 'updatePart'])->name('app.quotes.parts.update');
+    Route::delete('/quotes/{quote}/parts/{quotePart}', [QuotePartsController::class, 'deletePart'])->name('app.quotes.parts.destroy');
     
 
 
@@ -442,19 +456,19 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::delete('/settings/job-titles/{jobTitle}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyJobTitle'])->name('settings.job-titles.destroy');
         
         // Allowances
-        Route::post('/settings/allowances', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeAllowance'])->name('settings.allowances.store');
-        Route::put('/settings/allowances/{allowance}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateAllowance'])->name('settings.allowances.update');
-        Route::delete('/settings/allowances/{allowance}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyAllowance'])->name('settings.allowances.destroy');
+        Route::post('/settings/allowances', [\App\Http\Controllers\App\HR\HRPayrollSettingsController::class, 'storeAllowance'])->name('settings.allowances.store');
+        Route::put('/settings/allowances/{allowance}', [\App\Http\Controllers\App\HR\HRPayrollSettingsController::class, 'updateAllowance'])->name('settings.allowances.update');
+        Route::delete('/settings/allowances/{allowance}', [\App\Http\Controllers\App\HR\HRPayrollSettingsController::class, 'destroyAllowance'])->name('settings.allowances.destroy');
         
         // Deductions
-        Route::post('/settings/deductions', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeDeduction'])->name('settings.deductions.store');
-        Route::put('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateDeduction'])->name('settings.deductions.update');
-        Route::delete('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyDeduction'])->name('settings.deductions.destroy');
+        Route::post('/settings/deductions', [\App\Http\Controllers\App\HR\HRPayrollSettingsController::class, 'storeDeduction'])->name('settings.deductions.store');
+        Route::put('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\HRPayrollSettingsController::class, 'updateDeduction'])->name('settings.deductions.update');
+        Route::delete('/settings/deductions/{deduction}', [\App\Http\Controllers\App\HR\HRPayrollSettingsController::class, 'destroyDeduction'])->name('settings.deductions.destroy');
  
         // Regulations
-        Route::post('/settings/regulations', [\App\Http\Controllers\App\HR\SettingsController::class, 'storeRegulation'])->name('settings.regulations.store');
-        Route::put('/settings/regulations/{regulation}', [\App\Http\Controllers\App\HR\SettingsController::class, 'updateRegulation'])->name('settings.regulations.update');
-        Route::delete('/settings/regulations/{regulation}', [\App\Http\Controllers\App\HR\SettingsController::class, 'destroyRegulation'])->name('settings.regulations.destroy');
+        Route::post('/settings/regulations', [\App\Http\Controllers\App\HR\HRRegulationsController::class, 'storeRegulation'])->name('settings.regulations.store');
+        Route::put('/settings/regulations/{regulation}', [\App\Http\Controllers\App\HR\HRRegulationsController::class, 'updateRegulation'])->name('settings.regulations.update');
+        Route::delete('/settings/regulations/{regulation}', [\App\Http\Controllers\App\HR\HRRegulationsController::class, 'destroyRegulation'])->name('settings.regulations.destroy');
  
         // Employee Permissions
         Route::get('/employees/{employee}/permissions', [\App\Http\Controllers\App\HR\EmployeePermissionsController::class, 'index'])->name('employees.permissions.index');
@@ -467,15 +481,15 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::get('/employees/{employee}', [\App\Http\Controllers\App\HR\EmployeeController::class, 'show'])->name('employees.show');
         Route::put('/employees/{employee}', [\App\Http\Controllers\App\HR\EmployeeController::class, 'update'])->name('employees.update');
         Route::delete('/employees/{employee}', [\App\Http\Controllers\App\HR\EmployeeController::class, 'destroy'])->name('employees.destroy');
-        Route::put('/employees/{employee}/allowances', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateAllowances'])->name('employees.allowances.update');
-        Route::put('/employees/{employee}/deductions', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateDeductions'])->name('employees.deductions.update');
+        Route::put('/employees/{employee}/allowances', [\App\Http\Controllers\App\HR\EmployeeFinancialsController::class, 'updateAllowances'])->name('employees.allowances.update');
+        Route::put('/employees/{employee}/deductions', [\App\Http\Controllers\App\HR\EmployeeFinancialsController::class, 'updateDeductions'])->name('employees.deductions.update');
         Route::post('/employees/{employee}/upload-photo', [\App\Http\Controllers\App\HR\EmployeeController::class, 'uploadPhoto'])->name('employees.upload-photo');
         Route::put('/employees/{employee}/default-shift', [\App\Http\Controllers\App\HR\EmployeeShiftController::class, 'updateDefaultShift'])->name('employees.default-shift.update');
         Route::put('/employees/{employee}/weekly-schedule', [\App\Http\Controllers\App\HR\EmployeeShiftController::class, 'updateWeeklySchedule'])->name('employees.weekly-schedule.update');
         
         // Employee Financial
-        Route::put('/employees/{employee}/bank-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateBankInfo'])->name('employees.bank-info.update');
-        Route::put('/employees/{employee}/financial-info', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateFinancialInfo'])->name('employees.financial-info.update');
+        Route::put('/employees/{employee}/bank-info', [\App\Http\Controllers\App\HR\EmployeeFinancialsController::class, 'updateBankInfo'])->name('employees.bank-info.update');
+        Route::put('/employees/{employee}/financial-info', [\App\Http\Controllers\App\HR\EmployeeFinancialsController::class, 'updateFinancialInfo'])->name('employees.financial-info.update');
         Route::put('/employees/{employee}/roles', [\App\Http\Controllers\App\HR\EmployeeController::class, 'updateRoles'])->name('employees.roles.update');
 
         // Documents
@@ -565,12 +579,12 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadAttachment'])->name('purchases.attachment.store');
         Route::delete('/purchases/{purchaseInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyAttachment'])->name('purchases.attachment.destroy');
         Route::post('/purchases/{purchaseInvoice}/payments', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordPayment'])->name('purchases.payments.store');
-        Route::post('/purchases/{purchaseInvoice}/returns', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturn'])->name('purchases.returns.store');
-        Route::get('/purchases/returns/{purchaseReturnInvoice}', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'showReturn'])->name('purchases.returns.show');
-        Route::get('/purchases/returns/{purchaseReturnInvoice}/print', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'printReturn'])->name('purchases.returns.print');
-        Route::post('/purchases/returns/{purchaseReturnInvoice}/refunds', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'recordReturnRefund'])->name('purchases.returns.refunds.store');
-        Route::post('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'uploadReturnAttachment'])->name('purchases.returns.attachment.store');
-        Route::delete('/purchases/returns/{purchaseReturnInvoice}/attachment', [\App\Http\Controllers\App\PurchaseInvoicesController::class, 'destroyReturnAttachment'])->name('purchases.returns.attachment.destroy');
+        Route::post('/purchases/{purchaseInvoice}/returns', [PurchaseReturnsController::class, 'recordReturn'])->name('purchases.returns.store');
+        Route::get('/purchases/returns/{purchaseReturnInvoice}', [PurchaseReturnsController::class, 'showReturn'])->name('purchases.returns.show');
+        Route::get('/purchases/returns/{purchaseReturnInvoice}/print', [PurchaseReturnsController::class, 'printReturn'])->name('purchases.returns.print');
+        Route::post('/purchases/returns/{purchaseReturnInvoice}/refunds', [PurchaseReturnsController::class, 'recordReturnRefund'])->name('purchases.returns.refunds.store');
+        Route::post('/purchases/returns/{purchaseReturnInvoice}/attachment', [PurchaseReturnsController::class, 'uploadReturnAttachment'])->name('purchases.returns.attachment.store');
+        Route::delete('/purchases/returns/{purchaseReturnInvoice}/attachment', [PurchaseReturnsController::class, 'destroyReturnAttachment'])->name('purchases.returns.attachment.destroy');
 
         // Individual invoice show / print (existing)
         Route::get('/{invoice}', [\App\Http\Controllers\App\InvoicesController::class, 'show'])->name('show');

@@ -305,66 +305,6 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Update employee allowances.
-     */
-    public function updateAllowances(Request $request, Employee $employee)
-    {
-        $validated = $request->validate([
-            'allowances' => 'array',
-            'allowances.*.id' => 'required|exists:hr_allowances,id',
-            'allowances.*.custom_amount' => 'nullable|numeric|min:0',
-            'allowances.*.period_type' => 'required|in:one_time,fixed_period,indefinite',
-            'allowances.*.start_date' => 'nullable|date',
-            'allowances.*.end_date' => 'nullable|date|after_or_equal:allowances.*.start_date',
-        ]);
-
-        // Sync allowances
-        $syncData = [];
-        foreach ($validated['allowances'] ?? [] as $allowance) {
-            $syncData[$allowance['id']] = [
-                'custom_amount' => $allowance['custom_amount'] ?? null,
-                'period_type' => $allowance['period_type'] ?? 'indefinite',
-                'start_date' => $allowance['start_date'] ?? null,
-                'end_date' => $allowance['end_date'] ?? null,
-                'is_active' => true,
-            ];
-        }
-        $employee->allowances()->sync($syncData);
-
-        return back()->with('success', __('messages.updated_successfully'));
-    }
-
-    /**
-     * Update employee deductions.
-     */
-    public function updateDeductions(Request $request, Employee $employee)
-    {
-        $validated = $request->validate([
-            'deductions' => 'array',
-            'deductions.*.id' => 'required|exists:hr_deductions,id',
-            'deductions.*.custom_amount' => 'nullable|numeric|min:0',
-            'deductions.*.period_type' => 'required|in:one_time,fixed_period,indefinite',
-            'deductions.*.start_date' => 'nullable|date',
-            'deductions.*.end_date' => 'nullable|date|after_or_equal:deductions.*.start_date',
-        ]);
-
-        // Sync deductions
-        $syncData = [];
-        foreach ($validated['deductions'] ?? [] as $deduction) {
-            $syncData[$deduction['id']] = [
-                'custom_amount' => $deduction['custom_amount'] ?? null,
-                'period_type' => $deduction['period_type'] ?? 'indefinite',
-                'start_date' => $deduction['start_date'] ?? null,
-                'end_date' => $deduction['end_date'] ?? null,
-                'is_active' => true,
-            ];
-        }
-        $employee->deductions()->sync($syncData);
-
-        return back()->with('success', __('messages.updated_successfully'));
-    }
-
-    /**
      * Upload employee photo.
      */
     public function uploadPhoto(Request $request, Employee $employee)
@@ -382,42 +322,6 @@ class EmployeeController extends Controller
         $path = $request->file('photo')->store('employees/photos', 'public');
         
         $employee->update(['photo_path' => $path]);
-
-        return back()->with('success', __('messages.updated_successfully'));
-    }
-
-    /**
-     * Update employee bank info.
-     */
-    public function updateBankInfo(Request $request, Employee $employee)
-    {
-        $this->authorize('update', $employee);
-        
-        $validated = $request->validate([
-            'bank_name' => 'nullable|string|max:100',
-            'bank_iban' => 'nullable|string|max:34',
-            'bank_account_number' => 'nullable|string|max:50',
-            'bank_notes' => 'nullable|string',
-        ]);
-
-        $employee->update($validated);
-
-        return back()->with('success', __('messages.updated_successfully'));
-    }
-
-    /**
-     * Update employee financial info (salary, GOSI rate).
-     */
-    public function updateFinancialInfo(Request $request, Employee $employee)
-    {
-        $this->authorize('update', $employee);
-        
-        $validated = $request->validate([
-            'base_salary' => 'required|numeric|min:0',
-            'gosi_rate' => 'nullable|numeric|min:0|max:100',
-        ]);
-
-        $employee->update($validated);
 
         return back()->with('success', __('messages.updated_successfully'));
     }
@@ -446,7 +350,6 @@ class EmployeeController extends Controller
         $department = Department::find($departmentId);
         if (!$department) return;
 
-        // Check if department is "Management" / "الإدارة"
         $isManagement = str_contains($department->name_en, 'Management') || 
                         str_contains($department->name_ar, 'الإدارة');
 
@@ -462,7 +365,6 @@ class EmployeeController extends Controller
     {
         $this->authorize('update', $employee);
         
-        // Ensure employee has a linked user
         if (!$employee->user) {
             return back()->with('error', __('hr.employees.no_user_linked'));
         }
@@ -472,27 +374,20 @@ class EmployeeController extends Controller
             'roles.*' => 'string|exists:roles,name',
         ]);
 
-        // Get tenant ID for permission context
         $tenantId = $employee->tenant_id;
-        
-        // Set team context for role operations
         app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenantId);
         
-        // Get allowed roles for this tenant (exclude super_admin)
         $allowedRoles = \App\Models\Role::where('tenant_id', $tenantId)
             ->whereNotIn('name', ['super_admin'])
             ->pluck('name')
             ->toArray();
         
-        // Filter to only allowed roles and always include 'employee' role
         $rolesToSync = array_intersect($validated['roles'], $allowedRoles);
         if (!in_array('employee', $rolesToSync)) {
-            $rolesToSync[] = 'employee'; // Employee role is always required
+            $rolesToSync[] = 'employee';
         }
         
-        // Sync roles
         $employee->user->syncRoles($rolesToSync);
-        
         \Log::info("Updated roles for employee {$employee->id}", ['roles' => $rolesToSync]);
         
         return back()->with('success', __('hr.employees.roles_updated'));

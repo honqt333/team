@@ -70,6 +70,12 @@ class AuthenticatedSessionController extends Controller
         // If user ONLY has 'employee' role, redirect to employee portal
         $roles = $user->getRoleNames()->toArray();
         $isOnlyEmployee = count($roles) === 1 && in_array('employee', $roles);
+
+        // Clear API/JSON intended routes to prevent post-login Inertia errors
+        $intended = $request->session()->get('url.intended');
+        if ($intended && (str_contains($intended, '/api/') || str_contains($intended, '/unread-count') || $request->expectsJson())) {
+            $request->session()->forget('url.intended');
+        }
         
         if ($isOnlyEmployee) {
             return redirect()->intended(route('employee.dashboard', absolute: false));

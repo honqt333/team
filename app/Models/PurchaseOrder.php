@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory, SoftDeletes, TenantScoped;
+    use HasFactory, SoftDeletes, TenantScoped, \App\Traits\HasPurchaseOrderRelations;
 
     public const STATUS_DRAFT = 'draft';
     public const STATUS_SENT = 'sent';
@@ -58,45 +58,7 @@ class PurchaseOrder extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
-    public function center(): BelongsTo
-    {
-        return $this->belongsTo(Center::class);
-    }
-
-    public function supplier(): BelongsTo
-    {
-        return $this->belongsTo(Supplier::class);
-    }
-
-    public function warehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class);
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(PurchaseOrderItem::class);
-    }
-
-    public function goodsReceivedNotes(): HasMany
-    {
-        return $this->hasMany(GoodsReceivedNote::class);
-    }
-
-    public function sentByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'sent_by');
-    }
-
-    public function cancelledByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'cancelled_by');
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Scopes

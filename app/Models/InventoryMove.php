@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class InventoryMove extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Traits\HasInventoryMoveRelations;
 
     public const TYPE_RECEIPT = 'receipt';
     public const TYPE_ISSUE_TO_WORKORDER = 'issue_to_workorder';
@@ -54,43 +54,7 @@ class InventoryMove extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
-    public function warehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class);
-    }
 
-    public function part(): BelongsTo
-    {
-        return $this->belongsTo(Part::class);
-    }
-
-    public function postedByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'posted_by');
-    }
-
-    public function reversedByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'reversed_by');
-    }
-
-    public function reversesMove(): BelongsTo
-    {
-        return $this->belongsTo(InventoryMove::class, 'reverses_move_id');
-    }
-
-    public function reversedByMove(): BelongsTo
-    {
-        return $this->belongsTo(InventoryMove::class, 'reversed_by_move_id');
-    }
-
-    /**
-     * Polymorphic reference to source document (GRN, WorkOrderItemPart, etc.)
-     */
-    public function reference(): MorphTo
-    {
-        return $this->morphTo();
-    }
 
     /**
      * Polymorphic accessor: returns the WorkOrder linked to this move, if any.

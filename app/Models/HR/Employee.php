@@ -2,101 +2,39 @@
 
 namespace App\Models\HR;
 
-use App\Models\Center;
 use App\Models\Concerns\TenantScoped;
 use App\Models\Department;
-use App\Models\Nationality;
-use App\Models\Tenant;
-use App\Models\User;
+use App\Models\HR\Shift;
+use App\Traits\HasEmployeeRelations;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
     use SoftDeletes, TenantScoped;
+    use HasEmployeeRelations;
 
     protected $table = 'hr_employees';
 
     protected $fillable = [
-        'tenant_id',
-        'center_id',
-        'user_id',
-        'employee_number',
-        'name_ar',
-        'name_en',
-        'phone',
-        'email',
-        // البيانات الأساسية
-        'photo_path',
-        'gender',
-        'marital_status',
-        'birth_date',
-        // العنوان
-        'city',
-        'district',
-        'street',
-        'building_number',
-        'postal_code',
-        // البيانات الوظيفية
-        'job_title_id',
-        'employee_type_id',
-        'department_id',
-        'hire_date',
-        'contract_end_date',
-        'default_shift_id',
-        // الهوية
-        'nationality_id',
-        'national_id',
-        'national_id_expiry',
-        'passport_number',
-        'passport_expiry',
-        'border_entry_number',
-        'border_port',
-        'sponsor_name',
-        'profession_on_id',
-        // التأمين
-        'insurance_company',
-        'insurance_card_number',
-        'insurance_policy_number',
-        'insurance_expiry',
-        'insurance_classification',
-        'insurance_details',
-        // الراتب
-        'base_salary',
-        'commission_enabled',
-        'commission_type',
-        'commission_rate',
-        'status',
-        'termination_date',
-        'termination_reason',
-        'notes',
-        // Biometric
-        'biometric_id',
-        // Bank Info
-        'bank_name',
-        'bank_iban',
-        'bank_account_number',
-        'bank_notes',
-        'gosi_rate',
+        'tenant_id', 'center_id', 'user_id', 'employee_number', 'name_ar', 'name_en', 'phone', 'email',
+        'photo_path', 'gender', 'marital_status', 'birth_date', 'city', 'district', 'street', 'building_number',
+        'postal_code', 'job_title_id', 'employee_type_id', 'department_id', 'hire_date', 'contract_end_date',
+        'default_shift_id', 'nationality_id', 'national_id', 'national_id_expiry', 'passport_number',
+        'passport_expiry', 'border_entry_number', 'border_port', 'sponsor_name', 'profession_on_id',
+        'insurance_company', 'insurance_card_number', 'insurance_policy_number', 'insurance_expiry',
+        'insurance_classification', 'insurance_details', 'base_salary', 'commission_enabled', 'commission_type',
+        'commission_rate', 'status', 'termination_date', 'termination_reason', 'notes', 'biometric_id',
+        'bank_name', 'bank_iban', 'bank_account_number', 'bank_notes', 'gosi_rate',
     ];
 
     protected $casts = [
-        'hire_date' => 'date:Y-m-d',
-        'contract_end_date' => 'date:Y-m-d',
-        'termination_date' => 'date:Y-m-d',
-        'birth_date' => 'date:Y-m-d',
-        'national_id_expiry' => 'date:Y-m-d',
-        'passport_expiry' => 'date:Y-m-d',
-        'insurance_expiry' => 'date:Y-m-d',
-        'base_salary' => 'float',
-        'commission_enabled' => 'boolean',
+        'hire_date' => 'date:Y-m-d', 'contract_end_date' => 'date:Y-m-d', 'termination_date' => 'date:Y-m-d',
+        'birth_date' => 'date:Y-m-d', 'national_id_expiry' => 'date:Y-m-d', 'passport_expiry' => 'date:Y-m-d',
+        'insurance_expiry' => 'date:Y-m-d', 'base_salary' => 'float', 'commission_enabled' => 'boolean',
         'commission_rate' => 'float',
     ];
 
-    // Boot method for auto-generating employee number
     protected static function boot()
     {
         parent::boot();
@@ -112,15 +50,12 @@ class Employee extends Model
 
         static::updated(function ($employee) {
             if ($employee->isDirty('status')) {
-                // If user is linked
                 if ($employee->user_id && $employee->user) {
                     $newStatus = $employee->status;
 
                     if (in_array($newStatus, ['terminated', 'inactive'])) {
-                        // Disable user to prevent login
                         $employee->user->update(['is_active' => false]);
                     } elseif ($newStatus === 'active') {
-                        // Enable user if inactive
                         if (!$employee->user->is_active) {
                             $employee->user->update(['is_active' => true]);
                         }
@@ -130,105 +65,11 @@ class Employee extends Model
         });
     }
 
-    // Relationships
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
-
-    public function center(): BelongsTo
-    {
-        return $this->belongsTo(Center::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function jobTitle(): BelongsTo
-    {
-        return $this->belongsTo(JobTitle::class);
-    }
-
-    public function employeeType(): BelongsTo
-    {
-        return $this->belongsTo(EmployeeType::class);
-    }
-
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class);
-    }
-
-    public function nationality(): BelongsTo
-    {
-        return $this->belongsTo(Nationality::class);
-    }
-
-    public function allowances(): BelongsToMany
-    {
-        return $this->belongsToMany(Allowance::class, 'hr_employee_allowances')
-            ->withPivot('custom_amount', 'period_type', 'start_date', 'end_date', 'is_active')
-            ->withTimestamps();
-    }
-
-    public function deductions(): BelongsToMany
-    {
-        return $this->belongsToMany(Deduction::class, 'hr_employee_deductions')
-            ->withPivot('custom_amount', 'period_type', 'start_date', 'end_date', 'is_active')
-            ->withTimestamps();
-    }
-
-    public function attendance(): HasMany
-    {
-        return $this->hasMany(Attendance::class);
-    }
-
-    public function leaves(): HasMany
-    {
-        return $this->hasMany(Leave::class);
-    }
-
-    public function payrollItems(): HasMany
-    {
-        return $this->hasMany(PayrollItem::class);
-    }
-
-    public function otherPayments(): HasMany
-    {
-        return $this->hasMany(OtherPayment::class);
-    }
-
-    public function defaultShift(): BelongsTo
-    {
-        return $this->belongsTo(Shift::class, 'default_shift_id');
-    }
-
-    public function employeeShifts(): HasMany
-    {
-        return $this->hasMany(EmployeeShift::class);
-    }
-
-    public function documents(): HasMany
-    {
-        return $this->hasMany(EmployeeDocument::class);
-    }
-
-    public function contracts(): HasMany
-    {
-        return $this->hasMany(EmployeeContract::class);
-    }
-
     /**
      * الحصول على وردية الموظف ليوم محدد
-     * يبحث أولاً عن وردية مجدولة لهذا اليوم
-     * ثم يبحث عن وردية أسبوعية متكررة
-     * وأخيراً يرجع الوردية الافتراضية
      */
     public function getShiftForDate(\Carbon\Carbon $date): ?Shift
     {
-        // 1. البحث عن وردية مجدولة لهذا التاريخ
         $scheduledShift = $this->employeeShifts()
             ->where('date', $date->format('Y-m-d'))
             ->with('shift')
@@ -238,8 +79,7 @@ class Employee extends Model
             return $scheduledShift->shift;
         }
 
-        // 2. البحث عن وردية أسبوعية (day_of_week)
-        $dayOfWeek = $date->dayOfWeek; // 0 = Sunday
+        $dayOfWeek = $date->dayOfWeek;
         $weeklyShift = $this->employeeShifts()
             ->where('day_of_week', $dayOfWeek)
             ->whereNull('date')
@@ -250,25 +90,13 @@ class Employee extends Model
             return $weeklyShift->shift;
         }
 
-        // 3. إرجاع الوردية الافتراضية
         return $this->defaultShift;
     }
 
     // Scopes
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
-    }
-
-    public function scopeInactive($query)
-    {
-        return $query->where('status', 'inactive');
-    }
-
-    public function scopeTerminated($query)
-    {
-        return $query->where('status', 'terminated');
-    }
+    public function scopeActive($query) { return $query->where('status', 'active'); }
+    public function scopeInactive($query) { return $query->where('status', 'inactive'); }
+    public function scopeTerminated($query) { return $query->where('status', 'terminated'); }
 
     // Accessors
     public function getDisplayNameAttribute(): string
@@ -285,7 +113,6 @@ class Employee extends Model
         foreach ($this->allowances as $allowance) {
             $amount = $allowance->pivot->custom_amount ?? $allowance->amount;
             if ($allowance->type === 'percentage') {
-                // Use the correct calculation base
                 $base = $this->getCalculationBase($allowance->calculation_base);
                 $total += ($base * $amount / 100);
             } else {
@@ -302,7 +129,6 @@ class Employee extends Model
         foreach ($this->deductions as $deduction) {
             $amount = $deduction->pivot->custom_amount ?? $deduction->amount;
             if ($deduction->type === 'percentage') {
-                // Use the correct calculation base
                 $base = $this->getCalculationBase($deduction->calculation_base);
                 $total += ($base * $amount / 100);
             } else {
@@ -316,7 +142,6 @@ class Employee extends Model
     public function calculateGosiAmount(): float
     {
         $rate = $this->gosi_rate ?? 0;
-        // GOSI is calculated on base salary only (not allowances)
         return round($this->base_salary * $rate / 100, 2);
     }
 
@@ -334,7 +159,7 @@ class Employee extends Model
         return match ($calculationBase) {
             'base_salary' => $this->base_salary ?? 0,
             'gross_salary' => ($this->base_salary ?? 0) + $this->calculateTotalAllowances(),
-            'monthly_contribution' => $this->base_salary ?? 0, // For GOSI-based calculations
+            'monthly_contribution' => $this->base_salary ?? 0,
             default => $this->base_salary ?? 0,
         };
     }

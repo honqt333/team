@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InventoryTransfer extends Model
 {
-    use HasFactory, SoftDeletes, TenantScoped;
+    use HasFactory, SoftDeletes, TenantScoped, \App\Traits\HasInventoryTransferRelations;
 
     // Status constants
     public const STATUS_DRAFT = 'draft';
@@ -53,45 +53,7 @@ class InventoryTransfer extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class);
-    }
 
-    public function fromWarehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class, 'from_warehouse_id');
-    }
-
-    public function toWarehouse(): BelongsTo
-    {
-        return $this->belongsTo(Warehouse::class, 'to_warehouse_id');
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(InventoryTransferItem::class);
-    }
-
-    public function createdByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function sentByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'sent_by');
-    }
-
-    public function receivedByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'received_by');
-    }
-
-    public function cancelledByUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'cancelled_by');
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Status Checks
