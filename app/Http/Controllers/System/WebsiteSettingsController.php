@@ -5,6 +5,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Inertia\Inertia;
 
 class WebsiteSettingsController extends Controller
@@ -201,5 +202,26 @@ class WebsiteSettingsController extends Controller
         }
 
         return back()->with('success', 'تم تحديث إعدادات الموقع بنجاح');
+    }
+
+    /**
+     * Upload a single image (logo or favicon) and return its public URL.
+     * Called via dedicated AJAX endpoint to avoid multipart/form-data issues
+     * when submitting large settings forms.
+     */
+    public function uploadImage(Request $request): JsonResponse
+    {
+        $request->validate([
+            'key'   => 'required|string|in:website_logo,website_favicon',
+            'image' => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:4096',
+        ]);
+
+        $path = $request->file('image')->store('website', 'public');
+        $url  = asset('storage/' . $path);
+
+        // Persist immediately so it survives even if the main form is not saved
+        Setting::set($request->key === 'website_logo' ? 'website.logo' : 'website.favicon', $url, 'website');
+
+        return response()->json(['url' => $url]);
     }
 }

@@ -675,6 +675,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // Website Settings
     Route::get('/settings/website', [\App\Http\Controllers\System\WebsiteSettingsController::class, 'index'])->name('system.settings.website');
     Route::put('/settings/website', [\App\Http\Controllers\System\WebsiteSettingsController::class, 'update'])->name('system.settings.website.update');
+    Route::post('/settings/website/upload-image', [\App\Http\Controllers\System\WebsiteSettingsController::class, 'uploadImage'])->name('system.settings.website.upload-image');
 
     // Contact Messages
     Route::get('/settings/contact-messages', [\App\Http\Controllers\System\ContactMessageController::class, 'index'])->name('system.contact_messages.index');

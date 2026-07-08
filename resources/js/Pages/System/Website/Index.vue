@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import { useToast } from '@/Composables/useToast';
 import GeneralTab from './Tabs/GeneralTab.vue';
@@ -51,12 +51,41 @@ const form = useForm({ settings: initSettings(props.settings) });
 const addItem = (listKey, defaults) => { form.settings[listKey].push({ ...defaults }); };
 const removeItem = (listKey, index) => { form.settings[listKey].splice(index, 1); };
 
-const submit = () => {
-  form.transform(data => ({
-    ...data,
-    _method: 'PUT',
-  })).post(route('system.settings.website.update'), {
-    forceFormData: true,
+// Upload an image (logo or favicon) via dedicated endpoint, returns the URL
+async function uploadImage(key, file) {
+  const fd = new FormData();
+  fd.append('key', key);
+  fd.append('image', file);
+  const res = await fetch(route('system.settings.website.upload-image'), {
+    method: 'POST',
+    headers: {
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+      'X-Inertia': 'true',
+      'X-Inertia-Version': document.querySelector('meta[name="inertia"]')?.content || '',
+    },
+    body: fd,
+  });
+  if (!res.ok) throw new Error('Upload failed');
+  const json = await res.json();
+  return json.url;
+}
+
+const submit = async () => {
+  // 1. Upload any pending file fields first, replace with URLs
+  const imageKeys = ['website_logo', 'website_favicon'];
+  for (const key of imageKeys) {
+    if (form.settings[key] instanceof File) {
+      try {
+        form.settings[key] = await uploadImage(key, form.settings[key]);
+      } catch (e) {
+        console.error('Image upload failed', e);
+        return;
+      }
+    }
+  }
+
+  // 2. Submit the rest as regular JSON via PUT
+  form.put(route('system.settings.website.update'), {
     preserveScroll: true,
     onSuccess: () => success('تم حفظ التغييرات بنجاح'),
   });
