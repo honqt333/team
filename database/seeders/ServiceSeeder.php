@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Center;
 use App\Models\Service;
+use App\Models\Department;
 use Illuminate\Database\Seeder;
 
 class ServiceSeeder extends Seeder
@@ -11,7 +12,7 @@ class ServiceSeeder extends Seeder
     public function run(): void
     {
         $services = [
-            // البانيات - Tires
+            // الإطارات والميزان - Tires
             ['name' => 'فحص الإطارات', 'category' => 'maintenance', 'default_price' => 0],
             ['name' => 'تبديل الإطارات', 'category' => 'maintenance', 'default_price' => 50],
             ['name' => 'موازنة الإطارات', 'category' => 'maintenance', 'default_price' => 40],
@@ -50,12 +51,44 @@ class ServiceSeeder extends Seeder
             ['name' => 'فحص شامل', 'category' => 'other', 'default_price' => 200],
         ];
 
+        $departmentNames = [
+            'maintenance' => ['ar' => 'الإطارات والميزان', 'en' => 'Tires & Alignment'],
+            'body_paint'  => ['ar' => 'السمكرة والدهان', 'en' => 'Body & Paint'],
+            'electrical'  => ['ar' => 'الكهرباء', 'en' => 'Electrical'],
+            'mechanical'  => ['ar' => 'الميكانيكا', 'en' => 'Mechanical'],
+            'washing'     => ['ar' => 'الغسيل والتلميع', 'en' => 'Washing & Detailing'],
+            'other'       => ['ar' => 'خدمات أخرى', 'en' => 'Other Services'],
+        ];
+
         // Get all centers and create services for each
         $centers = Center::all();
         
         foreach ($centers as $center) {
+            // 1. Pre-create departments for this center
+            $departmentsMap = [];
+            $orderDept = 1;
+            foreach ($departmentNames as $key => $names) {
+                $dept = Department::firstOrCreate(
+                    [
+                        'tenant_id' => $center->tenant_id,
+                        'center_id' => $center->id,
+                        'name_ar' => $names['ar'],
+                    ],
+                    [
+                        'name_en' => $names['en'],
+                        'description' => $names['en'],
+                        'sort_order' => $orderDept++,
+                        'is_active' => true,
+                    ]
+                );
+                $departmentsMap[$key] = $dept->id;
+            }
+
+            // 2. Create services and assign them to departments
             $order = 1;
             foreach ($services as $serviceData) {
+                $deptId = $departmentsMap[$serviceData['category']] ?? null;
+
                 Service::firstOrCreate(
                     [
                         'tenant_id' => $center->tenant_id,
@@ -63,9 +96,10 @@ class ServiceSeeder extends Seeder
                         'name_ar' => $serviceData['name'],
                     ],
                     [
-                        'name_en' => $serviceData['name'], // Fallback or could use translation mapping
+                        'name_en' => $serviceData['name'],
                         'base_price' => $serviceData['default_price'],
                         'type' => Service::TYPE_INTERNAL,
+                        'department_id' => $deptId,
                         'is_active' => true,
                         'sort_order' => $order++,
                     ]

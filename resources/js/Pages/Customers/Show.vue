@@ -796,18 +796,106 @@
 
                     <!-- ========== INVOICES TAB ========== -->
                     <div v-if="activeTab === 'invoices'" class="space-y-4">
-                        <div class="text-center py-12">
+                        <!-- Search Box -->
+                        <div class="flex items-center gap-3">
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input type="text" v-model="invoiceSearch" :placeholder="$t('common.search') + '...'"
+                                    class="w-full sm:w-48 ps-10 pe-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500" />
+                            </div>
+                        </div>
+
+                        <!-- Invoices Table -->
+                        <div v-if="filteredInvoices && filteredInvoices.length > 0"
+                            class="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead>
+                                    <tr class="bg-gray-100 dark:bg-gray-800">
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">
+                                            {{ $t('invoices.invoice_number') || 'رقم الفاتورة' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">
+                                            {{ $t('invoices.columns.issue_date') || 'تاريخ الإصدار' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">
+                                            {{ $t('invoices.columns.source') || 'أمر العمل / المصدر' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">
+                                            {{ $t('invoices.columns.status') || 'الحالة' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">
+                                            {{ $t('invoices.columns.total') || 'الإجمالي' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">
+                                            {{ $t('invoices.columns.paid') || 'المدفوع' }}</th>
+                                        <th
+                                            class="px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap align-middle">
+                                            {{ $t('invoices.columns.balance') || 'المتبقي' }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr v-for="invoice in filteredInvoices" :key="invoice.id"
+                                        @click="router.visit(route('app.invoices.show', invoice.id))"
+                                        class="hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                                        <td
+                                            class="px-4 py-3 font-medium text-amber-600 dark:text-amber-400 whitespace-nowrap align-middle text-center hover:underline">
+                                            #{{ invoice.invoice_number }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap align-middle">
+                                            {{ formatDate(invoice.issue_date) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-gray-700 dark:text-gray-300 whitespace-nowrap align-middle">
+                                            <template v-if="invoice.work_order">
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <SaudiPlateDisplay :plate-number="invoice.work_order.vehicle?.plate_number" size="sm" />
+                                                    <span class="text-xs text-gray-500">
+                                                        {{ $t('work_orders.work_order') || 'أمر عمل' }}: 
+                                                        <span class="font-semibold text-amber-600 dark:text-amber-400">{{ invoice.work_order.code }}</span>
+                                                    </span>
+                                                </div>
+                                            </template>
+                                            <template v-else>
+                                                <span class="text-gray-400">—</span>
+                                            </template>
+                                        </td>
+                                        <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
+                                            <span :class="getInvoicePaymentStatusClass(invoice.payment_status)"
+                                                class="px-2 py-0.5 text-xs font-semibold rounded-full">
+                                                {{ $t(`invoices.payment_status.${invoice.payment_status}`) || invoice.payment_status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold text-gray-900 dark:text-white whitespace-nowrap align-middle">
+                                            {{ formatPrice(invoice.total_incl_tax || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-medium text-emerald-600 dark:text-emerald-400 whitespace-nowrap align-middle">
+                                            {{ formatPrice(invoice.total_paid || 0) }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center font-bold text-rose-600 dark:text-rose-400 whitespace-nowrap align-middle">
+                                            {{ formatPrice(invoice.balance || 0) }}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div v-else class="text-center py-12">
                             <div
-                                class="w-16 h-16 mx-auto rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
-                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor"
+                                class="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mb-4">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                         d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" />
                                 </svg>
                             </div>
-                            <p class="text-lg font-medium text-gray-900 dark:text-white mb-1">{{
-                                $t('customers.invoices') }}</p>
-                            <p class="text-gray-500 dark:text-gray-400">{{ $t('common.coming_soon') }}</p>
+                            <p class="text-gray-500 dark:text-gray-400 mb-4">{{ $t('invoices.no_invoices') || 'لا توجد فواتير للعميل' }}</p>
                         </div>
                     </div>
 
@@ -866,10 +954,21 @@
                                         <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 whitespace-nowrap align-middle">{{
                                             index + 1 }}</td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
-                                            <Link :href="route('work-orders.show', payment.work_order_id)"
-                                                class="text-indigo-600 dark:text-indigo-400 hover:underline font-mono">
-                                                {{ payment.work_order?.code || '-' }}
-                                            </Link>
+                                            <template v-if="payment.work_order_id">
+                                                <Link :href="route('work-orders.show', payment.work_order_id)"
+                                                    class="text-indigo-600 dark:text-indigo-400 hover:underline font-mono">
+                                                    {{ payment.work_order?.code }}
+                                                </Link>
+                                            </template>
+                                            <template v-else-if="payment.invoice_id">
+                                                <Link :href="route('app.invoices.show', payment.invoice_id)"
+                                                    class="text-amber-600 dark:text-amber-400 hover:underline font-mono">
+                                                    #{{ payment.invoice?.invoice_number }}
+                                                </Link>
+                                            </template>
+                                            <template v-else>
+                                                <span class="text-gray-400">—</span>
+                                            </template>
                                         </td>
                                         <td class="px-4 py-3 text-center whitespace-nowrap align-middle">
                                             <span class="px-2 py-1 rounded-full text-xs font-medium"
@@ -963,6 +1062,7 @@ const props = defineProps({
     vehicles: Array,
     workOrders: Array,
     quotes: Array,
+    invoices: { type: Array, default: () => [] },
     payments: { type: Array, default: () => [] },
     makes: { type: Array, default: () => [] },
     colors: { type: Array, default: () => [] },
@@ -1013,6 +1113,7 @@ const vehicleSearch = ref('');
 const workOrderSearch = ref('');
 const quoteSearch = ref('');
 const paymentSearch = ref('');
+const invoiceSearch = ref('');
 
 // Persistence watchers
 watch(activeTab, (val) => localStorage.setItem('customer_active_tab', val));
@@ -1064,9 +1165,21 @@ const filteredPayments = computed(() => {
     const q = paymentSearch.value.toLowerCase();
     return props.payments.filter(p =>
         p.work_order?.code?.toLowerCase().includes(q) ||
+        p.invoice?.invoice_number?.toLowerCase().includes(q) ||
         p.notes?.toLowerCase().includes(q) ||
         p.payment_method?.toLowerCase().includes(q) ||
         p.received_by?.name?.toLowerCase().includes(q)
+    );
+});
+
+const filteredInvoices = computed(() => {
+    if (!props.invoices) return [];
+    if (!invoiceSearch.value) return props.invoices;
+    const q = invoiceSearch.value.toLowerCase();
+    return props.invoices.filter(inv =>
+        inv.invoice_number?.toLowerCase().includes(q) ||
+        inv.notes?.toLowerCase().includes(q) ||
+        inv.work_order?.code?.toLowerCase().includes(q)
     );
 });
 
@@ -1148,6 +1261,15 @@ function getColorHex(colorName) {
 function getQuoteStatusClass(status) {
     const classes = { draft: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300', pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400', approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400', rejected: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400', converted: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400' };
     return classes[status] || classes.draft;
+}
+
+function getInvoicePaymentStatusClass(status) {
+    const classes = {
+        paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+        partial: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        unpaid: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
+    };
+    return classes[status] || classes.unpaid;
 }
 
 function getPaymentMethodClass(method) {

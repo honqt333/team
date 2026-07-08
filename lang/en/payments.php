@@ -1,44 +1,74 @@
 <?php
 
-return [
-    'title' => 'Payments',
-    'payment' => 'Payment',
-    'payments' => 'Payments',
-    'add' => 'Add Payment',
-    'recorded' => 'Payment recorded successfully',
-    'deleted' => 'Payment deleted',
+return array (
+  'add' => 'Add Payment',
+  'add_payment' => 'Add Payment',
+  'amount' => 'Amount',
+  'amount_exceeds_balance' => 'The amount cannot exceed the remaining balance',
+  'amount_exceeds_paid' => 'Amount Exceeds Paid',
+  'auto_payment_notes' => 'Automatic payment recorded upon receipt of invoice',
+  'cannot_refund_unpaid' => 'Cannot Refund Unpaid',
+  'date' => 'Payment Date',
+  'deleted' => 'Payment deleted',
+  'deleted_successfully' => 'Deleted Successfully',
+  'edit_payment' => 'Edit Payment',
+  'errors' => 
+  array (
+    'cannot_refund_unpaid_invoice' => 'Cannot Refund Unpaid Invoice',
+  ),
+  'form' => 
+  array (
     'amount' => 'Amount',
-    'date' => 'Payment Date',
-    'method' => 'Payment Method',
-    'reference' => 'Reference',
+    'amount_placeholder' => 'Amount Placeholder',
+    'date' => 'Date',
+    'details' => 'Details',
+    'method' => 'Method',
     'notes' => 'Notes',
-    'received_by' => 'Received By',
-    'pay_full' => 'Pay Full Amount',
-    'pay_partial' => 'Partial Payment',
-    
-    // Payment Methods
-    'methods' => [
-        'cash' => 'Cash',
-        'card' => 'Card',
-        'transfer' => 'Bank Transfer',
-        'credit' => 'Credit',
-        'mada' => 'Mada',
-        'visa' => 'Visa',
-        'mastercard' => 'Mastercard',
-        'apple_pay' => 'Apple Pay',
-        'stc_pay' => 'STC Pay',
-        'debit_note' => 'Debit Note (Credit Balance)',
-        'other' => 'Other',
-    ],
-    
-    // Validation
-    'amount_exceeds_balance' => 'The amount cannot exceed the remaining balance',
-    'auto_payment_notes' => 'Automatic payment recorded upon receipt of invoice',
-    
-    // Types
-    'types' => [
-        'payment' => 'Payment',
-        'refund' => 'Refund',
-        'bad_debt' => 'Bad Debt',
-    ],
-];
+    'notes_placeholder' => 'Notes Placeholder',
+    'reference' => 'Reference',
+    'reference_placeholder' => 'Reference Placeholder',
+    'type' => 'Type',
+  ),
+  'method' => 'Payment Method',
+  'methods' => 
+  array (
+    'apple_pay' => 'Apple Pay',
+    'card' => 'Card',
+    'cash' => 'Cash',
+    'check' => 'Check',
+    'credit' => 'Credit',
+    'debit_note' => 'Debit Note (Credit Balance)',
+    'mada' => 'Mada',
+    'mastercard' => 'Mastercard',
+    'other' => 'Other',
+    'stc_pay' => 'STC Pay',
+    'tabby' => 'Tabby',
+    'tamara' => 'Tamara',
+    'transfer' => 'Bank Transfer',
+    'visa' => 'Visa',
+  ),
+  'no_payments' => 'No Payments',
+  'no_payments_desc' => 'No Payments Desc',
+  'no_refunds' => 'No Refunds',
+  'notes' => 'Notes',
+  'pay_full' => 'Pay Full Amount',
+  'pay_partial' => 'Partial Payment',
+  'payment' => 'Payment',
+  'payments' => 'Payments',
+  'received_by' => 'Received By',
+  'recorded' => 'Payment recorded successfully',
+  'recorded_by' => 'Recorded By',
+  'reference' => 'Reference',
+  'refund_for_return_notes' => 'Refund For Return Notes',
+  'refund_not_allowed_for_exited' => 'Refund Not Allowed For Exited',
+  'remaining_refund' => 'Remaining Refund',
+  'saved_successfully' => 'Saved Successfully',
+  'title' => 'Payments',
+  'types' => 
+  array (
+    'bad_debt' => 'Bad Debt',
+    'payment' => 'Payment',
+    'refund' => 'Refund',
+  ),
+  'updated_successfully' => 'Updated Successfully',
+);

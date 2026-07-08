@@ -16,7 +16,14 @@ import 'vue-tel-input/vue-tel-input.css';
 const appName = i18n.global.t('common.app_name') || import.meta.env.VITE_APP_NAME || 'Laravel';
 
 // Apply initial theme on startup
-applyTheme(getInitialTheme());
+// Force page reload on back-forward cache restore to ensure correct auth states
+if (typeof window !== 'undefined') {
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+}
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

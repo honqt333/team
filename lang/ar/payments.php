@@ -1,44 +1,74 @@
 <?php
 
-return [
-    'title' => 'المدفوعات',
+return array (
+  'add' => 'إضافة دفعة',
+  'add_payment' => '[AR] payments.add_payment',
+  'amount' => 'المبلغ',
+  'amount_exceeds_balance' => 'المبلغ لا يمكن أن يتجاوز المتبقي',
+  'amount_exceeds_paid' => '[AR] payments.amount_exceeds_paid',
+  'auto_payment_notes' => 'تسجيل دفعة تلقائية عند استلام الفاتورة',
+  'cannot_refund_unpaid' => '[AR] payments.cannot_refund_unpaid',
+  'date' => 'تاريخ الدفع',
+  'deleted' => 'تم حذف الدفعة',
+  'deleted_successfully' => '[AR] payments.deleted_successfully',
+  'edit_payment' => '[AR] payments.edit_payment',
+  'errors' => 
+  array (
+    'cannot_refund_unpaid_invoice' => '[AR] payments.errors.cannot_refund_unpaid_invoice',
+  ),
+  'form' => 
+  array (
+    'amount' => '[AR] payments.form.amount',
+    'amount_placeholder' => '[AR] payments.form.amount_placeholder',
+    'date' => '[AR] payments.form.date',
+    'details' => '[AR] payments.form.details',
+    'method' => '[AR] payments.form.method',
+    'notes' => '[AR] payments.form.notes',
+    'notes_placeholder' => '[AR] payments.form.notes_placeholder',
+    'reference' => '[AR] payments.form.reference',
+    'reference_placeholder' => '[AR] payments.form.reference_placeholder',
+    'type' => '[AR] payments.form.type',
+  ),
+  'method' => 'طريقة الدفع',
+  'methods' => 
+  array (
+    'apple_pay' => 'أبل باي',
+    'card' => 'بطاقة',
+    'cash' => 'نقداً',
+    'check' => '[AR] payments.methods.check',
+    'credit' => 'آجل',
+    'debit_note' => 'فاتورة مدينة (رصيد دائن)',
+    'mada' => 'مدى',
+    'mastercard' => 'ماستركارد',
+    'other' => 'أخرى',
+    'stc_pay' => 'إس تي سي باي',
+    'tabby' => '[AR] payments.methods.tabby',
+    'tamara' => '[AR] payments.methods.tamara',
+    'transfer' => 'تحويل بنكي',
+    'visa' => 'فيزا',
+  ),
+  'no_payments' => '[AR] payments.no_payments',
+  'no_payments_desc' => '[AR] payments.no_payments_desc',
+  'no_refunds' => '[AR] payments.no_refunds',
+  'notes' => 'ملاحظات',
+  'pay_full' => 'دفع كامل المبلغ',
+  'pay_partial' => 'دفع جزئي',
+  'payment' => 'دفعة',
+  'payments' => 'المدفوعات',
+  'received_by' => 'المستلم',
+  'recorded' => 'تم تسجيل الدفعة بنجاح',
+  'recorded_by' => '[AR] payments.recorded_by',
+  'reference' => 'رقم المرجع',
+  'refund_for_return_notes' => '[AR] payments.refund_for_return_notes',
+  'refund_not_allowed_for_exited' => '[AR] payments.refund_not_allowed_for_exited',
+  'remaining_refund' => '[AR] payments.remaining_refund',
+  'saved_successfully' => '[AR] payments.saved_successfully',
+  'title' => 'المدفوعات',
+  'types' => 
+  array (
+    'bad_debt' => 'ديون معدومة',
     'payment' => 'دفعة',
-    'payments' => 'المدفوعات',
-    'add' => 'إضافة دفعة',
-    'recorded' => 'تم تسجيل الدفعة بنجاح',
-    'deleted' => 'تم حذف الدفعة',
-    'amount' => 'المبلغ',
-    'date' => 'تاريخ الدفع',
-    'method' => 'طريقة الدفع',
-    'reference' => 'رقم المرجع',
-    'notes' => 'ملاحظات',
-    'received_by' => 'المستلم',
-    'pay_full' => 'دفع كامل المبلغ',
-    'pay_partial' => 'دفع جزئي',
-    
-    // Payment Methods
-    'methods' => [
-        'cash' => 'نقداً',
-        'card' => 'بطاقة',
-        'transfer' => 'تحويل بنكي',
-        'credit' => 'آجل',
-        'mada' => 'مدى',
-        'visa' => 'فيزا',
-        'mastercard' => 'ماستركارد',
-        'apple_pay' => 'أبل باي',
-        'stc_pay' => 'إس تي سي باي',
-        'debit_note' => 'فاتورة مدينة (رصيد دائن)',
-        'other' => 'أخرى',
-    ],
-    
-    // Validation
-    'amount_exceeds_balance' => 'المبلغ لا يمكن أن يتجاوز المتبقي',
-    'auto_payment_notes' => 'تسجيل دفعة تلقائية عند استلام الفاتورة',
-    
-    // Types
-    'types' => [
-        'payment' => 'دفعة',
-        'refund' => 'استرجاع',
-        'bad_debt' => 'ديون معدومة',
-    ],
-];
+    'refund' => 'استرجاع',
+  ),
+  'updated_successfully' => '[AR] payments.updated_successfully',
+);

@@ -627,7 +627,12 @@ const activeTab = ref('invoice_items'); // 'invoice_items', 'parts', 'payments'
 const showPaymentModal = ref(false);
 
 // Split lines into services vs spare parts
-const serviceLines = computed(() => (props.invoice.lines || []).filter(l => !l.is_part));
+const serviceLines = computed(() => {
+    if (!props.invoice.work_order_id) {
+        return props.invoice.lines || [];
+    }
+    return (props.invoice.lines || []).filter(l => !l.is_part);
+});
 const partsLines   = computed(() => (props.invoice.lines || []).filter(l =>  l.is_part));
 
 const invoiceBadDebt = computed(() => {

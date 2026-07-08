@@ -21,9 +21,8 @@ class DatabaseSeeder extends Seeder
         // 2. Create Initial System Admin (Production)
         $this->call(InitialSystemSeeder::class);
 
-        // 3. Create Technical Data (Cars, Colors, Services)
-        $this->call(VehicleMakesSeeder::class);
-        $this->call(VehicleColorsSeeder::class);
+        // 3. Create Technical Data (Cars, Colors, Services, Units, HR Metadata)
+        $this->call(MetadataSeeder::class);
         $this->call(ServiceSeeder::class);
         $this->call(VehicleConditionSeeder::class);
 

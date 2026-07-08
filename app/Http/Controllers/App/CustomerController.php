@@ -139,12 +139,24 @@ class CustomerController
             ->latest()
             ->get();
 
-        // Get all payments from customer's work orders - optimized single query
-        $payments = \App\Models\Payment::whereHas('workOrder', function($q) use ($customer) {
-                $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
+        // Get all payments from customer's work orders or direct invoices
+        $payments = \App\Models\Payment::where(function($query) use ($customer) {
+                $query->whereHas('workOrder', function($q) use ($customer) {
+                    $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
+                })
+                ->orWhereHas('invoice', function($q) use ($customer) {
+                    $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
+                });
             })
-            ->with(['receivedBy', 'workOrder'])
+            ->with(['receivedBy', 'workOrder', 'invoice'])
             ->latest('payment_date')
+            ->get();
+
+        // Get customer's invoices (bypassing center_scoped to show tenant-wide history)
+        $invoices = $customer->invoices()
+            ->withoutGlobalScope('center_scoped')
+            ->with(['workOrder.vehicle'])
+            ->latest()
             ->get();
 
         // Use counts from the relationship counts (avoid extra queries)
@@ -152,7 +164,7 @@ class CustomerController
             'vehicles' => $customer->vehicles_count ?? $vehicles->count(),
             'quotes' => $customer->quotes_count ?? $quotes->count(),
             'workOrders' => $customer->work_orders_count ?? $workOrders->count(),
-            'invoices' => 0, // Placeholder for future
+            'invoices' => $invoices->count(),
             'payments' => $payments->count(),
         ];
 
@@ -173,6 +185,7 @@ class CustomerController
             'vehicles' => $vehicles,
             'workOrders' => $workOrders,
             'quotes' => $quotes,
+            'invoices' => $invoices,
             'payments' => $payments,
             'makes' => $makes,
             'colors' => $colors,
