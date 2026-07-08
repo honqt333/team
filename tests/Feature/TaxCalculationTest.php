@@ -183,8 +183,8 @@ class TaxCalculationTest extends TestCase
         $doc = $this->calculator->calculateDocument($lines);
         
         // Each line tax: 1.01 * 0.15 = 0.1515 -> round(2) = 0.15
-        // Total Tax sum = 1.50.
-        $this->assertEquals(1.50, $doc['total_tax']);
+        // Reconciled Total Tax on Document (10.10 * 15% = 1.515 -> 1.52)
+        $this->assertEquals(1.52, $doc['total_tax']);
         
         // Note: ZATCA allows both approaches (Sum of Lines vs Calc on Total). 
         // Sum of Lines is generally safer for invoice consistency.

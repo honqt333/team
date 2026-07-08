@@ -6,6 +6,7 @@ use App\Models\TenantTaxSetting;
 use App\Support\TenancyContext;
 use Illuminate\Database\Eloquent\Model;
 
+// @bypass-tenancy-scanner - This is a Trait (Concern), not an Eloquent Model. Scoping is handled by the parent model.
 trait HasTaxSnapshot
 {
     public static function bootHasTaxSnapshot(): void

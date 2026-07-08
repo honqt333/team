@@ -6,8 +6,8 @@
     >
         <!-- Center Header -->
         <div class="text-center pb-3 border-b transition-all duration-300" :class="isSleek ? 'border-b-2 border-slate-900' : 'border-b border-dashed border-gray-300'">
-            <div v-if="visualSettings.show_logo && centerData.logo" class="w-12 h-12 mx-auto mb-1">
-                <img :src="centerData.logo" alt="Logo" class="w-full h-full object-contain" />
+            <div v-if="visualSettings.show_logo && (centerData.logo_url || centerData.logo)" class="w-12 h-12 mx-auto mb-1">
+                <img :src="centerData.logo_url || centerData.logo" alt="Logo" class="w-full h-full object-contain" />
             </div>
             <h2 class="text-sm font-bold text-gray-900 transition-all duration-300" :style="{ color: isSleek ? primaryColor : '#111827' }">{{ centerData.name || 'مركز خدمة برو' }}</h2>
             <p v-if="isTaxEnabled() && centerData.tax_number" class="text-[10px] text-gray-500 mt-0.5">{{ $t('company_profile.profile.vat_number') }}: {{ centerData.tax_number }}</p>
@@ -248,7 +248,7 @@
         </div>
 
         <!-- Terms and Conditions -->
-        <div v-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || dummyTerms.length > 0)" class="py-2 border-t border-dashed border-gray-300">
+        <div v-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || (previewMode && dummyTerms.length > 0))" class="py-2 border-t border-dashed border-gray-300">
             <span class="block font-bold text-[9px] text-gray-500 mb-1">{{ $t('work_orders.print_view.terms_conditions') }}:</span>
             <ul class="text-[8px] text-gray-400 space-y-0.5 list-disc list-inside leading-tight">
                 <li v-for="(term, idx) in documentSettings.terms?.length > 0 ? documentSettings.terms : dummyTerms" :key="idx">
@@ -260,9 +260,9 @@
         <!-- Signatures & Stamp -->
         <div class="py-4 border-t border-dashed border-gray-300 relative min-h-[25mm]">
             <!-- Dynamic Signatures Columns -->
-            <div class="grid gap-4 items-center justify-center text-center" :class="getSignatureGridClass(documentSettings.signatures?.length || 2)">
+            <div class="grid gap-4 items-center justify-center text-center" :class="getSignatureGridClass(visibleSignatures.length || 2)">
                 <div 
-                    v-for="(sig, index) in documentSettings.signatures?.length > 0 ? documentSettings.signatures : defaultSignatures" 
+                    v-for="(sig, index) in visibleSignatures" 
                     :key="index" 
                     class="text-center flex flex-col items-center justify-end"
                 >
@@ -275,7 +275,7 @@
             </div>
 
             <!-- Thermal Small Stamp -->
-            <div v-if="visualSettings.show_stamp && (previewMode || centerData.stamp_url || visualSettings.stamp_url)" class="absolute bottom-2 left-4 w-16 h-16 select-none pointer-events-none z-10 opacity-70 -rotate-12 transition-all">
+            <div v-if="documentSettings.show_stamp && (previewMode || centerData.stamp_url || visualSettings.stamp_url)" class="absolute bottom-2 left-4 w-16 h-16 select-none pointer-events-none z-10 opacity-70 -rotate-12 transition-all">
                 <img v-if="centerData.stamp_url || visualSettings.stamp_url" :src="centerData.stamp_url || visualSettings.stamp_url" class="w-full h-full object-contain" />
                 <svg v-else-if="previewMode" class="w-full h-full text-emerald-600/80 print:hidden" fill="none" viewBox="0 0 100 100" stroke="currentColor">
                     <circle cx="50" cy="50" r="45" stroke-width="2.5" stroke-dasharray="3 3"/>
@@ -290,7 +290,7 @@
         </div>
 
         <!-- ZATCA / Standard QR code for Thermal print -->
-        <div v-if="visualSettings.show_qr_code && data.qr_code_url" class="flex flex-col items-center justify-center mt-3 pt-3 border-t border-dashed border-gray-200">
+        <div v-if="documentSettings.show_qr_code && data.qr_code_url" class="flex flex-col items-center justify-center mt-3 pt-3 border-t border-dashed border-gray-200">
             <img :src="data.qr_code_url" alt="QR" class="w-24 h-24 p-1 bg-white border border-gray-200 rounded" />
         </div>
 
@@ -478,9 +478,17 @@ const dummyTerms = [
 ];
 
 const defaultSignatures = [
-    { name_ar: 'المستلم', name_en: 'Recipient' },
-    { name_ar: 'العميل', name_en: 'Customer' }
+    { name_ar: 'المستلم', name_en: 'Recipient', show: true },
+    { name_ar: 'العميل', name_en: 'Customer', show: true }
 ];
+
+// Only render signatures with show !== false
+const visibleSignatures = computed(() => {
+    const sigs = props.documentSettings?.signatures?.length > 0
+        ? props.documentSettings.signatures
+        : defaultSignatures;
+    return sigs.filter(s => s.show !== false);
+});
 
 function isTaxEnabled() {
     const val = props.data.tax_enabled_snapshot;

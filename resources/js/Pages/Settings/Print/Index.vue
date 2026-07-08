@@ -59,17 +59,27 @@
                                 <div 
                                     v-for="tmpl in availableTemplates" 
                                     :key="tmpl.id"
-                                    class="p-4 rounded-2xl border text-start transition-all duration-300 flex flex-col justify-between min-h-[110px] relative overflow-hidden group"
-                                    :class="form.visual.active_template === tmpl.id 
-                                        ? 'border-amber-500 bg-amber-500/[0.04] ring-2 ring-amber-500/20' 
-                                        : 'border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30 hover:border-gray-200 dark:hover:border-gray-700'"
+                                    @click="previewTemplate(tmpl)"
+                                    class="p-4 rounded-2xl border text-start transition-all duration-300 flex flex-col justify-between min-h-[110px] relative overflow-hidden group cursor-pointer"
+                                    :class="[
+                                        form.visual.active_template === tmpl.id 
+                                            ? 'border-amber-500 bg-amber-500/[0.04] ring-2 ring-amber-500/20' 
+                                            : previewingTemplate === tmpl.id
+                                                ? 'border-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/10 ring-2 ring-indigo-400/20'
+                                                : 'border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30 hover:border-gray-200 dark:hover:border-gray-700'
+                                    ]"
                                 >
-                                    <!-- Premium/Integration Badge -->
+                                    <!-- Premium Badge -->
                                     <div v-if="tmpl.premium" class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-[8px] font-black tracking-wide border border-indigo-100 dark:border-indigo-900/50">
                                         <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                                         </svg>
                                         تكامل إضافي
+                                    </div>
+
+                                    <!-- Previewing indicator -->
+                                    <div v-if="previewingTemplate === tmpl.id && form.visual.active_template !== tmpl.id" class="absolute top-2 right-2">
+                                        <span class="text-[8px] font-black px-1.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400">جاري المعاينة</span>
                                     </div>
 
                                     <div class="flex flex-col gap-1 pr-1 pt-1">
@@ -83,10 +93,10 @@
                                     <div class="flex justify-between items-center mt-3 pt-2 border-t border-gray-100/50 dark:border-gray-800/50 w-full">
                                         <button 
                                             type="button"
-                                            @click="selectTemplate(tmpl)"
+                                            @click.stop="selectTemplate(tmpl)"
                                             class="text-[9px] font-bold px-2.5 py-1 rounded-lg transition-all"
                                             :class="form.visual.active_template === tmpl.id
-                                                ? 'bg-amber-500 text-white shadow-sm'
+                                                ? 'bg-amber-500 text-white shadow-sm cursor-default'
                                                 : 'bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 dark:bg-gray-800 dark:border-gray-750 dark:text-gray-300'"
                                         >
                                             {{ form.visual.active_template === tmpl.id ? 'القالب النشط' : 'تعيين كافتراضي' }}
@@ -100,41 +110,40 @@
 
                         <!-- General Toggles & Color -->
                         <div class="space-y-3.5">
-                            <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
-                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">إظهار شعار المركز</span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" v-model="form.visual.show_logo" class="sr-only peer">
-                                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
-                                </label>
-                            </div>
 
-                            <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
-                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">تفعيل الختم الرسمي العام</span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" v-model="form.visual.show_stamp" class="sr-only peer">
-                                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
-                                </label>
-                            </div>
-
-                            <div class="flex items-center justify-between p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
-                                <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">إظهار كود المعاينة QR</span>
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" v-model="form.visual.show_qr_code" class="sr-only peer">
-                                    <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
-                                </label>
-                            </div>
-
-                            <div class="p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
-                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">اللون الأساسي للهوية</label>
-                                <div class="flex items-center gap-3">
-                                    <input v-model="form.visual.primary_color" type="color" class="w-10 h-10 rounded-lg border-0 p-0 overflow-hidden cursor-pointer bg-transparent" />
-                                    <input v-model="form.visual.primary_color" type="text" class="flex-1 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs" dir="ltr" />
+                            <!-- Show Logo - Paid only -->
+                            <div class="relative p-3 rounded-xl border transition-all" :class="hasPaidSubscription ? 'border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30' : 'border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 opacity-70'">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xs font-semibold text-gray-700 dark:text-gray-300">إظهار شعار المركز</span>
+                                        <span v-if="!hasPaidSubscription" class="text-[9px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full font-bold">مدفوع</span>
+                                    </div>
+                                    <label class="relative inline-flex items-center" :class="hasPaidSubscription ? 'cursor-pointer' : 'cursor-not-allowed'">
+                                        <input type="checkbox" v-model="form.visual.show_logo" class="sr-only peer" :disabled="!hasPaidSubscription">
+                                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"></div>
+                                    </label>
                                 </div>
                             </div>
 
-                            <div class="p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30">
-                                <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">النص التذييلي الافتراضي (الفوتر)</label>
-                                <textarea v-model="form.visual.footer_text" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-normal" :placeholder="$t('print_settings.footer_placeholder')"></textarea>
+                            <!-- Primary color - Paid only -->
+                            <div class="relative p-3 rounded-xl border transition-all" :class="hasPaidSubscription ? 'border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30' : 'border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 opacity-70'">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">اللون الأساسي للهوية</label>
+                                    <span v-if="!hasPaidSubscription" class="text-[9px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full font-bold">مدفوع</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <input v-model="form.visual.primary_color" type="color" class="w-10 h-10 rounded-lg border-0 p-0 overflow-hidden bg-transparent" :class="hasPaidSubscription ? 'cursor-pointer' : 'cursor-not-allowed pointer-events-none'" />
+                                    <input v-model="form.visual.primary_color" type="text" class="flex-1 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs" dir="ltr" :readonly="!hasPaidSubscription" />
+                                </div>
+                            </div>
+
+                            <!-- Footer text - Paid only -->
+                            <div class="relative p-3 rounded-xl border transition-all" :class="hasPaidSubscription ? 'border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30' : 'border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 opacity-70'">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <label class="block text-xs font-semibold text-gray-700 dark:text-gray-300">النص التذييلي الافتراضي (الفوتر)</label>
+                                    <span v-if="!hasPaidSubscription" class="text-[9px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full font-bold">مدفوع</span>
+                                </div>
+                                <textarea v-model="form.visual.footer_text" rows="2" class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-normal" :placeholder="$t('print_settings.footer_placeholder')" :readonly="!hasPaidSubscription"></textarea>
                             </div>
                         </div>
                     </div>
@@ -202,12 +211,16 @@
                                     <span>تفعيل الختم</span>
                                 </label>
                                 <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer">
+                                    <input type="checkbox" v-model="form.documents[selectedDocKey].show_qr_code" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+                                    <span>إظهار كود QR</span>
+                                </label>
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer">
                                     <input type="checkbox" v-model="form.documents[selectedDocKey].show_iban" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
                                     <span>إظهار IBAN البنكي</span>
                                 </label>
-                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer col-span-2">
+                                <label class="flex items-center gap-2 p-2 rounded-lg bg-gray-50/50 dark:bg-gray-900/30 border border-gray-100 dark:border-gray-700/50 cursor-pointer">
                                     <input type="checkbox" v-model="form.documents[selectedDocKey].show_customer_address" class="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
-                                    <span>إظهار عنوان العميل في البيانات</span>
+                                    <span>إظهار عنوان العميل</span>
                                 </label>
                             </div>
 
@@ -276,7 +289,7 @@
                                 :data="dummyPrintData"
                                 :centerData="dummyCenterData"
                                 :documentSettings="form.documents[previewDocType]"
-                                :visualSettings="form.visual"
+                                :visualSettings="{ ...form.visual, active_template: previewingTemplate }"
                                 :previewMode="true"
                             />
                         </div>
@@ -356,6 +369,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -375,14 +389,15 @@ const props = defineProps({
     print_settings: Object
 });
 
+const page = usePage();
+const hasPaidSubscription = computed(() => page.props.tenant?.has_paid_subscription ?? false);
+
 const form = useForm({
     section: 'print',
     documents: props.print_settings?.documents ?? {},
     visual: props.print_settings?.visual ?? {
         active_template: 'TemplateDefaultA4',
         show_logo: true,
-        show_stamp: true,
-        show_qr_code: true,
         primary_color: '#fbbf24',
         footer_text: '',
     }
@@ -431,15 +446,26 @@ const availableTemplates = [
     }
 ];
 
+// Tracks which template is being *previewed* (may differ from saved active_template)
+const previewingTemplate = ref(form.visual.active_template || 'TemplateDefaultA4');
+
+// Click on card body → preview only (no save)
+function previewTemplate(template) {
+    previewingTemplate.value = template.id;
+}
+
+// Click on "تعيين كافتراضي" button → save as default
 function selectTemplate(template) {
-    // Set active in form (updates the sandbox preview immediately!)
-    form.visual.active_template = template.id;
-    
-    // If premium, show upgrade details modal
-    if (template.premium) {
+    // If premium and not paid → show upgrade modal, do NOT save
+    if (template.premium && !hasPaidSubscription.value) {
+        previewingTemplate.value = template.id; // still preview
         selectedPremiumTemplate.value = template;
         showUpgradeModal.value = true;
+        return;
     }
+    // Save as active template
+    form.visual.active_template = template.id;
+    previewingTemplate.value = template.id;
 }
 
 function requestActivation() {
@@ -486,7 +512,7 @@ function save() {
 // Sandbox Dummy Data
 const dummyCenterData = computed(() => ({
     name: 'مركز خدمة برو لصيانة السيارات',
-    logo: '/logo.png', // Fallback URL
+    logo_url: page.props.tenant?.logo_url || '/images/logo.png',
     tax_number: '310298374200003',
     address: 'الرياض، حي الصحافة، طريق الملك عبد العزيز',
     phone: '+966 55 123 4567',

@@ -6,9 +6,11 @@ use App\Models\Tenant;
 use App\Models\Center;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Concerns\CenterScoped;
 
 class WhatsappUsageLog extends Model
 {
+    use CenterScoped;
     protected $fillable = [
         'tenant_id',
         'center_id',

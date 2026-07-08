@@ -97,6 +97,25 @@ class Tenant extends Model
     }
 
     /**
+     * Check if the tenant has an active paid subscription.
+     */
+    public function hasPaidSubscription(): bool
+    {
+        // For development/seeding convenience, if running in local/testing and there are no plans/subscriptions at all, default to true or false.
+        // But to be precise, let's query the database.
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('ends_at')
+                    ->orWhere('ends_at', '>', now());
+            })
+            ->whereHas('plan', function ($query) {
+                $query->where('price_monthly', '>', 0);
+            })
+            ->exists();
+    }
+
+    /**
      * The "booted" method of the model.
      */
     protected static function booted(): void

@@ -605,6 +605,12 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // Dashboard
     Route::get('/', [\App\Http\Controllers\System\SystemDashboardController::class, 'index'])->name('system.dashboard');
     
+    // Developer Center
+    Route::get('/developer', [\App\Http\Controllers\System\DeveloperController::class, 'index'])->name('system.developer.index');
+    Route::post('/developer/audit', [\App\Http\Controllers\System\DeveloperController::class, 'runAudit'])->name('system.developer.audit');
+    Route::get('/developer/graph', [\App\Http\Controllers\System\DeveloperController::class, 'getGraph'])->name('system.developer.graph');
+    Route::post('/developer/ai-advice', [\App\Http\Controllers\System\DeveloperController::class, 'aiAdvice'])->name('system.developer.ai-advice');
+    
     // Tenants Management
     Route::get('/tenants', [\App\Http\Controllers\System\TenantsController::class, 'index'])->name('system.tenants.index');
     Route::get('/tenants/{tenant}', [\App\Http\Controllers\System\TenantsController::class, 'show'])->name('system.tenants.show');

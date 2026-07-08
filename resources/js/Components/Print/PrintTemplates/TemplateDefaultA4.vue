@@ -18,7 +18,7 @@
             
             <div class="w-1/3 flex flex-col items-center justify-center">
                 <div v-if="visualSettings.show_logo" class="mb-3">
-                    <img v-if="centerData.logo" :src="centerData.logo" alt="Logo" class="w-24 h-24 object-contain" />
+                    <img v-if="centerData.logo_url || centerData.logo" :src="centerData.logo_url || centerData.logo" alt="Logo" class="w-24 h-24 object-contain" />
                     <div v-else class="w-24 h-24 bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-xs font-bold">
                         [Logo]
                     </div>
@@ -33,7 +33,7 @@
             </div>
             
             <div class="w-1/3 flex flex-col" :class="isRtl ? 'items-end' : 'items-start'">
-                <div v-if="visualSettings.show_qr_code" class="w-20 h-20 bg-gray-100 border border-gray-300 p-1 mb-2">
+                <div v-if="documentSettings.show_qr_code" class="w-20 h-20 bg-gray-100 border border-gray-300 p-1 mb-2">
                     <img v-if="data.qr_code_url" :src="data.qr_code_url" alt="QR" class="w-full h-full object-contain" />
                     <div v-else class="w-full h-full flex items-center justify-center text-gray-400 text-xs">[QR]</div>
                 </div>
@@ -486,7 +486,7 @@
         <!-- Totals Block & Summary (For pricing documents) -->
         <div v-if="showPricingColumns && documentType !== 'receipt' && documentType !== 'payments'" class="flex justify-between items-start mb-12">
             <div class="w-1/2 pr-4 text-sm text-gray-500">
-                <div v-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || dummyTerms.length > 0)">
+                <div v-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || (previewMode && dummyTerms.length > 0))">
                     <h4 class="text-xs font-bold text-gray-700 mb-1">{{ $t('work_orders.print_view.terms_conditions') }}:</h4>
                     <ol class="list-decimal list-inside text-[10px] text-gray-500 space-y-1 leading-normal pr-2">
                         <li v-for="(term, idx) in documentSettings.terms?.length > 0 ? documentSettings.terms : dummyTerms" :key="idx">
@@ -541,7 +541,7 @@
         </div>
         
         <!-- For non-pricing documents, print terms in full width -->
-        <div v-else-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || dummyTerms.length > 0)" class="mb-12">
+        <div v-else-if="documentSettings.print_terms && (documentSettings.terms?.length > 0 || (previewMode && dummyTerms.length > 0))" class="mb-12">
             <h4 class="text-xs font-bold text-gray-700 mb-2">{{ $t('work_orders.print_view.terms_conditions') }}:</h4>
             <ol class="list-decimal list-inside text-xs text-gray-500 space-y-1.5 leading-relaxed pr-2">
                 <li v-for="(term, idx) in documentSettings.terms?.length > 0 ? documentSettings.terms : dummyTerms" :key="idx">
@@ -552,10 +552,10 @@
 
         <!-- Signatures & Official Stamp Grid -->
         <div class="mt-auto pt-8 border-t-2 border-gray-800">
-            <div class="grid gap-8 text-center text-sm font-bold text-gray-800 mb-8 relative" :class="getSignatureGridClass(documentSettings.signatures?.length || 2)">
+            <div class="grid gap-8 text-center text-sm font-bold text-gray-800 mb-8 relative" :class="getSignatureGridClass(visibleSignatures.length || 2)">
                 
                 <!-- Official Stamp positioned absolutely over signatures grid -->
-                <div v-if="visualSettings.show_stamp && (previewMode || centerData.stamp_url || visualSettings.stamp_url)" class="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none -rotate-12 z-10 select-none">
+                <div v-if="documentSettings.show_stamp && (previewMode || centerData.stamp_url || visualSettings.stamp_url)" class="absolute inset-0 flex items-center justify-center opacity-80 pointer-events-none -rotate-12 z-10 select-none">
                     <img v-if="centerData.stamp_url || visualSettings.stamp_url" :src="centerData.stamp_url || visualSettings.stamp_url" class="w-28 h-28 object-contain" />
                     <!-- Fallback premium stamp design in SVG if in preview mode and image not provided -->
                     <svg v-else-if="previewMode" class="w-28 h-28 text-emerald-600/80 print:hidden" fill="none" viewBox="0 0 100 100" stroke="currentColor">
@@ -569,8 +569,8 @@
                     </svg>
                 </div>
 
-                <!-- Signature roles -->
-                <div v-for="(sig, index) in documentSettings.signatures?.length > 0 ? documentSettings.signatures : defaultSignatures" :key="index" class="flex flex-col items-center">
+                <!-- Signature roles (only show=true) -->
+                <div v-for="(sig, index) in visibleSignatures" :key="index" class="flex flex-col items-center">
                     <p class="mb-4">{{ isRtl ? sig.name_ar : (sig.name_en || sig.name_ar) }}</p>
                     <div v-if="isClientSignature(isRtl ? sig.name_ar : (sig.name_en || sig.name_ar)) && (data.reception_signature || data.delivery_signature)" class="h-16 flex items-center justify-center mb-2">
                         <img :src="'/storage/' + (data.reception_signature || data.delivery_signature)" class="max-h-full max-w-[120px] object-contain" />
@@ -962,9 +962,17 @@ const dummyTerms = [
 ];
 
 const defaultSignatures = [
-    { name_ar: 'المدير', name_en: 'Manager' },
-    { name_ar: 'العميل', name_en: 'Customer' }
+    { name_ar: 'المدير', name_en: 'Manager', show: true },
+    { name_ar: 'العميل', name_en: 'Customer', show: true }
 ];
+
+// Only render signatures with show !== false
+const visibleSignatures = computed(() => {
+    const sigs = props.documentSettings?.signatures?.length > 0
+        ? props.documentSettings.signatures
+        : defaultSignatures;
+    return sigs.filter(s => s.show !== false);
+});
 
 // Computed Totals
 const totals = computed(() => {

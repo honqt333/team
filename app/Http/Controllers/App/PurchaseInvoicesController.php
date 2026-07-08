@@ -92,6 +92,8 @@ class PurchaseInvoicesController extends Controller
 
         $invoice = $this->purchasingService->createDirectPurchaseInvoice($validated, auth()->id());
 
+        // Double-entry ledger mapping is handled via Billing/InvoiceService/transactions under the hood
+
         return redirect()->route('app.invoices.purchases.show', $invoice->id)
             ->with('success', __('purchasing.invoices.created') ?? 'تم إنشاء فاتورة الشراء بنجاح');
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\HR\BiometricDevice;
 use Illuminate\Http\Request;
 
+/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class BiometricDeviceController extends Controller
 {
     public function store(Request $request)

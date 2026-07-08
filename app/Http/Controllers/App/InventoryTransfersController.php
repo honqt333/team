@@ -98,6 +98,8 @@ class InventoryTransfersController extends Controller
             'status' => InventoryTransfer::STATUS_DRAFT,
         ]);
 
+        $this->logActivity('create', $transfer, "Created draft transfer from warehouse {$transfer->from_warehouse_id} to {$transfer->to_warehouse_id}");
+
         return redirect()->route('app.inventory.transfers.show', $transfer)
             ->with('success', __('inventory.transfers.created'));
     }
@@ -187,6 +189,7 @@ class InventoryTransfersController extends Controller
 
         try {
             $this->inventoryService->sendTransfer($transfer, auth()->id());
+            $this->logActivity('send', $transfer, "Sent transfer from warehouse {$transfer->from_warehouse_id} to {$transfer->to_warehouse_id}");
             return back()->with('success', __('inventory.transfers.sent'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
@@ -211,6 +214,7 @@ class InventoryTransfersController extends Controller
                 $validated['received_qtys'] ?? [],
                 auth()->id()
             );
+            $this->logActivity('receive', $transfer, "Received transfer items");
             return back()->with('success', __('inventory.transfers.received'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
@@ -234,9 +238,24 @@ class InventoryTransfersController extends Controller
                 auth()->id(),
                 $validated['reason'] ?? null
             );
+            $this->logActivity('cancel', $transfer, "Cancelled transfer. Reason: " . ($validated['reason'] ?? 'N/A'));
             return back()->with('success', __('inventory.transfers.cancelled'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Log activity for inventory transfers.
+     */
+    protected function logActivity(string $action, InventoryTransfer $transfer, ?string $description = null): void
+    {
+        \Illuminate\Support\Facades\Log::info("Inventory Transfer Action: {$action}", [
+            'transfer_id' => $transfer->id,
+            'code' => $transfer->code,
+            'user_id' => auth()->id(),
+            'tenant_id' => auth()->user()->tenant_id,
+            'description' => $description,
+        ]);
     }
 }

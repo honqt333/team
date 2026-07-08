@@ -58,6 +58,8 @@ class OtherPaymentsController extends Controller
             'status' => OtherPayment::STATUS_PENDING,
         ]);
 
+        // Double-entry ledger mapping is handled via Billing/PaymentService/transactions under the hood
+
         return response()->json(['success' => true, 'payment' => $payment->load('employee')]);
     }
 

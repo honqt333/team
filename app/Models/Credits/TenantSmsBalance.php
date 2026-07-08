@@ -6,9 +6,11 @@ use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Concerns\TenantScoped;
 
 class TenantSmsBalance extends Model
 {
+    use TenantScoped;
     protected $fillable = [
         'tenant_id',
         'balance',

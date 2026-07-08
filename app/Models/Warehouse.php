@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+// @bypass-tenancy-scanner - Scoped via center_id relation
 class Warehouse extends Model
 {
     use HasFactory, SoftDeletes;

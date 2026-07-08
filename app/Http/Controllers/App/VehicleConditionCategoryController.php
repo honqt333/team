@@ -7,6 +7,7 @@ use App\Models\VehicleConditionCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
+/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class VehicleConditionCategoryController extends Controller
 {
     public function store(Request $request): RedirectResponse

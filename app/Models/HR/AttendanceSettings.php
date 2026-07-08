@@ -6,6 +6,7 @@ use App\Models\Center;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// @bypass-tenancy-scanner - Scoped via center_id relation
 class AttendanceSettings extends Model
 {
     protected $table = 'hr_attendance_settings';

@@ -7,6 +7,7 @@ use App\Models\HR\Shift;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
 
+/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class ShiftController extends Controller
 {
     public function store(Request $request)

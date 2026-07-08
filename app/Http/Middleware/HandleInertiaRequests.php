@@ -82,6 +82,7 @@ class HandleInertiaRequests extends Middleware
                 'invoice_terms' => $tenant->invoice_terms,
                 'print_settings' => $tenant->print_settings,
                 'tax_settings' => $tenant->taxSettings,
+                'has_paid_subscription' => $tenant->hasPaidSubscription(),
             ] : null,
             'center' => $user?->currentCenter ? [
                 'id' => $user->currentCenter->id,

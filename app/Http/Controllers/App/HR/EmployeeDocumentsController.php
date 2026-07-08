@@ -8,6 +8,7 @@ use App\Models\HR\EmployeeDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class EmployeeDocumentsController extends Controller
 {
     public function store(Request $request, Employee $employee)

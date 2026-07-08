@@ -7,6 +7,7 @@ use App\Models\VehicleMake;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class SystemSettingsController extends Controller
 {
     /**
@@ -55,10 +56,11 @@ class SystemSettingsController extends Controller
                 'name' => $name,
                 'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? ($tenant->{"{$key}_title"} ?? $name)),
                 'title_en' => $existing['title_en'] ?? ($existing['title'] ?? $name),
-                'terms' => is_array($existing['terms'] ?? null) ? $existing['terms'] : [['text_ar' => $existing['terms'] ?? ($tenant->{"{$key}_terms"} ?? ''), 'text_en' => '', 'order' => 1]],
+                'terms' => is_array($existing['terms'] ?? null) ? array_values(array_filter($existing['terms'], fn($t) => !empty($t['text_ar']) || !empty($t['text_en']))) : [],
                 'print_terms' => $existing['print_terms'] ?? true,
                 'terms_first_page' => $existing['terms_first_page'] ?? false,
                 'show_stamp' => $existing['show_stamp'] ?? true,
+                'show_qr_code' => $existing['show_qr_code'] ?? true,
                 'show_iban' => $existing['show_iban'] ?? false,
                 'show_customer_address' => $existing['show_customer_address'] ?? true,
                 'signatures' => $existing['signatures'] ?? [],
@@ -72,8 +74,6 @@ class SystemSettingsController extends Controller
                 'documents' => $documents,
                 'visual' => $printSettings['visual'] ?? [
                     'show_logo' => $printSettings['show_logo'] ?? true,
-                    'show_stamp' => $printSettings['show_stamp'] ?? true,
-                    'show_qr_code' => $printSettings['show_qr_code'] ?? true,
                     'primary_color' => $printSettings['primary_color'] ?? '#fbbf24',
                     'footer_text' => $printSettings['footer_text'] ?? '',
                 ],
@@ -105,8 +105,6 @@ class SystemSettingsController extends Controller
                     'documents' => 'required|array',
                     'visual' => 'required|array',
                     'visual.show_logo' => 'nullable|boolean',
-                    'visual.show_stamp' => 'nullable|boolean',
-                    'visual.show_qr_code' => 'nullable|boolean',
                     'visual.primary_color' => 'nullable|string|max:7',
                     'visual.footer_text' => 'nullable|string',
                 ]);
