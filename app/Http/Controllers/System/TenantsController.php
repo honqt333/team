@@ -148,6 +148,15 @@ class TenantsController extends Controller
             'status' => 'trial',
         ]);
 
+        // Sync with the database subscription
+        $tenant->subscriptions()
+            ->whereIn('status', ['trial', 'trialing', 'expired', 'suspended'])
+            ->update([
+                'status' => 'trialing',
+                'ends_at' => $newEndDate,
+                'trial_ends_at' => $newEndDate,
+            ]);
+
         return back()->with('success', "تم تمديد الفترة التجريبية {$request->days} يوم");
     }
 

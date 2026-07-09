@@ -179,9 +179,23 @@ class SubscriptionsController extends Controller
             'days' => 'required|integer|min:1|max:365',
         ]);
 
+        $newStatus = $subscription->status;
+        if (in_array($subscription->status, ['expired', 'suspended', 'cancelled'])) {
+            $newStatus = ($subscription->plan && $subscription->plan->slug === 'trial') ? 'trialing' : 'active';
+        }
+
         $subscription->update([
             'ends_at' => $subscription->ends_at->addDays($validated['days']),
+            'status' => $newStatus,
         ]);
+
+        // Sync tenant status and dates
+        $tenantStatus = ($newStatus === 'trialing') ? 'trial' : 'active';
+        $tenantUpdate = ['status' => $tenantStatus];
+        if ($newStatus === 'trialing') {
+            $tenantUpdate['trial_ends_at'] = $subscription->ends_at;
+        }
+        $subscription->tenant->update($tenantUpdate);
 
         return back()->with('success', "تم تمديد الاشتراك {$validated['days']} يوم");
     }
