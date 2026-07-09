@@ -40,13 +40,13 @@ class BranchesController extends Controller
         $this->authorize('create', Center::class);
 
         $validated = $request->validate([
-            'name_ar'      => 'required_without:name_en|nullable|string|max:255',
-            'name_en'      => 'required_without:name_ar|nullable|string|max:255',
-            'center_type'  => 'required|string|in:main,branch,workshop,warehouse',
+            'name_ar' => 'required_without:name_en|nullable|string|max:255',
+            'name_en' => 'required_without:name_ar|nullable|string|max:255',
+            'center_type' => 'required|string|in:main,branch,workshop,warehouse',
             'manager_name' => 'nullable|string|max:255',
-            'phone'        => 'nullable|string|max:50',
-            'email'        => 'nullable|email|max:255',
-            'is_active'    => 'sometimes|boolean',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'is_active' => 'sometimes|boolean',
         ]);
 
         // Derive the legacy `name` column from whichever localized name the
@@ -59,13 +59,31 @@ class BranchesController extends Controller
 
         // Generate unique slug from English name (fallback to Arabic)
         $slugSource = $validated['name_en'] ?? $validated['name_ar'] ?? $localizedName;
-        $validated['slug'] = Str::slug($slugSource) . '-' . Str::lower(Str::random(6));
+        $validated['slug'] = Str::slug($slugSource).'-'.Str::lower(Str::random(6));
 
         // Normalize is_active (checkbox may send 'true'/'false' or true/false)
         $validated['is_active'] = $request->boolean('is_active', true);
 
         $user = auth()->user();
         $tenant = $user->tenant;
+
+        // Check subscription limits for centers/branches
+        $activeSubscription = $tenant->subscriptions()
+            ->whereIn('status', ['active', 'trial', 'trialing'])
+            ->with('plan')
+            ->first();
+
+        $limits = $activeSubscription?->plan?->limits ?? ['centers' => 1];
+        $maxCenters = intval($limits['max_centers'] ?? $limits['centers'] ?? 1);
+        $currentCentersCount = $tenant->centers()->count();
+
+        if ($currentCentersCount >= $maxCenters) {
+            $msg = app()->getLocale() === 'en'
+                ? "You have reached the maximum limit of branches for your plan ({$maxCenters}). Please upgrade to add more."
+                : "لقد وصلت للحد الأقصى المسموح به للفروع في باقتك الحالية ({$maxCenters} فرع). يرجى الترقية لإضافة المزيد.";
+
+            return back()->with('error', $msg);
+        }
 
         // Determine if this new center is being designated as main.
         // We do this BEFORE create so the flag is set correctly in one
