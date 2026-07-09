@@ -96,9 +96,9 @@ class SubscriptionsController extends Controller
             ? $startDate->copy()->addYear()
             : $startDate->copy()->addMonth();
 
-        // Check if trial
-        $status = $plan->trial_days > 0 ? 'trialing' : 'active';
-        $trialEndsAt = $plan->trial_days > 0 ? $startDate->copy()->addDays($plan->trial_days) : null;
+        // Manual subscriptions created by admin are always active paid plans
+        $status = 'active';
+        $trialEndsAt = null;
 
         // Cancel/expire any existing active/trial/trialing subscriptions for this tenant
         Subscription::where('tenant_id', $validated['tenant_id'])
