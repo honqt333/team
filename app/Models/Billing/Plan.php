@@ -11,6 +11,8 @@ class Plan extends Model
 {
     use HasFactory;
 
+    protected $appends = ['yearly_discount', 'features_ar', 'features_en'];
+
     protected $fillable = [
         'name',
         'name_ar',
@@ -57,6 +59,47 @@ class Plan extends Model
         $yearlyIfMonthly = $this->price_monthly * 12;
 
         return round((($yearlyIfMonthly - $this->price_yearly) / $yearlyIfMonthly) * 100);
+    }
+
+    /**
+     * Get features attribute, translated according to current application locale.
+     */
+    public function getFeaturesAttribute($value): array
+    {
+        $features = is_array($value) ? $value : (json_decode($value, true) ?? []);
+        if (isset($features['ar']) || isset($features['en'])) {
+            $locale = app()->getLocale();
+
+            return $features[$locale] ?? $features['ar'] ?? [];
+        }
+
+        return $features;
+    }
+
+    /**
+     * Get Arabic features.
+     */
+    public function getFeaturesArAttribute(): array
+    {
+        $features = is_array($this->features) ? $this->features : (json_decode($this->getRawOriginal('features'), true) ?? []);
+        if (isset($features['ar']) || isset($features['en'])) {
+            return $features['ar'] ?? [];
+        }
+
+        return $features;
+    }
+
+    /**
+     * Get English features.
+     */
+    public function getFeaturesEnAttribute(): array
+    {
+        $features = is_array($this->features) ? $this->features : (json_decode($this->getRawOriginal('features'), true) ?? []);
+        if (isset($features['ar']) || isset($features['en'])) {
+            return $features['en'] ?? [];
+        }
+
+        return [];
     }
 
     /**
