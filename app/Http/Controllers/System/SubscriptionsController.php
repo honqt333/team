@@ -53,9 +53,7 @@ class SubscriptionsController extends Controller
                 'cancelled' => Subscription::where('status', 'cancelled')->count(),
                 'expired' => Subscription::where('status', 'expired')->count(),
             ],
-            'eligibleTenants' => Tenant::whereDoesntHave('subscriptions', function ($q) {
-                $q->whereIn('status', ['active', 'trial', 'trialing']);
-            })->get(['id', 'name', 'trade_name']),
+            'eligibleTenants' => Tenant::get(['id', 'name', 'trade_name']),
         ]);
     }
 
@@ -97,6 +95,13 @@ class SubscriptionsController extends Controller
         // Check if trial
         $status = $plan->trial_days > 0 ? 'trialing' : 'active';
         $trialEndsAt = $plan->trial_days > 0 ? $startDate->copy()->addDays($plan->trial_days) : null;
+
+        // Cancel/expire any existing active/trial/trialing subscriptions for this tenant
+        Subscription::where('tenant_id', $validated['tenant_id'])
+            ->whereIn('status', ['active', 'trial', 'trialing'])
+            ->update([
+                'status' => 'expired',
+            ]);
 
         $subscription = Subscription::create([
             'tenant_id' => $validated['tenant_id'],
