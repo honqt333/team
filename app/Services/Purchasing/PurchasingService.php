@@ -4,12 +4,15 @@ namespace App\Services\Purchasing;
 
 use App\Models\GoodsReceivedNote;
 use App\Models\GrnItem;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseOrderItem;
+use App\Models\Part;
+use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceLine;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class PurchasingService
@@ -46,7 +49,7 @@ class PurchasingService
             ]);
 
             // Add items if provided
-            if (!empty($data['items'])) {
+            if (! empty($data['items'])) {
                 foreach ($data['items'] as $item) {
                     $this->addPurchaseOrderItem($po, $item);
                 }
@@ -61,14 +64,14 @@ class PurchasingService
      */
     public function addPurchaseOrderItem(PurchaseOrder $po, array $data): PurchaseOrderItem
     {
-        if (!$po->isDraft()) {
+        if (! $po->isDraft()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot modify a sent purchase order.'],
             ]);
         }
 
-        $part = \App\Models\Part::find($data['part_id']);
-        if ($part && !empty($data['purchase_unit_id'])) {
+        $part = Part::find($data['part_id']);
+        if ($part && ! empty($data['purchase_unit_id'])) {
             $part->update([
                 'purchase_unit_id' => $data['purchase_unit_id'],
                 'purchase_conversion_factor' => $data['purchase_conversion_factor'] ?? 1.0,
@@ -90,7 +93,7 @@ class PurchasingService
      */
     public function updatePurchaseOrderItem(PurchaseOrderItem $item, array $data): PurchaseOrderItem
     {
-        if (!$item->purchaseOrder->isDraft()) {
+        if (! $item->purchaseOrder->isDraft()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot modify a sent purchase order.'],
             ]);
@@ -106,7 +109,7 @@ class PurchasingService
      */
     public function removePurchaseOrderItem(PurchaseOrderItem $item): void
     {
-        if (!$item->purchaseOrder->isDraft()) {
+        if (! $item->purchaseOrder->isDraft()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot modify a sent purchase order.'],
             ]);
@@ -120,7 +123,7 @@ class PurchasingService
      */
     public function sendPurchaseOrder(PurchaseOrder $po, int $userId): PurchaseOrder
     {
-        if (!$po->canBeSent()) {
+        if (! $po->canBeSent()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot send this purchase order.'],
             ]);
@@ -140,7 +143,7 @@ class PurchasingService
      */
     public function cancelPurchaseOrder(PurchaseOrder $po, int $userId, ?string $reason = null): PurchaseOrder
     {
-        if (!$po->canBeCancelled()) {
+        if (! $po->canBeCancelled()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot cancel this purchase order.'],
             ]);
@@ -165,7 +168,7 @@ class PurchasingService
      */
     public function createGoodsReceivedNote(PurchaseOrder $po, array $data): GoodsReceivedNote
     {
-        if (!$po->canBeReceived()) {
+        if (! $po->canBeReceived()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot receive goods for this order.'],
             ]);
@@ -185,18 +188,18 @@ class PurchasingService
             ]);
 
             // Add items
-            if (!empty($data['items'])) {
+            if (! empty($data['items'])) {
                 foreach ($data['items'] as $item) {
                     $poItem = PurchaseOrderItem::findOrFail($item['purchase_order_item_id']);
-                    
+
                     // Validate quantity (cannot receive more than pending)
                     if ($item['qty_received'] > $poItem->qty_pending) {
                         throw ValidationException::withMessages([
                             "items.{$item['purchase_order_item_id']}" => [
                                 __('purchasing.grn.over_receiving_error', [
                                     'part' => $poItem->part->name_ar ?? $poItem->part->name_en,
-                                    'pending' => $poItem->qty_pending
-                                ])
+                                    'pending' => $poItem->qty_pending,
+                                ]),
                             ],
                         ]);
                     }
@@ -221,7 +224,7 @@ class PurchasingService
      */
     public function postGoodsReceivedNote(GoodsReceivedNote $grn, int $userId): GoodsReceivedNote
     {
-        if (!$grn->canBePosted()) {
+        if (! $grn->canBePosted()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot post this GRN.'],
             ]);
@@ -285,7 +288,7 @@ class PurchasingService
             try {
                 $this->createInvoiceFromGrn($grn);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("Failed to auto-create invoice for GRN {$grn->code}: " . $e->getMessage());
+                Log::error("Failed to auto-create invoice for GRN {$grn->code}: ".$e->getMessage());
             }
 
             return $grn->fresh();
@@ -297,7 +300,7 @@ class PurchasingService
      */
     public function cancelGoodsReceivedNote(GoodsReceivedNote $grn, int $userId, ?string $reason = null): GoodsReceivedNote
     {
-        if (!$grn->canBeCancelled()) {
+        if (! $grn->canBeCancelled()) {
             throw ValidationException::withMessages([
                 'status' => ['Cannot cancel a posted GRN. Reverse the inventory moves instead.'],
             ]);
@@ -319,9 +322,9 @@ class PurchasingService
     protected function updatePurchaseOrderStatus(PurchaseOrder $po): void
     {
         $po->load('items');
-        
-        $allReceived = $po->items->every(fn($item) => $item->is_fully_received);
-        $anyReceived = $po->items->some(fn($item) => $item->qty_received > 0);
+
+        $allReceived = $po->items->every(fn ($item) => $item->is_fully_received);
+        $anyReceived = $po->items->some(fn ($item) => $item->qty_received > 0);
 
         if ($allReceived) {
             $po->update(['status' => PurchaseOrder::STATUS_RECEIVED]);
@@ -337,7 +340,7 @@ class PurchasingService
     {
         return DB::transaction(function () use ($grn) {
             $po = $grn->purchaseOrder;
-            
+
             $invoice = PurchaseInvoice::create([
                 'tenant_id' => $po->tenant_id,
                 'center_id' => $po->center_id,
@@ -359,16 +362,16 @@ class PurchasingService
             foreach ($grn->items as $item) {
                 $poItem = $item->purchaseOrderItem;
                 $taxRate = $poItem->tax_rate ?? 15.00;
-                
-                $qty = (string)$item->qty_received;
-                $unitCost = (string)$item->unit_cost; // High-precision (4 decimals!)
-                
+
+                $qty = (string) $item->qty_received;
+                $unitCost = (string) $item->unit_cost; // High-precision (4 decimals!)
+
                 $rawSubtotal = bcmul($qty, $unitCost, 6);
-                $rawTax = bcmul($rawSubtotal, bcdiv((string)$taxRate, '100', 6), 6);
-                
-                $lineSubtotal = round((float)$rawSubtotal, 2);
-                $lineTax = round((float)$rawTax, 2);
-                $lineTotal = bcadd((string)$lineSubtotal, (string)$lineTax, 2);
+                $rawTax = bcmul($rawSubtotal, bcdiv((string) $taxRate, '100', 6), 6);
+
+                $lineSubtotal = round((float) $rawSubtotal, 2);
+                $lineTax = round((float) $rawTax, 2);
+                $lineTotal = bcadd((string) $lineSubtotal, (string) $lineTax, 2);
 
                 PurchaseInvoiceLine::create([
                     'purchase_invoice_id' => $invoice->id,
@@ -380,8 +383,8 @@ class PurchasingService
                     'total' => $lineTotal,
                 ]);
 
-                $subtotal = bcadd((string)$subtotal, (string)$lineSubtotal, 2);
-                $taxAmount = bcadd((string)$taxAmount, (string)$lineTax, 2);
+                $subtotal = bcadd((string) $subtotal, (string) $lineSubtotal, 2);
+                $taxAmount = bcadd((string) $taxAmount, (string) $lineTax, 2);
             }
 
             $invoice->update([
@@ -420,10 +423,10 @@ class PurchasingService
 
             // 2. Add PO items and prepare GRN items array
             $grnItems = [];
-            if (!empty($data['items'])) {
+            if (! empty($data['items'])) {
                 foreach ($data['items'] as $item) {
-                    $part = \App\Models\Part::find($item['part_id']);
-                    if ($part && !empty($item['purchase_unit_id'])) {
+                    $part = Part::find($item['part_id']);
+                    if ($part && ! empty($item['purchase_unit_id'])) {
                         $part->update([
                             'purchase_unit_id' => $item['purchase_unit_id'],
                             'purchase_conversion_factor' => $item['purchase_conversion_factor'] ?? 1.0,
@@ -485,13 +488,13 @@ class PurchasingService
             }
 
             // 7. If payments were recorded in the direct purchase form, record them!
-            if ($invoice && !empty($data['payments'])) {
+            if ($invoice && ! empty($data['payments'])) {
                 $totalPaid = 0;
                 foreach ($data['payments'] as $payment) {
                     $amount = (float) $payment['amount'];
                     $totalPaid += $amount;
-                    
-                    \App\Models\Payment::create([
+
+                    Payment::create([
                         'tenant_id' => $invoice->tenant_id,
                         'center_id' => $invoice->center_id,
                         'purchase_invoice_id' => $invoice->id,
@@ -501,24 +504,24 @@ class PurchasingService
                         'reference' => $payment['reference'] ?? null,
                         'notes' => __('payments.auto_payment_notes') ?? 'تسجيل دفعة تلقائية عند استلام الفاتورة',
                         'received_by' => $userId,
-                        'type' => \App\Models\Payment::TYPE_PAYMENT,
+                        'type' => Payment::TYPE_PAYMENT,
                     ]);
                 }
-                
+
                 // If there are payments, let's update the balance and status
                 $newBalance = max(0, $invoice->total - $totalPaid);
                 $status = $newBalance <= 0.01 ? PurchaseInvoice::STATUS_PAID : PurchaseInvoice::STATUS_OPEN;
-                
+
                 $invoice->update([
                     'invoice_number' => $data['invoice_number'] ?? $invoice->invoice_number,
                     'balance' => $newBalance,
                     'status' => $status,
                 ]);
-            } else if ($invoice) {
+            } elseif ($invoice) {
                 // If no payments but create_credit_invoice is false (meaning full cash purchase without payments, let's assume fully paid or unpaid based on checkbox)
-                if (!$data['create_credit_invoice']) {
+                if (! $data['create_credit_invoice']) {
                     // Full payment direct cash, so balance = 0, status = paid
-                    \App\Models\Payment::create([
+                    Payment::create([
                         'tenant_id' => $invoice->tenant_id,
                         'center_id' => $invoice->center_id,
                         'purchase_invoice_id' => $invoice->id,
@@ -528,7 +531,7 @@ class PurchasingService
                         'reference' => null,
                         'notes' => __('payments.auto_payment_notes') ?? 'تسجيل دفعة تلقائية عند استلام الفاتورة',
                         'received_by' => $userId,
-                        'type' => \App\Models\Payment::TYPE_PAYMENT,
+                        'type' => Payment::TYPE_PAYMENT,
                     ]);
 
                     $invoice->update([
@@ -543,6 +546,10 @@ class PurchasingService
                         'status' => PurchaseInvoice::STATUS_OPEN,
                     ]);
                 }
+            }
+
+            if (! $invoice) {
+                throw new \Exception('Failed to generate purchase invoice from GRN.');
             }
 
             return $invoice->fresh(['supplier', 'purchaseOrder']);
