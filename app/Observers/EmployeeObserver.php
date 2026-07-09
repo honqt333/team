@@ -39,6 +39,15 @@ class EmployeeObserver
             }
         }
 
+        // If phone changed
+        if ($employee->isDirty('phone')) {
+            $user = $employee->user ?? User::find($employee->user_id);
+            if ($user) {
+                $user->update(['phone' => $employee->phone]);
+                \Log::info("EmployeeObserver: Phone updated for employee {$employee->id}");
+            }
+        }
+
         // Handle deactivation logic
         if ($employee->isDirty('status') && in_array($employee->status, ['terminated', 'resigned'])) {
             if ($employee->user) {
@@ -86,6 +95,7 @@ class EmployeeObserver
             $user = User::create([
                 'name' => $employee->name_en ?? $employee->name_ar ?? 'Employee',
                 'email' => $employee->email,
+                'phone' => $employee->phone,
                 'password' => Hash::make(Str::random(32)), // Random password - will be set via invite
                 'is_active' => true, // Active by default now
                 'email_verified_at' => now(), // Auto-verified since we're sending invite

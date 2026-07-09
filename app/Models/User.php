@@ -115,6 +115,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Get the user's phone number, falling back to employee phone if empty.
+     */
+    public function getPhoneAttribute(?string $value): ?string
+    {
+        return $value ?: $this->employee?->phone;
+    }
+
+    /**
      * Determine if the user can update their profile photo.
      */
     public function getCanUpdatePhotoAttribute(): bool

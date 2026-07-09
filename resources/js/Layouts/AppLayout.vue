@@ -1008,7 +1008,17 @@
                                 @click="userMenuOpen = !userMenuOpen"
                                 class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             >
+                                <img
+                                    v-if="
+                                        page.props.auth.user.photo_url &&
+                                        !page.props.auth.user.photo_url.includes('ui-avatars.com')
+                                    "
+                                    :src="page.props.auth.user.photo_url"
+                                    class="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-gray-700"
+                                    alt="User Avatar"
+                                />
                                 <div
+                                    v-else
                                     class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-sm font-bold"
                                 >
                                     {{ userInitial }}

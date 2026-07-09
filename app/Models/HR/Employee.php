@@ -3,16 +3,15 @@
 namespace App\Models\HR;
 
 use App\Models\Concerns\TenantScoped;
-use App\Models\Department;
-use App\Models\HR\Shift;
 use App\Traits\HasEmployeeRelations;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
-    use SoftDeletes, TenantScoped;
     use HasEmployeeRelations;
+    use SoftDeletes, TenantScoped;
 
     protected $table = 'hr_employees';
 
@@ -35,6 +34,16 @@ class Employee extends Model
         'commission_rate' => 'float',
     ];
 
+    protected $appends = [
+        'photo_url',
+        'display_name',
+    ];
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        return $this->photo_path ? asset('storage/'.$this->photo_path) : null;
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -44,7 +53,7 @@ class Employee extends Model
                 $lastNumber = static::where('tenant_id', $employee->tenant_id)
                     ->withTrashed()
                     ->max('id') ?? 0;
-                $employee->employee_number = 'EMP-' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+                $employee->employee_number = 'EMP-'.str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
             }
         });
 
@@ -56,7 +65,7 @@ class Employee extends Model
                     if (in_array($newStatus, ['terminated', 'inactive'])) {
                         $employee->user->update(['is_active' => false]);
                     } elseif ($newStatus === 'active') {
-                        if (!$employee->user->is_active) {
+                        if (! $employee->user->is_active) {
                             $employee->user->update(['is_active' => true]);
                         }
                     }
@@ -68,13 +77,13 @@ class Employee extends Model
     /**
      * الحصول على وردية الموظف ليوم محدد
      */
-    public function getShiftForDate(\Carbon\Carbon $date): ?Shift
+    public function getShiftForDate(Carbon $date): ?Shift
     {
         $scheduledShift = $this->employeeShifts()
             ->where('date', $date->format('Y-m-d'))
             ->with('shift')
             ->first();
-        
+
         if ($scheduledShift && $scheduledShift->shift) {
             return $scheduledShift->shift;
         }
@@ -85,7 +94,7 @@ class Employee extends Model
             ->whereNull('date')
             ->with('shift')
             ->first();
-        
+
         if ($weeklyShift && $weeklyShift->shift) {
             return $weeklyShift->shift;
         }
@@ -94,9 +103,20 @@ class Employee extends Model
     }
 
     // Scopes
-    public function scopeActive($query) { return $query->where('status', 'active'); }
-    public function scopeInactive($query) { return $query->where('status', 'inactive'); }
-    public function scopeTerminated($query) { return $query->where('status', 'terminated'); }
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopeInactive($query)
+    {
+        return $query->where('status', 'inactive');
+    }
+
+    public function scopeTerminated($query)
+    {
+        return $query->where('status', 'terminated');
+    }
 
     // Accessors
     public function getDisplayNameAttribute(): string
@@ -119,6 +139,7 @@ class Employee extends Model
                 $total += $amount;
             }
         }
+
         return round($total, 2);
     }
 
@@ -135,6 +156,7 @@ class Employee extends Model
                 $total += $amount;
             }
         }
+
         return round($total, 2);
     }
 
@@ -142,6 +164,7 @@ class Employee extends Model
     public function calculateGosiAmount(): float
     {
         $rate = $this->gosi_rate ?? 0;
+
         return round($this->base_salary * $rate / 100, 2);
     }
 
@@ -150,6 +173,7 @@ class Employee extends Model
     {
         $gross = $this->base_salary + $this->calculateTotalAllowances();
         $deductions = $this->calculateTotalDeductions() + $this->calculateGosiAmount();
+
         return round($gross - $deductions, 2);
     }
 
