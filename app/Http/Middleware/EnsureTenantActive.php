@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureTenantActive
@@ -11,29 +12,42 @@ class EnsureTenantActive
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             abort(403, 'User not authenticated');
         }
 
         $tenant = $user->tenant;
 
         // Check if tenant exists and is not soft-deleted
-        if (!$tenant || $tenant->trashed()) {
+        if (! $tenant || $tenant->trashed()) {
             abort(403, 'Tenant not found or inactive');
         }
 
-        // Check readonly status if column exists
-        if (\Illuminate\Support\Facades\Schema::hasColumn('tenants', 'status')) {
-            if ($tenant->status === 'readonly') {
-                // Block write operations
+        // Check tenant status if column exists
+        if (Schema::hasColumn('tenants', 'status')) {
+            // 1. Block suspended tenants
+            if ($tenant->status === 'suspended') {
+                if ($request->routeIs('logout') ||
+                    ($request->routeIs('app.settings.company') && $request->get('tab') === 'subscription')) {
+                    return $next($request);
+                }
+                abort(403, 'تم إيقاف حسابك مؤقتاً لعدم وجود اشتراك نشط. يرجى التواصل مع الإدارة للتفعيل.');
+            }
+
+            // 2. Block write operations for expired or readonly tenants
+            if ($tenant->status === 'expired' || $tenant->status === 'readonly') {
+                if ($request->routeIs('logout') ||
+                    ($request->routeIs('app.settings.company') && $request->get('tab') === 'subscription')) {
+                    return $next($request);
+                }
                 if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-                    abort(403, 'Tenant is in read-only mode');
+                    abort(403, 'انتهت صلاحية اشتراكك. يرجى تجديد الاشتراك لتتمكن من إجراء العمليات.');
                 }
             }
         }
