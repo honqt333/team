@@ -31,23 +31,19 @@ class EnsureTenantActive
 
         // Check tenant status if column exists
         if (Schema::hasColumn('tenants', 'status')) {
-            // 1. Block suspended tenants
-            if ($tenant->status === 'suspended') {
-                if ($request->routeIs('logout') ||
-                    ($request->routeIs('app.settings.company') && $request->get('tab') === 'subscription')) {
+            if (in_array($tenant->status, ['expired', 'suspended', 'readonly'])) {
+                // Allow logout route to proceed with write operations
+                if ($request->routeIs('logout')) {
                     return $next($request);
                 }
-                abort(403, 'تم إيقاف حسابك مؤقتاً لعدم وجود اشتراك نشط. يرجى التواصل مع الإدارة للتفعيل.');
-            }
 
-            // 2. Block write operations for expired or readonly tenants
-            if ($tenant->status === 'expired' || $tenant->status === 'readonly') {
-                if ($request->routeIs('logout') ||
-                    ($request->routeIs('app.settings.company') && $request->get('tab') === 'subscription')) {
-                    return $next($request);
-                }
+                // Block write/modifying operations
                 if (in_array($request->method(), ['POST', 'PUT', 'PATCH', 'DELETE'])) {
-                    abort(403, 'انتهت صلاحية اشتراكك. يرجى تجديد الاشتراك لتتمكن من إجراء العمليات.');
+                    $message = $tenant->status === 'suspended'
+                        ? 'تم تعليق حسابك مؤقتاً. يرجى تجديد الاشتراك لتتمكن من إجراء العمليات.'
+                        : 'انتهت صلاحية اشتراكك. يرجى تجديد الاشتراك لتتمكن من إجراء العمليات.';
+
+                    abort(403, $message);
                 }
             }
         }
