@@ -3112,6 +3112,22 @@
             "work_order_expected_end_date": "تاريخ إغلاق كرت الصيانة المتوقع",
             "years": "سنوات"
         },
+        "suggestions": {
+            "add": "إضافة",
+            "confidence_high": "ثقة عالية",
+            "confidence_low": "ثقة منخفضة",
+            "confidence_medium": "ثقة متوسطة",
+            "empty": "لا توجد اقتراحات حتى الآن. اكتب شكوى العميل لعرض الخدمات أو القطع ذات الصلة.",
+            "error_generic": "تعذّر جلب الاقتراحات. يرجى المحاولة مرة أخرى.",
+            "panel_subtitle": "اقتراحات مدعومة بالذكاء الاصطناعي بناءً على شكوى العميل",
+            "panel_title": "اقتراحات الذكاء الاصطناعي",
+            "powered_by_ai": "مدعوم بالذكاء الاصطناعي",
+            "provided_by": "مقدَّم من: {provider}",
+            "refresh": "تحديث",
+            "settings": "إعدادات الاقتراحات",
+            "type_part": "قطعة",
+            "type_service": "خدمة"
+        },
         "services": "الخدمات",
         "services_total": "الخدمات",
         "show": {
