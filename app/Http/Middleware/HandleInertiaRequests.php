@@ -89,6 +89,7 @@ class HandleInertiaRequests extends Middleware
                 'has_paid_subscription' => $tenant->hasPaidSubscription(),
                 'status' => $tenant->status,
                 'trial_ends_at' => $tenant->trial_ends_at ? $tenant->trial_ends_at->toIso8601String() : null,
+                'subscription_ends_at' => rescue(fn () => $tenant->subscriptions()->whereIn('status', ['active', 'trial', 'trialing'])->latest()->first()?->ends_at?->toIso8601String()),
             ] : null,
             'center' => $user?->currentCenter ? [
                 'id' => $user->currentCenter->id,
