@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\CompanyTransaction;
+use App\Models\IncomeCategory;
+use App\Models\Invoice;
+use App\Models\PurchaseInvoice;
 use App\Models\Tenant;
 use App\Models\TenantAddress;
 use App\Models\TenantTaxSetting;
@@ -24,7 +28,7 @@ class CompanyProfileController extends Controller
     {
         $tenant = auth()->user()->tenant;
         $tenant->load(['taxSettings', 'address', 'zatcaSettings']);
-        
+
         // Get the admin user (first user created for this tenant, usually the owner)
         $adminUser = auth()->user();
 
@@ -82,23 +86,27 @@ class CompanyProfileController extends Controller
                 'email' => $adminUser->email,
             ],
             'branches' => $tenant->centers()->select('id', 'name', 'slug', 'is_active', 'created_at')->get(),
-            'company_transactions' => \App\Models\CompanyTransaction::with(['incomeCategory', 'approvedBy', 'updatedBy'])
+            'company_transactions' => CompanyTransaction::with(['incomeCategory', 'approvedBy', 'updatedBy'])
+                ->whereNull('center_id')
                 ->latest('transaction_date')
                 ->get(),
-            'income_categories' => \App\Models\IncomeCategory::active()
+            'income_categories' => IncomeCategory::active()
                 ->get()
-                ->map(fn($cat) => [
+                ->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
-                    'transaction_type' => $cat->transaction_type
+                    'transaction_type' => $cat->transaction_type,
                 ]),
             'company_invoices' => [
-                'sales' => \App\Models\Invoice::whereIn('id', function($query) {
-                    $query->select('invoice_id')->from('company_transactions')->whereNotNull('invoice_id');
-                })->with(['customer', 'center'])->latest()->get(),
-                'purchases' => \App\Models\PurchaseInvoice::whereIn('id', function($query) {
-                    $query->select('purchase_invoice_id')->from('company_transactions')->whereNotNull('purchase_invoice_id');
-                })->with(['supplier', 'center'])->latest()->get(),
+                'sales' => Invoice::withoutGlobalScope('center_scoped')
+                    ->whereNull('center_id')
+                    ->whereIn('id', function ($query) {
+                        $query->select('invoice_id')->from('company_transactions')->whereNull('center_id')->whereNotNull('invoice_id');
+                    })->with(['customer', 'center'])->latest()->get(),
+                'purchases' => PurchaseInvoice::whereNull('center_id')
+                    ->whereIn('id', function ($query) {
+                        $query->select('purchase_invoice_id')->from('company_transactions')->whereNull('center_id')->whereNotNull('purchase_invoice_id');
+                    })->with(['supplier', 'center'])->latest()->get(),
             ],
         ]);
     }
@@ -256,14 +264,14 @@ class CompanyProfileController extends Controller
         // For VAT section, logout the user and redirect to login
         if ($section === 'vat') {
             $intendedUrl = route('settings.company', ['tab' => 'vat']);
-            
+
             auth()->logout();
             request()->session()->invalidate();
             request()->session()->regenerateToken();
-            
+
             // Set intended URL in the NEW session after invalidation
             session()->put('url.intended', $intendedUrl);
-            
+
             return redirect()->route('login')->with('success', __('common.vat_settings_updated'));
         }
 
@@ -300,15 +308,15 @@ class CompanyProfileController extends Controller
                     'show_amount_before_vat' => 'boolean',
                     'vat_number' => 'nullable|string',
                 ];
-                
+
                 // If VAT is enabled, VAT number is required and must be exactly 15 digits starting and ending with 3 (ZATCA Rule)
                 if ($data['vat_enabled'] ?? false) {
-                     $rules['vat_number'] = ['required', 'string', 'size:15', 'regex:/^3[0-9]{13}3$/'];
-                     $messages = [
-                         'vat_number.required' => __('validation.required', ['attribute' => __('purchasing.tax_number')]),
-                         'vat_number.size' => __('validation.tax_number_invalid'),
-                         'vat_number.regex' => __('validation.tax_number_invalid'),
-                     ];
+                    $rules['vat_number'] = ['required', 'string', 'size:15', 'regex:/^3[0-9]{13}3$/'];
+                    $messages = [
+                        'vat_number.required' => __('validation.required', ['attribute' => __('purchasing.tax_number')]),
+                        'vat_number.size' => __('validation.tax_number_invalid'),
+                        'vat_number.regex' => __('validation.tax_number_invalid'),
+                    ];
                 }
                 break;
 
@@ -357,9 +365,9 @@ class CompanyProfileController extends Controller
     public function updateAdminUser(Request $request)
     {
         $user = auth()->user();
-        
+
         $request->validate([
-            'email' => 'sometimes|required|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'sometimes|required|email|max:255|unique:users,email,'.$user->id,
             'current_password' => 'required_with:new_password|current_password',
             'new_password' => 'sometimes|required|min:8|confirmed',
         ], [
@@ -401,7 +409,7 @@ class CompanyProfileController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => __('company_profile.admin_user.current_password_wrong')
+            'message' => __('company_profile.admin_user.current_password_wrong'),
         ], 422);
     }
 }
