@@ -121,7 +121,7 @@ class CompanyProfileController extends Controller
                 if (! $hasTrial && $tenant->created_at) {
                     $trialStarts = $tenant->created_at;
                     $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
-                    $trialDays = $trialStarts->diffInDays($trialEnds) ?: 14;
+                    $trialDays = (int) round($trialStarts->diffInDays($trialEnds) ?: 14);
                     $trialStatus = $trialEnds->isFuture() ? 'trial' : 'expired';
 
                     $virtualTrial = [
