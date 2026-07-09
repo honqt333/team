@@ -117,7 +117,7 @@ class TenantsController extends Controller
     public function activate(Tenant $tenant)
     {
         $tenant->update([
-            'status' => 'active',
+            'status' => 'trial',
             'suspended_at' => null,
             'suspension_reason' => null,
         ]);
