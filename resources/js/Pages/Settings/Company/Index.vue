@@ -1597,28 +1597,310 @@
                         </div>
                     </div>
 
-                    <!-- Subscription Tab (Coming Soon) -->
-                    <div v-if="activeTab === 'subscription'" class="space-y-6">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">
-                            {{ $t('company_profile.tabs.subscription') }}
-                        </h3>
-                        <div class="flex flex-col items-center justify-center py-12 text-center">
-                            <svg
-                                class="w-16 h-16 text-gray-300 dark:text-gray-600 mb-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
+                    <!-- Subscription Tab -->
+                    <div v-if="activeTab === 'subscription'" class="space-y-8">
+                        <div
+                            class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700/50 pb-4"
+                        >
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ $t('company_profile.tabs.subscription') }}
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    عرض تفاصيل اشتراكك الحالي والباقات المتاحة للترقية
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Current Subscription Info -->
+                        <div
+                            class="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 p-6 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30 shadow-sm relative overflow-hidden"
+                        >
+                            <div
+                                class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-200/20 dark:bg-indigo-900/10 rounded-full blur-2xl"
+                            ></div>
+
+                            <div
+                                class="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10"
                             >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="1.5"
-                                    d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
-                                />
-                            </svg>
-                            <p class="text-gray-500 dark:text-gray-400">
-                                {{ $t('common.coming_soon') }}
-                            </p>
+                                <div class="space-y-2">
+                                    <div class="flex items-center gap-3">
+                                        <span
+                                            class="text-xs uppercase tracking-wider font-semibold text-indigo-600 dark:text-indigo-400"
+                                        >
+                                            الاشتراك الحالي
+                                        </span>
+                                        <span
+                                            v-if="current_subscription?.status === 'active'"
+                                            class="px-2.5 py-0.5 text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-full font-medium"
+                                        >
+                                            نشط
+                                        </span>
+                                        <span
+                                            v-else-if="
+                                                current_subscription?.status === 'trialing' ||
+                                                current_subscription?.status === 'trial'
+                                            "
+                                            class="px-2.5 py-0.5 text-xs bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 rounded-full font-medium"
+                                        >
+                                            تجريبي
+                                        </span>
+                                        <span
+                                            v-else
+                                            class="px-2.5 py-0.5 text-xs bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-400 rounded-full font-medium"
+                                        >
+                                            منتهي
+                                        </span>
+                                    </div>
+                                    <h4 class="text-2xl font-bold text-gray-900 dark:text-white">
+                                        {{
+                                            current_subscription
+                                                ? getPlanName(current_subscription)
+                                                : 'لا يوجد اشتراك نشط'
+                                        }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                                        <span v-if="current_subscription?.ends_at">
+                                            ينتهي في: {{ formatDate(current_subscription.ends_at) }}
+                                        </span>
+                                        <span v-else>لا يوجد تاريخ انتهاء محدد</span>
+                                    </p>
+                                </div>
+
+                                <div class="text-start md:text-end space-y-1">
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 block">
+                                        قيمة الاشتراك الحالي
+                                    </span>
+                                    <span class="text-3xl font-black text-gray-900 dark:text-white">
+                                        {{
+                                            current_subscription
+                                                ? formatCurrency(current_subscription.price || 0)
+                                                : '0.00 SAR'
+                                        }}
+                                    </span>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 block">
+                                        /
+                                        {{
+                                            current_subscription?.billing_cycle === 'yearly'
+                                                ? 'سنوي'
+                                                : 'شهري'
+                                        }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Available Subscriptions -->
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-base font-bold text-gray-900 dark:text-white">
+                                    الاشتراكات المتاحة
+                                </h4>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    اختر الباقة المناسبة لاحتياجات مركزك وتواصل معنا للترقية
+                                </p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div
+                                    v-for="plan in available_plans"
+                                    :key="plan.id"
+                                    class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group"
+                                    :class="{
+                                        'ring-2 ring-indigo-600 dark:ring-indigo-400':
+                                            current_subscription?.plan_id === plan.id,
+                                    }"
+                                >
+                                    <div
+                                        v-if="current_subscription?.plan_id === plan.id"
+                                        class="absolute -top-3 right-6 bg-indigo-600 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow"
+                                    >
+                                        بافتك الحالية
+                                    </div>
+
+                                    <div class="space-y-4">
+                                        <div>
+                                            <h5
+                                                class="text-lg font-bold text-gray-900 dark:text-white"
+                                            >
+                                                {{ plan.name_ar }}
+                                            </h5>
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                {{ plan.name_en }}
+                                            </p>
+                                        </div>
+
+                                        <div class="py-2">
+                                            <div class="flex items-baseline gap-1">
+                                                <span
+                                                    class="text-3xl font-black text-gray-900 dark:text-white"
+                                                >
+                                                    {{ formatCurrency(plan.price_monthly) }}
+                                                </span>
+                                                <span
+                                                    class="text-xs text-gray-500 dark:text-gray-400"
+                                                >
+                                                    / شهري
+                                                </span>
+                                            </div>
+                                            <div class="flex items-baseline gap-1 mt-1">
+                                                <span
+                                                    class="text-sm font-semibold text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {{ formatCurrency(plan.price_yearly) }}
+                                                </span>
+                                                <span class="text-[10px] text-gray-400">
+                                                    / سنوي
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Features -->
+                                        <div
+                                            class="space-y-2 pt-4 border-t border-gray-100 dark:border-gray-700/50"
+                                        >
+                                            <p
+                                                class="text-xs font-bold text-gray-700 dark:text-gray-300"
+                                            >
+                                                ميزات الباقة:
+                                            </p>
+                                            <ul class="space-y-2">
+                                                <li
+                                                    v-for="(feat, fIdx) in locale === 'en'
+                                                        ? plan.features_en || plan.features_ar || []
+                                                        : plan.features_ar ||
+                                                          plan.features_en ||
+                                                          []"
+                                                    :key="fIdx"
+                                                    class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-400"
+                                                >
+                                                    <svg
+                                                        class="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2.5"
+                                                            d="M5 13l4 4L19 7"
+                                                        />
+                                                    </svg>
+                                                    <span>{{ feat }}</span>
+                                                </li>
+                                                <li
+                                                    v-if="
+                                                        !(
+                                                            locale === 'en'
+                                                                ? plan.features_en || []
+                                                                : plan.features_ar || []
+                                                        ).length
+                                                    "
+                                                    class="text-xs text-gray-400 italic"
+                                                >
+                                                    لا توجد ميزات مسجلة
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div
+                                        class="pt-6 mt-6 border-t border-gray-100 dark:border-gray-700/50"
+                                    >
+                                        <button
+                                            class="w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold transition-all duration-300"
+                                            :class="
+                                                current_subscription?.plan_id === plan.id
+                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                                    : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:hover:bg-indigo-900/50 dark:text-indigo-400'
+                                            "
+                                            :disabled="current_subscription?.plan_id === plan.id"
+                                            @click="activeTab = 'profile'"
+                                        >
+                                            {{
+                                                current_subscription?.plan_id === plan.id
+                                                    ? 'بافتك الحالية'
+                                                    : 'تواصل معنا للترقية'
+                                            }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Support Notice Card -->
+                            <div
+                                class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 flex flex-col md:flex-row items-center justify-between gap-4 mt-8"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
+                                    >
+                                        <svg
+                                            class="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="1.5"
+                                                d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm text-gray-900 dark:text-white">
+                                            هل تحتاج إلى مساعدة في الترقية أو اختيار الباقة؟
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            فريق الدعم الفني جاهز لمساعدتك في أي وقت وتفعيل الاشتراك
+                                            المناسب لمركزك
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <a
+                                        :href="`tel:${props.contact?.phone || '+966599999999'}`"
+                                        class="px-4 py-2 bg-white dark:bg-gray-800 hover:bg-gray-50 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-bold text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-1.5 shadow-sm"
+                                    >
+                                        <svg
+                                            class="w-3.5 h-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="1.5"
+                                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                            />
+                                        </svg>
+                                        اتصل بنا
+                                    </a>
+                                    <a
+                                        :href="`mailto:${props.contact?.email || 'support@example.com'}`"
+                                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-xs font-bold text-white transition-colors flex items-center gap-1.5 shadow-md"
+                                    >
+                                        <svg
+                                            class="w-3.5 h-3.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="1.5"
+                                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                            />
+                                        </svg>
+                                        راسلنا
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -2591,6 +2873,14 @@ const props = defineProps({
         default: () => ({ sales: [], purchases: [] }),
     },
     subscriptions: {
+        type: Array,
+        default: () => [],
+    },
+    current_subscription: {
+        type: Object,
+        default: () => null,
+    },
+    available_plans: {
         type: Array,
         default: () => [],
     },
