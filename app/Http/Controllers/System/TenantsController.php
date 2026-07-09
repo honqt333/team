@@ -136,7 +136,7 @@ class TenantsController extends Controller
     public function extendTrial(Request $request, Tenant $tenant)
     {
         $request->validate([
-            'days' => 'required|integer|min:1|max:90',
+            'days' => 'required|integer|min:-90|max:90',
         ]);
 
         $newEndDate = $tenant->trial_ends_at
