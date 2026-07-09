@@ -3,16 +3,22 @@
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\Center;
 use App\Models\Department;
 use App\Models\HR\Allowance;
 use App\Models\HR\Deduction;
 use App\Models\HR\Employee;
 use App\Models\HR\EmployeeType;
 use App\Models\HR\JobTitle;
+use App\Models\HR\Shift;
+use App\Models\Nationality;
+use App\Models\Role;
 use App\Models\User;
 use App\Support\TenancyContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\Permission\PermissionRegistrar;
 
 class EmployeeController extends Controller
 {
@@ -22,17 +28,17 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Employee::class);
-        
+
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
         $status = $request->get('status', 'active');
         $isSuperAdmin = auth()->user()->hasRole('super_admin');
 
         $employees = Employee::where('tenant_id', $tenantId)
-            ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
-            ->when($isSuperAdmin && $request->center_id, fn($q) => $q->where('center_id', $request->center_id))
-            ->when($status === 'active', fn($q) => $q->active())
-            ->when($status === 'inactive', fn($q) => $q->where('status', '!=', 'active'))
+            ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
+            ->when($isSuperAdmin && $request->center_id, fn ($q) => $q->where('center_id', $request->center_id))
+            ->when($status === 'active', fn ($q) => $q->active())
+            ->when($status === 'inactive', fn ($q) => $q->where('status', '!=', 'active'))
             ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en', 'employeeType:id,name_ar,name_en', 'center:id,name'])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -51,13 +57,13 @@ class EmployeeController extends Controller
             'filters' => array_merge($request->only(['search', 'center_id']), ['status' => $status]),
             'counts' => [
                 'active' => Employee::where('tenant_id', $tenantId)
-                    ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
-                    ->when($isSuperAdmin && $request->center_id, fn($q) => $q->where('center_id', $request->center_id))
+                    ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
+                    ->when($isSuperAdmin && $request->center_id, fn ($q) => $q->where('center_id', $request->center_id))
                     ->active()
                     ->count(),
                 'inactive' => Employee::where('tenant_id', $tenantId)
-                    ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
-                    ->when($isSuperAdmin && $request->center_id, fn($q) => $q->where('center_id', $request->center_id))
+                    ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
+                    ->when($isSuperAdmin && $request->center_id, fn ($q) => $q->where('center_id', $request->center_id))
                     ->where('status', '!=', 'active')
                     ->count(),
             ],
@@ -65,14 +71,14 @@ class EmployeeController extends Controller
             'jobTitles' => JobTitle::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
             'employeeTypes' => EmployeeType::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
             'departments' => Department::where('tenant_id', $tenantId)->where('is_active', true)->get(['id', 'name_ar', 'name_en']),
-            'centers' => $isSuperAdmin 
-                ? \App\Models\Center::where('tenant_id', $tenantId)->get(['id', 'name'])
-                : \App\Models\Center::where('id', $centerId)->get(['id', 'name']),
-            'nationalities' => \App\Models\Nationality::active()->orderBy('name_ar')->get(['id', 'name_ar', 'name_en']),
+            'centers' => $isSuperAdmin
+                ? Center::where('tenant_id', $tenantId)->get(['id', 'name'])
+                : Center::where('id', $centerId)->get(['id', 'name']),
+            'nationalities' => Nationality::active()->orderBy('name_ar')->get(['id', 'name_ar', 'name_en']),
             'users' => User::where('tenant_id', $tenantId)
                 ->whereDoesntHave('employee')
                 ->get(['id', 'name', 'email']),
-            'shifts' => \App\Models\HR\Shift::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
+            'shifts' => Shift::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
         ]);
     }
 
@@ -82,30 +88,30 @@ class EmployeeController extends Controller
     public function print()
     {
         $this->authorize('viewAny', Employee::class);
-        
+
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
         $isSuperAdmin = auth()->user()->hasRole('super_admin');
 
         $employees = Employee::where('tenant_id', $tenantId)
-            ->when(!$isSuperAdmin, fn($q) => $q->where('center_id', $centerId))
+            ->when(! $isSuperAdmin, fn ($q) => $q->where('center_id', $centerId))
             ->active()
             ->with(['jobTitle:id,name_ar,name_en', 'department:id,name_ar,name_en'])
             ->orderBy('name_ar')
             ->get();
 
         // Group statistics
-        $byDepartment = $employees->groupBy(fn($e) => $e->department?->name_ar ?? 'بدون قسم')->map->count();
-        $byJobTitle = $employees->groupBy(fn($e) => $e->jobTitle?->name_ar ?? 'بدون مسمى')->map->count();
+        $byDepartment = $employees->groupBy(fn ($e) => $e->department?->name_ar ?? 'بدون قسم')->map->count();
+        $byJobTitle = $employees->groupBy(fn ($e) => $e->jobTitle?->name_ar ?? 'بدون مسمى')->map->count();
 
         return Inertia::render('HR/Employees/Print', [
             'employees' => $employees,
             'tenant' => auth()->user()->tenant,
-            'center' => \App\Models\Center::find($centerId),
+            'center' => Center::find($centerId),
             'stats' => [
                 'by_department' => $byDepartment,
                 'by_job_title' => $byJobTitle,
-            ]
+            ],
         ]);
     }
 
@@ -116,12 +122,12 @@ class EmployeeController extends Controller
     {
         \Log::info('Employee store initiated', $request->all());
         $this->authorize('create', Employee::class);
-        
+
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:hr_employees,phone,NULL,id,tenant_id,' . TenancyContext::tenantId(),
-            'email' => 'required|email|max:255|unique:hr_employees,email,NULL,id,tenant_id,' . TenancyContext::tenantId(),
+            'phone' => 'required|string|max:20|unique:hr_employees,phone,NULL,id,tenant_id,'.TenancyContext::tenantId(),
+            'email' => 'required|email|max:255|unique:users,email|unique:hr_employees,email',
             'gender' => 'required|in:male,female',
             'nationality_id' => 'required|exists:nationalities,id',
             'job_title_id' => 'required|exists:hr_job_titles,id',
@@ -135,31 +141,33 @@ class EmployeeController extends Controller
         }
 
         // Check if user has permission to management if center_id is null
-        if (empty($validated['center_id']) && !auth()->user()->hasRole('super_admin')) {
-             $validated['center_id'] = TenancyContext::centerId();
-             \Log::info('Auto-assigned center_id', ['center_id' => $validated['center_id']]);
+        if (empty($validated['center_id']) && ! auth()->user()->hasRole('super_admin')) {
+            $validated['center_id'] = TenancyContext::centerId();
+            \Log::info('Auto-assigned center_id', ['center_id' => $validated['center_id']]);
         }
 
         try {
-            $employee = new Employee();
+            $employee = new Employee;
             $employee->fill([
                 'tenant_id' => TenancyContext::tenantId(),
                 'center_id' => array_key_exists('center_id', $validated) ? $validated['center_id'] : TenancyContext::centerId(),
                 'status' => 'active',
                 ...$validated,
             ]);
-            
+
             $employee->save();
 
             \Log::info('Employee created', ['id' => $employee->id]);
-        } catch (\Illuminate\Database\QueryException $e) {
-            \Log::error('Database Error creating employee: ' . $e->getMessage());
+        } catch (QueryException $e) {
+            \Log::error('Database Error creating employee: '.$e->getMessage());
             if ($e->errorInfo[1] == 1062) { // Duplicate entry
-                return back()->with('error', __('messages.duplicate_entry_error') . ' - ' . __('hr.employees.employee_number_exists'));
+                return back()->with('error', __('messages.duplicate_entry_error').' - '.__('hr.employees.employee_number_exists'));
             }
+
             return back()->with('error', __('messages.error_occurred'));
         } catch (\Exception $e) {
-            \Log::error('Error creating employee: ' . $e->getMessage());
+            \Log::error('Error creating employee: '.$e->getMessage());
+
             return back()->with('error', __('messages.error_occurred'));
         }
 
@@ -172,7 +180,7 @@ class EmployeeController extends Controller
     public function show(Employee $employee)
     {
         $this->authorize('view', $employee);
-        
+
         $tenantId = TenancyContext::tenantId();
 
         $employee->load([
@@ -184,11 +192,11 @@ class EmployeeController extends Controller
             'user:id,name,email',
             'allowances',
             'deductions',
-            'leaves' => fn($q) => $q->orderBy('start_date', 'desc'),
+            'leaves' => fn ($q) => $q->orderBy('start_date', 'desc'),
             'defaultShift',
             'employeeShifts.shift',
-            'documents' => fn($q) => $q->orderBy('created_at', 'desc'),
-            'contracts' => fn($q) => $q->orderBy('start_date', 'desc'),
+            'documents' => fn ($q) => $q->orderBy('created_at', 'desc'),
+            'contracts' => fn ($q) => $q->orderBy('start_date', 'desc'),
         ]);
 
         // Get weekly schedule (day_of_week based)
@@ -196,15 +204,15 @@ class EmployeeController extends Controller
             ->whereNull('date')
             ->whereNotNull('day_of_week')
             ->keyBy('day_of_week')
-            ->map(fn($s) => $s->shift_id);
+            ->map(fn ($s) => $s->shift_id);
 
         return Inertia::render('HR/Employees/Show', [
             'employee' => $employee,
             'jobTitles' => JobTitle::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
             'employeeTypes' => EmployeeType::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en']),
             'departments' => Department::where('tenant_id', $tenantId)->where('is_active', true)->get(['id', 'name_ar', 'name_en']),
-            'nationalities' => \App\Models\Nationality::active()->orderBy('name_ar')->get(['id', 'name_ar', 'name_en']),
-            'centers' => \App\Models\Center::where('tenant_id', $tenantId)->get(['id', 'name']),
+            'nationalities' => Nationality::active()->orderBy('name_ar')->get(['id', 'name_ar', 'name_en']),
+            'centers' => Center::where('tenant_id', $tenantId)->get(['id', 'name']),
             'allAllowances' => Allowance::where('tenant_id', $tenantId)->active()->get(),
             'allDeductions' => Deduction::where('tenant_id', $tenantId)->active()->get(),
             'users' => User::where('tenant_id', $tenantId)
@@ -213,10 +221,10 @@ class EmployeeController extends Controller
                         ->orWhere('id', $employee->user_id);
                 })
                 ->get(['id', 'name', 'email']),
-            'shifts' => \App\Models\HR\Shift::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en', 'start_time', 'end_time', 'color']),
+            'shifts' => Shift::where('tenant_id', $tenantId)->active()->get(['id', 'name_ar', 'name_en', 'start_time', 'end_time', 'color']),
             'weeklySchedule' => $weeklySchedule,
             // Roles for assignment
-            'availableRoles' => \App\Models\Role::where('tenant_id', $tenantId)
+            'availableRoles' => Role::where('tenant_id', $tenantId)
                 ->whereNotIn('name', ['super_admin']) // Exclude super_admin from assignment
                 ->get(['id', 'name', 'label_ar', 'label_en']),
             'userRoles' => $employee->user ? $employee->user->roles->pluck('name') : [],
@@ -240,13 +248,19 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee)
     {
         $this->authorize('update', $employee);
-        
+
         $validated = $request->validate([
             // Basic Info
             'name_ar' => 'required|string|max:255',
             'name_en' => 'sometimes|required|string|max:255',
-            'phone' => 'nullable|string|max:20|unique:hr_employees,phone,' . $employee->id . ',id,tenant_id,' . TenancyContext::tenantId(),
-            'email' => 'required|email|max:255|unique:hr_employees,email,' . $employee->id . ',id,tenant_id,' . TenancyContext::tenantId(),
+            'phone' => 'nullable|string|max:20|unique:hr_employees,phone,'.$employee->id.',id,tenant_id,'.TenancyContext::tenantId(),
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                'unique:hr_employees,email,'.$employee->id,
+                'unique:users,email,'.($employee->user_id ?? 'NULL').',id',
+            ],
             'gender' => 'nullable|in:male,female',
             'marital_status' => 'nullable|in:single,married',
             'birth_date' => 'nullable|date',
@@ -320,7 +334,7 @@ class EmployeeController extends Controller
 
         // Store new photo
         $path = $request->file('photo')->store('employees/photos', 'public');
-        
+
         $employee->update(['photo_path' => $path]);
 
         return back()->with('success', __('messages.updated_successfully'));
@@ -332,8 +346,9 @@ class EmployeeController extends Controller
     public function destroy(Employee $employee)
     {
         $this->authorize('delete', $employee);
-        
+
         $employee->delete();
+
         return redirect()->route('app.hr.employees.index')
             ->with('success', __('messages.deleted_successfully'));
     }
@@ -348,9 +363,11 @@ class EmployeeController extends Controller
         }
 
         $department = Department::find($departmentId);
-        if (!$department) return;
+        if (! $department) {
+            return;
+        }
 
-        $isManagement = str_contains($department->name_en, 'Management') || 
+        $isManagement = str_contains($department->name_en, 'Management') ||
                         str_contains($department->name_ar, 'الإدارة');
 
         if ($isManagement) {
@@ -364,8 +381,8 @@ class EmployeeController extends Controller
     public function updateRoles(Request $request, Employee $employee)
     {
         $this->authorize('update', $employee);
-        
-        if (!$employee->user) {
+
+        if (! $employee->user) {
             return back()->with('error', __('hr.employees.no_user_linked'));
         }
 
@@ -375,21 +392,21 @@ class EmployeeController extends Controller
         ]);
 
         $tenantId = $employee->tenant_id;
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenantId);
-        
-        $allowedRoles = \App\Models\Role::where('tenant_id', $tenantId)
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenantId);
+
+        $allowedRoles = Role::where('tenant_id', $tenantId)
             ->whereNotIn('name', ['super_admin'])
             ->pluck('name')
             ->toArray();
-        
+
         $rolesToSync = array_intersect($validated['roles'], $allowedRoles);
-        if (!in_array('employee', $rolesToSync)) {
+        if (! in_array('employee', $rolesToSync)) {
             $rolesToSync[] = 'employee';
         }
-        
+
         $employee->user->syncRoles($rolesToSync);
         \Log::info("Updated roles for employee {$employee->id}", ['roles' => $rolesToSync]);
-        
+
         return back()->with('success', __('hr.employees.roles_updated'));
     }
 }
