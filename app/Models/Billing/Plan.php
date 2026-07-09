@@ -11,6 +11,8 @@ class Plan extends Model
 {
     use HasFactory;
 
+    protected $appends = ['yearly_discount', 'features_ar', 'features_en'];
+
     protected $fillable = [
         'name',
         'name_ar',
@@ -57,6 +59,70 @@ class Plan extends Model
         $yearlyIfMonthly = $this->price_monthly * 12;
 
         return round((($yearlyIfMonthly - $this->price_yearly) / $yearlyIfMonthly) * 100);
+    }
+
+    /**
+     * Get features attribute, translated according to current application locale.
+     */
+    public function getFeaturesAttribute($value): array
+    {
+        if (is_array($value)) {
+            $features = $value;
+        } elseif (is_string($value)) {
+            $features = json_decode($value, true) ?? [];
+        } else {
+            $features = [];
+        }
+
+        if (isset($features['ar']) || isset($features['en'])) {
+            $locale = app()->getLocale();
+
+            return $features[$locale] ?? $features['ar'] ?? [];
+        }
+
+        return $features;
+    }
+
+    /**
+     * Get Arabic features.
+     */
+    public function getFeaturesArAttribute(): array
+    {
+        $raw = $this->getRawOriginal('features');
+        if (is_array($raw)) {
+            $features = $raw;
+        } elseif (is_string($raw)) {
+            $features = json_decode($raw, true) ?? [];
+        } else {
+            $features = [];
+        }
+
+        if (isset($features['ar']) || isset($features['en'])) {
+            return $features['ar'] ?? [];
+        }
+
+        return $features;
+    }
+
+    /**
+     * Get English features.
+     */
+    public function getFeaturesEnAttribute(): array
+    {
+        $raw = $this->getRawOriginal('features');
+        if (is_array($raw)) {
+            $features = $raw;
+        } elseif (is_string($raw)) {
+            $features = json_decode($raw, true) ?? [];
+        } else {
+            $features = [];
+        }
+
+        if (isset($features['ar']) || isset($features['en'])) {
+            return $features['en'] ?? [];
+        }
+
+        return [];
     }
 
     /**

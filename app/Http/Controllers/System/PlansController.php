@@ -16,12 +16,12 @@ class PlansController extends Controller
     public function index(): Response
     {
         $plans = Plan::orderBy('sort_order')->get();
-        
+
         return Inertia::render('System/Plans/Index', [
             'plans' => $plans,
         ]);
     }
-    
+
     /**
      * Show the form for creating a new plan.
      */
@@ -31,7 +31,7 @@ class PlansController extends Controller
             'plan' => null,
         ]);
     }
-    
+
     /**
      * Store a newly created plan.
      */
@@ -46,20 +46,25 @@ class PlansController extends Controller
             'price_monthly' => 'required|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
-            'features' => 'nullable|array',
+            'features_ar' => 'nullable|array',
+            'features_en' => 'nullable|array',
             'limits' => 'nullable|array',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
         ]);
-        
+
         $validated['name'] = $validated['name_ar'];
-        
+        $validated['features'] = [
+            'ar' => array_values(array_filter($request->input('features_ar', []))),
+            'en' => array_values(array_filter($request->input('features_en', []))),
+        ];
+
         Plan::create($validated);
-        
+
         return redirect()->route('system.plans.index')->with('success', 'تم إنشاء الباقة بنجاح');
     }
-    
+
     /**
      * Show the form for editing the specified plan.
      */
@@ -69,7 +74,7 @@ class PlansController extends Controller
             'plan' => $plan,
         ]);
     }
-    
+
     /**
      * Update the specified plan.
      */
@@ -78,26 +83,31 @@ class PlansController extends Controller
         $validated = $request->validate([
             'name_ar' => 'required|string|max:255',
             'name_en' => 'required|string|max:255',
-            'slug' => 'required|string|max:255|unique:plans,slug,' . $plan->id,
+            'slug' => 'required|string|max:255|unique:plans,slug,'.$plan->id,
             'description_ar' => 'nullable|string',
             'description_en' => 'nullable|string',
             'price_monthly' => 'required|numeric|min:0',
             'price_yearly' => 'required|numeric|min:0',
             'trial_days' => 'required|integer|min:0',
-            'features' => 'nullable|array',
+            'features_ar' => 'nullable|array',
+            'features_en' => 'nullable|array',
             'limits' => 'nullable|array',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'integer',
         ]);
-        
+
         $validated['name'] = $validated['name_ar'];
-        
+        $validated['features'] = [
+            'ar' => array_values(array_filter($request->input('features_ar', []))),
+            'en' => array_values(array_filter($request->input('features_en', []))),
+        ];
+
         $plan->update($validated);
-        
+
         return redirect()->route('system.plans.index')->with('success', 'تم تحديث الباقة بنجاح');
     }
-    
+
     /**
      * Remove the specified plan.
      */
@@ -107,9 +117,9 @@ class PlansController extends Controller
         if ($plan->subscriptions()->whereIn('status', ['active', 'trialing'])->exists()) {
             return back()->with('error', 'لا يمكن حذف باقة لها اشتراكات نشطة');
         }
-        
+
         $plan->delete();
-        
+
         return redirect()->route('system.plans.index')->with('success', 'تم حذف الباقة');
     }
 }

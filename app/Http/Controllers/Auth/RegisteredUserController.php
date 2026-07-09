@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Billing\Plan;
+use App\Models\Billing\Subscription;
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
@@ -14,8 +16,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\PermissionRegistrar;
 
 class RegisteredUserController extends Controller
 {
@@ -35,7 +39,7 @@ class RegisteredUserController extends Controller
      * Handle an incoming registration request.
      * Creates: Tenant → Center → User (with Super Admin role)
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
@@ -52,25 +56,27 @@ class RegisteredUserController extends Controller
 
         // Check if phone already exists for any tenant
         $formattedPhone = $this->formatPhoneNumber($request->phone);
-        if (\App\Models\Tenant::where('phone', $formattedPhone)->exists()) {
+        if (Tenant::where('phone', $formattedPhone)->exists()) {
             return back()->withErrors(['phone' => __('auth.phone_already_registered')]);
         }
 
         // Check phone verification if Authentica is enabled
-        if (\App\Http\Controllers\Auth\PhoneVerificationController::isEnabled()) {
-            if (!session('phone_verified') || session('verified_phone_number') !== $this->formatPhoneNumber($request->phone)) {
+        if (PhoneVerificationController::isEnabled()) {
+            if (! session('phone_verified') || session('verified_phone_number') !== $this->formatPhoneNumber($request->phone)) {
                 return back()->withErrors(['phone' => __('auth.verify_phone_first')]);
             }
         }
 
         $user = DB::transaction(function () use ($request) {
-            $ownerName = $request->first_name . ' ' . $request->last_name;
-            $phone = '+966' . ltrim($request->phone, '0');
-            
+            $ownerName = $request->first_name.' '.$request->last_name;
+            $phone = '+966'.ltrim($request->phone, '0');
+
             // 1. Create Tenant with full company profile
             $tenant = Tenant::create([
                 'name' => $request->company_name,
-                'slug' => Str::slug($request->company_name) . '-' . Str::random(6),
+                'slug' => Str::slug($request->company_name).'-'.Str::random(6),
+                'status' => 'trial',
+                'trial_ends_at' => now()->addDays(14),
                 // Company Profile - all same as company_name initially
                 'legal_name' => $request->company_name,
                 'legal_name_en' => $request->company_name,
@@ -78,8 +84,24 @@ class RegisteredUserController extends Controller
                 'owner_name' => $ownerName,
                 'phone' => $phone,
                 'email' => $request->email,
-                // Logo will be null initially, system will use default logo
             ]);
+
+            // Create default trial subscription in database using the Trial Plan
+            $trialPlan = Plan::where('slug', 'trial')->first();
+
+            if ($trialPlan) {
+                Subscription::create([
+                    'tenant_id' => $tenant->id,
+                    'plan_id' => $trialPlan->id,
+                    'status' => 'trialing',
+                    'billing_cycle' => 'yearly',
+                    'starts_at' => now(),
+                    'ends_at' => now()->addDays(14),
+                    'trial_ends_at' => now()->addDays(14),
+                    'price' => 0.00,
+                    'auto_renew' => false,
+                ]);
+            }
 
             // 2. Create Default Center (Main Branch) with same data
             $center = Center::create([
@@ -87,7 +109,7 @@ class RegisteredUserController extends Controller
                 'name' => $request->company_name,
                 'name_ar' => $request->company_name,
                 'name_en' => $request->company_name,
-                'slug' => 'main-' . $tenant->id,
+                'slug' => 'main-'.$tenant->id,
                 'is_active' => true,
                 'is_main' => true, // First center is always main
                 'center_type' => 'المركز الرئيسي',
@@ -97,16 +119,16 @@ class RegisteredUserController extends Controller
             ]);
 
             // Set Spatie permissions team context for the new tenant
-            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-            app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+            app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
 
             // 3. Create User (Super Admin)
             $user = User::create([
                 'tenant_id' => $tenant->id,
                 'current_center_id' => $center->id,
-                'name' => $request->first_name . ' ' . $request->last_name,
+                'name' => $request->first_name.' '.$request->last_name,
                 'email' => $request->email,
-                'phone' => '+966' . ltrim($request->phone, '0'),
+                'phone' => '+966'.ltrim($request->phone, '0'),
                 'password' => Hash::make($request->password),
             ]);
 
@@ -145,19 +167,19 @@ class RegisteredUserController extends Controller
 
         // If starts with 0, remove it and add +966
         if (str_starts_with($phone, '0')) {
-            $phone = '+966' . substr($phone, 1);
+            $phone = '+966'.substr($phone, 1);
         }
         // If starts with 5 (Saudi mobile), add +966
         elseif (str_starts_with($phone, '5')) {
-            $phone = '+966' . $phone;
+            $phone = '+966'.$phone;
         }
         // If starts with 966, add +
         elseif (str_starts_with($phone, '966')) {
-            $phone = '+' . $phone;
+            $phone = '+'.$phone;
         }
         // If doesn't start with +, add it
-        elseif (!str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+        elseif (! str_starts_with($phone, '+')) {
+            $phone = '+'.$phone;
         }
 
         return $phone;

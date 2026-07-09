@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\Billing\Plan;
 use App\Models\CompanyTransaction;
 use App\Models\IncomeCategory;
 use App\Models\Invoice;
@@ -108,6 +109,84 @@ class CompanyProfileController extends Controller
                         $query->select('purchase_invoice_id')->from('company_transactions')->whereNull('center_id')->whereNotNull('purchase_invoice_id');
                     })->with(['supplier', 'center'])->latest()->get(),
             ],
+            'subscriptions' => rescue(function () use ($tenant) {
+                $subs = $tenant->subscriptions()
+                    ->with('plan')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                $hasTrial = $subs->contains(function ($sub) {
+                    return $sub->status === 'trialing' || $sub->status === 'trial';
+                });
+
+                if (! $hasTrial && $tenant->created_at) {
+                    $trialStarts = $tenant->created_at;
+                    $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
+                    $trialDays = (int) round($trialStarts->diffInDays($trialEnds) ?: 14);
+                    $trialStatus = $trialEnds->isFuture() ? 'trial' : 'expired';
+
+                    $virtualTrial = [
+                        'id' => 'trial-virtual',
+                        'created_at' => $trialStarts->toIso8601String(),
+                        'starts_at' => $trialStarts->toIso8601String(),
+                        'ends_at' => $trialEnds->toIso8601String(),
+                        'status' => $trialStatus,
+                        'billing_cycle' => 'yearly',
+                        'price' => 0.00,
+                        'discount_amount' => 0.00,
+                        'plan' => [
+                            'name_ar' => "فترة تجريبية {$trialDays} يوم",
+                            'name_en' => "{$trialDays} days Trial",
+                            'price_monthly' => 0,
+                            'price_yearly' => 0,
+                        ],
+                    ];
+
+                    $subs = $subs->concat([$virtualTrial]);
+                }
+
+                return $subs;
+            }, function () {
+                return [];
+            }),
+            'current_subscription' => rescue(function () use ($tenant) {
+                $sub = $tenant->subscriptions()
+                    ->whereIn('status', ['active', 'trial', 'trialing'])
+                    ->with('plan')
+                    ->first();
+
+                if (! $sub && ($tenant->status === 'trial' || $tenant->trial_ends_at)) {
+                    $trialStarts = $tenant->created_at;
+                    $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
+                    $trialDays = (int) round($trialStarts->diffInDays($trialEnds) ?: 14);
+                    $trialStatus = $trialEnds->isFuture() ? 'trial' : 'expired';
+
+                    $sub = [
+                        'id' => 'trial-virtual',
+                        'created_at' => $trialStarts->toIso8601String(),
+                        'starts_at' => $trialStarts->toIso8601String(),
+                        'ends_at' => $trialEnds->toIso8601String(),
+                        'status' => $trialStatus,
+                        'billing_cycle' => 'yearly',
+                        'price' => 0.00,
+                        'discount_amount' => 0.00,
+                        'plan' => [
+                            'name_ar' => "فترة تجريبية {$trialDays} يوم",
+                            'name_en' => "{$trialDays} days Trial",
+                            'price_monthly' => 0,
+                            'price_yearly' => 0,
+                            'features' => [],
+                            'features_ar' => [],
+                            'features_en' => [],
+                        ],
+                    ];
+                }
+
+                return $sub;
+            }),
+            'available_plans' => Plan::where('is_active', true)
+                ->orderBy('price_monthly', 'asc')
+                ->get(),
         ]);
     }
 

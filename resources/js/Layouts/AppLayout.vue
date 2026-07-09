@@ -1111,6 +1111,93 @@
                     </div>
                 </header>
 
+                <!-- Subscription/Trial Expiration Notice Banner -->
+                <div
+                    v-if="showExpirationNotice"
+                    class="border-b px-4 py-2.5 text-xs flex items-center justify-center transition-colors flex-shrink-0"
+                    :class="
+                        isSubscriptionExpired
+                            ? 'bg-rose-500/10 dark:bg-rose-500/5 border-rose-500/20 text-rose-800 dark:text-rose-300'
+                            : 'bg-amber-500/10 dark:bg-amber-500/5 border-amber-500/20 text-amber-800 dark:text-amber-300'
+                    "
+                >
+                    <div class="flex items-center justify-center gap-2 text-center">
+                        <svg
+                            class="w-4 h-4 flex-shrink-0 animate-bounce"
+                            :class="isSubscriptionExpired ? 'text-rose-500' : 'text-amber-500'"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                        <template v-if="isSubscriptionExpired">
+                            <span v-if="isRtl">
+                                لقد انتهت فترة اشتراكك! لمتابعة استخدام النظام وتفادي توقف العمليات،
+                                يرجى تجديد الاشتراك
+                                <a
+                                    href="/app/settings/company?tab=subscription"
+                                    class="font-bold underline text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
+                                >
+                                    بالضغط هنا
+                                </a>
+                                .
+                            </span>
+                            <span v-else>
+                                Your subscription has expired! To continue using the system, please
+                                renew your subscription
+                                <a
+                                    href="/app/settings/company?tab=subscription"
+                                    class="font-bold underline text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
+                                >
+                                    by clicking here
+                                </a>
+                                .
+                            </span>
+                        </template>
+                        <template v-else>
+                            <span v-if="isRtl">
+                                بقي
+                                <span
+                                    class="font-extrabold font-mono underline decoration-amber-500/50"
+                                >
+                                    {{ subscriptionDaysLeft }}
+                                </span>
+                                أيام على انتهاء اشتراكك. لتفادي انقطاع الخدمة، يرجى التجديد
+                                <a
+                                    href="/app/settings/company?tab=subscription"
+                                    class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
+                                >
+                                    اضغط هنا
+                                </a>
+                                .
+                            </span>
+                            <span v-else>
+                                Only
+                                <span
+                                    class="font-extrabold font-mono underline decoration-amber-500/50"
+                                >
+                                    {{ subscriptionDaysLeft }}
+                                </span>
+                                days left on your subscription. To prevent service interruption,
+                                please renew
+                                <a
+                                    href="/app/settings/company?tab=subscription"
+                                    class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
+                                >
+                                    click here
+                                </a>
+                                .
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
                 <main class="flex-1 px-4 py-6 overflow-auto print:!overflow-visible">
                     <slot />
                 </main>
@@ -2114,6 +2201,40 @@ const userInitial = computed(() => {
         return user.name.charAt(0).toUpperCase();
     }
     return 'U';
+});
+const subscriptionDaysLeft = computed(() => {
+    const tenant = page.props.tenant;
+    if (!tenant) return null;
+
+    const dateStr = tenant.subscription_ends_at || tenant.trial_ends_at;
+    if (!dateStr) return null;
+
+    const end = new Date(dateStr);
+    const now = new Date();
+    const diffTime = end - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+});
+
+const showExpirationNotice = computed(() => {
+    const tenant = page.props.tenant;
+    if (!tenant) return false;
+
+    if (tenant.status === 'expired') return true;
+
+    const days = subscriptionDaysLeft.value;
+    if (days === null) return false;
+
+    return days <= 7;
+});
+
+const isSubscriptionExpired = computed(() => {
+    const tenant = page.props.tenant;
+    if (!tenant) return false;
+    if (tenant.status === 'expired') return true;
+
+    const days = subscriptionDaysLeft.value;
+    return days !== null && days <= 0;
 });
 
 watch(

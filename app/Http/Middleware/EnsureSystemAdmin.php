@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AdminUser;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnsureSystemAdmin
@@ -24,14 +26,26 @@ class EnsureSystemAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Automatically stop impersonation if returning to system routes
+        if ($request->hasSession() && $request->session()->has('impersonating_from')) {
+            $originalUserId = $request->session()->get('impersonating_from');
+            $originalUser = User::find($originalUserId);
+            if ($originalUser && ($originalUser->is_system_admin || $originalUser instanceof AdminUser)) {
+                Auth::login($originalUser);
+                $request->session()->forget('impersonating_from');
+                $request->session()->forget('impersonating_tenant');
+                $request->setUserResolver(fn () => $originalUser);
+            }
+        }
+
         $user = $request->user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
         // 1. If user is AdminUser instance -> Allow
-        if ($user instanceof \App\Models\AdminUser) {
+        if ($user instanceof AdminUser) {
             return $next($request);
         }
 

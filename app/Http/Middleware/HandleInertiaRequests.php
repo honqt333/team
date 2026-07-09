@@ -2,8 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ContactMessage;
 use App\Models\InternalNotification;
+use App\Models\Quote;
 use App\Models\SystemAnnouncement;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Middleware;
@@ -36,7 +40,7 @@ class HandleInertiaRequests extends Middleware
         $tenant = $user?->tenant;
 
         // Check if user is a regular tenant User
-        $isTenantUser = $user instanceof \App\Models\User;
+        $isTenantUser = $user instanceof User;
 
         return [
             ...parent::share($request),
@@ -47,13 +51,13 @@ class HandleInertiaRequests extends Middleware
                 'available_centers' => ($user && $isTenantUser) ? $user->centers()->get(['centers.id', 'centers.name_ar', 'centers.name_en']) : [],
                 'unread_notifications_count' => ($user && $isTenantUser)
                     ? InternalNotification::where('user_id', $user->id)->where('tenant_id', $user->tenant_id)->whereNull('read_at')->count()
-                    + ($tenant ? SystemAnnouncement::forTenant($tenant->id)->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $tenant->id))->count() : 0)
+                    + ($tenant ? SystemAnnouncement::forTenant($tenant->id)->whereDoesntHave('reads', fn ($q) => $q->where('tenant_id', $tenant->id))->count() : 0)
                     : 0,
                 'approved_quotes_count' => ($user && $isTenantUser)
-                    ? \App\Models\Quote::where('status', \App\Models\Quote::STATUS_APPROVED)->count()
+                    ? Quote::where('status', Quote::STATUS_APPROVED)->count()
                     : 0,
-                'unread_contact_messages_count' => (!$isTenantUser && $user)
-                    ? \App\Models\ContactMessage::where('is_read', false)->count()
+                'unread_contact_messages_count' => (! $isTenantUser && $user)
+                    ? ContactMessage::where('is_read', false)->count()
                     : 0,
             ],
             'flash' => [
@@ -83,6 +87,9 @@ class HandleInertiaRequests extends Middleware
                 'print_settings' => $tenant->print_settings,
                 'tax_settings' => $tenant->taxSettings,
                 'has_paid_subscription' => $tenant->hasPaidSubscription(),
+                'status' => $tenant->status,
+                'trial_ends_at' => $tenant->trial_ends_at ? $tenant->trial_ends_at->toIso8601String() : null,
+                'subscription_ends_at' => rescue(fn () => $tenant->subscriptions()->whereIn('status', ['active', 'trial', 'trialing'])->latest()->first()?->ends_at?->toIso8601String()),
             ] : null,
             'center' => $user?->currentCenter ? [
                 'id' => $user->currentCenter->id,
@@ -95,13 +102,13 @@ class HandleInertiaRequests extends Middleware
             ] : null,
             // Impersonation state
             'impersonating' => $request->session()->has('impersonating_from'),
-            'impersonating_tenant_name' => $request->session()->has('impersonating_tenant') 
-                ? \App\Models\Tenant::find($request->session()->get('impersonating_tenant'))?->trade_name 
+            'impersonating_tenant_name' => $request->session()->has('impersonating_tenant')
+                ? Tenant::find($request->session()->get('impersonating_tenant'))?->trade_name
                 : null,
             // System announcements for tenant users
             'system_announcements' => ($user && $isTenantUser && $tenant)
                 ? SystemAnnouncement::forTenant($tenant->id)
-                    ->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $tenant->id))
+                    ->whereDoesntHave('reads', fn ($q) => $q->where('tenant_id', $tenant->id))
                     ->select('id', 'title', 'content', 'type', 'published_at')
                     ->latest('published_at')
                     ->limit(5)

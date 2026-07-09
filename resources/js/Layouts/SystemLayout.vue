@@ -1333,15 +1333,36 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useTheme } from '@/Composables/useTheme';
+import { useToast } from '@/Composables/useToast';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Toast from '@/Components/Toast.vue';
 
 const page = usePage();
 const { locale } = useI18n();
+const {
+    success: toastSuccess,
+    error: toastError,
+    warning: toastWarning,
+    info: toastInfo,
+} = useToast();
+
+// Global Flash Handler for System Panel
+watch(
+    () => page.props.flash,
+    (flash) => {
+        if (flash) {
+            if (flash.success) toastSuccess(flash.success, { fromFlash: true });
+            if (flash.error) toastError(flash.error, { fromFlash: true });
+            if (flash.warning) toastWarning(flash.warning, { fromFlash: true });
+            if (flash.info) toastInfo(flash.info, { fromFlash: true });
+        }
+    },
+    { deep: true, immediate: true }
+);
 
 const mobileMenuOpen = ref(false);
 const userMenuOpen = ref(false);

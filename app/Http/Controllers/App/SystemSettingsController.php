@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleMake;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -13,10 +14,10 @@ class SystemSettingsController extends Controller
     /**
      * Display the system settings page with side panel navigation.
      */
-    public function index(\Illuminate\Http\Request $request): Response
+    public function index(Request $request): Response
     {
         $makes = VehicleMake::ordered()->get();
-        
+
         return Inertia::render('Settings/System/Index', [
             'makes' => $makes,
             'activeSection' => $request->query('section', 'makes'),
@@ -33,7 +34,7 @@ class SystemSettingsController extends Controller
     {
         $tenant = auth()->user()->tenant;
         $printSettings = $tenant->print_settings ?? [];
-        
+
         $documentTypes = [
             'invoice' => 'فاتورة',
             'parts_invoice' => 'فاتورة قطع غيار',
@@ -56,7 +57,7 @@ class SystemSettingsController extends Controller
                 'name' => $name,
                 'title_ar' => $existing['title_ar'] ?? ($existing['title'] ?? ($tenant->{"{$key}_title"} ?? $name)),
                 'title_en' => $existing['title_en'] ?? ($existing['title'] ?? $name),
-                'terms' => is_array($existing['terms'] ?? null) ? array_values(array_filter($existing['terms'], fn($t) => !empty($t['text_ar']) || !empty($t['text_en']))) : [],
+                'terms' => is_array($existing['terms'] ?? null) ? array_values(array_filter($existing['terms'], fn ($t) => ! empty($t['text_ar']) || ! empty($t['text_en']))) : [],
                 'print_terms' => $existing['print_terms'] ?? true,
                 'terms_first_page' => $existing['terms_first_page'] ?? false,
                 'show_stamp' => $existing['show_stamp'] ?? true,
@@ -72,11 +73,13 @@ class SystemSettingsController extends Controller
         return Inertia::render('Settings/Print/Index', [
             'print_settings' => [
                 'documents' => $documents,
-                'visual' => $printSettings['visual'] ?? [
-                    'show_logo' => $printSettings['show_logo'] ?? true,
-                    'primary_color' => $printSettings['primary_color'] ?? '#fbbf24',
-                    'footer_text' => $printSettings['footer_text'] ?? '',
-                ],
+                'visual' => array_merge([
+                    'active_template' => 'TemplateDefaultA4',
+                    'show_logo' => true,
+                    'primary_color' => '#fbbf24',
+                    'footer_text' => '',
+                    'stamp_url' => '',
+                ], $printSettings['visual'] ?? []),
             ],
         ]);
     }
@@ -84,7 +87,7 @@ class SystemSettingsController extends Controller
     /**
      * Update system settings (Tenant level).
      */
-    public function update(\Illuminate\Http\Request $request)
+    public function update(Request $request)
     {
         $section = $request->input('section', 'general');
         $tenant = auth()->user()->tenant;
@@ -104,6 +107,8 @@ class SystemSettingsController extends Controller
                 $validated = $request->validate([
                     'documents' => 'required|array',
                     'visual' => 'required|array',
+                    'visual.active_template' => 'nullable|string',
+                    'visual.stamp_url' => 'nullable|string',
                     'visual.show_logo' => 'nullable|boolean',
                     'visual.primary_color' => 'nullable|string|max:7',
                     'visual.footer_text' => 'nullable|string',
@@ -112,7 +117,7 @@ class SystemSettingsController extends Controller
                 // Add timestamps and user info to changed documents
                 $currentSettings = $tenant->print_settings ?? [];
                 $newDocuments = $validated['documents'];
-                
+
                 foreach ($newDocuments as $key => $doc) {
                     $oldDoc = $currentSettings['documents'][$key] ?? null;
                     // Simplified check: if any boolean or string field changed

@@ -19,6 +19,10 @@ class TenancyContext
      */
     public static function tenantId(): ?int
     {
+        if (request()->is('system/*') || request()->is('system')) {
+            return null;
+        }
+
         $user = self::user();
 
         return $user?->tenant_id;

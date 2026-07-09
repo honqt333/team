@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Tenant;
+use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,54 +22,54 @@ class TenantsController extends Controller
     {
         $query = Tenant::query()
             ->withCount('centers', 'users');
-        
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
+
         // Search by name
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('trade_name', 'like', "%{$search}%")
-                  ->orWhere('legal_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('trade_name', 'like', "%{$search}%")
+                    ->orWhere('legal_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
-        
+
         $tenants = $query->orderBy('created_at', 'desc')
             ->paginate(20)
             ->withQueryString();
-        
+
         return Inertia::render('System/Tenants/Index', [
             'tenants' => $tenants,
             'filters' => $request->only(['status', 'search']),
         ]);
     }
-    
+
     /**
      * Display the specified tenant with usage analytics.
      */
     public function show(Tenant $tenant): Response
     {
         $tenant->load(['centers', 'users', 'subscriptions.plan']);
-        
+
         // Get all center IDs for this tenant
         $centerIds = $tenant->centers->pluck('id');
-        
+
         // Usage Analytics - bypass only center_scoped, keep SoftDeletes
         $analytics = [
-            'customers' => \App\Models\Customer::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
-            'vehicles' => \App\Models\Vehicle::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
-            'work_orders' => \App\Models\WorkOrder::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
-            'invoices' => \App\Models\Invoice::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
+            'customers' => Customer::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
+            'vehicles' => Vehicle::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
+            'work_orders' => WorkOrder::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
+            'invoices' => Invoice::withoutGlobalScope('center_scoped')->whereIn('center_id', $centerIds)->count(),
             'users' => $tenant->users->count(),
             'centers' => $tenant->centers->count(),
         ];
-        
+
         // Calculate storage size (photos, documents)
         $storagePath = storage_path("app/public/tenants/{$tenant->id}");
         $storageSize = 0;
@@ -72,22 +77,22 @@ class TenantsController extends Controller
             $storageSize = $this->getDirectorySize($storagePath);
         }
         $analytics['storage_mb'] = round($storageSize / 1024 / 1024, 2);
-        
+
         // Recent activity - bypass only center_scoped
-        $recentWorkOrders = \App\Models\WorkOrder::withoutGlobalScope('center_scoped')
+        $recentWorkOrders = WorkOrder::withoutGlobalScope('center_scoped')
             ->whereIn('center_id', $centerIds)
-            ->with(['vehicle.customer' => fn($q) => $q->withoutGlobalScope('center_scoped')])
+            ->with(['vehicle.customer' => fn ($q) => $q->withoutGlobalScope('center_scoped')])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get(['id', 'code', 'status', 'vehicle_id', 'center_id', 'created_at']);
-        
+
         return Inertia::render('System/Tenants/Show', [
             'tenant' => $tenant,
             'analytics' => $analytics,
             'recentWorkOrders' => $recentWorkOrders,
         ]);
     }
-    
+
     /**
      * Suspend a tenant.
      */
@@ -96,51 +101,65 @@ class TenantsController extends Controller
         $request->validate([
             'reason' => 'required|string|max:500',
         ]);
-        
+
         $tenant->update([
             'status' => 'suspended',
             'suspended_at' => now(),
             'suspension_reason' => $request->reason,
         ]);
-        
+
         return back()->with('success', 'تم تعليق المستأجر بنجاح');
     }
-    
+
     /**
      * Activate a tenant.
      */
     public function activate(Tenant $tenant)
     {
         $tenant->update([
-            'status' => 'active',
+            'status' => 'trial',
             'suspended_at' => null,
             'suspension_reason' => null,
         ]);
-        
-        return back()->with('success', 'تم تفعيل المستأجر بنجاح');
+
+        // Verify all unverified users' emails of this tenant upon activation
+        $tenant->users()->whereNull('email_verified_at')->update([
+            'email_verified_at' => now(),
+        ]);
+
+        return back()->with('success', 'تم تفعيل المستأجر وتأكيد البريد الإلكتروني لمستخدميه بنجاح');
     }
-    
+
     /**
      * Extend trial period.
      */
     public function extendTrial(Request $request, Tenant $tenant)
     {
         $request->validate([
-            'days' => 'required|integer|min:1|max:90',
+            'days' => 'required|integer|min:-90|max:90',
         ]);
-        
-        $newEndDate = $tenant->trial_ends_at 
+
+        $newEndDate = $tenant->trial_ends_at
             ? $tenant->trial_ends_at->addDays($request->days)
             : now()->addDays($request->days);
-        
+
         $tenant->update([
             'trial_ends_at' => $newEndDate,
             'status' => 'trial',
         ]);
-        
+
+        // Sync with the database subscription
+        $tenant->subscriptions()
+            ->whereIn('status', ['trial', 'trialing', 'expired', 'suspended'])
+            ->update([
+                'status' => 'trialing',
+                'ends_at' => $newEndDate,
+                'trial_ends_at' => $newEndDate,
+            ]);
+
         return back()->with('success', "تم تمديد الفترة التجريبية {$request->days} يوم");
     }
-    
+
     /**
      * Hard delete a tenant and all related data.
      */
@@ -149,40 +168,40 @@ class TenantsController extends Controller
         $request->validate([
             'confirmation' => 'required|string',
         ]);
-        
+
         // Verify confirmation matches tenant name
         if ($request->confirmation !== $tenant->name) {
             return back()->with('error', 'اسم المستأجر غير متطابق');
         }
-        
+
         \DB::transaction(function () use ($tenant) {
             $centerIds = $tenant->centers()->pluck('id');
-            
+
             // 1. Delete customers first (restrictOnDelete on center_id and tenant_id)
-            \App\Models\Customer::withoutGlobalScopes()
+            Customer::withoutGlobalScopes()
                 ->whereIn('center_id', $centerIds)
                 ->forceDelete();
-            
+
             // 2. Nullify user center references before deleting centers
-            \App\Models\User::where('tenant_id', $tenant->id)
+            User::where('tenant_id', $tenant->id)
                 ->update(['current_center_id' => null]);
-            
-            // 3. Delete centers (cascade handles: addresses, working_hours, departments, 
+
+            // 3. Delete centers (cascade handles: addresses, working_hours, departments,
             //    services, quotes, invoices, work_orders, sequences, etc.)
             foreach ($tenant->centers as $center) {
                 $center->forceDelete();
             }
-            
+
             // 4. Delete users (restrictOnDelete on tenant_id)
             $tenant->users()->forceDelete();
-            
+
             // 5. Finally delete the tenant
             $tenant->forceDelete();
         });
-        
+
         return redirect()->route('system.tenants.index')->with('success', 'تم حذف المستأجر وجميع بياناته نهائياً');
     }
-    
+
     /**
      * Calculate directory size recursively.
      */
@@ -195,6 +214,7 @@ class TenantsController extends Controller
         foreach ($files as $file) {
             $size += $file->getSize();
         }
+
         return $size;
     }
 }
