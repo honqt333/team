@@ -4,9 +4,9 @@ namespace App\Observers;
 
 use App\Models\HR\Employee;
 use App\Models\User;
+use App\Notifications\WelcomeEmployeeInvitation;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Notifications\WelcomeEmployeeInvitation;
 use Spatie\Permission\PermissionRegistrar;
 
 class EmployeeObserver
@@ -25,9 +25,18 @@ class EmployeeObserver
      */
     public function updated(Employee $employee): void
     {
-        // If email changed and no user linked, try to create/link user
-        if ($employee->isDirty('email') && !$employee->user_id) {
-            $this->handleUserCreation($employee);
+        // If email changed
+        if ($employee->isDirty('email')) {
+            $user = $employee->user ?? User::find($employee->user_id);
+            if ($user) {
+                // Update the linked user's email so they can log in
+                $user->update(['email' => $employee->email]);
+                // Send new activation/invitation email
+                $user->notify(new WelcomeEmployeeInvitation);
+                \Log::info("EmployeeObserver: Email updated and new invitation sent for employee {$employee->id}");
+            } else {
+                $this->handleUserCreation($employee);
+            }
         }
 
         // Handle deactivation logic
@@ -39,7 +48,7 @@ class EmployeeObserver
 
         // Handle reactivation
         if ($employee->isDirty('status') && $employee->status === 'active') {
-            if ($employee->user && !$employee->user->is_active) {
+            if ($employee->user && ! $employee->user->is_active) {
                 $employee->user->update(['is_active' => true]);
             }
         }
@@ -47,7 +56,7 @@ class EmployeeObserver
 
     /**
      * Handle automatic user creation for employee.
-     * 
+     *
      * New Logic:
      * 1. Every employee gets a User account automatically
      * 2. Every employee gets the 'employee' role (self-service portal access)
@@ -59,6 +68,7 @@ class EmployeeObserver
         // Skip if no email
         if (empty($employee->email)) {
             \Log::warning("EmployeeObserver: Skipping user creation for employee {$employee->id} - no email");
+
             return;
         }
 
@@ -71,7 +81,7 @@ class EmployeeObserver
         $user = User::where('email', $employee->email)->first();
         $isNewUser = false;
 
-        if (!$user) {
+        if (! $user) {
             $isNewUser = true;
             $user = User::create([
                 'name' => $employee->name_en ?? $employee->name_ar ?? 'Employee',
@@ -90,11 +100,11 @@ class EmployeeObserver
             }
         } else {
             // Existing user found - ensure they're attached to employee's center
-            if ($employee->center_id && !$user->centers->contains($employee->center_id)) {
+            if ($employee->center_id && ! $user->centers->contains($employee->center_id)) {
                 $user->centers()->attach($employee->center_id, ['tenant_id' => $employee->tenant_id]);
             }
             // Update current center if not set
-            if (!$user->current_center_id && $employee->center_id) {
+            if (! $user->current_center_id && $employee->center_id) {
                 $user->update(['current_center_id' => $employee->center_id]);
             }
         }
@@ -107,23 +117,22 @@ class EmployeeObserver
         app(PermissionRegistrar::class)->setPermissionsTeamId($employee->tenant_id);
 
         // Always assign base 'employee' role
-        if (!$user->hasRole('employee')) {
+        if (! $user->hasRole('employee')) {
             $user->assignRole('employee');
         }
 
         // Assign additional role from Job Title if defined
         if ($employee->jobTitle && $employee->jobTitle->default_role_name) {
             $additionalRole = $employee->jobTitle->default_role_name;
-            if ($additionalRole !== 'employee' && !$user->hasRole($additionalRole)) {
+            if ($additionalRole !== 'employee' && ! $user->hasRole($additionalRole)) {
                 $user->assignRole($additionalRole);
             }
         }
 
         // Send invitation email for new users
         if ($isNewUser) {
-            $user->notify(new WelcomeEmployeeInvitation());
+            $user->notify(new WelcomeEmployeeInvitation);
             \Log::info("EmployeeObserver: Created user and sent invite for employee {$employee->id}");
         }
     }
 }
-
