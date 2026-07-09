@@ -108,10 +108,46 @@ class CompanyProfileController extends Controller
                         $query->select('purchase_invoice_id')->from('company_transactions')->whereNull('center_id')->whereNotNull('purchase_invoice_id');
                     })->with(['supplier', 'center'])->latest()->get(),
             ],
-            'subscriptions' => $tenant->subscriptions()
-                ->with('plan')
-                ->orderBy('created_at', 'desc')
-                ->get(),
+            'subscriptions' => rescue(function () use ($tenant) {
+                $subs = $tenant->subscriptions()
+                    ->with('plan')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                $hasTrial = $subs->contains(function ($sub) {
+                    return $sub->status === 'trialing' || $sub->status === 'trial';
+                });
+
+                if (! $hasTrial && $tenant->created_at) {
+                    $trialStarts = $tenant->created_at;
+                    $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
+                    $trialDays = $trialStarts->diffInDays($trialEnds) ?: 14;
+                    $trialStatus = $trialEnds->isFuture() ? 'trial' : 'expired';
+
+                    $virtualTrial = [
+                        'id' => 'trial-virtual',
+                        'created_at' => $trialStarts->toIso8601String(),
+                        'starts_at' => $trialStarts->toIso8601String(),
+                        'ends_at' => $trialEnds->toIso8601String(),
+                        'status' => $trialStatus,
+                        'billing_cycle' => 'yearly',
+                        'price' => 0.00,
+                        'discount_amount' => 0.00,
+                        'plan' => [
+                            'name_ar' => "فترة تجريبية {$trialDays} يوم",
+                            'name_en' => "{$trialDays} days Trial",
+                            'price_monthly' => 0,
+                            'price_yearly' => 0,
+                        ],
+                    ];
+
+                    $subs = $subs->concat([$virtualTrial]);
+                }
+
+                return $subs;
+            }, function () {
+                return [];
+            }),
         ]);
     }
 

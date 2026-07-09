@@ -3234,10 +3234,12 @@ const getPlanName = (sub) => {
             ? sub.plan?.name_en || sub.plan?.name_ar
             : sub.plan?.name_ar || sub.plan?.name_en;
     if (!name)
-        return sub.status === 'trialing' || sub.status === 'trial'
-            ? 'فترة تجريبية (Trial)'
-            : 'باقة مجهولة';
-    if (sub.status === 'trialing' || sub.status === 'trial') {
+        return sub.status === 'trialing' || sub.status === 'trial' ? 'فترة تجريبية' : 'باقة مجهولة';
+    if (
+        (sub.status === 'trialing' || sub.status === 'trial') &&
+        !name.includes('Trial') &&
+        !name.includes('تجريبي')
+    ) {
         return locale.value === 'en' ? `${name} (Trial)` : `${name} (تجريبي)`;
     }
     return name;
