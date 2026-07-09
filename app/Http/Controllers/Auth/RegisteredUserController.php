@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Billing\Plan;
+use App\Models\Billing\Subscription;
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
@@ -82,8 +84,24 @@ class RegisteredUserController extends Controller
                 'owner_name' => $ownerName,
                 'phone' => $phone,
                 'email' => $request->email,
-                // Logo will be null initially, system will use default logo
             ]);
+
+            // Create default trial subscription in database using the Trial Plan
+            $trialPlan = Plan::where('slug', 'trial')->first();
+
+            if ($trialPlan) {
+                Subscription::create([
+                    'tenant_id' => $tenant->id,
+                    'plan_id' => $trialPlan->id,
+                    'status' => 'trialing',
+                    'billing_cycle' => 'yearly',
+                    'starts_at' => now(),
+                    'ends_at' => now()->addDays(14),
+                    'trial_ends_at' => now()->addDays(14),
+                    'price' => 0.00,
+                    'auto_renew' => false,
+                ]);
+            }
 
             // 2. Create Default Center (Main Branch) with same data
             $center = Center::create([
