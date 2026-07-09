@@ -3500,12 +3500,14 @@ const transactionFilter = ref('all');
 const subInvoiceTab = ref('sales');
 
 const formatCurrency = (value) => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return '0.00 SAR';
     return (
         new Intl.NumberFormat('en-US', {
             style: 'decimal',
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-        }).format(value) + ' SAR'
+        }).format(num) + ' SAR'
     );
 };
 
