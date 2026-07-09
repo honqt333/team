@@ -1,33 +1,48 @@
 <template>
-    <div class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center" :dir="isRtl ? 'rtl' : 'ltr'">
+    <div
+        class="print-container bg-white min-h-screen p-8 print:p-0 print:m-0 flex flex-col items-center"
+        :dir="isRtl ? 'rtl' : 'ltr'"
+    >
         <!-- Print / Back Controls (hidden during print) -->
         <div class="fixed bottom-6 left-6 flex items-center gap-3 print:hidden z-50">
             <!-- Back Button -->
-            <button 
-                @click="goBack" 
+            <button
+                @click="goBack"
                 class="px-4 py-2.5 bg-white hover:bg-gray-50 text-gray-700 rounded-xl text-sm font-semibold transition-all border border-gray-200 shadow-lg flex items-center gap-2"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                    />
                 </svg>
                 {{ $t('common.back') }}
             </button>
 
             <!-- Print Button -->
-            <button 
-                @click="printPage" 
+            <button
+                @click="printPage"
                 class="px-5 py-2.5 text-white rounded-xl text-sm font-semibold transition-all shadow-lg flex items-center gap-2"
                 :style="{ backgroundColor: visualSettings.primary_color || '#3b82f6' }"
             >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 022 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+                    />
                 </svg>
                 {{ labels.print || $t('common.print') }}
             </button>
         </div>
 
-        <PrintEngine 
-            :documentType="invoice.work_order_id || invoice.company_transaction ? 'invoice' : 'parts_invoice'"
+        <PrintEngine
+            :documentType="
+                invoice.work_order_id || invoice.company_transaction ? 'invoice' : 'parts_invoice'
+            "
             :data="mappedData"
             :centerData="mappedCenterData"
             :documentSettings="documentSettings"
@@ -69,19 +84,28 @@ const goBack = () => {
 };
 const printPage = () => window.print();
 
-const formatNumber = (num) => new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
+const formatNumber = (num) =>
+    new Intl.NumberFormat(isRtl.value ? 'ar-SA-u-nu-latn' : 'en-US').format(num || 0);
 
 const mappedData = computed(() => {
     // Map vehicle details
     let vehicleStr = '-';
     if (props.invoice.work_order?.vehicle) {
-        const make = props.invoice.work_order.vehicle.make?.name_ar || props.invoice.work_order.vehicle.make?.name_en || props.invoice.work_order.vehicle.make || '';
-        const model = props.invoice.work_order.vehicle.model?.name_ar || props.invoice.work_order.vehicle.model?.name_en || props.invoice.work_order.vehicle.model || '';
+        const make =
+            props.invoice.work_order.vehicle.make?.name_ar ||
+            props.invoice.work_order.vehicle.make?.name_en ||
+            props.invoice.work_order.vehicle.make ||
+            '';
+        const model =
+            props.invoice.work_order.vehicle.model?.name_ar ||
+            props.invoice.work_order.vehicle.model?.name_en ||
+            props.invoice.work_order.vehicle.model ||
+            '';
         vehicleStr = `${make} ${model}`.trim() || '-';
     }
 
     // Map line items
-    const lines = (props.invoice.lines || []).map(line => ({
+    const lines = (props.invoice.lines || []).map((line) => ({
         service_name: line.description || '',
         description: line.notes || '',
         qty: Number(line.qty || 1),
@@ -92,30 +116,33 @@ const mappedData = computed(() => {
         tax_rate_snapshot: line.tax_rate_snapshot,
         line_total_excl_tax: Number(line.line_total_excl_tax || 0),
         line_total_incl_tax: Number(line.line_total_incl_tax || 0),
-        tax_amount: Number(line.tax_amount || 0)
+        tax_amount: Number(line.tax_amount || 0),
     }));
 
-
-    const qrUrl = props.invoice.zatca_qr_tlv 
-        ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(props.invoice.zatca_qr_tlv)}` 
+    const qrUrl = props.invoice.zatca_qr_tlv
+        ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(props.invoice.zatca_qr_tlv)}`
         : '';
 
     const tenant = props.invoice.tenant || page.props.tenant || {};
-    const isVatEnabled = tenant.tax_settings?.vat_enabled ?? tenant.taxSettings?.vat_enabled ?? true;
+    const isVatEnabled =
+        tenant.tax_settings?.vat_enabled ?? tenant.taxSettings?.vat_enabled ?? true;
 
     return {
         code: props.invoice.invoice_number,
         created_at: props.invoice.issue_date,
         entry_date: props.invoice.supply_date || props.invoice.issue_date,
         mileage: props.invoice.work_order?.mileage,
-        odometer: props.invoice.work_order?.mileage ? formatNumber(props.invoice.work_order.mileage) : '-',
+        odometer: props.invoice.work_order?.mileage
+            ? formatNumber(props.invoice.work_order.mileage)
+            : '-',
         fuel_level: props.invoice.work_order?.fuel_level,
         customer_complaint: props.invoice.work_order?.customer_complaint,
         qr_code_url: qrUrl,
         customer: {
             name: props.invoice.customer_name_snapshot || props.invoice.customer?.name,
             phone: props.invoice.customer?.phone,
-            address: props.invoice.customer_address_snapshot || props.invoice.customer?.address_line,
+            address:
+                props.invoice.customer_address_snapshot || props.invoice.customer?.address_line,
             tax_number: props.invoice.customer_vat_snapshot || props.invoice.customer?.tax_number,
         },
         vehicle: {
@@ -124,15 +151,23 @@ const mappedData = computed(() => {
             color: props.invoice.work_order?.vehicle?.color,
         },
         tax_enabled_snapshot: props.invoice.tax_enabled_snapshot && isVatEnabled,
-        pricing_mode_snapshot: props.invoice.pricing_mode_snapshot || props.invoice.work_order?.pricing_mode_snapshot,
+        pricing_mode_snapshot:
+            props.invoice.pricing_mode_snapshot || props.invoice.work_order?.pricing_mode_snapshot,
         total_excl_tax: Number(props.invoice.total_excl_tax || 0),
         total_tax: Number(props.invoice.total_tax || 0),
         total_incl_tax: Number(props.invoice.total_incl_tax || 0),
-        bad_debt: (props.invoice.payments || []).reduce((s, p) => p.type === 'bad_debt' ? s + Number(p.amount || 0) : s, 0),
+        bad_debt: (props.invoice.payments || []).reduce(
+            (s, p) => (p.type === 'bad_debt' ? s + Number(p.amount || 0) : s),
+            0
+        ),
         total_paid: Number(props.invoice.total_paid || 0),
-        balance: Number(props.invoice.balance !== undefined ? props.invoice.balance : (Number(props.invoice.total_incl_tax || 0) - Number(props.invoice.total_paid || 0))),
+        balance: Number(
+            props.invoice.balance !== undefined
+                ? props.invoice.balance
+                : Number(props.invoice.total_incl_tax || 0) - Number(props.invoice.total_paid || 0)
+        ),
         is_company: !!props.invoice.company_transaction,
-        items: lines
+        items: lines,
     };
 });
 
@@ -169,18 +204,24 @@ const formatAddress = (addr) => {
 };
 
 const mappedCenterData = computed(() => {
-    const isCompany = !!props.invoice.company_transaction;
-    const center = isCompany ? {} : (props.invoice.center || {});
+    const isCompany = !props.invoice.center_id;
+    const center = isCompany ? {} : props.invoice.center || {};
     const tenant = props.invoice.tenant || page.props.tenant || {};
     return {
-        name: isRtl.value ? (tenant.trade_name || tenant.legal_name || tenant.name || center.name_ar || center.name) : (tenant.trade_name || tenant.legal_name || tenant.name || center.name_en || center.name),
+        name: isRtl.value
+            ? tenant.trade_name || tenant.legal_name || tenant.name || center.name_ar || center.name
+            : tenant.trade_name ||
+              tenant.legal_name ||
+              tenant.name ||
+              center.name_en ||
+              center.name,
         tax_number: tenant.vat_number || center.vat_number,
         cr_number: tenant.cr_number,
         phone: tenant.phone || center.phone,
         logo: tenant.logo_url || center.logo_invoice_url || center.logo_light_url || '',
         iban: tenant.iban || '',
         address: formatAddress(tenant.address) || formatAddress(center.address) || '',
-        stamp_url: isCompany ? '' : (center.stamp_url || ''),
+        stamp_url: isCompany ? '' : center.stamp_url || '',
     };
 });
 
@@ -190,14 +231,19 @@ const documentSettings = computed(() => {
     return {
         title_ar: docSettings.title_ar || props.labels?.document_title || 'فاتورة ضريبية مبسطة',
         title_en: docSettings.title_en || props.labels?.document_title || 'Simplified Tax Invoice',
-        terms: docSettings.terms || (page.props.tenant?.invoice_terms ? [page.props.tenant.invoice_terms] : []),
+        terms:
+            docSettings.terms ||
+            (page.props.tenant?.invoice_terms ? [page.props.tenant.invoice_terms] : []),
         print_terms: docSettings.print_terms !== false,
         show_stamp: docSettings.show_stamp !== false,
         show_customer_address: docSettings.show_customer_address !== false,
-        signatures: docSettings.signatures && docSettings.signatures.length > 0 ? docSettings.signatures : [
-            { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
-            { name_ar: 'توقيع العميل', name_en: 'Customer Signature' }
-        ]
+        signatures:
+            docSettings.signatures && docSettings.signatures.length > 0
+                ? docSettings.signatures
+                : [
+                      { name_ar: 'توقيع المدير', name_en: 'Manager Signature' },
+                      { name_ar: 'توقيع العميل', name_en: 'Customer Signature' },
+                  ],
     };
 });
 
@@ -212,14 +258,21 @@ const visualSettings = computed(() => {
         show_qr_code: vis.show_qr_code !== false,
         primary_color: vis.primary_color || '#3b82f6',
         footer_text: vis.footer_text || props.invoice.tenant?.print_settings?.footer_text || '',
-        stamp_url: center.stamp_url || vis.stamp_url || ''
+        stamp_url: center.stamp_url || vis.stamp_url || '',
     };
 });
 </script>
 
 <style>
 @media print {
-    @page { size: A4; margin: 0 1cm; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+    @page {
+        size: A4;
+        margin: 0 1cm;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background: white;
+    }
 }
 </style>

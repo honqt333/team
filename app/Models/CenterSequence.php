@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-use App\Models\Concerns\CenterScoped;
+use Illuminate\Support\Facades\DB;
 
 class CenterSequence extends Model
 {
-    use HasFactory, CenterScoped;
+    use CenterScoped, HasFactory;
 
     protected $fillable = [
         'tenant_id',
@@ -20,11 +20,15 @@ class CenterSequence extends Model
         'year',
     ];
 
-    public static function getNextValue(int $tenantId, int $centerId, string $type, ?int $year = null): int
+    public static function getNextValue(int $tenantId, ?int $centerId, string $type, ?int $year = null): int
     {
         // Pessimistic Locking to prevent gaps/duplicates
-        return \Illuminate\Support\Facades\DB::transaction(function () use ($tenantId, $centerId, $type, $year) {
-            $sequence = static::lockForUpdate()->firstOrCreate(
+        return DB::transaction(function () use ($tenantId, $centerId, $type, $year) {
+            $query = static::query();
+            if ($centerId === null) {
+                $query = $query->withoutGlobalScope('center_scoped');
+            }
+            $sequence = $query->lockForUpdate()->firstOrCreate(
                 [
                     'tenant_id' => $tenantId,
                     'center_id' => $centerId,
@@ -35,7 +39,7 @@ class CenterSequence extends Model
             );
 
             $sequence->increment('current_value');
-            
+
             return $sequence->current_value;
         });
     }

@@ -5,11 +5,12 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\CompanyTransaction;
 use App\Models\Customer;
-use App\Models\Supplier;
-use App\Models\Invoice;
-use App\Models\PurchaseInvoice;
-use App\Models\Part;
 use App\Models\InventoryUnit;
+use App\Models\Invoice;
+use App\Models\Part;
+use App\Models\Payment;
+use App\Models\PurchaseInvoice;
+use App\Models\Supplier;
 use App\Services\InvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,9 +31,9 @@ class CompanyTransactionController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if ($request->input('is_taxable') && !$request->input('contact_id')) {
+        if ($request->input('is_taxable') && ! $request->input('contact_id')) {
             return redirect()->back()->withErrors([
-                'contact_id' => 'يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية'
+                'contact_id' => 'يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية',
             ])->withInput();
         }
 
@@ -53,7 +54,7 @@ class CompanyTransactionController extends Controller
 
         $user = auth()->user();
         $validated['tenant_id'] = $user->tenant_id;
-        $validated['center_id'] = $validated['center_id'] ?? $user->current_center_id;
+        $validated['center_id'] = $validated['center_id'] ?? null;
         $validated['updated_by'] = $user->id;
         $validated['status'] = 'draft';
 
@@ -71,9 +72,9 @@ class CompanyTransactionController extends Controller
             return redirect()->back()->with('error', 'لا يمكن تعديل المعاملات المعتمدة');
         }
 
-        if ($request->input('is_taxable') && !$request->input('contact_id')) {
+        if ($request->input('is_taxable') && ! $request->input('contact_id')) {
             return redirect()->back()->withErrors([
-                'contact_id' => 'يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية'
+                'contact_id' => 'يجب تحديد العميل/المورد عند تفعيل خاضع للضريبة لضمان التوافق مع الفوترة الضريبية',
             ])->withInput();
         }
 
@@ -134,12 +135,12 @@ class CompanyTransactionController extends Controller
                             $customer = Customer::find($transaction->contact_id);
                         }
 
-                        if (!$customer) {
+                        if (! $customer) {
                             $customer = Customer::where('name', 'عميل إداري عام')
                                 ->where('tenant_id', $transaction->tenant_id)
                                 ->first();
 
-                            if (!$customer) {
+                            if (! $customer) {
                                 $customer = Customer::create([
                                     'tenant_id' => $transaction->tenant_id,
                                     'center_id' => $transaction->center_id,
@@ -154,20 +155,20 @@ class CompanyTransactionController extends Controller
                         $customerAddress = null;
                         if ($customer) {
                             $addressParts = array_filter([
-                                $customer->building_number ? 'مبنى ' . $customer->building_number : null,
+                                $customer->building_number ? 'مبنى '.$customer->building_number : null,
                                 $customer->address_line ?: null,
-                                $customer->district ? 'حي ' . $customer->district : null,
+                                $customer->district ? 'حي '.$customer->district : null,
                                 $customer->city ?: null,
-                                $customer->postal_code ? 'الرمز البريدي ' . $customer->postal_code : null,
+                                $customer->postal_code ? 'الرمز البريدي '.$customer->postal_code : null,
                             ]);
-                            $customerAddress = !empty($addressParts) ? implode('، ', $addressParts) : null;
+                            $customerAddress = ! empty($addressParts) ? implode('، ', $addressParts) : null;
                         }
 
                         $invoice = Invoice::create([
                             'tenant_id' => $transaction->tenant_id,
                             'center_id' => $transaction->center_id,
                             'customer_id' => $customer?->id,
-                            'invoice_number' => 'DRAFT-COMP-' . $transaction->id,
+                            'invoice_number' => 'DRAFT-COMP-'.$transaction->id,
                             'issue_date' => $transaction->transaction_date,
                             'supply_date' => $transaction->transaction_date,
                             'due_date' => $transaction->transaction_date,
@@ -175,17 +176,17 @@ class CompanyTransactionController extends Controller
                             'subtype' => 'simplified',
                             'status' => 'draft',
                             'payment_status' => 'paid',
-                            
+
                             // Snapshots
                             'customer_name_snapshot' => $customer?->name ?? 'عميل نقدي',
                             'customer_vat_snapshot' => $customer?->tax_number,
                             'customer_address_snapshot' => $customerAddress,
-                            
+
                             'tax_enabled_snapshot' => true,
                             'pricing_mode_snapshot' => 'exclusive',
                             'tax_rate_snapshot' => 15,
                             'currency_code' => 'SAR',
-                            
+
                             'total_excl_tax' => $transaction->amount,
                             'total_tax' => $transaction->tax_amount,
                             'total_incl_tax' => $transaction->total_amount,
@@ -215,14 +216,14 @@ class CompanyTransactionController extends Controller
                         $this->invoiceService->issueInvoice($invoice);
 
                         // Create payment record
-                        \App\Models\Payment::create([
+                        Payment::create([
                             'tenant_id' => $invoice->tenant_id,
                             'center_id' => $invoice->center_id,
                             'invoice_id' => $invoice->id,
                             'amount' => $transaction->total_amount,
                             'payment_date' => $transaction->transaction_date,
                             'payment_method' => 'cash',
-                            'notes' => 'تسجيل دفع تلقائي لمعاملة إدارية رقم ' . $transaction->id,
+                            'notes' => 'تسجيل دفع تلقائي لمعاملة إدارية رقم '.$transaction->id,
                             'received_by' => $user->id,
                             'type' => 'payment',
                         ]);
@@ -234,17 +235,17 @@ class CompanyTransactionController extends Controller
                             $supplier = Supplier::find($transaction->contact_id);
                         }
 
-                        if (!$supplier) {
+                        if (! $supplier) {
                             $supplier = Supplier::withoutGlobalScope('center_scoped')
                                 ->where('name', 'مورد إداري عام')
                                 ->where('tenant_id', $transaction->tenant_id)
                                 ->first();
 
-                            if (!$supplier) {
+                            if (! $supplier) {
                                 $supplier = Supplier::create([
                                     'tenant_id' => $transaction->tenant_id,
                                     'name' => 'مورد إداري عام',
-                                    'code' => 'SUP-ADMIN-' . $transaction->tenant_id,
+                                    'code' => 'SUP-ADMIN-'.$transaction->tenant_id,
                                     'is_active' => true,
                                 ]);
                             }
@@ -290,14 +291,14 @@ class CompanyTransactionController extends Controller
                         ]);
 
                         // Create payment record
-                        \App\Models\Payment::create([
+                        Payment::create([
                             'tenant_id' => $purchaseInvoice->tenant_id,
                             'center_id' => $purchaseInvoice->center_id,
                             'purchase_invoice_id' => $purchaseInvoice->id,
                             'amount' => $transaction->total_amount,
                             'payment_date' => $transaction->transaction_date,
                             'payment_method' => 'cash',
-                            'notes' => 'تسجيل دفع تلقائي لمعاملة إدارية رقم ' . $transaction->id,
+                            'notes' => 'تسجيل دفع تلقائي لمعاملة إدارية رقم '.$transaction->id,
                             'received_by' => $user->id,
                             'type' => 'payment',
                         ]);
@@ -313,7 +314,7 @@ class CompanyTransactionController extends Controller
 
             return redirect()->back()->with('success', 'تم اعتماد المعاملة المالية وإصدار الفاتورة بنجاح');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'حدث خطأ أثناء الاعتماد: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'حدث خطأ أثناء الاعتماد: '.$e->getMessage());
         }
     }
 
@@ -329,11 +330,11 @@ class CompanyTransactionController extends Controller
             ->select('id', 'name', 'phone')
             ->limit(10)
             ->get()
-            ->map(fn($c) => [
+            ->map(fn ($c) => [
                 'value' => "customer-{$c->id}",
                 'label' => "{$c->name} ({$c->phone}) - عميل",
                 'type' => 'customer',
-                'id' => $c->id
+                'id' => $c->id,
             ]);
 
         $suppliers = Supplier::where('name', 'like', "%{$search}%")
@@ -341,11 +342,11 @@ class CompanyTransactionController extends Controller
             ->select('id', 'name', 'phone')
             ->limit(10)
             ->get()
-            ->map(fn($s) => [
+            ->map(fn ($s) => [
                 'value' => "supplier-{$s->id}",
                 'label' => "{$s->name} ({$s->phone}) - مورد",
                 'type' => 'supplier',
-                'id' => $s->id
+                'id' => $s->id,
             ]);
 
         return response()->json($customers->merge($suppliers));
