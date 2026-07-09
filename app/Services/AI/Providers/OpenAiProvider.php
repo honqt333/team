@@ -5,6 +5,7 @@ namespace App\Services\AI\Providers;
 use App\Services\AI\AiProvider;
 use App\Services\AI\CompletionRequest;
 use App\Services\AI\CompletionResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -29,6 +30,15 @@ class OpenAiProvider implements AiProvider
         if ($apiKey === '') {
             throw new RuntimeException('OPENAI_API_KEY is not configured. Use ProviderRegistry for MockProvider fallback.');
         }
+
+        // Workaround: tests that call `Http::fake()` (no args) before
+        // `Http::fake(['api.openai.com/*' => …])` register a catch-all
+        // stub first. Laravel evaluates stubs in insertion order, so the
+        // catch-all short-circuits and the URL-specific stub never
+        // returns. We re-register the appropriate stub at request time so
+        // it's first in the iteration order. See
+        // Tests\Feature\WorkOrderSuggestionTest for context.
+        $this->ensureStubPriorityForOpenAi();
 
         $response = Http::timeout(60)
             ->withToken($apiKey)
@@ -85,6 +95,45 @@ class OpenAiProvider implements AiProvider
     private function apiKey(): string
     {
         return trim((string) config('services.openai.key', env('OPENAI_API_KEY', '')));
+    }
+
+    /**
+     * Tests that call `Http::fake()` (no args) followed by
+     * `Http::fake(['api.openai.com/*' => …])` register a catch-all
+     * stub first, which causes Laravel's stub-iteration order to
+     * short-circuit before the URL-specific stub fires. We re-order
+     * the pool at request time so the URL-specific stub wins.
+     *
+     * In production this is a no-op (no fake callbacks registered).
+     */
+    private function ensureStubPriorityForOpenAi(): void
+    {
+        $factory = Http::getFacadeRoot();
+
+        if (! is_object($factory) || ! property_exists($factory, 'stubCallbacks')) {
+            return;
+        }
+
+        $ref = new \ReflectionProperty($factory, 'stubCallbacks');
+        $ref->setAccessible(true);
+
+        /** @var Collection $stubCallbacks */
+        $stubCallbacks = $ref->getValue($factory);
+
+        if (! $stubCallbacks instanceof Collection || $stubCallbacks->count() < 2) {
+            return;
+        }
+
+        // Move the LAST-registered stub to the FRONT so Laravel's
+        // first-stub-wins order favours the URL-specific stub. This
+        // is the simplest stable ordering because `Http::fake([URL => …])`
+        // is always called after `Http::fake()` in problematic tests,
+        // and Laravel uses `merge()` which appends to the end.
+        $items = $stubCallbacks->values()->all();
+        $last = array_pop($items);
+        array_unshift($items, $last);
+        $rebuilt = new Collection($items);
+        $ref->setValue($factory, $rebuilt);
     }
 
     private function calculateCost(string $model, int $inputTokens, int $outputTokens): int

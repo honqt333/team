@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AiDemoController;
 use App\Http\Controllers\Api\HR\BiometricAttendanceController;
+use App\Http\Controllers\Api\WorkOrderSuggestionController;
 use App\Http\Controllers\HealthController;
 use App\Http\Middleware\TrackAiUsage;
 use Illuminate\Support\Facades\Route;
@@ -46,3 +47,7 @@ Route::prefix('v1/attendance')->middleware('throttle:30,1')->group(function () {
 Route::post('/v1/ai/demo/describe-vehicle', [AiDemoController::class, 'describe'])
     ->middleware(['auth:sanctum', TrackAiUsage::class, 'tenant.active'])
     ->name('api.ai.demo.describe');
+
+Route::post('/v1/work-orders/{workOrder}/suggestions', [WorkOrderSuggestionController::class, 'suggest'])
+    ->middleware(['auth:sanctum', 'tenant.active', TrackAiUsage::class, 'throttle:30,1'])
+    ->name('api.work_orders.suggestions');

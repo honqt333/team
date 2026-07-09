@@ -9,11 +9,13 @@ use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeam;
+use App\Http\Middleware\TrackAiUsage;
 use App\Logging\JsonFormatter;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -63,6 +65,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
         ]);
+
+        // Ensure TrackAiUsage fails closed BEFORE SubstituteBindings so a
+        // request without a tenant_id never triggers a 404 from route
+        // model binding. See docs/features/ai-service-suggester/design.md §8.
+        $middleware->prependToPriorityList(
+            before: SubstituteBindings::class,
+            prepend: TrackAiUsage::class,
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
