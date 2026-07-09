@@ -30,7 +30,7 @@ body {
     color: var(--color-text-primary);
     background-color: var(--color-background);
     /* Improve Arabic rendering on macOS / Windows */
-    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'rlig' 1, 'init' 1, 'medi' 1, 'fina' 1;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
 }
 
 /* Headings use the display family for stronger Arabic geometry */
