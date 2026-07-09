@@ -2141,8 +2141,16 @@ onUnmounted(() => {
 
 function toggleLocale() {
     const newLocale = currentLocale.value === 'ar' ? 'en' : 'ar';
-    setLocale(newLocale);
-    currentLocale.value = newLocale;
+    router.post(
+        route('locale.set'),
+        { locale: newLocale },
+        {
+            onSuccess: () => {
+                setLocale(newLocale);
+                currentLocale.value = newLocale;
+            },
+        }
+    );
 }
 
 function isActive(path) {

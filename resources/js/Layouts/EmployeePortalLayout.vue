@@ -569,11 +569,19 @@ const isActive = (path) => {
 
 const toggleLocale = () => {
     const newLocale = currentLocale.value === 'ar' ? 'en' : 'ar';
-    setLocale(newLocale);
-    currentLocale.value = newLocale;
-    locale.value = newLocale;
-    document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = newLocale;
+    router.post(
+        route('locale.set'),
+        { locale: newLocale },
+        {
+            onSuccess: () => {
+                setLocale(newLocale);
+                currentLocale.value = newLocale;
+                locale.value = newLocale;
+                document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr';
+                document.documentElement.lang = newLocale;
+            },
+        }
+    );
 };
 
 const logout = () => {
