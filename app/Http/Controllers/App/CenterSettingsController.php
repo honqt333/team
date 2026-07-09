@@ -5,9 +5,15 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Models\Center;
 use App\Models\CenterWorkingHour;
+use App\Models\CompanyTransaction;
+use App\Models\IncomeCategory;
+use App\Models\Invoice;
+use App\Models\PurchaseInvoice;
 use App\Support\CenterTypeGuard;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -20,13 +26,22 @@ class CenterSettingsController extends Controller
     {
         // Ensure center belongs to current tenant
         $this->authorize('view', $center);
-        
-        $center->load(['address', 'workingHours']);
-        
+
+        $center->load([
+            'address',
+            'workingHours' => function ($query) {
+                $query->withoutGlobalScope('center_scoped');
+            },
+        ]);
+
         // Initialize working hours if not exists
         if ($center->workingHours->isEmpty()) {
             $this->initializeWorkingHours($center);
-            $center->load('workingHours');
+            $center->load([
+                'workingHours' => function ($query) {
+                    $query->withoutGlobalScope('center_scoped');
+                },
+            ]);
         }
 
         return Inertia::render('Settings/Centers/Show', [
@@ -75,27 +90,27 @@ class CenterSettingsController extends Controller
                 'open_time' => $wh->open_time,
                 'close_time' => $wh->close_time,
             ]),
-            'center_transactions' => \App\Models\CompanyTransaction::where('center_id', $center->id)
+            'center_transactions' => CompanyTransaction::where('center_id', $center->id)
                 ->with(['incomeCategory', 'approvedBy', 'updatedBy'])
                 ->latest('transaction_date')
                 ->get(),
-            'income_categories' => \App\Models\IncomeCategory::active()
+            'income_categories' => IncomeCategory::active()
                 ->get()
-                ->map(fn($cat) => [
+                ->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
-                    'transaction_type' => $cat->transaction_type
+                    'transaction_type' => $cat->transaction_type,
                 ]),
             'center_invoices' => [
-                'sales' => \App\Models\Invoice::where('center_id', $center->id)
-                    ->whereIn('id', function($query) use ($center) {
+                'sales' => Invoice::where('center_id', $center->id)
+                    ->whereIn('id', function ($query) use ($center) {
                         $query->select('invoice_id')
                             ->from('company_transactions')
                             ->where('center_id', $center->id)
                             ->whereNotNull('invoice_id');
                     })->with(['customer', 'center'])->latest()->get(),
-                'purchases' => \App\Models\PurchaseInvoice::where('center_id', $center->id)
-                    ->whereIn('id', function($query) use ($center) {
+                'purchases' => PurchaseInvoice::where('center_id', $center->id)
+                    ->whereIn('id', function ($query) use ($center) {
                         $query->select('purchase_invoice_id')
                             ->from('company_transactions')
                             ->where('center_id', $center->id)
@@ -116,9 +131,9 @@ class CenterSettingsController extends Controller
     public function update(Request $request, Center $center)
     {
         $this->authorize('update', $center);
-        
+
         $section = $request->input('section');
-        
+
         switch ($section) {
             case 'profile':
                 $this->updateProfile($request, $center);
@@ -206,25 +221,25 @@ class CenterSettingsController extends Controller
         // Validate logic: Close time must be after open time if both present
         foreach ($workingHours as $wh) {
             if ($wh['is_open'] && $wh['open_time'] && $wh['close_time']) {
-                $open = \Carbon\Carbon::createFromFormat('H:i', $wh['open_time']);
-                $close = \Carbon\Carbon::createFromFormat('H:i', $wh['close_time']);
-                
+                $open = Carbon::createFromFormat('H:i', $wh['open_time']);
+                $close = Carbon::createFromFormat('H:i', $wh['close_time']);
+
                 // If close is before or equal open (and not covering next day logic which we imply for now is same day)
                 // Assuming simple same-day shifts for now.
                 if ($close->lte($open)) {
-                     // For shifts crossing midnight, logic differs, but user asked for "close > open" check
-                     // Check if users meant cross-midnight? Usually shops close same day.
-                     // But if 10 PM to 2 AM? 
-                     // User said: "add check (close>open)". This strictly implies close MUST be greater.
-                     throw \Illuminate\Validation\ValidationException::withMessages([
-                        'working_hours' => __('Ensure close time is after open time')
-                     ]);
+                    // For shifts crossing midnight, logic differs, but user asked for "close > open" check
+                    // Check if users meant cross-midnight? Usually shops close same day.
+                    // But if 10 PM to 2 AM?
+                    // User said: "add check (close>open)". This strictly implies close MUST be greater.
+                    throw ValidationException::withMessages([
+                        'working_hours' => __('Ensure close time is after open time'),
+                    ]);
                 }
             }
         }
 
         foreach ($validated['working_hours'] as $wh) {
-            CenterWorkingHour::updateOrCreate(
+            CenterWorkingHour::withoutGlobalScope('center_scoped')->updateOrCreate(
                 [
                     'center_id' => $center->id,
                     'day_of_week' => $wh['day_of_week'],
@@ -244,7 +259,7 @@ class CenterSettingsController extends Controller
     public function uploadLogo(Request $request, Center $center)
     {
         $this->authorize('update', $center);
-        
+
         $request->validate([
             'logo' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048',
             'type' => 'required|in:light,dark,invoice',
@@ -252,7 +267,7 @@ class CenterSettingsController extends Controller
 
         $type = $request->input('type');
         $pathField = "logo_{$type}_path";
-        
+
         // Delete old logo if exists
         if ($center->$pathField) {
             Storage::delete($center->$pathField);
@@ -270,14 +285,14 @@ class CenterSettingsController extends Controller
     public function deleteLogo(Request $request, Center $center)
     {
         $this->authorize('update', $center);
-        
+
         $request->validate([
             'type' => 'required|in:light,dark,invoice',
         ]);
 
         $type = $request->input('type');
         $pathField = "logo_{$type}_path";
-        
+
         if ($center->$pathField) {
             Storage::delete($center->$pathField);
             $center->update([$pathField => null]);
@@ -292,7 +307,7 @@ class CenterSettingsController extends Controller
     public function uploadStamp(Request $request, Center $center)
     {
         $this->authorize('update', $center);
-        
+
         $request->validate([
             'stamp' => 'required|image|mimes:png,jpg,jpeg,webp|max:2048',
         ]);
@@ -314,7 +329,7 @@ class CenterSettingsController extends Controller
     public function deleteStamp(Center $center)
     {
         $this->authorize('update', $center);
-        
+
         if ($center->stamp_path) {
             Storage::delete($center->stamp_path);
             $center->update(['stamp_path' => null]);
