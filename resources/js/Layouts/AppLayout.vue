@@ -1111,6 +1111,60 @@
                     </div>
                 </header>
 
+                <!-- Trial Expiration Notice Banner -->
+                <div
+                    v-if="trialDaysLeft !== null"
+                    class="bg-amber-500/10 dark:bg-amber-500/5 border-b border-amber-500/20 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors flex-shrink-0"
+                >
+                    <div class="flex items-center gap-2">
+                        <svg
+                            class="w-4 h-4 text-amber-500 flex-shrink-0 animate-bounce"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                        <span v-if="isRtl">
+                            اشتراكك التجريبي سينتهي خلال
+                            <span
+                                class="font-extrabold font-mono underline decoration-amber-500/50"
+                            >
+                                {{ trialDaysLeft }}
+                            </span>
+                            أيام. لتجديد اشتراكك
+                            <a
+                                href="/app/settings/company?tab=subscription"
+                                class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
+                            >
+                                اضغط هنا
+                            </a>
+                            .
+                        </span>
+                        <span v-else>
+                            Your trial subscription will end in
+                            <span
+                                class="font-extrabold font-mono underline decoration-amber-500/50"
+                            >
+                                {{ trialDaysLeft }}
+                            </span>
+                            days. To renew your subscription
+                            <a
+                                href="/app/settings/company?tab=subscription"
+                                class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
+                            >
+                                click here
+                            </a>
+                            .
+                        </span>
+                    </div>
+                </div>
+
                 <main class="flex-1 px-4 py-6 overflow-auto print:!overflow-visible">
                     <slot />
                 </main>
@@ -2114,6 +2168,17 @@ const userInitial = computed(() => {
         return user.name.charAt(0).toUpperCase();
     }
     return 'U';
+});
+const trialDaysLeft = computed(() => {
+    const tenant = page.props.tenant;
+    if (!tenant || tenant.status !== 'trial' || !tenant.trial_ends_at) {
+        return null;
+    }
+    const end = new Date(tenant.trial_ends_at);
+    const now = new Date();
+    const diffTime = end - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
 });
 
 watch(
