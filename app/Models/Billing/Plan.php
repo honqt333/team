@@ -66,7 +66,14 @@ class Plan extends Model
      */
     public function getFeaturesAttribute($value): array
     {
-        $features = is_array($value) ? $value : (json_decode($value, true) ?? []);
+        if (is_array($value)) {
+            $features = $value;
+        } elseif (is_string($value)) {
+            $features = json_decode($value, true) ?? [];
+        } else {
+            $features = [];
+        }
+
         if (isset($features['ar']) || isset($features['en'])) {
             $locale = app()->getLocale();
 
@@ -81,7 +88,15 @@ class Plan extends Model
      */
     public function getFeaturesArAttribute(): array
     {
-        $features = is_array($this->features) ? $this->features : (json_decode($this->getRawOriginal('features'), true) ?? []);
+        $raw = $this->getRawOriginal('features');
+        if (is_array($raw)) {
+            $features = $raw;
+        } elseif (is_string($raw)) {
+            $features = json_decode($raw, true) ?? [];
+        } else {
+            $features = [];
+        }
+
         if (isset($features['ar']) || isset($features['en'])) {
             return $features['ar'] ?? [];
         }
@@ -94,7 +109,15 @@ class Plan extends Model
      */
     public function getFeaturesEnAttribute(): array
     {
-        $features = is_array($this->features) ? $this->features : (json_decode($this->getRawOriginal('features'), true) ?? []);
+        $raw = $this->getRawOriginal('features');
+        if (is_array($raw)) {
+            $features = $raw;
+        } elseif (is_string($raw)) {
+            $features = json_decode($raw, true) ?? [];
+        } else {
+            $features = [];
+        }
+
         if (isset($features['ar']) || isset($features['en'])) {
             return $features['en'] ?? [];
         }
