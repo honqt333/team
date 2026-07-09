@@ -23,7 +23,11 @@ class SubscriptionsController extends Controller
 
         // Filter by status
         if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
+            if ($request->status === 'trial') {
+                $query->whereIn('status', ['trial', 'trialing']);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         // Filter by plan
@@ -49,7 +53,7 @@ class SubscriptionsController extends Controller
             'stats' => [
                 'total' => Subscription::count(),
                 'active' => Subscription::where('status', 'active')->count(),
-                'trial' => Subscription::where('status', 'trial')->count(),
+                'trial' => Subscription::whereIn('status', ['trial', 'trialing'])->count(),
                 'cancelled' => Subscription::where('status', 'cancelled')->count(),
                 'expired' => Subscription::where('status', 'expired')->count(),
             ],
