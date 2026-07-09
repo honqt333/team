@@ -1,0 +1,418 @@
+version: 1
+plan:
+  name: 'Carag V2 — AI Service Suggester for Work Orders (Feature)'
+  max_concurrency: 4
+  max_consecutive_failures: 2
+  max_cycles: 8
+  auto_reject_retries: 1
+  verifier_config:
+    default_verifiers: [verifier]
+    audit_sample_rate: 0.0
+tasks:
+  - id: backend-suggestion-api
+    title: 'Backend — WorkOrder Suggestion API + Service + Tests'
+    assigned_to: backend-dev
+    verified_by: [code-reviewer-carag, tester-carag]
+    max_retries: 2
+    prompt: |-
+      You are building the **backend half** of a new feature: an AI-powered service/part suggester
+      for Carag V2 WorkOrders. The contract is **already written** — read it before doing anything
+      else and follow it exactly.
+
+      ## Read this first (mandatory)
+
+      `docs/features/ai-service-suggester/design.md` — sections 2, 3, 4, 5, 6, 7, 8, 10 (backend
+      rows), 12 (backend rows), 13. This is the **single source of truth** for the contract.
+
+      ## Stack & repo conventions (you already know these, but re-state)
+
+      - Laravel 11, PHP 8.3, Inertia + Vue 3, multi-tenant via `App\Models\Concerns\TenantScoped`.
+      - All API routes mount under `/api` prefix (see `routes/api.php`).
+      - Tenant-scoped queries must use `TenancyContext::tenantId()` — do NOT use `Tenant::current()`.
+      - Use the existing `app/Services/AI/ProviderRegistry` for provider selection. Do NOT hard-code
+        a provider inside the controller.
+      - AI usage tracking is automatic via `TrackAiUsage` middleware — just attach the response
+        to the request via `$request->attributes->set('ai_usage', $completion)`, same pattern as
+        `AiDemoController`.
+      - Tests live in `tests/Feature/` and use `RefreshDatabase`. Follow `tests/Feature/AiDemoTest.php`
+        as the canonical pattern: clear `PermissionRegistrar` cache, seed `PermissionsSeeder`, set
+        logging + api keys to empty in `setUp`, use `Http::fake()` for outbound HTTP.
+
+      ## What to build (concrete file list, exact paths)
+
+      1. `app/Http/Requests/WorkOrder/WorkOrderSuggestionRequest.php` — FormRequest with the
+         validation rules from §3 of the contract. Class is `final readonly` if possible.
+      2. `app/Services/AI/MockSuggester.php` — domain-realistic keyword-overlap scorer. Method
+         `suggestForComplaint(string $complaint, \Illuminate\Support\Collection $services,
+         \Illuminate\Support\Collection $parts, int $limit, string $locale): array`. Returns
+         the canonical suggestion array shape (item_type, item_id, name, reason, confidence, qty).
+         Confidence is `min(0.99, max(0.1, $score))` where $score is token-overlap / max possible.
+      3. `app/Services/AI/WorkOrderSuggestionService.php` — the orchestrator. Constructor injects
+         `ProviderRegistry`. Public method:
+         `suggest(WorkOrder $workOrder, WorkOrderSuggestionRequest $request, User $user,
+         int $tenantId, int $centerId): array` returning the full response payload (suggestions +
+         meta + usage). Inside:
+           - Build the catalog query from §6 (services+parts scoped by `center_id`).
+           - Resolve the prompt: `Prompt::where('key', 'work_order.suggest')->where('active', true)
+             ->where('tenant_id', $tenantId)->first()`, fallback to the hard-coded Arabic system
+             prompt from §5.
+           - Build messages per §5 user-message structure, with the catalog rendered as a
+             numbered list.
+           - Call the provider. **If the provider is the generic `mock`** (check
+             `$provider->name() === 'mock'` and `MockProvider` instance), skip the network call and
+             delegate to `MockSuggester::suggestForComplaint()`. This is critical — the existing
+             `MockProvider::complete()` returns a reversed string, which is wrong for this feature.
+           - Parse the response as JSON. If the JSON is invalid, throw
+             `WorkOrderAiInvalidResponseException` (define it in the same file or a new
+             `Exceptions/` file). The controller turns this into 502.
+           - Re-fetch every returned `item_id` from the DB scoped to `tenant_id` + `center_id`.
+             Drop anything not found. Update `meta.returned` accordingly.
+           - Use `app()->getLocale()` for `name` selection (`name_ar` if locale is `ar`, else
+             `name_en`).
+           - Set the response on the request: `$request->attributes->set('ai_usage', $completion)`
+             when a real provider was used. The middleware does the rest.
+      4. `app/Http/Controllers/Api/WorkOrderSuggestionController.php` — thin. Use
+         `AuthorizesRequests` trait. `__construct(WorkOrderSuggestionService $svc)`. Method
+         `suggest(WorkOrder $workOrder, WorkOrderSuggestionRequest $request)`:
+           - `$this->authorize('update', $workOrder)`.
+           - Resolve tenant + center from the authenticated user. If `center_id` is null, return
+             403 with the message from §8.
+           - Call the service, return JSON.
+         Use route model binding on `WorkOrder` — combined with the `CenterScoped` global scope,
+         this means a user from another tenant gets a 404 automatically (no manual check needed).
+      5. `app/Http/Middleware/TrackAiUsage.php` — **no changes**, already correct.
+      6. `routes/api.php` — add the route from §2 of the contract. Place it right after the existing
+         `api/v1/ai/demo/describe-vehicle` route for consistency.
+      7. `database/seeders/WorkOrderSuggestionPromptSeeder.php` — seeds ONE Prompt row
+         (`key = 'work_order.suggest'`, `version = 1`, `active = true`, `model = 'gpt-4o-mini'`,
+         `temperature = 0.2`) for tenant_id=1 (system). Call it from `DatabaseSeeder` if there's
+         a sensible place, otherwise just make it runnable via `php artisan db:seed --class=...`.
+         Tenant-specific overrides can be created later by tenant admins.
+      8. `tests/Feature/WorkOrderSuggestionTest.php` — implement all 9 tests from §10 (backend
+         rows). Use `Http::fake` to mock OpenAI/Anthropic when needed. For the mock-with-key
+         test, assert that `meta.provider === 'mock'` AND that the response suggestions come
+         from the `MockSuggester` (i.e. contain a real catalog item from the test seed).
+         For the AI-hallucination defense test, fake a `Http::fake` response that returns an
+         `item_id` that is NOT in the test catalog and assert it is dropped.
+
+      ## Hard rules (verifier will FAIL on any of these)
+
+      - **No tenant leakage**: in test #3 and #6, the test must actually create two tenants with
+        different catalogs and prove isolation. Don't mock around this with `actingAs` tricks.
+      - **No silent failure on invalid AI JSON**: test #9 must assert HTTP 502 with the exact
+        message from §8.
+      - **No `Tenant::current()` usage anywhere** — use `$workOrder->tenant_id` and
+        `$user->tenant_id`.
+      - **No hard-coded provider name** in the controller — go through `ProviderRegistry`.
+      - **The `MockSuggester` must actually rank** — a passing test with a constant output is
+        not acceptable. The test must prove that the highest-overlap item is the first
+        suggestion.
+      - **Center scoping is explicit** — even though `TenantScoped` would catch it, also filter
+        by `center_id` to prevent cross-center leaks for the same tenant.
+      - **i18n**: error messages come from `__('...')`, not hard-coded Arabic/English strings.
+        Add new keys to `lang/ar.json` and `lang/en.json` if you add new error messages.
+
+      ## Done means (your commit message should reflect this)
+
+      - All 9 new tests pass.
+      - `php artisan test` shows no new failures (the pre-existing `ExampleTest` failure is
+        acceptable and pre-dates this work — note its existence in your deliverable).
+      - `php -l` is clean on every new/modified file.
+      - `vendor/bin/pint` (without --test) has been run on every new/modified PHP file.
+      - New routes are visible via `php artisan route:list --name=api.work_orders.suggestions`.
+      - A short `deliverable.md` at the worktree root listing: files added, files modified, test
+        count + pass count, any deviations from the contract (with reason).
+
+      ## Git
+
+      Work on a feature branch named `feature/ai-work-order-suggester-backend`. Do NOT push to
+      `main`. Report the branch name + final commit hash in your deliverable.
+    verify_prompt:
+      code-reviewer-carag: |-
+        You are reviewing the **backend diff** for the AI WorkOrder Suggester feature. Do NOT
+        rubber-stamp — actually read the diff and challenge it.
+
+        ## Read first
+
+        - `docs/features/ai-service-suggester/design.md` — the contract.
+        - The full diff on the `feature/ai-work-order-suggester-backend` branch against `main`.
+
+        ## What to check (each is a PASS/FAIL line)
+
+        1. **Tenant isolation**: open `app/Services/AI/WorkOrderSuggestionService.php` and confirm
+           every catalog query has both `tenant_id` and `center_id` filters. Search the diff for
+           any `where(` calls on `services` or `parts` tables that are missing either.
+        2. **Authorization**: confirm the controller uses `$this->authorize('update', $workOrder)`,
+           NOT a custom role check that could be bypassed.
+        3. **Provider wiring**: confirm the controller does NOT call `new OpenAiProvider`
+           directly. It must go through `ProviderRegistry::default()` or `for($name)`.
+        4. **MockSuggester correctness**: open `app/Services/AI/MockSuggester.php` and confirm
+           it ranks by token overlap (not random, not constant). Run a 30-second test: the
+           function should return the highest-overlap item first for any non-trivial complaint.
+        5. **i18n**: confirm no new error message is a hard-coded Arabic/English string in PHP.
+           They must go through `__()`.
+        6. **Pint / PSR-12**: confirm `vendor/bin/pint --test app/Services/AI/WorkOrderSuggestionService.php
+           app/Http/Controllers/Api/WorkOrderSuggestionController.php
+           app/Http/Requests/WorkOrder/WorkOrderSuggestionRequest.php
+           app/Services/AI/MockSuggester.php` exits 0.
+        7. **No `Tenant::current()`**: grep the new code for `Tenant::current` — must be zero hits.
+        8. **Schema conformance**: the JSON shape in the controller response MUST match §4 of
+           the design exactly. Field names, types, and the `meta` block.
+        9. **No regressions in existing tests**: run `php artisan test --filter=WorkOrderSuggestionTest`
+           and confirm 9 passing (or however many the contract requires). Then run
+           `php artisan test --filter=AiDemoTest` and confirm the 5 existing tests still pass.
+
+        ## Output format
+
+        Write `verifier-report.md` at the worktree root with:
+        - One section per check above, with PASS/FAIL and a one-sentence justification.
+        - A final Verdict line: `VERDICT: PASS` or `VERDICT: FAIL — <top reason>`.
+        - If FAIL, list the exact files + line numbers that need fixing.
+      tester-carag: |-
+        You are the **adversarial PHPUnit tester** for the backend. Re-run every new test
+        yourself and try to break the implementation. Do NOT edit project test files; if you find
+        a coverage gap, FAIL the verification with the exact missing test.
+
+        ## Read first
+
+        - `docs/features/ai-service-suggester/design.md` §10 (backend rows) — the required test list.
+        - The new test file `tests/Feature/WorkOrderSuggestionTest.php`.
+
+        ## What to do
+
+        1. `php artisan test --filter=WorkOrderSuggestionTest` — must show all 9 tests passing
+           (or whatever the contract says, but at least the 9 from §10).
+        2. `php artisan test` — must not regress. The pre-existing `ExampleTest` failure is
+           acceptable; everything else must pass.
+        3. Adversarial probes — write **throwaway** scripts in `$TMPDIR` (NOT in the project) to
+           confirm:
+           a. With `services.openai.key` empty, every call to the new endpoint produces
+              `provider=mock` AND the suggestions come from `MockSuggester` (not the generic
+              `MockProvider`).
+           b. Create a fake `Http::fake` response that returns an `item_id` not in the catalog
+              (e.g. `id: 99999`). The response should drop it AND `meta.returned` should be less
+              than `meta.total_candidates`.
+           c. Create a fake `Http::fake` response that returns malformed JSON. The endpoint must
+              return HTTP 502 with the message from §8.
+        4. Tenant isolation probe — build two tenants A and B with two different catalogs.
+           Authenticate as a user from A, hit the endpoint. Confirm no item from B's catalog
+           appears in the response. Repeat with a B user against A's work order: should be 404
+           (route model binding + global scope).
+        5. Center isolation probe — within the same tenant, create two centers. Authenticate
+           a user with `current_center_id` in center A, hit the endpoint. Confirm no item from
+           center B appears in the response.
+
+        ## Output format
+
+        Write `verifier-report-tester.md` at the worktree root with:
+        - All test command outputs (paste actual output, not summary).
+        - Adversarial probe results (a/b/c above).
+        - Tenant + center isolation probe results.
+        - Verdict line: `VERDICT: PASS` or `VERDICT: FAIL — <specific gap>`.
+
+  - id: frontend-suggestion-panel
+    title: 'Frontend — WorkOrder Suggestions Panel + Composable + i18n'
+    assigned_to: frontend-dev
+    verified_by: code-reviewer-carag
+    max_retries: 2
+    prompt: |-
+      You are building the **frontend half** of the AI WorkOrder Suggester feature for Carag V2.
+      The contract is already written — read it before doing anything else and follow it exactly.
+
+      ## Read this first (mandatory)
+
+      `docs/features/ai-service-suggester/design.md` — sections 2, 4, 9, 10 (frontend rows),
+      12 (frontend rows), 13. This is the **single source of truth** for the contract.
+
+      ## Stack & repo conventions (you already know these, but re-state)
+
+      - Vue 3 + Inertia.js 2 + Vite 7, TypeScript via `vue-tsc` (non-blocking in CI but please
+        keep it clean).
+      - Composables live in `resources/js/Composables/`. Each is a named export, function form
+        (not default), that takes a single object argument and returns refs/computeds.
+      - Component path: `resources/js/Components/WorkOrders/WorkOrderSuggestionsPanel.vue`.
+      - Design system: use `resources/js/Components/App/AppButton.vue` and friends from Track A.
+        Do NOT use raw `<button>`, `<input>`, or `<select>` — the App* components are required.
+      - RTL-safe: do not hard-code `text-left` / `text-right`. Use logical properties
+        (`text-start` / `text-end`) or rely on the global `dir` attribute.
+      - i18n: every user-visible string goes through `$t()` (or `t()` in setup). Add new keys
+        to BOTH `resources/js/lang/ar.json` AND `resources/js/lang/en.json`. Place under a
+        `work_orders.suggestions.*` namespace.
+      - Inertia props: components receive data via props, do not re-fetch with axios unless
+        the contract explicitly says so. Here, the panel DOES need a network call to the new
+        endpoint — use the `$fetch` / `axios` helper consistently with how other components
+        in `resources/js/Components/WorkOrders/` do it.
+
+      ## What to build (concrete file list, exact paths)
+
+      1. `resources/js/Composables/useWorkOrderSuggestions.js` — see §9 of the contract for the
+         exact exported shape. Internal logic:
+           - `watch(() => workOrder.complaint, ..., { debounce: 600 })` to refetch.
+           - On mount, do an immediate fetch (no debounce).
+           - Use `$fetch` (Nuxt-style) or `axios` (whichever is used in the rest of the codebase
+             — check before choosing) with `X-Requested-With: XMLHttpRequest` so Laravel returns
+             JSON, not a redirect.
+           - On 4xx/5xx, set `error.value = err.response?._data?.message ?? err.message`.
+           - On 200, set `suggestions.value` and `meta.value`. If `meta.total_candidates === 0`,
+             keep `suggestions.value = []` and do NOT show an error toast.
+      2. `resources/js/Components/WorkOrders/WorkOrderSuggestionsPanel.vue` — see §9 props/emits
+         and §9 styling rules. The card layout:
+           - Top row: title (i18n key), provider badge (e.g. "mock" or "openai"), refresh button.
+           - Body: skeleton when loading, error alert when error, empty state when
+             `suggestions.length === 0`, otherwise a list of suggestion cards.
+           - Each card: confidence pill (high/medium/low colors from Track A tokens), name,
+             department name, formatted price, reason, "Add" button. The "Add" button emits
+             the `add` event with the payload from §9.
+           - Bottom row: small "Provided by {provider}" line + a link to settings (out of scope
+             to wire, just a `href="#" placeholder`).
+      3. `resources/js/Pages/WorkOrders/Show.vue` — wire the panel between
+         `WorkOrderComplaintAssessment` and `WorkOrderTabsContainer`. Import the component, pass
+         `:work-order="workOrder"`, listen for `@add` and call the existing add-service or
+         add-part handler (look for `addDepartment` / `openAddServiceModal` / `openAddPartModal`
+         in the existing code — you may need to add a new handler that dispatches based on
+         `event.itemType`).
+      4. `resources/js/Composables/__tests__/useWorkOrderSuggestions.test.js` — vitest. Cover
+         the 4 cases from §10 (frontend rows). Use `vi.useFakeTimers()` for the debounce test.
+         Mock `$fetch` (or `axios`) — do NOT hit a real server.
+      5. `resources/js/lang/ar.json` and `resources/js/lang/en.json` — add the new keys under
+         `work_orders.suggestions.*`. Required keys (mirror across both locales):
+         - `panel_title`, `panel_subtitle`, `refresh`, `add`, `error_generic`, `empty`,
+           `confidence_high`, `confidence_medium`, `confidence_low`, `provided_by`,
+           `powered_by_ai`.
+
+      ## Hard rules (verifier will FAIL on any of these)
+
+      - **No raw `<button>`, `<input>`, `<select>` in the new component** — use App* components.
+      - **No hard-coded user-facing strings in English or Arabic** — all of them go through
+        `$t()`.
+      - **No `text-left` / `text-right`** — use logical properties.
+      - **Debounce 600ms is real** — a passing test that does not actually wait for the debounce
+        timer is not acceptable.
+      - **The `add` event payload must match §9 exactly** — field names and types.
+      - **Do not break the existing `Show.vue` structure** — minimal, surgical insertion of the
+        new component. No unrelated refactors.
+
+      ## Done means
+
+      - `npm run build` exits 0.
+      - `npm run type-check` exits 0 (the script is non-blocking but keep it clean).
+      - `npm run test` passes including the new vitest.
+      - The panel renders correctly in a manual `npm run dev` check (you can describe this in
+        the deliverable; the verifier will spot-check).
+      - `deliverable.md` at the worktree root listing files added/modified, test count + pass
+        count, any deviations from the contract.
+
+      ## Git
+
+      Work on a feature branch named `feature/ai-work-order-suggester-frontend`. Do NOT push
+      to `main`. Report branch + final commit hash in the deliverable.
+    verify_prompt: |-
+      You are reviewing the **frontend diff** for the AI WorkOrder Suggester panel. Do NOT
+      rubber-stamp.
+
+      ## Read first
+
+      - `docs/features/ai-service-suggester/design.md` §9.
+      - The full diff on `feature/ai-work-order-suggester-frontend` against `main`.
+
+      ## What to check
+
+      1. **Component contract**: open `WorkOrderSuggestionsPanel.vue` and confirm the props match
+         §9 exactly. Confirm the `add` event payload matches §9.
+      2. **Composable contract**: open `useWorkOrderSuggestions.js` and confirm the exports match
+         §9 exactly. Confirm the debounce is 600ms.
+      3. **Design system usage**: grep the new component for raw `<button` / `<input` / `<select` /
+         `<textarea` outside of `App*` wrappers. Must be zero hits (Track A requirement).
+      4. **i18n**: grep the new files for hard-coded Arabic or English strings. Should only be
+         `t('...')` / `$t('...')` calls and the keys in the JSON files. Open
+         `resources/js/lang/ar.json` and `resources/js/lang/en.json` and confirm the same keys
+         exist in both under `work_orders.suggestions.*`.
+      5. **RTL safety**: grep for `text-left` / `text-right` in the new component. Must be zero.
+      6. **Vitest**: run `npm run test -- --run resources/js/Composables/__tests__/useWorkOrderSuggestions.test.js`.
+         All 4 tests must pass. Confirm the debounce test actually uses `vi.useFakeTimers()`.
+      7. **Build & type-check**: `npm run build` and `npm run type-check` — both must exit 0.
+      8. **Show.vue integration**: confirm the component is wired between
+         `WorkOrderComplaintAssessment` and `WorkOrderTabsContainer` (line order). Confirm the
+         `@add` handler dispatches to the correct existing handler (service vs part).
+
+      ## Output
+
+      `verifier-report.md` at the worktree root with PASS/FAIL per check + a final Verdict line.
+      If FAIL, name the file + line + the exact fix needed.
+
+  - id: integration-gate
+    title: 'Final integration gate — backend + frontend together'
+    role: verify-as-task
+    assigned_to: verifier
+    depends_on: [backend-suggestion-api, frontend-suggestion-panel]
+    max_retries: 1
+    prompt: |-
+      You are the **final integration gate** for the AI WorkOrder Suggester feature. Both the
+      backend (`feature/ai-work-order-suggester-backend`) and frontend
+      (`feature/ai-work-order-suggester-frontend`) tracks have been verified by their respective
+      reviewers. Your job is to confirm the feature works **end-to-end** as a real user would
+      experience it, and produce the final PASS/FAIL.
+
+      ## Read first
+
+      - `docs/features/ai-service-suggester/design.md` — the full contract, especially §13
+        (Definition of Done).
+      - The two feature branches' diffs and `deliverable.md` reports.
+      - `docs/phase-1/final-report.md` for context on the existing toolchain.
+
+      ## What to run (EVERY command below must be executed; paste real output)
+
+      1. **Pre-flight**
+         ```bash
+         git fetch --all
+         git checkout main
+         git merge --no-ff feature/ai-work-order-suggester-backend
+         git merge --no-ff feature/ai-work-order-suggester-frontend
+         ```
+         If either merge has a conflict, FAIL immediately with the conflict markers and stop.
+      2. **Backend suite**:
+         ```bash
+         composer install --no-interaction
+         php artisan config:clear
+         php artisan test 2>&1 | tail -30
+         ```
+         Must show: existing 251 tests still pass (the pre-existing `ExampleTest` failure is
+         acceptable and pre-dates this work — note it but do not count as a regression), plus
+         the 9 new `WorkOrderSuggestionTest` tests.
+      3. **Frontend suite**:
+         ```bash
+         npm ci
+         npm run type-check
+         npm run test 2>&1 | tail -20
+         npm run build 2>&1 | tail -10
+         ```
+         All must exit 0.
+      4. **Live API smoke** (the real test):
+         ```bash
+         php artisan serve --host=127.0.0.1 --port=8765 &
+         SERVE_PID=$!
+         sleep 2
+
+         # Create a tenant + center + 3 services + 1 part + a user, then call the endpoint.
+         # Use `php artisan tinker` or a one-off `php -r` script — write it to $TMPDIR, do NOT
+         # commit it.
+         # Confirm the response is HTTP 200, has `provider=mock` (no OPENAI_API_KEY set),
+         # has at least 1 suggestion, and the suggestion names match real catalog items.
+         # Then change the request `complaint` to gibberish and confirm the response is
+         # still 200 (graceful) but with fewer/no suggestions.
+
+         kill $SERVE_PID
+         ```
+      5. **Cross-tenant isolation probe** (real DB, not mocked):
+         Build 2 tenants in a tinker script, each with a distinct service, then call the
+         endpoint as tenant A's user. Assert tenant B's service never appears in any response.
+
+      ## Output
+
+      `final-integration-report.md` at the repo root (do NOT commit it) with:
+      - All command outputs (paste real output).
+      - A per-Definition-of-Done-item checklist with PASS/FAIL.
+      - A final Verdict line:
+        - `FINAL VERDICT: PASS` — feature is ready to merge to main and ship.
+        - `FINAL VERDICT: FAIL — <top reason>` — list the specific failure with the
+          file/line/test/command that needs to be fixed.

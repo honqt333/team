@@ -2809,6 +2809,22 @@
         "view_details": "View Details"
     },
     "work_orders": {
+        "suggestions": {
+            "add": "Add",
+            "confidence_high": "High confidence",
+            "confidence_low": "Low confidence",
+            "confidence_medium": "Medium confidence",
+            "empty": "No suggestions yet. Type the customer's complaint to surface relevant services or parts.",
+            "error_generic": "Could not fetch suggestions. Please try again.",
+            "panel_subtitle": "AI-powered suggestions based on the customer's complaint",
+            "panel_title": "AI suggestions",
+            "powered_by_ai": "Powered by AI",
+            "provided_by": "Provided by: {provider}",
+            "refresh": "Refresh",
+            "settings": "Suggestion settings",
+            "type_part": "Part",
+            "type_service": "Service"
+        },
         "actions": {
             "cancel": "Cancel Card",
             "complete": "Close Card",

@@ -2809,6 +2809,22 @@
         "view_details": "عرض التفاصيل"
     },
     "work_orders": {
+        "suggestions": {
+            "add": "إضافة",
+            "confidence_high": "ثقة عالية",
+            "confidence_low": "ثقة منخفضة",
+            "confidence_medium": "ثقة متوسطة",
+            "empty": "لا توجد اقتراحات حالياً. اكتب شكوى العميل لاقتراح خدمات أو قطع.",
+            "error_generic": "تعذّر جلب الاقتراحات. حاول مرة أخرى.",
+            "panel_subtitle": "اقتراحات ذكية بناءً على شكوى العميل",
+            "panel_title": "اقتراحات الذكاء الاصطناعي",
+            "powered_by_ai": "مدعوم بالذكاء الاصطناعي",
+            "provided_by": "مقدّم من: {provider}",
+            "refresh": "تحديث",
+            "settings": "إعدادات الاقتراحات",
+            "type_part": "قطعة",
+            "type_service": "خدمة"
+        },
         "actions": {
             "cancel": "إلغاء الكرت",
             "complete": "إغلاق الكرت",
