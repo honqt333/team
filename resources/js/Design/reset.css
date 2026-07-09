@@ -1,0 +1,139 @@
+/* ============================================================
+ * Carag V2 — Modern CSS Reset
+ * ------------------------------------------------------------
+ * Adapted from Andy Bell's modern reset and Josh Comeau's reset,
+ * tuned for the Carag Vue 3 + Inertia stack. Goal: predictable
+ * defaults, RTL-aware, and consistent across light/dark.
+ * ============================================================ */
+
+/* 1. Use border-box globally */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* 2. Remove default margin and padding */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+/* 3. Allow percentage-based heights in the application */
+html,
+body {
+    height: 100%;
+}
+
+/* 4. Typographic tweaks — inherit from root */
+body {
+    line-height: var(--line-height-normal, 1.5);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* 5. Media defaults */
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+/* 6. Form controls inherit font */
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+}
+
+/* 7. Buttons reset */
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+/* 8. Textarea resize behavior */
+textarea {
+    resize: vertical;
+}
+
+/* 9. Avoid text overflow */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    overflow-wrap: break-word;
+}
+
+/* 10. Root stacking context */
+#app,
+#__nuxt,
+#root {
+    isolation: isolate;
+}
+
+/* 11. Lists */
+ul,
+ol {
+    list-style: none;
+}
+
+/* 12. Anchor reset */
+a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+/* 13. Fieldset reset */
+fieldset {
+    border: none;
+}
+
+/* 14. Table reset */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* 15. Selection */
+::selection {
+    background: var(--color-brand-primary);
+    color: var(--color-brand-on);
+}
+
+/* 16. Focus visible — uses brand focus ring */
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+/* 17. Honor reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

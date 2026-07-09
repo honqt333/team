@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use App\Support\PricingHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,8 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuoteLine extends Model
 {
+    use CenterScoped;
+
     protected $fillable = [
         'quote_id',
+        'tenant_id',
+        'center_id',
         'service_id',
         'department_id',
         'description',
@@ -76,7 +81,7 @@ class QuoteLine extends Model
                 $taxRate = $quote->tax_rate_snapshot ?? 15; // Default 15%
                 $line->is_taxable = true;
                 $line->tax_rate_snapshot = $taxRate;
-                
+
                 if ($quote->pricing_mode_snapshot === 'inclusive') {
                     $taxFactor = 1 + ($taxRate / 100);
                     $line->line_total_incl_tax = $computed['line_total'];
@@ -143,9 +148,9 @@ class QuoteLine extends Model
         if ($this->service_id && $this->service) {
             return $this->service->name;
         }
+
         return $this->description ?: 'أخرى';
     }
 
     protected $appends = ['parts_total', 'title'];
 }
-

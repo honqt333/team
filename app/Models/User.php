@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\HR\Employee;
+use App\Notifications\ResetPasswordNotification;
+use App\Notifications\VerifyEmailNotification;
+use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,13 +14,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 
+// @bypass-tenancy-scanner - Identity root: queried without a tenant context during auth
 class User extends Authenticatable implements MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes, HasRoles;
-    
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, HasRoles, Notifiable, SoftDeletes;
+
     protected $appends = [
         'photo_url',
         'can_update_photo',
@@ -97,16 +102,16 @@ class User extends Authenticatable implements MustVerifyEmail
         // 1. Check if user is an employee and has an HR photo
         $hrPhoto = $this->employee?->photo_path;
         if ($hrPhoto) {
-            return asset('storage/' . $hrPhoto);
+            return asset('storage/'.$hrPhoto);
         }
 
         // 2. Check for uploaded profile photo
         if ($this->photo_path) {
-            return asset('storage/' . $this->photo_path);
+            return asset('storage/'.$this->photo_path);
         }
 
         // 3. Fallback: UI Avatars or null
-        return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name).'&color=7F9CF5&background=EBF4FF';
     }
 
     /**
@@ -135,16 +140,16 @@ class User extends Authenticatable implements MustVerifyEmail
         static::created(function (User $user) {
             // Check if this is the first user for the tenant
             $count = User::where('tenant_id', $user->tenant_id)->count();
-            
-            if ($count === 1 && !app()->runningUnitTests()) {
+
+            if ($count === 1 && ! app()->runningUnitTests()) {
                 // First user gets Super Admin role
-                $superAdminRole = \App\Models\Role::where('name', 'super_admin')
+                $superAdminRole = Role::where('name', 'super_admin')
                     ->where('tenant_id', $user->tenant_id)
                     ->first();
-                    
+
                 if ($superAdminRole) {
                     // Set permission team context
-                    app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+                    app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
                     $user->assignRole($superAdminRole);
                 }
             }
@@ -156,7 +161,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new \App\Notifications\VerifyEmailNotification);
+        $this->notify(new VerifyEmailNotification);
     }
 
     /**
@@ -164,7 +169,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
+        $this->notify(new ResetPasswordNotification($token));
     }
 }
-

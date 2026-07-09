@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
+// @bypass-tenancy-scanner - Single-row global payment gateway config (cached, not tenant-owned)
 class PaymentSettings extends Model
 {
     protected $table = 'payment_settings';
@@ -50,7 +51,7 @@ class PaymentSettings extends Model
     public static function getSettings(): self
     {
         return Cache::remember('payment_settings', 3600, function () {
-            return self::first() ?? new self();
+            return self::first() ?? new self;
         });
     }
 
@@ -76,13 +77,15 @@ class PaymentSettings extends Model
     public function isGatewayEnabled(string $gateway): bool
     {
         $config = $this->getGatewayConfig($gateway);
-        if (empty($config['enabled'])) return false;
-        
+        if (empty($config['enabled'])) {
+            return false;
+        }
+
         // Check for required keys based on gateway
         return match ($gateway) {
-            'tamara' => !empty($config['api_token']),
-            'tabby' => !empty($config['secret_key']),
-            default => !empty($config['secret_key'] ?? $config['server_key']),
+            'tamara' => ! empty($config['api_token']),
+            'tabby' => ! empty($config['secret_key']),
+            default => ! empty($config['secret_key'] ?? $config['server_key']),
         };
     }
 
@@ -92,12 +95,25 @@ class PaymentSettings extends Model
     public function getEnabledMethods(): array
     {
         $methods = [];
-        if ($this->mada_enabled) $methods[] = 'mada';
-        if ($this->visa_enabled) $methods[] = 'visa';
-        if ($this->mastercard_enabled) $methods[] = 'mastercard';
-        if ($this->applepay_enabled) $methods[] = 'applepay';
-        if ($this->stcpay_enabled) $methods[] = 'stcpay';
-        if ($this->bank_transfer_enabled) $methods[] = 'bank_transfer';
+        if ($this->mada_enabled) {
+            $methods[] = 'mada';
+        }
+        if ($this->visa_enabled) {
+            $methods[] = 'visa';
+        }
+        if ($this->mastercard_enabled) {
+            $methods[] = 'mastercard';
+        }
+        if ($this->applepay_enabled) {
+            $methods[] = 'applepay';
+        }
+        if ($this->stcpay_enabled) {
+            $methods[] = 'stcpay';
+        }
+        if ($this->bank_transfer_enabled) {
+            $methods[] = 'bank_transfer';
+        }
+
         return $methods;
     }
 

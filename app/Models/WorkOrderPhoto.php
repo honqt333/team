@@ -2,21 +2,29 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkOrderPhoto extends Model
 {
+    use CenterScoped;
+
     protected $fillable = [
         'work_order_id',
+        'tenant_id',
+        'center_id',
         'path',
         'type',
         'caption',
     ];
 
     public const TYPE_BEFORE = 'before';
+
     public const TYPE_AFTER = 'after';
+
     public const TYPE_DAMAGE = 'damage';
+
     public const TYPE_GENERAL = 'general';
 
     public const TYPES = [
@@ -36,6 +44,6 @@ class WorkOrderPhoto extends Model
      */
     public function getUrlAttribute(): string
     {
-        return asset('storage/' . $this->path);
+        return asset('storage/'.$this->path);
     }
 }

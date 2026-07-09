@@ -1,0 +1,173 @@
+/* ============================================================
+ * Carag V2 — Design Tokens
+ * ------------------------------------------------------------
+ * Single source of truth for color, spacing, type, motion, etc.
+ * Bilingual (light + dark) via :root and [data-theme="dark"].
+ * The dark variant activates on <html class="dark"> (Tailwind)
+ * which the existing theme.js toggles.
+ *
+ * Components MUST consume these via var(--*). Hex values belong
+ * only here and in tokens.json.
+ * ============================================================ */
+
+:root,
+:root[data-theme='light'] {
+    /* --- Brand --- */
+    --color-brand-primary: #fbbf24;
+    --color-brand-primary-hover: #f59e0b;
+    --color-brand-primary-active: #d97706;
+    --color-brand-primary-soft: #fef3c7;
+    --color-brand-primary-soft-dark: rgba(251, 191, 36, 0.16);
+    --color-brand-on: #0f172a;
+
+    /* --- Surfaces (light) --- */
+    --color-background: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f1f5f9;
+    --color-surface-raised: #ffffff;
+    --color-border: #e2e8f0;
+    --color-border-strong: #cbd5e1;
+
+    /* --- Text (light) --- */
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-muted: #94a3b8;
+    --color-text-inverse: #ffffff;
+
+    /* --- Feedback (theme-agnostic) --- */
+    --color-success: #16a34a;
+    --color-success-soft: #dcfce7;
+    --color-warning: #f59e0b;
+    --color-warning-soft: #fef3c7;
+    --color-danger: #dc2626;
+    --color-danger-soft: #fee2e2;
+    --color-info: #0ea5e9;
+    --color-info-soft: #e0f2fe;
+
+    /* --- Focus --- */
+    --color-focus-ring: #fbbf24;
+    --color-focus-ring-soft: rgba(251, 191, 36, 0.4);
+
+    /* --- Spacing --- */
+    --space-0: 0;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+
+    /* --- Radius --- */
+    --radius-none: 0;
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.25rem;
+    --radius-full: 9999px;
+
+    /* --- Typography --- */
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-tight: 1.25;
+    --line-height-snug: 1.375;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.625;
+
+    --font-family-sans: 'IBM Plex Sans Arabic', 'Tajawal', 'Noto Kufi Arabic', 'Inter', system-ui,
+        -apple-system, sans-serif;
+    --font-family-display: 'Tajawal', 'IBM Plex Sans Arabic', 'Noto Kufi Arabic', system-ui,
+        sans-serif;
+    --font-family-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, monospace;
+
+    /* --- Motion --- */
+    --motion-duration-fast: 120ms;
+    --motion-duration-base: 180ms;
+    --motion-duration-slow: 280ms;
+    --motion-duration-slower: 400ms;
+    --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --motion-ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+    --motion-ease-decelerated: cubic-bezier(0, 0, 0.2, 1);
+
+    /* --- Shadows (light) --- */
+    --shadow-none: none;
+    --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.08), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.1),
+        0 2px 4px -2px rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1),
+        0 4px 6px -4px rgba(15, 23, 42, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.12),
+        0 8px 10px -6px rgba(15, 23, 42, 0.05);
+    --shadow-focus: 0 0 0 4px rgba(251, 191, 36, 0.4);
+
+    /* --- z-index --- */
+    --z-hide: -1;
+    --z-base: 0;
+    --z-raised: 10;
+    --z-dropdown: 1000;
+    --z-sticky: 1100;
+    --z-modal: 1300;
+    --z-popover: 1400;
+    --z-toast: 1700;
+
+    /* --- Sizes --- */
+    --size-control-sm: 2.25rem;
+    --size-control-md: 2.75rem;
+    --size-control-lg: 3.25rem;
+    --size-icon-sm: 1rem;
+    --size-icon-md: 1.25rem;
+    --size-icon-lg: 1.5rem;
+
+    /* --- Color scheme (UA) --- */
+    color-scheme: light;
+}
+
+/* Dark mode — active when <html class="dark"> is set (Tailwind) */
+:root.dark,
+:root[data-theme='dark'] {
+    --color-background: #0f172a;
+    --color-surface: #1e293b;
+    --color-surface-muted: #334155;
+    --color-surface-raised: #1e293b;
+    --color-border: #334155;
+    --color-border-strong: #475569;
+
+    --color-text-primary: #f1f5f9;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #64748b;
+    --color-text-inverse: #0f172a;
+
+    --color-brand-primary: #fbbf24;
+    --color-brand-primary-hover: #fcd34d;
+    --color-brand-primary-active: #fde68a;
+    --color-brand-primary-soft: rgba(251, 191, 36, 0.16);
+    --color-brand-primary-soft-dark: rgba(251, 191, 36, 0.16);
+    --color-brand-on: #0f172a;
+
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.45), 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.55), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.55), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+
+    color-scheme: dark;
+}

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+// @bypass-tenancy-scanner - Global lookup shared across all tenants
 class Nationality extends Model
 {
     protected $fillable = [
@@ -25,6 +26,7 @@ class Nationality extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
     }
 

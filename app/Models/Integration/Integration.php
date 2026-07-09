@@ -4,8 +4,8 @@ namespace App\Models\Integration;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Crypt;
 
+// @bypass-tenancy-scanner - Provider catalog (Twilio, Unifonic, ...). Per-tenant config lives in TenantIntegration.
 class Integration extends Model
 {
     protected $fillable = [
@@ -65,13 +65,13 @@ class Integration extends Model
     public function isConfigured(): bool
     {
         return match ($this->provider) {
-            'unifonic' => !empty($this->config['app_sid']),
-            'twilio' => !empty($this->config['account_sid']) && !empty($this->config['auth_token']),
-            '360dialog' => !empty($this->config['api_key']),
-            'whatsapp_cloud' => !empty($this->config['access_token']) && !empty($this->config['phone_number_id']),
-            'mailgun' => !empty($this->config['api_key']) && !empty($this->config['domain']),
-            'smtp' => !empty($this->config['host']) && !empty($this->config['username']),
-            'authentica' => !empty($this->config['api_key']),
+            'unifonic' => ! empty($this->config['app_sid']),
+            'twilio' => ! empty($this->config['account_sid']) && ! empty($this->config['auth_token']),
+            '360dialog' => ! empty($this->config['api_key']),
+            'whatsapp_cloud' => ! empty($this->config['access_token']) && ! empty($this->config['phone_number_id']),
+            'mailgun' => ! empty($this->config['api_key']) && ! empty($this->config['domain']),
+            'smtp' => ! empty($this->config['host']) && ! empty($this->config['username']),
+            'authentica' => ! empty($this->config['api_key']),
             default => false,
         };
     }
@@ -120,9 +120,9 @@ class Integration extends Model
     /**
      * Get integration for a specific purpose.
      * Falls back to default or any active integration if no specific purpose found.
-     * 
-     * @param string $type The integration type (sms, whatsapp, email)
-     * @param string $purpose The purpose (otp, notifications)
+     *
+     * @param  string  $type  The integration type (sms, whatsapp, email)
+     * @param  string  $purpose  The purpose (otp, notifications)
      */
     public static function getForPurpose(string $type, string $purpose): ?self
     {
@@ -131,21 +131,21 @@ class Integration extends Model
             ->where('is_active', true)
             ->where('purpose', $purpose)
             ->first();
-        
+
         if ($integration) {
             return $integration;
         }
-        
+
         // Fall back to "all" purpose
         $integration = self::where('type', $type)
             ->where('is_active', true)
             ->where('purpose', 'all')
             ->first();
-        
+
         if ($integration) {
             return $integration;
         }
-        
+
         // Fall back to default
         return self::getDefault($type);
     }

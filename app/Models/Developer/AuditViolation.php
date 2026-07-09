@@ -5,6 +5,7 @@ namespace App\Models\Developer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// @bypass-tenancy-scanner - Developer tooling, child of AuditSnapshot
 class AuditViolation extends Model
 {
     protected $table = 'dev_audit_violations';

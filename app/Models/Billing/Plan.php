@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+// @bypass-tenancy-scanner - Catalog entry: pricing tiers shared across tenants
 class Plan extends Model
 {
     use HasFactory;
@@ -50,8 +51,11 @@ class Plan extends Model
      */
     public function getYearlyDiscountAttribute(): float
     {
-        if ($this->price_monthly == 0) return 0;
+        if ($this->price_monthly == 0) {
+            return 0;
+        }
         $yearlyIfMonthly = $this->price_monthly * 12;
+
         return round((($yearlyIfMonthly - $this->price_yearly) / $yearlyIfMonthly) * 100);
     }
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+// @bypass-tenancy-scanner - Admin-published broadcasts; targeted via target_tenant_ids JSON column
 class SystemAnnouncement extends Model
 {
     protected $fillable = [
@@ -82,8 +83,13 @@ class SystemAnnouncement extends Model
      */
     public function isActive(): bool
     {
-        if (!$this->is_published) return false;
-        if ($this->expires_at && $this->expires_at->isPast()) return false;
+        if (! $this->is_published) {
+            return false;
+        }
+        if ($this->expires_at && $this->expires_at->isPast()) {
+            return false;
+        }
+
         return true;
     }
 
@@ -96,9 +102,9 @@ class SystemAnnouncement extends Model
 
         return match ($this->target) {
             'all' => $query,
-            'active' => $query->whereHas('subscriptions', fn($q) => $q->where('status', 'active')),
-            'trial' => $query->whereHas('subscriptions', fn($q) => $q->where('status', 'trial')),
-            'expired' => $query->whereHas('subscriptions', fn($q) => $q->where('status', 'expired')),
+            'active' => $query->whereHas('subscriptions', fn ($q) => $q->where('status', 'active')),
+            'trial' => $query->whereHas('subscriptions', fn ($q) => $q->where('status', 'trial')),
+            'expired' => $query->whereHas('subscriptions', fn ($q) => $q->where('status', 'expired')),
             'specific' => $query->whereIn('id', $this->target_tenant_ids ?? []),
             default => $query,
         };
@@ -133,7 +139,7 @@ class SystemAnnouncement extends Model
     public function scopePublished($query)
     {
         return $query->where('is_published', true)
-            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
     }
 
     /**
@@ -144,8 +150,8 @@ class SystemAnnouncement extends Model
         return $query->published()
             ->where(function ($q) use ($tenantId) {
                 $q->where('target', 'all')
-                  ->orWhere('target', '!=', 'specific')
-                  ->orWhereJsonContains('target_tenant_ids', $tenantId);
+                    ->orWhere('target', '!=', 'specific')
+                    ->orWhereJsonContains('target_tenant_ids', $tenantId);
             });
     }
 }

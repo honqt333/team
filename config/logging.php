@@ -1,5 +1,6 @@
 <?php
 
+use App\Logging\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -62,6 +63,35 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        // ------------------------------------------------------------------
+        // Track C — structured JSON logs streamed to stdout. Recommended
+        // for container/12-factor deployments (Docker/Kubernetes) where the
+        // log shipper (Fluent Bit / Vector) tails container stdout.
+        // Captures correlation_id / tenant_id / user_id / route from
+        // App\Http\Middleware\SentryContext via Laravel's log context.
+        // ------------------------------------------------------------------
+        'structured' => [
+            'driver' => 'monolog',
+            'level' => env('LOG_LEVEL', 'info'),
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => env('LOG_STRUCTURED_STREAM', 'php://stdout'),
+            ],
+            'formatter' => JsonFormatter::class,
+        ],
+
+        // ------------------------------------------------------------------
+        // AI audit trail — every prompt/response routed through the
+        // AiProvider pipeline also writes a paired record here so we have a
+        // dedicated, append-only stream for compliance review.
+        // ------------------------------------------------------------------
+        'ai' => [
+            'driver' => 'single',
+            'path' => env('LOG_AI_PATH', storage_path('logs/ai.log')),
+            'level' => env('LOG_LEVEL', 'info'),
             'replace_placeholders' => true,
         ],
 

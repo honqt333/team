@@ -5,6 +5,7 @@ namespace App\Models\Credits;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+// @bypass-tenancy-scanner - Catalog entry: same packages offered to every tenant
 class WhatsappPackage extends Model
 {
     protected $fillable = [

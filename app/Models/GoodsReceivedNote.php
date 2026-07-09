@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,15 +11,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GoodsReceivedNote extends Model
 {
-    use HasFactory, SoftDeletes;
+    use CenterScoped, HasFactory, SoftDeletes;
 
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_POSTED = 'posted';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
         'purchase_order_id',
         'warehouse_id',
+        'tenant_id',
+        'center_id',
         'code',
         'status',
         'received_date',
@@ -112,9 +117,9 @@ class GoodsReceivedNote extends Model
     {
         $year = now()->year;
         $prefix = "GRN-{$year}-";
-        
+
         // Get last code through PO relationship
-        $lastCode = static::whereHas('purchaseOrder', fn($q) => $q->where('tenant_id', $tenantId))
+        $lastCode = static::whereHas('purchaseOrder', fn ($q) => $q->where('tenant_id', $tenantId))
             ->where('code', 'like', "{$prefix}%")
             ->orderBy('code', 'desc')
             ->value('code');
@@ -126,6 +131,6 @@ class GoodsReceivedNote extends Model
             $nextNumber = 1;
         }
 
-        return $prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 }

@@ -2,26 +2,34 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class InventoryMove extends Model
 {
-    use HasFactory, \App\Traits\HasInventoryMoveRelations;
+    use \App\Traits\HasInventoryMoveRelations, CenterScoped, HasFactory;
 
     public const TYPE_RECEIPT = 'receipt';
+
     public const TYPE_ISSUE_TO_WORKORDER = 'issue_to_workorder';
+
     public const TYPE_ADJUSTMENT_IN = 'adjustment_in';
+
     public const TYPE_ADJUSTMENT_OUT = 'adjustment_out';
+
     public const TYPE_TRANSFER_OUT = 'transfer_out';
+
     public const TYPE_TRANSFER_IN = 'transfer_in';
+
     public const TYPE_REVERSAL = 'reversal';
+
     public const TYPE_PURCHASE_RETURN = 'purchase_return';
 
     protected $fillable = [
         'warehouse_id',
+        'tenant_id',
+        'center_id',
         'part_id',
         'move_type',
         'qty',
@@ -54,8 +62,6 @@ class InventoryMove extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
-
-
     /**
      * Polymorphic accessor: returns the WorkOrder linked to this move, if any.
      * Safe across all reference types — only WorkOrderItemPart carries a WorkOrder.
@@ -63,15 +69,16 @@ class InventoryMove extends Model
      * `workOrder` only exists on WorkOrderItemPart (and the move's reference_type
      * may legitimately be other models that don't have a `workOrder` relation).
      */
-    public function getWorkOrderAttribute(): ?\App\Models\WorkOrder
+    public function getWorkOrderAttribute(): ?WorkOrder
     {
         $ref = $this->reference;
-        if ($ref instanceof \App\Models\WorkOrderItemPart) {
+        if ($ref instanceof WorkOrderItemPart) {
             return $ref->workOrder;
         }
-        if ($ref instanceof \App\Models\WorkOrder) {
+        if ($ref instanceof WorkOrder) {
             return $ref;
         }
+
         return null;
     }
 
@@ -120,7 +127,7 @@ class InventoryMove extends Model
 
     public function canBeReversed(): bool
     {
-        return $this->isPosted() && !$this->isReversed();
+        return $this->isPosted() && ! $this->isReversed();
     }
 
     public function isIncoming(): bool

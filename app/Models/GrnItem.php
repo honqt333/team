@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class GrnItem extends Model
 {
-    use HasFactory;
+    use CenterScoped, HasFactory;
 
     protected $fillable = [
         'goods_received_note_id',
+        'tenant_id',
+        'center_id',
         'purchase_order_item_id',
         'part_id',
         'qty_received',
@@ -64,8 +67,8 @@ class GrnItem extends Model
     {
         static::saving(function (GrnItem $item) {
             if (is_numeric($item->qty_received) && is_numeric($item->unit_cost)) {
-                $total = bcmul((string)$item->qty_received, (string)$item->unit_cost, 6);
-                $item->line_total = round((float)$total, 2);
+                $total = bcmul((string) $item->qty_received, (string) $item->unit_cost, 6);
+                $item->line_total = round((float) $total, 2);
             }
         });
     }

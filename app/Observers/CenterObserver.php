@@ -49,11 +49,12 @@ class CenterObserver
         }
 
         return Warehouse::create([
-            'center_id'  => $center->id,
-            'name'       => $this->resolveWarehouseName($center),
-            'code'       => $this->generateUniqueCode($center),
+            'center_id' => $center->id,
+            'tenant_id' => $center->tenant_id,
+            'name' => $this->resolveWarehouseName($center),
+            'code' => $this->generateUniqueCode($center),
             'is_default' => true,
-            'is_active'  => true,
+            'is_active' => true,
         ]);
     }
 
@@ -87,10 +88,10 @@ class CenterObserver
         $suffix = '';
 
         // Ensure uniqueness across the warehouses table
-        while (Warehouse::withTrashed()->where('code', $code . $suffix)->exists()) {
-            $suffix = '-' . strtoupper(Str::random(3));
+        while (Warehouse::withTrashed()->where('code', $code.$suffix)->exists()) {
+            $suffix = '-'.strtoupper(Str::random(3));
         }
 
-        return $code . $suffix;
+        return $code.$suffix;
     }
 }

@@ -2,19 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
+use App\Support\TenancyContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-// @bypass-tenancy-scanner - Scoped via center_id relation
 class Warehouse extends Model
 {
-    use HasFactory, SoftDeletes;
+    use CenterScoped, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'center_id',
+        'tenant_id',
         'name',
         'code',
         'is_default',
@@ -73,16 +75,25 @@ class Warehouse extends Model
      */
     public static function getOrCreateDefault(int $centerId): self
     {
-        $warehouse = static::forCenter($centerId)->default()->first();
+        // Need tenant context to bypass CenterScoped global scope.
+        $tenantId = TenancyContext::tenantId()
+            ?? Center::query()->withoutGlobalScopes()->whereKey($centerId)->value('tenant_id');
 
-        if (!$warehouse) {
-            $warehouse = static::create([
-                'center_id' => $centerId,
-                'name' => 'المستودع الرئيسي',
-                'code' => 'MAIN',
-                'is_default' => true,
-                'is_active' => true,
-            ]);
+        $warehouse = static::query()
+            ->withoutGlobalScopes()
+            ->where('center_id', $centerId)
+            ->where('is_default', true)
+            ->first();
+
+        if (! $warehouse) {
+            $warehouse = new static;
+            $warehouse->center_id = $centerId;
+            $warehouse->tenant_id = $tenantId;
+            $warehouse->name = 'المستودع الرئيسي';
+            $warehouse->code = 'MAIN';
+            $warehouse->is_default = true;
+            $warehouse->is_active = true;
+            $warehouse->save();
         }
 
         return $warehouse;

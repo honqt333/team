@@ -2,6 +2,7 @@
 
 namespace App\Models\HR;
 
+use App\Models\Concerns\CenterScoped;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -9,12 +10,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PayrollItem extends Model
 {
-    use HasFactory;
+    use CenterScoped, HasFactory;
 
     protected $table = 'hr_payroll_items';
 
     protected $fillable = [
         'payroll_run_id',
+        'tenant_id',
+        'center_id',
         'employee_id',
         'base_salary',
         'gosi_rate',

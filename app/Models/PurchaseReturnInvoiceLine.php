@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseReturnInvoiceLine extends Model
 {
+    use CenterScoped;
+
     protected $fillable = [
-        'purchase_return_invoice_id', 'purchase_invoice_line_id', 'part_id',
-        'qty', 'unit_cost', 'tax_rate', 'tax_amount', 'total'
+        'purchase_return_invoice_id', 'tenant_id', 'center_id', 'purchase_invoice_line_id', 'part_id',
+        'qty', 'unit_cost', 'tax_rate', 'tax_amount', 'total',
     ];
 
     protected $casts = [
@@ -21,9 +24,20 @@ class PurchaseReturnInvoiceLine extends Model
     ];
 
     // Relationships
-    public function purchaseReturnInvoice() { return $this->belongsTo(PurchaseReturnInvoice::class); }
-    public function purchaseInvoiceLine() { return $this->belongsTo(PurchaseInvoiceLine::class); }
-    public function part() { return $this->belongsTo(Part::class); }
+    public function purchaseReturnInvoice()
+    {
+        return $this->belongsTo(PurchaseReturnInvoice::class);
+    }
+
+    public function purchaseInvoiceLine()
+    {
+        return $this->belongsTo(PurchaseInvoiceLine::class);
+    }
+
+    public function part()
+    {
+        return $this->belongsTo(Part::class);
+    }
 
     public function workOrder(): BelongsTo
     {

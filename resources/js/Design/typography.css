@@ -1,0 +1,138 @@
+/* ============================================================
+ * Carag V2 — Typography
+ * ------------------------------------------------------------
+ * Arabic-first webfont stack with English fallback. Components
+ * should rely on --font-family-sans, --font-size-*, etc. — the
+ * raw font name should rarely appear outside this file.
+ *
+ * Fluid type scale via clamp() so the same token scales smoothly
+ * between mobile (320px) and desktop (1440px).
+ * ============================================================ */
+
+/* Webfonts: load IBM Plex Sans Arabic (Latin + Arabic) and Tajawal
+ * as a display fallback. Using <link> is preferable, but importing
+ * here keeps Phase-1 self-contained. The @import is non-blocking
+ * for build (Vite will inline or warn at most). */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap');
+
+html {
+    font-family: var(--font-family-sans);
+    font-size: 16px;
+    /* Fluid base — clamps between 15px and 17px */
+    font-size: clamp(0.9375rem, 0.875rem + 0.25vw, 1.0625rem);
+    line-height: var(--line-height-normal);
+    text-underline-offset: 0.2em;
+}
+
+body {
+    font-family: var(--font-family-sans);
+    font-weight: var(--font-weight-regular);
+    color: var(--color-text-primary);
+    background-color: var(--color-background);
+    /* Improve Arabic rendering on macOS / Windows */
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1, 'rlig' 1, 'init' 1, 'medi' 1, 'fina' 1;
+}
+
+/* Headings use the display family for stronger Arabic geometry */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.app-display {
+    font-family: var(--font-family-display);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+}
+
+h1 {
+    /* 1.875rem → 2.5rem */
+    font-size: clamp(1.875rem, 1.5rem + 1.5vw, 2.5rem);
+}
+h2 {
+    /* 1.5rem → 2rem */
+    font-size: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+}
+h3 {
+    /* 1.25rem → 1.5rem */
+    font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+}
+h4 {
+    font-size: var(--font-size-xl);
+}
+h5 {
+    font-size: var(--font-size-lg);
+}
+h6 {
+    font-size: var(--font-size-base);
+}
+
+p,
+li,
+dd,
+dt,
+label,
+input,
+select,
+textarea,
+button {
+    font-family: var(--font-family-sans);
+    line-height: var(--line-height-normal);
+}
+
+/* Mono — for invoices, plate numbers, etc. */
+code,
+kbd,
+samp,
+pre,
+.app-mono {
+    font-family: var(--font-family-mono);
+    font-feature-settings: 'liga' 0, 'calt' 0;
+}
+
+/* Small utilities */
+.app-text-xs {
+    font-size: var(--font-size-xs);
+}
+.app-text-sm {
+    font-size: var(--font-size-sm);
+}
+.app-text-base {
+    font-size: var(--font-size-base);
+}
+.app-text-lg {
+    font-size: var(--font-size-lg);
+}
+.app-text-xl {
+    font-size: var(--font-size-xl);
+}
+.app-text-2xl {
+    font-size: var(--font-size-2xl);
+}
+.app-text-3xl {
+    font-size: var(--font-size-3xl);
+}
+.app-text-4xl {
+    font-size: var(--font-size-4xl);
+}
+
+.app-text-muted {
+    color: var(--color-text-muted);
+}
+.app-text-secondary {
+    color: var(--color-text-secondary);
+}
+
+/* RTL adjustments — `html[dir=rtl]` already reverses the writing
+ * direction. We only need to add a logical helper for digit-only
+ * contexts (plate numbers, invoices) that must stay LTR even in
+ * an Arabic page. */
+.app-ltr-numerals,
+.app-numerals-ltr {
+    direction: ltr;
+    unicode-bidi: embed;
+    font-variant-numeric: tabular-nums;
+}

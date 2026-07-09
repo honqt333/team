@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuotePart extends Model
 {
+    use CenterScoped;
+
     // Source constants
     public const SOURCE_WAREHOUSE = 'warehouse';
+
     public const SOURCE_EXTERNAL = 'external';
+
     public const SOURCE_CUSTOMER = 'customer';
 
     public const SOURCES = [
@@ -21,6 +26,8 @@ class QuotePart extends Model
     protected $fillable = [
         'quote_id',
         'quote_line_id',
+        'tenant_id',
+        'center_id',
         'part_id',
         'source',
         'name',
@@ -79,9 +86,9 @@ class QuotePart extends Model
                 $part->tax_rate_snapshot = $taxRate;
 
                 if ($quote->pricing_mode_snapshot === 'inclusive') {
-                    $taxFactor = (float)bcadd('1', bcdiv($taxRate, '100', 4), 4);
-                    $part->total_incl_tax = (float)$netAmount;
-                    
+                    $taxFactor = (float) bcadd('1', bcdiv($taxRate, '100', 4), 4);
+                    $part->total_incl_tax = (float) $netAmount;
+
                     // Use round for base price to ensure Base + Tax = Total
                     $baseExclTax = round($part->total_incl_tax / $taxFactor, 2);
                     $part->total_excl_tax = $baseExclTax;
@@ -95,8 +102,8 @@ class QuotePart extends Model
                 $part->is_taxable = false;
                 $part->tax_rate_snapshot = 0;
                 $part->tax_amount = 0;
-                $part->total_excl_tax = (float)$netAmount;
-                $part->total_incl_tax = (float)$netAmount;
+                $part->total_excl_tax = (float) $netAmount;
+                $part->total_incl_tax = (float) $netAmount;
             }
         });
     }

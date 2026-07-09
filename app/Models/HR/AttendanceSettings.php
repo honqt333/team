@@ -3,16 +3,20 @@
 namespace App\Models\HR;
 
 use App\Models\Center;
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-// @bypass-tenancy-scanner - Scoped via center_id relation
+// @bypass-tenancy-scanner - Scoped via center_id + tenant_id columns
 class AttendanceSettings extends Model
 {
+    use CenterScoped;
+
     protected $table = 'hr_attendance_settings';
 
     protected $fillable = [
         'center_id',
+        'tenant_id',
         'grace_period_minutes',
         'late_deduction_per_minute',
         'absence_deduction_value',
@@ -66,6 +70,7 @@ class AttendanceSettings extends Model
     public function isWorkingDay(int $dayOfWeek): bool
     {
         $workingDays = $this->working_days ?? [0, 1, 2, 3, 4];
+
         return in_array($dayOfWeek, $workingDays);
     }
 }

@@ -4,9 +4,12 @@ namespace App\Services\Inventory;
 
 use App\Models\InventoryBalance;
 use App\Models\InventoryMove;
+use App\Models\InventoryTransfer;
+use App\Models\InventoryTransferItem;
 use App\Models\Part;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Support\TenancyContext;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -33,15 +36,19 @@ class InventoryService
         }
 
         return DB::transaction(function () use ($warehouseId, $partId, $qty, $unitCost, $userId, $referenceType, $referenceId, $notes) {
-            // Lock balance row
-            $balance = InventoryBalance::where('warehouse_id', $warehouseId)
+            // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
+            $balance = InventoryBalance::query()
+                ->withoutGlobalScopes()
+                ->where('warehouse_id', $warehouseId)
                 ->where('part_id', $partId)
                 ->lockForUpdate()
                 ->first();
 
-            if (!$balance) {
-                $balance = InventoryBalance::create([
+            if (! $balance) {
+                $balance = InventoryBalance::query()->withoutGlobalScopes()->create([
                     'warehouse_id' => $warehouseId,
+                    'tenant_id' => $this->resolveTenantId($warehouseId),
+                    'center_id' => $this->resolveCenterId($warehouseId),
                     'part_id' => $partId,
                     'qty_on_hand' => 0,
                     'wac_cost' => 0,
@@ -102,15 +109,19 @@ class InventoryService
         }
 
         return DB::transaction(function () use ($warehouseId, $partId, $qty, $userId, $referenceType, $referenceId, $notes, $allowNegative, $moveType) {
-            // Lock balance row
-            $balance = InventoryBalance::where('warehouse_id', $warehouseId)
+            // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
+            $balance = InventoryBalance::query()
+                ->withoutGlobalScopes()
+                ->where('warehouse_id', $warehouseId)
                 ->where('part_id', $partId)
                 ->lockForUpdate()
                 ->first();
 
-            if (!$balance) {
-                $balance = InventoryBalance::create([
+            if (! $balance) {
+                $balance = InventoryBalance::query()->withoutGlobalScopes()->create([
                     'warehouse_id' => $warehouseId,
+                    'tenant_id' => $this->resolveTenantId($warehouseId),
+                    'center_id' => $this->resolveCenterId($warehouseId),
                     'part_id' => $partId,
                     'qty_on_hand' => 0,
                     'wac_cost' => 0,
@@ -118,9 +129,9 @@ class InventoryService
             }
 
             // Check sufficient stock
-            if (!$allowNegative && $balance->qty_on_hand < $qty) {
+            if (! $allowNegative && $balance->qty_on_hand < $qty) {
                 throw ValidationException::withMessages([
-                    'qty' => ['Insufficient stock. Available: ' . $balance->qty_on_hand . ', Requested: ' . $qty],
+                    'qty' => ['Insufficient stock. Available: '.$balance->qty_on_hand.', Requested: '.$qty],
                 ]);
             }
 
@@ -173,15 +184,19 @@ class InventoryService
         }
 
         return DB::transaction(function () use ($warehouseId, $partId, $qty, $unitCost, $userId, $notes, $allowNegative) {
-            // Lock balance row
-            $balance = InventoryBalance::where('warehouse_id', $warehouseId)
+            // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
+            $balance = InventoryBalance::query()
+                ->withoutGlobalScopes()
+                ->where('warehouse_id', $warehouseId)
                 ->where('part_id', $partId)
                 ->lockForUpdate()
                 ->first();
 
-            if (!$balance) {
-                $balance = InventoryBalance::create([
+            if (! $balance) {
+                $balance = InventoryBalance::query()->withoutGlobalScopes()->create([
                     'warehouse_id' => $warehouseId,
+                    'tenant_id' => $this->resolveTenantId($warehouseId),
+                    'center_id' => $this->resolveCenterId($warehouseId),
                     'part_id' => $partId,
                     'qty_on_hand' => 0,
                     'wac_cost' => 0,
@@ -201,9 +216,9 @@ class InventoryService
                 $moveType = InventoryMove::TYPE_ADJUSTMENT_IN;
             } else {
                 // Adjustment Out - WAC unchanged
-                if (!$allowNegative && $oldQty < abs($qty)) {
+                if (! $allowNegative && $oldQty < abs($qty)) {
                     throw ValidationException::withMessages([
-                        'qty' => ['Insufficient stock. Available: ' . $oldQty . ', Adjustment: ' . abs($qty)],
+                        'qty' => ['Insufficient stock. Available: '.$oldQty.', Adjustment: '.abs($qty)],
                     ]);
                 }
                 $newWac = $oldWac;
@@ -244,15 +259,17 @@ class InventoryService
         ?int $userId = null,
         ?string $notes = null
     ): InventoryMove {
-        if (!$move->canBeReversed()) {
+        if (! $move->canBeReversed()) {
             throw ValidationException::withMessages([
                 'move' => ['This move cannot be reversed.'],
             ]);
         }
 
         return DB::transaction(function () use ($move, $userId, $notes) {
-            // Lock balance row
-            $balance = InventoryBalance::where('warehouse_id', $move->warehouse_id)
+            // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
+            $balance = InventoryBalance::query()
+                ->withoutGlobalScopes()
+                ->where('warehouse_id', $move->warehouse_id)
                 ->where('part_id', $move->part_id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -290,7 +307,7 @@ class InventoryService
                 'balance_after' => $newQty,
                 'wac_after' => $newWac,
                 'reverses_move_id' => $move->id,
-                'notes' => $notes ?? 'Reversal of move #' . $move->id,
+                'notes' => $notes ?? 'Reversal of move #'.$move->id,
                 'posted_at' => now(),
                 'posted_by' => $userId,
             ]);
@@ -324,11 +341,49 @@ class InventoryService
     }
 
     /**
+     * Resolve the tenant_id for a warehouse when there is no current tenant context.
+     * Used by service methods that identify records by natural warehouse_id keys
+     * (and therefore bypass CenterScoped globally) but still need to satisfy
+     * the tenant_id NOT NULL constraint when creating new rows.
+     */
+    protected function resolveTenantId(int $warehouseId): ?int
+    {
+        $ctx = TenancyContext::tenantId();
+        if ($ctx !== null) {
+            return $ctx;
+        }
+
+        return DB::table('warehouses')
+            ->where('id', $warehouseId)
+            ->value('tenant_id');
+    }
+
+    /**
+     * Resolve the center_id for a warehouse when there is no current center context.
+     * Used by service methods that identify records by natural warehouse_id keys
+     * (and therefore bypass CenterScoped globally) but still need to satisfy
+     * the center_id NOT NULL constraint when creating new rows.
+     */
+    protected function resolveCenterId(int $warehouseId): ?int
+    {
+        $ctx = TenancyContext::centerId();
+        if ($ctx !== null) {
+            return $ctx;
+        }
+
+        return DB::table('warehouses')
+            ->where('id', $warehouseId)
+            ->value('center_id');
+    }
+
+    /**
      * Get current stock level for a part in a warehouse.
      */
     public function getStockLevel(int $warehouseId, int $partId): array
     {
-        $balance = InventoryBalance::where('warehouse_id', $warehouseId)
+        $balance = InventoryBalance::query()
+            ->withoutGlobalScopes()
+            ->where('warehouse_id', $warehouseId)
             ->where('part_id', $partId)
             ->first();
 
@@ -364,8 +419,10 @@ class InventoryService
         }
 
         return DB::transaction(function () use ($originalMove, $qty, $userId, $notes) {
-            // Lock balance row
-            $balance = InventoryBalance::where('warehouse_id', $originalMove->warehouse_id)
+            // Lock balance row (bypass global scope — we identify by natural key warehouse_id+part_id).
+            $balance = InventoryBalance::query()
+                ->withoutGlobalScopes()
+                ->where('warehouse_id', $originalMove->warehouse_id)
                 ->where('part_id', $originalMove->part_id)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -391,7 +448,7 @@ class InventoryService
                 'balance_after' => $newQty,
                 'wac_after' => $wac,
                 'reverses_move_id' => $originalMove->id,
-                'notes' => $notes ?? 'Partial reversal of move #' . $originalMove->id,
+                'notes' => $notes ?? 'Partial reversal of move #'.$originalMove->id,
                 'posted_at' => now(),
                 'posted_by' => $userId,
             ]);
@@ -406,10 +463,10 @@ class InventoryService
      * Send a transfer (issues from source warehouse).
      */
     public function sendTransfer(
-        \App\Models\InventoryTransfer $transfer,
+        InventoryTransfer $transfer,
         ?int $userId = null
-    ): \App\Models\InventoryTransfer {
-        if (!$transfer->canBeSent()) {
+    ): InventoryTransfer {
+        if (! $transfer->canBeSent()) {
             throw ValidationException::withMessages([
                 'transfer' => ['Transfer cannot be sent in current state.'],
             ]);
@@ -417,8 +474,10 @@ class InventoryService
 
         return DB::transaction(function () use ($transfer, $userId) {
             foreach ($transfer->items as $item) {
-                // Get WAC from source
-                $balance = InventoryBalance::where('warehouse_id', $transfer->from_warehouse_id)
+                // Get WAC from source (bypass global scope — natural key lookup).
+                $balance = InventoryBalance::query()
+                    ->withoutGlobalScopes()
+                    ->where('warehouse_id', $transfer->from_warehouse_id)
                     ->where('part_id', $item->part_id)
                     ->lockForUpdate()
                     ->first();
@@ -431,9 +490,9 @@ class InventoryService
                     partId: $item->part_id,
                     qty: (float) $item->qty_requested,
                     userId: $userId,
-                    referenceType: \App\Models\InventoryTransferItem::class,
+                    referenceType: InventoryTransferItem::class,
                     referenceId: $item->id,
-                    notes: "Transfer to " . $transfer->toWarehouse->name
+                    notes: 'Transfer to '.$transfer->toWarehouse->name
                 );
 
                 // Update item with send info
@@ -446,7 +505,7 @@ class InventoryService
 
             // Update transfer status
             $transfer->update([
-                'status' => \App\Models\InventoryTransfer::STATUS_SENT,
+                'status' => InventoryTransfer::STATUS_SENT,
                 'sent_at' => now(),
                 'sent_by' => $userId,
             ]);
@@ -459,11 +518,11 @@ class InventoryService
      * Receive a transfer (receipts into destination warehouse).
      */
     public function receiveTransfer(
-        \App\Models\InventoryTransfer $transfer,
+        InventoryTransfer $transfer,
         array $receivedQtys = [],
         ?int $userId = null
-    ): \App\Models\InventoryTransfer {
-        if (!$transfer->canBeReceived()) {
+    ): InventoryTransfer {
+        if (! $transfer->canBeReceived()) {
             throw ValidationException::withMessages([
                 'transfer' => ['Transfer cannot be received in current state.'],
             ]);
@@ -473,7 +532,7 @@ class InventoryService
             foreach ($transfer->items as $item) {
                 // Get qty to receive (default to qty_sent if not specified)
                 $qtyToReceive = $receivedQtys[$item->id] ?? (float) $item->qty_sent;
-                
+
                 if ($qtyToReceive <= 0) {
                     continue;
                 }
@@ -485,9 +544,9 @@ class InventoryService
                     qty: $qtyToReceive,
                     unitCost: (float) $item->unit_cost,
                     userId: $userId,
-                    referenceType: \App\Models\InventoryTransferItem::class,
+                    referenceType: InventoryTransferItem::class,
                     referenceId: $item->id,
-                    notes: "Transfer from " . $transfer->fromWarehouse->name
+                    notes: 'Transfer from '.$transfer->fromWarehouse->name
                 );
 
                 // Update item with receive info
@@ -499,7 +558,7 @@ class InventoryService
 
             // Update transfer status
             $transfer->update([
-                'status' => \App\Models\InventoryTransfer::STATUS_RECEIVED,
+                'status' => InventoryTransfer::STATUS_RECEIVED,
                 'received_at' => now(),
                 'received_by' => $userId,
             ]);
@@ -512,11 +571,11 @@ class InventoryService
      * Cancel a transfer (reverses if already sent).
      */
     public function cancelTransfer(
-        \App\Models\InventoryTransfer $transfer,
+        InventoryTransfer $transfer,
         ?int $userId = null,
         ?string $reason = null
-    ): \App\Models\InventoryTransfer {
-        if (!$transfer->canBeCancelled()) {
+    ): InventoryTransfer {
+        if (! $transfer->canBeCancelled()) {
             throw ValidationException::withMessages([
                 'transfer' => ['Transfer cannot be cancelled in current state.'],
             ]);
@@ -529,7 +588,7 @@ class InventoryService
                     if ($item->send_move_id) {
                         $move = InventoryMove::find($item->send_move_id);
                         if ($move && $move->canBeReversed()) {
-                            $this->reverseMove($move, $userId, 'Transfer cancelled: ' . ($reason ?? 'No reason'));
+                            $this->reverseMove($move, $userId, 'Transfer cancelled: '.($reason ?? 'No reason'));
                         }
                     }
                 }
@@ -537,7 +596,7 @@ class InventoryService
 
             // Update transfer status
             $transfer->update([
-                'status' => \App\Models\InventoryTransfer::STATUS_CANCELLED,
+                'status' => InventoryTransfer::STATUS_CANCELLED,
                 'cancelled_at' => now(),
                 'cancelled_by' => $userId,
                 'cancel_reason' => $reason,
@@ -547,4 +606,3 @@ class InventoryService
         });
     }
 }
-

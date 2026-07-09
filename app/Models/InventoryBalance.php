@@ -2,16 +2,21 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
+use App\Support\TenancyContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class InventoryBalance extends Model
 {
-    use HasFactory;
+    use CenterScoped, HasFactory;
 
     protected $fillable = [
         'warehouse_id',
+        'tenant_id',
+        'center_id',
         'part_id',
         'qty_on_hand',
         'wac_cost',
@@ -82,10 +87,33 @@ class InventoryBalance extends Model
      */
     public static function getOrCreate(int $warehouseId, int $partId): self
     {
-        return static::firstOrCreate(
-            ['warehouse_id' => $warehouseId, 'part_id' => $partId],
-            ['qty_on_hand' => 0, 'wac_cost' => 0]
-        );
+        // Without global scopes — we identify the balance by its natural key (warehouse+part),
+        // not by tenant. The unique constraint at the DB level guarantees no duplicates.
+        $balance = static::query()
+            ->withoutGlobalScopes()
+            ->where('warehouse_id', $warehouseId)
+            ->where('part_id', $partId)
+            ->first();
+
+        if (! $balance) {
+            // Derive tenant_id + center_id from the warehouse if not in context.
+            $warehouseRow = DB::table('warehouses')
+                ->where('id', $warehouseId)
+                ->first(['tenant_id', 'center_id']);
+            $tenantId = TenancyContext::tenantId() ?? $warehouseRow?->tenant_id;
+            $centerId = TenancyContext::centerId() ?? $warehouseRow?->center_id;
+
+            $balance = static::query()->withoutGlobalScopes()->create([
+                'warehouse_id' => $warehouseId,
+                'tenant_id' => $tenantId,
+                'center_id' => $centerId,
+                'part_id' => $partId,
+                'qty_on_hand' => 0,
+                'wac_cost' => 0,
+            ]);
+        }
+
+        return $balance;
     }
 
     /**

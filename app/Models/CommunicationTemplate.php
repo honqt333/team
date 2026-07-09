@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+// @bypass-tenancy-scanner - System-managed template catalog shared by all tenants
 class CommunicationTemplate extends Model
 {
     use HasFactory;

@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CenterWorkingHour extends Model
 {
+    use CenterScoped;
+
     protected $fillable = [
         'center_id',
+        'tenant_id',
         'day_of_week',
         'is_open',
         'open_time',
@@ -32,6 +36,7 @@ class CenterWorkingHour extends Model
             'ar' => ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
             'en' => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
         ];
+
         return $days[$locale][$dayOfWeek] ?? $days['en'][$dayOfWeek];
     }
 }

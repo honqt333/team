@@ -2,16 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\CenterScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InventoryTransferItem extends Model
 {
-    use HasFactory;
+    use CenterScoped, HasFactory;
 
     protected $fillable = [
         'inventory_transfer_id',
+        'tenant_id',
+        'center_id',
         'part_id',
         'qty_requested',
         'qty_sent',

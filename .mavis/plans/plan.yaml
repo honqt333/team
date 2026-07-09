@@ -1,0 +1,822 @@
+version: 1
+plan:
+  name: 'Carag V2 — Phase 1: World-Class Foundation Sprint'
+  max_concurrency: 5
+  max_consecutive_failures: 2
+  max_cycles: 8
+  auto_reject_retries: 1
+  verifier_config:
+    default_verifiers: [verifier]
+    audit_sample_rate: 0.0
+
+tasks:
+  # =====================================================================
+  # Track A — Design System Foundation (frontend-dev)
+  # =====================================================================
+  - id: track-a-design-system
+    title: 'مسار A — Design System: tokens + App components أساسية'
+    assigned_to: frontend-dev
+    verified_by: code-reviewer-carag
+    max_retries: 2
+    prompt: |-
+      أنت Track A في Phase 1 من خطة "World-Class Transformation" لـ Carag V2.
+
+      **النطاق الخاص بك فقط:**
+      - resources/js/Design/         (جديد)
+      - resources/js/Components/App/ (جديد)
+      - لا تلمس package.json (المسار D يملكه) ولا composer.json
+
+      **المطلوب بالترتيب:**
+
+      ### 1. Design Tokens (يوم 1-2)
+      أنشئ `resources/js/Design/`:
+      ```
+      resources/js/Design/
+      ├── tokens.json           // colors, spacing, typography, motion, radii, shadows
+      ├── tokens.css            // CSS variables: --color-primary, --space-4, --radius-md، إلخ
+      ├── reset.css             // modern CSS reset
+      └── typography.css        // Arabic-first webfont stack + fluid type scale
+      ```
+      Tokens يجب أن تكون:
+      - ثنائية اللغة (light + dark mode في نفس الملف عبر `:root` و `[data-theme=dark]`)
+      - تعكس الـ brand الحالي (gold accent #fbbf24 + slate base — مقتبس من الـ splash الحالي)
+      - مكتوبة بـ camelCase keys
+
+      أضف import في `resources/js/app.js`:
+      ```js
+      import '@/Design/tokens.css';
+      import '@/Design/reset.css';
+      import '@/Design/typography.css';
+      ```
+
+      ### 2. AppButton.vue (يوم 3)
+      `resources/js/Components/App/AppButton.vue` يدعم:
+      - `variant`: `primary | secondary | ghost | danger`
+      - `size`: `sm | md | lg`
+      - `iconLeft`, `iconRight` (SVG paths)
+      - `loading` (boolean → spinner + disabled)
+      - `as` prop (button | a | Inertia Link)
+      - يستهلك tokens فقط (لا hex colors مباشرة)
+      - Histoire story في `resources/js/Components/App/AppButton.story.vue` أو ملف `.stories.ts`
+
+      أضف في `resources/js/app.js` ربط اختياري: عند `app.component('AppButton', AppButton)` ليصبح متاح globally عبر `<AppButton>` في جميع الـ templates.
+
+      ### 3. AppInput.vue (يوم 4)
+      `resources/js/Components/App/AppInput.vue` يلفّ:
+      - TextInput.vue الموجود
+      - InputLabel.vue + InputError.vue
+      - Props: `id`, `label`, `error`, `hint`, `v-model`, `type` (text/email/tel/number/password)
+      - Type=number يدعم `suffix` للعملة
+      - Accessibility: aria-invalid, aria-describedby
+
+      ### 4. AppSelect.vue (يوم 4)
+      `resources/js/Components/App/AppSelect.vue` يلف SelectInput.vue الموجود مع AppInput pattern.
+
+      ### 5. AppTextarea.vue, AppCheckbox.vue (يوم 4)
+      نفس النمط — يلفون Components الموجودين.
+
+      **معايير النجاح (Phase 1 Exit Gate for Track A):**
+      - [ ] 6 App components تعمل وتستخدم tokens
+      - [ ] Histoire/`pnpm story` يعرض stories نظيفة (إن لم يكن Histoire موجوداً، أنشئ placeholder story files للـ CI)
+      - [ ] لا توابع hex مباشرة في أي component جديد
+      - [ ] `npm run build` ينجح بدون warnings من Track A files
+      - [ ] في README أو docs/track-a.md: شرح tokens system + قائمة الـ components + كيفية الاستخدام
+
+      **التنسيق:**
+      - لا تكسر imports موجودة — components الأصلية تبقى تعمل
+      - اكتب colocated tests إذا أضفت tests بسيطة (لا تطلب test infrastructure من Track D)
+      - **لا تلمس** أي ملف خارج resources/js/Design/ و resources/js/Components/App/ إلا imports داخل app.js (نعم هذا مسموح)
+
+      **Output النهائي:**
+      أخبرني بـ:
+      - قائمة الملفات اللي أنشأتها مع line counts
+      - أوامر التحقق اللي شغّلتها ونتائجها
+      - confirmation أن `npm run build` انتهى بنجاح
+      - ملاحظات أو limitations للـ Track B,D,E حتى يتجنبوا conflicts
+
+    verify_prompt: |-
+      أنت code-reviewer-carag تراجع عمل Track A (Design System).
+
+      **Check independently — لا تقرأ وصف المنتج فقط:**
+
+      1. **Files exist and have content:**
+         ```bash
+         ls -la /Users/ahmad/Herd/carag-v2/resources/js/Design/
+         ls -la /Users/ahmad/Herd/carag-v2/resources/js/Components/App/
+         ```
+         يجب ≥ 4 files في Design/ و ≥ 6 components في App/.
+
+      2. **Build smoke test:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && npm run build 2>&1 | tail -20
+         ```
+         يجب ينتهي بـ success بدون errors جديدة (warnings قد تظهر).
+
+      3. **Tokens consume check** — اقرأ AppButton.vue و AppInput.vue:
+         - هل يستخدمون CSS variables (`var(--*)`) بدل hex colors مباشرة؟
+         - هل يدعمون dark mode عبر tokens.css؟
+         - هل type props موجود وقابل للاستخدام؟
+         - هل accessibility attributes موجودة (aria-* على AppInput)؟
+
+      4. **Component breadth:**
+         ```bash
+         ls /Users/ahmad/Herd/carag-v2/resources/js/Components/App/
+         ```
+         يجب AppButton, AppInput, AppSelect على الأقل.
+
+      5. **سجلتهاكات المسار:**
+         - هل Track A لمس package.json؟ (لا يجب)
+         - هل Track A لمس composer.json؟ (لا يجب)
+         - هل Track A لمس app/؟ (لا يجب)
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && git diff --name-only HEAD resources/js/Design/ resources/js/Components/App/ resources/js/app.js 2>&1
+         ```
+
+      6. **RTL compatibility:**
+         - اقرأ typography.css — هل يدعم Arabic fonts؟
+         - هل tokens.css يستخدم logical properties (margin-inline-start بدل margin-left)؟
+
+      **PASS criteria:** كل الفحوصات 1-4 تنجح + لا سجلتهاكات من 5.  
+      **FAIL criteria:** أي فحص يفشل — سمّ الفحص بالضبط في الـ report.
+
+  # =====================================================================
+  # Track B — AI Foundation (backend-dev)
+  # =====================================================================
+  - id: track-b-ai-foundation
+    title: 'مسار B — AI Foundation: provider abstraction + token tracking + demo'
+    assigned_to: backend-dev
+    verified_by: code-reviewer-carag
+    max_retries: 2
+    prompt: |-
+      أنت Track B في Phase 1 من خطة "World-Class Transformation" لـ Carag V2.
+
+      **النطاق الخاص بك فقط:**
+      - app/Services/AI/        (جديد بالكامل)
+      - app/Models/Prompt.php    (جديد)
+      - app/Http/Middleware/TrackAiUsage.php  (جديد)
+      - app/Http/Controllers/Api/AiDemoController.php (جديد)
+      - routes/api.php          (إضافة routes فقط)
+      - database/migrations/*_create_prompts_table.php (جديد)
+      - لا تلمس resources/js/* ولا composer.json (Track C يملك composer.json)
+
+      **المطلوب بالترتيب:**
+
+      ### 1. Provider Interface (يوم 16)
+      `app/Services/AI/AiProvider.php` — interface بـ:
+      ```php
+      public function complete(CompletionRequest $req): CompletionResponse;
+      public function stream(CompletionRequest $req): \Generator;
+      public function name(): string;
+      public function estimateCost(CompletionRequest $req): int; // in micro-cents
+      ```
+
+      `app/Services/AI/CompletionRequest.php` و `CompletionResponse.php` — DTOs:
+      - CompletionRequest: model, messages[], temperature, maxTokens, tenantId
+      - CompletionResponse: content, inputTokens, outputTokens, cost, provider, model
+
+      ### 2. OpenAiProvider + AnthropicProvider + MockProvider (يوم 17)
+      `app/Services/AI/Providers/OpenAiProvider.php`:
+      - يستخدم `Illuminate\Support\Facades\Http`
+      - يقرأ OPENAI_API_KEY من config('services.openai.key')
+      - يحسب cost من model pricing table (hard-coded constants في Provider نفسه)
+
+      `AnthropicProvider.php`: نفس النمط.
+
+      `MockProvider.php`: deterministic stub يرجع نص متوقع — يستخدم للـ tests والـ demo بدون cost.
+
+      **مهم:** MockProvider يرجع `-- حسب input tokens count، يرجع reversed string --` كـ smoke test. هذا يكفي لتأكيد abstraction يعمل.
+
+      ### 3. ProviderRegistry + Token Tracker Middleware (يوم 18-19)
+      `app/Services/AI/ProviderRegistry.php`:
+      ```php
+      public function for(?string $name = null): AiProvider;
+      public function default(): AiProvider;
+      ```
+
+      `app/Http/Middleware/TrackAiUsage.php`:
+      - middleware يحسب tokens + cost
+      - يكتب للـ log channel `ai`
+      - **لا يحسب أي cost بدون tenant_id واضح — fail closed إذا لا يوجد tenant**
+
+      ### 4. Prompt Model + Migration (يوم 19)
+      `app/Models/Prompt.php`:
+      - tenant_id, key (unique per tenant), version, content, model, temperature, active
+      - use SoftDeletes
+      - scopes: `forTenant()`, `active()`
+      - belongsTo Tenant
+
+      `database/migrations/2026_07_*_create_prompts_table.php`:
+      - id, tenant_id, key, version, content (text), model (string), temperature (decimal), active (boolean default true), timestamps, soft deletes
+      - unique(['tenant_id', 'key', 'version'])
+      - index(['tenant_id', 'key', 'active'])
+
+      ### 5. Demo Controller + Route (يوم 20)
+      `app/Http/Controllers/Api/AiDemoController.php` يعرض endpoint:
+      ```php
+      Route::post('/api/v1/ai/demo/describe-vehicle', [AiDemoController::class, 'describe'])
+          ->middleware(['auth:sanctum', 'tenant'])
+          ->name('api.ai.demo.describe');
+      ```
+
+      الـ demo يستدعي ProviderRegistry::for('openai') ويولّد description لمركبة.  
+      مع MockProvider الافتراضي إذا ما في OPENAI_API_KEY.
+
+      ### 6. README للـ AI layer
+      أنشئ `app/Services/AI/README.md` يشرح:
+      - كيف تضيف provider جديد
+      - كيف تسجل usage في billing per tenant
+      - كيف تشغّل demo
+      - كيف تختبر بـ MockProvider
+
+      **معايير النجاح:**
+      - [ ] 4 ملفات PHP في app/Services/AI/ + 2 providers + 1 mock
+      - [ ] Prompt model مع migration يعمل ويقبل seed
+      - [ ] Middleware يرفض requests بدون tenant_id (test via phpunit)
+      - [ ] Demo route يستجيب (test via feature test بسيط)
+      - [ ] لا كود production calls OpenAI عند عدم وجود OPENAI_API_KEY (MockProvider fallback)
+      - [ ] README موجود وواضح
+
+      **Output النهائي:**
+      أخبرني بـ:
+      - ملفات تم إنشاؤها (ls /Users/ahmad/Herd/carag-v2/app/Services/AI/)
+      - كيف تشغّل الـ demo محلياً (commands)
+      - كيف تتحقق أن abstraction يعمل بدون API key
+      - migration + seed command للـ Prompt model
+
+    verify_prompt: |-
+      أنت code-reviewer-carag تراجع Track B (AI Foundation).
+
+      **Check independently:**
+
+      1. **File existence:**
+         ```bash
+         ls /Users/ahmad/Herd/carag-v2/app/Services/AI/
+         ls /Users/ahmad/Herd/carag-v2/app/Models/Prompt.php 2>&1
+         ```
+
+      2. **Interface contract:**
+         - اقرأ AiProvider.php — هل هو interface حقيقي (abstract methods only)؟
+         - اقرأ OpenAiProvider و AnthropicProvider — كلاهما implements AiProvider؟
+         - اقرأ MockProvider — يطبق نفس الـ interface؟
+
+      3. **Multi-tenant enforcement:**
+         - اقرأ `app/Http/Middleware/TrackAiUsage.php`: هل يرمي AuthorizationException إذا tenant_id غائب؟
+         - اقرأ `app/Models/Prompt.php`: هل يستخدم `BelongsToTenant` trait أو scope؟
+         - شغّل: `grep -r "Tenant::current\|tenant_id" app/Services/AI/ app/Models/Prompt.php`
+
+      4. **Migration validity:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && php artisan migrate:status --pretend 2>&1 | grep -i prompt
+         ```
+         الـ migration لازم يكون listed بدون errors.
+
+      5. **Smoke test for demo (without real API):**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2
+         unset OPENAI_API_KEY
+         php artisan test --filter=AiDemoTest 2>&1 | tail -20
+         ```
+         يجب يكون في Feature test للـ AiDemoController على الأقل 1 PASS.
+
+      6. **Cost calculation sanity:**
+         - اقرأ OpenAiProvider — هل يحسب cost فعلياً من token count × model rate؟
+         - MockProvider — يرجع cost ثابت ومعقول؟
+
+      7. **سجلتهاكات المسار:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && git diff --name-only HEAD app/ routes/ database/ 2>&1
+         ```
+         Track B لا يجب يلمس resources/js/ أو composer.json أو package.json.
+
+      **PASS criteria:** 1-6 تنجح + 7 ينظف.  
+      **FAIL criteria:** أي فحص يفشل — سمّه بالضبط.
+
+  # =====================================================================
+  # Track C — Observability & Operations (coder)
+  # =====================================================================
+  - id: track-c-observability
+    title: 'مسار C — Observability: Sentry + structured logging + health checks'
+    assigned_to: coder
+    verified_by: verifier
+    max_retries: 2
+    prompt: |-
+      أنت Track C في Phase 1 من خطة "World-Class Transformation" لـ Carag V2.
+
+      **النطاق الخاص بك فقط:**
+      - composer.json (إضافة sentry فقط)
+      - config/logging.php (إضافة ai channel + structured channel)
+      - config/sentry.php (جديد)
+      - app/Logging/ (جديد)
+      - bootstrap/app.php (logging channel registration)
+      - app/Http/Controllers/HealthController.php (جديد)
+      - routes/web.php أو routes/api.php (health route فقط)
+      - .env.example (إضافة SENTRY_DSN, LOG_CHANNEL placeholders)
+
+      **المطلوب:**
+
+      ### 1. Sentry Integration (يوم 21-22)
+      - `composer require sentry/sentry-laravel` (في الـ plan YAML فقط — عند التنفيذ، شغّلها فعلاً)
+      - أنشئ `config/sentry.php` عبر `php artisan vendor:publish --provider="Sentry\Laravel\ServiceProvider"`
+      - في `.env.example`:
+        ```
+        SENTRY_LARAVEL_DSN=
+        SENTRY_TRACES_SAMPLE_RATE=0.2
+        SENTRY_PROFILES_SAMPLE_RATE=0.1
+        ```
+      - تأكد أن `bootstrap/app.php` يستخدم `Sentry\Tracing\TraceContext` في middleware stack
+      - أضف Sentry context for `tenant_id` على كل request عبر middleware صغير
+      - تأكد أن errors في production ترجع إلى Sentry بدون leak في response
+
+      ### 2. Structured Logging (يوم 23)
+      - في `config/logging.php`، أضف channels:
+        ```php
+        'structured' => [
+            'driver' => 'monolog',
+            'handler' => Monolog\Handler\StreamHandler::class,
+            'with' => ['stream' => 'php://stdout'],
+            'formatter' => App\Logging\JsonFormatter::class,
+        ],
+        'ai' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/ai.log'),
+            'level' => 'info',
+        ],
+        ```
+
+      - أنشئ `app/Logging/JsonFormatter.php` يستخدم `Monolog\Formatter\JsonFormatter` مع context including:
+        - correlation_id (من request header X-Correlation-Id أو generate)
+        - tenant_id
+        - user_id
+        - route
+        - timestamp ISO 8601
+
+      - في `bootstrap/app.php`، فعّل structured channel كـ default في non-local:
+        ```php
+        if (!$app->environment('local')) {
+            $app->configureMonologUsing(function ($monolog) {
+                // apply JsonFormatter
+            });
+        }
+        ```
+
+      ### 3. Health & Readiness Endpoint (يوم 24)
+      `app/Http/Controllers/HealthController.php`:
+      - `GET /healthz` — liveness probe (returns 200 + status: ok)
+      - `GET /readyz` — readiness probe (checks DB, Redis, Queue connections)
+      - No auth required
+      - JSON response: `{"status":"ready","checks":{"db":"ok","cache":"ok","queue":"ok"}}`
+
+      - Route في `routes/api.php`:
+        ```php
+        Route::get('/healthz', [HealthController::class, 'live']);
+        Route::get('/readyz', [HealthController::class, 'ready']);
+        ```
+
+      ### 4. Backup Strategy Doc
+      أنشئ `docs/operations/backup-dr.md`:
+      - S3 backup strategy (daily DB + storage)
+      - 30-day retention
+      - Quarterly restore drill
+      - Runbook for restore
+
+      **معايير النجاح:**
+      - [ ] Sentry installed و config موجود
+      - [ ] JSON formatter في App\Logging يضيف tenant_id و correlation_id
+      - [ ] /healthz و /readyz يعملان (test بـ curl)
+      - [ ] .env.example محدّث مع Sentry placeholders
+      - [ ] docs/operations/backup-dr.md موجود بخطوات ملموسة
+      - [ ] لا كود في production يتجاوز new Sentry/Logging إلا local fallback
+
+      **Output النهائي:**
+      - قائمة الـ composer commands اللي شغّلتها
+      - ناتج `php artisan test --filter=HealthTest 2>&1 | tail -10`
+      - أوامر التحقق من /healthz و /readyz
+
+    verify_prompt: |-
+      أنت verifier تراجع Track C (Observability).
+
+      **Check independently:**
+
+      1. **Sentry installed:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2
+         grep -A1 "sentry/sentry-laravel" composer.json
+         ls config/sentry.php 2>&1
+         ```
+
+      2. **Structured logging:**
+         ```bash
+         grep -A5 "'structured'" config/logging.php
+         ls /Users/ahmad/Herd/carag-v2/app/Logging/JsonFormatter.php
+         ```
+         اقرأ JsonFormatter — هل يستخدم `Monolog\Formatter\JsonFormatter` و يضيف tenant_id؟
+
+      3. **Health endpoints respond:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2
+         php artisan serve --port=8765 &  # يختبر في background
+         sleep 3
+         curl -s http://127.0.0.1:8765/healthz
+         curl -s http://127.0.0.1:8765/readyz
+         kill %1 2>/dev/null
+         ```
+         يجب /healthz يرجع 200 و /readyz إما 200 (all green) أو 503 مع reasons واضحة.
+
+      4. **Tests pass:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && php artisan test --filter=HealthTest 2>&1 | tail -10
+         ```
+
+      5. **.env.example updated:**
+         ```bash
+         grep -E "SENTRY_DSN|SENTRY_TRACES|LOG_CHANNEL" /Users/ahmad/Herd/carag-v2/.env.example
+         ```
+
+      6. **Docs exist:**
+         ```bash
+         ls /Users/ahmad/Herd/carag-v2/docs/operations/backup-dr.md 2>&1
+         ```
+         اقرأ أول 30 سطر — هل هي خطة runbook حقيقية؟
+
+      7. **سجلتهاكات المسار:**
+         Track C لا يجب يلمس resources/js/، routes/web.php (إلا health route)، Track A/D/B scoped files.
+
+      **PASS criteria:** 1-6 تنجح.  
+      **FAIL criteria:** أي فحص يفشل.
+
+  # =====================================================================
+  # Track D — Developer Experience & Quality Gates (coder)
+  # =====================================================================
+  - id: track-d-devx
+    title: 'مسار D — DevX: Husky + CI matrix + Vitest + TypeScript config'
+    assigned_to: coder
+    verified_by: verifier
+    max_retries: 2
+    prompt: |-
+      أنت Track D في Phase 1 من خطة "World-Class Transformation" لـ Carag V2.
+
+      **النطاق الخاص بك فقط:**
+      - package.json (إضافة devDependencies: husky, lint-staged, vitest, @vue/test-utils, prettier؛ scripts)
+      - tsconfig.json (جديد، strict mode)
+      - vitest.config.ts (جديد)
+      - .github/workflows/ci.yml (جديد)
+      - .husky/pre-commit (جديد)
+      - .prettierrc.json (جديد)
+      - resources/js/types/ (جديد — placeholders للـ Phase 2)
+
+      **المطلوب:**
+
+      ### 1. TypeScript config (يوم 18)
+      `tsconfig.json` — Vue 3 + strict mode:
+      ```json
+      {
+        "compilerOptions": {
+          "target": "ES2022",
+          "module": "ESNext",
+          "moduleResolution": "Bundler",
+          "strict": true,
+          "noUncheckedIndexedAccess": true,
+          "exactOptionalPropertyTypes": false,  // Vue interop
+          "jsx": "preserve",
+          "lib": ["ES2022", "DOM", "DOM.Iterable"],
+          "types": ["node", "vitest/globals"],
+          "paths": { "@/*": ["./resources/js/*"] },
+          "baseUrl": "."
+        },
+        "include": ["resources/js/**/*", "resources/js/**/*.vue"]
+      }
+      ```
+
+      أضف في package.json:
+      ```json
+      "scripts": {
+        "type-check": "vue-tsc --noEmit",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "lint": "eslint . --ext .vue,.js,.ts",
+        "format": "prettier --write .",
+        "prepare": "husky install"
+      }
+      ```
+
+      **مهم:** ضع `type-check` كـ non-blocking (نضيف `|| true`) في البداية حتى ما يكسر CI لمن الـ TS migration ما خلص. أضف TODO comment يوضح.
+
+      ### 2. Pre-commit Hooks (يوم 19)
+      Install:
+      ```bash
+      pnpm add -D husky lint-staged
+      pnpm exec husky install
+      ```
+
+      `.husky/pre-commit`:
+      ```sh
+      #!/usr/bin/env sh
+      . "$(dirname -- "$0")/_/husky.sh"
+      npx lint-staged
+      ```
+
+      `.prettierrc.json`:
+      ```json
+      {
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "printWidth": 100,
+        "vueIndentScriptAndStyle": false
+      }
+      ```
+
+      في package.json أضف `lint-staged`:
+      ```json
+      "lint-staged": {
+        "*.{vue,js,ts}": ["prettier --write", "eslint --fix"],
+        "*.php": ["php artisan pint --test"]
+      }
+      ```
+
+      ### 3. Vitest Setup (يوم 19)
+      `vitest.config.ts`:
+      ```ts
+      import { defineConfig } from 'vitest/config';
+      import vue from '@vitejs/plugin-vue';
+      import { fileURLToPath, URL } from 'node:url';
+
+      export default defineConfig({
+        plugins: [vue()],
+        test: {
+          globals: true,
+          environment: 'jsdom',
+          include: ['resources/js/**/*.test.ts', 'resources/js/**/*.test.js'],
+          coverage: {
+            reporter: ['text', 'html'],
+            exclude: ['**/node_modules/**', '**/dist/**'],
+          },
+        },
+        resolve: {
+          alias: { '@': fileURLToPath(new URL('./resources/js', import.meta.url)) },
+        },
+      });
+      ```
+
+      أضف في package.json devDependencies:
+      - vitest
+      - @vue/test-utils
+      - jsdom
+      - @vitejs/plugin-vue
+
+      أنشئ `resources/js/types/README.md` يقول "Phase 2 will populate this".
+
+      ### 4. CI Matrix (يوم 20)
+      `.github/workflows/ci.yml`:
+      - Triggers: push, pull_request to main
+      - Jobs matrix:
+        - `test-backend` — PHP 8.2 + 8.3 + 8.4, runs `php artisan test`
+        - `lint-backend` — `php artisan pint --test`
+        - `test-frontend` — Node 20, runs `npm run test`
+        - `type-check-frontend` — `npm run type-check || true` (non-blocking during migration)
+        - `lint-frontend` — `npm run lint`
+        - `build-frontend` — `npm run build`
+      - Fail fast strategy
+
+      **معايير النجاح:**
+      - [ ] `pnpm run type-check` ينجح
+      - [ ] `pnpm run test` ينجح (حتى لو 0 tests)
+      - [ ] `pnpm run lint` ينجح
+      - [ ] `.husky/pre-commit` موجود و executable
+      - [ ] `.github/workflows/ci.yml` YAML valid
+      - [ ] لا فشل `pnpm install` بعد التغييرات
+
+      **Output النهائي:**
+      - pnpm/npm commands التي شغلتها مع نتائجها
+      - قائمة الـ files التي أنشأتها
+      - confirmation أن CI YAML is syntactically valid
+
+    verify_prompt: |-
+      أنت verifier تراجع Track D (DevX).
+
+      **Check independently:**
+
+      1. **Install dry-run:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && pnpm install --frozen-lockfile 2>&1 | tail -10
+         ```
+         يجب ينجح.
+
+      2. **Type-check:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && pnpm run type-check 2>&1 | tail -10
+         ```
+         يجب ينجح (مع || true لكن).
+
+      3. **Test runner:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && pnpm run test 2>&1 | tail -10
+         ```
+         يجب ينجح (حتى بدون tests).
+
+      4. **Lint:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && pnpm run lint 2>&1 | tail -10
+         ```
+
+      5. **Pre-commit hook file:**
+         ```bash
+         ls -la /Users/ahmad/Herd/carag-v2/.husky/pre-commit
+         cat /Users/ahmad/Herd/carag-v2/.husky/pre-commit
+         ```
+
+      6. **CI YAML valid:**
+         ```bash
+         python3 -c "import yaml; yaml.safe_load(open('/Users/ahmad/Herd/carag-v2/.github/workflows/ci.yml'))" 2>&1 && echo "VALID" || echo "INVALID"
+         ```
+
+      7. **سجلتهاكات المسار:**
+         Track D لا يجب يلمس app/ (PHP) ولا resources/js/Components/App/ (Track A scope).
+
+      **PASS criteria:** 1-6 تنجح.  
+      **FAIL criteria:** أي فشل.
+
+  # =====================================================================
+  # Track E — Multi-Tenant Hardening (backend-dev)
+  # =====================================================================
+  - id: track-e-multitenant
+    title: 'مسار E — Multi-Tenant: scope 35 models + contract tests'
+    assigned_to: backend-dev
+    verified_by: [code-reviewer-carag, tester-carag]
+    max_retries: 2
+    prompt: |-
+      أنت Track E في Phase 1 من خطة "World-Class Transformation" لـ Carag V2.
+
+      **النطاق الخاص بك فقط:**
+      - app/Models/*.php         (تحسينات tenant scoping فقط)
+      - app/Models/Concerns/     (trait جديد إذا لزم)
+      - tests/Feature/TenantIsolation/ (جديد)
+      - database/factories/      (تحسينات فقط — tenant_id في factories الناقصة)
+
+      **الـ Basline:** يوجد 35 model unscoped حسب audit المرحلة 1.
+
+      **المطلوب:**
+
+      ### 1. Audit & Categorize
+      أولاً: أنشئ `docs/multitenant/audit.md` يحوي قائمة الـ 35 model unscoped مع:
+      - لماذا unscoped (هل هو global config / currency / etc.)
+      - هل يجب أن يكون scoped (multi-tenant data isolation)
+      - خطة العلاج لكل model
+
+      ### 2. Enforce Tenant Scope
+      لكل model يحتاج scoping:
+      - أضف `use BelongsToTenant` trait (موجود بالفعل في المشروع — استخدم الـ trait المستخدم حالياً)
+      - أو أضف explicit `tenant_id` column + scope مخصص إذا الـ trait لا يصلح
+      - تأكد من `unique()` constraint يشمل `tenant_id` (لتجنب cross-tenant collisions)
+
+      ### 3. Contract Tests
+      `tests/Feature/TenantIsolation/` أنشئ tests لكل model scoped:
+      ```php
+      class SupplierTenantIsolationTest extends TestCase {
+          public function test_supplier_cannot_leak_across_tenants(): void {
+              $tenantA = Tenant::factory()->create();
+              $tenantB = Tenant::factory()->create();
+              // ... verify supplier created in A is NOT visible in B
+          }
+      }
+      ```
+
+      الحد الأدنى: 10 Feature tests تغطي أهم models (Supplier, Part, Customer, Vehicle, WorkOrder, Invoice, Payment, Employee, etc.)
+
+      ### 4. Factory Updates
+      في كل factory ناقص، أضف tenant_id (إذا الـ model يحتاج tenant).
+
+      **معايير النجاح:**
+      - [ ] docs/multitenant/audit.md مع قائمة الـ 35 model
+      - [ ] كل الـ 35 model إما scoped أو موثّق سبب عدم الـ scoping
+      - [ ] ≥ 10 Feature tests للـ tenant isolation
+      - [ ] `php artisan test --testsuite=Feature --filter=Tenant` ينجح
+      - [ ] لا regression في باقي الـ tests: `php artisan test` نفس عدد passing أو أكثر
+
+      **Output النهائي:**
+      - audit.md بقائمة الـ 35 model
+      - ملف بحالة كل model (scoped/refused/reason)
+      - test output summary
+      - commit/message جاهز للـ PR
+
+    verify_prompt: |-
+      أنت code-reviewer-carag و tester-carag تراجعان Track E (Multi-Tenant).
+
+      **الجزء الأول (code-reviewer-carag) — Architectural Review:**
+
+      1. اقرأ `docs/multitenant/audit.md`:
+         - هل يغطي الـ 35 model؟
+         - هل كل model له قرار واضح (scoped/refused/reason)؟
+
+      2. فحص 5 models عشوائياً (Supplier, Part, WorkOrder, Customer, Employee):
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2
+         grep -l "use BelongsToTenant\|TenantScope" app/Models/Supplier.php app/Models/Part.php app/Models/WorkOrder.php app/Models/Customer.php app/Models/Employee.php
+         ```
+         هل كل واحد يستخدم scoping pattern؟
+
+      3. **Cross-tenant attack simulation:**
+         - في `SupplierTenantIsolationTest`، تأكد أن الـ test ينشئ بيانات في tenantA و tenantB و يتأكد أن supplier من A غير مرئي في B queries.
+         - تحقق أن الـ test يستخدم `actingAs` أو explicit `Tenant::current()` بشكل صحيح.
+
+      4. **سجلتهاكات المسار:**
+         Track E لا يجب يلمس resources/js/، composer.json، routes/web.php، أو app/Services/AI/.
+
+      **الجزء الثاني (tester-carag) — Runtime Verification:**
+
+      1. **Run tests:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && php artisan test --filter=TenantIsolation 2>&1 | tail -20
+         ```
+         كل الـ tests لازم PASS.
+
+      2. **Full suite regression:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2 && php artisan test 2>&1 | tail -10
+         ```
+         عدد passing لا يقل عن baseline (106 حسب assessment).
+
+      3. **عدد TenantIsolation tests:**
+         ```bash
+         find /Users/ahmad/Herd/carag-v2/tests/Feature/TenantIsolation -name "*.php" 2>&1 | wc -l
+         ```
+         ≥ 10 tests.
+
+      **PASS criteria:** كل الفحوصات تنجح.  
+      **FAIL criteria:** أي فشل أو عدد tests أقل من baseline.
+
+  # =====================================================================
+  # Final Integration Gate (verify-as-task)
+  # =====================================================================
+  - id: final-integration-gate
+    title: 'البوابة النهائية — integration audit + Score snapshot'
+    role: verify-as-task
+    assigned_to: verifier
+    depends_on: [track-a-design-system, track-b-ai-foundation, track-c-observability, track-d-devx, track-e-multitenant]
+    max_retries: 1
+    prompt: |-
+      أنت البوابة النهائية لـ Phase 1. كل المسارات الـ 5 خلصت.
+
+      **مهمتك:** integration audit شامل.
+
+      **Run these commands independently:**
+
+      1. **Build & Test Full Suite:**
+         ```bash
+         cd /Users/ahmad/Herd/carag-v2
+         npm install --frozen-lockfile 2>&1 | tail -5
+         npm run build 2>&1 | tail -10
+         php artisan test 2>&1 | tail -15
+         ```
+
+      2. **Count improvements:**
+         ```bash
+         find resources/js/Components/App -name "*.vue" 2>/dev/null | wc -l
+         find app/Services/AI -name "*.php" 2>/dev/null | wc -l
+         find tests/Feature/TenantIsolation -name "*.php" 2>/dev/null | wc -l
+         ls config/sentry.php 2>&1
+         ls .github/workflows/ci.yml 2>&1
+         ls .husky/pre-commit 2>&1
+         ```
+
+      3. **Sanity check:**
+         ```bash
+         grep "AppButton" resources/js/app.js 2>&1
+         grep "use_track_ai" routes/api.php 2>&1  # or similar AiDemo route
+         curl -s http://127.0.0.1:8000/healthz 2>&1 || true
+         ```
+
+      4. **Re-compute Score:**
+         - Design System Maturity: any App components in Histoire/usage? → upgrade
+         - AI Readiness: provider interface exists? OpenAiProvider exists? → upgrade
+         - Multi-Tenant: 10+ isolation tests? → upgrade
+         - Observability: /healthz + sentry installed? → upgrade
+         - DevX: husky + vitest + CI? → upgrade
+
+      **Deliverable:** report مفصّل:
+      ```
+      ## Phase 1 Final Report
+
+      ### Build/Test Results
+      - npm run build: PASS/FAIL
+      - php artisan test: PASS/FAIL (X passed, Y failed)
+
+      ### Track Summary
+      - Track A (Design): X files created
+      - Track B (AI): X files created
+      - Track C (Observability): X components live
+      - Track D (DevX): X gates installed
+      - Track E (Multi-Tenant): X models scoped, Y tests
+
+      ### Score Recompute
+      | Pillar | Before | After | Delta |
+      | ... | 65 | XX | +X |
+
+      ### Final Verdict
+      PASS / FAIL
+
+      ### Blockers for Phase 2
+      - (any items that should be done first)
+      ```
+
+      **أنشئ هذا الـ report في `docs/phase-1/final-report.md` وأخبرني بـ PASS/FAIL.**

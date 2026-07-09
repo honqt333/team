@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Spatie\Permission\Models\Role as SpatieRole;
 
+// @bypass-tenancy-scanner - Spatie role isolation enforced via PermissionRegistrar::setPermissionsTeamId
 class Role extends SpatieRole
 {
     protected $fillable = [

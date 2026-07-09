@@ -4,6 +4,7 @@ namespace App\Models\Developer;
 
 use Illuminate\Database\Eloquent\Model;
 
+// @bypass-tenancy-scanner - Developer tooling (audit/memory), outside tenant boundary
 class AiMemory extends Model
 {
     protected $table = 'dev_ai_memory';

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+// @bypass-tenancy-scanner - Admin-panel identity, lives outside tenant boundary
 class AdminUser extends Authenticatable
 {
     use HasFactory, Notifiable, SoftDeletes;

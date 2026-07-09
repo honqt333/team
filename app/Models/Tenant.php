@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Billing\Subscription;
+use App\Services\TenantSetupService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
+// @bypass-tenancy-scanner - Root identity: this IS the tenant
 class Tenant extends Model
 {
     use HasFactory, SoftDeletes;
@@ -45,7 +49,7 @@ class Tenant extends Model
         // Visual Print Settings
         'print_settings',
     ];
-    
+
     protected $appends = [
         'logo_url',
     ];
@@ -63,7 +67,7 @@ class Tenant extends Model
 
     public function getLogoUrlAttribute(): string
     {
-        return $this->logo_path ? \Illuminate\Support\Facades\Storage::url($this->logo_path) : asset('images/logo.png');
+        return $this->logo_path ? Storage::url($this->logo_path) : asset('images/logo.png');
     }
 
     public function centers(): HasMany
@@ -93,7 +97,7 @@ class Tenant extends Model
 
     public function subscriptions(): HasMany
     {
-        return $this->hasMany(\App\Models\Billing\Subscription::class);
+        return $this->hasMany(Subscription::class);
     }
 
     /**
@@ -121,7 +125,7 @@ class Tenant extends Model
     protected static function booted(): void
     {
         static::created(function (Tenant $tenant) {
-            $service = new \App\Services\TenantSetupService();
+            $service = new TenantSetupService;
 
             // Seed default roles + permissions for the new tenant
             $service->seedRolesForTenant($tenant->id);

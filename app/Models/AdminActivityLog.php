@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+// @bypass-tenancy-scanner - Admin panel audit log, no tenant context at write time
 class AdminActivityLog extends Model
 {
     protected $fillable = [

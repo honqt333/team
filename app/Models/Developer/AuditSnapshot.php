@@ -5,6 +5,7 @@ namespace App\Models\Developer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+// @bypass-tenancy-scanner - Developer tooling (audit snapshots), outside tenant boundary
 class AuditSnapshot extends Model
 {
     protected $table = 'dev_audit_snapshots';
