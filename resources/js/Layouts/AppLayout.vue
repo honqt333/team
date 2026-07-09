@@ -1114,9 +1114,9 @@
                 <!-- Trial Expiration Notice Banner -->
                 <div
                     v-if="trialDaysLeft !== null"
-                    class="bg-amber-500/10 dark:bg-amber-500/5 border-b border-amber-500/20 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between transition-colors flex-shrink-0"
+                    class="bg-amber-500/10 dark:bg-amber-500/5 border-b border-amber-500/20 px-4 py-2.5 text-xs text-amber-800 dark:text-amber-300 flex items-center justify-center transition-colors flex-shrink-0"
                 >
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center justify-center gap-2 text-center">
                         <svg
                             class="w-4 h-4 text-amber-500 flex-shrink-0 animate-bounce"
                             fill="none"
