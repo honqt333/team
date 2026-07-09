@@ -40,7 +40,19 @@ class PurchaseInvoice extends Model
     // Code generator: PINV-0001
     public static function generateCode(int $tenantId): string
     {
-        $last = static::where('tenant_id', $tenantId)->withTrashed()->count();
-        return 'PINV-' . str_pad($last + 1, 4, '0', STR_PAD_LEFT);
+        $last = static::where('tenant_id', $tenantId)
+            ->withTrashed()
+            ->latest('id')
+            ->first();
+
+        $nextNumber = 1;
+        if ($last && $last->code) {
+            $lastNumber = (int) preg_replace('/[^0-9]/', '', $last->code);
+            if ($lastNumber > 0) {
+                $nextNumber = $lastNumber + 1;
+            }
+        }
+
+        return 'PINV-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 }
