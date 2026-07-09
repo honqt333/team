@@ -108,6 +108,10 @@ class CompanyProfileController extends Controller
                         $query->select('purchase_invoice_id')->from('company_transactions')->whereNull('center_id')->whereNotNull('purchase_invoice_id');
                     })->with(['supplier', 'center'])->latest()->get(),
             ],
+            'subscriptions' => $tenant->subscriptions()
+                ->with('plan')
+                ->orderBy('created_at', 'desc')
+                ->get(),
         ]);
     }
 
