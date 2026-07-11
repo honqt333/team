@@ -253,6 +253,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/settings/print', [\App\Http\Controllers\App\SystemSettingsController::class, 'printSettings'])->name('settings.print');
     Route::put('/settings/system', [\App\Http\Controllers\App\SystemSettingsController::class, 'update'])->name('settings.system.update');
 
+    // Print Settings — Signatures (tenant-scoped image uploads)
+    Route::post('/settings/print/signatures', [\App\Http\Controllers\App\PrintSettingsSignatureController::class, 'store'])->name('settings.print.signatures.store');
+
     // Users Settings
     Route::resource('settings/users', \App\Http\Controllers\App\UserController::class)->names('settings.users');
     Route::patch('/settings/users/{user}/toggle-active', [\App\Http\Controllers\App\UserController::class, 'toggleActive'])->name('settings.users.toggle');
