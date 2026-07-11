@@ -643,6 +643,15 @@
             @save="handleDocSave"
         />
 
+        <!-- Term Edit Modal (top-level binding) -->
+        <TermEditModal
+            v-if="isTermEditOpen"
+            :show="true"
+            :term="editingTerm"
+            @close="closeTermEdit"
+            @save="handleTermSaved"
+        />
+
         <!-- Upgrade Premium Template Modal -->
         <div
             v-if="showUpgradeModal"
@@ -731,6 +740,7 @@ import BackButton from '@/Components/BackButton.vue';
 import { useToast } from '@/Composables/useToast';
 import TermsModal from './Modals/TermsModal.vue';
 import TermsListModal from './Modals/TermsListModal.vue';
+import TermEditModal from './Modals/TermEditModal.vue';
 
 // Import newly created PrintEngine wrapper
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
@@ -769,6 +779,15 @@ if (!form.visual.active_template) {
 
 const editingDoc = ref(null);
 const editingTermsDoc = ref(null);
+
+// Term-edit modal state (top-level binding for TermEditModal).
+// `editingTerm` holds the term being edited; null when modal is closed.
+// `isTermEditOpen` controls modal visibility (also gated by v-if in template).
+// `editingTermDocKey` tracks which document's terms list to mutate on save
+// because TermEditModal emits only the term payload (no document context).
+const editingTerm = ref(null);
+const isTermEditOpen = ref(false);
+const editingTermDocKey = ref(null);
 
 // Premium template upgrade refs and actions
 const showUpgradeModal = ref(false);
@@ -858,6 +877,49 @@ function handleDocSave(newDoc) {
         form.documents[editingDoc.value] = { ...newDoc };
     } else if (editingTermsDoc.value) {
         form.documents[editingTermsDoc.value] = { ...newDoc };
+    }
+}
+
+// Open TermEditModal for a specific term in a specific document.
+// `term` may be:
+//   - an existing term object (with optional `_index` to know position) → edit mode
+//   - a blank template object → add mode (no _index)
+function openTermEdit(term) {
+    editingTerm.value = term ? { ...term } : null;
+    isTermEditOpen.value = true;
+}
+
+function closeTermEdit() {
+    isTermEditOpen.value = false;
+    editingTerm.value = null;
+    editingTermDocKey.value = null;
+}
+
+// Receive a saved term from TermEditModal and update the document's terms
+// list in place (no reload, no server call). Decision logic:
+//   - If the saved term carries a valid `_index` → update at that position
+//   - Otherwise → append as a new term
+// `_index` is stripped before storing so it never leaks into the form payload.
+function handleTermSaved(updatedTerm) {
+    const docKey = editingTermDocKey.value;
+    if (!docKey || !form.documents[docKey]) {
+        return;
+    }
+    const doc = form.documents[docKey];
+    if (!Array.isArray(doc.terms)) {
+        doc.terms = [];
+    }
+
+    const cleanTerm = { ...updatedTerm };
+    const idx = cleanTerm._index;
+    delete cleanTerm._index;
+
+    if (typeof idx === 'number' && idx >= 0 && idx < doc.terms.length) {
+        // Edit existing term in place
+        doc.terms[idx] = cleanTerm;
+    } else {
+        // Append new term
+        doc.terms.push(cleanTerm);
     }
 }
 
