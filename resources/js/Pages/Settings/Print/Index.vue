@@ -112,27 +112,6 @@
                                               : 'border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/30 hover:border-gray-200 dark:hover:border-gray-700',
                                     ]"
                                 >
-                                    <!-- Premium Badge -->
-                                    <div
-                                        v-if="tmpl.premium"
-                                        class="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400 text-[8px] font-black tracking-wide border border-indigo-100 dark:border-indigo-900/50"
-                                    >
-                                        <svg
-                                            class="w-2.5 h-2.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                stroke-width="2.5"
-                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                                            />
-                                        </svg>
-                                        تكامل إضافي
-                                    </div>
-
                                     <!-- Previewing indicator -->
                                     <div
                                         v-if="
@@ -186,13 +165,7 @@
                                                     : 'تعيين كافتراضي'
                                             }}
                                         </button>
-                                        <span
-                                            v-if="tmpl.premium"
-                                            class="text-[9px] text-indigo-500 font-black font-mono"
-                                        >
-                                            {{ tmpl.premium_price }}
-                                        </span>
-                                        <span v-else class="text-[9px] text-emerald-500 font-bold">
+                                        <span class="text-[9px] text-emerald-500 font-bold">
                                             مشمول مجاناً
                                         </span>
                                     </div>
@@ -202,14 +175,9 @@
 
                         <!-- General Toggles & Color -->
                         <div class="space-y-3.5">
-                            <!-- Show Logo - Paid only -->
+                            <!-- Show Logo -->
                             <div
-                                class="relative p-3 rounded-xl border transition-all"
-                                :class="
-                                    hasPaidSubscription
-                                        ? 'border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30'
-                                        : 'border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 opacity-70'
-                                "
+                                class="relative p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30 transition-all"
                             >
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-2">
@@ -218,26 +186,12 @@
                                         >
                                             إظهار شعار المركز
                                         </span>
-                                        <span
-                                            v-if="!hasPaidSubscription"
-                                            class="text-[9px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full font-bold"
-                                        >
-                                            مدفوع
-                                        </span>
                                     </div>
-                                    <label
-                                        class="relative inline-flex items-center"
-                                        :class="
-                                            hasPaidSubscription
-                                                ? 'cursor-pointer'
-                                                : 'cursor-not-allowed'
-                                        "
-                                    >
+                                    <label class="relative inline-flex items-center cursor-pointer">
                                         <input
                                             type="checkbox"
                                             v-model="form.visual.show_logo"
                                             class="sr-only peer"
-                                            :disabled="!hasPaidSubscription"
                                         />
                                         <div
                                             class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-amber-300 dark:peer-focus:ring-amber-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-amber-600"
@@ -246,14 +200,9 @@
                                 </div>
                             </div>
 
-                            <!-- Primary color - Paid only -->
+                            <!-- Primary color -->
                             <div
-                                class="relative p-3 rounded-xl border transition-all"
-                                :class="
-                                    hasPaidSubscription
-                                        ? 'border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30'
-                                        : 'border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 opacity-70'
-                                "
+                                class="relative p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30 transition-all"
                             >
                                 <div class="flex items-center gap-2 mb-2">
                                     <label
@@ -261,42 +210,25 @@
                                     >
                                         اللون الأساسي للهوية
                                     </label>
-                                    <span
-                                        v-if="!hasPaidSubscription"
-                                        class="text-[9px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full font-bold"
-                                    >
-                                        مدفوع
-                                    </span>
                                 </div>
                                 <div class="flex items-center gap-3">
                                     <input
                                         v-model="form.visual.primary_color"
                                         type="color"
-                                        class="w-10 h-10 rounded-lg border-0 p-0 overflow-hidden bg-transparent"
-                                        :class="
-                                            hasPaidSubscription
-                                                ? 'cursor-pointer'
-                                                : 'cursor-not-allowed pointer-events-none'
-                                        "
+                                        class="w-10 h-10 rounded-lg border-0 p-0 overflow-hidden bg-transparent cursor-pointer"
                                     />
                                     <input
                                         v-model="form.visual.primary_color"
                                         type="text"
                                         class="flex-1 px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-xs"
                                         dir="ltr"
-                                        :readonly="!hasPaidSubscription"
                                     />
                                 </div>
                             </div>
 
-                            <!-- Footer text - Paid only -->
+                            <!-- Footer text -->
                             <div
-                                class="relative p-3 rounded-xl border transition-all"
-                                :class="
-                                    hasPaidSubscription
-                                        ? 'border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30'
-                                        : 'border-amber-100 dark:border-amber-900/30 bg-amber-50/20 dark:bg-amber-950/10 opacity-70'
-                                "
+                                class="relative p-3 rounded-xl border border-gray-100 dark:border-gray-700/60 bg-gray-50/30 dark:bg-gray-900/30 transition-all"
                             >
                                 <div class="flex items-center gap-2 mb-2">
                                     <label
@@ -304,19 +236,12 @@
                                     >
                                         النص التذييلي الافتراضي (الفوتر)
                                     </label>
-                                    <span
-                                        v-if="!hasPaidSubscription"
-                                        class="text-[9px] px-1.5 py-0.5 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400 rounded-full font-bold"
-                                    >
-                                        مدفوع
-                                    </span>
                                 </div>
                                 <textarea
                                     v-model="form.visual.footer_text"
                                     rows="2"
                                     class="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-xs leading-normal"
                                     :placeholder="$t('print_settings.footer_placeholder')"
-                                    :readonly="!hasPaidSubscription"
                                 ></textarea>
                             </div>
                         </div>
@@ -642,7 +567,6 @@
             @close="editingTermsDoc = null"
             @save="handleDocSave"
         />
-
         <!-- Term Edit Modal (top-level binding) -->
         <TermEditModal
             v-if="isTermEditOpen"
@@ -652,80 +576,6 @@
             @save="handleTermSaved"
         />
 
-        <!-- Upgrade Premium Template Modal -->
-        <div
-            v-if="showUpgradeModal"
-            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm transition-all duration-300"
-        >
-            <div
-                class="bg-white dark:bg-gray-800 rounded-3xl p-6 max-w-md w-full shadow-2xl border border-gray-100 dark:border-gray-700 animate-in fade-in zoom-in duration-200"
-            >
-                <div class="flex items-center gap-3 mb-4">
-                    <div
-                        class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/30 text-amber-500 flex items-center justify-center border border-amber-100 dark:border-amber-900/50"
-                    >
-                        <svg
-                            class="w-6 h-6 animate-pulse"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-black text-gray-900 dark:text-white">
-                            تفعيل القالب المتميز
-                        </h3>
-                        <p class="text-[10px] text-gray-400">تكامل القوالب والحلول الإضافية</p>
-                    </div>
-                </div>
-
-                <div
-                    class="space-y-3 leading-relaxed text-xs text-gray-600 dark:text-gray-300 bg-gray-50 dark:bg-gray-900/30 p-4 rounded-2xl border border-gray-100 dark:border-gray-750 mb-6"
-                >
-                    <p>
-                        لقد قمت باختيار القالب المتميز:
-                        <strong class="text-gray-900 dark:text-white">
-                            {{ selectedPremiumTemplate?.name }}
-                        </strong>
-                        .
-                    </p>
-                    <p>
-                        هذا القالب يتطلب تفعيل تكامل "حزمة قوالب الطباعة الفاخرة" عبر لوحة التحكم
-                        العامة لمتجر التكاملات.
-                    </p>
-                    <div
-                        class="flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400 mt-2 bg-indigo-50/50 dark:bg-indigo-950/20 p-2 rounded-xl"
-                    >
-                        <span>الرسوم الإضافية المقدرة:</span>
-                        <span class="font-mono">{{ selectedPremiumTemplate?.premium_price }}</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <button
-                        type="button"
-                        @click="requestActivation"
-                        class="flex-1 py-2.5 px-4 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-amber-600/10"
-                    >
-                        إرسال طلب تفعيل التكامل
-                    </button>
-                    <button
-                        type="button"
-                        @click="showUpgradeModal = false"
-                        class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-bold transition-all"
-                    >
-                        إغلاق المعاينة
-                    </button>
-                </div>
-            </div>
-        </div>
     </AppLayout>
 </template>
 
@@ -753,13 +603,6 @@ const props = defineProps({
 });
 
 const page = usePage();
-const hasPaidSubscription = computed(() => {
-    const slug = page.props.tenant?.slug;
-    if (slug === 'khidmh' || slug === 'test-company') {
-        return true;
-    }
-    return page.props.tenant?.has_paid_subscription ?? false;
-});
 
 const form = useForm({
     section: 'print',
@@ -789,38 +632,27 @@ const editingTerm = ref(null);
 const isTermEditOpen = ref(false);
 const editingTermDocKey = ref(null);
 
-// Premium template upgrade refs and actions
-const showUpgradeModal = ref(false);
-const selectedPremiumTemplate = ref(null);
 
 const availableTemplates = [
     {
         id: 'TemplateDefaultA4',
         name: 'Classic A4',
         description: 'طباعة A4 للمكاتب والمستندات الرسمية والمبيعات',
-        premium: false,
-        premium_price: null,
     },
     {
         id: 'TemplateThermal80',
         name: 'Thermal 80mm',
         description: 'طباعة حرارية ضيقة للفواتير السريعة والعملاء ورسائل الواتساب',
-        premium: false,
-        premium_price: null,
     },
     {
         id: 'TemplateModernA4',
         name: 'Modern Compact A4',
         description: 'قالب A4 عصري وموفر للحبر ذو تصميم مضغوط وأنيق وجدول خدمات ملون',
-        premium: true,
-        premium_price: '49 ر.س / شهرياً',
     },
     {
         id: 'TemplateSleekThermal',
         name: 'Sleek Thermal 80mm',
         description: 'تصميم إيصال حراري حديث بلمسة داكنة وتفاصيل انسيابية وتصميم أنيق',
-        premium: true,
-        premium_price: '29 ر.س / شهرياً',
     },
 ];
 
@@ -834,23 +666,8 @@ function previewTemplate(template) {
 
 // Click on "تعيين كافتراضي" button → save as default
 function selectTemplate(template) {
-    // If premium and not paid → show upgrade modal, do NOT save
-    if (template.premium && !hasPaidSubscription.value) {
-        previewingTemplate.value = template.id; // still preview
-        selectedPremiumTemplate.value = template;
-        showUpgradeModal.value = true;
-        return;
-    }
-    // Save as active template
     form.visual.active_template = template.id;
     previewingTemplate.value = template.id;
-}
-
-function requestActivation() {
-    showUpgradeModal.value = false;
-    success(
-        'تم إرسال طلب التفعيل بنجاح! سيقوم فريق التكامل بالاتصال بك لتفعيل القالب خلال 24 ساعة.'
-    );
 }
 
 // Sandbox reactive state
