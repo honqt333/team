@@ -240,7 +240,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span>{{ uploading ? $t('print_settings.uploading') : $t('print_settings.save_signature') }}</span>
+                        <span>{{ uploading ? $t('print_settings.signature_uploading') : $t('print_settings.save_signature') }}</span>
                     </button>
                 </div>
             </div>
@@ -474,7 +474,7 @@ function onFileSelected(e) {
 
     const ext = (file.name.split('.').pop() || '').toLowerCase();
     if (!ALLOWED_MIME.includes(file.type) && !ALLOWED_EXT.includes(ext)) {
-        uploadError.value = t('print_settings.invalid_file_type');
+        uploadError.value = t('print_settings.signature_invalid_file_type');
         clearUploadSelection();
         return;
     }
