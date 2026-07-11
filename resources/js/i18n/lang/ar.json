@@ -1984,7 +1984,23 @@
         "visual_preferences": "تفضيلات المظهر",
         "work_order": "كرت عمل",
         "work_order_terms": "شروط أمر العمل",
-        "work_order_title": "عنوان أمر العمل"
+        "work_order_title": "عنوان أمر العمل",
+        "tab_draw": "رسم",
+        "tab_upload": "رفع",
+        "tab_library": "المكتبة",
+        "brush_size": "حجم القلم",
+        "clear_canvas": "مسح اللوحة",
+        "canvas_hint": "استخدم الماوس أو اللمس لرسم توقيعك داخل المستطيل",
+        "upload_hint": "اختر صورة (PNG أو JPG أو SVG) كحد أقصى 2 ميغابايت",
+        "library_empty": "لا توجد توقيعات محفوظة بعد",
+        "library_select": "اختر من المحفوظات",
+        "uploading": "جاري الرفع...",
+        "upload_failed": "فشل رفع التوقيع. حاول مرة أخرى.",
+        "invalid_file_type": "نوع الملف غير مدعوم. الأنواع المسموحة: PNG، JPG، SVG.",
+        "drawing_required": "يرجى رسم التوقيع قبل الحفظ",
+        "upload_required": "يرجى اختيار ملف للرفع",
+        "selection_required": "يرجى اختيار توقيع من المكتبة",
+        "save_signature": "حفظ التوقيع"
     },
     "profile": {
         "info": {

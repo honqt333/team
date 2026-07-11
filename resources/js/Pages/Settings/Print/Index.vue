@@ -503,7 +503,7 @@
                             <div class="grid grid-cols-2 gap-3 pt-2">
                                 <button
                                     type="button"
-                                    @click="openEditModal(selectedDocKey)"
+                                    @click="openSignatureModal(selectedDocKey)"
                                     class="flex items-center justify-center gap-1.5 py-2 px-3 border border-indigo-200 hover:border-indigo-400 text-indigo-600 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/10 rounded-xl text-[10px] font-bold transition-all"
                                 >
                                     <svg
@@ -643,6 +643,16 @@
             @save="handleDocSave"
         />
 
+        <!-- Signature Modal (draw / upload / library) -->
+        <SignatureModal
+            v-if="editingSignaturesDoc"
+            :show="true"
+            :document="form.documents[editingSignaturesDoc]"
+            :doc-key="editingSignaturesDoc"
+            @close="closeSignatureModal"
+            @signature-saved="handleSignatureSaved"
+        />
+
         <!-- Upgrade Premium Template Modal -->
         <div
             v-if="showUpgradeModal"
@@ -731,6 +741,7 @@ import BackButton from '@/Components/BackButton.vue';
 import { useToast } from '@/Composables/useToast';
 import TermsModal from './Modals/TermsModal.vue';
 import TermsListModal from './Modals/TermsListModal.vue';
+import SignatureModal from './Modals/SignatureModal.vue';
 
 // Import newly created PrintEngine wrapper
 import PrintEngine from '@/Components/Print/PrintEngine.vue';
@@ -769,6 +780,7 @@ if (!form.visual.active_template) {
 
 const editingDoc = ref(null);
 const editingTermsDoc = ref(null);
+const editingSignaturesDoc = ref(null);
 
 // Premium template upgrade refs and actions
 const showUpgradeModal = ref(false);
@@ -853,12 +865,63 @@ function openTermsList(key) {
     editingTermsDoc.value = key;
 }
 
+function openSignatureModal(key) {
+    editingSignaturesDoc.value = key;
+}
+
+function closeSignatureModal() {
+    editingSignaturesDoc.value = null;
+}
+
 function handleDocSave(newDoc) {
     if (editingDoc.value) {
         form.documents[editingDoc.value] = { ...newDoc };
     } else if (editingTermsDoc.value) {
         form.documents[editingTermsDoc.value] = { ...newDoc };
     }
+}
+
+/**
+ * Called by SignatureModal after the user saves / picks a signature.
+ * We append it to the current document's `signatures` list and ensure
+ * the doc has a `signature` placeholder for the TemplateDefaultA4 footer
+ * (the first signature becomes the default).
+ */
+function handleSignatureSaved(sig) {
+    const key = editingSignaturesDoc.value;
+    if (!key || !sig) return;
+
+    const doc = form.documents[key];
+    if (!doc) return;
+
+    const list = Array.isArray(doc.signatures) ? [...doc.signatures] : [];
+    // Dedupe by id — if it already exists, no-op
+    if (sig.id && list.some((s) => s.id === sig.id)) {
+        closeSignatureModal();
+        return;
+    }
+    list.push({
+        id: sig.id,
+        name_ar: sig.name_ar || doc.signature?.name_ar || '',
+        name_en: sig.name_en || doc.name_en || '',
+        url: sig.url,
+        uploaded_at: sig.uploaded_at,
+        show: true,
+        order: list.length + 1,
+    });
+    // Stamp the first signature as the default footer reference
+    const nextDoc = { ...doc, signatures: list };
+    if (!nextDoc.signature) {
+        nextDoc.signature = {
+            id: sig.id,
+            name_ar: sig.name_ar || '',
+            name_en: sig.name_en || '',
+            url: sig.url,
+            show: true,
+        };
+    }
+    form.documents[key] = nextDoc;
+    closeSignatureModal();
 }
 
 function save() {
