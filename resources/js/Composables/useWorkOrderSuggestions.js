@@ -1,4 +1,4 @@
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import axios from 'axios';
 
 /**
@@ -154,6 +154,17 @@ export function useWorkOrderSuggestions({ workOrder, endpoint, debounceMs = 600 
         refresh();
     });
 
+    // Drop any pending debounced fetch when the host component unmounts.
+    // Without this, the in-flight setTimeout would call refresh() against a
+    // torn-down reactive scope and produce noisy "set on unmounted" warnings
+    // in vitest (e.g. when the user navigates away mid-debounce).
+    onUnmounted(() => {
+        if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+        }
+    });
+
     watch(
         () => readComplaint(),
         (next, prev) => {
@@ -162,6 +173,7 @@ export function useWorkOrderSuggestions({ workOrder, endpoint, debounceMs = 600 
             if (next === prev) return;
             if (debounceTimer) clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
+                debounceTimer = null;
                 refresh();
             }, debounceMs);
         }
