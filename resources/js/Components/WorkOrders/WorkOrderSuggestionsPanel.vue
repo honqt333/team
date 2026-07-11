@@ -55,105 +55,116 @@
         </header>
 
         <!-- ─── Body ───────────────────────────────────────────────────── -->
-        <!-- Loading skeleton -->
-        <div
-            v-if="isLoading && suggestions.length === 0"
-            class="space-y-2"
-            data-testid="wo-suggestions-skeleton"
-        >
-            <div v-for="n in 3" :key="n" class="wo-suggestions__skeleton h-16" />
-        </div>
-
-        <!-- Error alert -->
-        <div
-            v-else-if="error"
-            class="wo-suggestions__alert"
-            role="alert"
-            data-testid="wo-suggestions-error"
-        >
-            <div class="flex items-start gap-2">
-                <svg
-                    class="w-4 h-4 mt-0.5 shrink-0"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                <span class="text-sm">{{ error }}</span>
-            </div>
-        </div>
-
-        <!-- Empty state -->
-        <div
-            v-else-if="!isLoading && suggestions.length === 0"
-            class="wo-suggestions__empty"
-            data-testid="wo-suggestions-empty"
-        >
-            <span class="text-sm">{{ $t('work_orders.suggestions.empty') }}</span>
-        </div>
-
-        <!-- Suggestion cards -->
-        <ul v-else class="grid grid-cols-1 md:grid-cols-2 gap-3" data-testid="wo-suggestions-list">
-            <li
-                v-for="s in suggestions"
-                :key="s.item_type + ':' + s.item_id"
-                class="wo-suggestions__card"
+        <div class="wo-suggestions__body" role="region" aria-live="polite" aria-atomic="false">
+            <!-- Loading skeleton -->
+            <div
+                v-if="isLoading && suggestions.length === 0"
+                class="space-y-2"
+                data-testid="wo-suggestions-skeleton"
             >
-                <div class="flex items-start justify-between gap-2 mb-1">
-                    <div class="min-w-0">
-                        <p class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                            {{ s.name }}
-                        </p>
-                        <p
-                            v-if="s.name_en && s.name_en !== s.name"
-                            class="text-xs text-gray-500 dark:text-gray-400 truncate"
-                        >
-                            {{ s.name_en }}
-                        </p>
-                    </div>
-                    <span
-                        class="wo-suggestions__pill shrink-0"
-                        :class="`wo-suggestions__pill--${confidenceLevel(s.confidence)}`"
-                        :title="confidenceTitle(s.confidence)"
+                <div v-for="n in 3" :key="n" class="wo-suggestions__skeleton h-16" />
+            </div>
+
+            <!-- Error alert -->
+            <div
+                v-else-if="error"
+                class="wo-suggestions__alert"
+                role="alert"
+                data-testid="wo-suggestions-error"
+            >
+                <div class="flex items-start gap-2">
+                    <svg
+                        class="w-4 h-4 mt-0.5 shrink-0"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
                     >
-                        {{ confidenceLabel(s.confidence) }}
-                    </span>
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    <span class="text-sm">{{ error }}</span>
                 </div>
+            </div>
 
-                <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
-                    <span class="wo-suggestions__dept-badge">{{ s.department_name }}</span>
-                    <span aria-hidden="true">•</span>
-                    <span class="wo-suggestions__type-badge">{{ typeLabel(s.item_type) }}</span>
-                </div>
+            <!-- Empty state -->
+            <div
+                v-else-if="!isLoading && suggestions.length === 0"
+                class="wo-suggestions__empty"
+                data-testid="wo-suggestions-empty"
+            >
+                <span class="text-sm">{{ $t('work_orders.suggestions.empty') }}</span>
+            </div>
 
-                <p
-                    v-if="s.reason"
-                    class="text-xs text-gray-600 dark:text-gray-300 mb-3 leading-relaxed"
+            <!-- Suggestion cards -->
+            <ul
+                v-else
+                class="grid grid-cols-1 md:grid-cols-2 gap-3"
+                data-testid="wo-suggestions-list"
+            >
+                <li
+                    v-for="s in suggestions"
+                    :key="s.item_type + ':' + s.item_id"
+                    class="wo-suggestions__card"
                 >
-                    {{ s.reason }}
-                </p>
+                    <div class="flex items-start justify-between gap-2 mb-1">
+                        <div class="min-w-0">
+                            <p
+                                class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate"
+                            >
+                                {{ s.name }}
+                            </p>
+                            <p
+                                v-if="s.name_en && s.name_en !== s.name"
+                                class="text-xs text-gray-500 dark:text-gray-400 truncate"
+                            >
+                                {{ s.name_en }}
+                            </p>
+                        </div>
+                        <span
+                            class="wo-suggestions__pill shrink-0"
+                            :class="`wo-suggestions__pill--${confidenceLevel(s.confidence)}`"
+                            :title="confidenceTitle(s.confidence)"
+                        >
+                            {{ confidenceLabel(s.confidence) }}
+                        </span>
+                    </div>
 
-                <div class="flex items-center justify-between gap-2">
-                    <span class="wo-suggestions__price font-mono" dir="ltr">
-                        {{ formatPrice(s) }}
-                    </span>
-                    <AppButton
-                        variant="primary"
-                        size="sm"
-                        :data-testid="`wo-suggestion-add-${s.item_type}-${s.item_id}`"
-                        @click="onAdd(s)"
+                    <div
+                        class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2"
                     >
-                        {{ $t('work_orders.suggestions.add') }}
-                    </AppButton>
-                </div>
-            </li>
-        </ul>
+                        <span class="wo-suggestions__dept-badge">{{ s.department_name }}</span>
+                        <span aria-hidden="true">•</span>
+                        <span class="wo-suggestions__type-badge">{{ typeLabel(s.item_type) }}</span>
+                    </div>
+
+                    <p
+                        v-if="s.reason"
+                        class="text-xs text-gray-600 dark:text-gray-300 mb-3 leading-relaxed"
+                    >
+                        {{ s.reason }}
+                    </p>
+
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="wo-suggestions__price font-mono" dir="ltr">
+                            {{ formatPrice(s) }}
+                        </span>
+                        <AppButton
+                            variant="primary"
+                            size="sm"
+                            :data-testid="`wo-suggestion-add-${s.item_type}-${s.item_id}`"
+                            @click="onAdd(s)"
+                        >
+                            {{ $t('work_orders.suggestions.add') }}
+                        </AppButton>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <!-- /wo-suggestions__body -->
 
         <!-- ─── Footer row ────────────────────────────────────────────── -->
         <footer

@@ -203,4 +203,33 @@ describe('useWorkOrderSuggestions', () => {
             })
         );
     });
+
+    // 5) Bonus coverage: isStale flips when the user types a new complaint
+    //    that the last fetch didn't cover. Important for the panel's
+    //    "press refresh to update" hint.
+    it('flips isStale to true when the user types a new complaint', async () => {
+        axios.post.mockResolvedValue({ data: SAMPLE_RESPONSE });
+
+        const workOrderRef = vueRef({
+            id: 123,
+            complaint: 'صوت طقطقة في الفرامل',
+        });
+        const { api } = mountHost(() => workOrderRef.value);
+
+        // Wait past the on-mount fetch.
+        await nextTick();
+        await nextTick();
+
+        // After a successful fetch, the panel is "fresh".
+        expect(api.isStale.value).toBe(false);
+
+        // The user edits the complaint — the panel is now showing data for
+        // an older complaint than what's in the work order.
+        workOrderRef.value = {
+            id: 123,
+            complaint: 'تيل الفرامل مهترئ جداً',
+        };
+        await nextTick();
+        expect(api.isStale.value).toBe(true);
+    });
 });
