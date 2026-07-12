@@ -89,6 +89,82 @@ class UploadSignatureRequest extends FormRequest
                         $fail(__('validation.regex', ['attribute' => $attribute]));
                     }
                 },
+                // SVG XSS hardening — block active content inside uploaded SVGs.
+                // We accept SVG (vector signatures) but must reject any markup
+                // that could execute script in a browser context. The list of
+                // patterns is intentionally narrow: signatures are simple
+                // stroke/curve/path data. Anything more exotic is rejected.
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if (! $value instanceof \Illuminate\Http\UploadedFile) {
+                        return;
+                    }
+                    $clientMime = (string) $value->getMimeType();
+                    $clientExt = strtolower($value->getClientOriginalExtension());
+                    if ($clientExt !== 'svg' && ! str_contains($clientMime, 'svg')) {
+                        // Raster image — XSS check is not applicable.
+                        return;
+                    }
+
+                    // Read the whole file (cap at 64KB; signatures are small).
+                    // Reading 64KB instead of 4KB so that obfuscated payloads
+                    // split across many elements are still caught.
+                    $raw = file_get_contents($value->getRealPath(), false, null, 0, 65536) ?: '';
+                    $lower = strtolower($raw);
+
+                    // Patterns that must never appear in a signature SVG.
+                    // Match is case-insensitive and whole-tag tolerant.
+                    $forbidden = [
+                        '<script'                  => 'script element',
+                        '</script'                 => 'script closing tag',
+                        '<foreignobject'           => 'foreignObject element',
+                        '</foreignobject'          => 'foreignObject closing tag',
+                        '<iframe'                  => 'iframe element',
+                        '<embed'                   => 'embed element',
+                        '<object'                  => 'object element',
+                        '<handler'                 => 'SVG event handler element',
+                        '<listener'                => 'SVG event listener element',
+                        '<?xml-stylesheet'         => 'XSLT stylesheet directive',
+                        '<!--#exec'                => 'SSI exec directive',
+                        'xlink:href'               => 'xlink:href attribute (XSS vector)',
+                        'javascript:'              => 'javascript: URI scheme',
+                        'vbscript:'                => 'vbscript: URI scheme',
+                        'data:text/html'           => 'data: text/html URI (XSS vector)',
+                        'data:application/xhtml'  => 'data: XHTML URI (XSS vector)',
+                    ];
+
+                    // Pre-translate once so the closure doesn't re-lookup on
+                    // every fail() call. Note: the `validation.regex`
+                    // message format uses `:attribute` (Laravel placeholder),
+                    // which is automatically replaced by the validator when
+                    // the failure is added. We pass the attribute key in the
+                    // translator array so the final message is rendered
+                    // correctly (e.g. "The signature format is invalid.").
+                    $message = __('validation.regex', ['attribute' => $attribute]);
+
+                    foreach ($forbidden as $needle => $description) {
+                        if (str_contains($lower, strtolower($needle))) {
+                            $fail($message);
+                            return;
+                        }
+                    }
+
+                    // Event handler attributes: on*= (onload, onerror, onclick, onbegin, ...).
+                    // The attribute form is `<tag ... on<word>=` — we look for ` on` followed
+                    // by a letter and `=` so we don't match words like "only" or "honor".
+                    if (preg_match('/\son[a-z]+\s*=/i', $raw) === 1) {
+                        $fail($message);
+                        return;
+                    }
+
+                    // External entity / DTD — prevent XXE-style attacks even though
+                    // the PHP DOMDocument we'd parse with (if we did) would block by
+                    // default. Defense in depth.
+                    if (preg_match('/<!ENTITY\s+/i', $raw) === 1
+                        || preg_match('/<!DOCTYPE[^>]+SYSTEM/i', $raw) === 1) {
+                        $fail($message);
+                        return;
+                    }
+                },
             ],
             'name' => ['required', 'string', 'max:120'],
             'document_type' => [

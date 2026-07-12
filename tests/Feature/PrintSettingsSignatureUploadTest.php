@@ -103,6 +103,21 @@ class PrintSettingsSignatureUploadTest extends TestCase
         return new UploadedFile($tmp, $name, 'image/svg+xml', null, true);
     }
 
+    /**
+     * Helper: build an SVG file with arbitrary body content. Used by the
+     * XSS-hardening tests to inject malicious markup into a real SVG
+     * envelope (so the file passes the MIME check but should fail the
+     * XSS validator).
+     */
+    private function makeSvgWithBody(string $body, string $name = 'evil.svg'): UploadedFile
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'sig_xss_');
+        $xml = '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20">'.$body.'</svg>';
+        file_put_contents($tmp, $xml);
+
+        return new UploadedFile($tmp, $name, 'image/svg+xml', null, true);
+    }
+
     public function test_user_can_upload_valid_png_signature(): void
     {
         $response = $this->actingAs($this->user)
@@ -235,5 +250,184 @@ class PrintSettingsSignatureUploadTest extends TestCase
 
         $this->assertEmpty($originalTenantFiles, 'attacker must NOT have written into the victim tenant directory');
         $this->assertNotEmpty($attackerFiles, 'attacker upload should land in their own tenant directory');
+    }
+
+    // ---------------------------------------------------------------
+    // SVG XSS hardening tests
+    //
+    // Each test loads an SVG envelope with a specific malicious payload
+    // and asserts that the validator rejects it (422). The valid-PNG
+    // happy path is unchanged — these tests only prove the new SVG
+    // content validator does what it says.
+    // ---------------------------------------------------------------
+
+    public function test_svg_with_script_tag_is_rejected(): void
+    {
+        $evil = $this->makeSvgWithBody('<script>alert(1)</script><rect width="20" height="20" fill="#000"/>');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $evil,
+                'name' => 'has script',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+
+        $files = Storage::disk('public')->allFiles('tenants/'.$this->tenant->id.'/signatures');
+        $this->assertEmpty($files, 'malicious SVG must not be written to disk');
+    }
+
+    public function test_svg_with_foreign_object_is_rejected(): void
+    {
+        $evil = $this->makeSvgWithBody('<foreignObject width="20" height="20"><body xmlns="http://www.w3.org/1999/xhtml"><script>alert(1)</script></body></foreignObject>');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $evil,
+                'name' => 'has foreignObject',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+    }
+
+    public function test_svg_with_javascript_uri_is_rejected(): void
+    {
+        $evil = $this->makeSvgWithBody('<a xlink:href="javascript:alert(1)"><rect width="20" height="20" fill="#000"/></a>');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $evil,
+                'name' => 'has javascript:',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+    }
+
+    public function test_svg_with_event_handler_attribute_is_rejected(): void
+    {
+        // onload= is the classic SVG XSS vector. We test several forms
+        // to make sure the regex catches all of them.
+        $cases = [
+            '<rect onload="alert(1)" width="20" height="20" fill="#000"/>',
+            '<rect width="20" height="20" fill="#000" onerror="alert(1)"/>',
+            '<rect onclick = "alert(1)" width="20" height="20" fill="#000"/>',
+            '<rect onbegin="alert(1)" width="20" height="20" fill="#000"/>',
+            '<g onmouseover="alert(1)"><rect width="20" height="20" fill="#000"/></g>',
+        ];
+
+        foreach ($cases as $i => $body) {
+            $evil = $this->makeSvgWithBody($body);
+            $response = $this->actingAs($this->user)
+                ->postJson(route('settings.print.signatures.store'), [
+                    'signature' => $evil,
+                    'name' => "case {$i}",
+                ]);
+
+            $message = "case {$i} should be rejected: {$body}";
+            $response->assertStatus(422);
+            $response->assertJsonValidationErrors(['signature']);
+            $this->assertTrue(true, $message);
+        }
+    }
+
+    public function test_svg_with_data_text_html_uri_is_rejected(): void
+    {
+        $evil = $this->makeSvgWithBody('<image xlink:href="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==" width="20" height="20"/>');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $evil,
+                'name' => 'data uri',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+    }
+
+    public function test_svg_with_iframe_or_embed_is_rejected(): void
+    {
+        $cases = [
+            '<iframe src="javascript:alert(1)"></iframe>',
+            '<embed src="https://evil.example.com/payload.swf"/>',
+            '<object data="https://evil.example.com/payload"></object>',
+            '<handler xmlns="http://www.w3.org/2000/svg" type="application/ecmascript" ev:event="load">alert(1)</handler>',
+            '<listener xmlns="http://www.w3.org/2001/xml-events" event="load" handler="#x"/>',
+        ];
+
+        foreach ($cases as $i => $body) {
+            $evil = $this->makeSvgWithBody($body);
+            $response = $this->actingAs($this->user)
+                ->postJson(route('settings.print.signatures.store'), [
+                    'signature' => $evil,
+                    'name' => "case {$i}",
+                ]);
+
+            $message = "case {$i} should be rejected: {$body}";
+            $response->assertStatus(422);
+            $response->assertJsonValidationErrors(['signature']);
+            $this->assertTrue(true, $message);
+        }
+    }
+
+    public function test_svg_with_external_entity_dtd_is_rejected(): void
+    {
+        $evil = $this->makeSvgWithBody('<!DOCTYPE svg [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]><rect width="20" height="20" fill="#000"/>');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $evil,
+                'name' => 'has DTD',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+    }
+
+    public function test_svg_with_xslt_stylesheet_directive_is_rejected(): void
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'sig_xslt_');
+        file_put_contents(
+            $tmp,
+            '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="https://evil.example.com/payload.xsl"?><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="#000"/></svg>'
+        );
+        $evil = new UploadedFile($tmp, 'xslt.svg', 'image/svg+xml', null, true);
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $evil,
+                'name' => 'has xslt',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+    }
+
+    public function test_clean_svg_with_paths_and_curves_still_uploads(): void
+    {
+        // This is the "happy path" for SVG: a signature made of stroke
+        // and path elements. The new validator must NOT reject this.
+        $tmp = tempnam(sys_get_temp_dir(), 'sig_clean_');
+        file_put_contents(
+            $tmp,
+            '<?xml version="1.0" encoding="UTF-8"?>'.
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80">'.
+            '<path d="M10 60 Q 50 10 100 60 T 190 60" stroke="#000" stroke-width="3" fill="none"/>'.
+            '<circle cx="100" cy="40" r="3" fill="#000"/>'.
+            '</svg>'
+        );
+        $clean = new UploadedFile($tmp, 'clean.svg', 'image/svg+xml', null, true);
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $clean,
+                'name' => 'clean vector',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonFragment(['name' => 'clean vector']);
+        $response->assertJsonFragment(['mime_type' => 'image/svg+xml']);
     }
 }
