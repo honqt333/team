@@ -572,9 +572,19 @@
                 <!-- Signature roles (only show=true) -->
                 <div v-for="(sig, index) in visibleSignatures" :key="index" class="flex flex-col items-center">
                     <p class="mb-4">{{ isRtl ? sig.name_ar : (sig.name_en || sig.name_ar) }}</p>
-                    <div v-if="isClientSignature(isRtl ? sig.name_ar : (sig.name_en || sig.name_ar)) && (data.reception_signature || data.delivery_signature)" class="h-16 flex items-center justify-center mb-2">
+                    <!-- 1) Per-signature image uploaded via SignatureModal (highest priority) -->
+                    <div v-if="sig.url" class="h-16 flex items-end justify-center mb-2" :class="isRtl ? 'self-end' : 'self-start'">
+                        <img
+                            :src="sig.url"
+                            :alt="isRtl ? (sig.name_ar || sig.name_en) : (sig.name_en || sig.name_ar)"
+                            class="max-h-16 max-w-[160px] object-contain"
+                        />
+                    </div>
+                    <!-- 2) Client signature from the work-order reception/delivery flow -->
+                    <div v-else-if="isClientSignature(isRtl ? sig.name_ar : (sig.name_en || sig.name_ar)) && (data.reception_signature || data.delivery_signature)" class="h-16 flex items-center justify-center mb-2">
                         <img :src="'/storage/' + (data.reception_signature || data.delivery_signature)" class="max-h-full max-w-[120px] object-contain" />
                     </div>
+                    <!-- 3) Fallback: signature line -->
                     <div v-else class="h-12 w-1/2 border-b border-gray-400 mb-6"></div>
                 </div>
             </div>

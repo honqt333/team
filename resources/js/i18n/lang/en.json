@@ -1984,7 +1984,23 @@
         "visual_preferences": "Visual Preferences",
         "work_order": "Work Order",
         "work_order_terms": "Work Order Terms",
-        "work_order_title": "Work Order Title"
+        "work_order_title": "Work Order Title",
+        "tab_draw": "Draw",
+        "tab_upload": "Upload",
+        "tab_library": "Library",
+        "brush_size": "Brush Size",
+        "clear_canvas": "Clear Canvas",
+        "canvas_hint": "Use your mouse or touch to draw your signature inside the box",
+        "upload_hint": "Choose an image (PNG, JPG, or SVG) up to 2 MB",
+        "library_empty": "No saved signatures yet",
+        "library_select": "Pick from saved signatures",
+        "signature_uploading": "Uploading...",
+        "upload_failed": "Failed to upload signature. Please try again.",
+        "signature_invalid_file_type": "Unsupported file type. Allowed: PNG, JPG, SVG.",
+        "drawing_required": "Please draw the signature before saving",
+        "upload_required": "Please choose a file to upload",
+        "selection_required": "Please pick a signature from the library",
+        "save_signature": "Save Signature"
     },
     "profile": {
         "info": {
