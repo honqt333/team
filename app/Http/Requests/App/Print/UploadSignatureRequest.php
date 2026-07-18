@@ -95,7 +95,7 @@ class UploadSignatureRequest extends FormRequest
                 // patterns is intentionally narrow: signatures are simple
                 // stroke/curve/path data. Anything more exotic is rejected.
                 function (string $attribute, mixed $value, \Closure $fail): void {
-                    if (! $value instanceof \Illuminate\Http\UploadedFile) {
+                    if (! $value instanceof UploadedFile) {
                         return;
                     }
                     $clientMime = (string) $value->getMimeType();
@@ -114,22 +114,22 @@ class UploadSignatureRequest extends FormRequest
                     // Patterns that must never appear in a signature SVG.
                     // Match is case-insensitive and whole-tag tolerant.
                     $forbidden = [
-                        '<script'                  => 'script element',
-                        '</script'                 => 'script closing tag',
-                        '<foreignobject'           => 'foreignObject element',
-                        '</foreignobject'          => 'foreignObject closing tag',
-                        '<iframe'                  => 'iframe element',
-                        '<embed'                   => 'embed element',
-                        '<object'                  => 'object element',
-                        '<handler'                 => 'SVG event handler element',
-                        '<listener'                => 'SVG event listener element',
-                        '<?xml-stylesheet'         => 'XSLT stylesheet directive',
-                        '<!--#exec'                => 'SSI exec directive',
-                        'xlink:href'               => 'xlink:href attribute (XSS vector)',
-                        'javascript:'              => 'javascript: URI scheme',
-                        'vbscript:'                => 'vbscript: URI scheme',
-                        'data:text/html'           => 'data: text/html URI (XSS vector)',
-                        'data:application/xhtml'  => 'data: XHTML URI (XSS vector)',
+                        '<script' => 'script element',
+                        '</script' => 'script closing tag',
+                        '<foreignobject' => 'foreignObject element',
+                        '</foreignobject' => 'foreignObject closing tag',
+                        '<iframe' => 'iframe element',
+                        '<embed' => 'embed element',
+                        '<object' => 'object element',
+                        '<handler' => 'SVG event handler element',
+                        '<listener' => 'SVG event listener element',
+                        '<?xml-stylesheet' => 'XSLT stylesheet directive',
+                        '<!--#exec' => 'SSI exec directive',
+                        'xlink:href' => 'xlink:href attribute (XSS vector)',
+                        'javascript:' => 'javascript: URI scheme',
+                        'vbscript:' => 'vbscript: URI scheme',
+                        'data:text/html' => 'data: text/html URI (XSS vector)',
+                        'data:application/xhtml' => 'data: XHTML URI (XSS vector)',
                     ];
 
                     // Pre-translate once so the closure doesn't re-lookup on
@@ -144,6 +144,7 @@ class UploadSignatureRequest extends FormRequest
                     foreach ($forbidden as $needle => $description) {
                         if (str_contains($lower, strtolower($needle))) {
                             $fail($message);
+
                             return;
                         }
                     }
@@ -153,6 +154,7 @@ class UploadSignatureRequest extends FormRequest
                     // by a letter and `=` so we don't match words like "only" or "honor".
                     if (preg_match('/\son[a-z]+\s*=/i', $raw) === 1) {
                         $fail($message);
+
                         return;
                     }
 
@@ -162,11 +164,20 @@ class UploadSignatureRequest extends FormRequest
                     if (preg_match('/<!ENTITY\s+/i', $raw) === 1
                         || preg_match('/<!DOCTYPE[^>]+SYSTEM/i', $raw) === 1) {
                         $fail($message);
+
                         return;
                     }
                 },
             ],
-            'name' => ['required', 'string', 'max:120'],
+            // Bilingual labels. The print templates render these directly
+            // (sig.name_ar / sig.name_en) so both are required for every
+            // signature the tenant stores. We keep the legacy `name` field
+            // as an optional fallback for older API clients (and for the
+            // curl-based smoke tests) — when present, the controller
+            // copies it into the AR slot so the template still has data.
+            'name_ar' => ['required_without:name', 'nullable', 'string', 'max:120'],
+            'name_en' => ['required_without:name', 'nullable', 'string', 'max:120'],
+            'name' => ['required_without_all:name_ar,name_en', 'nullable', 'string', 'max:120'],
             'document_type' => [
                 'nullable',
                 'string',
@@ -203,6 +214,10 @@ class UploadSignatureRequest extends FormRequest
             'signature.max' => __('validation.max.file', ['attribute' => __('validation.attributes.signature'), 'max' => 2048]),
             'name.required' => __('validation.required', ['attribute' => __('validation.attributes.name')]),
             'name.max' => __('validation.max.string', ['attribute' => __('validation.attributes.name'), 'max' => 120]),
+            'name_ar.required_without' => __('validation.required', ['attribute' => __('validation.attributes.name_ar')]),
+            'name_ar.max' => __('validation.max.string', ['attribute' => __('validation.attributes.name_ar'), 'max' => 120]),
+            'name_en.required_without' => __('validation.required', ['attribute' => __('validation.attributes.name_en')]),
+            'name_en.max' => __('validation.max.string', ['attribute' => __('validation.attributes.name_en'), 'max' => 120]),
         ];
     }
 }

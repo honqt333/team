@@ -770,6 +770,13 @@ function handleSignatureSaved(sig) {
     const doc = form.documents[key];
     if (!doc) return;
 
+    // The backend now returns BOTH name_ar and name_en on every upload.
+    // We still accept a legacy single `name` field as a fallback so older
+    // clients keep working, and we treat missing data as empty string
+    // rather than `undefined` so the template render never throws.
+    const nameAr = sig.name_ar ?? sig.name ?? '';
+    const nameEn = sig.name_en ?? sig.name ?? '';
+
     const list = Array.isArray(doc.signatures) ? [...doc.signatures] : [];
     // Dedupe by id — if it already exists, no-op
     if (sig.id && list.some((s) => s.id === sig.id)) {
@@ -778,20 +785,23 @@ function handleSignatureSaved(sig) {
     }
     list.push({
         id: sig.id,
-        name_ar: sig.name_ar || doc.signature?.name_ar || '',
-        name_en: sig.name_en || doc.name_en || '',
+        name_ar: nameAr,
+        name_en: nameEn,
         url: sig.url,
         uploaded_at: sig.uploaded_at,
         show: true,
         order: list.length + 1,
     });
-    // Stamp the first signature as the default footer reference
+    // Stamp the first signature as the default footer reference so the
+    // template can render a single "primary" signature even when many
+    // are configured. Subsequent signatures just live in the signatures
+    // array.
     const nextDoc = { ...doc, signatures: list };
     if (!nextDoc.signature) {
         nextDoc.signature = {
             id: sig.id,
-            name_ar: sig.name_ar || '',
-            name_en: sig.name_en || '',
+            name_ar: nameAr,
+            name_en: nameEn,
             url: sig.url,
             show: true,
         };

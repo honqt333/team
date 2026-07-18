@@ -118,9 +118,23 @@ class PrintSettingsSignatureController extends Controller
 
         $uploadedAt = now();
 
+        // Bilingual labels: the print template renders sig.name_ar and
+        // sig.name_en directly. We require both in the FormRequest, but
+        // fall back to the legacy single `name` field for older clients
+        // and curl-based smoke tests so the controller never returns an
+        // empty name pair.
+        $nameAr = $request->string('name_ar')->toString()
+            ?: $request->string('name')->toString();
+        $nameEn = $request->string('name_en')->toString()
+            ?: $request->string('name')->toString();
+
         $signaturePayload = [
             'id' => $signatureId,
-            'name' => $request->string('name')->toString(),
+            'name_ar' => $nameAr,
+            'name_en' => $nameEn,
+            // Legacy single-name field kept for clients that still read it
+            // (it is no longer the canonical source of truth).
+            'name' => $nameEn ?: $nameAr,
             'path' => $path,
             'url' => Storage::disk('public')->url($path),
             'uploaded_at' => $uploadedAt->toIso8601String(),
