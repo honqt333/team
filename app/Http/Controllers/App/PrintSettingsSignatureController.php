@@ -171,6 +171,120 @@ class PrintSettingsSignatureController extends Controller
     }
 
     /**
+     * Delete a signature by id.
+     *
+     * The id is the UUID we minted in `store()`. We search every document
+     * type under the tenant and remove the matching entry — this is
+     * symmetric with the Inertia save flow which also stores signatures
+     * by document_type.
+     *
+     * If the signature was not found anywhere, return 404. If it WAS
+     * found, we also try to delete the underlying file from disk to
+     * keep storage clean. The file delete is best-effort: a missing
+     * file (e.g. already removed by an admin) does not roll back the
+     * database row removal.
+     *
+     * Response: 204 No Content on success.
+     */
+    public function destroy(string $signatureId)
+    {
+        $tenant = auth()->user()->tenant;
+        $this->authorize('update', $tenant);
+
+        $current = $tenant->print_settings ?? [];
+        $documents = $current['documents'] ?? [];
+        $found = false;
+        $removedFilePath = null;
+
+        foreach ($documents as $docKey => $doc) {
+            $signatures = $doc['signatures'] ?? [];
+            // Same defensive flatten as appendSignatureToPrintSettings so
+            // we can locate a signature even if the stored shape is
+            // nested from a previous bug.
+            $flat = $this->flattenSignaturesForRead($signatures);
+            $kept = [];
+            foreach ($flat as $sig) {
+                if (($sig['id'] ?? null) === $signatureId) {
+                    $found = true;
+                    if (! empty($sig['path'])) {
+                        $removedFilePath = $sig['path'];
+                    }
+
+                    continue;
+                }
+                $kept[] = $sig;
+            }
+            if ($found) {
+                $documents[$docKey]['signatures'] = $kept;
+                // If the deleted signature was the primary footer
+                // reference on this document, clear that too so the
+                // template does not keep referencing a non-existent id.
+                if (($documents[$docKey]['signature']['id'] ?? null) === $signatureId) {
+                    $documents[$docKey]['signature'] = null;
+                }
+                $documents[$docKey]['updated_at'] = now()->format('Y-m-d H:i:s');
+                $documents[$docKey]['updated_by'] = auth()->user()?->name;
+                break;
+            }
+        }
+
+        if (! $found) {
+            return response()->json(['message' => 'Signature not found'], 404);
+        }
+
+        $current['documents'] = $documents;
+        $tenant->print_settings = $current;
+        $tenant->save();
+
+        // Best-effort file delete. A missing file is non-fatal.
+        if ($removedFilePath) {
+            try {
+                Storage::disk('public')->delete($removedFilePath);
+            } catch (\Throwable $e) {
+                Log::warning('print_settings.signature_file_delete_failed', [
+                    'tenant_id' => $tenant->id,
+                    'path' => $removedFilePath,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        Log::info('print_settings.signature_deleted', [
+            'tenant_id' => $tenant->id,
+            'user_id' => auth()->id(),
+            'signature_id' => $signatureId,
+        ]);
+
+        return response()->noContent();
+    }
+
+    /**
+     * Read-side flatten: turn either a flat list or a 1-level-nested
+     * list into a flat list of signature objects. Used by destroy() to
+     * locate a signature by id even if the saved shape is the legacy
+     * nested format.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function flattenSignaturesForRead(mixed $signatures): array
+    {
+        $flat = [];
+        foreach ((array) $signatures as $item) {
+            if (is_array($item) && array_is_list($item)) {
+                foreach ($item as $sub) {
+                    if (is_array($sub)) {
+                        $flat[] = $sub;
+                    }
+                }
+            } elseif (is_array($item)) {
+                $flat[] = $item;
+            }
+        }
+
+        return $flat;
+    }
+
+    /**
      * Map a PHP-detected MIME type to a safe, lowercase file extension.
      * Returns null if the MIME is not in the whitelist.
      */
@@ -198,6 +312,16 @@ class PrintSettingsSignatureController extends Controller
     /**
      * Append a signature payload to `print_settings.documents.{type}.signatures`
      * in the tenant JSON column, preserving the rest of the JSON.
+     *
+     * The signatures field is unconditionally a flat array of signature
+     * objects. The previous implementation used `$signatures[] = $payload`
+     * which silently produced a nested array whenever a caller had saved
+     * the document via PUT /app/settings/system with a `signatures: []`
+     * payload of its own (e.g. the Inertia form re-submits the full
+     * documents object on Save, so `signatures` was already an array
+     // — `$signatures[]` then nested a *second* array). We now
+     * normalise the existing value with array_merge and reject any
+     * shape that isn't a list of signature objects.
      */
     private function appendSignatureToPrintSettings(Tenant $tenant, string $documentType, array $signaturePayload): void
     {
@@ -206,9 +330,27 @@ class PrintSettingsSignatureController extends Controller
         $document = $documents[$documentType] ?? [];
         $signatures = $document['signatures'] ?? [];
 
-        $signatures[] = $signaturePayload;
+        // Defensive: flatten if the saved shape is already nested. The
+        // expected shape is a list of {id, name_ar, name_en, url, ...}
+        // associative objects; anything else is treated as orphan and
+        // dropped, except the payload we are about to add.
+        $flat = [];
+        foreach ((array) $signatures as $item) {
+            if (is_array($item) && array_is_list($item)) {
+                // nested list — recurse one level
+                foreach ($item as $sub) {
+                    if (is_array($sub) && isset($sub['id'])) {
+                        $flat[] = $sub;
+                    }
+                }
+            } elseif (is_array($item) && isset($item['id'])) {
+                $flat[] = $item;
+            }
+        }
 
-        $document['signatures'] = $signatures;
+        $flat[] = $signaturePayload;
+
+        $document['signatures'] = $flat;
         $document['updated_at'] = now()->format('Y-m-d H:i:s');
         $document['updated_by'] = auth()->user()?->name;
 

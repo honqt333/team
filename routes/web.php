@@ -329,8 +329,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/settings/print', [SystemSettingsController::class, 'printSettings'])->name('settings.print');
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
 
-    // Print Settings — Signatures (tenant-scoped image uploads)
+    // Print Settings — Signatures (tenant-scoped image uploads + lifecycle)
     Route::post('/settings/print/signatures', [PrintSettingsSignatureController::class, 'store'])->name('settings.print.signatures.store');
+    Route::delete('/settings/print/signatures/{signatureId}', [PrintSettingsSignatureController::class, 'destroy'])->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.destroy');
 
     // Users Settings
     Route::resource('settings/users', UserController::class)->names('settings.users');

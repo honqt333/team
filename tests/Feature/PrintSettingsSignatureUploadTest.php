@@ -497,4 +497,166 @@ class PrintSettingsSignatureUploadTest extends TestCase
         $response->assertJsonFragment(['name_ar' => 'Legacy Single Name']);
         $response->assertJsonFragment(['name_en' => 'Legacy Single Name']);
     }
+
+    // ---------------------------------------------------------------
+    // BUG #1 — array nesting on subsequent POST after PUT
+    //
+    // The save flow in the index page submits the full `documents` tree
+    // as a flat array of signature objects. If a follow-up upload
+    // then appended via the existing `$signatures[] = $payload` line,
+    // the saved shape became a nested list `[[sig1, sig2], sig3]`.
+    // The print template then iterates the outer array and renders
+    // arrays instead of signatures, silently breaking the invoice.
+    // The fix in appendSignatureToPrintSettings() now flattens both
+    // shapes before pushing.
+    // ---------------------------------------------------------------
+
+    public function test_subsequent_upload_after_put_saves_does_not_nest_signatures(): void
+    {
+        // Simulate the Inertia save flow: client sends a flat array
+        // of three signatures via PUT /app/settings/system. We write
+        // that shape directly here (this test focuses on the POST
+        // follow-up, not the PUT itself).
+        $this->tenant->print_settings = [
+            'documents' => [
+                'invoice' => [
+                    'signatures' => [
+                        ['id' => 'a-uuid', 'name_ar' => 'توقيع 1', 'name_en' => 'Sig 1', 'url' => 'x'],
+                        ['id' => 'b-uuid', 'name_ar' => 'توقيع 2', 'name_en' => 'Sig 2', 'url' => 'y'],
+                    ],
+                ],
+            ],
+            'visual' => ['active_template' => 'TemplateDefaultA4'],
+        ];
+        $this->tenant->save();
+
+        // Now follow up with a regular upload. The controller must
+        // detect the already-saved array and append, NOT wrap.
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع 3',
+                'name_en' => 'Sig 3',
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertOk();
+
+        $this->tenant->refresh();
+        $sigs = $this->tenant->print_settings['documents']['invoice']['signatures'] ?? [];
+
+        // Must be a flat list of three, not a nested list.
+        $this->assertIsList($sigs, 'signatures must be a flat list');
+        $this->assertCount(3, $sigs);
+        foreach ($sigs as $sig) {
+            $this->assertIsArray($sig);
+            $this->assertArrayHasKey('id', $sig, 'each entry must be a signature object with id');
+            $this->assertArrayHasKey('name_ar', $sig);
+            $this->assertArrayHasKey('name_en', $sig);
+        }
+    }
+
+    public function test_upload_with_corrupted_nested_signatures_recovers_to_flat(): void
+    {
+        // Simulate a tenant whose print_settings already contains a
+        // nested signatures array (left over from the bug above).
+        // The next upload must heal the shape so the template
+        // recovers.
+        $this->tenant->print_settings = [
+            'documents' => [
+                'invoice' => [
+                    'signatures' => [
+                        // nested — array of arrays
+                        [
+                            ['id' => 'a-uuid', 'name_ar' => 'x', 'name_en' => 'x', 'url' => 'x'],
+                            ['id' => 'b-uuid', 'name_ar' => 'y', 'name_en' => 'y', 'url' => 'y'],
+                        ],
+                    ],
+                ],
+            ],
+            'visual' => ['active_template' => 'TemplateDefaultA4'],
+        ];
+        $this->tenant->save();
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع 3',
+                'name_en' => 'Sig 3',
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertOk();
+        $this->tenant->refresh();
+        $sigs = $this->tenant->print_settings['documents']['invoice']['signatures'] ?? [];
+
+        // After healing: 3 flat signature objects.
+        $this->assertIsList($sigs);
+        $this->assertCount(3, $sigs);
+    }
+
+    // ---------------------------------------------------------------
+    // BUG #2 — DELETE endpoint
+    // ---------------------------------------------------------------
+
+    public function test_can_delete_uploaded_signature(): void
+    {
+        // Upload first.
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع للحذف',
+                'name_en' => 'Doomed Signature',
+                'document_type' => 'invoice',
+            ]);
+        $upload->assertOk();
+        $sigId = $upload->json('id');
+
+        $this->tenant->refresh();
+        $this->assertCount(1, $this->tenant->print_settings['documents']['invoice']['signatures'] ?? []);
+
+        // Delete.
+        $delete = $this->actingAs($this->user)
+            ->deleteJson(route('settings.print.signatures.destroy', $sigId));
+
+        $delete->assertNoContent(); // 204
+        $this->tenant->refresh();
+        $this->assertCount(0, $this->tenant->print_settings['documents']['invoice']['signatures'] ?? []);
+    }
+
+    public function test_delete_missing_signature_returns_404(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->deleteJson(route('settings.print.signatures.destroy', '00000000-0000-0000-0000-000000000000'));
+        $response->assertNotFound();
+    }
+
+    // ---------------------------------------------------------------
+    // BUG #4 — SVG XSS via data:image URI
+    //
+    // <image xlink:href="data:image/png;base64,..."> is a legitimate
+    // way to embed raster data in SVG, BUT it can also be used to
+    // embed a base64-encoded HTML payload that the browser would
+    // render in the same origin as the signature. We deny any data:
+    // URI in the SVG content to be safe.
+    // ---------------------------------------------------------------
+
+    public function test_svg_with_data_image_uri_is_rejected(): void
+    {
+        $svg = '<?xml version="1.0"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><image xlink:href="data:image/png;base64,abc" width="10" height="10"/></svg>';
+
+        $tmp = tempnam(sys_get_temp_dir(), 'sig_xss_');
+        file_put_contents($tmp, $svg);
+        $file = new UploadedFile($tmp, 'xss.svg', 'image/svg+xml', null, true);
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $file,
+                'name_ar' => 'هجوم',
+                'name_en' => 'attack',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+    }
 }
