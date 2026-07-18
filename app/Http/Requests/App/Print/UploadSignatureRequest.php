@@ -69,6 +69,42 @@ class UploadSignatureRequest extends FormRequest
                             ]));
                         }
 
+                        // SVG XSS hardening. Reject any markup that
+                        // could execute script or fetch external content
+                        // when the SVG is rendered in a browser context.
+                        // Allowed content for a signature is paths,
+                        // curves, and the document wrapper only.
+                        $xssPatterns = [
+                            '<script', '</script',
+                            '<foreignobject', '</foreignobject',
+                            '<iframe', '<embed', '<object',
+                            '<handler', '<listener',
+                            '<?xml-stylesheet', '<!--#exec',
+                            'xlink:href',
+                            'javascript:', 'vbscript:',
+                            'data:text/html', 'data:application/xhtml',
+                            'data:image',
+                        ];
+                        $lower = strtolower($head);
+                        foreach ($xssPatterns as $needle) {
+                            if (str_contains($lower, $needle)) {
+                                $fail(__('validation.regex', [
+                                    'attribute' => __('validation.attributes.signature'),
+                                ]));
+
+                                return;
+                            }
+                        }
+                        // Event handler attributes (onload=, onerror=,
+                        // onclick=, onbegin=, onmouseover=, ...).
+                        if (preg_match('/\son[a-z]+\s*=/i', $head) === 1) {
+                            $fail(__('validation.regex', [
+                                'attribute' => __('validation.attributes.signature'),
+                            ]));
+
+                            return;
+                        }
+
                         return;
                     }
 
