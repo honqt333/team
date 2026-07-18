@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\App\Print;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 
 class UploadSignatureRequest extends FormRequest
@@ -35,7 +37,7 @@ class UploadSignatureRequest extends FormRequest
      * `print_settings` JSON. When omitted, the file is uploaded as an
      * "orphan" that the frontend can later bind to a document type.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -50,7 +52,7 @@ class UploadSignatureRequest extends FormRequest
                 // validates raster images via getimagesize() AND accepts
                 // SVG when the content is a real SVG document.
                 function (string $attribute, mixed $value, \Closure $fail): void {
-                    if (! $value instanceof \Illuminate\Http\UploadedFile) {
+                    if (! $value instanceof UploadedFile) {
                         return;
                     }
 
@@ -66,6 +68,7 @@ class UploadSignatureRequest extends FormRequest
                                 'values' => 'png, jpg, jpeg, svg, webp',
                             ]));
                         }
+
                         return;
                     }
 
@@ -78,7 +81,7 @@ class UploadSignatureRequest extends FormRequest
                 },
                 // Reject obvious double-extension / null-byte tricks
                 function (string $attribute, mixed $value, \Closure $fail): void {
-                    if (! $value instanceof \Illuminate\Http\UploadedFile) {
+                    if (! $value instanceof UploadedFile) {
                         return;
                     }
                     $name = $value->getClientOriginalName();
@@ -87,7 +90,15 @@ class UploadSignatureRequest extends FormRequest
                     }
                 },
             ],
-            'name' => ['required', 'string', 'max:120'],
+            // Bilingual labels. The print templates render these directly
+            // (sig.name_ar / sig.name_en) so both are required for every
+            // signature the tenant stores. We keep the legacy `name` field
+            // as an optional fallback for older API clients (and for the
+            // curl-based smoke tests) — when present, the controller
+            // copies it into the AR slot so the template still has data.
+            'name_ar' => ['required_without:name', 'nullable', 'string', 'max:120'],
+            'name_en' => ['required_without:name', 'nullable', 'string', 'max:120'],
+            'name' => ['required_without_all:name_ar,name_en', 'nullable', 'string', 'max:120'],
             'document_type' => [
                 'nullable',
                 'string',
@@ -124,6 +135,10 @@ class UploadSignatureRequest extends FormRequest
             'signature.max' => __('validation.max.file', ['attribute' => __('validation.attributes.signature'), 'max' => 2048]),
             'name.required' => __('validation.required', ['attribute' => __('validation.attributes.name')]),
             'name.max' => __('validation.max.string', ['attribute' => __('validation.attributes.name'), 'max' => 120]),
+            'name_ar.required_without' => __('validation.required', ['attribute' => __('validation.attributes.name_ar')]),
+            'name_ar.max' => __('validation.max.string', ['attribute' => __('validation.attributes.name_ar'), 'max' => 120]),
+            'name_en.required_without' => __('validation.required', ['attribute' => __('validation.attributes.name_en')]),
+            'name_en.max' => __('validation.max.string', ['attribute' => __('validation.attributes.name_en'), 'max' => 120]),
         ];
     }
 }

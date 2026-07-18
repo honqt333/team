@@ -5,9 +5,9 @@ namespace App\Http\Controllers\App;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\App\Print\UploadSignatureRequest;
 use App\Models\Tenant;
-
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -118,9 +118,23 @@ class PrintSettingsSignatureController extends Controller
 
         $uploadedAt = now();
 
+        // Bilingual labels: the print template renders sig.name_ar and
+        // sig.name_en directly. We require both in the FormRequest, but
+        // fall back to the legacy single `name` field for older clients
+        // and curl-based smoke tests so the controller never returns an
+        // empty name pair.
+        $nameAr = $request->string('name_ar')->toString()
+            ?: $request->string('name')->toString();
+        $nameEn = $request->string('name_en')->toString()
+            ?: $request->string('name')->toString();
+
         $signaturePayload = [
             'id' => $signatureId,
-            'name' => $request->string('name')->toString(),
+            'name_ar' => $nameAr,
+            'name_en' => $nameEn,
+            // Legacy single-name field kept for clients that still read it
+            // (it is no longer the canonical source of truth).
+            'name' => $nameEn ?: $nameAr,
             'path' => $path,
             'url' => Storage::disk('public')->url($path),
             'uploaded_at' => $uploadedAt->toIso8601String(),
@@ -160,7 +174,7 @@ class PrintSettingsSignatureController extends Controller
      * Map a PHP-detected MIME type to a safe, lowercase file extension.
      * Returns null if the MIME is not in the whitelist.
      */
-    private function resolveExtensionFromMime(\Illuminate\Http\UploadedFile $file): ?string
+    private function resolveExtensionFromMime(UploadedFile $file): ?string
     {
         $mime = $file->getMimeType();
 

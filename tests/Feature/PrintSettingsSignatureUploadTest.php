@@ -7,6 +7,7 @@ use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\Permissions;
+use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,7 @@ class PrintSettingsSignatureUploadTest extends TestCase
 
         // Seed all permissions so the COMPANY_MANAGE permission exists
         // for the user role assignment.
-        $this->seed(\Database\Seeders\PermissionsSeeder::class);
+        $this->seed(PermissionsSeeder::class);
 
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
@@ -234,5 +235,72 @@ class PrintSettingsSignatureUploadTest extends TestCase
 
         $this->assertEmpty($originalTenantFiles, 'attacker must NOT have written into the victim tenant directory');
         $this->assertNotEmpty($attackerFiles, 'attacker upload should land in their own tenant directory');
+    }
+
+    // ---------------------------------------------------------------
+    // Bilingual name flow (name_ar + name_en)
+    //
+    // Print templates render sig.name_ar and sig.name_en directly,
+    // so the FormRequest + controller must accept and persist both
+    // labels. These tests pin the contract that:
+    //   - The API rejects requests with neither name_ar nor name_en
+    //     (the legacy `name` field is still accepted as a fallback).
+    //   - The response always contains both name_ar and name_en.
+    //   - The persisted print_settings JSON stores both fields.
+    // ---------------------------------------------------------------
+
+    public function test_upload_accepts_both_name_ar_and_name_en(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع المدير',
+                'name_en' => 'Manager Signature',
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonFragment(['name_ar' => 'توقيع المدير']);
+        $response->assertJsonFragment(['name_en' => 'Manager Signature']);
+
+        // The persisted JSON must contain both fields so the template
+        // can render `isRtl ? sig.name_ar : sig.name_en` without nulls.
+        $this->tenant->refresh();
+        $signatures = $this->tenant->print_settings['documents']['invoice']['signatures'] ?? [];
+        $this->assertCount(1, $signatures);
+        $this->assertSame('توقيع المدير', $signatures[0]['name_ar']);
+        $this->assertSame('Manager Signature', $signatures[0]['name_en']);
+    }
+
+    public function test_upload_rejects_request_with_no_name_at_all(): void
+    {
+        // Neither name_ar nor name_en nor legacy name — must fail.
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertStatus(422);
+        // The error must be attached to a name-related field. Laravel will
+        // surface this on `name` (the first field declared in rules).
+        $response->assertJsonValidationErrors(['name']);
+    }
+
+    public function test_upload_accepts_legacy_single_name_as_fallback(): void
+    {
+        // Older clients (and curl smoke tests) still send only `name`.
+        // The FormRequest must accept it via required_without_all, and
+        // the controller must copy it into both name_ar and name_en
+        // slots so the template never receives an empty pair.
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name' => 'Legacy Single Name',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonFragment(['name_ar' => 'Legacy Single Name']);
+        $response->assertJsonFragment(['name_en' => 'Legacy Single Name']);
     }
 }
