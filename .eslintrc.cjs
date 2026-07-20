@@ -10,9 +10,16 @@ module.exports = {
         node: true,
         es2022: true,
     },
+    parser: 'vue-eslint-parser',
     parserOptions: {
         ecmaVersion: 2022,
         sourceType: 'module',
+        parser: {
+            // For <script lang="ts"> blocks, delegate to TS parser
+            ts: '@typescript-eslint/parser',
+            // For <script> (default JS) blocks, use the default parser
+            js: 'espree',
+        },
     },
     extends: [
         'eslint:recommended',
@@ -66,5 +73,7 @@ module.exports = {
         'bootstrap/cache/',
         'public/build/',
         'resources/js/ziggy.js',
+        // TypeScript declaration files (consumed by vue-tsc, not Vite/ESLint)
+        'resources/js/types/',
     ],
 };

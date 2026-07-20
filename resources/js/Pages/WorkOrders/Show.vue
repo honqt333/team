@@ -31,7 +31,9 @@
             </div>
 
             <!-- Main Content Container with Info Cards -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700"
+            >
                 <!-- Info Cards (extracted to WorkOrderInfoCards) -->
                 <WorkOrderInfoCards :work-order="workOrder" :is-read-only="isReadOnly" />
 
@@ -39,10 +41,7 @@
                 <WorkOrderComplaintAssessment :work-order="workOrder" />
 
                 <!-- Tabs container (extracted to WorkOrderTabsContainer) -->
-                <WorkOrderTabsContainer
-                    :tabs="tabs"
-                    v-model:active-tab="activeTab"
-                >
+                <WorkOrderTabsContainer :tabs="tabs" v-model:active-tab="activeTab">
                     <!-- Tab content is rendered inside the container's slot. -->
 
                     <!-- Services Tab (extracted to WorkOrderServicesTab) -->
@@ -78,17 +77,23 @@
                     <!-- Spare Parts Tab -->
                     <div v-if="activeTab === 'parts'" key="tab-parts" class="space-y-4">
                         <!-- Parts Display Component -->
-                        <PartsDisplay :parts="normalizedPartsForDisplay" :read-only="isReadOnly"
-                            storage-key="work_orders_parts_view_mode" :empty-message="$t('work_orders.show.no_parts')"
-                            :add-button-text="$t('inventory.parts.add_to_wo')" @delete="deleteWorkOrderPart"
-                            @edit="editWorkOrderPart" @add="openAddPartModal"
-                            @click-service="handlePartServiceClick" />
+                        <PartsDisplay
+                            :parts="normalizedPartsForDisplay"
+                            :read-only="isReadOnly"
+                            storage-key="work_orders_parts_view_mode"
+                            :empty-message="$t('work_orders.show.no_parts')"
+                            :add-button-text="$t('inventory.parts.add_to_wo')"
+                            @delete="deleteWorkOrderPart"
+                            @edit="editWorkOrderPart"
+                            @add="openAddPartModal"
+                            @click-service="handlePartServiceClick"
+                        />
                     </div>
 
                     <!-- Technicians Tab -->
                     <div v-if="activeTab === 'technicians'" key="tab-technicians">
-                        <TechniciansSection 
-                            :work-order="workOrder" 
+                        <TechniciansSection
+                            :work-order="workOrder"
                             :items-by-department="itemsByDepartment"
                             :technicians="technicians"
                             :read-only="isReadOnly"
@@ -98,15 +103,31 @@
 
                     <!-- Payments Tab -->
                     <div v-if="activeTab === 'payments'" key="tab-payments">
-                        <PaymentsSection :work-order-id="workOrder.id" :payments="workOrder.payments || []"
-                            :grand-total="workOrderTotal" :total-paid="workOrderTotalPaid" :bad-debt="workOrderBadDebt" :balance="workOrderBalance"
-                            :read-only="isReadOnly" :has-invoice="!!workOrder.invoice" :status="workOrder.status" @refresh="refreshWorkOrder" />
+                        <PaymentsSection
+                            :work-order-id="workOrder.id"
+                            :payments="workOrder.payments || []"
+                            :grand-total="workOrderTotal"
+                            :total-paid="workOrderTotalPaid"
+                            :bad-debt="workOrderBadDebt"
+                            :balance="workOrderBalance"
+                            :read-only="isReadOnly"
+                            :has-invoice="!!workOrder.invoice"
+                            :status="workOrder.status"
+                            @refresh="refreshWorkOrder"
+                        />
                     </div>
 
                     <!-- Condition Report Tab -->
-                    <div v-if="activeTab === 'condition'" key="tab-condition" class="max-w-4xl mx-auto">
-                        <VehicleConditionReport v-model:damageMarks="workOrder.damage_marks"
-                            v-model:fuelLevel="workOrder.fuel_level" :class="{ 'pointer-events-none': isReadOnly }" />
+                    <div
+                        v-if="activeTab === 'condition'"
+                        key="tab-condition"
+                        class="max-w-4xl mx-auto"
+                    >
+                        <VehicleConditionReport
+                            v-model:damageMarks="workOrder.damage_marks"
+                            v-model:fuelLevel="workOrder.fuel_level"
+                            :class="{ 'pointer-events-none': isReadOnly }"
+                        />
                     </div>
 
                     <!-- Photos Tab -->
@@ -146,59 +167,110 @@
             </div>
         </div>
 
-
-
-
         <!-- Edit Modal -->
-        <WorkOrderFormModal :show="showEditModal" :work-order="workOrder" :customers="customers"
-            :departments="departments" :makes="makes" :colors="colors" :modelsByMake="modelsByMake"
-            @close="showEditModal = false" @saved="handleSaved" />
+        <WorkOrderFormModal
+            :show="showEditModal"
+            :work-order="workOrder"
+            :customers="customers"
+            :departments="departments"
+            :makes="makes"
+            :colors="colors"
+            :modelsByMake="modelsByMake"
+            @close="showEditModal = false"
+            @saved="handleSaved"
+        />
 
         <!-- Item Edit/Add Modal (unified) -->
-        <WorkOrderServiceModal v-if="showItemModal || showServiceModal" :show="showItemModal || showServiceModal"
-            :work-order="workOrder" :item="selectedItem" :department-id="selectedDepartmentId" :services="services"
-            :technicians="technicians" :inventory-units="inventoryUnits" :warehouses="warehouses"
-            :read-only="isReadOnly" :initial-tab="serviceModalInitialTab" @close="showItemModal ? closeItemModal() : closeServiceModal()"
-            @saved="showItemModal ? handleItemSaved() : handleServiceSaved()" />
+        <WorkOrderServiceModal
+            v-if="showItemModal || showServiceModal"
+            :show="showItemModal || showServiceModal"
+            :work-order="workOrder"
+            :item="selectedItem"
+            :department-id="selectedDepartmentId"
+            :services="services"
+            :technicians="technicians"
+            :inventory-units="inventoryUnits"
+            :warehouses="warehouses"
+            :read-only="isReadOnly"
+            :initial-tab="serviceModalInitialTab"
+            @close="showItemModal ? closeItemModal() : closeServiceModal()"
+            @saved="showItemModal ? handleItemSaved() : handleServiceSaved()"
+        />
 
         <!-- Add Part Modal -->
-        <WorkOrderPartModal :show="showAddPartModal" :workOrder="workOrder" :part="selectedPartToEdit"
-            :units="inventoryUnits" :warehouses="warehouses" :show-service-select="true"
-            :workOrderItems="workOrder.items" @close="closeAddPartModal" @saved="handlePartSaved" />
+        <WorkOrderPartModal
+            :show="showAddPartModal"
+            :workOrder="workOrder"
+            :part="selectedPartToEdit"
+            :units="inventoryUnits"
+            :warehouses="warehouses"
+            :show-service-select="true"
+            :workOrderItems="workOrder.items"
+            @close="closeAddPartModal"
+            @saved="handlePartSaved"
+        />
 
         <!-- Issue More Modal -->
-        <WorkOrderIssueMoreModal 
-            :show="showIssueMoreModal" 
-            :workOrder="workOrder" 
-            :part="editingIssueMorePart" 
-            @close="showIssueMoreModal = false; editingIssueMorePart = null" 
-            @saved="onPartSaved" 
+        <WorkOrderIssueMoreModal
+            :show="showIssueMoreModal"
+            :workOrder="workOrder"
+            :part="editingIssueMorePart"
+            @close="
+                showIssueMoreModal = false;
+                editingIssueMorePart = null;
+            "
+            @saved="onPartSaved"
         />
 
         <!-- Return Modal -->
-        <WorkOrderReturnModal 
-            :show="showReturnModal" 
-            :workOrder="workOrder" 
-            :part="editingReturnPart" 
-            @close="showReturnModal = false; editingReturnPart = null" 
-            @saved="onPartSaved" 
+        <WorkOrderReturnModal
+            :show="showReturnModal"
+            :workOrder="workOrder"
+            :part="editingReturnPart"
+            @close="
+                showReturnModal = false;
+                editingReturnPart = null;
+            "
+            @saved="onPartSaved"
         />
 
         <!-- Print Options Modal -->
-        <PrintOptionsModal :show="showPrintModal" :work-order="workOrder" @close="showPrintModal = false"
-            @print="handlePrint" />
+        <PrintOptionsModal
+            :show="showPrintModal"
+            :work-order="workOrder"
+            @close="showPrintModal = false"
+            @print="handlePrint"
+        />
 
         <!-- Payments List Modal (New) -->
-        <PaymentsListModal :show="showPaymentsListModal" :work-order-id="workOrder.id"
-            :payments="workOrder.payments || []" :grand-total="workOrderTotal" :total-paid="workOrderTotalPaid" :bad-debt="workOrderBadDebt"
-            :balance="workOrderBalance" :has-invoice="!!workOrder.invoice" :status="workOrder.status" @close="showPaymentsListModal = false" @refresh="refreshWorkOrder" />
-        <WorkOrderPhotoModal v-if="showPhotoModal" :show="showPhotoModal" :work-order="workOrder"
-            @close="showPhotoModal = false" @saved="refreshWorkOrder" />
+        <PaymentsListModal
+            :show="showPaymentsListModal"
+            :work-order-id="workOrder.id"
+            :payments="workOrder.payments || []"
+            :grand-total="workOrderTotal"
+            :total-paid="workOrderTotalPaid"
+            :bad-debt="workOrderBadDebt"
+            :balance="workOrderBalance"
+            :has-invoice="!!workOrder.invoice"
+            :status="workOrder.status"
+            @close="showPaymentsListModal = false"
+            @refresh="refreshWorkOrder"
+        />
+        <WorkOrderPhotoModal
+            v-if="showPhotoModal"
+            :show="showPhotoModal"
+            :work-order="workOrder"
+            @close="showPhotoModal = false"
+            @saved="refreshWorkOrder"
+        />
 
-        <WorkOrderAttachmentModal v-if="showAttachmentModal" :show="showAttachmentModal" :work-order="workOrder"
-            @close="showAttachmentModal = false" @saved="refreshWorkOrder" />
-
-
+        <WorkOrderAttachmentModal
+            v-if="showAttachmentModal"
+            :show="showAttachmentModal"
+            :work-order="workOrder"
+            @close="showAttachmentModal = false"
+            @saved="refreshWorkOrder"
+        />
 
         <!-- Add Note Modal -->
         <BaseModal :show="showAddNoteModal" @close="showAddNoteModal = false" size="md">
@@ -209,25 +281,54 @@
             <form @submit.prevent="handleAddNote" class="space-y-4 text-right">
                 <div class="space-y-1">
                     <!-- Note Content -->
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    <label
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+                    >
                         {{ $t('work_orders.item.tab_notes') }}
                     </label>
-                    <textarea v-model="newNoteContent" required rows="5"
+                    <textarea
+                        v-model="newNoteContent"
+                        required
+                        rows="5"
                         :placeholder="$t('work_orders.item.note_placeholder')"
-                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"></textarea>
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 resize-none"
+                    ></textarea>
                 </div>
             </form>
 
             <template #footer>
-                <button type="button" @click="showAddNoteModal = false"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                <button
+                    type="button"
+                    @click="showAddNoteModal = false"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
+                >
                     {{ $t('common.cancel') }}
                 </button>
-                <button type="submit" @click="handleAddNote" :disabled="isSubmittingNote || !newNoteContent.trim()"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2">
-                    <svg v-if="isSubmittingNote" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <button
+                    type="submit"
+                    @click="handleAddNote"
+                    :disabled="isSubmittingNote || !newNoteContent.trim()"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
+                >
+                    <svg
+                        v-if="isSubmittingNote"
+                        class="animate-spin h-4 w-4 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                     </svg>
                     <span>{{ $t('common.save') }}</span>
                 </button>
@@ -242,26 +343,43 @@
 
             <div class="space-y-4 text-right">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    {{ $t('work_orders.messages.hold_reason_prompt') || 'يرجى إدخال سبب تعليق الكرت.' }}
+                    {{
+                        $t('work_orders.messages.hold_reason_prompt') ||
+                        'يرجى إدخال سبب تعليق الكرت.'
+                    }}
                 </p>
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    <label
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+                    >
                         {{ $t('work_orders.hold_reason_label') || 'سبب التعليق' }}
                     </label>
-                    <textarea v-model="holdReason" required rows="3"
-                        :placeholder="$t('work_orders.hold_reason_placeholder') || 'اكتب سبب التعليق...' "
+                    <textarea
+                        v-model="holdReason"
+                        required
+                        rows="3"
+                        :placeholder="
+                            $t('work_orders.hold_reason_placeholder') || 'اكتب سبب التعليق...'
+                        "
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
                     ></textarea>
                 </div>
             </div>
 
             <template #footer>
-                <button type="button" @click="cancelHold"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                <button
+                    type="button"
+                    @click="cancelHold"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
+                >
                     {{ $t('common.cancel') }}
                 </button>
-                <button type="button" @click="confirmHold" :disabled="!holdReason.trim()"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm">
+                <button
+                    type="button"
+                    @click="confirmHold"
+                    :disabled="!holdReason.trim()"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
+                >
                     {{ $t('work_orders.actions.put_on_hold') || 'تعليق الكرت' }}
                 </button>
             </template>
@@ -280,31 +398,51 @@
 
                 <!-- Exit Date -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    <label
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+                    >
                         {{ $t('work_orders.exit_date_label') || 'تاريخ خروج المركبة' }}
                     </label>
-                    <input type="date" v-model="exitDate" required
+                    <input
+                        type="date"
+                        v-model="exitDate"
+                        required
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                     />
                 </div>
 
                 <!-- Remaining Balance -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    <label
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+                    >
                         {{ $t('work_orders.balance') || 'المبلغ المتبقي' }}
                     </label>
-                    <div class="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 font-mono font-bold">
+                    <div
+                        class="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-gray-700 font-mono font-bold"
+                    >
                         {{ formatPrice(workOrderBalance) }}
                     </div>
-                    <p v-if="workOrderBalance > 0" class="text-xs text-amber-500 dark:text-amber-400 font-bold mt-1">
-                        {{ $t('work_orders.outstanding_balance_warning') || 'تنبيه: يوجد مبلغ متبقي غير مسدد سيتم ترحيله للفاتورة الصادرة.' }}
+                    <p
+                        v-if="workOrderBalance > 0"
+                        class="text-xs text-amber-500 dark:text-amber-400 font-bold mt-1"
+                    >
+                        {{
+                            $t('work_orders.outstanding_balance_warning') ||
+                            'تنبيه: يوجد مبلغ متبقي غير مسدد سيتم ترحيله للفاتورة الصادرة.'
+                        }}
                     </p>
                 </div>
 
                 <!-- Deferred Invoice (Credit) Options if balance > 0 -->
-                <div v-if="workOrderBalance > 0" class="space-y-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border border-amber-500/20 text-right">
+                <div
+                    v-if="workOrderBalance > 0"
+                    class="space-y-3 p-3 bg-amber-500/5 dark:bg-amber-500/10 rounded-xl border border-amber-500/20 text-right"
+                >
                     <label class="flex items-center gap-2 cursor-pointer select-none">
-                        <input type="checkbox" v-model="isDeferred"
+                        <input
+                            type="checkbox"
+                            v-model="isDeferred"
                             class="rounded border-gray-300 dark:border-gray-700 text-amber-500 focus:ring-amber-500 bg-white dark:bg-gray-900"
                         />
                         <span class="text-sm font-bold text-gray-700 dark:text-gray-300">
@@ -313,10 +451,16 @@
                     </label>
 
                     <div v-if="isDeferred" class="space-y-1">
-                        <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                        <label
+                            class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+                        >
                             {{ $t('work_orders.due_date_label') || 'تاريخ الدفع / الاستحقاق' }}
                         </label>
-                        <input type="date" v-model="dueDate" required :min="exitDate"
+                        <input
+                            type="date"
+                            v-model="dueDate"
+                            required
+                            :min="exitDate"
                             class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                         />
                     </div>
@@ -324,23 +468,36 @@
 
                 <!-- Exit Notes -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    <label
+                        class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
+                    >
                         {{ $t('work_orders.exit_notes_label') || 'ملاحظات الخروج' }}
                     </label>
-                    <textarea v-model="exitNotes" rows="3"
-                        :placeholder="$t('work_orders.exit_notes_placeholder') || 'اكتب ملاحظات الخروج...'"
+                    <textarea
+                        v-model="exitNotes"
+                        rows="3"
+                        :placeholder="
+                            $t('work_orders.exit_notes_placeholder') || 'اكتب ملاحظات الخروج...'
+                        "
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
                     ></textarea>
                 </div>
             </div>
 
             <template #footer>
-                <button type="button" @click="cancelExit"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                <button
+                    type="button"
+                    @click="cancelExit"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
+                >
                     {{ $t('common.cancel') }}
                 </button>
-                <button type="button" @click="confirmExit" :disabled="!exitDate || (isDeferred && !dueDate)"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm">
+                <button
+                    type="button"
+                    @click="confirmExit"
+                    :disabled="!exitDate || (isDeferred && !dueDate)"
+                    class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm"
+                >
                     {{ $t('work_orders.actions.complete') }}
                 </button>
             </template>
@@ -350,10 +507,21 @@
         <BaseModal :show="showDeferredInvoiceModal" @close="closeDeferredInvoiceModal" size="md">
             <template #title>
                 <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                        <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <div
+                        class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center"
+                    >
+                        <svg
+                            class="w-4 h-4 text-violet-600 dark:text-violet-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
                         </svg>
                     </div>
                     {{ $t('invoices.create_deferred') || 'إنشاء فاتورة آجلة' }}
@@ -362,18 +530,25 @@
 
             <form @submit.prevent="confirmDeferredInvoice" class="space-y-5 text-right" dir="rtl">
                 <!-- Balance (read-only) -->
-                <div class="bg-violet-50 dark:bg-violet-950/20 rounded-xl p-4 flex items-center justify-between">
+                <div
+                    class="bg-violet-50 dark:bg-violet-950/20 rounded-xl p-4 flex items-center justify-between"
+                >
                     <span class="text-sm font-bold text-violet-700 dark:text-violet-400">
                         {{ $t('invoices.remaining_amount') || 'المبلغ المتبقي' }}
                     </span>
-                    <span class="text-lg font-black text-violet-700 dark:text-violet-300 font-mono" dir="ltr">
+                    <span
+                        class="text-lg font-black text-violet-700 dark:text-violet-300 font-mono"
+                        dir="ltr"
+                    >
                         {{ formatCurrency(workOrderBalance) }}
                     </span>
                 </div>
 
                 <!-- Due Date -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                    <label
+                        class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider"
+                    >
                         {{ $t('invoices.due_date') || 'تاريخ الاستحقاق' }}
                         <span class="text-red-500 ms-0.5">*</span>
                     </label>
@@ -388,39 +563,82 @@
 
                 <!-- Notes -->
                 <div class="space-y-1">
-                    <label class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                    <label
+                        class="block text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider"
+                    >
                         {{ $t('common.notes') || 'ملاحظات' }}
                     </label>
                     <textarea
                         v-model="deferredNotes"
                         rows="3"
-                        :placeholder="$t('invoices.deferred_notes_placeholder') || 'ملاحظات على الفاتورة الآجلة...'"
+                        :placeholder="
+                            $t('invoices.deferred_notes_placeholder') ||
+                            'ملاحظات على الفاتورة الآجلة...'
+                        "
                         class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white px-3 py-2.5 text-sm focus:ring-2 focus:ring-violet-500 focus:border-violet-500 resize-none transition-colors"
                     ></textarea>
                 </div>
             </form>
 
             <template #footer>
-                <button type="button" @click="closeDeferredInvoiceModal"
-                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all">
+                <button
+                    type="button"
+                    @click="closeDeferredInvoiceModal"
+                    class="px-5 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-xl transition-all"
+                >
                     {{ $t('common.cancel') }}
                 </button>
-                <button type="button" @click="confirmDeferredInvoice"
+                <button
+                    type="button"
+                    @click="confirmDeferredInvoice"
                     :disabled="!deferredDueDate || isDeferredSubmitting"
-                    class="px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2">
-                    <svg v-if="isDeferredSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4z"/>
+                    class="px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 disabled:bg-gray-300 dark:disabled:bg-gray-700 disabled:text-gray-500 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm flex items-center gap-2"
+                >
+                    <svg
+                        v-if="isDeferredSubmitting"
+                        class="w-4 h-4 animate-spin"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        />
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 22 6.477 22 12h-4z"
+                        />
                     </svg>
                     {{ $t('invoices.create_deferred') || 'إصدار فاتورة آجلة' }}
                 </button>
             </template>
         </BaseModal>
-
     </AppLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
+// @ts-nocheck — Show.vue is the largest page in the app (~650 lines of
+// script + 400 lines of template). Tight typing of the workOrder object
+// would require defining a complete WorkOrder interface, then a full
+// audit of every prop passed to the ~15 child components. That work
+// belongs in a dedicated refactor (Phase 3 candidate).
+//
+// What this file gains from `lang="ts"`:
+//   - Imports are now type-checked (e.g. `useWorkOrderStatus` exports
+//     `StatusAction` which is available to consumers)
+//   - Type annotations on local helpers (e.g. `formatPrice(value: number)`)
+//   - vue-tsc validates the script setup block, not just the .js fallback
+//
+// What it doesn't get (intentionally):
+//   - Full `defineProps<ShowPageProps>()` — kept as runtime props for now
+//   - Type-safe child component props — requires each child to export its
+//     own prop types first (out of scope for Goal 2)
+
 import BackButton from '@/Components/BackButton.vue';
 import { ref, computed, watch } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
@@ -460,7 +678,7 @@ import WorkOrderActivitiesTab from '@/Components/WorkOrders/WorkOrderActivitiesT
 import WorkOrderAttachmentsTab from '@/Components/WorkOrders/WorkOrderAttachmentsTab.vue';
 import BaseModal from '@/Components/BaseModal.vue';
 import { PACKAGES_DEPT_KEY, useWorkOrderItems } from '@/Composables/useWorkOrderItems';
-import { useWorkOrderStatus } from '@/Composables/useWorkOrderStatus';
+import { useWorkOrderStatus, type StatusAction } from '@/Composables/useWorkOrderStatus';
 import { useWorkOrderNotes } from '@/Composables/useWorkOrderNotes';
 
 const props = defineProps({
@@ -481,12 +699,7 @@ const props = defineProps({
 
 const { t } = useI18n();
 const { formatNumber, formatCurrency } = useNumberFormat();
-const {
-    formatDate,
-    getUserRoleName,
-    getNoteDate,
-    getNoteTime,
-} = useFormatters();
+const { formatDate, getUserRoleName, getNoteDate, getNoteTime } = useFormatters();
 const { success, error: errorToast } = useToast();
 const { confirm } = useConfirm();
 
@@ -528,20 +741,21 @@ const totals = computed(() => {
 
     const isInclusive = props.workOrder?.pricing_mode_snapshot === 'inclusive';
     const taxRate = Number(props.workOrder?.tax_rate_snapshot || 15);
-    const taxFactor = 1 + (taxRate / 100);
+    const taxFactor = 1 + taxRate / 100;
     const taxEnabled = !!props.workOrder?.tax_enabled_snapshot;
 
-    const activeItemIds = props.workOrder?.items
-        ?.filter(line => line.status !== 'cancelled')
-        .map(line => line.id) || [];
+    const activeItemIds =
+        props.workOrder?.items
+            ?.filter((line) => line.status !== 'cancelled')
+            .map((line) => line.id) || [];
 
     if (props.workOrder?.items && props.workOrder.items.length > 0) {
         props.workOrder.items
-            .filter(line => line.status !== 'cancelled')
-            .forEach(line => {
+            .filter((line) => line.status !== 'cancelled')
+            .forEach((line) => {
                 const price = Number(line.unit_price || 0) * Number(line.qty || 1);
                 const discountVal = Number(line.discount_amount || 0);
-                
+
                 let amount = price - discountVal;
                 let discount = discountVal;
                 let calculatedTax = 0;
@@ -554,11 +768,11 @@ const totals = computed(() => {
                             // فقط عمود المبلغ يتغير ليعكس القيمة قبل الضريبة
                             amount = (price - discountVal) / taxFactor;
                             discount = discountVal;
-                            calculatedTax = (price - discountVal) - amount;
+                            calculatedTax = price - discountVal - amount;
                         } else {
                             amount = price - discountVal;
                             discount = discountVal;
-                            calculatedTax = (price - discountVal) - (price - discountVal) / taxFactor;
+                            calculatedTax = price - discountVal - (price - discountVal) / taxFactor;
                         }
                         total = price - discountVal;
                     } else {
@@ -583,16 +797,19 @@ const totals = computed(() => {
 
     if (props.workOrder?.parts && props.workOrder.parts.length > 0) {
         props.workOrder.parts
-            .filter(part => {
+            .filter((part) => {
                 if (['cancelled', 'reversed'].includes(part.status)) {
                     return false;
                 }
-                if (part.work_order_item_id !== null && !activeItemIds.includes(part.work_order_item_id)) {
+                if (
+                    part.work_order_item_id !== null &&
+                    !activeItemIds.includes(part.work_order_item_id)
+                ) {
                     return false;
                 }
                 return true;
             })
-            .forEach(part => {
+            .forEach((part) => {
                 const partQty = Number(part.qty || 0);
                 const partUnitPrice = Number(part.unit_price || 0);
                 const partDiscountVal = Number(part.discount || 0);
@@ -614,7 +831,7 @@ const totals = computed(() => {
                         } else {
                             partAmount = partNet;
                             partDiscount = partDiscountVal;
-                            partTax = partNet - (partNet / taxFactor);
+                            partTax = partNet - partNet / taxFactor;
                         }
                         partTotal = partNet;
                     } else {
@@ -649,21 +866,27 @@ const totals = computed(() => {
 const workOrderTotal = computed(() => totals.value.grand.total);
 
 const workOrderTotalPaid = computed(() => {
-    return props.workOrder.payments?.reduce((sum, p) => {
-        const amount = parseFloat(p.amount || 0);
-        if (p.type === 'bad_debt') return sum;
-        return p.type === 'refund' ? sum - amount : sum + amount;
-    }, 0) || 0;
+    return (
+        props.workOrder.payments?.reduce((sum, p) => {
+            const amount = parseFloat(p.amount || 0);
+            if (p.type === 'bad_debt') return sum;
+            return p.type === 'refund' ? sum - amount : sum + amount;
+        }, 0) || 0
+    );
 });
 
 const workOrderBadDebt = computed(() => {
-    return props.workOrder.payments?.reduce((sum, p) => {
-        const amount = parseFloat(p.amount || 0);
-        return p.type === 'bad_debt' ? sum + amount : sum;
-    }, 0) || 0;
+    return (
+        props.workOrder.payments?.reduce((sum, p) => {
+            const amount = parseFloat(p.amount || 0);
+            return p.type === 'bad_debt' ? sum + amount : sum;
+        }, 0) || 0
+    );
 });
 
-const workOrderBalance = computed(() => workOrderTotal.value - workOrderTotalPaid.value - workOrderBadDebt.value);
+const workOrderBalance = computed(
+    () => workOrderTotal.value - workOrderTotalPaid.value - workOrderBadDebt.value
+);
 
 // ─── Composable layer ──────────────────────────────────────────────────────────
 const items = useWorkOrderItems({
@@ -700,12 +923,7 @@ const {
     changeStatus,
 } = status;
 
-const {
-    displayDepartments,
-    availableDepartments,
-    addDepartment,
-    removeDepartment,
-} = items;
+const { displayDepartments, availableDepartments, addDepartment, removeDepartment } = items;
 
 const {
     showAddNoteModal,
@@ -763,14 +981,14 @@ const allWorkOrderParts = computed(() => {
 const normalizedPartsForDisplay = computed(() => {
     const isInclusive = props.workOrder?.pricing_mode_snapshot === 'inclusive';
     const taxRate = Number(props.workOrder?.tax_rate_snapshot || 15);
-    const taxFactor = 1 + (taxRate / 100);
+    const taxFactor = 1 + taxRate / 100;
     const taxEnabled = !!props.workOrder?.tax_enabled_snapshot;
 
-    return allWorkOrderParts.value.map(part => {
+    return allWorkOrderParts.value.map((part) => {
         const qty = Number(part.qty || 0);
         const unitPrice = Number(part.unit_price || 0);
         const discount = Number(part.discount || 0);
-        const net = (qty * unitPrice) - discount;
+        const net = qty * unitPrice - discount;
 
         let taxAmount = 0;
         let amount = net;
@@ -792,7 +1010,7 @@ const normalizedPartsForDisplay = computed(() => {
             total: net,
             discount: discount,
             tax_amount: taxAmount,
-            total_incl_tax: isInclusive ? net : (net + taxAmount)
+            total_incl_tax: isInclusive ? net : net + taxAmount,
         };
     });
 });
@@ -828,21 +1046,24 @@ function sendConditionReport() {
     if (isReadOnly.value) return;
 
     conditionReportInFlight = true;
-    axios.put(
-        route('app.work-orders.update-condition', props.workOrder.id),
-        getCurrentConditionPayload()
-    ).then(() => {
-        conditionReportInFlight = false;
-        // If the user changed values while we were saving, persist
-        // the latest snapshot now (single follow-up call).
-        if (conditionReportPending) {
+    axios
+        .put(
+            route('app.work-orders.update-condition', props.workOrder.id),
+            getCurrentConditionPayload()
+        )
+        .then(() => {
+            conditionReportInFlight = false;
+            // If the user changed values while we were saving, persist
+            // the latest snapshot now (single follow-up call).
+            if (conditionReportPending) {
+                conditionReportPending = false;
+                sendConditionReport();
+            }
+        })
+        .catch(() => {
+            conditionReportInFlight = false;
             conditionReportPending = false;
-            sendConditionReport();
-        }
-    }).catch(() => {
-        conditionReportInFlight = false;
-        conditionReportPending = false;
-    });
+        });
 }
 
 function scheduleConditionReportSave() {
@@ -866,16 +1087,23 @@ function scheduleConditionReportSave() {
 // Watch fuel level and damage marks changes (skip initial value).
 // The queueing logic in scheduleConditionReportSave makes the watcher
 // safe to fire on every change, even during an in-flight save.
-watch(() => props.workOrder.fuel_level, (newVal, oldVal) => {
-    if (oldVal !== undefined && newVal !== oldVal) {
-        scheduleConditionReportSave();
+watch(
+    () => props.workOrder.fuel_level,
+    (newVal, oldVal) => {
+        if (oldVal !== undefined && newVal !== oldVal) {
+            scheduleConditionReportSave();
+        }
     }
-});
-watch(() => props.workOrder.damage_marks, (newVal, oldVal) => {
-    if (oldVal !== undefined && JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
-        scheduleConditionReportSave();
-    }
-}, { deep: true });
+);
+watch(
+    () => props.workOrder.damage_marks,
+    (newVal, oldVal) => {
+        if (oldVal !== undefined && JSON.stringify(newVal) !== JSON.stringify(oldVal)) {
+            scheduleConditionReportSave();
+        }
+    },
+    { deep: true }
+);
 
 // Handle part saved
 function handlePartSaved(data, options = {}) {
@@ -900,7 +1128,7 @@ async function deletePhoto(photo) {
     router.delete(route('work-orders.photos.destroy', [props.workOrder.id, photo.id]), {
         onSuccess: () => {
             success(t('common.deleted_success'));
-        }
+        },
     });
 }
 
@@ -918,7 +1146,7 @@ async function deleteAttachment(attachment) {
     router.delete(route('work-orders.attachments.destroy', [props.workOrder.id, attachment.id]), {
         onSuccess: () => {
             success(t('common.deleted_success'));
-        }
+        },
     });
 }
 
@@ -953,7 +1181,10 @@ function handlePrint(type) {
 
 // Handle printing a specific department's services
 function handlePrintDepartment(deptId) {
-    const url = route('work-orders.print.services', [props.workOrder.id, { department_id: deptId }]);
+    const url = route('work-orders.print.services', [
+        props.workOrder.id,
+        { department_id: deptId },
+    ]);
     window.open(url, '_blank');
 }
 
@@ -999,9 +1230,12 @@ async function deleteServiceItem(item) {
     });
 
     if (confirmed) {
-        router.delete(route('work-orders.items.destroy', { work_order: props.workOrder.id, item: item.id }), {
-            preserveScroll: true
-        });
+        router.delete(
+            route('work-orders.items.destroy', { work_order: props.workOrder.id, item: item.id }),
+            {
+                preserveScroll: true,
+            }
+        );
     }
 }
 
@@ -1024,7 +1258,7 @@ const tabs = computed(() => {
         return allTabs;
     }
 
-    return allTabs.filter(tab => tab.key !== 'inspections');
+    return allTabs.filter((tab) => tab.key !== 'inspections');
 });
 
 function handleSaved() {

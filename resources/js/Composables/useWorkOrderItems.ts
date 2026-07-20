@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, type Ref, type ComputedRef } from 'vue';
 import { router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useToast } from '@/Composables/useToast';
@@ -7,17 +7,64 @@ import { useConfirm } from '@/Composables/useConfirm';
 export const PACKAGES_DEPT_KEY = 'packages';
 export const UNASSIGNED_DEPT_KEY = '0';
 
-export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, services }) {
+export interface Department {
+    id: number | string;
+    name_ar?: string;
+    name_en?: string;
+    name?: string;
+    is_virtual?: boolean;
+    [key: string]: unknown;
+}
+
+export interface Service {
+    id: number;
+    type: string;
+    [key: string]: unknown;
+}
+
+export interface WorkOrderLite {
+    id: number;
+    departments?: Department[];
+    show_packages_section?: boolean;
+    [key: string]: unknown;
+}
+
+export type WorkOrderInput = WorkOrderLite | (() => WorkOrderLite);
+export type ItemsByDepartmentInput = Record<string, unknown[]> | (() => Record<string, unknown[]>);
+
+export interface UseWorkOrderItemsReturn {
+    showDeptMenu: Ref<boolean>;
+    expandedDepartments: Ref<(number | string)[]>;
+    displayDepartments: ComputedRef<Department[]>;
+    availableDepartments: ComputedRef<Department[]>;
+    getDepartmentItems: (deptId: number | string) => unknown[];
+    toggleDepartment: (deptId: number | string) => void;
+    addDepartment: (deptId: number) => void;
+    removeDepartment: (deptId: number) => Promise<void>;
+}
+
+export function useWorkOrderItems(params: {
+    workOrder: WorkOrderInput;
+    itemsByDepartment: ItemsByDepartmentInput;
+    departments: Department[];
+    services?: Service[];
+}): UseWorkOrderItemsReturn {
     const { t } = useI18n();
     const { success } = useToast();
     const { confirm } = useConfirm();
 
-    const getWorkOrder = () => typeof workOrder === 'function' ? workOrder() : workOrder;
-    const getItemsByDepartment = () => typeof itemsByDepartment === 'function' ? itemsByDepartment() : itemsByDepartment;
+    const { workOrder, itemsByDepartment, departments, services } = params;
+
+    const getWorkOrder = (): WorkOrderLite =>
+        typeof workOrder === 'function' ? (workOrder as () => WorkOrderLite)() : workOrder;
+    const getItemsByDepartment = (): Record<string, unknown[]> =>
+        typeof itemsByDepartment === 'function'
+            ? (itemsByDepartment as () => Record<string, unknown[]>)()
+            : itemsByDepartment;
 
     // ─── Local state ─────────────────────────────────────────────────────────
     const showDeptMenu = ref(false);
-    const expandedDepartments = ref([]);
+    const expandedDepartments = ref<(number | string)[]>([]);
 
     // ─── Computed ─────────────────────────────────────────────────────────────
     /**
@@ -25,8 +72,8 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
      * Shows departments that have items or are linked to the work order,
      * plus the virtual "packages" bucket if applicable.
      */
-    const displayDepartments = computed(() => {
-        const deptIds = new Set();
+    const displayDepartments = computed<Department[]>(() => {
+        const deptIds = new Set<number>();
 
         // Add departments that have items (active or cancelled)
         Object.entries(getItemsByDepartment()).forEach(([id, items]) => {
@@ -38,10 +85,10 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
         });
 
         // Add work order's linked departments
-        getWorkOrder().departments?.forEach(dept => deptIds.add(dept.id));
+        getWorkOrder().departments?.forEach((dept) => deptIds.add(dept.id as number));
 
         // Get database departments matching active list
-        const list = departments.filter(d => deptIds.has(d.id));
+        const list: Department[] = departments.filter((d) => deptIds.has(d.id as number));
 
         // Virtual packages section — show if it has package items or the flag is active
         const packageItems = getItemsByDepartment()[PACKAGES_DEPT_KEY];
@@ -63,12 +110,12 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
     /**
      * Departments that can still be added to the work order.
      */
-    const availableDepartments = computed(() => {
-        const usedIds = displayDepartments.value.map(d => d.id);
-        const list = departments.filter(d => !usedIds.includes(d.id));
+    const availableDepartments = computed<Department[]>(() => {
+        const usedIds = displayDepartments.value.map((d) => d.id);
+        const list: Department[] = departments.filter((d) => !usedIds.includes(d.id));
 
         // Append virtual packages department if packages exist and it's not already used
-        const hasAvailablePackages = services?.some(s => s.type === 'package');
+        const hasAvailablePackages = services?.some((s) => s.type === 'package');
         if (hasAvailablePackages && !usedIds.includes(PACKAGES_DEPT_KEY)) {
             list.push({
                 id: PACKAGES_DEPT_KEY,
@@ -82,11 +129,11 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
     });
 
     // ─── Helpers ──────────────────────────────────────────────────────────────
-    function getDepartmentItems(deptId) {
+    function getDepartmentItems(deptId: number | string): unknown[] {
         return getItemsByDepartment()[deptId] || [];
     }
 
-    function toggleDepartment(deptId) {
+    function toggleDepartment(deptId: number | string): void {
         const idx = expandedDepartments.value.indexOf(deptId);
         if (idx > -1) {
             expandedDepartments.value.splice(idx, 1);
@@ -96,21 +143,25 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
     }
 
     // ─── Actions ──────────────────────────────────────────────────────────────
-    function addDepartment(deptId) {
+    function addDepartment(deptId: number): void {
         showDeptMenu.value = false;
-        router.post(route('work-orders.departments.store', getWorkOrder().id), {
-            department_id: deptId,
-        }, {
-            onSuccess: () => {
-                success(t('common.saved_success'));
-                if (!expandedDepartments.value.includes(deptId)) {
-                    expandedDepartments.value.push(deptId);
-                }
+        router.post(
+            route('work-orders.departments.store', getWorkOrder().id),
+            {
+                department_id: deptId,
             },
-        });
+            {
+                onSuccess: () => {
+                    success(t('common.saved_success'));
+                    if (!expandedDepartments.value.includes(deptId)) {
+                        expandedDepartments.value.push(deptId);
+                    }
+                },
+            }
+        );
     }
 
-    async function removeDepartment(deptId) {
+    async function removeDepartment(deptId: number): Promise<void> {
         const confirmed = await confirm({
             title: t('common.confirm_delete_title'),
             message: t('common.confirm_delete_message'),
@@ -121,7 +172,10 @@ export function useWorkOrderItems({ workOrder, itemsByDepartment, departments, s
 
         if (confirmed) {
             router.delete(
-                route('work-orders.departments.destroy', { work_order: getWorkOrder().id, department_id: deptId }),
+                route('work-orders.departments.destroy', {
+                    work_order: getWorkOrder().id,
+                    department_id: deptId,
+                }),
                 { onSuccess: () => success(t('common.deleted_success')) }
             );
         }
