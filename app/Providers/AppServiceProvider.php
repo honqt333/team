@@ -23,6 +23,7 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderInspection;
+use App\Models\Payment;
 use App\Observers\CenterObserver;
 use App\Observers\EmployeeObserver;
 use App\Policies\CustomerPolicy;
