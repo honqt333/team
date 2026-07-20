@@ -118,5 +118,24 @@ class InitialSystemSeeder extends Seeder
         $this->command->info('✅ Initial System Setup Complete!');
         $this->command->info('📧 Email: admin@khidmh.pro');
         $this->command->info('🔑 Password: [As requested]');
+
+        // 6. Chain the rest of the bootstrap so this seeder leaves the
+        //    DB in a state where every admin page renders correctly.
+        //    Order matters: metadata before services (services may
+        //    reference departments/units seeded above), conditions
+        //    after services (independent), communication templates
+        //    last (purely static content).
+        //
+        //    Note: VehicleDataSeeder (which depends on
+        //    storage/app/temp_data/car-list.json) is NOT called here
+        //    because that JSON is not in the repo. VehicleMakesSeeder
+        //    (chained via MetadataSeeder) provides the hardcoded
+        //    make + model list, which is enough for the UI to work.
+        $this->call([
+            MetadataSeeder::class,
+            ServiceSeeder::class,
+            VehicleConditionSeeder::class,
+            CommunicationTemplateSeeder::class,
+        ]);
     }
 }

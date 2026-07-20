@@ -2,8 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\CommunicationTemplate;
+use App\Models\Department;
+use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\VehicleColor;
+use App\Models\VehicleConditionItem;
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use Database\Seeders\InitialSystemSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\PermissionRegistrar;
@@ -60,5 +67,51 @@ class InitialSystemSeederTest extends TestCase
         app(PermissionRegistrar::class)->setPermissionsTeamId($firstTenantId);
         $user->refresh();
         $this->assertTrue($user->hasRole('super_admin'), 'admin must still have super_admin role after re-run');
+    }
+
+    /**
+     * Regression: communication templates, services, vehicle
+     * conditions, and reference metadata used to require running
+     * `php artisan db:seed` (the full DatabaseSeeder) before the
+     * admin pages rendered any data. Running only
+     * InitialSystemSeeder in isolation left /system/communication/
+     * templates and other admin pages empty.
+     *
+     * The seeder now chains the dependent seeders so the DB is
+     * fully bootstrapped after a single call.
+     */
+    public function test_seeder_populates_communication_templates_and_reference_data(): void
+    {
+        $this->seed(InitialSystemSeeder::class);
+
+        // Communication templates — without these the
+        // /system/communication/templates page is empty and
+        // notifications fall back to hard-coded HTML.
+        $this->assertGreaterThan(
+            0,
+            CommunicationTemplate::count(),
+            'communication templates must be seeded so /system/communication/templates is non-empty'
+        );
+        $this->assertTrue(
+            CommunicationTemplate::where('code', '2fa_verification')->exists(),
+            '2FA template is required by the auth flow'
+        );
+
+        // Service catalog — without these the work order "add
+        // service" dropdown is empty.
+        $this->assertGreaterThan(0, Service::count(), 'service catalog must be seeded');
+        $this->assertGreaterThan(0, Department::count(), 'departments must be seeded');
+
+        // Vehicle condition report — required by the work order
+        // inspection tab on every new work order.
+        $this->assertGreaterThan(0, VehicleConditionItem::count(), 'vehicle condition items must be seeded');
+
+        // Vehicle catalog — the /app/customers and /app/vehicles
+        // "select make" / "select model" dropdowns are empty
+        // without these. VehicleMakesSeeder (chained via
+        // MetadataSeeder) provides hardcoded makes + models.
+        $this->assertGreaterThan(0, VehicleMake::count(), 'vehicle makes must be seeded');
+        $this->assertGreaterThan(0, VehicleModel::count(), 'vehicle models must be seeded');
+        $this->assertGreaterThan(0, VehicleColor::count(), 'vehicle colors must be seeded');
     }
 }
