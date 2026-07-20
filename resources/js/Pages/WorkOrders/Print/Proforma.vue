@@ -155,15 +155,18 @@ const mappedData = computed(() => {
     // Map parts
     const parts = (props.allParts || [])
         .filter(part => !part.hide_on_print)
-        .map(part => ({
-            service_name: part.name || part.part?.name_ar || part.part?.name_en || '',
-            description: part.description || '',
-            qty: part.qty || 1,
-            unit_price: part.unit_price || 0,
-            discount: Number(part.discount || 0),
-            is_part: true,
-            is_taxable: isTaxEnabled.value
-        }));
+        .map(part => {
+            const name = part.name || part.part?.name_ar || part.part?.name_en || part.part_number || part.part?.sku || 'قطعة غيار';
+            return {
+                service_name: name,
+                description: part.description || (part.part_number ? `رمز القطعة: ${part.part_number}` : ''),
+                qty: part.qty || 1,
+                unit_price: part.unit_price || 0,
+                discount: Number(part.discount || 0),
+                is_part: true,
+                is_taxable: isTaxEnabled.value
+            };
+        });
 
     return {
         code: wo.code,

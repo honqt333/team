@@ -137,6 +137,8 @@ class WorkOrderPrintController
             'items.service.department',
             'items.parts.part',
             'items.parts.warehouse',
+            'parts.part',
+            'parts.warehouse',
             'center',
             'tenant',
         ]);
@@ -145,31 +147,37 @@ class WorkOrderPrintController
         $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== WorkOrderItem::STATUS_CANCELLED);
         $workOrder->setRelation('items', $filteredItems->values());
 
+        // Filter out cancelled / reversed parts (both item-level and order-level)
+        $activeItemIds = $filteredItems->pluck('id')->all();
+        $activeParts = $workOrder->parts->filter(function ($part) use ($activeItemIds) {
+            if (in_array($part->status, [\App\Models\WorkOrderItemPart::STATUS_CANCELLED, \App\Models\WorkOrderItemPart::STATUS_REVERSED])) {
+                return false;
+            }
+            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+                return false;
+            }
+            return true;
+        })->values();
+
         $workOrder->append(['total', 'total_discount']);
 
-        $servicesTotal = $workOrder->items->sum(function ($item) {
+        $servicesTotal = $filteredItems->sum(function ($item) {
             return $item->line_total ?? ($item->qty * $item->unit_price);
         });
 
-        $partsTotal = $workOrder->items->sum(function ($item) {
-            return $item->parts->sum(function ($part) {
-                return $part->qty * $part->unit_price;
-            });
+        $partsTotal = $activeParts->sum(function ($part) {
+            return ((float)$part->unit_price * (float)$part->qty) - (float)($part->discount ?? 0);
         });
 
         $totalPaid = $workOrder->total_paid ?? 0;
         $grandTotal = $servicesTotal + $partsTotal;
         $balance = $grandTotal - $totalPaid;
 
-        $itemsByDepartment = $workOrder->items->groupBy(function ($item) {
+        $itemsByDepartment = $filteredItems->groupBy(function ($item) {
             if ($item->service?->type === Service::TYPE_PACKAGE) {
                 return 'packages';
             }
             return $item->department_id ?? $item->service?->department_id ?? 0;
-        });
-
-        $allParts = $workOrder->items->flatMap(function ($item) {
-            return $item->parts;
         });
 
         $departments = Department::active()->ordered()->get()->keyBy('id');
@@ -178,7 +186,7 @@ class WorkOrderPrintController
         return Inertia::render('WorkOrders/Print/Proforma', [
             'workOrder' => $workOrder,
             'itemsByDepartment' => $itemsByDepartment,
-            'allParts' => $allParts,
+            'allParts' => $activeParts,
             'departments' => $departments,
             'servicesTotal' => $servicesTotal,
             'partsTotal' => $partsTotal,

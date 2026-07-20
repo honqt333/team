@@ -279,31 +279,63 @@ class InvoiceService
      */
     public function getProformaData(WorkOrder $workOrder): array
     {
-        $workOrder->load(['customer', 'items.service', 'center', 'vehicle']);
+        $workOrder->load([
+            'customer',
+            'items.service',
+            'items.parts.part',
+            'items.parts.warehouse',
+            'parts.part',
+            'parts.warehouse',
+            'center',
+            'vehicle.make',
+            'vehicle.model',
+            'tenant',
+        ]);
 
         // Filter out cancelled items
         $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== \App\Models\WorkOrderItem::STATUS_CANCELLED);
         $workOrder->setRelation('items', $filteredItems->values());
-        
+
+        $activeItemIds = $filteredItems->pluck('id')->all();
+        $activeParts = $workOrder->parts->filter(function ($part) use ($activeItemIds) {
+            if (in_array($part->status, [\App\Models\WorkOrderItemPart::STATUS_CANCELLED, \App\Models\WorkOrderItemPart::STATUS_REVERSED])) {
+                return false;
+            }
+            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+                return false;
+            }
+            return true;
+        })->values();
+
         $tenant = $workOrder->tenant;
         $taxSettings = $tenant->taxSettings;
         $template = \App\Models\InvoiceTemplate::getDefault($tenant->id, 'proforma');
 
+        $servicesTotal = $filteredItems->sum(fn($item) => $item->line_total ?? ($item->qty * $item->unit_price));
+        $partsTotal = $activeParts->sum(fn($part) => ((float)$part->unit_price * (float)$part->qty) - (float)($part->discount ?? 0));
+        $grandTotal = $servicesTotal + $partsTotal;
+
         return [
+            'workOrder' => $workOrder,
             'work_order' => $workOrder,
             'customer' => $workOrder->customer,
             'vehicle' => $workOrder->vehicle,
             'items' => $workOrder->items,
+            'allParts' => $activeParts,
+            'servicesTotal' => $servicesTotal,
+            'partsTotal' => $partsTotal,
+            'grandTotal' => $grandTotal,
             'center' => $workOrder->center,
             'tenant' => $tenant,
+            'taxSettings' => $taxSettings,
             'tax_settings' => $taxSettings,
             'template' => $template,
             'labels' => $template->getAllLabels(),
             'is_proforma' => true,
             'totals' => [
-                'subtotal' => $workOrder->total_excl_tax ?? 0,
+                'subtotal' => $grandTotal,
                 'tax' => $workOrder->total_tax ?? 0,
-                'total' => $workOrder->total_incl_tax ?? 0,
+                'total' => $workOrder->total_incl_tax ?? $grandTotal,
             ],
         ];
     }

@@ -133,9 +133,7 @@ class InvoicesController extends Controller
     {
         $this->authorize('view', $workOrder);
 
-        $data = $this->invoiceService->getProformaData($workOrder);
-
-        return Inertia::render('Invoices/PrintProforma', $data);
+        return redirect()->route('work-orders.print.proforma', $workOrder->id);
     }
 
     /**
