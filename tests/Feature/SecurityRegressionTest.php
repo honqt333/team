@@ -38,6 +38,11 @@ class SecurityRegressionTest extends TestCase
     {
         parent::setUp();
 
+        // The bundle-safety tests read every .js file in public/build/assets/
+        // (~12MB at full build size) into memory. Raise the per-process limit
+        // so the assertions don't OOM when the build folder is large.
+        @ini_set('memory_limit', '512M');
+
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Permissions required by InventoryBalancePolicy / InventoryMovePolicy
@@ -97,10 +102,10 @@ class SecurityRegressionTest extends TestCase
         // A malicious `sort` value that would try to break out of the ORDER BY
         // clause if it were passed straight to SQL. After the fix, the value
         // must be ignored and the request must still respond 200.
-        $maliciousSort = "(SELECT CASE WHEN (SELECT COUNT(*) FROM users) > 0 THEN 1 ELSE qty_on_hand END)";
+        $maliciousSort = '(SELECT CASE WHEN (SELECT COUNT(*) FROM users) > 0 THEN 1 ELSE qty_on_hand END)';
 
         $response = $this->actingAs($user)
-            ->get('/app/inventory/stock?sort=' . urlencode($maliciousSort));
+            ->get('/app/inventory/stock?sort='.urlencode($maliciousSort));
 
         $response->assertStatus(200);
     }
@@ -112,7 +117,7 @@ class SecurityRegressionTest extends TestCase
         // The fix forces `order` to either `asc` or `desc`; any other value
         // (e.g. UNION attack) must be coerced to `desc`. Request still 200s.
         $response = $this->actingAs($user)
-            ->get('/app/inventory/stock?order=' . urlencode('ASC; DROP TABLE users'));
+            ->get('/app/inventory/stock?order='.urlencode('ASC; DROP TABLE users'));
 
         $response->assertStatus(200);
     }
@@ -123,7 +128,7 @@ class SecurityRegressionTest extends TestCase
 
         foreach (['qty_on_hand', 'min_stock', 'created_at', 'sku', 'name'] as $sort) {
             $response = $this->actingAs($user)
-                ->get('/app/inventory/stock?sort=' . $sort . '&order=asc');
+                ->get('/app/inventory/stock?sort='.$sort.'&order=asc');
 
             $response->assertStatus(200);
         }
@@ -150,10 +155,10 @@ class SecurityRegressionTest extends TestCase
     {
         $user = $this->createUserWithPermissions(['inventory.moves.view']);
 
-        $maliciousSort = "posted_at; UPDATE users SET is_admin = 1 WHERE id = " . $user->id;
+        $maliciousSort = 'posted_at; UPDATE users SET is_admin = 1 WHERE id = '.$user->id;
 
         $response = $this->actingAs($user)
-            ->get('/app/inventory/moves?sort=' . urlencode($maliciousSort));
+            ->get('/app/inventory/moves?sort='.urlencode($maliciousSort));
 
         $response->assertStatus(200);
 
@@ -171,7 +176,7 @@ class SecurityRegressionTest extends TestCase
 
         foreach (['posted_at', 'part_id', 'qty', 'created_at', 'sku'] as $sort) {
             $response = $this->actingAs($user)
-                ->get('/app/inventory/moves?sort=' . $sort . '&order=desc');
+                ->get('/app/inventory/moves?sort='.$sort.'&order=desc');
 
             $response->assertStatus(200);
         }
@@ -216,7 +221,7 @@ class SecurityRegressionTest extends TestCase
         $buildDir = public_path('build/assets');
         $this->assertDirectoryExists($buildDir, 'Vite build output is missing');
 
-        $files = glob($buildDir . '/*.js');
+        $files = glob($buildDir.'/*.js');
         $this->assertNotEmpty($files, 'No built JS bundles found');
 
         $bundleText = '';
