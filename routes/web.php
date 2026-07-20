@@ -332,6 +332,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Print Settings — Signatures (tenant-scoped image uploads + lifecycle)
     Route::post('/settings/print/signatures', [PrintSettingsSignatureController::class, 'store'])->middleware('throttle:uploads')->name('settings.print.signatures.store');
     Route::delete('/settings/print/signatures/{signatureId}', [PrintSettingsSignatureController::class, 'destroy'])->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.destroy');
+    // Update (rename + show/hide) and reorder (drag-drop in the library).
+    // PATCH is correct REST for partial updates; POST is correct for
+    // "reorder this list" which is an action over the collection.
+    Route::patch('/settings/print/signatures/{signatureId}', [PrintSettingsSignatureController::class, 'update'])->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.update');
+    Route::post('/settings/print/signatures/reorder', [PrintSettingsSignatureController::class, 'reorder'])->name('settings.print.signatures.reorder');
 
     // Users Settings
     Route::resource('settings/users', UserController::class)->names('settings.users');

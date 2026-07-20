@@ -68,6 +68,14 @@ const page = usePage();
 const { locale } = useI18n();
 const isRtl = computed(() => locale.value === 'ar');
 
+const isTaxEnabled = computed(() => {
+    const ts = page.props.tenant?.tax_settings;
+    if (!ts) return false;
+    // Match the contract used by the A4/Thermal templates: tax is on when
+    // `enabled` is truthy. Fall back to `is_enabled` for older payloads.
+    return Boolean(ts.enabled ?? ts.is_enabled ?? false);
+});
+
 const goBack = () => {
     if (window.history.length <= 1) {
         // Try closing the tab first if it was opened in target="_blank"
@@ -230,18 +238,28 @@ const documentSettings = computed(() => {
     const docSettings = tenantSettings?.documents?.['invoice'] || {};
 
     const defaultTitleAr = isTaxEnabled.value
-        ? (props.labels?.document_title || 'فاتورة ضريبية مبسطة')
+        ? props.labels?.document_title || 'فاتورة ضريبية مبسطة'
         : 'فاتورة';
     const defaultTitleEn = isTaxEnabled.value
-        ? (props.labels?.document_title || 'Simplified Tax Invoice')
+        ? props.labels?.document_title || 'Simplified Tax Invoice'
         : 'Invoice';
 
     let titleAr = docSettings.title_ar || defaultTitleAr;
     let titleEn = docSettings.title_en || defaultTitleEn;
 
     if (!isTaxEnabled.value) {
-        titleAr = titleAr.replace(/فاتورة ضريبية مبسطة/g, 'فاتورة').replace(/فاتورة ضريبية/g, 'فاتورة').replace(/ضريبية/g, '').trim() || 'فاتورة';
-        titleEn = titleEn.replace(/Simplified Tax Invoice/gi, 'Invoice').replace(/Tax Invoice/gi, 'Invoice').replace(/Tax/gi, '').trim() || 'Invoice';
+        titleAr =
+            titleAr
+                .replace(/فاتورة ضريبية مبسطة/g, 'فاتورة')
+                .replace(/فاتورة ضريبية/g, 'فاتورة')
+                .replace(/ضريبية/g, '')
+                .trim() || 'فاتورة';
+        titleEn =
+            titleEn
+                .replace(/Simplified Tax Invoice/gi, 'Invoice')
+                .replace(/Tax Invoice/gi, 'Invoice')
+                .replace(/Tax/gi, '')
+                .trim() || 'Invoice';
     }
 
     return {

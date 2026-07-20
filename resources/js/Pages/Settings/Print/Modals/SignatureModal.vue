@@ -300,57 +300,288 @@
                             </span>
                         </div>
 
-                        <div v-else class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <button
-                                v-for="sig in librarySignatures"
-                                :key="sig.id"
-                                type="button"
-                                @click="selectLibrarySig(sig)"
-                                :disabled="uploading"
-                                class="group relative rounded-2xl border-2 transition-all overflow-hidden bg-white dark:bg-gray-900/30 p-2 flex flex-col gap-1.5 disabled:opacity-50"
-                                :class="
-                                    selectedLibraryId === sig.id
-                                        ? 'border-emerald-500 ring-2 ring-emerald-500/20'
-                                        : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700'
-                                "
-                            >
+                        <div v-else class="space-y-3">
+                            <!-- Per-row action toolbar — saves a click vs hover-only icons -->
+                            <p class="text-[10px] text-gray-400 font-bold">
+                                {{
+                                    $t('print_settings.library_manage_hint') ||
+                                    'اسحب لإعادة الترتيب · انقر ✎ لتعديل · ⊘ للحذف · 👁 للإخفاء'
+                                }}
+                            </p>
+                            <div class="space-y-2">
                                 <div
-                                    class="aspect-[8/3] bg-white flex items-center justify-center overflow-hidden rounded-xl"
+                                    v-for="(sig, idx) in librarySignatures"
+                                    :key="sig.id"
+                                    draggable="true"
+                                    @dragstart="onDragStart($event, idx)"
+                                    @dragover.prevent="onDragOver($event, idx)"
+                                    @dragenter.prevent="onDragEnter($event, idx)"
+                                    @dragleave="onDragLeave($event, idx)"
+                                    @drop.prevent="onDrop($event, idx)"
+                                    @dragend="onDragEnd"
+                                    :data-drag-index="idx"
+                                    :data-drop-target="idx"
+                                    :class="[
+                                        'group relative rounded-2xl border-2 transition-all bg-white dark:bg-gray-900/30 overflow-hidden',
+                                        selectedLibraryId === sig.id
+                                            ? 'border-emerald-500 ring-2 ring-emerald-500/20'
+                                            : 'border-gray-200 dark:border-gray-700',
+                                        draggedIndex === idx ? 'opacity-40' : '',
+                                        dropTargetIndex === idx && draggedIndex !== idx
+                                            ? 'ring-2 ring-amber-400 border-amber-400'
+                                            : '',
+                                        sig.show === false ? 'opacity-60 grayscale' : '',
+                                    ]"
                                 >
-                                    <img
-                                        :src="sig.url"
-                                        :alt="sig.name_ar || sig.name_en"
-                                        class="max-h-full max-w-full object-contain"
-                                    />
-                                </div>
-                                <p
-                                    class="text-[10px] font-bold text-gray-700 dark:text-gray-300 truncate text-start"
-                                >
-                                    {{
-                                        isRtl
-                                            ? sig.name_ar || sig.name_en
-                                            : sig.name_en || sig.name_ar
-                                    }}
-                                </p>
-                                <div
-                                    v-if="selectedLibraryId === sig.id"
-                                    class="absolute top-1.5 end-1.5 w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center"
-                                >
-                                    <svg
-                                        class="w-3 h-3"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
+                                    <!-- Inner: clickable image to select, side panel for actions -->
+                                    <div class="flex items-stretch">
+                                        <!-- Drag handle -->
+                                        <div
+                                            class="flex items-center justify-center px-2 cursor-grab active:cursor-grabbing text-gray-300 hover:text-amber-500 border-e border-gray-100 dark:border-gray-800"
+                                            :title="$t('print_settings.drag_handle') || 'اسحب'"
+                                        >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <circle cx="7" cy="5" r="1.5" />
+                                                <circle cx="13" cy="5" r="1.5" />
+                                                <circle cx="7" cy="10" r="1.5" />
+                                                <circle cx="13" cy="10" r="1.5" />
+                                                <circle cx="7" cy="15" r="1.5" />
+                                                <circle cx="13" cy="15" r="1.5" />
+                                            </svg>
+                                        </div>
+
+                                        <!-- Image (click to select for current document) -->
+                                        <button
+                                            type="button"
+                                            @click="selectLibrarySig(sig)"
+                                            :disabled="uploading"
+                                            class="flex-1 min-w-0 p-2 flex items-center gap-2 text-start disabled:opacity-50"
+                                        >
+                                            <div
+                                                class="aspect-[8/3] w-20 bg-white flex items-center justify-center overflow-hidden rounded-lg flex-shrink-0"
+                                            >
+                                                <img
+                                                    v-if="sig.url"
+                                                    :src="sig.url"
+                                                    :alt="sig.name_ar || sig.name_en"
+                                                    class="max-h-full max-w-full object-contain"
+                                                />
+                                                <span v-else class="text-[9px] text-gray-400">
+                                                    no img
+                                                </span>
+                                            </div>
+                                            <div class="min-w-0 flex-1">
+                                                <p
+                                                    class="text-xs font-bold text-gray-700 dark:text-gray-200 truncate"
+                                                >
+                                                    {{
+                                                        isRtl
+                                                            ? sig.name_ar || sig.name_en
+                                                            : sig.name_en || sig.name_ar
+                                                    }}
+                                                </p>
+                                                <p
+                                                    v-if="sig.show === false"
+                                                    class="text-[9px] text-gray-400 font-bold mt-0.5"
+                                                >
+                                                    {{ isRtl ? 'مخفي' : 'hidden' }}
+                                                </p>
+                                            </div>
+                                        </button>
+
+                                        <!-- Action buttons -->
+                                        <div
+                                            class="flex items-center gap-1 px-2 border-s border-gray-100 dark:border-gray-800"
+                                        >
+                                            <button
+                                                type="button"
+                                                @click="toggleSignatureVisibility(sig)"
+                                                :disabled="busySigId === sig.id"
+                                                :title="
+                                                    sig.show === false
+                                                        ? isRtl
+                                                            ? 'إظهار'
+                                                            : 'Show'
+                                                        : isRtl
+                                                          ? 'إخفاء'
+                                                          : 'Hide'
+                                                "
+                                                class="p-1.5 rounded-lg text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors disabled:opacity-30"
+                                            >
+                                                <svg
+                                                    v-if="sig.show !== false"
+                                                    class="w-3.5 h-3.5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                    />
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                    />
+                                                </svg>
+                                                <svg
+                                                    v-else
+                                                    class="w-3.5 h-3.5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="startEdit(sig)"
+                                                :disabled="busySigId === sig.id"
+                                                :title="isRtl ? 'تعديل الاسم' : 'Rename'"
+                                                class="p-1.5 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 transition-colors disabled:opacity-30"
+                                            >
+                                                <svg
+                                                    class="w-3.5 h-3.5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                                    />
+                                                </svg>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="confirmDelete(sig)"
+                                                :disabled="busySigId === sig.id"
+                                                :title="isRtl ? 'حذف' : 'Delete'"
+                                                class="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-30"
+                                            >
+                                                <svg
+                                                    class="w-3.5 h-3.5"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        stroke-linecap="round"
+                                                        stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Inline edit form (expanded for the row being edited) -->
+                                    <div
+                                        v-if="editingSigId === sig.id"
+                                        class="border-t border-gray-100 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-900/40 p-3 space-y-2"
                                     >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="3"
-                                            d="M5 13l4 4L19 7"
-                                        />
-                                    </svg>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <input
+                                                v-model="editForm.name_ar"
+                                                type="text"
+                                                :placeholder="
+                                                    isRtl ? 'الاسم بالعربية' : 'Arabic name'
+                                                "
+                                                maxlength="120"
+                                                class="px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                            />
+                                            <input
+                                                v-model="editForm.name_en"
+                                                type="text"
+                                                :placeholder="
+                                                    isRtl ? 'الاسم بالإنجليزية' : 'English name'
+                                                "
+                                                maxlength="120"
+                                                class="px-2 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                                            />
+                                        </div>
+                                        <p
+                                            v-if="editError"
+                                            class="text-[10px] text-red-500 font-bold"
+                                        >
+                                            {{ editError }}
+                                        </p>
+                                        <div class="flex gap-2 justify-end">
+                                            <button
+                                                type="button"
+                                                @click="cancelEdit"
+                                                class="px-3 py-1.5 text-[10px] font-bold rounded-lg text-gray-600 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                            >
+                                                {{ isRtl ? 'إلغاء' : 'Cancel' }}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                @click="saveEdit(sig)"
+                                                :disabled="busySigId === sig.id"
+                                                class="px-3 py-1.5 text-[10px] font-bold rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                                            >
+                                                {{ isRtl ? 'حفظ' : 'Save' }}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete confirmation modal (nested) -->
+                    <div
+                        v-if="deletingSig"
+                        class="absolute inset-0 z-20 flex items-center justify-center bg-black/40 rounded-3xl p-4"
+                        @click.self="deletingSig = null"
+                    >
+                        <div
+                            class="bg-white dark:bg-gray-800 rounded-2xl p-5 max-w-xs w-full shadow-2xl"
+                        >
+                            <h4 class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-2">
+                                {{ isRtl ? 'تأكيد الحذف' : 'Confirm delete' }}
+                            </h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                                {{
+                                    isRtl
+                                        ? `هل تريد حذف التوقيع "${deletingSig.name_ar || deletingSig.name_en}"؟ لا يمكن التراجع.`
+                                        : `Delete signature "${deletingSig.name_en || deletingSig.name_ar}"? This cannot be undone.`
+                                }}
+                            </p>
+                            <div class="flex gap-2 justify-end">
+                                <button
+                                    type="button"
+                                    @click="deletingSig = null"
+                                    class="px-3 py-1.5 text-xs font-bold rounded-lg text-gray-600 hover:bg-gray-100"
+                                >
+                                    {{ isRtl ? 'إلغاء' : 'Cancel' }}
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="executeDelete"
+                                    :disabled="busySigId === deletingSig?.id"
+                                    class="px-3 py-1.5 text-xs font-bold rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    {{ isRtl ? 'حذف' : 'Delete' }}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -459,7 +690,7 @@ const props = defineProps({
     },
 });
 
-const emit = defineEmits(['close', 'signature-saved']);
+const emit = defineEmits(['close', 'signature-saved', 'signature-changed']);
 
 const page = usePage();
 
@@ -472,6 +703,219 @@ const librarySignatures = computed(() => {
     if (fromDoc.length > 0) return fromDoc;
     return page.props?.print_settings?.signatures ?? page.props?.signatures ?? [];
 });
+
+// ── Per-signature management (edit, delete, reorder, toggle) ───────────
+// These operations target the LIBRARY (tenant-wide), not just the
+// current document. The library IS the source of truth — when a user
+// hides a signature here, it disappears from every document that
+// pulled it from the library.
+//
+// All four operations emit `signature-changed` so the parent
+// (Settings/Print/Index.vue) can re-fetch signatures from the server
+// after a successful round trip. The modal handles the in-flight UI
+// state (`busySigId`) and the confirm dialogs.
+
+const busySigId = ref(null);
+const editingSigId = ref(null);
+const editForm = ref({ name_ar: '', name_en: '' });
+const editError = ref('');
+const deletingSig = ref(null);
+
+// Drag-and-drop state. We use HTML5 native DnD because the project
+// already pulls in `interact.js` in some places but we want zero new
+// dependencies here. The "drop target" is highlighted on dragover
+// and the actual reorder fires on `drop`.
+const draggedIndex = ref(null);
+const dropTargetIndex = ref(null);
+
+function startEdit(sig) {
+    editingSigId.value = sig.id;
+    editForm.value = {
+        name_ar: sig.name_ar || '',
+        name_en: sig.name_en || '',
+    };
+    editError.value = '';
+}
+
+function cancelEdit() {
+    editingSigId.value = null;
+    editForm.value = { name_ar: '', name_en: '' };
+    editError.value = '';
+}
+
+async function saveEdit(sig) {
+    busySigId.value = sig.id;
+    editError.value = '';
+    try {
+        // useForm.patch sends CSRF + the X-Inertia header, which makes
+        // the controller flash the updated payload back. The page
+        // reload re-pulls the canonical signature list.
+        const editFormObj = useForm({
+            name_ar: editForm.value.name_ar,
+            name_en: editForm.value.name_en,
+        });
+        await new Promise((resolve, reject) => {
+            editFormObj.patch(`/app/settings/print/signatures/${sig.id}`, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    emit('signature-changed', { action: 'update', id: sig.id });
+                    editingSigId.value = null;
+                    resolve();
+                },
+                onError: (errors) => {
+                    editError.value =
+                        errors.name_ar?.[0] ||
+                        errors.name_en?.[0] ||
+                        errors.error ||
+                        'Update failed';
+                    reject(new Error(editError.value));
+                },
+            });
+        });
+    } catch (e) {
+        // error already shown via editError
+    } finally {
+        busySigId.value = null;
+    }
+}
+
+async function toggleSignatureVisibility(sig) {
+    busySigId.value = sig.id;
+    try {
+        const formObj = useForm({ show: sig.show === false ? true : false });
+        await new Promise((resolve, reject) => {
+            formObj.patch(`/app/settings/print/signatures/${sig.id}`, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    emit('signature-changed', { action: 'toggle', id: sig.id });
+                    resolve();
+                },
+                onError: (errors) => {
+                    console.error('Toggle failed', errors);
+                    reject(new Error(errors.error || 'Toggle failed'));
+                },
+            });
+        });
+    } catch (e) {
+        // swallow; user can retry
+    } finally {
+        busySigId.value = null;
+    }
+}
+
+function confirmDelete(sig) {
+    deletingSig.value = sig;
+}
+
+async function executeDelete() {
+    if (!deletingSig.value) return;
+    const sig = deletingSig.value;
+    busySigId.value = sig.id;
+    try {
+        const formObj = useForm({});
+        await new Promise((resolve, reject) => {
+            formObj.delete(`/app/settings/print/signatures/${sig.id}`, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    emit('signature-changed', { action: 'delete', id: sig.id });
+                    if (selectedLibraryId.value === sig.id) {
+                        selectedLibraryId.value = null;
+                    }
+                    deletingSig.value = null;
+                    resolve();
+                },
+                onError: (errors) => {
+                    console.error('Delete failed', errors);
+                    deletingSig.value = null;
+                    reject(new Error(errors.error || 'Delete failed'));
+                },
+            });
+        });
+    } catch (e) {
+        // swallow
+    } finally {
+        busySigId.value = null;
+    }
+}
+
+// ── Drag-and-drop reorder ──────────────────────────────────────────────
+// We track the dragged row's source index and the currently-hovered
+// target row. On drop, we mutate the local list optimistically and
+// fire a single reorder request to the server. If the server rejects
+// (e.g. because someone else edited the list concurrently), the
+// parent will re-fetch and reset our view.
+function onDragStart(event, idx) {
+    draggedIndex.value = idx;
+    dropTargetIndex.value = idx;
+    // Required for Firefox to start the drag
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', String(idx));
+}
+
+function onDragOver(event, idx) {
+    if (draggedIndex.value === null) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    dropTargetIndex.value = idx;
+}
+
+function onDragEnter(event, idx) {
+    if (draggedIndex.value === null) return;
+    dropTargetIndex.value = idx;
+}
+
+function onDragLeave(event, idx) {
+    // Only clear if we actually left the row (not a child element)
+    if (event.currentTarget.contains(event.relatedTarget)) return;
+    if (dropTargetIndex.value === idx) {
+        dropTargetIndex.value = null;
+    }
+}
+
+async function onDrop(event, targetIdx) {
+    event.preventDefault();
+    const sourceIdx = draggedIndex.value;
+    draggedIndex.value = null;
+    dropTargetIndex.value = null;
+    if (sourceIdx === null || sourceIdx === targetIdx) return;
+
+    // Reorder the LOCAL list (read-only fallback if the server fails)
+    const next = librarySignatures.value.slice();
+    const [moved] = next.splice(sourceIdx, 1);
+    next.splice(targetIdx, 0, moved);
+
+    // Build the id list in the new order
+    const newOrder = next.map((s) => s.id);
+
+    // Fire the reorder request
+    busySigId.value = next[targetIdx].id;
+    try {
+        const formObj = useForm({ order: newOrder, document_type: props.docKey || '' });
+        await new Promise((resolve, reject) => {
+            formObj.post('/app/settings/print/signatures/reorder', {
+                preserveScroll: true,
+                onSuccess: () => {
+                    emit('signature-changed', { action: 'reorder', order: newOrder });
+                    resolve();
+                },
+                onError: (errors) => {
+                    console.error('Reorder failed', errors);
+                    reject(new Error(errors.message || 'Reorder failed'));
+                },
+            });
+        });
+    } catch (e) {
+        // On failure, the parent will re-fetch and reset us
+        emit('signature-changed', { action: 'reorder', refresh: true });
+    } finally {
+        busySigId.value = null;
+    }
+}
+
+function onDragEnd() {
+    draggedIndex.value = null;
+    dropTargetIndex.value = null;
+}
 
 // ── Tabs ───────────────────────────────────────────────────────────────
 const tabs = computed(() => [

@@ -659,4 +659,323 @@ class PrintSettingsSignatureUploadTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['signature']);
     }
+
+    // BUG #3 — Inertia response shape. Modal uses form.post() which sets
+    // X-Inertia; the controller must redirect-back + flash the payload
+    // instead of returning plain JSON, otherwise the modal's onSuccess
+    // never fires and the user sees
+    //   "All Inertia requests must receive a valid Inertia response,
+    //    however a plain JSON response was received."
+    public function test_inertia_upload_returns_redirect_with_flashed_payload(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'Accept' => 'text/html, application/xhtml+xml',
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->post(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع انرتيا',
+                'name_en' => 'Inertia Signature',
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertStatus(302);
+        $response->assertRedirect();
+        $response->assertSessionHas('signature', function ($payload) {
+            return is_array($payload)
+                && ($payload['name_ar'] ?? null) === 'توقيع انرتيا'
+                && ($payload['name_en'] ?? null) === 'Inertia Signature'
+                && ! empty($payload['url']);
+        });
+
+        $this->tenant->refresh();
+        $sigs = $this->tenant->print_settings['documents']['invoice']['signatures'] ?? [];
+        $this->assertCount(1, $sigs);
+        $this->assertSame('توقيع انرتيا', $sigs[0]['name_ar']);
+    }
+
+    public function test_inertia_delete_returns_redirect(): void
+    {
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'للحذف',
+                'name_en' => 'Doomed',
+                'document_type' => 'invoice',
+            ]);
+        $sigId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->withHeaders([
+                'X-Inertia' => 'true',
+                'Accept' => 'text/html, application/xhtml+xml',
+                'X-Requested-With' => 'XMLHttpRequest',
+            ])
+            ->delete(route('settings.print.signatures.destroy', $sigId));
+
+        $response->assertStatus(303);
+        $response->assertRedirect();
+    }
+
+    // ---------------------------------------------------------------
+    // BUG #5 — PATCH /signatures/{id} (rename + show/hide)
+    //
+    // The new UI lets the user rename a signature, or hide it from
+    // the print template without deleting it. The endpoint must:
+    //   - accept partial updates (sometimes-only fields)
+    //   - persist changes to the JSON column
+    //   - dual-respond (Inertia redirect vs raw JSON)
+    //   - return 404 when the id does not exist
+    // ---------------------------------------------------------------
+
+    public function test_can_rename_existing_signature(): void
+    {
+        // Seed a signature first via the non-Inertia path
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'اسم قديم',
+                'name_en' => 'Old Name',
+                'document_type' => 'invoice',
+            ]);
+        $sigId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->patchJson(route('settings.print.signatures.update', $sigId), [
+                'name_ar' => 'اسم جديد',
+                'name_en' => 'New Name',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonFragment(['name_ar' => 'اسم جديد']);
+        $response->assertJsonFragment(['name_en' => 'New Name']);
+
+        // Persisted to the JSON column
+        $this->tenant->refresh();
+        $sig = $this->tenant->print_settings['documents']['invoice']['signatures'][0];
+        $this->assertSame('اسم جديد', $sig['name_ar']);
+        $this->assertSame('New Name', $sig['name_en']);
+    }
+
+    public function test_can_toggle_signature_visibility(): void
+    {
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'مرئي',
+                'name_en' => 'Visible',
+                'document_type' => 'invoice',
+            ]);
+        $sigId = $upload->json('id');
+
+        // Initially the show flag is absent (treated as visible).
+        $this->assertArrayNotHasKey('show', $upload->json());
+
+        // Hide it
+        $hide = $this->actingAs($this->user)
+            ->patchJson(route('settings.print.signatures.update', $sigId), [
+                'show' => false,
+            ]);
+
+        $hide->assertOk();
+        $hide->assertJsonFragment(['show' => false]);
+
+        // Persisted
+        $this->tenant->refresh();
+        $sig = $this->tenant->print_settings['documents']['invoice']['signatures'][0];
+        $this->assertFalse($sig['show']);
+
+        // Re-show it
+        $show = $this->actingAs($this->user)
+            ->patchJson(route('settings.print.signatures.update', $sigId), [
+                'show' => true,
+            ]);
+        $show->assertOk();
+        $this->tenant->refresh();
+        $this->assertTrue($this->tenant->print_settings['documents']['invoice']['signatures'][0]['show']);
+    }
+
+    public function test_update_missing_signature_returns_404(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->patchJson(route('settings.print.signatures.update', '00000000-0000-0000-0000-000000000000'), [
+                'name_ar' => 'x',
+            ]);
+        $response->assertNotFound();
+    }
+
+    public function test_update_validates_max_length(): void
+    {
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'a',
+                'name_en' => 'b',
+                'document_type' => 'invoice',
+            ]);
+        $sigId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->patchJson(route('settings.print.signatures.update', $sigId), [
+                'name_ar' => str_repeat('x', 121),  // over the 120 limit
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['name_ar']);
+    }
+
+    public function test_inertia_update_redirects_with_updated_payload(): void
+    {
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'a',
+                'name_en' => 'b',
+                'document_type' => 'invoice',
+            ]);
+        $sigId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->withHeaders(['X-Inertia' => 'true', 'Accept' => 'text/html, application/xhtml+xml'])
+            ->patch(route('settings.print.signatures.update', $sigId), [
+                'name_ar' => 'محدّث',
+                'name_en' => 'Updated',
+            ]);
+
+        // PATCH redirects use 303 (Laravel behavior)
+        $response->assertStatus(303);
+        $response->assertRedirect();
+        $response->assertSessionHas('signature', fn ($p) => ($p['name_ar'] ?? null) === 'محدّث');
+    }
+
+    // ---------------------------------------------------------------
+    // BUG #6 — POST /signatures/reorder (drag-drop in library)
+    //
+    // The library tab lets the user drag-reorder signatures. The
+    // controller must:
+    //   - accept a complete ordered list of ids
+    //   - reject partial / mismatched lists (refuse silent data loss)
+    //   - persist the new order
+    //   - dual-respond
+    // ---------------------------------------------------------------
+
+    public function test_can_reorder_signatures(): void
+    {
+        // Seed three signatures in a known order
+        $ids = [];
+        foreach (['الأول', 'الثاني', 'الثالث'] as $name) {
+            $resp = $this->actingAs($this->user)
+                ->postJson(route('settings.print.signatures.store'), [
+                    'signature' => $this->makeValidPng(),
+                    'name_ar' => $name,
+                    'name_en' => $name,
+                    'document_type' => 'invoice',
+                ]);
+            $ids[] = $resp->json('id');
+        }
+
+        // Reverse the order
+        $reversed = array_reverse($ids);
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.reorder'), [
+                'order' => $reversed,
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonFragment(['order' => $reversed]);
+
+        // Persisted in the new order
+        $this->tenant->refresh();
+        $stored = $this->tenant->print_settings['documents']['invoice']['signatures'];
+        $storedIds = array_map(fn ($s) => $s['id'], $stored);
+        $this->assertSame($reversed, $storedIds);
+    }
+
+    public function test_reorder_rejects_mismatched_id_list(): void
+    {
+        // Seed two signatures
+        $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'a', 'name_en' => 'a',
+                'document_type' => 'invoice',
+            ]);
+        $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'b', 'name_en' => 'b',
+                'document_type' => 'invoice',
+            ]);
+
+        // Submit a list with an extra id that does not belong to the tenant
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.reorder'), [
+                'order' => [
+                    '00000000-0000-0000-0000-000000000000',
+                    '11111111-1111-1111-1111-111111111111',
+                ],
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertStatus(422);
+    }
+
+    public function test_reorder_rejects_duplicate_ids(): void
+    {
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'a', 'name_en' => 'a',
+                'document_type' => 'invoice',
+            ]);
+        $sigId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.reorder'), [
+                'order' => [$sigId, $sigId],  // duplicate
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['order.0', 'order.1']);
+    }
+
+    public function test_reorder_validates_uuids(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.reorder'), [
+                'order' => ['not-a-uuid', 'also-not-a-uuid'],
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['order.0', 'order.1']);
+    }
+
+    public function test_inertia_reorder_redirects_with_payload(): void
+    {
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'a', 'name_en' => 'a',
+                'document_type' => 'invoice',
+            ]);
+        $sigId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->withHeaders(['X-Inertia' => 'true', 'Accept' => 'text/html, application/xhtml+xml'])
+            ->post(route('settings.print.signatures.reorder'), [
+                'order' => [$sigId],
+                'document_type' => 'invoice',
+            ]);
+
+        // POST redirects use 302 (Laravel behavior)
+        $response->assertStatus(302);
+        $response->assertRedirect();
+        $response->assertSessionHas('reordered');
+    }
 }

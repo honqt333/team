@@ -583,13 +583,14 @@
             :doc-key="editingSignaturesDoc"
             @close="closeSignatureModal"
             @signature-saved="handleSignatureSaved"
+            @signature-changed="handleSignatureChanged"
         />
     </AppLayout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { usePage } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
+import { usePage, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
@@ -809,6 +810,92 @@ function handleSignatureSaved(sig) {
     form.documents[key] = nextDoc;
     closeSignatureModal();
 }
+
+/**
+ * Called by SignatureModal after the user performs a destructive or
+ * ordering action (delete, rename, toggle show/hide, drag-reorder)
+ * on a signature that's already in the library.
+ *
+ * The modal already sent the PATCH/DELETE/POST request to the server
+ * and the server already persisted the change. Our job here is to
+ * keep the in-page state in sync with the server, so the modal
+ * (which reads from `form.documents[editingSignaturesDoc].signatures`)
+ * shows the fresh data without a manual page refresh.
+ *
+ * Why we re-sync from the server rather than mutate locally:
+ *   - The server is the source of truth (also `updated_at` /
+ *     `updated_by` are stamped there). A local mutation would
+ *     drift from disk on the next reload.
+ *   - The full Inertia `router.reload` (no `only:`) is a single
+ *     cheap round-trip and re-derives `form` via the form-init
+ *     watcher below. We do not use `only: ['tenant']` because
+ *     `print_settings` is a nested key on `tenant` and partial
+ *     reloads have surprised us before.
+ */
+function handleSignatureChanged(payload) {
+    const key = editingSignaturesDoc.value;
+    if (!key) return;
+
+    const doc = form.documents[key];
+    if (!doc || !Array.isArray(doc.signatures)) return;
+
+    if (payload?.action === 'delete') {
+        // Local optimistic delete so the modal collapses the row
+        // immediately. The reload below will overwrite with the
+        // server's canonical list.
+        doc.signatures = doc.signatures.filter((s) => s.id !== payload.id);
+        if (doc.signature?.id === payload.id) {
+            doc.signature = null;
+        }
+    } else if (
+        payload?.action === 'reorder' &&
+        Array.isArray(payload.order) &&
+        payload.order.length > 0
+    ) {
+        // Local optimistic reorder
+        const byId = new Map(doc.signatures.map((s) => [s.id, s]));
+        doc.signatures = payload.order.map((id) => byId.get(id)).filter(Boolean);
+    }
+
+    // Always reload the page data. The reload fires `onSuccess` after
+    // the new Inertia payload lands; the watcher below then re-derives
+    // `form.documents` from the fresh tenant.print_settings, so the
+    // modal (and the PrintEngine preview) reflect the server's
+    // canonical state.
+    router.reload();
+}
+
+/**
+ * Watch the tenant's `print_settings` so the local form state stays
+ * in sync with the server. Without this, the modal would keep showing
+ * stale data after a PATCH / DELETE / reorder round trip — the
+ * PrintEngine preview would also lie.
+ *
+ * The watcher fires:
+ *   1. On first mount when Inertia hydrates page.props.
+ *   2. After `router.reload()` returns, with the fresh payload.
+ *   3. After the user hits Save and the server returns an updated
+ *      tenant with merged print_settings.
+ *
+ * We only sync the `signatures` field per document; everything else
+ * (title, terms, show_stamp, etc) is user-edited and only saved on
+ * the explicit Save button. Mirroring those would clobber the
+ * user's in-progress edits.
+ */
+watch(
+    () => page.props.tenant?.print_settings,
+    (newSettings) => {
+        if (!newSettings?.documents) return;
+        for (const [key, serverDoc] of Object.entries(newSettings.documents)) {
+            const local = form.documents[key];
+            if (!local) continue;
+            local.signatures = Array.isArray(serverDoc.signatures)
+                ? serverDoc.signatures.map((s) => ({ ...s }))
+                : [];
+        }
+    },
+    { deep: true }
+);
 
 function save() {
     form.put('/app/settings/system', {

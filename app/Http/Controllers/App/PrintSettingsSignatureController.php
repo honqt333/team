@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\App\Print\ReorderSignaturesRequest;
+use App\Http\Requests\App\Print\UpdateSignatureRequest;
 use App\Http\Requests\App\Print\UploadSignatureRequest;
 use App\Models\Tenant;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -67,7 +68,7 @@ class PrintSettingsSignatureController extends Controller
      *     "document_type": "invoice"   // null if uploaded without a target
      *   }
      */
-    public function store(UploadSignatureRequest $request): JsonResponse
+    public function store(UploadSignatureRequest $request): \Symfony\Component\HttpFoundation\Response
     {
         $tenant = $request->user()->tenant;
 
@@ -167,6 +168,25 @@ class PrintSettingsSignatureController extends Controller
             'path' => $path,
         ]);
 
+        // Dual response shape: Inertia requests must receive a proper
+        // Inertia response (a redirect or a full page render), never a
+        // plain JSON body — otherwise the Inertia client throws
+        //   "All Inertia requests must receive a valid Inertia response,
+        //    however a plain JSON response was received."
+        // and the modal's onSuccess handler never fires, even though the
+        // upload succeeded (file is on disk, JSON column is updated).
+        //
+        // We detect Inertia by the standard `X-Inertia` header that every
+        // Inertia request sets. For Inertia clients we flash the saved
+        // signature payload into the session so the modal's
+        //   page.props.flash.signature
+        // reader picks it up on the redirect back. For non-Inertia clients
+        // (curl, Postman, smoke tests, the existing feature tests) we
+        // return the raw JSON they expect.
+        if ($request->header('X-Inertia')) {
+            return back()->with('signature', $signaturePayload);
+        }
+
         return response()->json($signaturePayload, 200);
     }
 
@@ -255,7 +275,245 @@ class PrintSettingsSignatureController extends Controller
             'signature_id' => $signatureId,
         ]);
 
+        // Dual response: see store() for the rationale. Inertia requests
+        // get a redirect back; non-Inertia clients (curl, Postman, feature
+        // tests) get the legacy 204 No Content.
+        if (request()->header('X-Inertia')) {
+            return back();
+        }
+
         return response()->noContent();
+    }
+
+    /**
+     * Update an existing signature's metadata — bilingual names and
+     * visibility (`show`) flag.
+     *
+     * The signature file itself is NOT replaced here. To swap the
+     * image, the user must delete + re-upload. This keeps the API
+     * surface small and avoids a class of "I lost my old signature"
+     * support tickets.
+     *
+     * What we DO update:
+     *   - name_ar / name_en: the human-readable labels shown in the
+     *     print layout. The legacy `name` field is mirrored into both
+     *     so the template never renders an empty caption.
+     *   - show: when false, the print template's `s.show !== false`
+     *     filter hides the signature from the footer without removing
+     *     it from storage. The user can re-enable it later.
+     *
+     * Concurrency: the JSON column is a single atomic read-modify-write
+     * on the Tenant model. Two concurrent updates would race; this is
+     * an admin-only endpoint with low traffic so the worst case is a
+     * "your change was overwritten" report, not data corruption. If
+     * the volume grows, switch to a row-level lock or JSONB column
+     * with native concurrency control.
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function update(UpdateSignatureRequest $request, string $signatureId)
+    {
+        $tenant = auth()->user()->tenant;
+        $this->authorize('update', $tenant);
+
+        $current = $tenant->print_settings ?? [];
+        $documents = $current['documents'] ?? [];
+        $found = false;
+        $updated = null;
+
+        foreach ($documents as $docKey => $doc) {
+            $signatures = $doc['signatures'] ?? [];
+            $flat = $this->flattenSignaturesForRead($signatures);
+            $kept = [];
+            foreach ($flat as $sig) {
+                if (($sig['id'] ?? null) === $signatureId) {
+                    $found = true;
+                    $data = $request->validatedWithDefaults();
+
+                    // Bilingual labels — at least one must be present
+                    // so the template never has an empty caption. If
+                    // the client sent `name` only, copy it into both.
+                    if (isset($data['name_ar'])) {
+                        $sig['name_ar'] = (string) $data['name_ar'];
+                    }
+                    if (isset($data['name_en'])) {
+                        $sig['name_en'] = (string) $data['name_en'];
+                    }
+                    if (isset($data['name']) && ! isset($sig['name_ar']) && ! isset($sig['name_en'])) {
+                        $sig['name_ar'] = (string) $data['name'];
+                        $sig['name_en'] = (string) $data['name'];
+                    }
+                    // Keep the legacy `name` mirror in sync.
+                    $sig['name'] = $sig['name_en'] ?? $sig['name_ar'] ?? '';
+
+                    // Visibility — boolean. Absent key means "no change".
+                    if (array_key_exists('show', $data)) {
+                        $sig['show'] = (bool) $data['show'];
+                    }
+
+                    $sig['updated_at'] = now()->format('Y-m-d H:i:s');
+                    $sig['updated_by'] = auth()->user()?->name;
+
+                    $updated = $sig;
+                }
+                $kept[] = $sig;
+            }
+            if ($found) {
+                $documents[$docKey]['signatures'] = $kept;
+                $documents[$docKey]['updated_at'] = now()->format('Y-m-d H:i:s');
+                $documents[$docKey]['updated_by'] = auth()->user()?->name;
+                break;
+            }
+        }
+
+        if (! $found) {
+            return response()->json(['message' => 'Signature not found'], 404);
+        }
+
+        $current['documents'] = $documents;
+        $tenant->print_settings = $current;
+        $tenant->save();
+
+        Log::info('print_settings.signature_updated', [
+            'tenant_id' => $tenant->id,
+            'user_id' => auth()->id(),
+            'signature_id' => $signatureId,
+            'fields' => array_keys($request->validatedWithDefaults()),
+        ]);
+
+        // Same dual-response pattern as store() and destroy().
+        if ($request->header('X-Inertia')) {
+            return back()->with('signature', $updated);
+        }
+
+        return response()->json($updated, 200);
+    }
+
+    /**
+     * Reorder signatures within a single document type.
+     *
+     * The signature order in the JSON array IS the order the print
+     * template renders them (left → right in A4, top → bottom in
+     * Thermal). Reordering = rewriting the array in the requested
+     * sequence.
+     *
+     * Safety rules enforced by the controller (in addition to the
+     * FormRequest's shape validation):
+     *   1. The submitted `order` MUST be a permutation of the existing
+     *      signature ids. We never silently drop or duplicate a
+     *      signature — reordering is a "shuffle", not a "remix".
+     *   2. If `document_type` is given, we reorder only that document.
+     *      If omitted, we apply the same order to ALL documents that
+     *      contain the same set of signatures (rare; mostly for the
+     *      library view where signatures are doc-agnostic).
+     *   3. We never touch signatures from OTHER tenants. The
+     *      `$signatureId` is matched against THIS tenant's JSON only.
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function reorder(ReorderSignaturesRequest $request)
+    {
+        $tenant = auth()->user()->tenant;
+        $this->authorize('update', $tenant);
+
+        $validated = $request->validated();
+        /** @var array<int, string> $order */
+        $order = $validated['order'];
+        $documentType = $validated['document_type'] ?? null;
+
+        $current = $tenant->print_settings ?? [];
+        $documents = $current['documents'] ?? [];
+
+        // If document_type is given, target only that document. Otherwise
+        // apply to every document whose signature set matches `order`.
+        $targetDocKeys = $documentType
+            ? [$documentType]
+            : array_keys($documents);
+
+        $touched = [];
+        $mismatch = false;
+
+        foreach ($targetDocKeys as $docKey) {
+            if (! isset($documents[$docKey])) {
+                if ($documentType) {
+                    $mismatch = true;
+
+                    break;
+                }
+
+                continue;
+            }
+
+            $signatures = $documents[$docKey]['signatures'] ?? [];
+            $flat = $this->flattenSignaturesForRead($signatures);
+
+            // Build id -> signature map for O(1) lookup.
+            $byId = [];
+            foreach ($flat as $sig) {
+                $id = $sig['id'] ?? null;
+                if ($id) {
+                    $byId[$id] = $sig;
+                }
+            }
+
+            // Validate permutation: the set of ids in $order must equal
+            // the set of ids currently stored for this document.
+            $existingIds = array_keys($byId);
+            $submittedIds = $order;
+
+            sort($existingIds);
+            $sortedSubmitted = $submittedIds;
+            sort($sortedSubmitted);
+
+            if ($existingIds !== $sortedSubmitted) {
+                $mismatch = true;
+
+                break;
+            }
+
+            // Rebuild the array in the new order.
+            $reordered = [];
+            foreach ($order as $id) {
+                $reordered[] = $byId[$id];
+            }
+
+            $documents[$docKey]['signatures'] = $reordered;
+            $documents[$docKey]['updated_at'] = now()->format('Y-m-d H:i:s');
+            $documents[$docKey]['updated_by'] = auth()->user()?->name;
+            $touched[] = $docKey;
+        }
+
+        if ($mismatch) {
+            return response()->json([
+                'message' => 'The submitted order does not match the current signatures. Reload the page and try again.',
+            ], 422);
+        }
+
+        $current['documents'] = $documents;
+        $tenant->print_settings = $current;
+        $tenant->save();
+
+        Log::info('print_settings.signatures_reordered', [
+            'tenant_id' => $tenant->id,
+            'user_id' => auth()->id(),
+            'documents' => $touched,
+            'count' => count($order),
+        ]);
+
+        // Dual response: Inertia clients get a redirect-back with the
+        // new order in flash, so the modal can re-render without a
+        // full page reload. Non-Inertia clients get the raw JSON.
+        if ($request->header('X-Inertia')) {
+            return back()->with('reordered', [
+                'documents' => $touched,
+                'order' => $order,
+            ]);
+        }
+
+        return response()->json([
+            'documents' => $touched,
+            'order' => $order,
+        ], 200);
     }
 
     /**
