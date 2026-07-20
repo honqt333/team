@@ -18,7 +18,7 @@
         <div class="py-2 border-b border-dashed border-gray-300 text-[10px] text-gray-600 space-y-0.5">
             <div class="flex justify-between items-center">
                 <span class="font-bold text-gray-800 transition-all duration-300" :class="isSleek ? 'text-[10px] font-black uppercase tracking-wider px-2 py-0.5 bg-slate-900 text-white rounded' : ''" :style="isSleek ? { backgroundColor: primaryColor } : {}">
-                    {{ isRtl ? (documentSettings.title_ar || getDocTypeTitle(documentType)) : (documentSettings.title_en || getDocTypeTitle(documentType)) }}
+                    {{ getDocumentTitle() }}
                 </span>
                 <span class="font-bold" :style="{ color: primaryColor }">#{{ data.code || 'WO-100293' }}</span>
             </div>
@@ -430,39 +430,68 @@ function getSignatureGridClass(count) {
 
 // Map document keys to localized Titles
 function getDocTypeTitle(type) {
+    const taxActive = isTaxEnabled();
     const titlesAr = {
-        invoice: 'فاتورة مبسطة',
+        invoice: taxActive ? 'فاتورة ضريبية مبسطة' : 'فاتورة مبسطة',
         proforma_invoice: 'فاتورة أولية مبسطة',
         quotation: 'عرض سعر صيانة',
-        parts_invoice: 'فاتورة قطع غيار مبسطة',
+        parts_invoice: taxActive ? 'فاتورة قطع غيار ضريبية مبسطة' : 'فاتورة قطع غيار مبسطة',
         work_order: 'كرت الصيانة',
         receipt: 'سند قبض مالي',
         checklist: 'الفحص المنهجي',
         delivery_note: 'سند تسليم مركبة',
         condition_report: 'تقرير حالة المركبة',
         payments: 'سندات الدفع والمدفوعات المبسطة',
-        purchase_invoice: 'فاتورة مشتريات مبسطة',
-        purchase_return: 'فاتورة مرتجع مشتريات مبسطة'
+        purchase_invoice: taxActive ? 'فاتورة مشتريات ضريبية مبسطة' : 'فاتورة مشتريات مبسطة',
+        purchase_return: taxActive ? 'فاتورة مرتجع مشتريات ضريبية مبسطة' : 'فاتورة مرتجع مشتريات مبسطة'
     };
     const titlesEn = {
-        invoice: 'Simplified Invoice',
+        invoice: taxActive ? 'Simplified Tax Invoice' : 'Simplified Invoice',
         proforma_invoice: 'Simplified Proforma Invoice',
         quotation: 'Maintenance Quote',
-        parts_invoice: 'Simplified Parts Invoice',
+        parts_invoice: taxActive ? 'Simplified Tax Parts Invoice' : 'Simplified Parts Invoice',
         work_order: 'Work Order',
         receipt: 'Receipt',
         checklist: 'Systematic Checklist',
         delivery_note: 'Vehicle Delivery Note',
         condition_report: 'Vehicle Condition Report',
         payments: 'Payments Receipt',
-        purchase_invoice: 'Simplified Purchase Invoice',
-        purchase_return: 'Simplified Purchase Return Invoice'
+        purchase_invoice: taxActive ? 'Simplified Tax Purchase Invoice' : 'Simplified Purchase Invoice',
+        purchase_return: taxActive ? 'Simplified Tax Purchase Return Invoice' : 'Simplified Purchase Return Invoice'
     };
     if (isRtl.value) {
         return titlesAr[type] || 'وثيقة رسمية';
     } else {
         return titlesEn[type] || 'Official Document';
     }
+}
+
+function getDocumentTitle() {
+    const taxActive = isTaxEnabled();
+    let title = isRtl.value
+        ? (props.documentSettings?.title_ar || getDocTypeTitle(props.documentType))
+        : (props.documentSettings?.title_en || getDocTypeTitle(props.documentType));
+
+    if (!taxActive) {
+        if (isRtl.value) {
+            title = title
+                .replace(/فاتورة ضريبية مبسطة/g, 'فاتورة مبسطة')
+                .replace(/فاتورة ضريبية/g, 'فاتورة')
+                .replace(/ضريبية/g, '')
+                .trim();
+        } else {
+            title = title
+                .replace(/Simplified Tax Invoice/gi, 'Simplified Invoice')
+                .replace(/Tax Invoice/gi, 'Invoice')
+                .replace(/Tax/gi, '')
+                .trim();
+        }
+        if (!title) {
+            title = isRtl.value ? 'فاتورة' : 'Invoice';
+        }
+    }
+
+    return title;
 }
 
 // Dummy Fallback Data

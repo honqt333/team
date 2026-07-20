@@ -228,9 +228,25 @@ const mappedCenterData = computed(() => {
 const documentSettings = computed(() => {
     const tenantSettings = page.props.tenant?.print_settings;
     const docSettings = tenantSettings?.documents?.['invoice'] || {};
+
+    const defaultTitleAr = isTaxEnabled.value
+        ? (props.labels?.document_title || 'فاتورة ضريبية مبسطة')
+        : 'فاتورة';
+    const defaultTitleEn = isTaxEnabled.value
+        ? (props.labels?.document_title || 'Simplified Tax Invoice')
+        : 'Invoice';
+
+    let titleAr = docSettings.title_ar || defaultTitleAr;
+    let titleEn = docSettings.title_en || defaultTitleEn;
+
+    if (!isTaxEnabled.value) {
+        titleAr = titleAr.replace(/فاتورة ضريبية مبسطة/g, 'فاتورة').replace(/فاتورة ضريبية/g, 'فاتورة').replace(/ضريبية/g, '').trim() || 'فاتورة';
+        titleEn = titleEn.replace(/Simplified Tax Invoice/gi, 'Invoice').replace(/Tax Invoice/gi, 'Invoice').replace(/Tax/gi, '').trim() || 'Invoice';
+    }
+
     return {
-        title_ar: docSettings.title_ar || props.labels?.document_title || 'فاتورة ضريبية مبسطة',
-        title_en: docSettings.title_en || props.labels?.document_title || 'Simplified Tax Invoice',
+        title_ar: titleAr,
+        title_en: titleEn,
         terms:
             docSettings.terms ||
             (page.props.tenant?.invoice_terms ? [page.props.tenant.invoice_terms] : []),
