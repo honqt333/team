@@ -472,6 +472,8 @@ function getDocumentTitle() {
         ? (props.documentSettings?.title_ar || getDocTypeTitle(props.documentType))
         : (props.documentSettings?.title_en || getDocTypeTitle(props.documentType));
 
+    title = String(title || '');
+
     if (!taxActive) {
         if (isRtl.value) {
             title = title

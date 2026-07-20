@@ -100,12 +100,13 @@ const isTaxEnabled = computed(() => {
 });
 
 const mappedData = computed(() => {
-    const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
-    const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
+    const wo = props.workOrder || {};
+    const make = wo.vehicle?.make?.name_ar || wo.vehicle?.make?.name_en || '';
+    const model = wo.vehicle?.model?.name_ar || wo.vehicle?.model?.name_en || '';
     const vehicleStr = `${make} ${model}`.trim() || '-';
 
     // Map services
-    const services = (props.workOrder.items || []).map(item => {
+    const services = (wo.items || []).map(item => {
         let serviceName = '';
         const isStandard = item.service && 
             item.service.name_ar?.trim() !== 'أخرى' && 
@@ -165,34 +166,34 @@ const mappedData = computed(() => {
         }));
 
     return {
-        code: props.workOrder.code,
+        code: wo.code,
         created_at: new Date().toISOString(),
-        entry_date: props.workOrder.entry_date,
-        mileage: props.workOrder.mileage,
-        odometer: props.workOrder.mileage ? formatNumber(props.workOrder.mileage) : '-',
-        fuel_level: props.workOrder.fuel_level,
-        customer_complaint: props.workOrder.customer_complaint,
-        reception_signature: props.workOrder.reception_signature,
-        delivery_signature: props.workOrder.delivery_signature,
+        entry_date: wo.entry_date,
+        mileage: wo.mileage,
+        odometer: wo.mileage ? formatNumber(wo.mileage) : '-',
+        fuel_level: wo.fuel_level,
+        customer_complaint: wo.customer_complaint,
+        reception_signature: wo.reception_signature,
+        delivery_signature: wo.delivery_signature,
         customer: {
-            name: props.workOrder.customer?.name,
-            phone: props.workOrder.customer?.phone,
-            address: props.workOrder.customer?.address_line,
-            tax_number: props.workOrder.customer?.tax_number,
+            name: wo.customer?.name,
+            phone: wo.customer?.phone,
+            address: wo.customer?.address_line,
+            tax_number: wo.customer?.tax_number,
         },
         vehicle: {
             make: vehicleStr,
-            plate: props.workOrder.vehicle?.plate_number,
-            color: props.workOrder.vehicle?.color,
+            plate: wo.vehicle?.plate_number,
+            color: wo.vehicle?.color,
         },
         tax_enabled_snapshot: isTaxEnabled.value,
-        pricing_mode_snapshot: props.workOrder.pricing_mode_snapshot || 'exclusive',
-        total_excl_tax: Number(props.workOrder.total_excl_tax || props.grandTotal || 0),
-        total_tax: isTaxEnabled.value ? Number(props.workOrder.total_tax || 0) : 0,
-        total_incl_tax: isTaxEnabled.value ? Number(props.workOrder.total_incl_tax || 0) : Number(props.workOrder.total_excl_tax || props.grandTotal || 0),
-        discount_amount: Number(props.workOrder.total_discount || 0),
+        pricing_mode_snapshot: wo.pricing_mode_snapshot || 'exclusive',
+        total_excl_tax: Number(wo.total_excl_tax || props.grandTotal || 0),
+        total_tax: isTaxEnabled.value ? Number(wo.total_tax || 0) : 0,
+        total_incl_tax: isTaxEnabled.value ? Number(wo.total_incl_tax || 0) : Number(wo.total_excl_tax || props.grandTotal || 0),
+        discount_amount: Number(wo.total_discount || 0),
         total_paid: props.totalPaid ?? 0,
-        balance: (isTaxEnabled.value ? Number(props.workOrder.total || 0) : Number(props.grandTotal || 0)) - Number(props.totalPaid || 0),
+        balance: (isTaxEnabled.value ? Number(wo.total || 0) : Number(props.grandTotal || 0)) - Number(props.totalPaid || 0),
         items: [...services, ...parts]
     };
 });
