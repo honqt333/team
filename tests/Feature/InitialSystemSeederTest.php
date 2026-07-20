@@ -13,6 +13,7 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use Database\Seeders\InitialSystemSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -113,5 +114,20 @@ class InitialSystemSeederTest extends TestCase
         $this->assertGreaterThan(0, VehicleMake::count(), 'vehicle makes must be seeded');
         $this->assertGreaterThan(0, VehicleModel::count(), 'vehicle models must be seeded');
         $this->assertGreaterThan(0, VehicleColor::count(), 'vehicle colors must be seeded');
+
+        // Logo files — VehicleMakeLogoSeeder generates a
+        // placeholder SVG for every make. Without it the vehicles
+        // list page renders an empty image placeholder.
+        $makesWithLogos = VehicleMake::whereNotNull('logo_path')->count();
+        $this->assertSame(
+            VehicleMake::count(),
+            $makesWithLogos,
+            'every vehicle make must have a logo_path set after InitialSystemSeeder'
+        );
+        $firstMake = VehicleMake::whereNotNull('logo_path')->first();
+        $this->assertTrue(
+            Storage::disk('public')->exists($firstMake->logo_path),
+            'logo file must exist on the public disk: '.$firstMake->logo_path
+        );
     }
 }

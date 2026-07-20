@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -25,6 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->call(MetadataSeeder::class);
         $this->call(ServiceSeeder::class);
         $this->call(VehicleConditionSeeder::class);
+        $this->call(VehicleMakeLogoSeeder::class);
 
         // 4. Create Communication Templates (email/sms)
         // Without these, /system/communication/templates is empty and

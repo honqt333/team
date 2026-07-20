@@ -130,11 +130,13 @@ class InitialSystemSeeder extends Seeder
         //    storage/app/temp_data/car-list.json) is NOT called here
         //    because that JSON is not in the repo. VehicleMakesSeeder
         //    (chained via MetadataSeeder) provides the hardcoded
-        //    make + model list, which is enough for the UI to work.
+        //    make + model list, and VehicleMakeLogoSeeder generates
+        //    placeholder SVG logos so the UI is never blank.
         $this->call([
             MetadataSeeder::class,
             ServiceSeeder::class,
             VehicleConditionSeeder::class,
+            VehicleMakeLogoSeeder::class,
             CommunicationTemplateSeeder::class,
         ]);
     }
