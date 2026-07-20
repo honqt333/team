@@ -4,17 +4,18 @@ namespace App\Policies;
 
 use App\Models\HR\Leave;
 use App\Models\User;
+use App\Support\Permissions;
 
 class LeavePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('leaves.view');
+        return $user->can(Permissions::LEAVES_VIEW);
     }
 
     public function view(User $user, Leave $leave): bool
     {
-        if (! $user->can('leaves.view')) {
+        if (! $user->can(Permissions::LEAVES_VIEW)) {
             return false;
         }
 
@@ -24,7 +25,7 @@ class LeavePolicy
         }
 
         // HR can see all in tenant
-        if ($user->can('leaves.view-all') && $leave->tenant_id === $user->tenant_id) {
+        if ($user->can(Permissions::LEAVES_VIEW_ALL) && $leave->tenant_id === $user->tenant_id) {
             return true;
         }
 
@@ -33,12 +34,12 @@ class LeavePolicy
 
     public function create(User $user): bool
     {
-        return $user->can('leaves.create');
+        return $user->can(Permissions::LEAVES_CREATE);
     }
 
     public function approve(User $user, Leave $leave): bool
     {
-        if (! $user->can('leaves.approve')) {
+        if (! $user->can(Permissions::LEAVES_APPROVE)) {
             return false;
         }
 

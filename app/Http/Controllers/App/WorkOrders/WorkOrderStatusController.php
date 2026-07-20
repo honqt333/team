@@ -18,22 +18,15 @@ class WorkOrderStatusController
     /**
      * Update condition report (fuel level and damage marks).
      */
-    public function updateCondition(Request $request, WorkOrder $workOrder): mixed
+    public function updateCondition(\App\Http\Requests\WorkOrder\UpdateConditionRequest $request, WorkOrder $workOrder): mixed
     {
         $this->authorize('update', $workOrder);
-        
+
         if (!$workOrder->canBeEdited()) {
             return back()->withErrors(['error' => __('messages.work_order_locked')]);
         }
 
-        $validated = $request->validate([
-            'fuel_level'               => 'nullable|numeric|min:0|max:100',
-            'damage_marks'             => 'nullable|array',
-            'damage_marks.*.x'         => 'required|numeric',
-            'damage_marks.*.y'         => 'required|numeric',
-            'damage_marks.*.color'     => 'required|string|in:red,blue,gray',
-            'damage_marks.*.description' => 'nullable|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         $hasChanges = false;
         
@@ -117,13 +110,11 @@ class WorkOrderStatusController
     /**
      * Put work order on hold.
      */
-    public function putOnHold(Request $request, WorkOrder $work_order): RedirectResponse
+    public function putOnHold(\App\Http\Requests\WorkOrder\ChangeStatusRequest $request, WorkOrder $work_order): RedirectResponse
     {
         $this->authorize('update', $work_order);
 
-        $validated = $request->validate([
-            'reason' => 'required|string|max:255',
-        ]);
+        $validated = $request->validated();
 
         if (!$work_order->canBeOnHold()) {
             return redirect()->back()->with('error', __('messages.cannot_put_on_hold'));

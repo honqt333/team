@@ -4,11 +4,16 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\WorkOrderItem;
+use App\Support\Permissions;
 
 class WorkOrderItemPolicy
 {
     public function view(User $user, WorkOrderItem $item): bool
     {
+        if (! $user->can(Permissions::WORK_ORDER_ITEMS_VIEW)) {
+            return false;
+        }
+
         $wo = $item->workOrder;
         if (! $wo) {
             return false;
@@ -20,6 +25,10 @@ class WorkOrderItemPolicy
 
     public function create(User $user, WorkOrderItem $item): bool
     {
+        if (! $user->can(Permissions::WORK_ORDER_ITEMS_CREATE)) {
+            return false;
+        }
+
         $wo = $item->workOrder;
         if (! $wo) {
             return false;
@@ -35,11 +44,19 @@ class WorkOrderItemPolicy
 
     public function update(User $user, WorkOrderItem $item): bool
     {
+        if (! $user->can(Permissions::WORK_ORDER_ITEMS_UPDATE)) {
+            return false;
+        }
+
         return $this->create($user, $item);
     }
 
     public function delete(User $user, WorkOrderItem $item): bool
     {
+        if (! $user->can(Permissions::WORK_ORDER_ITEMS_DELETE)) {
+            return false;
+        }
+
         return $this->create($user, $item);
     }
 }

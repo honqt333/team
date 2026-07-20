@@ -34,7 +34,7 @@ class RolePermissionsContractTest extends TestCase
      * is changed and the change is reviewed.
      */
     private const EXPECTED_PERMISSION_COUNTS = [
-        'super_admin'    => 103,
+        'super_admin'    => 120,
         'branch_manager' => 30,
         'receptionist'   => 13,
         'technician'     => 4,

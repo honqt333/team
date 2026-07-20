@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use HasFactory, SoftDeletes, TenantScoped, CenterScoped;
+    use HasFactory, SoftDeletes, TenantScoped;
 
     protected static function boot(): void
     {

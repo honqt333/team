@@ -6,8 +6,9 @@
         "build": "vite build",
         "dev": "vite",
         "type-check": "vue-tsc --noEmit || true",
-        "test": "vitest run --passWithNoTests",
+        "test": "vitest run",
         "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
         "lint": "eslint . --ext .vue,.js,.ts",
         "format": "prettier --write .",
         "prepare": "husky"

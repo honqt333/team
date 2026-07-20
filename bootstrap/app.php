@@ -25,6 +25,7 @@ use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         \App\Providers\RouteServiceProvider::class,
+        \App\Providers\EventServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

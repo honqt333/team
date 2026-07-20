@@ -4,17 +4,18 @@ namespace App\Policies;
 
 use App\Models\Payment;
 use App\Models\User;
+use App\Support\Permissions;
 
 class PaymentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('payments.view');
+        return $user->can(Permissions::PAYMENTS_VIEW);
     }
 
     public function view(User $user, Payment $payment): bool
     {
-        if (! $user->can('payments.view')) {
+        if (! $user->can(Permissions::PAYMENTS_VIEW)) {
             return false;
         }
 
@@ -24,12 +25,12 @@ class PaymentPolicy
 
     public function create(User $user): bool
     {
-        return $user->can('payments.create');
+        return $user->can(Permissions::PAYMENTS_CREATE);
     }
 
     public function update(User $user, Payment $payment): bool
     {
-        if (! $user->can('payments.update')) {
+        if (! $user->can(Permissions::PAYMENTS_UPDATE)) {
             return false;
         }
 
@@ -39,7 +40,7 @@ class PaymentPolicy
 
     public function delete(User $user, Payment $payment): bool
     {
-        if (! $user->can('payments.delete')) {
+        if (! $user->can(Permissions::PAYMENTS_DELETE)) {
             return false;
         }
 

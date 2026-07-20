@@ -125,6 +125,8 @@ class AppServiceProvider extends ServiceProvider
         // Observers
         Employee::observe(EmployeeObserver::class);
         Center::observe(CenterObserver::class);
+        WorkOrder::observe(\App\Observers\WorkOrderObserver::class);
+        Payment::observe(\App\Observers\PaymentObserver::class);
 
         // Super Admin Bypass
         //

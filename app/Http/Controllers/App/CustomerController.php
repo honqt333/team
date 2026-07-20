@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\App;
 
-use App\Http\Requests\CustomerStoreRequest;
-use App\Http\Requests\CustomerUpdateRequest;
+use App\Http\Requests\Customer\CustomerMergeRequest;
+use App\Http\Requests\Customer\CustomerStoreRequest;
+use App\Http\Requests\Customer\CustomerUpdateRequest;
 use App\Models\Customer;
 use App\Models\Department;
 use App\Models\Service;
