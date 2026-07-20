@@ -14,6 +14,8 @@ use App\Events\WorkOrder\WorkOrderCreated;
 use App\Events\WorkOrder\WorkOrderStatusChanged;
 use App\Listeners\Auth\LogFailedLogin;
 use App\Listeners\Auth\LogSuccessfulLogin;
+use App\Listeners\Payment\HandleAutoInvoiceOnDoneWorkOrder;
+use App\Listeners\Payment\LinkPaymentToInvoice;
 use App\Listeners\Payment\UpdateInvoiceStatusOnPayment;
 use App\Listeners\WorkOrder\LogActivityOnStatusChange;
 use App\Listeners\WorkOrder\NotifyOwnerOnCreation;
@@ -29,7 +31,9 @@ class EventServiceProvider extends ServiceProvider
             LogActivityOnStatusChange::class,
         ],
         PaymentRecorded::class => [
+            LinkPaymentToInvoice::class,
             UpdateInvoiceStatusOnPayment::class,
+            HandleAutoInvoiceOnDoneWorkOrder::class,
         ],
         InvoiceIssued::class => [
             // (listeners can be attached here)

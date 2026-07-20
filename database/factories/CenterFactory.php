@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Center>
+ * @extends Factory<Center>
  */
 class CenterFactory extends Factory
 {
@@ -38,6 +38,18 @@ class CenterFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Bind the centre to a specific tenant (overrides the default
+     * `tenant_id` factory so we don't create a stray tenant when
+     * callers already have one in scope).
+     */
+    public function forTenant(Tenant $tenant): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tenant_id' => $tenant->id,
         ]);
     }
 }

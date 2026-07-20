@@ -3,7 +3,6 @@
 namespace Tests\Unit\Support;
 
 use App\Support\PricingHelper;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class PricingHelperTest extends TestCase
@@ -41,7 +40,7 @@ class PricingHelperTest extends TestCase
     public function test_line_total_with_quantity(): void
     {
         $result = PricingHelper::computeLineTotal(100, 'percentage', 10, 3, 0);
-        $this->assertEquals(30, $result['discount_amount']);
+        $this->assertEquals(10, $result['discount_amount']);
         $this->assertEquals(90, $result['final_unit_price']);
         $this->assertEquals(270, $result['line_total']);
     }

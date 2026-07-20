@@ -9,6 +9,9 @@ use App\Models\Department;
 use App\Models\HR\Attendance;
 use App\Models\HR\Employee;
 use App\Models\HR\EmployeeContract;
+use App\Models\HR\Leave;
+use App\Models\HR\Payroll;
+use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
 use App\Models\Quote;
@@ -23,14 +26,19 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderInspection;
-use App\Models\Payment;
+use App\Models\WorkOrderItem;
 use App\Observers\CenterObserver;
 use App\Observers\EmployeeObserver;
+use App\Observers\PaymentObserver;
+use App\Observers\WorkOrderObserver;
 use App\Policies\CustomerPolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\EmployeeContractPolicy;
 use App\Policies\HR\AttendancePolicy;
 use App\Policies\HR\EmployeePolicy;
+use App\Policies\LeavePolicy;
+use App\Policies\PaymentPolicy;
+use App\Policies\PayrollPolicy;
 use App\Policies\PurchaseInvoicePolicy;
 use App\Policies\QuoteLinePolicy;
 use App\Policies\QuotePolicy;
@@ -42,6 +50,7 @@ use App\Policies\VehicleMakePolicy;
 use App\Policies\VehicleModelPolicy;
 use App\Policies\VehiclePolicy;
 use App\Policies\WorkOrderInspectionPolicy;
+use App\Policies\WorkOrderItemPolicy;
 use App\Policies\WorkOrderPolicy;
 use App\Services\Email\SmtpConfigService;
 use Illuminate\Support\Facades\Gate;
@@ -118,16 +127,16 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(WorkOrderInspection::class, WorkOrderInspectionPolicy::class);
 
         // Phase 0 Critical Policies
-        Gate::policy(\App\Models\Payment::class, \App\Policies\PaymentPolicy::class);
-        Gate::policy(\App\Models\HR\Leave::class, \App\Policies\LeavePolicy::class);
-        Gate::policy(\App\Models\HR\Payroll::class, \App\Policies\PayrollPolicy::class);
-        Gate::policy(\App\Models\WorkOrderItem::class, \App\Policies\WorkOrderItemPolicy::class);
+        Gate::policy(Payment::class, PaymentPolicy::class);
+        Gate::policy(Leave::class, LeavePolicy::class);
+        Gate::policy(Payroll::class, PayrollPolicy::class);
+        Gate::policy(WorkOrderItem::class, WorkOrderItemPolicy::class);
 
         // Observers
         Employee::observe(EmployeeObserver::class);
         Center::observe(CenterObserver::class);
-        WorkOrder::observe(\App\Observers\WorkOrderObserver::class);
-        Payment::observe(\App\Observers\PaymentObserver::class);
+        WorkOrder::observe(WorkOrderObserver::class);
+        Payment::observe(PaymentObserver::class);
 
         // Super Admin Bypass
         //

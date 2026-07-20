@@ -2,22 +2,22 @@
 
 namespace App\Traits;
 
-use App\Models\Tenant;
 use App\Models\Center;
 use App\Models\Customer;
-use App\Models\Vehicle;
-use App\Models\Quote;
-use App\Models\Invoice;
-use App\Models\WorkOrderItem;
-use App\Models\WorkOrderDamageMark;
-use App\Models\WorkOrderPhoto;
 use App\Models\Department;
+use App\Models\Invoice;
 use App\Models\Payment;
-use App\Models\WorkOrderItemPart;
-use App\Models\WorkOrderAttachment;
+use App\Models\Quote;
+use App\Models\Tenant;
+use App\Models\Vehicle;
 use App\Models\WorkOrderActivity;
+use App\Models\WorkOrderAttachment;
+use App\Models\WorkOrderDamageMark;
 use App\Models\WorkOrderInspection;
+use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemNote;
+use App\Models\WorkOrderItemPart;
+use App\Models\WorkOrderPhoto;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -52,7 +52,7 @@ trait HasWorkOrderRelations
 
     public function invoice(): HasOne
     {
-        return $this->hasOne(Invoice::class);
+        return $this->hasOne(Invoice::class, 'work_order_id');
     }
 
     public function items(): HasMany

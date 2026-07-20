@@ -4,10 +4,16 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Part;
+use App\Models\Payment;
+use App\Models\Service;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\Warehouse;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
+use App\Models\WorkOrderItemPart;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -132,7 +138,7 @@ class WorkOrdersCrudTest extends TestCase
         // Create another tenant/center with a work order
         $otherTenant = Tenant::factory()->create();
         $otherCenter = Center::factory()->create(['tenant_id' => $otherTenant->id]);
-        
+
         $otherCustomer = Customer::create([
             'tenant_id' => $otherTenant->id,
             'center_id' => $otherCenter->id,
@@ -140,7 +146,7 @@ class WorkOrdersCrudTest extends TestCase
             'name' => 'Other Customer',
             'phone' => '0509876543',
         ]);
-        
+
         $otherVehicle = Vehicle::create([
             'tenant_id' => $otherTenant->id,
             'center_id' => $otherCenter->id,
@@ -205,9 +211,9 @@ class WorkOrdersCrudTest extends TestCase
         ]);
 
         [$customer, $vehicle1] = $this->createCustomerAndVehicle($user);
-        
+
         // Create a second vehicle for the same customer
-        $vehicle2 = \App\Models\Vehicle::create([
+        $vehicle2 = Vehicle::create([
             'tenant_id' => $user->tenant_id,
             'center_id' => $user->current_center_id,
             'customer_id' => $customer->id,
@@ -253,13 +259,13 @@ class WorkOrdersCrudTest extends TestCase
         ]);
 
         $response->assertStatus(201);
-        
+
         // Get work order ID and check items directly from DB
         $workOrderId = $response->json('id');
-        $items = \App\Models\WorkOrderItem::withoutGlobalScopes()
+        $items = WorkOrderItem::withoutGlobalScopes()
             ->where('work_order_id', $workOrderId)
             ->get();
-        
+
         $this->assertCount(1, $items, 'Should have 1 item');
         $this->assertEquals(100.00, (float) $items[0]->total);
     }
@@ -333,7 +339,7 @@ class WorkOrdersCrudTest extends TestCase
         // Attempt delete
         $deleteResponse = $this->actingAs($user)->delete("/app/work-orders/{$workOrder->id}/items/{$item->id}");
         $deleteResponse->assertRedirect();
-        
+
         // Assert item was NOT deleted
         $this->assertDatabaseHas('work_order_items', ['id' => $item->id]);
 
@@ -341,19 +347,19 @@ class WorkOrdersCrudTest extends TestCase
         $item->technicians()->detach($techUser->id);
 
         // 2. Attach a part
-        $warehouse = \App\Models\Warehouse::create([
+        $warehouse = Warehouse::create([
             'tenant_id' => $user->tenant_id,
             'center_id' => $user->current_center_id,
             'name' => 'Main Warehouse',
         ]);
-        $part = \App\Models\Part::create([
+        $part = Part::create([
             'tenant_id' => $user->tenant_id,
             'sku' => 'PART123',
             'name_ar' => 'قطعة غيار',
             'name_en' => 'Spare Part',
             'is_active' => true,
         ]);
-        $itemPart = \App\Models\WorkOrderItemPart::create([
+        $itemPart = WorkOrderItemPart::create([
             'tenant_id' => $user->tenant_id,
             'center_id' => $user->current_center_id,
             'work_order_item_id' => $item->id,
@@ -410,7 +416,7 @@ class WorkOrdersCrudTest extends TestCase
         $item = $workOrder->items()->first();
 
         // 1. Create a payment on the work order
-        $payment = \App\Models\Payment::create([
+        $payment = Payment::create([
             'tenant_id' => $user->tenant_id,
             'center_id' => $user->current_center_id,
             'work_order_id' => $workOrder->id,
@@ -497,7 +503,7 @@ class WorkOrdersCrudTest extends TestCase
         $workOrder = WorkOrder::withoutGlobalScopes()->find($workOrderId);
 
         // Create a service of type package
-        $service = \App\Models\Service::create([
+        $service = Service::create([
             'tenant_id' => $user->tenant_id,
             'center_id' => $user->current_center_id,
             'name_ar' => 'باقة خدمات',
@@ -518,7 +524,7 @@ class WorkOrdersCrudTest extends TestCase
         ]);
 
         $addResponse->assertRedirect();
-        
+
         // Assert item was created with department_id null
         $item = $workOrder->items()->first();
         $this->assertNotNull($item);
@@ -548,15 +554,15 @@ class WorkOrdersCrudTest extends TestCase
 
         $workOrderId = $response->json('id');
         $workOrder = WorkOrder::withoutGlobalScopes()->find($workOrderId);
-        
+
         // Set statuses to Open / In Progress
         $workOrder->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
 
         $itemA = $workOrder->items[0];
         $itemB = $workOrder->items[1];
 
-        $itemA->update(['status' => \App\Models\WorkOrderItem::STATUS_PENDING]);
-        $itemB->update(['status' => \App\Models\WorkOrderItem::STATUS_IN_PROGRESS]);
+        $itemA->update(['status' => WorkOrderItem::STATUS_PENDING]);
+        $itemB->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
 
         // 2. Put on Hold
         $holdResponse = $this->actingAs($user)->post("/app/work-orders/{$workOrder->id}/hold", [
@@ -572,12 +578,12 @@ class WorkOrdersCrudTest extends TestCase
         $this->assertEquals('Waiting for parts', $workOrder->hold_reason);
 
         // Both items should be on hold
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_ON_HOLD, $itemA->status);
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_ON_HOLD, $itemB->status);
-        
+        $this->assertEquals(WorkOrderItem::STATUS_ON_HOLD, $itemA->status);
+        $this->assertEquals(WorkOrderItem::STATUS_ON_HOLD, $itemB->status);
+
         // Original statuses must be stored in suspended_status
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_PENDING, $itemA->suspended_status);
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_IN_PROGRESS, $itemB->suspended_status);
+        $this->assertEquals(WorkOrderItem::STATUS_PENDING, $itemA->suspended_status);
+        $this->assertEquals(WorkOrderItem::STATUS_IN_PROGRESS, $itemB->suspended_status);
 
         // 3. Resume
         $resumeResponse = $this->actingAs($user)->post("/app/work-orders/{$workOrder->id}/resume");
@@ -591,8 +597,8 @@ class WorkOrdersCrudTest extends TestCase
         $this->assertNull($workOrder->hold_reason);
 
         // Items should be restored to their original statuses
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_PENDING, $itemA->status);
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_IN_PROGRESS, $itemB->status);
+        $this->assertEquals(WorkOrderItem::STATUS_PENDING, $itemA->status);
+        $this->assertEquals(WorkOrderItem::STATUS_IN_PROGRESS, $itemB->status);
 
         // suspended_status column should be cleared
         $this->assertNull($itemA->suspended_status);
@@ -623,26 +629,26 @@ class WorkOrdersCrudTest extends TestCase
 
         // 1. When card is Open, transitioning to pending and back is allowed
         $workOrder->update(['status' => WorkOrder::STATUS_OPEN]);
-        $item->update(['status' => \App\Models\WorkOrderItem::STATUS_IN_PROGRESS]);
-        
+        $item->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
+
         $updateResponse = $this->actingAs($user)->patchJson("/app/work-orders/{$workOrder->id}/items/{$item->id}/status", [
-            'status' => \App\Models\WorkOrderItem::STATUS_PENDING,
+            'status' => WorkOrderItem::STATUS_PENDING,
         ]);
         // Should succeed when card is open
         $updateResponse->assertOk();
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_PENDING, $item->fresh()->status);
+        $this->assertEquals(WorkOrderItem::STATUS_PENDING, $item->fresh()->status);
 
         // 2. When card is In Progress, changing from in_progress back to pending is BLOCKED
         $workOrder->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
         $item->refresh();
-        $item->update(['status' => \App\Models\WorkOrderItem::STATUS_IN_PROGRESS]);
+        $item->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
 
         $updateResponseBlocked = $this->actingAs($user)->patchJson("/app/work-orders/{$workOrder->id}/items/{$item->id}/status", [
-            'status' => \App\Models\WorkOrderItem::STATUS_PENDING,
+            'status' => WorkOrderItem::STATUS_PENDING,
         ]);
         // Should fail validation (returns 422)
         $updateResponseBlocked->assertStatus(422);
-        $this->assertEquals(\App\Models\WorkOrderItem::STATUS_IN_PROGRESS, $item->fresh()->status);
+        $this->assertEquals(WorkOrderItem::STATUS_IN_PROGRESS, $item->fresh()->status);
     }
 
     public function test_completing_work_order_with_or_without_balance_generates_invoice(): void
@@ -670,7 +676,7 @@ class WorkOrdersCrudTest extends TestCase
 
         // Transition work order and item to proper states
         $workOrder->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
-        $item->update(['status' => \App\Models\WorkOrderItem::STATUS_COMPLETED]);
+        $item->update(['status' => WorkOrderItem::STATUS_COMPLETED]);
 
         // There's a remaining balance of 100 since no payment was made, but vehicle exit should succeed!
         $completeResponse = $this->actingAs($user)->post("/app/work-orders/{$workOrder->id}/complete", [
@@ -719,7 +725,7 @@ class WorkOrdersCrudTest extends TestCase
         $item = $workOrder->items[0];
 
         $workOrder->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
-        $item->update(['status' => \App\Models\WorkOrderItem::STATUS_COMPLETED]);
+        $item->update(['status' => WorkOrderItem::STATUS_COMPLETED]);
 
         // Attempt complete without is_deferred
         $completeResponse = $this->actingAs($user)->post("/app/work-orders/{$workOrder->id}/complete", [
@@ -744,10 +750,10 @@ class WorkOrdersCrudTest extends TestCase
         [$customer, $vehicleA] = $this->createCustomerAndVehicle($user);
 
         // Create a second vehicle for the same customer
-        $vehicleB = \App\Models\Vehicle::create([
-            'tenant_id'    => $customer->tenant_id,
-            'center_id'    => $customer->center_id,
-            'customer_id'  => $customer->id,
+        $vehicleB = Vehicle::create([
+            'tenant_id' => $customer->tenant_id,
+            'center_id' => $customer->center_id,
+            'customer_id' => $customer->id,
             'plate_number' => 'XYZ 9999',
         ]);
 
@@ -762,10 +768,10 @@ class WorkOrdersCrudTest extends TestCase
         $responseA->assertSuccessful();
         $workOrderA = WorkOrder::withoutGlobalScopes()->find($responseA->json('id'));
         $workOrderA->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
-        \App\Models\WorkOrderItem::withoutGlobalScopes()
+        WorkOrderItem::withoutGlobalScopes()
             ->where('work_order_id', $workOrderA->id)
             ->first()
-            ->update(['status' => \App\Models\WorkOrderItem::STATUS_COMPLETED]);
+            ->update(['status' => WorkOrderItem::STATUS_COMPLETED]);
 
         // 2. Work Order B: In progress service, not completed (different vehicle)
         $responseB = $this->actingAs($user)->postJson('/app/work-orders', [
@@ -780,14 +786,13 @@ class WorkOrdersCrudTest extends TestCase
         $workOrderB->update(['status' => WorkOrder::STATUS_IN_PROGRESS]);
 
         // Request work orders with status=open and sub_filter=completed via JSON API
-        $indexResponse = $this->actingAs($user)->getJson("/app/api/work-orders-index?status=open&sub_filter=completed");
+        $indexResponse = $this->actingAs($user)->getJson('/app/api/work-orders-index?status=open&sub_filter=completed');
         $indexResponse->assertStatus(200);
 
         $ids = collect($indexResponse->json('data'))->pluck('id')->all();
         $this->assertContains($workOrderA->id, $ids);
         $this->assertNotContains($workOrderB->id, $ids);
     }
-
 
     public function test_cannot_start_work_on_work_order_without_services(): void
     {
@@ -862,9 +867,9 @@ class WorkOrdersCrudTest extends TestCase
         $workOrder->save();
         $workOrder->refresh();
 
-        $this->assertEquals(150.00, (float)$workOrder->total_excl_tax);
-        $this->assertEquals(22.50, (float)$workOrder->total_tax);
-        $this->assertEquals(172.50, (float)$workOrder->total_incl_tax);
+        $this->assertEquals(150.00, (float) $workOrder->total_excl_tax);
+        $this->assertEquals(22.50, (float) $workOrder->total_tax);
+        $this->assertEquals(172.50, (float) $workOrder->total_incl_tax);
 
         // Now cancel service B via patch request
         $response = $this->actingAs($user)->patchJson("/app/work-orders/{$workOrder->id}/items/{$itemB->id}/status", [
@@ -876,9 +881,9 @@ class WorkOrdersCrudTest extends TestCase
         $workOrder->refresh();
 
         // Totals must be recalculated and saved in DB immediately
-        $this->assertEquals(100.00, (float)$workOrder->total_excl_tax);
-        $this->assertEquals(15.00, (float)$workOrder->total_tax);
-        $this->assertEquals(115.00, (float)$workOrder->total_incl_tax);
+        $this->assertEquals(100.00, (float) $workOrder->total_excl_tax);
+        $this->assertEquals(15.00, (float) $workOrder->total_tax);
+        $this->assertEquals(115.00, (float) $workOrder->total_incl_tax);
     }
 
     public function test_cannot_complete_work_order_if_no_completed_services(): void
@@ -922,7 +927,7 @@ class WorkOrdersCrudTest extends TestCase
         // It should reject completing, redirect with error, and keep the work order in progress
         $completeResponse->assertRedirect();
         $completeResponse->assertSessionHas('error');
-        
+
         $workOrder->refresh();
         $this->assertEquals(WorkOrder::STATUS_IN_PROGRESS, $workOrder->status);
     }
@@ -963,6 +968,7 @@ class WorkOrdersCrudTest extends TestCase
         $payment = $workOrder->payments()->create([
             'tenant_id' => $workOrder->tenant_id,
             'center_id' => $workOrder->center_id,
+            'work_order_id' => $workOrder->id,
             'amount' => 40.00,
             'payment_date' => now(),
             'payment_method' => 'cash',
@@ -982,7 +988,7 @@ class WorkOrdersCrudTest extends TestCase
         ]);
 
         $completeResponse->assertRedirect();
-        
+
         $workOrder->refresh();
         $invoice = $workOrder->invoice;
         $this->assertNotNull($invoice);
@@ -992,13 +998,14 @@ class WorkOrdersCrudTest extends TestCase
         $this->assertEquals($invoice->id, $payment->invoice_id);
 
         $invoice->refresh();
-        $this->assertEquals(40.00, (float)$invoice->total_paid);
+        $this->assertEquals(40.00, (float) $invoice->total_paid);
         $this->assertEquals('partial', $invoice->payment_status);
 
         // 4. Record a new payment of 60 on the work order after completion
         $newPayment = $workOrder->payments()->create([
             'tenant_id' => $workOrder->tenant_id,
             'center_id' => $workOrder->center_id,
+            'work_order_id' => $workOrder->id,
             'amount' => 60.00,
             'payment_date' => now(),
             'payment_method' => 'mada',
@@ -1011,7 +1018,7 @@ class WorkOrdersCrudTest extends TestCase
         $this->assertEquals($invoice->id, $newPayment->invoice_id);
 
         $invoice->refresh();
-        $this->assertEquals(100.00, (float)$invoice->total_paid);
+        $this->assertEquals(100.00, (float) $invoice->total_paid);
         $this->assertEquals('paid', $invoice->payment_status);
     }
 
@@ -1098,7 +1105,7 @@ class WorkOrdersCrudTest extends TestCase
         ]);
 
         // Create a payment record (making physical deletion impossible)
-        $payment = \App\Models\Payment::create([
+        $payment = Payment::create([
             'tenant_id' => $user->tenant_id,
             'center_id' => $user->current_center_id,
             'work_order_id' => $workOrder->id,
@@ -1138,7 +1145,7 @@ class WorkOrdersCrudTest extends TestCase
             'status' => WorkOrder::STATUS_DONE,
         ]);
 
-        $service = \App\Models\Service::create([
+        $service = Service::create([
             'tenant_id' => $user->tenant_id,
             'center_id' => $user->current_center_id,
             'name_ar' => 'خدمة اختبار الضمان',
@@ -1146,7 +1153,7 @@ class WorkOrdersCrudTest extends TestCase
             'base_price' => 100,
             'warranty_value' => 30,
             'warranty_unit' => 'days',
-            'type' => \App\Models\Service::TYPE_INTERNAL,
+            'type' => Service::TYPE_INTERNAL,
         ]);
 
         // Add a completed item to start warranty
@@ -1157,7 +1164,7 @@ class WorkOrdersCrudTest extends TestCase
             'title' => 'Warranty Test Service',
             'qty' => 1,
             'unit_price' => 100,
-            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
             'completed_at' => now(),
             'warranty_value_snapshot' => 30,
             'warranty_unit_snapshot' => 'days',
@@ -1181,7 +1188,7 @@ class WorkOrdersCrudTest extends TestCase
             'title' => 'Warranty Test Service',
             'qty' => 1,
             'unit_price' => 100,
-            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
             'completed_at' => now(),
             'is_warranty' => true,
         ]);
@@ -1223,7 +1230,7 @@ class WorkOrdersCrudTest extends TestCase
             'title' => 'Custom Manual Service',
             'qty' => 1,
             'unit_price' => 120,
-            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
             'completed_at' => now(),
             'warranty_value_snapshot' => 60,
             'warranty_unit_snapshot' => 'days',
@@ -1233,7 +1240,7 @@ class WorkOrdersCrudTest extends TestCase
         // Retrieve active warranties via API
         $response = $this->actingAs($user)->get("/app/api/vehicles/{$vehicle->id}/active-warranties");
         $response->assertStatus(200);
-        
+
         // Should find the warranty with title 'Custom Manual Service' and null service_id
         $response->assertJsonCount(1, 'active_warranties');
         $response->assertJsonPath('active_warranties.0.service_id', null);
@@ -1249,7 +1256,7 @@ class WorkOrdersCrudTest extends TestCase
         ]);
 
         // Create a second branch (center) under same tenant
-        $branchB = \App\Models\Center::create([
+        $branchB = Center::create([
             'tenant_id' => $userBranchA->tenant_id,
             'name' => 'Branch B',
             'slug' => 'branch-b',
@@ -1272,11 +1279,11 @@ class WorkOrdersCrudTest extends TestCase
             'odometer' => 10000,
         ]);
 
-        $service = \App\Models\Service::create([
+        $service = Service::create([
             'name_ar' => 'خدمة مشتركة',
             'name_en' => 'Shared Service',
             'base_price' => 200,
-            'type' => \App\Models\Service::TYPE_INTERNAL,
+            'type' => Service::TYPE_INTERNAL,
             'is_active' => true,
         ]);
 
@@ -1297,7 +1304,7 @@ class WorkOrdersCrudTest extends TestCase
             'title' => 'Shared Service',
             'qty' => 1,
             'unit_price' => 200,
-            'status' => \App\Models\WorkOrderItem::STATUS_COMPLETED,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
             'completed_at' => now(),
             'warranty_value_snapshot' => 30,
             'warranty_unit_snapshot' => 'days',
@@ -1317,7 +1324,7 @@ class WorkOrdersCrudTest extends TestCase
         $this->assertNotNull(Vehicle::find($vehicle->id));
 
         // 3. Verify service is shared & queryable from Branch B
-        $this->assertNotNull(\App\Models\Service::find($service->id));
+        $this->assertNotNull(Service::find($service->id));
 
         // 4. Verify user can VIEW Branch A's work order (cross-branch read access)
         $responseView = $this->actingAs($userBranchA)->get("/app/work-orders/{$workOrderBranchA->id}");
@@ -1325,7 +1332,7 @@ class WorkOrdersCrudTest extends TestCase
 
         // 5. Verify user CANNOT edit/update Branch A's work order (restricted write access)
         $responseUpdate = $this->actingAs($userBranchA)->put("/app/work-orders/{$workOrderBranchA->id}", [
-            'status' => 'in_progress'
+            'status' => 'in_progress',
         ]);
         $responseUpdate->assertStatus(403);
     }

@@ -77,9 +77,14 @@ class NotificationService
         ?string $icon = null,
         ?array $data = null,
     ): void {
+        // Use raw query instead of ->role() to avoid RoleDoesNotExist
+        // when the role exists but the spatie permission cache is stale
+        // or the team/guard context isn't set.
         $userIds = User::where('tenant_id', $tenantId)
             ->where('is_active', true)
-            ->role($roleName)
+            ->whereHas('roles', function ($q) use ($roleName) {
+                $q->where('name', $roleName)->where('guard_name', 'web');
+            })
             ->pluck('id')
             ->toArray();
 

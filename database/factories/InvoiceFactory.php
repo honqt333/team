@@ -4,28 +4,31 @@ namespace Database\Factories;
 
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Tenant;
-use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class WorkOrderFactory extends Factory
+/**
+ * @extends Factory<Invoice>
+ */
+class InvoiceFactory extends Factory
 {
-    protected $model = WorkOrder::class;
+    protected $model = Invoice::class;
 
     public function definition(): array
     {
-        // Use factory callbacks (closures) so the factories only run when
-        // the parent attribute is not explicitly set. This prevents
-        // `array_merge()` from blowing up when callers override
-        // tenant_id / center_id / customer_id / vehicle_id.
         return [
             'tenant_id' => fn () => Tenant::factory(),
             'center_id' => fn () => Center::factory(),
             'customer_id' => fn () => Customer::factory(),
-            'vehicle_id' => fn () => Vehicle::factory(),
-            'code' => 'WO-'.$this->faker->unique()->numberBetween(1000, 9999),
-            'status' => 'open',
+            'work_order_id' => fn () => WorkOrder::factory(),
+            'invoice_number' => 'INV-'.$this->faker->unique()->numberBetween(1000, 9999),
+            'issue_date' => now(),
+            'supply_date' => now()->toDateString(),
+            'type' => 'invoice',
+            'status' => 'draft',
+            'payment_status' => 'unpaid',
             'tax_enabled_snapshot' => false,
             'pricing_mode_snapshot' => 'exclusive',
             'tax_rate_snapshot' => 15.00,
@@ -33,6 +36,8 @@ class WorkOrderFactory extends Factory
             'total_excl_tax' => 0,
             'total_tax' => 0,
             'total_incl_tax' => 0,
+            'total_taxable_amount' => 0,
+            'total_paid' => 0,
         ];
     }
 }

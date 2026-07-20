@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\AI;
 
 use App\Exceptions\AI\WorkOrderAiInvalidResponseException;
-use App\Http\Requests\WorkOrder\WorkOrderSuggestionRequest;
 use App\Models\Department;
 use App\Models\Part;
 use App\Models\Prompt;
@@ -13,6 +12,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Services\AI\Providers\MockProvider;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
@@ -91,7 +91,7 @@ AR;
      */
     public function suggest(
         WorkOrder $workOrder,
-        WorkOrderSuggestionRequest $request,
+        Request $request,
         User $user,
         int $tenantId,
         int $centerId,
