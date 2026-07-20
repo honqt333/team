@@ -22,7 +22,7 @@ class CustomerUpdateRequest extends FormRequest
         return [
             'type' => ['sometimes', Rule::in(['individual', 'company', 'government'])],
             'name' => ['sometimes', 'string', 'max:255'],
-            'contact_name' => ['nullable', 'string', 'max:255'],
+            'contact_name' => ['required_if:type,company', 'nullable', 'string', 'max:255'],
             'phone' => [
                 'sometimes',
                 'string',
@@ -34,7 +34,7 @@ class CustomerUpdateRequest extends FormRequest
             ],
             'whatsapp' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'email', 'max:255'],
-            'tax_number' => ['nullable', 'string', 'max:50'],
+            'tax_number' => ['required_if:type,company', 'nullable', 'regex:/^\d{15}$/', 'string'],
             'address_line' => ['nullable', 'string', 'max:500'],
             'building_number' => ['nullable', 'string', 'max:20'],
             'postal_code' => ['nullable', 'string', 'max:10'],
@@ -45,6 +45,15 @@ class CustomerUpdateRequest extends FormRequest
             'lat' => ['nullable', 'numeric', 'between:-90,90'],
             'lng' => ['nullable', 'numeric', 'between:-180,180'],
             'notes' => ['nullable', 'string', 'max:2000'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'contact_name.required_if' => 'اسم جهة الاتصال مطلوب للعملاء من نوع شركة.',
+            'tax_number.required_if' => 'الرقم الضريبي مطلوب للعملاء من نوع شركة.',
+            'tax_number.regex' => 'الرقم الضريبي يجب أن يكون 15 رقماً.',
         ];
     }
 }
