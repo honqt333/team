@@ -76,6 +76,7 @@ class Quote extends Model
         'converted_at' => 'datetime',
         'tax_breakdown' => 'array', // JSON cast
         'show_packages_section' => 'boolean',
+        'tax_enabled_snapshot' => 'boolean',
     ];
 
     // ─────────────────────────────────────────────────────────────

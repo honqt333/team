@@ -160,13 +160,13 @@ const mappedPrintData = computed(() => {
             plate: props.quote.vehicle?.plate_number,
             color: props.quote.vehicle?.color,
         },
-        tax_enabled_snapshot: props.quote.tax_enabled_snapshot !== false,
+        tax_enabled_snapshot: Boolean(props.quote.tax_enabled_snapshot),
         pricing_mode_snapshot: props.quote.pricing_mode_snapshot || 'exclusive',
         total_excl_tax: Number(props.quote.total_excl_tax || 0),
-        total_tax: Number(props.quote.total_tax || 0),
-        total_incl_tax: Number(props.quote.total_incl_tax || 0),
+        total_tax: props.quote.tax_enabled_snapshot ? Number(props.quote.total_tax || 0) : 0,
+        total_incl_tax: props.quote.tax_enabled_snapshot ? Number(props.quote.total_incl_tax || 0) : Number(props.quote.total_excl_tax || 0),
         total_paid: 0,
-        balance: Number(props.quote.total || 0),
+        balance: props.quote.tax_enabled_snapshot ? Number(props.quote.total || 0) : Number(props.quote.total_excl_tax || 0),
         items: [...services, ...parts]
     };
 });

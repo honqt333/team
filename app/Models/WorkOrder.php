@@ -129,7 +129,7 @@ class WorkOrder extends Model
         'opened_at' => 'datetime', 'closed_at' => 'datetime', 'entry_date' => 'date:Y-m-d',
         'expected_end_date' => 'date:Y-m-d', 'mileage' => 'integer', 'fuel_level' => 'float',
         'tax_breakdown' => 'array', 'reception_signed_at' => 'datetime', 'delivery_signed_at' => 'datetime',
-        'show_packages_section' => 'boolean',
+        'show_packages_section' => 'boolean', 'tax_enabled_snapshot' => 'boolean',
     ];
 
     /**

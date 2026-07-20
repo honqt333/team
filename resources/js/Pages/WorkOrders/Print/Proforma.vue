@@ -85,6 +85,20 @@ const getDiscount = (item) => {
     return 0;
 };
 
+const isTaxEnabled = computed(() => {
+    if (props.taxSettings && (props.taxSettings.vat_enabled === false || props.taxSettings.vat_enabled === 0 || props.taxSettings.vat_enabled === '0')) {
+        return false;
+    }
+    const woTax = props.workOrder?.tax_enabled_snapshot;
+    if (woTax === false || woTax === 0 || woTax === '0') {
+        return false;
+    }
+    if (woTax === true || woTax === 1 || woTax === '1') {
+        return true;
+    }
+    return Boolean(props.taxSettings?.vat_enabled);
+});
+
 const mappedData = computed(() => {
     const make = props.workOrder.vehicle?.make?.name_ar || props.workOrder.vehicle?.make?.name_en || '';
     const model = props.workOrder.vehicle?.model?.name_ar || props.workOrder.vehicle?.model?.name_en || '';
@@ -132,7 +146,8 @@ const mappedData = computed(() => {
             qty: item.qty || 1,
             unit_price: item.unit_price || 0,
             discount: getDiscount(item),
-            is_part: false
+            is_part: false,
+            is_taxable: isTaxEnabled.value
         };
     });
 
@@ -145,7 +160,8 @@ const mappedData = computed(() => {
             qty: part.qty || 1,
             unit_price: part.unit_price || 0,
             discount: Number(part.discount || 0),
-            is_part: true
+            is_part: true,
+            is_taxable: isTaxEnabled.value
         }));
 
     return {
@@ -169,14 +185,14 @@ const mappedData = computed(() => {
             plate: props.workOrder.vehicle?.plate_number,
             color: props.workOrder.vehicle?.color,
         },
-        tax_enabled_snapshot: props.workOrder.tax_enabled_snapshot !== false && (props.taxSettings?.vat_enabled ?? true),
+        tax_enabled_snapshot: isTaxEnabled.value,
         pricing_mode_snapshot: props.workOrder.pricing_mode_snapshot || 'exclusive',
-        total_excl_tax: Number(props.workOrder.total_excl_tax || 0),
-        total_tax: Number(props.workOrder.total_tax || 0),
-        total_incl_tax: Number(props.workOrder.total_incl_tax || 0),
+        total_excl_tax: Number(props.workOrder.total_excl_tax || props.grandTotal || 0),
+        total_tax: isTaxEnabled.value ? Number(props.workOrder.total_tax || 0) : 0,
+        total_incl_tax: isTaxEnabled.value ? Number(props.workOrder.total_incl_tax || 0) : Number(props.workOrder.total_excl_tax || props.grandTotal || 0),
         discount_amount: Number(props.workOrder.total_discount || 0),
         total_paid: props.totalPaid ?? 0,
-        balance: Number(props.workOrder.total || 0) - Number(props.totalPaid || 0),
+        balance: (isTaxEnabled.value ? Number(props.workOrder.total || 0) : Number(props.grandTotal || 0)) - Number(props.totalPaid || 0),
         items: [...services, ...parts]
     };
 });
