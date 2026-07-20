@@ -67,7 +67,7 @@ class PrintSettingsSignatureController extends Controller
      *     "document_type": "invoice"   // null if uploaded without a target
      *   }
      */
-    public function store(UploadSignatureRequest $request): JsonResponse
+    public function store(UploadSignatureRequest $request): JsonResponse|\Symfony\Component\HttpFoundation\Response
     {
         $tenant = $request->user()->tenant;
 
@@ -167,6 +167,21 @@ class PrintSettingsSignatureController extends Controller
             'path' => $path,
         ]);
 
+        // Two response shapes:
+        //
+        //   1. Inertia call (X-Inertia: true header from
+        //      Inertia.useForm().post(...)) → flash the payload and
+        //      redirect back so the page receives an Inertia response
+        //      it can render. The SignatureModal.vue reads
+        //      `page.props.flash.signature` in onSuccess.
+        //
+        //   2. Plain API / curl call → return the JSON payload as-is
+        //      so external consumers (mobile apps, smoke tests) still
+        //      get a stable contract.
+        if ($request->header('X-Inertia')) {
+            return back()->with('signature', $signaturePayload);
+        }
+
         return response()->json($signaturePayload, 200);
     }
 
@@ -254,6 +269,13 @@ class PrintSettingsSignatureController extends Controller
             'user_id' => auth()->id(),
             'signature_id' => $signatureId,
         ]);
+
+        // Mirror the store() dual-response contract: Inertia calls
+        // (X-Inertia: true) get a flash + back() redirect so the page
+        // re-renders cleanly; plain API/curl calls get 204 No Content.
+        if (request()->header('X-Inertia')) {
+            return back()->with('success', __('Signature deleted.'));
+        }
 
         return response()->noContent();
     }

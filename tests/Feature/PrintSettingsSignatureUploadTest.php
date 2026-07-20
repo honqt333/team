@@ -659,4 +659,112 @@ class PrintSettingsSignatureUploadTest extends TestCase
         $response->assertStatus(422);
         $response->assertJsonValidationErrors(['signature']);
     }
+
+    // ---------------------------------------------------------------
+    // Inertia vs plain JSON response contract
+    //
+    // The signature modal posts via Inertia.useForm().post(...), which
+    // sets `X-Inertia: true` on the request. Inertia requires the
+    // response to be an Inertia response (redirect, render, or back()
+    // with flash data). Returning a plain JsonResponse to an Inertia
+    // request makes the client throw:
+    //   "All Inertia requests must receive a valid Inertia response,
+    //    however a plain JSON response was received."
+    //
+    // The controller must therefore branch on the X-Inertia header:
+    //   - present  → back()->with('signature', $payload) (flash)
+    //   - absent   → response()->json($payload) (stable API contract)
+    // ---------------------------------------------------------------
+
+    public function test_store_returns_inertia_redirect_when_inertia_header_is_set(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->withHeaders(['X-Inertia' => 'true'])
+            ->post(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع',
+                'name_en' => 'My Sig',
+                'document_type' => 'invoice',
+            ]);
+
+        // back() returns a 302 redirect; Inertia turns that into its own
+        // client-side history push. The payload is in the session flash
+        // bag under the `signature` key — accessible via
+        // page.props.flash.signature in the Vue onSuccess handler.
+        $response->assertStatus(302);
+        $response->assertRedirect();
+
+        $this->assertNotNull(
+            session('signature'),
+            'flash.signature must be set so the Inertia client can read it from page.props'
+        );
+
+        $flash = session('signature');
+        $this->assertSame('توقيع', $flash['name_ar']);
+        $this->assertSame('My Sig', $flash['name_en']);
+        $this->assertArrayHasKey('id', $flash);
+        $this->assertArrayHasKey('url', $flash);
+    }
+
+    public function test_store_returns_plain_json_when_inertia_header_is_absent(): void
+    {
+        // No X-Inertia header — this is the curl / API client path.
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع',
+                'name_en' => 'My Sig',
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonStructure(['id', 'url', 'name_ar', 'name_en', 'uploaded_at', 'size', 'mime_type']);
+        $response->assertJsonFragment(['name_ar' => 'توقيع']);
+    }
+
+    public function test_destroy_returns_inertia_redirect_when_inertia_header_is_set(): void
+    {
+        // Upload one first so we have something to delete.
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع',
+                'name_en' => 'My Sig',
+                'document_type' => 'invoice',
+            ]);
+        $upload->assertOk();
+        $signatureId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->withHeaders(['X-Inertia' => 'true'])
+            ->deleteJson(route('settings.print.signatures.destroy', $signatureId));
+
+        // Laravel 12 returns 303 for back() after a DELETE/PUT/POST to
+        // match HTTP semantics (the agent should re-issue as GET).
+        $response->assertStatus(303);
+        $response->assertRedirect();
+        $this->assertNotNull(session('success'), 'Inertia destroy must flash a success message');
+    }
+
+    public function test_destroy_returns_204_when_inertia_header_is_absent(): void
+    {
+        // The signature is only persisted into print_settings when a
+        // document_type is supplied, and the destroy() lookup iterates
+        // that stored array. Pass a document_type so we exercise the
+        // same code path as the modal.
+        $upload = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name_ar' => 'توقيع',
+                'name_en' => 'My Sig',
+                'document_type' => 'invoice',
+            ]);
+        $upload->assertOk();
+        $signatureId = $upload->json('id');
+
+        $response = $this->actingAs($this->user)
+            ->deleteJson(route('settings.print.signatures.destroy', $signatureId));
+
+        $response->assertStatus(204);
+    }
 }
