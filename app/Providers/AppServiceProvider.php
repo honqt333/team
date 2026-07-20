@@ -22,6 +22,8 @@ use App\Models\VehicleMake;
 use App\Models\VehicleModel;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderInspection;
+use App\Observers\CenterObserver;
+use App\Observers\EmployeeObserver;
 use App\Policies\CustomerPolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\EmployeeContractPolicy;
@@ -38,9 +40,12 @@ use App\Policies\VehicleModelPolicy;
 use App\Policies\VehiclePolicy;
 use App\Policies\WorkOrderInspectionPolicy;
 use App\Policies\WorkOrderPolicy;
+use App\Services\Email\SmtpConfigService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
+use Spatie\Permission\PermissionRegistrar;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -51,7 +56,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Make SmtpConfigService a singleton so we look up the default email
         // integration once per request and reuse the resolved config.
-        $this->app->singleton(\App\Services\Email\SmtpConfigService::class);
+        $this->app->singleton(SmtpConfigService::class);
     }
 
     /**
@@ -65,12 +70,22 @@ class AppServiceProvider extends ServiceProvider
         // any notification or email gets a chance to read mail.* config.
         // Both development and production read the same source of truth,
         // configured under /system/integrations.
-        app(\App\Services\Email\SmtpConfigService::class)->apply();
+        app(SmtpConfigService::class)->apply();
 
         // Defensive: invalidate spatie permission cache on every boot
         // so a stale cache (left over from before adding/removing permissions
         // or assigning roles) can never make super_admin bypass fail.
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        //
+        // The cache table may not exist yet on a fresh install (pre-migrate)
+        // or in a unit-test environment that has not loaded the schema. The
+        // forget call would otherwise throw a QueryException at boot, which
+        // would block any artisan command that runs before migrations — most
+        // importantly `php artisan key:generate` in CI. Bail out cleanly
+        // when the table is missing; the next request after migrations will
+        // pick up the live cache.
+        if (Schema::hasTable('cache')) {
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        }
 
         // Register policies
         Gate::policy(Customer::class, CustomerPolicy::class);
@@ -84,7 +99,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Quote::class, QuotePolicy::class);
         Gate::policy(QuoteLine::class, QuoteLinePolicy::class);
         Gate::policy(Supplier::class, SupplierPolicy::class);
-        
+
         // HR Policies
         Gate::policy(Employee::class, EmployeePolicy::class);
         Gate::policy(Attendance::class, AttendancePolicy::class);
@@ -99,8 +114,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(WorkOrderInspection::class, WorkOrderInspectionPolicy::class);
 
         // Observers
-        Employee::observe(\App\Observers\EmployeeObserver::class);
-        Center::observe(\App\Observers\CenterObserver::class);
+        Employee::observe(EmployeeObserver::class);
+        Center::observe(CenterObserver::class);
 
         // Super Admin Bypass
         //
@@ -124,6 +139,7 @@ class AppServiceProvider extends ServiceProvider
             if ($user instanceof User && $user->is_system_admin) {
                 return true;
             }
+
             return null;
         });
     }
