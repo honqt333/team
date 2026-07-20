@@ -1,0 +1,239 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Center;
+use App\Models\Role;
+use App\Models\Tenant;
+use App\Models\User;
+use App\Support\Permissions;
+use Database\Seeders\PermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\PermissionRegistrar;
+use Tests\TestCase;
+
+class PrintSettingsSignatureUploadTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected User $user;
+
+    protected Tenant $tenant;
+
+    protected Center $center;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Storage fake — we never want the test run to write to the real
+        // public disk. The controller calls Storage::disk('public'), which
+        // is intercepted by Storage::fake('public').
+        Storage::fake('public');
+
+        // Seed all permissions so the COMPANY_MANAGE permission exists
+        // for the user role assignment.
+        $this->seed(PermissionsSeeder::class);
+
+        $this->tenant = Tenant::factory()->create();
+        $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
+
+        $this->user = User::factory()->create([
+            'tenant_id' => $this->tenant->id,
+            'current_center_id' => $this->center->id,
+        ]);
+        $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
+
+        // Permissions are scoped per-tenant via Spatie's team feature.
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+
+        // Grant the user the COMPANY_MANAGE permission by creating and
+        // assigning a super_admin role for the tenant. This mirrors the
+        // production bootstrap in TenantSetupService::seedRolesForTenant.
+        $role = Role::firstOrCreate(
+            [
+                'name' => 'super_admin',
+                'guard_name' => 'web',
+                'tenant_id' => $this->tenant->id,
+            ],
+            [
+                'label_ar' => 'مدير عام',
+                'label_en' => 'Super Admin',
+                'description' => 'kitchen sink',
+            ]
+        );
+        $role->syncPermissions([Permissions::COMPANY_MANAGE]);
+        $this->user->assignRole($role);
+
+        // Reload user with permissions for the request.
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $this->user->refresh();
+    }
+
+    /**
+     * Helper: build a real PNG file from a 1x1 transparent pixel so the
+     * validator's `image` rule is satisfied (which uses getimagesize()
+     * under the hood, not just the client-supplied MIME).
+     */
+    private function makeValidPng(string $name = 'signature.png'): UploadedFile
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'sig_png_');
+        $im = imagecreatetruecolor(8, 8);
+        imagepng($im, $tmp);
+        imagedestroy($im);
+
+        return new UploadedFile($tmp, $name, 'image/png', null, true);
+    }
+
+    /**
+     * Helper: build a real SVG file. SVG has a text payload, no binary
+     * header, so the validator's `image` rule passes (fileinfo
+     * identifies it as image/svg+xml).
+     */
+    private function makeValidSvg(string $name = 'signature.svg'): UploadedFile
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'sig_svg_');
+        file_put_contents(
+            $tmp,
+            '<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="#000"/></svg>'
+        );
+
+        return new UploadedFile($tmp, $name, 'image/svg+xml', null, true);
+    }
+
+    public function test_user_can_upload_valid_png_signature(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng(),
+                'name' => 'CEO signature',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'id',
+            'url',
+            'name',
+            'uploaded_at',
+            'size',
+            'mime_type',
+        ]);
+        $response->assertJsonFragment(['name' => 'CEO signature']);
+
+        // Response URL must point at the public disk.
+        $payload = $response->json();
+        $this->assertStringContainsString('/storage/tenants/'.$this->tenant->id.'/signatures/', $payload['url']);
+
+        // File actually exists on the (faked) public disk.
+        $path = 'tenants/'.$this->tenant->id.'/signatures/'.$payload['id'].'.png';
+        Storage::disk('public')->assertExists($path);
+    }
+
+    public function test_user_can_upload_valid_svg_signature(): void
+    {
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidSvg(),
+                'name' => 'Vector seal',
+                'document_type' => 'invoice',
+            ]);
+
+        $response->assertOk();
+        $response->assertJsonFragment(['name' => 'Vector seal']);
+        $response->assertJsonFragment(['document_type' => 'invoice']);
+
+        // The signature was also appended to the tenant's print_settings JSON.
+        $this->tenant->refresh();
+        $signatures = $this->tenant->print_settings['documents']['invoice']['signatures'] ?? [];
+        $this->assertCount(1, $signatures);
+        $this->assertSame('Vector seal', $signatures[0]['name']);
+        $this->assertSame('invoice', $signatures[0]['document_type']);
+    }
+
+    public function test_upload_rejects_5mb_file(): void
+    {
+        // 5MB > 2MB cap. The form request `max:2048` is in KB.
+        $big = UploadedFile::fake()->create('huge.png', 5120, 'image/png');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $big,
+                'name' => 'too big',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+
+        // Nothing should have been written to storage.
+        $files = Storage::disk('public')->allFiles('tenants/'.$this->tenant->id.'/signatures');
+        $this->assertEmpty($files);
+    }
+
+    public function test_upload_rejects_executable_file(): void
+    {
+        $exe = UploadedFile::fake()->create('malware.exe', 10, 'application/x-msdownload');
+
+        $response = $this->actingAs($this->user)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $exe,
+                'name' => 'not an image',
+            ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonValidationErrors(['signature']);
+    }
+
+    public function test_tenant_isolation_prevents_writing_to_other_tenants_directory(): void
+    {
+        // Create a SECOND tenant + user to act as the attacker. The
+        // attacker tries to upload but the file MUST be saved under their
+        // own tenant_id, never the original tenant's id.
+        $otherTenant = Tenant::factory()->create();
+        $otherCenter = Center::factory()->create(['tenant_id' => $otherTenant->id]);
+        $attacker = User::factory()->create([
+            'tenant_id' => $otherTenant->id,
+            'current_center_id' => $otherCenter->id,
+        ]);
+        $attacker->centers()->attach($otherCenter->id, ['tenant_id' => $otherTenant->id]);
+
+        app(PermissionRegistrar::class)->setPermissionsTeamId($otherTenant->id);
+        $attackerRole = Role::firstOrCreate(
+            [
+                'name' => 'super_admin',
+                'guard_name' => 'web',
+                'tenant_id' => $otherTenant->id,
+            ],
+            [
+                'label_ar' => 'مدير',
+                'label_en' => 'Super',
+                'description' => 'x',
+            ]
+        );
+        $attackerRole->syncPermissions([Permissions::COMPANY_MANAGE]);
+        $attacker->assignRole($attackerRole);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $attacker->refresh();
+
+        $response = $this->actingAs($attacker)
+            ->postJson(route('settings.print.signatures.store'), [
+                'signature' => $this->makeValidPng('evil.png'),
+                'name' => 'steal',
+            ]);
+
+        $response->assertOk();
+
+        // Attacker is successful for their OWN tenant. Now assert
+        //   (a) file written under the attacker tenant id
+        //   (b) NO file was written under the original tenant id
+        $payload = $response->json();
+        $this->assertStringContainsString('/storage/tenants/'.$otherTenant->id.'/signatures/', $payload['url']);
+
+        $originalTenantFiles = Storage::disk('public')->allFiles('tenants/'.$this->tenant->id.'/signatures');
+        $attackerFiles = Storage::disk('public')->allFiles('tenants/'.$otherTenant->id.'/signatures');
+
+        $this->assertEmpty($originalTenantFiles, 'attacker must NOT have written into the victim tenant directory');
+        $this->assertNotEmpty($attackerFiles, 'attacker upload should land in their own tenant directory');
+    }
+}
