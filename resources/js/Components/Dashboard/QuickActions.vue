@@ -89,7 +89,7 @@ const actions = computed(() => {
             >
                 <!-- Icon -->
                 <div :class="['w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-gradient-to-br text-white shadow-sm', action.gradient, action.shadow]">
-                    <span v-html="action.icon" />
+                    <span v-safe-html="action.icon" />
                 </div>
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300 leading-tight">{{ action.label }}</span>
             </a>

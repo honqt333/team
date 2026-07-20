@@ -50,6 +50,13 @@ module.exports = {
         'vue/require-default-prop': 'warn',
         'vue/html-closing-bracket-spacing': 'warn',
         'vue/multiline-html-element-content-newline': 'warn',
+        'no-restricted-syntax': [
+            'error',
+            {
+                selector: "VAttribute[key.name='html']",
+                message: 'Use v-safe-html instead of v-html. See SafeHtmlPlugin.',
+            },
+        ],
     },
     ignorePatterns: [
         'node_modules/',

@@ -751,7 +751,7 @@ const getSocialIcon = (platform) => {
             <p class="footer-about">{{ t('footer_about_ar', 'footer_about_en') }}</p>
             <div class="socials">
               <a v-for="link in (settings.social_links || [])" :key="link.url" :href="link.url" class="social-link"
-                target="_blank" v-html="getSocialIcon(link.platform)">
+                target="_blank" v-safe-html="getSocialIcon(link.platform)">
               </a>
             </div>
           </div>

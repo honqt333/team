@@ -15,7 +15,7 @@
             <div class="flex-1 min-w-0">
                 <span class="font-semibold">{{ announcement.title }}</span>
                 <span v-if="announcement.content" class="mx-1.5 opacity-70">—</span>
-                <span v-if="announcement.content" class="opacity-90" v-html="truncate(announcement.content, 120)"></span>
+                <span v-if="announcement.content" class="opacity-90" v-safe-html="truncate(announcement.content, 120)"></span>
 
             </div>
 

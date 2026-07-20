@@ -43,10 +43,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'is_system_admin',
         'tenant_id',
         'current_center_id',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-        'two_factor_confirmed_at',
-        'two_factor_type',
     ];
 
     /**
@@ -60,6 +56,56 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_secret',
         'two_factor_recovery_codes',
     ];
+
+    /**
+     * Enable 2FA for the user safely without mass assignment vulnerabilities.
+     */
+    public function enableTwoFactor(
+        string $secret = '',
+        array $recoveryCodes = [],
+        string $type = 'totp'
+    ): void {
+        $encryptedSecret = ! empty($secret)
+            ? \Illuminate\Support\Facades\Crypt::encryptString($secret)
+            : null;
+
+        $this->forceFill([
+            'two_factor_secret' => $encryptedSecret,
+            'two_factor_recovery_codes' => \Illuminate\Support\Facades\Crypt::encryptString(json_encode($recoveryCodes)),
+            'two_factor_confirmed_at' => now(),
+            'two_factor_type' => $type,
+        ])->save();
+    }
+
+    /**
+     * Disable 2FA for the user safely.
+     */
+    public function disableTwoFactor(): void
+    {
+        $this->forceFill([
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+            'two_factor_type' => null,
+        ])->save();
+    }
+
+    /**
+     * Regenerate 2FA recovery codes.
+     */
+    public function regenerateRecoveryCodes(): array
+    {
+        $codes = [];
+        for ($i = 0; $i < 8; $i++) {
+            $codes[] = \Illuminate\Support\Str::random(10);
+        }
+
+        $this->forceFill([
+            'two_factor_recovery_codes' => \Illuminate\Support\Facades\Crypt::encryptString(json_encode($codes)),
+        ])->save();
+
+        return $codes;
+    }
 
     /**
      * Get the attributes that should be cast.

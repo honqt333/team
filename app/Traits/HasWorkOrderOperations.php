@@ -29,9 +29,9 @@ trait HasWorkOrderOperations
     public function getTotalPaidAttribute(): float
     {
         if ($this->relationLoaded('payments')) {
-            return (float) $this->payments->sum(fn($p) => ($p->type === 'payment' || $p->type === 'Payment' || $p->type === 'bad_debt' || $p->type === 'Bad_debt') ? $p->amount : -$p->amount);
+            return (float) $this->payments->sum(fn($p) => ($p->type === 'payment' || $p->type === \App\Enums\PaymentType::PAYMENT || $p->type === 'bad_debt' || $p->type === \App\Enums\PaymentType::BAD_DEBT) ? $p->amount : -$p->amount);
         }
-        return (float) $this->payments()->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment", "bad_debt", "Bad_debt") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')->value('paid');
+        return (float) $this->payments()->selectRaw('SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) as paid')->value('paid');
     }
 
     /**
@@ -40,9 +40,9 @@ trait HasWorkOrderOperations
     public function getBadDebtAttribute(): float
     {
         if ($this->relationLoaded('payments')) {
-            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === 'Bad_debt') ? $p->amount : 0);
+            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === \App\Enums\PaymentType::BAD_DEBT) ? $p->amount : 0);
         }
-        return (float) $this->payments()->whereIn('type', ['bad_debt', 'Bad_debt'])->sum('amount');
+        return (float) $this->payments()->where('type', 'bad_debt')->sum('amount');
     }
 
     /**

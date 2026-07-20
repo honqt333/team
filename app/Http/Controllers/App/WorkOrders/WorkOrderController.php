@@ -189,7 +189,7 @@ class WorkOrderController
 
         $totalPaid = (float) DB::table('payments')
             ->whereIn('work_order_id', (clone $baseQuery)->select('id'))
-            ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')
+            ->selectRaw('SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) as paid')
             ->value('paid');
 
         return [

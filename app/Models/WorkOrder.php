@@ -244,7 +244,7 @@ class WorkOrder extends Model
      */
     public function scopeHasOutstandingBalance($query): void
     {
-        $query->whereRaw('(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))');
+        $query->whereRaw('(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))');
     }
 
     /**
@@ -280,7 +280,7 @@ class WorkOrder extends Model
      */
     public static function outstandingBalanceSql(): string
     {
-        return '(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type IN ("payment", "Payment") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))';
+        return '(COALESCE((SELECT SUM((unit_price * qty) - discount_amount) FROM work_order_items WHERE work_order_id = work_orders.id), 0) + COALESCE((SELECT SUM((unit_price * qty) - discount) FROM work_order_item_parts WHERE work_order_id = work_orders.id), 0)) > (COALESCE((SELECT SUM(CASE WHEN type = "payment" THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) FROM payments WHERE work_order_id = work_orders.id), 0))';
     }
 
     /**

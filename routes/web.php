@@ -110,18 +110,18 @@ use Illuminate\Support\Facades\Route;
 // ─────────────────────────────────────────────────────────────────────────────
 Route::prefix('view')->name('public.')->group(function () {
     Route::get('/quote/{uuid}', [PublicQuoteController::class, 'show'])->name('quotes.show');
-    Route::post('/quote/{uuid}/approve', [PublicQuoteController::class, 'approve'])->name('quotes.approve');
-    Route::post('/quote/{uuid}/reject', [PublicQuoteController::class, 'reject'])->name('quotes.reject');
+    Route::post('/quote/{uuid}/approve', [PublicQuoteController::class, 'approve'])->middleware('throttle:quote-public')->name('quotes.approve');
+    Route::post('/quote/{uuid}/reject', [PublicQuoteController::class, 'reject'])->middleware('throttle:quote-public')->name('quotes.reject');
 });
 
 Route::get('/', [PublicLandingController::class, 'preview'])->name('home');
 
 Route::get('/landing-preview', [PublicLandingController::class, 'preview'])->name('public.landing.preview');
-Route::post('/landing-preview/contact', [PublicLandingController::class, 'submitContact'])->name('public.landing.contact');
+Route::post('/landing-preview/contact', [PublicLandingController::class, 'submitContact'])->middleware('throttle:public-landing')->name('public.landing.contact');
 
 // Phone Verification (Registration)
-Route::post('/phone/send-otp', [PhoneVerificationController::class, 'sendOtp'])->name('phone.send-otp');
-Route::post('/phone/verify-otp', [PhoneVerificationController::class, 'verifyOtp'])->name('phone.verify-otp');
+Route::post('/phone/send-otp', [PhoneVerificationController::class, 'sendOtp'])->middleware('throttle:phone-otp')->name('phone.send-otp');
+Route::post('/phone/verify-otp', [PhoneVerificationController::class, 'verifyOtp'])->middleware('throttle:phone-otp')->name('phone.verify-otp');
 
 // Locale Management
 Route::post('/locale', [LocaleController::class, 'setLocale'])->name('locale.set');
@@ -139,19 +139,19 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 
 // 2FA Challenge (during login)
 Route::get('/app/2fa/challenge', [TwoFactorAuthenticatedSessionController::class, 'challenge'])->name('app.2fa.challenge');
-Route::post('/app/2fa/verify', [TwoFactorAuthenticatedSessionController::class, 'verify'])->name('app.2fa.verify');
-Route::post('/app/2fa/challenge/resend', [TwoFactorAuthenticatedSessionController::class, 'resend'])->name('app.2fa.challenge.resend');
+Route::post('/app/2fa/verify', [TwoFactorAuthenticatedSessionController::class, 'verify'])->middleware('throttle:2fa-verify')->name('app.2fa.verify');
+Route::post('/app/2fa/challenge/resend', [TwoFactorAuthenticatedSessionController::class, 'resend'])->middleware('throttle:phone-otp')->name('app.2fa.challenge.resend');
 
 Route::middleware(['auth', 'verified', EnsureTenantActive::class])->prefix('app')->group(function () {
     // Profile
     Route::get('/profile', [App\Http\Controllers\App\ProfileController::class, 'index'])->name('app.profile');
     Route::patch('/profile', [App\Http\Controllers\App\ProfileController::class, 'update'])->name('app.profile.update');
-    Route::post('/profile/photo', [App\Http\Controllers\App\ProfileController::class, 'updatePhoto'])->name('app.profile.photo.update');
+    Route::post('/profile/photo', [App\Http\Controllers\App\ProfileController::class, 'updatePhoto'])->middleware('throttle:uploads')->name('app.profile.photo.update');
     Route::post('/profile/switch-center', [ProfileController::class, 'switchCenter'])->name('profile.switch-center');
 
     // Two-Factor Authentication (Tenant App)
-    Route::post('/security/2fa/send-code', [TwoFactorController::class, 'sendCode'])->name('app.2fa.send-code');
-    Route::post('/security/2fa/enable', [TwoFactorController::class, 'enable'])->name('app.security.2fa.enable');
+    Route::post('/security/2fa/send-code', [TwoFactorController::class, 'sendCode'])->middleware('throttle:phone-otp')->name('app.2fa.send-code');
+    Route::post('/security/2fa/enable', [TwoFactorController::class, 'enable'])->middleware('throttle:2fa-verify')->name('app.security.2fa.enable');
     Route::post('/security/2fa/disable', [TwoFactorController::class, 'disable'])->name('app.security.2fa.disable');
     Route::post('/security/2fa/regenerate', [TwoFactorController::class, 'regenerateRecoveryCodes'])->name('app.security.2fa.regenerate');
 
@@ -330,7 +330,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
 
     // Print Settings — Signatures (tenant-scoped image uploads + lifecycle)
-    Route::post('/settings/print/signatures', [PrintSettingsSignatureController::class, 'store'])->name('settings.print.signatures.store');
+    Route::post('/settings/print/signatures', [PrintSettingsSignatureController::class, 'store'])->middleware('throttle:uploads')->name('settings.print.signatures.store');
     Route::delete('/settings/print/signatures/{signatureId}', [PrintSettingsSignatureController::class, 'destroy'])->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.destroy');
 
     // Users Settings

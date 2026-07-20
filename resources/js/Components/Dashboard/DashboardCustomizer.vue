@@ -142,7 +142,7 @@ function close() {
 
                                     <!-- Icon -->
                                     <div class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 pointer-events-none">
-                                        <span v-html="element.icon" class="text-gray-500 dark:text-gray-400 [&>svg]:w-3.5 [&>svg]:h-3.5" />
+                                        <span v-safe-html="element.icon" class="text-gray-500 dark:text-gray-400 [&>svg]:w-3.5 [&>svg]:h-3.5" />
                                     </div>
 
                                     <!-- Label -->

@@ -165,7 +165,7 @@ const animatedFormatted = computed(() => {
         <div class="relative flex items-start justify-between gap-4">
             <!-- Icon -->
             <div :class="['w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm ring-1', c.iconBg, c.ring]">
-                <span v-html="icon" :class="['w-6 h-6', c.icon]" />
+                <span v-safe-html="icon" :class="['w-6 h-6', c.icon]" />
             </div>
 
             <!-- Change badge -->

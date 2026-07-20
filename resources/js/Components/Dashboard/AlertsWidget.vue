@@ -99,7 +99,7 @@ const hasAlerts = computed(() => alerts.value.length > 0);
                 :class="['flex items-center gap-3 p-3 rounded-xl border transition-all hover:shadow-sm hover:-translate-y-0.5', alert.bg, alert.border]"
             >
                 <div :class="['w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0', alert.iconBg, alert.iconColor]">
-                    <span v-html="alert.icon" />
+                    <span v-safe-html="alert.icon" />
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ alert.label }}</p>

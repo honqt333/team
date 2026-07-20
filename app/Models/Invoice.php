@@ -61,6 +61,7 @@ class Invoice extends Model
         'issue_date' => 'datetime',
         'supply_date' => 'date',
         'due_date' => 'date',
+        'type' => \App\Enums\InvoiceType::class,
         'tax_enabled_snapshot' => 'boolean',
         'tax_rate_snapshot' => 'decimal:2',
         'total_excl_tax' => 'decimal:2',
@@ -108,9 +109,9 @@ class Invoice extends Model
     public function getBadDebtAttribute(): float
     {
         if ($this->relationLoaded('payments')) {
-            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === 'Bad_debt') ? $p->amount : 0);
+            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === \App\Enums\PaymentType::BAD_DEBT) ? $p->amount : 0);
         }
-        return (float) $this->payments()->whereIn('type', ['bad_debt', 'Bad_debt'])->sum('amount');
+        return (float) $this->payments()->where('type', 'bad_debt')->sum('amount');
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -127,9 +128,9 @@ class Invoice extends Model
     public function updatePaymentStatus(): void
     {
         // Mirror WorkOrder::getTotalPaidAttribute — payments add, refunds subtract.
-        // type values come from Payment::TYPES: 'payment' / 'refund' (lowercase).
+        // type values come from Payment::TYPES: 'payment' / 'refund' / 'bad_debt' (lowercase).
         $totalPaid = (float) $this->payments()
-            ->selectRaw('SUM(CASE WHEN type IN ("payment", "Payment", "bad_debt", "Bad_debt") THEN amount WHEN type IN ("refund", "Refund") THEN -amount ELSE 0 END) as paid')
+            ->selectRaw('SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) as paid')
             ->value('paid');
 
         $this->total_paid = $totalPaid;

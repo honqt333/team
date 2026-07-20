@@ -27,9 +27,12 @@ class Payment extends Model
         'type', // 'payment' or 'refund'
     ];
 
+    public const TYPES = ['payment', 'refund', 'bad_debt'];
+
     protected $casts = [
         'amount' => 'decimal:2',
         'payment_date' => 'datetime',
+        'type' => \App\Enums\PaymentType::class,
     ];
 
     protected static function booted(): void

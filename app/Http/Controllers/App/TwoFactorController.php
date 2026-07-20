@@ -113,12 +113,7 @@ class TwoFactorController extends Controller
         // Generate recovery codes
         $recoveryCodes = $this->twoFactor->generateRecoveryCodes();
 
-        $user->update([
-            'two_factor_confirmed_at' => now(),
-            'two_factor_type' => $method,
-            'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
-            'two_factor_secret' => null, 
-        ]);
+        $user->enableTwoFactor('', $recoveryCodes, $method);
         
         Cache::forget('2fa_setup_' . $user->id);
         Cache::forget('2fa_setup_method_' . $user->id);
@@ -146,11 +141,7 @@ class TwoFactorController extends Controller
             return back()->withErrors(['password' => 'كلمة المرور غير صحيحة']);
         }
 
-        $user->update([
-            'two_factor_secret' => null,
-            'two_factor_recovery_codes' => null,
-            'two_factor_confirmed_at' => null,
-        ]);
+        $user->disableTwoFactor();
 
         return back()->with('success', 'تم إلغاء المصادقة الثنائية');
     }
@@ -170,10 +161,7 @@ class TwoFactorController extends Controller
             return back()->withErrors(['password' => 'كلمة المرور غير صحيحة']);
         }
 
-        $recoveryCodes = $this->twoFactor->generateRecoveryCodes();
-        $user->update([
-            'two_factor_recovery_codes' => encrypt(json_encode($recoveryCodes)),
-        ]);
+        $user->regenerateRecoveryCodes();
 
         return back()->with('success', 'تم إنشاء رموز استرداد جديدة');
     }

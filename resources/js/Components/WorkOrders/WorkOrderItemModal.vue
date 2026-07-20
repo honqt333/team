@@ -107,7 +107,7 @@
                                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                             ]"
                         >
-                            <span v-html="status.icon"></span>
+                            <span v-safe-html="status.icon"></span>
                             {{ status.label }}
                         </button>
                     </div>

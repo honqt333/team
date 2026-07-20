@@ -171,6 +171,35 @@ class Permissions
     public const HR_CONTRACTS_DELETE = 'hr.contracts.delete';
 
     // ========================================
+    // PHASE 0 POLICY PERMISSIONS
+    // ========================================
+
+    /** Payments Policy Permissions */
+    public const PAYMENTS_VIEW = 'payments.view';
+    public const PAYMENTS_CREATE = 'payments.create';
+    public const PAYMENTS_UPDATE = 'payments.update';
+    public const PAYMENTS_DELETE = 'payments.delete';
+    public const PAYMENTS_REFUND = 'payments.refund';
+
+    /** Leaves Policy Permissions */
+    public const LEAVES_VIEW = 'leaves.view';
+    public const LEAVES_VIEW_ALL = 'leaves.view-all';
+    public const LEAVES_CREATE = 'leaves.create';
+    public const LEAVES_APPROVE = 'leaves.approve';
+
+    /** Payroll Policy Permissions */
+    public const PAYROLL_VIEW = 'payroll.view';
+    public const PAYROLL_PROCESS = 'payroll.process';
+    public const PAYROLL_APPROVE = 'payroll.approve';
+    public const PAYROLL_DISBURSE = 'payroll.disburse';
+
+    /** Work Order Items Policy Permissions */
+    public const WORK_ORDER_ITEMS_VIEW = 'work-order-items.view';
+    public const WORK_ORDER_ITEMS_CREATE = 'work-order-items.create';
+    public const WORK_ORDER_ITEMS_UPDATE = 'work-order-items.update';
+    public const WORK_ORDER_ITEMS_DELETE = 'work-order-items.delete';
+
+    // ========================================
     // EMPLOYEE PORTAL (Self-Service)
     // ========================================
     
@@ -391,6 +420,25 @@ class Permissions
                 self::EMPLOYEE_LEAVES_REQUEST,
                 self::EMPLOYEE_PAYSLIPS_VIEW,
                 self::EMPLOYEE_REQUESTS_CREATE,
+            ],
+            'phase_0_policies' => [
+                self::PAYMENTS_VIEW,
+                self::PAYMENTS_CREATE,
+                self::PAYMENTS_UPDATE,
+                self::PAYMENTS_DELETE,
+                self::PAYMENTS_REFUND,
+                self::LEAVES_VIEW,
+                self::LEAVES_VIEW_ALL,
+                self::LEAVES_CREATE,
+                self::LEAVES_APPROVE,
+                self::PAYROLL_VIEW,
+                self::PAYROLL_PROCESS,
+                self::PAYROLL_APPROVE,
+                self::PAYROLL_DISBURSE,
+                self::WORK_ORDER_ITEMS_VIEW,
+                self::WORK_ORDER_ITEMS_CREATE,
+                self::WORK_ORDER_ITEMS_UPDATE,
+                self::WORK_ORDER_ITEMS_DELETE,
             ],
         ];
     }

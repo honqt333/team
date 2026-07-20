@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\TenantScoped;
 
 class Vehicle extends Model
 {
-    use HasFactory, TenantScoped, SoftDeletes, \App\Traits\HasVehicleRelations;
+    use HasFactory, TenantScoped, CenterScoped, SoftDeletes, \App\Traits\HasVehicleRelations;
 
     protected static function boot(): void
     {

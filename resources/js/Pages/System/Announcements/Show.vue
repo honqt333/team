@@ -49,7 +49,7 @@
             <!-- Content -->
             <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
                 <h3 class="font-semibold text-gray-900 dark:text-white mb-3">المحتوى</h3>
-                <div class="prose dark:prose-invert max-w-none" v-html="sanitizedContent"></div>
+                <div class="prose dark:prose-invert max-w-none" v-safe-html="sanitizedContent"></div>
                 <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex gap-4 text-sm text-gray-500">
                     <span>القنوات: {{ (announcement.channels || ['in_app']).join(', ') }}</span>
                     <span v-if="announcement.expires_at">ينتهي: {{ formatDate(announcement.expires_at) }}</span>

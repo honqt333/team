@@ -90,7 +90,7 @@
                                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                             "
                         >
-                            <span v-html="tab.icon" class="w-4 h-4"></span>
+                            <span v-safe-html="tab.icon" class="w-4 h-4"></span>
                             {{ tab.label }}
                         </button>
                     </div>

@@ -25,7 +25,7 @@
                         <h4 class="font-medium text-gray-900 dark:text-white mb-3">1. امسح رمز QR</h4>
                         <p class="text-sm text-gray-500 mb-3">استخدم تطبيق Google Authenticator أو أي تطبيق TOTP</p>
                         <div class="flex items-center gap-6">
-                            <div v-html="qrCode" class="bg-white p-2 rounded-lg border"></div>
+                            <div v-safe-html="qrCode" class="bg-white p-2 rounded-lg border"></div>
                             <div>
                                 <p class="text-xs text-gray-500 mb-1">أو أدخل الرمز يدوياً:</p>
                                 <code class="block text-sm bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded font-mono select-all">{{ secret }}</code>

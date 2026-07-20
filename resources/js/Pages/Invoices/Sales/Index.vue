@@ -138,7 +138,7 @@
                             ? 'bg-white/20'
                             : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white'
                     ]">
-                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-html="tab.iconPath"/>
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" v-safe-html="tab.iconPath"/>
                     </div>
 
                     <span class="font-black tracking-tight text-sm uppercase">

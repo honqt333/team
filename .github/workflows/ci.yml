@@ -39,6 +39,17 @@ jobs:
       - name: Run Pint (lint check, no fixes)
         run: php artisan pint --test
 
+  tenant-scope-check:
+    name: Tenant Scope Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - name: Check tenant scope
+        run: bash scripts/check-tenant-scope.sh
+
   test-backend:
     name: Test Backend (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest

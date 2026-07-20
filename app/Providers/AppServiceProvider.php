@@ -116,6 +116,12 @@ class AppServiceProvider extends ServiceProvider
         // Work Order Inspection Policy
         Gate::policy(WorkOrderInspection::class, WorkOrderInspectionPolicy::class);
 
+        // Phase 0 Critical Policies
+        Gate::policy(\App\Models\Payment::class, \App\Policies\PaymentPolicy::class);
+        Gate::policy(\App\Models\HR\Leave::class, \App\Policies\LeavePolicy::class);
+        Gate::policy(\App\Models\HR\Payroll::class, \App\Policies\PayrollPolicy::class);
+        Gate::policy(\App\Models\WorkOrderItem::class, \App\Policies\WorkOrderItemPolicy::class);
+
         // Observers
         Employee::observe(EmployeeObserver::class);
         Center::observe(CenterObserver::class);
