@@ -12,6 +12,7 @@ use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
+use App\Services\Billing\PaymentCompletionService;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +23,10 @@ use Throwable;
 
 class CompanySubscriptionController extends Controller
 {
-    public function __construct(protected PaymentManager $paymentManager) {}
+    public function __construct(
+        protected PaymentManager $paymentManager,
+        protected PaymentCompletionService $paymentCompletion
+    ) {}
 
     /**
      * Show the subscription management page.
@@ -371,6 +375,20 @@ class CompanySubscriptionController extends Controller
                 ],
             ], $validated['gateway']);
 
+            // Persist the gateway-side reference (e.g. Tap charge id, Tabby
+            // session id, Tamara order id) so we can reconcile even if the
+            // callback never arrives. Without this, gateway_payment_id stays
+            // NULL until callback and the payment is effectively orphaned.
+            $gatewayPaymentId = $formData['payment_id']
+                ?? $formData['session_id']
+                ?? $formData['order_id']
+                ?? $formData['checkout_id']
+                ?? null;
+
+            if ($gatewayPaymentId) {
+                $payment->update(['gateway_payment_id' => (string) $gatewayPaymentId]);
+            }
+
             DB::commit();
 
             return response()->json([
@@ -396,28 +414,21 @@ class CompanySubscriptionController extends Controller
 
     /**
      * Handle payment gateway callback (for tenant-initiated payments).
+     *
+     * Delegates to PaymentCompletionService which:
+     * - Marks the payment paid
+     * - Activates the subscription + tenant
+     * - Marks the invoice paid
+     * - Logs an audit trail
+     * - Sends the activation email
+     * - Is idempotent (re-callbacks are no-ops)
      */
     public function callback(Request $request, SubscriptionPayment $payment)
     {
         $result = $this->paymentManager->verify($request->all(), $payment->gateway);
 
         if ($result['success']) {
-            $payment->markAsPaid($result['raw_response'] ?? []);
-            $payment->update([
-                'gateway_payment_id' => $result['payment_id'] ?? null,
-                'payment_method' => $result['payment_method'] ?? null,
-            ]);
-
-            $subscription = $payment->subscription;
-
-            if ($subscription) {
-                $subscription->update(['status' => 'active']);
-                $payment->invoice?->update([
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                ]);
-                $subscription->tenant->update(['status' => 'active']);
-            }
+            $this->paymentCompletion->completePayment($payment, $result);
 
             return Inertia::render('Settings/Company/SubscriptionSuccess', [
                 'payment' => $payment->fresh()->load('subscription.plan'),

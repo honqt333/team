@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
+use App\Services\Billing\PaymentCompletionService;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,9 +18,14 @@ class PaymentController extends Controller
 {
     protected PaymentManager $paymentManager;
 
-    public function __construct(PaymentManager $paymentManager)
-    {
+    protected PaymentCompletionService $paymentCompletion;
+
+    public function __construct(
+        PaymentManager $paymentManager,
+        PaymentCompletionService $paymentCompletion
+    ) {
         $this->paymentManager = $paymentManager;
+        $this->paymentCompletion = $paymentCompletion;
     }
 
     /**
@@ -75,6 +81,10 @@ class PaymentController extends Controller
 
     /**
      * Handle payment callback from gateway.
+     *
+     * Delegates to PaymentCompletionService for the post-payment side effects
+     * (invoice mark-paid, tenant activation, audit log, activation email).
+     * The service is idempotent so re-callbacks are safe.
      */
     public function callback(Request $request, SubscriptionPayment $payment)
     {
@@ -85,26 +95,12 @@ class PaymentController extends Controller
         );
 
         if ($result['success']) {
-            // Mark payment as successful
-            $payment->markAsPaid($result['raw_response'] ?? []);
-            $payment->update([
-                'gateway_payment_id' => $result['payment_id'] ?? null,
-                'payment_method' => $result['payment_method'] ?? null,
-            ]);
-
-            // Activate subscription
-            $subscription = $payment->subscription;
-
-            if ($subscription) {
-                $subscription->update([
-                    'status' => 'active',
-                ]);
-
-                // Update tenant status
-                $subscription->tenant->update([
-                    'status' => 'active',
-                ]);
-            }
+            // System-initiated payments are recorded against a tenant
+            // (typically from the admin re-charging a tenant). Pass the
+            // current admin user id for the audit log so we can trace who
+            // triggered the payment on the system side.
+            $adminUserId = auth('admin')->id();
+            $this->paymentCompletion->completePayment($payment, $result, $adminUserId);
 
             return redirect()->route('system.payment.success', ['payment' => $payment->id]);
         }
