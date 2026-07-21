@@ -19,8 +19,15 @@ class PricingHelper
     public static function computeDiscountAmount(
         float $unitPrice,
         string $discountType,
-        ?float $discountValue
+        float|int|string|null $discountValue
     ): float {
+        // Eloquent's `decimal:2` cast returns the raw string from the
+        // database (to preserve precision). Form requests can also
+        // hand us a string. Coerce here so every caller — model
+        // boot hook, controller, test — gets the same behavior and
+        // we never throw a TypeError on a perfectly valid input.
+        $discountValue = self::coerceToFloatOrNull($discountValue);
+
         if ($discountType === 'none' || $discountValue === null || $discountValue <= 0) {
             return 0;
         }
@@ -43,7 +50,7 @@ class PricingHelper
     public static function computeFinalUnitPrice(
         float $unitPrice,
         string $discountType,
-        ?float $discountValue
+        float|int|string|null $discountValue
     ): float {
         $discountAmount = self::computeDiscountAmount($unitPrice, $discountType, $discountValue);
 
@@ -63,7 +70,7 @@ class PricingHelper
     public static function computeLineTotal(
         float $unitPrice,
         string $discountType,
-        ?float $discountValue,
+        float|int|string|null $discountValue,
         int|float $qty,
         float $minPrice = 0
     ): array {
@@ -125,5 +132,47 @@ class PricingHelper
         }
 
         return true;
+    }
+
+    /**
+     * Coerce a discount value to float|null.
+     *
+     * Why this exists: PHP's `?float` parameter is strict — a string
+     * "10.50" from a request or an Eloquent `decimal:2` cast throws
+     * a TypeError. Rather than scatter `(float) ... ?: null` at
+     * every caller, we centralize the coercion here. The function is
+     * private: callers should not be tempted to use it elsewhere
+     * because it would hide the same problem in their own code.
+     */
+    private static function coerceToFloatOrNull(mixed $value): ?float
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_string($value)) {
+            // Reject obviously bad input early so a string like
+            // "abc" doesn't silently become 0.0 (which would
+            // erase the user's discount by accident).
+            if (! is_numeric($value)) {
+                throw new InvalidArgumentException(
+                    "Discount value must be numeric, got: '{$value}'"
+                );
+            }
+            $value = (float) $value;
+        }
+
+        if (is_int($value)) {
+            $value = (float) $value;
+        }
+
+        if (! is_float($value)) {
+            // bool, array, object — none of these are valid.
+            throw new InvalidArgumentException(
+                'Discount value must be a number, got: '.gettype($value)
+            );
+        }
+
+        return $value;
     }
 }
