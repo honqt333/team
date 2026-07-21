@@ -1,7 +1,11 @@
 <template>
     <div class="space-y-4">
-        <!-- Moyasar form mount point -->
-        <div id="moyasar-form" class="min-h-[180px]"></div>
+        <!-- Moyasar form mount point.
+             CRITICAL: Must use class selector (.mysr-form) — Moyasar's init()
+             replaces the matched element internally and an id selector
+             doesn't resolve correctly. The element must be empty before
+             init() is called. -->
+        <div class="mysr-form min-h-[180px]"></div>
 
         <!-- Loading state -->
         <div v-if="loading" class="text-center py-4 text-sm text-gray-500">
@@ -72,7 +76,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     // Don't remove the script — it's cached globally and other pages may use it.
     // Just clean up the form container.
-    const el = document.getElementById('moyasar-form');
+    const el = document.querySelector('.mysr-form');
     if (el) el.innerHTML = '';
 });
 
@@ -127,19 +131,17 @@ function initMoyasar() {
 
     try {
         window.Moyasar.init({
-            element: '#moyasar-form',
+            element: '.mysr-form',
             amount: props.formData.amount,
             currency: props.formData.currency,
             description: props.formData.description,
             publishable_api_key: props.formData.publishable_key,
             callback_url: props.formData.callback_url,
             metadata: props.formData.metadata || {},
-            methods: ['creditcard', 'applepay'],
-            apple_pay: {
-                country: 'SA',
-                label: 'Carag',
-                validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
-            },
+            // Only creditcard — Apple Pay requires a real validate_merchant_url
+            // (https://api.moyasar.com/v1/applepay/initiate returns 365 bytes
+            // of config-notice instead of a form when not configured for it).
+            methods: ['creditcard'],
             on_completed: function (payment) {
                 // Moyasar redirects to callback_url on success, so this
                 // mainly fires for 3DS failures or cancelled flows.

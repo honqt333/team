@@ -81,7 +81,7 @@
 
                 <!-- Moyasar Payment Form -->
                 <div v-else>
-                    <div id="moyasar-form" class="min-h-[200px]"></div>
+                    <div class="mysr-form min-h-[200px]"></div>
                 </div>
             </div>
 
@@ -138,19 +138,15 @@ const initMoyasar = () => {
     if (typeof Moyasar === 'undefined') return;
 
     Moyasar.init({
-        element: '#moyasar-form',
+        element: '.mysr-form',
         amount: props.formData.amount,
         currency: props.formData.currency,
         description: props.formData.description,
         publishable_api_key: props.formData.publishable_key,
         callback_url: props.formData.callback_url,
         metadata: props.formData.metadata,
-        methods: ['creditcard', 'applepay'],
-        apple_pay: {
-            country: 'SA',
-            label: 'Khidmh Pro',
-            validate_merchant_url: 'https://api.moyasar.com/v1/applepay/initiate',
-        },
+        // Only creditcard — Apple Pay requires a real validate_merchant_url
+        methods: ['creditcard'],
         on_completed: function (payment) {},
     });
 };
