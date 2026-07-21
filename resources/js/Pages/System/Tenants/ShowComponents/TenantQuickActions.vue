@@ -51,6 +51,22 @@
             إعدادات الأمان
         </button>
 
+        <!-- Backup (super_admin only) -->
+        <button
+            @click="$emit('backup')"
+            class="px-4 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+                />
+            </svg>
+            نسخة احتياطية الآن
+        </button>
+
         <!-- Delete (super_admin only) -->
         <button
             @click="$emit('delete')"
@@ -66,5 +82,5 @@ defineProps({
     tenant: { type: Object, required: true },
 });
 
-defineEmits(['impersonate', 'suspend', 'activate', 'extend-trial', 'security', 'delete']);
+defineEmits(['impersonate', 'suspend', 'activate', 'extend-trial', 'security', 'backup', 'delete']);
 </script>

@@ -15,6 +15,7 @@
                 @activate="activateTenant"
                 @extend-trial="modals.extend = true"
                 @security="modals.security = true"
+                @backup="createBackup"
                 @delete="modals.delete = true"
             />
 
@@ -117,5 +118,9 @@ const deleteTenant = (confirmation) => {
 
 const impersonateTenant = () => {
     router.post(`/system/tenants/${props.tenant.id}/impersonate`);
+};
+
+const createBackup = () => {
+    router.post(`/system/tenants/${props.tenant.id}/backups`, {});
 };
 </script>

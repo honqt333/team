@@ -21,3 +21,11 @@ Schedule::command('subscriptions:process-renewals')
 Schedule::command(UpdateOverdueInstallments::class)
     ->daily()
     ->withoutOverlapping();
+
+// Tenant backups - weekly on Sundays at 2 AM
+Schedule::command('tenants:backup --active-only')
+    ->weekly()
+    ->sundays()
+    ->at('02:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/tenant-backups.log'));

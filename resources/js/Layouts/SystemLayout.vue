@@ -45,7 +45,7 @@
 
                 <!-- Navigation (shared with mobile drawer) -->
                 <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                    <template v-for="(group, gIdx) in systemNavGroups" :key="group.label">
+                    <template v-for="(group, gIdx) in visibleNavGroups" :key="group.label">
                         <!-- Group heading -->
                         <p
                             v-if="gIdx > 0"
@@ -357,7 +357,7 @@
                 </div>
 
                 <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                    <template v-for="(group, gIdx) in systemNavGroups" :key="`m-${group.label}`">
+                    <template v-for="(group, gIdx) in visibleNavGroups" :key="`m-${group.label}`">
                         <p
                             v-if="gIdx > 0"
                             class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 mt-6"
@@ -465,6 +465,24 @@ const {
     warning: toastWarning,
     info: toastInfo,
 } = useToast();
+
+// Filter out nav groups the current user isn't allowed to see. The
+// `requiresSuperAdmin` flag on a group hides the whole section for
+// non-super-admins (server-side middleware still enforces the route
+// protection — this is just a UX nicety so regular admins don't see
+// a link that 403s them).
+const isSuperAdmin = computed(() => {
+    return page.props.auth?.is_super_admin === true;
+});
+
+const visibleNavGroups = computed(() => {
+    return systemNavGroups.filter((group) => {
+        if (group.requiresSuperAdmin && !isSuperAdmin.value) {
+            return false;
+        }
+        return true;
+    });
+});
 
 watch(
     () => page.props.flash,

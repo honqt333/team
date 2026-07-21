@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\AdminUser;
 use App\Models\ContactMessage;
 use App\Models\InternalNotification;
 use App\Models\Quote;
@@ -43,12 +44,22 @@ class HandleInertiaRequests extends Middleware
 
         // Check if user is a regular tenant User
         $isTenantUser = $user instanceof User;
+        $isSystemAdmin = $user instanceof AdminUser;
+
+        // Expose super_admin flag for nav-group filtering in the layout.
+        // Server-side EnsureSuperAdmin middleware still enforces the
+        // actual route protection; this is purely for hiding links
+        // the user can't open.
+        $isSuperAdmin = $isSystemAdmin
+            ? $user->isSuperAdmin()
+            : ($isTenantUser ? (bool) ($user->is_system_admin ?? false) : false);
 
         return [
             ...parent::share($request),
             'locale' => app()->getLocale(),
             'auth' => [
                 'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,
+                'is_super_admin' => $isSuperAdmin,
                 'permissions' => $user ? ($isTenantUser ? $user->getAllPermissions()->pluck('name') : ($user->permissions ?? [])) : [],
                 'available_centers' => ($user && $isTenantUser) ? $user->centers()->get(['centers.id', 'centers.name_ar', 'centers.name_en']) : [],
                 'unread_notifications_count' => ($user && $isTenantUser)

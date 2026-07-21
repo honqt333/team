@@ -8,15 +8,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Tenant;
+use App\Models\TenantBackup;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
+use App\Services\Backup\TenantBackupService;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Throwable;
 
 class TenantsController extends Controller
 {
@@ -178,6 +182,31 @@ class TenantsController extends Controller
         // Verify confirmation matches tenant name
         if ($request->confirmation !== $tenant->name) {
             return back()->with('error', 'اسم المستأجر غير متطابق');
+        }
+
+        // Pre-delete safety net: capture a backup BEFORE the forceDelete
+        // so the data is recoverable if the deletion turns out to be a
+        // mistake. We do this outside the destroy transaction because
+        // the backup must commit independently of the delete. If the
+        // backup fails, we abort the whole operation — better to fail
+        // safe than to lose data.
+        try {
+            $backup = app(TenantBackupService::class)->createBackup(
+                $tenant,
+                sprintf('Pre-delete backup by %s @ %s', $request->user()?->name ?? 'system', now()->format('Y-m-d H:i')),
+                TenantBackup::TYPE_PRE_DELETE,
+                $request->user()?->id
+            );
+        } catch (Throwable $e) {
+            Log::error('Pre-delete backup failed', [
+                'tenant_id' => $tenant->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with(
+                'error',
+                'فشل إنشاء نسخة احتياطية قبل الحذف — تم إيقاف العملية. الخطأ: '.$e->getMessage()
+            );
         }
 
         DB::transaction(function () use ($tenant) {

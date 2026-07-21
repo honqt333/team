@@ -102,6 +102,11 @@ class Tenant extends Model
         return $this->hasMany(Subscription::class);
     }
 
+    public function backups(): HasMany
+    {
+        return $this->hasMany(TenantBackup::class);
+    }
+
     /**
      * Check if the tenant has an active paid subscription.
      */
