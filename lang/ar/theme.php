@@ -1,5 +1,7 @@
 <?php
 
-return array (
-  'toggle' => '[AR] theme.toggle',
-);
+declare(strict_types=1);
+
+return [
+    'toggle' => 'تبديل',
+];

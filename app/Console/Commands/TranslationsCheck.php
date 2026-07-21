@@ -29,9 +29,10 @@ class TranslationsCheck extends Command
                             {--fix : Print a stub array of missing keys for the missing locale}
                             {--strict : Exit with code 1 when missing keys are found}
                             {--vue : Also scan Vue i18n JSON files (resources/js/i18n/lang/*.json)}
-                            {--vue-only : Only check Vue i18n JSON files}';
+                            {--vue-only : Only check Vue i18n JSON files}
+                            {--no-placeholders : Skip the AR-placeholder value check}';
 
-    protected $description = 'Scan codebase for translation key usages and report keys that are not yet defined in lang/{en,ar}/*.php.';
+    protected $description = 'Scan codebase for translation key usages and report keys that are not yet defined in lang/{en,ar}/*.php. Also flags AR placeholder values like "[AR] foo.bar".';
 
     /** @var array<int, string> */
     private array $patterns = [
@@ -62,21 +63,30 @@ class TranslationsCheck extends Command
         $strict = (bool) $this->option('strict');
         $withVue = (bool) $this->option('vue');
         $vueOnly = (bool) $this->option('vue-only');
+        $skipPlaceholders = (bool) $this->option('no-placeholders');
 
         $locales = $filterLocale ? [$filterLocale] : ['en', 'ar'];
 
         // 1) Collect defined keys per locale (PHP files)
         $definedKeys = []; // locale => ['file.key.sub' => true]
+        $placeholderValues = []; // locale => ['file.key.sub' => placeholder_string]
+        $placeholderPattern = '/^\[(?:AR|EN|TODO)[^\]]*\]\s/';
 
         foreach ($locales as $locale) {
             $definedKeys[$locale] = [];
+            $placeholderValues[$locale] = [];
 
             foreach (glob($base."/lang/{$locale}/*.php") as $file) {
                 $name = basename($file, '.php');
                 $arr = include $file;
 
-                foreach ($this->flatten($arr) as $k => $_) {
+                foreach ($this->flatten($arr) as $k => $v) {
                     $definedKeys[$locale]["{$name}.{$k}"] = true;
+
+                    // Detect placeholder values like "[AR] foo.bar" or "[TODO:ar] foo"
+                    if (is_string($v) && preg_match($placeholderPattern, $v)) {
+                        $placeholderValues[$locale]["{$name}.{$k}"] = $v;
+                    }
                 }
             }
         }
@@ -230,6 +240,23 @@ class TranslationsCheck extends Command
             $totalMissing += count($keys);
         }
 
+        // 3c) Placeholder values (e.g. "[AR] foo.bar") per locale — independent
+        // of usage; these are untranslated values that still render to the user.
+        $placeholders = []; // locale => [key => value]
+
+        if (! $skipPlaceholders) {
+            foreach ($locales as $locale) {
+                $placeholders[$locale] = $placeholderValues[$locale] ?? [];
+                ksort($placeholders[$locale]);
+            }
+        }
+
+        $totalPlaceholders = 0;
+
+        foreach ($placeholders as $loc => $items) {
+            $totalPlaceholders += count($items);
+        }
+
         if ($asJson) {
             $payload = [
                 'total_missing' => $totalMissing,
@@ -245,11 +272,22 @@ class TranslationsCheck extends Command
             if ($withVue || $vueOnly) {
                 $payload['vue_missing'] = $vueMissing;
             }
+
+            if (! $skipPlaceholders) {
+                $payload['total_placeholders'] = $totalPlaceholders;
+                $payload['placeholders'] = $placeholders;
+            }
+
             $this->line(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         } else {
             $this->info('Translation check complete.');
             $this->line('  Total usages found: '.count($usages));
             $this->line('  Total missing keys: '.$totalMissing);
+
+            if (! $skipPlaceholders) {
+                $this->line('  Total placeholder values (untranslated): '.$totalPlaceholders);
+            }
+
             $this->line('');
 
             foreach ($missing as $loc => $keys) {
@@ -279,6 +317,34 @@ class TranslationsCheck extends Command
                 $this->line('');
             }
 
+            // Placeholder values report (untranslated AR/EN values)
+            if (! $skipPlaceholders && $totalPlaceholders > 0) {
+                foreach ($placeholders as $loc => $items) {
+                    if (empty($items)) {
+                        continue;
+                    }
+                    $this->line("--- Placeholder values in '{$loc}' (".count($items).' untranslated) ---');
+
+                    $byFile = [];
+
+                    foreach ($items as $key => $val) {
+                        $prefix = explode('.', $key)[0];
+                        $byFile[$prefix][] = $key;
+                    }
+                    ksort($byFile);
+
+                    foreach ($byFile as $prefix => $keys) {
+                        $this->line("  [{$prefix}] ".count($keys).' keys');
+
+                        foreach ($keys as $key) {
+                            $sample = mb_substr($items[$key], 0, 60);
+                            $this->line("    {$key}  (value: \"{$sample}\")");
+                        }
+                    }
+                    $this->line('');
+                }
+            }
+
             // Vue JSON cross-check
             if ($withVue || $vueOnly) {
                 foreach ($vueMissing as $loc => $items) {
@@ -292,7 +358,10 @@ class TranslationsCheck extends Command
             }
         }
 
-        return ($totalMissing > 0 && $strict) ? self::FAILURE : self::SUCCESS;
+        // Strict fails on missing keys OR placeholder values.
+        $hasIssues = ($totalMissing > 0) || (! $skipPlaceholders && $totalPlaceholders > 0);
+
+        return ($hasIssues && $strict) ? self::FAILURE : self::SUCCESS;
     }
 
     private function flatten($arr, string $prefix = ''): array

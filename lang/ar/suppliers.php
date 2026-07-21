@@ -1,5 +1,7 @@
 <?php
 
-return array (
-  'tax_number' => '[AR] suppliers.tax_number',
-);
+declare(strict_types=1);
+
+return [
+    'tax_number' => 'الرقم الضريبي',
+];

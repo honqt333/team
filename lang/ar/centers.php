@@ -1,6 +1,8 @@
 <?php
 
-return array (
-  'no_address' => '[AR] centers.no_address',
-  'title_singular' => '[AR] centers.title_singular',
-);
+declare(strict_types=1);
+
+return [
+    'no_address' => 'لا يوجد عنوان',
+    'title_singular' => 'عنوان مفرد',
+];

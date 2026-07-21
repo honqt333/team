@@ -1,17 +1,19 @@
 <?php
 
-return array (
-  'add' => '[AR] packages.add',
-  'add_item' => '[AR] packages.add_item',
-  'add_new_definition' => '[AR] packages.add_new_definition',
-  'calculate_total' => '[AR] packages.calculate_total',
-  'definition_price_notice' => '[AR] packages.definition_price_notice',
-  'empty' => '[AR] packages.empty',
-  'empty_items_hint' => '[AR] packages.empty_items_hint',
-  'items' => '[AR] packages.items',
-  'quantity' => '[AR] packages.quantity',
-  'select_from_catalog' => '[AR] packages.select_from_catalog',
-  'select_package_placeholder' => '[AR] packages.select_package_placeholder',
-  'select_service' => '[AR] packages.select_service',
-  'title' => '[AR] packages.title',
-);
+declare(strict_types=1);
+
+return [
+    'add' => 'إضافة',
+    'add_item' => 'إضافة عنصر',
+    'add_new_definition' => 'إضافة تعريف جديد',
+    'calculate_total' => 'حساب الإجمالي',
+    'definition_price_notice' => 'تنبيه سعر التعريف',
+    'empty' => 'فارغ',
+    'empty_items_hint' => 'تلميح العناصر الفارغة',
+    'items' => 'العناصر',
+    'quantity' => 'الكمية',
+    'select_from_catalog' => 'اختر من الكتالوج',
+    'select_package_placeholder' => 'اختر الباقة',
+    'select_service' => 'اختر الخدمة',
+    'title' => 'العنوان',
+];

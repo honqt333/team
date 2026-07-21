@@ -1,23 +1,25 @@
 <?php
 
-return array (
-  'brand' => '[AR] nav.brand',
-  'close' => '[AR] nav.close',
-  'customers' => '[AR] nav.customers',
-  'dashboard' => '[AR] nav.dashboard',
-  'employee_portal' => '[AR] nav.employee_portal',
-  'integrations' => '[AR] nav.integrations',
-  'invoices' => '[AR] nav.invoices',
-  'logout' => '[AR] nav.logout',
-  'payroll' => '[AR] nav.payroll',
-  'profile' => '[AR] nav.profile',
-  'purchases' => '[AR] nav.purchases',
-  'quotes' => '[AR] nav.quotes',
-  'reports' => '[AR] nav.reports',
-  'sales' => '[AR] nav.sales',
-  'services' => '[AR] nav.services',
-  'settings' => '[AR] nav.settings',
-  'vehicles' => '[AR] nav.vehicles',
-  'website' => '[AR] nav.website',
-  'work_orders' => '[AR] nav.work_orders',
-);
+declare(strict_types=1);
+
+return [
+    'brand' => 'العلامة التجارية',
+    'close' => 'إغلاق',
+    'customers' => 'العملاء',
+    'dashboard' => 'لوحة التحكم',
+    'employee_portal' => 'بوابة الموظف',
+    'integrations' => 'التكاملات',
+    'invoices' => 'الفواتير',
+    'logout' => 'تسجيل الخروج',
+    'payroll' => 'الرواتب',
+    'profile' => 'الملف الشخصي',
+    'purchases' => 'المشتريات',
+    'quotes' => 'عروض الأسعار',
+    'reports' => 'التقارير',
+    'sales' => 'المبيعات',
+    'services' => 'الخدمات',
+    'settings' => 'الإعدادات',
+    'vehicles' => 'المركبات',
+    'website' => 'الموقع الإلكتروني',
+    'work_orders' => 'أوامر العمل',
+];

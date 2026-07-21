@@ -1,17 +1,19 @@
 <?php
 
-return array (
-  'final_invoice' => '[AR] print.final_invoice',
-  'final_invoice_desc' => '[AR] print.final_invoice_desc',
-  'final_tax_invoice' => '[AR] print.final_tax_invoice',
-  'final_tax_invoice_desc' => '[AR] print.final_tax_invoice_desc',
-  'options_title' => '[AR] print.options_title',
-  'payments_receipt' => '[AR] print.payments_receipt',
-  'payments_receipt_desc' => '[AR] print.payments_receipt_desc',
-  'proforma_invoice' => '[AR] print.proforma_invoice',
-  'proforma_invoice_desc' => '[AR] print.proforma_invoice_desc',
-  'vehicle_report' => '[AR] print.vehicle_report',
-  'vehicle_report_desc' => '[AR] print.vehicle_report_desc',
-  'work_order' => '[AR] print.work_order',
-  'work_order_desc' => '[AR] print.work_order_desc',
-);
+declare(strict_types=1);
+
+return [
+    'final_invoice' => 'الفاتورة النهائية',
+    'final_invoice_desc' => 'وصف الفاتورة النهائية',
+    'final_tax_invoice' => 'الفاتورة الضريبية النهائية',
+    'final_tax_invoice_desc' => 'وصف الفاتورة الضريبية النهائية',
+    'options_title' => 'عنوان الخيارات',
+    'payments_receipt' => 'إيصال المدفوعات',
+    'payments_receipt_desc' => 'وصف إيصال المدفوعات',
+    'proforma_invoice' => 'فاتورة شكلية',
+    'proforma_invoice_desc' => 'وصف الفاتورة الشكلية',
+    'vehicle_report' => 'تقرير المركبة',
+    'vehicle_report_desc' => 'وصف تقرير المركبة',
+    'work_order' => 'أمر العمل',
+    'work_order_desc' => 'وصف أمر العمل',
+];

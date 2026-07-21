@@ -1,17 +1,19 @@
 <?php
 
-return array (
-  'active_shops' => '[AR] landing.active_shops',
-  'exclusive_tools' => '[AR] landing.exclusive_tools',
-  'explore_features' => '[AR] landing.explore_features',
-  'free_trial' => '[AR] landing.free_trial',
-  'monthly' => '[AR] landing.monthly',
-  'most_popular' => '[AR] landing.most_popular',
-  'no_contracts' => '[AR] landing.no_contracts',
-  'price_unit' => '[AR] landing.price_unit',
-  'pricing_plans' => '[AR] landing.pricing_plans',
-  'start_now' => '[AR] landing.start_now',
-  'support_24_7' => '[AR] landing.support_24_7',
-  'uptime' => '[AR] landing.uptime',
-  'yearly' => '[AR] landing.yearly',
-);
+declare(strict_types=1);
+
+return [
+    'active_shops' => 'الورش النشطة',
+    'exclusive_tools' => 'أدوات حصرية',
+    'explore_features' => 'استكشف الميزات',
+    'free_trial' => 'تجربة مجانية',
+    'monthly' => 'شهري',
+    'most_popular' => 'الأكثر شيوعاً',
+    'no_contracts' => 'بدون عقود',
+    'price_unit' => 'وحدة السعر',
+    'pricing_plans' => 'باقات الأسعار',
+    'start_now' => 'ابدأ الآن',
+    'support_24_7' => 'دعم على مدار الساعة',
+    'uptime' => 'وقت التشغيل',
+    'yearly' => 'سنوي',
+];
