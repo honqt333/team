@@ -557,6 +557,17 @@
     "subscription_history": {
       "placeholder": "Subscription history will appear here once the component is lifted.",
       "subtitle": "Subscription log with renewal dates and payments for the company."
+    },
+    "subscription": {
+      "bank_transfer_pending": "Your bank transfer subscription request has been received. Your subscription will be activated once the transfer is verified.",
+      "cancelled": "Your subscription has been cancelled",
+      "create_failed": "Failed to create subscription. Please try again.",
+      "expired": "This subscription has expired",
+      "promo_exhausted": "This promo code has reached its maximum usage",
+      "promo_invalid": "Invalid or expired promo code",
+      "resume_invalid": "This subscription cannot be resumed",
+      "resumed": "Your subscription has been resumed",
+      "unsupported_gateway": "The selected payment method is not configured. Please choose another or contact support."
     }
   },
   "customers": {
@@ -3557,7 +3568,8 @@
       "general_settings": "General Settings",
       "payment_settings": "Payment Settings",
       "developer_center": "Developer Center",
-      "back_to_app": "Back to App"
+      "back_to_app": "Back to App",
+      "backups": "Backups"
     },
     "actions": {
       "save": "Save",
@@ -3725,8 +3737,7 @@
       "inactive": "Inactive",
       "unlimited": "∞",
       "no_codes": "No promo codes",
-      "first_code": "Create first code",
-      "promo_codes": "Promo Codes"
+      "first_code": "Create first code"
     },
     "settings": {
       "general_title": "General Settings",
@@ -3804,6 +3815,46 @@
     },
     "layout": {
       "mobile_menu": "Menu"
+    },
+    "backups": {
+      "title": "Backups",
+      "subtitle": "Manage tenant data backups",
+      "stats": {
+        "total": "Total",
+        "completed": "Completed",
+        "failed": "Failed",
+        "total_size": "Total Size"
+      },
+      "col": {
+        "name": "Name",
+        "tenant": "Tenant",
+        "type": "Type",
+        "status": "Status",
+        "size": "Size",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "filter_tenant": "Filter by tenant",
+      "filter_status": "Filter by status",
+      "filter_type": "Filter by type",
+      "filter_all_tenants": "All tenants",
+      "empty": "No backups yet",
+      "status": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "type": {
+        "manual": "Manual",
+        "scheduled": "Scheduled",
+        "pre_delete": "Pre-Delete"
+      },
+      "confirm_delete": "Delete backup \":name\"?",
+      "create_success": "Backup created",
+      "create_failed": "Backup failed",
+      "delete_success": "Backup deleted",
+      "tenants_button": "Backup"
     }
   }
 }

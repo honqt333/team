@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\App\BranchesController;
 use App\Http\Controllers\App\CenterSettingsController;
 use App\Http\Controllers\App\CompanyProfileController;
+use App\Http\Controllers\App\CompanySubscriptionController;
 use App\Http\Controllers\App\CompanyTransactionController;
 use App\Http\Controllers\App\CustomerController;
 use App\Http\Controllers\App\CustomerImportExportController;
@@ -88,6 +89,7 @@ use App\Http\Controllers\Public\PublicLandingController;
 use App\Http\Controllers\Public\PublicQuoteController;
 use App\Http\Controllers\System\AdminUsersController;
 use App\Http\Controllers\System\AnnouncementsController;
+use App\Http\Controllers\System\BackupController;
 use App\Http\Controllers\System\CommunicationTemplatesController;
 use App\Http\Controllers\System\ContactMessageController;
 use App\Http\Controllers\System\DeveloperController;
@@ -317,6 +319,21 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/settings/company/contacts/search', [CompanyTransactionController::class, 'searchContacts'])->name('settings.company.contacts.search');
     Route::resource('/settings/company/transactions', CompanyTransactionController::class)->names('settings.company.transactions');
     Route::post('/settings/company/transactions/{transaction}/approve', [CompanyTransactionController::class, 'approve'])->name('settings.company.transactions.approve');
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Company Subscription Management (tenant self-service)
+    // Uses payment settings configured by system admin (system/settings/payment)
+    // ─────────────────────────────────────────────────────────────────────
+    Route::prefix('settings/company/subscription')->name('app.subscription.')->group(function () {
+        Route::get('/', [CompanySubscriptionController::class, 'index'])->name('index');
+        Route::post('/calculate', [CompanySubscriptionController::class, 'calculatePrice'])->name('calculate');
+        Route::post('/validate-promo', [CompanySubscriptionController::class, 'validatePromo'])->name('validate-promo');
+        Route::post('/subscribe', [CompanySubscriptionController::class, 'subscribe'])->name('subscribe');
+        Route::post('/callback/{payment}', [CompanySubscriptionController::class, 'callback'])->name('callback');
+        Route::post('/cancel/{subscription}', [CompanySubscriptionController::class, 'cancel'])->name('cancel');
+        Route::post('/resume/{subscription}', [CompanySubscriptionController::class, 'resume'])->name('resume');
+        Route::post('/auto-renew/{subscription}', [CompanySubscriptionController::class, 'toggleAutoRenew'])->name('auto-renew');
+    });
 
     // Branches Settings
     Route::get('/settings/branches', [BranchesController::class, 'index'])->name('settings.branches');
@@ -725,6 +742,19 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update');
         // Impersonation is super_admin only — powerful debugging affordance.
         Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start');
+
+        // Tenant backups — super_admin only because they reveal
+        // a tenant's full data set, and the file itself is held on
+        // shared storage. Both pre-delete (automatic) and manual
+        // backups go through this controller.
+        Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store');
+    });
+
+    // Backups cross-tenant listing/download — super_admin only.
+    Route::middleware('super_admin')->group(function () {
+        Route::get('/backups', [BackupController::class, 'index'])->name('system.backups.index');
+        Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('system.backups.download');
+        Route::delete('/backups/{backup}', [BackupController::class, 'destroy'])->name('system.backups.destroy');
     });
 
     // Communication Templates

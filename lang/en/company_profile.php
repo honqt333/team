@@ -187,12 +187,25 @@ return [
     ],
     'zatca' => [
         'complete_vat_first' => 'Complete Vat First',
-        'open_vat' => 'Open Vat',
-        'phase1_title' => 'Phase1 Title',
-        'phase2_description' => 'Phase2 Description',
-        'phase2_title' => 'Phase2 Title',
-        'qr_enabled' => 'Qr Enabled',
-        'qr_enabled_hint' => 'Qr Enabled Hint',
-        'setup_integration' => 'Setup Integration',
+        'open_vat' => 'Open VAT settings',
+        'phase1_title' => 'Phase 1 - E-invoicing issuance',
+        'phase2_description' => 'Phase 2 includes full integration with the Fatoora platform and digital invoice signing',
+        'phase2_title' => 'Phase 2 - Integration and digital signature',
+        'qr_enabled' => 'QR code enabled',
+        'qr_enabled_hint' => 'ZATCA-compliant QR code will appear on all invoices',
+        'setup_integration' => 'Set up ZATCA integration',
+    ],
+
+    // Subscription management (self-service)
+    'subscription' => [
+        'bank_transfer_pending' => 'Your bank transfer subscription request has been received. Your subscription will be activated once the transfer is verified.',
+        'cancelled' => 'Your subscription has been cancelled',
+        'create_failed' => 'Failed to create subscription. Please try again.',
+        'expired' => 'This subscription has expired',
+        'promo_exhausted' => 'This promo code has reached its maximum usage',
+        'promo_invalid' => 'Invalid or expired promo code',
+        'resume_invalid' => 'This subscription cannot be resumed',
+        'resumed' => 'Your subscription has been resumed',
+        'unsupported_gateway' => 'The selected payment method is not configured. Please choose another or contact support.',
     ],
 ];

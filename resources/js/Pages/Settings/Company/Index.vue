@@ -1808,20 +1808,22 @@
                                     <div
                                         class="pt-6 mt-6 border-t border-gray-100 dark:border-gray-700/50"
                                     >
+                                        <a
+                                            v-if="current_subscription?.plan_id !== plan.id"
+                                            :href="`/app/settings/company/subscription?plan=${plan.id}`"
+                                            class="block w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold transition-all duration-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:hover:bg-indigo-900/50 dark:text-indigo-400"
+                                        >
+                                            {{ locale === 'ar' ? 'اشترك الآن' : 'Subscribe now' }}
+                                        </a>
                                         <button
-                                            class="w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold transition-all duration-300"
-                                            :class="
-                                                current_subscription?.plan_id === plan.id
-                                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                                                    : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/30 dark:hover:bg-indigo-900/50 dark:text-indigo-400'
-                                            "
-                                            :disabled="current_subscription?.plan_id === plan.id"
-                                            @click="activeTab = 'profile'"
+                                            v-else
+                                            class="w-full py-2.5 px-4 rounded-xl text-center text-xs font-bold transition-all duration-300 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                                            disabled
                                         >
                                             {{
-                                                current_subscription?.plan_id === plan.id
-                                                    ? 'بافتك الحالية'
-                                                    : 'تواصل معنا للترقية'
+                                                locale === 'ar'
+                                                    ? 'باقتك الحالية'
+                                                    : 'Your current plan'
                                             }}
                                         </button>
                                     </div>
