@@ -88,6 +88,6 @@ class SubscriptionInvoice extends Model
         $year = date('Y');
         $count = self::whereYear('created_at', $year)->count() + 1;
 
-        return "INV-{$year}-".str_pad($count, 6, '0', STR_PAD_LEFT);
+        return "INV-{$year}-".str_pad((string) $count, 6, '0', STR_PAD_LEFT);
     }
 }

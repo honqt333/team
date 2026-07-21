@@ -76,8 +76,8 @@ class QuotePart extends Model
             }
 
             // Auto-calculate base total: (qty * unit_price) - discount
-            $subtotal = bcmul($part->qty, $part->unit_price, 2);
-            $netAmount = bcsub($subtotal, $part->discount, 2);
+            $subtotal = bcmul((string) $part->qty, (string) $part->unit_price, 2);
+            $netAmount = bcsub($subtotal, (string) ($part->discount ?? 0), 2);
             $part->total = $netAmount; // Base amount used for overall subtotal
 
             // Calculate tax based on quote's tax settings

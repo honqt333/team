@@ -99,8 +99,8 @@ class WorkOrderItemPart extends Model
             }
 
             // total = (qty * unit_price) - discount
-            $subtotal = bcmul($part->qty, $part->unit_price, 2);
-            $part->total = bcsub($subtotal, $part->discount ?? 0, 2);
+            $subtotal = bcmul((string) $part->qty, (string) $part->unit_price, 2);
+            $part->total = bcsub($subtotal, (string) ($part->discount ?? 0), 2);
 
             if ($part->total < 0) {
                 $part->total = 0;

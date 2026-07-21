@@ -57,7 +57,7 @@ class Supplier extends Model
                 $lastId = static::where('tenant_id', $supplier->tenant_id)
                     ->withTrashed()
                     ->max('id') ?? 0;
-                $supplier->code = 'SUP-'.str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
+                $supplier->code = 'SUP-'.str_pad((string) ($lastId + 1), 5, '0', STR_PAD_LEFT);
             }
         });
     }

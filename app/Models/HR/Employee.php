@@ -55,7 +55,7 @@ class Employee extends Model
                 $lastNumber = static::where('tenant_id', $employee->tenant_id)
                     ->withTrashed()
                     ->max('id') ?? 0;
-                $employee->employee_number = 'EMP-'.str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+                $employee->employee_number = 'EMP-'.str_pad((string) ($lastNumber + 1), 4, '0', STR_PAD_LEFT);
             }
         });
 

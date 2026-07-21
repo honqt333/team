@@ -363,8 +363,8 @@ class InvoiceService
         $tlv .= $this->tlvEncode(1, $tenant->legal_name ?? $tenant->name); // Seller Name
         $tlv .= $this->tlvEncode(2, $tenant->taxSettings?->tax_number ?? ''); // VAT Number
         $tlv .= $this->tlvEncode(3, $invoice->issue_date->toIso8601String()); // Timestamp
-        $tlv .= $this->tlvEncode(4, number_format($invoice->total_incl_tax, 2, '.', '')); // Total with VAT
-        $tlv .= $this->tlvEncode(5, number_format($invoice->total_tax, 2, '.', '')); // VAT Amount
+        $tlv .= $this->tlvEncode(4, number_format((float) $invoice->total_incl_tax, 2, '.', '')); // Total with VAT
+        $tlv .= $this->tlvEncode(5, number_format((float) $invoice->total_tax, 2, '.', '')); // VAT Amount
 
         return base64_encode($tlv);
     }

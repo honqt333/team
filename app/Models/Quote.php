@@ -124,7 +124,7 @@ class Quote extends Model
                 $nextNumber = 1;
             }
 
-            return 'QT-'.str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            return 'QT-'.str_pad((string) $nextNumber, 6, '0', STR_PAD_LEFT);
         });
     }
 

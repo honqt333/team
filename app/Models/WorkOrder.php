@@ -173,7 +173,7 @@ class WorkOrder extends Model
                 }
             }
 
-            return 'WO-'.str_pad($maxNumber + 1, 6, '0', STR_PAD_LEFT);
+            return 'WO-'.str_pad((string) ($maxNumber + 1), 6, '0', STR_PAD_LEFT);
         });
     }
 
