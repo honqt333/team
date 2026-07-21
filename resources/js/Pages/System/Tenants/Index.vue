@@ -4,111 +4,200 @@
             <!-- Page Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">المستأجرين</h1>
-                    <p class="text-gray-500 dark:text-gray-400">إدارة جميع المستأجرين في النظام</p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ $t('system.tenants.title') }}
+                    </h1>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        {{ $t('system.tenants.subtitle') }}
+                    </p>
                 </div>
             </div>
-            
+
             <!-- Filters -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-200 dark:border-gray-700"
+            >
                 <div class="flex flex-wrap gap-4">
                     <!-- Search -->
                     <div class="flex-1 min-w-[200px]">
-                        <input 
-                            v-model="search" 
-                            type="text" 
-                            placeholder="البحث بالاسم أو البريد أو الهاتف..."
+                        <input
+                            v-model="search"
+                            type="text"
+                            :placeholder="$t('system.tenants.search_placeholder')"
                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
                             @input="debouncedSearch"
                         />
                     </div>
-                    
+
                     <!-- Status Filter -->
                     <SearchableSelect
                         v-model="statusFilter"
                         :options="statusOptions"
                         option-label="label"
                         option-value="value"
-                        placeholder="جميع الحالات"
+                        :placeholder="$t('system.tenants.all_statuses')"
                         compact
                     />
                 </div>
             </div>
-            
+
             <!-- Tenants Table -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">#</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">المستأجر</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">التواصل</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">المراكز</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">المستخدمين</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">الحالة</th>
-                                <th class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center">التسجيل</th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    #
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.tenants.trade_name') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.tenants.phone') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.tenants.centers') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.tenants.users') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.tenants.status') }}
+                                </th>
+                                <th
+                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.tenants.registration_date') }}
+                                </th>
                                 <th class="px-6 py-4 align-middle text-center"></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            <tr v-for="tenant in tenants.data" :key="tenant.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/30">
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">{{ tenant.id }}</td>
-                                <td class="px-6 py-4 align-middle">
-                                    <div class="font-medium text-gray-900 dark:text-white">{{ tenant.trade_name || tenant.name }}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ tenant.legal_name }}</div>
+                            <tr
+                                v-for="tenant in tenants.data"
+                                :key="tenant.id"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                            >
+                                <td
+                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
+                                >
+                                    {{ tenant.id }}
                                 </td>
                                 <td class="px-6 py-4 align-middle">
-                                    <div class="text-sm text-gray-900 dark:text-white" dir="ltr">{{ tenant.phone }}</div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ tenant.email }}</div>
+                                    <div class="font-medium text-gray-900 dark:text-white">
+                                        {{ tenant.trade_name || tenant.name }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ tenant.legal_name }}
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle">{{ tenant.centers_count }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle">{{ tenant.users_count }}</td>
                                 <td class="px-6 py-4 align-middle">
-                                    <span :class="getStatusClass(tenant.status)" class="px-2.5 py-1 rounded-full text-xs font-medium">
+                                    <div class="text-sm text-gray-900 dark:text-white" dir="ltr">
+                                        {{ tenant.phone }}
+                                    </div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                        {{ tenant.email }}
+                                    </div>
+                                </td>
+                                <td
+                                    class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle"
+                                >
+                                    {{ tenant.centers_count }}
+                                </td>
+                                <td
+                                    class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle"
+                                >
+                                    {{ tenant.users_count }}
+                                </td>
+                                <td class="px-6 py-4 align-middle">
+                                    <span
+                                        :class="getStatusClass(tenant.status)"
+                                        class="px-2.5 py-1 rounded-full text-xs font-medium"
+                                    >
                                         {{ getStatusLabel(tenant.status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle">
+                                <td
+                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
+                                >
                                     {{ formatDate(tenant.created_at) }}
                                 </td>
                                 <td class="px-6 py-4 text-end align-middle">
-                                    <Link :href="`/system/tenants/${tenant.id}`" class="text-indigo-600 hover:text-indigo-700 font-medium text-sm">
-                                        عرض
+                                    <Link
+                                        :href="`/system/tenants/${tenant.id}`"
+                                        class="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
+                                    >
+                                        {{ $t('system.actions.view') }}
                                     </Link>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- Empty State -->
                 <div v-if="!tenants.data?.length" class="px-6 py-12 text-center">
-                    <svg class="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    <svg
+                        class="w-12 h-12 mx-auto text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="1.5"
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                        />
                     </svg>
-                    <p class="mt-4 text-gray-500 dark:text-gray-400">لا يوجد مستأجرين</p>
+                    <p class="mt-4 text-gray-500 dark:text-gray-400">
+                        {{ $t('system.tenants.no_tenants') }}
+                    </p>
                 </div>
-                
+
                 <!-- Pagination -->
-                <div v-if="tenants.data?.length" class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <div
+                    v-if="tenants.data?.length"
+                    class="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between"
+                >
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        عرض {{ tenants.from }} - {{ tenants.to }} من {{ tenants.total }}
+                        {{
+                            $t('pagination.showing_range', {
+                                from: tenants.from,
+                                to: tenants.to,
+                                total: tenants.total,
+                            })
+                        }}
                     </p>
                     <div class="flex gap-2">
-                        <Link 
+                        <Link
                             v-if="tenants.prev_page_url"
                             :href="tenants.prev_page_url"
                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                         >
-                            السابق
+                            {{ $t('pagination.previous') }}
                         </Link>
-                        <Link 
+                        <Link
                             v-if="tenants.next_page_url"
                             :href="tenants.next_page_url"
                             class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600"
                         >
-                            التالي
+                            {{ $t('pagination.next') }}
                         </Link>
                     </div>
                 </div>
@@ -119,9 +208,12 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     tenants: Object,
@@ -132,9 +224,9 @@ const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || '');
 
 const statusOptions = computed(() => [
-    { value: 'active', label: 'نشط' },
-    { value: 'trial', label: 'تجريبي' },
-    { value: 'suspended', label: 'معلّق' },
+    { value: 'active', label: t('system.status.active') },
+    { value: 'trial', label: t('system.status.trial') },
+    { value: 'suspended', label: t('system.status.suspended') },
 ]);
 
 let searchTimeout = null;
@@ -147,13 +239,17 @@ const debouncedSearch = () => {
 };
 
 const applyFilters = () => {
-    router.get('/system/tenants', {
-        search: search.value || undefined,
-        status: statusFilter.value || undefined,
-    }, {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get(
+        '/system/tenants',
+        {
+            search: search.value || undefined,
+            status: statusFilter.value || undefined,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+        }
+    );
 };
 
 const formatDate = (date) => {
@@ -171,11 +267,11 @@ const getStatusClass = (status) => {
 };
 
 const getStatusLabel = (status) => {
-    const labels = {
-        active: 'نشط',
-        trial: 'تجريبي',
-        suspended: 'معلّق',
-    };
-    return labels[status] || status || 'غير محدد';
+    // Use i18n for the standard statuses; fall back to the raw value.
+    const known = ['active', 'trial', 'suspended'];
+    if (known.includes(status)) {
+        return t(`system.status.${status}`);
+    }
+    return status || t('system.status.no');
 };
 </script>
