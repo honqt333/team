@@ -59,6 +59,11 @@ class SubscriptionInvoice extends Model
         return $this->belongsTo(Tenant::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(SubscriptionPayment::class, 'subscription_invoice_id');
+    }
+
     public function installments(): HasMany
     {
         return $this->hasMany(Installment::class);
