@@ -253,6 +253,7 @@ const formatCurrency = (amount) => {
                     <BankTransferReceiptUpload
                         :subscription="bankTransferResult.subscription"
                         :payment-settings="paymentSettings"
+                        :vat-settings="vatSettings"
                         @success="onReceiptUploaded"
                         @close="emit('close')"
                     />
@@ -366,10 +367,15 @@ const formatCurrency = (amount) => {
                                     - {{ formatCurrency(pricing.discount) }} SAR
                                 </span>
                             </div>
-                            <div class="flex justify-between text-slate-500 dark:text-slate-400">
+                            <div
+                                v-if="vatSettings.enabled && pricing.vat_amount > 0"
+                                class="flex justify-between text-slate-500 dark:text-slate-400"
+                            >
                                 <span>
                                     {{
-                                        locale === 'ar' ? 'ضريبة القيمة المضافة (15%)' : 'VAT (15%)'
+                                        locale === 'ar'
+                                            ? `ضريبة القيمة المضافة (${vatSettings.rate}%)`
+                                            : `VAT (${vatSettings.rate}%)`
                                     }}
                                 </span>
                                 <span class="font-mono">

@@ -118,6 +118,12 @@ class CompanySubscriptionController extends Controller
                 'applepay_enabled' => $paymentSettings->applepay_enabled,
                 'stcpay_enabled' => $paymentSettings->stcpay_enabled,
             ],
+            'company_info' => $paymentSettings->getCompanyInfo(),
+            'vat_settings' => [
+                'enabled' => (bool) $paymentSettings->subscription_vat_enabled,
+                'rate' => (float) $paymentSettings->getSubscriptionVatRate(),
+                'inclusive' => (bool) $paymentSettings->subscription_vat_inclusive,
+            ],
         ]);
     }
 
@@ -159,9 +165,15 @@ class CompanySubscriptionController extends Controller
         }
 
         $subtotal = $basePrice - $discount;
-        $vatRate = 15; // SA
-        $vatAmount = $subtotal * ($vatRate / 100);
-        $total = $subtotal + $vatAmount;
+        $paymentSettings = PaymentSettings::first();
+        $vatCalc = $paymentSettings?->calculateVat($subtotal) ?? [
+            'exclusive' => $subtotal,
+            'vat' => 0,
+            'total' => $subtotal,
+        ];
+        $vatRate = $paymentSettings?->getSubscriptionVatRate() ?? 0;
+        $vatAmount = $vatCalc['vat'];
+        $total = $vatCalc['total'];
 
         return response()->json([
             'plan' => [
@@ -173,6 +185,7 @@ class CompanySubscriptionController extends Controller
             'base_price' => round($basePrice, 2),
             'discount' => round($discount, 2),
             'subtotal' => round($subtotal, 2),
+            'vat_enabled' => (bool) $paymentSettings?->subscription_vat_enabled,
             'vat_rate' => $vatRate,
             'vat_amount' => round($vatAmount, 2),
             'total' => round($total, 2),
@@ -269,8 +282,15 @@ class CompanySubscriptionController extends Controller
         }
 
         $subtotal = $basePrice - $discount;
-        $vatAmount = $subtotal * 0.15;
-        $total = $subtotal + $vatAmount;
+        $paymentSettings = PaymentSettings::first();
+        $vatCalc = $paymentSettings?->calculateVat($subtotal) ?? [
+            'exclusive' => $subtotal,
+            'vat' => 0,
+            'total' => $subtotal,
+        ];
+        $vatRate = $paymentSettings?->getSubscriptionVatRate() ?? 0;
+        $vatAmount = $vatCalc['vat'];
+        $total = $vatCalc['total'];
 
         // Calculate subscription dates
         $startDate = now();
@@ -306,7 +326,7 @@ class CompanySubscriptionController extends Controller
                 'tenant_id' => $tenant->id,
                 'invoice_number' => 'SUB-'.str_pad((string) $subscription->id, 6, '0', STR_PAD_LEFT).'-'.now()->format('Ymd'),
                 'subtotal' => $subtotal,
-                'vat_rate' => 15,
+                'vat_rate' => $vatRate ?? 0,
                 'vat_amount' => $vatAmount,
                 'discount' => $discount,
                 'total' => $total,

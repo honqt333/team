@@ -5,6 +5,7 @@ import { router } from '@inertiajs/vue3';
 const props = defineProps({
     subscription: { type: Object, default: null },
     paymentSettings: { type: Object, default: () => ({}) },
+    vatSettings: { type: Object, default: () => ({ enabled: false, rate: 0, inclusive: false }) },
 });
 
 const emit = defineEmits(['success', 'close']);
@@ -31,8 +32,17 @@ const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf
 
 const defaultAmount = computed(() => {
     if (!props.subscription?.price) return 0;
-    // Compute approximate total (price + 15% VAT)
-    return (parseFloat(props.subscription.price) * 1.15).toFixed(2);
+    const price = parseFloat(props.subscription.price);
+    if (props.vatSettings?.enabled && props.vatSettings.rate > 0) {
+        const rate = props.vatSettings.rate / 100;
+        if (props.vatSettings.inclusive) {
+            // VAT is inside the price — display price as-is
+            return price.toFixed(2);
+        }
+        // Exclusive — add VAT on top
+        return (price * (1 + rate)).toFixed(2);
+    }
+    return price.toFixed(2);
 });
 
 function pickFile() {
