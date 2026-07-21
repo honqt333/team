@@ -9,6 +9,7 @@ use App\Http\Middleware\EnsureSystemAdmin;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PreventBackHistory;
+use App\Http\Middleware\RequestId;
 use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeam;
@@ -51,6 +52,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Observability: tag every request with correlation_id + tenant_id
         // so Sentry events and structured log records share the same context.
         // Registered on the global stack so it covers web + api routes.
+        // RequestId runs first so every subsequent middleware (including
+        // SentryContext) can read the id from $request->attributes.
+        $middleware->append(RequestId::class);
         $middleware->append(SentryContext::class);
 
         // Exempt locale switching from CSRF — it's a safe, session-only action
