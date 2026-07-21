@@ -60,7 +60,7 @@ class InventoryBalanceController extends Controller
         $sort = in_array($request->input('sort'), $allowedSorts, true)
             ? $request->input('sort')
             : 'qty_on_hand';
-        $order = strtolower($request->input('order')) === 'asc' ? 'asc' : 'desc';
+        $order = strtolower((string) $request->input('order', '')) === 'asc' ? 'asc' : 'desc';
 
         $query = InventoryBalance::forWarehouse($warehouse->id)
             ->with(['part' => fn ($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'description')->with(['category', 'unit'])])
@@ -104,12 +104,23 @@ class InventoryBalanceController extends Controller
                 ];
             });
 
-        // Summary stats
+        // Combined summary stats query (1 query instead of 4)
+        // NOTE: alias 'stock_value' (not 'total_value') to avoid InventoryBalance::getTotalValueAttribute() accessor
+        $statsRaw = InventoryBalance::forWarehouse($warehouse->id)
+            ->leftJoin('parts', 'inventory_balances.part_id', '=', 'parts.id')
+            ->selectRaw('
+                COUNT(*) as total_items,
+                SUM(CASE WHEN qty_on_hand > 0 THEN 1 ELSE 0 END) as in_stock,
+                SUM(CASE WHEN qty_on_hand > 0 AND parts.min_qty IS NOT NULL AND qty_on_hand <= parts.min_qty THEN 1 ELSE 0 END) as low_stock,
+                SUM(qty_on_hand * wac_cost) as stock_value
+            ')
+            ->first();
+
         $stats = [
-            'total_items' => InventoryBalance::forWarehouse($warehouse->id)->count(),
-            'in_stock' => InventoryBalance::forWarehouse($warehouse->id)->withStock()->count(),
-            'low_stock' => InventoryBalance::forWarehouse($warehouse->id)->lowStock()->count(),
-            'total_value' => InventoryBalance::forWarehouse($warehouse->id)->selectRaw('SUM(qty_on_hand * wac_cost) as total')->value('total') ?? 0,
+            'total_items' => (int) ($statsRaw->total_items ?? 0),
+            'in_stock' => (int) ($statsRaw->in_stock ?? 0),
+            'low_stock' => (int) ($statsRaw->low_stock ?? 0),
+            'total_value' => (float) ($statsRaw->stock_value ?? 0),
         ];
 
         return Inertia::render('Inventory/Stock/Index', [

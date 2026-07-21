@@ -71,7 +71,7 @@ class WorkOrderController
     protected function buildWorkOrderQuery(?string $status = null, ?string $subFilter = null): Builder
     {
         $query = WorkOrder::query()
-            ->with(['customer', 'vehicle.make', 'invoice'])
+            ->with(['customer', 'vehicle.make', 'invoice', 'payments', 'items'])
             ->withCount('items');
 
         if ($status === 'open') {

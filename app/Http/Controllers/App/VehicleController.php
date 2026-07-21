@@ -14,6 +14,7 @@ use App\Models\Service;
 use App\Models\Vehicle;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -133,11 +134,11 @@ class VehicleController
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
 
         // Build modelsByMake map
-        $modelsByMake = [];
-
-        foreach ($makes as $make) {
-            $modelsByMake[$make->id] = $make->models()->ordered()->get(['id', 'name_ar', 'name_en']);
-        }
+        $modelsByMake = VehicleModel::query()
+            ->select('id', 'make_id', 'name_ar', 'name_en')
+            ->ordered()
+            ->get()
+            ->groupBy('make_id');
 
         return Inertia::render('Vehicles/Index', [
             'vehicles' => $vehicles,
