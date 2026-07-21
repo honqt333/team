@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Middleware\ConvertArabicNumerals;
 use App\Http\Middleware\EnsureCenterContext;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureSystemAdmin;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -68,6 +69,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant.active' => EnsureTenantActive::class,
             'center.context' => EnsureCenterContext::class,
             'system.admin' => EnsureSystemAdmin::class,
+            'super_admin' => EnsureSuperAdmin::class,
             // Spatie Permission middleware
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

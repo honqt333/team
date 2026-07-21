@@ -64,6 +64,27 @@ class SubscriptionsController extends Controller
     }
 
     /**
+     * Show the form for creating a new subscription.
+     *
+     * Provides a dedicated page for creating a subscription (used when the
+     * admin navigates to /system/subscriptions/create directly). The Index
+     * page also has its own modal-based creation flow.
+     */
+    public function create(): Response
+    {
+        return Inertia::render('System/Subscriptions/Create', [
+            'plans' => Plan::where('is_active', true)
+                ->orderBy('sort_order')
+                ->get(['id', 'name_ar', 'name_en', 'slug', 'price_monthly', 'price_yearly', 'trial_days', 'is_featured']),
+            'tenants' => Tenant::orderBy('trade_name')
+                ->get(['id', 'name', 'trade_name', 'status']),
+            'eligibleTenants' => Tenant::whereIn('status', ['trial', 'active', 'expired'])
+                ->orderBy('trade_name')
+                ->get(['id', 'name', 'trade_name']),
+        ]);
+    }
+
+    /**
      * Display the specified subscription.
      */
     public function show(Subscription $subscription): Response

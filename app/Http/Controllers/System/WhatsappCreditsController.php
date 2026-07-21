@@ -137,4 +137,52 @@ class WhatsappCreditsController extends Controller
             'filters' => $request->only(['status']),
         ]);
     }
+
+    /**
+     * List all WhatsApp credit purchases across tenants.
+     *
+     * Mirrors SmsCreditsController::purchases so admins can see the
+     * full purchase history for WhatsApp — the field parity was the
+     * only thing missing from the system panel.
+     */
+    public function purchases(Request $request): Response
+    {
+        $query = WhatsappPurchase::with(['tenant', 'package']);
+
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('tenant', fn ($t) => $t->where('trade_name', 'like', "%{$search}%")
+                    ->orWhere('name', 'like', "%{$search}%"))
+                    ->orWhere('payment_reference', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->status && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->gateway && $request->gateway !== 'all') {
+            $query->where('payment_gateway', $request->gateway);
+        }
+
+        $purchases = $query->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+
+        $stats = [
+            'total' => WhatsappPurchase::count(),
+            'paid' => WhatsappPurchase::where('status', 'paid')->count(),
+            'pending' => WhatsappPurchase::where('status', 'pending')->count(),
+            'failed' => WhatsappPurchase::where('status', 'failed')->count(),
+            'total_revenue' => (float) WhatsappPurchase::where('status', 'paid')->sum('amount'),
+            'total_credits_sold' => (int) WhatsappPurchase::where('status', 'paid')->sum('credits'),
+        ];
+
+        return Inertia::render('System/Credits/WhatsappPurchases', [
+            'purchases' => $purchases,
+            'stats' => $stats,
+            'filters' => $request->only(['search', 'status', 'gateway']),
+        ]);
+    }
 }

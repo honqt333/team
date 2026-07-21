@@ -711,33 +711,42 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::get('/developer/graph', [DeveloperController::class, 'getGraph'])->name('system.developer.graph');
     Route::post('/developer/ai-advice', [DeveloperController::class, 'aiAdvice'])->name('system.developer.ai-advice');
 
-    // Tenants Management
+    // Tenants Management — read access for any system admin
     Route::get('/tenants', [TenantsController::class, 'index'])->name('system.tenants.index');
     Route::get('/tenants/{tenant}', [TenantsController::class, 'show'])->name('system.tenants.show');
-    Route::post('/tenants/{tenant}/suspend', [TenantsController::class, 'suspend'])->name('system.tenants.suspend');
-    Route::post('/tenants/{tenant}/activate', [TenantsController::class, 'activate'])->name('system.tenants.activate');
-    Route::post('/tenants/{tenant}/extend-trial', [TenantsController::class, 'extendTrial'])->name('system.tenants.extend-trial');
+
+    // Destructive / privileged tenant actions — super_admin only.
+    // Wrapping in a nested group keeps the outer /system prefix intact.
+    Route::middleware('super_admin')->group(function () {
+        Route::post('/tenants/{tenant}/suspend', [TenantsController::class, 'suspend'])->name('system.tenants.suspend');
+        Route::post('/tenants/{tenant}/activate', [TenantsController::class, 'activate'])->name('system.tenants.activate');
+        Route::post('/tenants/{tenant}/extend-trial', [TenantsController::class, 'extendTrial'])->name('system.tenants.extend-trial');
+        Route::delete('/tenants/{tenant}', [TenantsController::class, 'destroy'])->name('system.tenants.destroy');
+        Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update');
+        // Impersonation is super_admin only — powerful debugging affordance.
+        Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start');
+    });
 
     // Communication Templates
     Route::resource('communication/templates', CommunicationTemplatesController::class)
         ->only(['index', 'edit', 'update'])
         ->names('system.communication.templates');
-    Route::delete('/tenants/{tenant}', [TenantsController::class, 'destroy'])->name('system.tenants.destroy');
-    Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update');
 
     // Plans Management
+    // NOTE: create/edit routes removed because the Form.vue page is intentionally
+    // not implemented. The Index page has a full modal-based CRUD flow that
+    // posts directly to /plans and /plans/{id}. Re-introducing dedicated
+    // create/edit pages would require building System/Plans/Form.vue.
     Route::get('/plans', [PlansController::class, 'index'])->name('system.plans.index');
-    Route::get('/plans/create', [PlansController::class, 'create'])->name('system.plans.create');
     Route::post('/plans', [PlansController::class, 'store'])->name('system.plans.store');
-    Route::get('/plans/{plan}/edit', [PlansController::class, 'edit'])->name('system.plans.edit');
     Route::put('/plans/{plan}', [PlansController::class, 'update'])->name('system.plans.update');
     Route::delete('/plans/{plan}', [PlansController::class, 'destroy'])->name('system.plans.destroy');
 
     // Promo Codes Management
+    // See note above re: Plans — create/edit routes removed; Index.vue modal
+    // handles create/update via POST/PUT to /promo-codes and /promo-codes/{id}.
     Route::get('/promo-codes', [PromoCodesController::class, 'index'])->name('system.promo-codes.index');
-    Route::get('/promo-codes/create', [PromoCodesController::class, 'create'])->name('system.promo-codes.create');
     Route::post('/promo-codes', [PromoCodesController::class, 'store'])->name('system.promo-codes.store');
-    Route::get('/promo-codes/{promoCode}/edit', [PromoCodesController::class, 'edit'])->name('system.promo-codes.edit');
     Route::put('/promo-codes/{promoCode}', [PromoCodesController::class, 'update'])->name('system.promo-codes.update');
     Route::delete('/promo-codes/{promoCode}', [PromoCodesController::class, 'destroy'])->name('system.promo-codes.destroy');
 
@@ -808,6 +817,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::get('/whatsapp/balances', [WhatsappCreditsController::class, 'balances'])->name('system.whatsapp.balances');
     Route::post('/whatsapp/add-credits', [WhatsappCreditsController::class, 'addCredits'])->name('system.whatsapp.add-credits');
     Route::get('/whatsapp/usage', [WhatsappCreditsController::class, 'usage'])->name('system.whatsapp.usage');
+    Route::get('/whatsapp/purchases', [WhatsappCreditsController::class, 'purchases'])->name('system.whatsapp.purchases');
 
     // Integrations
     Route::get('/integrations', [IntegrationsController::class, 'index'])->name('system.integrations.index');
@@ -848,8 +858,10 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::post('/security/2fa/disable', [App\Http\Controllers\System\TwoFactorController::class, 'disable'])->name('system.2fa.disable');
     Route::post('/security/2fa/regenerate', [App\Http\Controllers\System\TwoFactorController::class, 'regenerateRecoveryCodes'])->name('system.2fa.regenerate');
 
-    // Impersonation (Login as Tenant)
-    Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start');
+    // NOTE: /system/tenants/{tenant}/impersonate is registered above inside
+    // the super_admin-only group. The duplicate declaration here was
+    // removed to avoid route-name collisions and to make the privilege
+    // boundary explicit in one place.
 });
 
 // 2FA Challenge (during login, before auth)
