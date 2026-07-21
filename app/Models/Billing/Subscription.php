@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models\Billing;
 
+use App\Models\BankTransferReceipt;
 use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,6 +56,16 @@ class Subscription extends Model
     public function invoices(): HasMany
     {
         return $this->hasMany(SubscriptionInvoice::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(SubscriptionPayment::class);
+    }
+
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(BankTransferReceipt::class);
     }
 
     /**
