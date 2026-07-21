@@ -3,8 +3,12 @@
         <div class="space-y-6">
             <!-- Header -->
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">مشتريات WhatsApp</h1>
-                <p class="text-gray-500 dark:text-gray-400">سجل شراء رصيد رسائل واتساب</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ $t('system.credits.whatsapp_purchases_title') }}
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                    {{ $t('system.credits.whatsapp_purchases_subtitle') }}
+                </p>
             </div>
 
             <!-- Navigation Tabs (mirrors WhatsappUsage) -->
@@ -13,25 +17,25 @@
                     href="/system/whatsapp/packages"
                     class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
                 >
-                    الباقات
+                    {{ $t('system.credits.tabs.packages') }}
                 </a>
                 <a
                     href="/system/whatsapp/balances"
                     class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
                 >
-                    الأرصدة
+                    {{ $t('system.credits.tabs.balances') }}
                 </a>
                 <a
                     href="/system/whatsapp/purchases"
                     class="px-4 py-2 border-b-2 border-emerald-600 text-emerald-600 font-medium"
                 >
-                    المشتريات
+                    {{ $t('system.credits.tabs.purchases') }}
                 </a>
                 <a
                     href="/system/whatsapp/usage"
                     class="px-4 py-2 border-b-2 border-transparent text-gray-500 hover:text-gray-700"
                 >
-                    سجل الاستخدام
+                    {{ $t('system.credits.tabs.usage') }}
                 </a>
             </div>
 
@@ -40,7 +44,9 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">إجمالي</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.subscriptions.stats.total') }}
+                    </p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ stats.total?.toLocaleString() }}
                     </p>
@@ -48,7 +54,9 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">مدفوع</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.status.paid') }}
+                    </p>
                     <p class="text-2xl font-bold text-emerald-600">
                         {{ stats.paid?.toLocaleString() }}
                     </p>
@@ -56,7 +64,9 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">معلق</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.status.pending') }}
+                    </p>
                     <p class="text-2xl font-bold text-amber-600">
                         {{ stats.pending?.toLocaleString() }}
                     </p>
@@ -64,7 +74,9 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">فشل</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.status.failed') }}
+                    </p>
                     <p class="text-2xl font-bold text-red-600">
                         {{ stats.failed?.toLocaleString() }}
                     </p>
@@ -72,7 +84,9 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">إيرادات</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.credits.revenue') }}
+                    </p>
                     <p class="text-2xl font-bold text-indigo-600">
                         {{ formatCurrency(stats.total_revenue) }}
                     </p>
@@ -80,7 +94,9 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">رصيد مبيع</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.credits.credits_sold') }}
+                    </p>
                     <p class="text-2xl font-bold text-purple-600">
                         {{ stats.total_credits_sold?.toLocaleString() }}
                     </p>
@@ -96,7 +112,7 @@
                         <input
                             v-model="search"
                             type="text"
-                            placeholder="بحث بالمستأجر أو رقم العملية..."
+                            :placeholder="$t('system.credits.search_purchases')"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             @keyup.enter="applyFilters"
                         />
@@ -106,7 +122,7 @@
                         :options="statusOptions"
                         option-label="label"
                         option-value="value"
-                        placeholder="كل الحالات"
+                        :placeholder="$t('system.common.all')"
                         compact
                     />
                 </div>
@@ -123,42 +139,42 @@
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    المستأجر
+                                    {{ $t('system.tenants.trade_name') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    الباقة
+                                    {{ $t('system.credits.package') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    الرصيد
+                                    {{ $t('system.credits.credits') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    المبلغ
+                                    {{ $t('system.credits.amount') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    الحالة
+                                    {{ $t('system.tenants.status') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    طريقة الدفع
+                                    {{ $t('system.credits.gateway') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    رقم العملية
+                                    {{ $t('system.credits.reference') }}
                                 </th>
                                 <th
                                     class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
                                 >
-                                    التاريخ
+                                    {{ $t('system.credits.date') }}
                                 </th>
                             </tr>
                         </thead>
@@ -172,7 +188,7 @@
                                     {{ purchase.tenant?.trade_name || '-' }}
                                 </td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-400">
-                                    {{ purchase.package?.name_ar || 'مخصص' }}
+                                    {{ purchase.package?.name_ar || $t('system.credits.custom') }}
                                 </td>
                                 <td
                                     class="px-4 py-3 text-indigo-600 dark:text-indigo-400 font-semibold"
@@ -208,7 +224,7 @@
                                     colspan="8"
                                     class="px-4 py-8 text-center text-gray-500 dark:text-gray-400"
                                 >
-                                    لا توجد مشتريات
+                                    {{ $t('system.credits.no_purchases') }}
                                 </td>
                             </tr>
                         </tbody>
@@ -221,8 +237,13 @@
                     class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between"
                 >
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                        عرض {{ purchases.from || 0 }} - {{ purchases.to || 0 }} من
-                        {{ purchases.total || 0 }}
+                        {{
+                            $t('pagination.showing_range', {
+                                from: purchases.from || 0,
+                                to: purchases.to || 0,
+                                total: purchases.total || 0,
+                            })
+                        }}
                     </p>
                     <div class="flex gap-1">
                         <template v-for="link in purchases.links" :key="link.label">
@@ -251,17 +272,20 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
+const { t } = useI18n();
+
 const statusOptions = [
-    { value: 'all', label: 'كل الحالات' },
-    { value: 'pending', label: 'معلق' },
-    { value: 'paid', label: 'مدفوع' },
-    { value: 'failed', label: 'فشل' },
-    { value: 'refunded', label: 'مسترد' },
+    { value: 'all', label: t('system.common.all') },
+    { value: 'pending', label: t('system.status.pending') },
+    { value: 'paid', label: t('system.status.paid') },
+    { value: 'failed', label: t('system.status.failed') },
+    { value: 'refunded', label: t('system.status.refunded') },
 ];
 
 const props = defineProps({
@@ -300,13 +324,13 @@ const formatCurrency = (amount) =>
 
 const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '-');
 
-const getStatusLabel = (status) =>
-    ({
-        pending: 'معلق',
-        paid: 'مدفوع',
-        failed: 'فشل',
-        refunded: 'مسترد',
-    })[status] || status;
+const getStatusLabel = (status) => {
+    const known = ['pending', 'paid', 'failed', 'refunded'];
+    if (known.includes(status)) {
+        return t(`system.status.${status}`);
+    }
+    return status;
+};
 
 const getStatusClass = (status) =>
     ({
