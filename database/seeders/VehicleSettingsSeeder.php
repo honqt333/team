@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\VehicleColor;
@@ -58,7 +60,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'RAV4', 'ar' => 'راف فور'],
                     ['en' => 'Innova', 'ar' => 'إنوفا'],
                     ['en' => 'Avalon', 'ar' => 'أفالون'],
-                ]
+                ],
             ],
             [
                 'en' => 'Hyundai', 'ar' => 'هونداي',
@@ -71,7 +73,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'Azera', 'ar' => 'أزيرا'],
                     ['en' => 'Creta', 'ar' => 'كريتا'],
                     ['en' => 'Kona', 'ar' => 'كونا'],
-                ]
+                ],
             ],
             [
                 'en' => 'Nissan', 'ar' => 'نيسان',
@@ -84,7 +86,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'Pathfinder', 'ar' => 'باثفندر'],
                     ['en' => 'Sentra', 'ar' => 'سنترا'],
                     ['en' => 'Kicks', 'ar' => 'كيكس'],
-                ]
+                ],
             ],
             [
                 'en' => 'Ford', 'ar' => 'فورد',
@@ -97,7 +99,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'Mustang', 'ar' => 'موستنج'],
                     ['en' => 'Edge', 'ar' => 'إيدج'],
                     ['en' => 'Fusion', 'ar' => 'فيوجن'],
-                ]
+                ],
             ],
             [
                 'en' => 'Honda', 'ar' => 'هوندا',
@@ -108,7 +110,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'Pilot', 'ar' => 'بايلوت'],
                     ['en' => 'CR-V', 'ar' => 'سي آر في'],
                     ['en' => 'Odyssey', 'ar' => 'أوديسي'],
-                ]
+                ],
             ],
             [
                 'en' => 'Chevrolet', 'ar' => 'شيفروليه',
@@ -121,7 +123,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'Cruze', 'ar' => 'كروز'],
                     ['en' => 'Camaro', 'ar' => 'كمارو'],
                     ['en' => 'Silverado', 'ar' => 'سلفرادو'],
-                ]
+                ],
             ],
             [
                 'en' => 'Kia', 'ar' => 'كيا',
@@ -134,7 +136,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'Sorento', 'ar' => 'سورينتو'],
                     ['en' => 'Pegas', 'ar' => 'بيجاس'],
                     ['en' => 'Sonet', 'ar' => 'سونيت'],
-                ]
+                ],
             ],
             [
                 'en' => 'Mazda', 'ar' => 'مازدا',
@@ -144,7 +146,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'CX-9', 'ar' => 'CX-9'],
                     ['en' => 'CX-5', 'ar' => 'CX-5'],
                     ['en' => 'CX-30', 'ar' => 'CX-30'],
-                ]
+                ],
             ],
             [
                 'en' => 'Lexus', 'ar' => 'لكزس',
@@ -155,7 +157,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'RX', 'ar' => 'RX'],
                     ['en' => 'IS', 'ar' => 'IS'],
                     ['en' => 'GX', 'ar' => 'GX'],
-                ]
+                ],
             ],
             [
                 'en' => 'GMC', 'ar' => 'جي إم سي',
@@ -164,7 +166,7 @@ class VehicleSettingsSeeder extends Seeder
                     ['en' => 'Sierra', 'ar' => 'سييرا'],
                     ['en' => 'Acadia', 'ar' => 'أكاديا'],
                     ['en' => 'Terrain', 'ar' => 'تيرين'],
-                ]
+                ],
             ],
         ];
 

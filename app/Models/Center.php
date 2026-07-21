@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Concerns\TenantScoped;
 
 class Center extends Model
 {
@@ -69,7 +71,7 @@ class Center extends Model
         return $this->hasMany(Warehouse::class);
     }
 
-    public function defaultWarehouse(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function defaultWarehouse(): HasOne
     {
         return $this->hasOne(Warehouse::class)->where('is_default', true);
     }
@@ -95,6 +97,7 @@ class Center extends Model
         if ($this->logo_dark_path) {
             return Storage::url($this->logo_dark_path);
         }
+
         // Fallback to light logo if dark is not set
         return $this->logo_light_path ? Storage::url($this->logo_light_path) : null;
     }
@@ -113,12 +116,15 @@ class Center extends Model
     public function getDisplayNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         if ($locale === 'ar' && $this->name_ar) {
             return $this->name_ar;
         }
+
         if ($locale === 'en' && $this->name_en) {
             return $this->name_en;
         }
+
         return $this->name_ar ?? $this->name_en ?? $this->name ?? '';
     }
 }

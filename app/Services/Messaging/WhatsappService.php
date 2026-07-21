@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Messaging;
 
-use App\Models\Integration\Integration;
-use App\Models\Integration\IntegrationLog;
 use App\Models\Credits\TenantWhatsappBalance;
 use App\Models\Credits\WhatsappUsageLog;
+use App\Models\Integration\Integration;
+use App\Models\Integration\IntegrationLog;
+use Exception;
 use Illuminate\Support\Facades\Http;
 
 class WhatsappService
@@ -27,15 +30,16 @@ class WhatsappService
         ?int $tenantId = null,
         string $language = 'ar'
     ): array {
-        if (!$this->integration || !$this->integration->is_active) {
-            throw new \Exception('لا يوجد مزود WhatsApp مفعّل');
+        if (! $this->integration || ! $this->integration->is_active) {
+            throw new Exception('لا يوجد مزود WhatsApp مفعّل');
         }
 
         // Check tenant balance
         if ($tenantId) {
             $balance = TenantWhatsappBalance::getOrCreate($tenantId);
-            if (!$balance->hasCredits()) {
-                throw new \Exception('رصيد WhatsApp غير كافي');
+
+            if (! $balance->hasCredits()) {
+                throw new Exception('رصيد WhatsApp غير كافي');
             }
         }
 
@@ -75,7 +79,7 @@ class WhatsappService
                 'success' => true,
                 'message_id' => $result['message_id'] ?? null,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $responseTime = (int) ((microtime(true) - $startTime) * 1000);
 
             IntegrationLog::log(
@@ -98,8 +102,8 @@ class WhatsappService
      */
     public function sendText(string $to, string $message, ?int $tenantId = null): array
     {
-        if (!$this->integration || !$this->integration->is_active) {
-            throw new \Exception('لا يوجد مزود WhatsApp مفعّل');
+        if (! $this->integration || ! $this->integration->is_active) {
+            throw new Exception('لا يوجد مزود WhatsApp مفعّل');
         }
 
         $config = $this->integration->config ?? [];
@@ -109,7 +113,7 @@ class WhatsappService
             $result = match ($this->integration->provider) {
                 'whatsapp_cloud' => $this->sendTextViaCloud($config, $to, $message),
                 '360dialog' => $this->sendTextVia360dialog($config, $to, $message),
-                default => throw new \Exception('مزود غير مدعوم'),
+                default => throw new Exception('مزود غير مدعوم'),
             };
 
             $responseTime = (int) ((microtime(true) - $startTime) * 1000);
@@ -126,7 +130,7 @@ class WhatsappService
             );
 
             return ['success' => true, 'message_id' => $result['message_id'] ?? null];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $responseTime = (int) ((microtime(true) - $startTime) * 1000);
 
             IntegrationLog::log(
@@ -151,17 +155,18 @@ class WhatsappService
         return match ($this->integration->provider) {
             'whatsapp_cloud' => $this->sendTemplateViaCloud($config, $to, $template, $params, $lang),
             '360dialog' => $this->sendTemplateVia360dialog($config, $to, $template, $params, $lang),
-            default => throw new \Exception('مزود غير مدعوم'),
+            default => throw new Exception('مزود غير مدعوم'),
         };
     }
 
     protected function sendTemplateViaCloud(array $config, string $to, string $template, array $params, string $lang): array
     {
         $components = [];
-        if (!empty($params)) {
+
+        if (! empty($params)) {
             $components[] = [
                 'type' => 'body',
-                'parameters' => array_map(fn($p) => ['type' => 'text', 'text' => $p], $params),
+                'parameters' => array_map(fn ($p) => ['type' => 'text', 'text' => $p], $params),
             ];
         }
 
@@ -177,8 +182,8 @@ class WhatsappService
                 ],
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ WhatsApp Cloud: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ WhatsApp Cloud: '.$response->body());
         }
 
         return ['message_id' => $response->json('messages.0.id')];
@@ -194,8 +199,8 @@ class WhatsappService
                 'text' => ['body' => $message],
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ WhatsApp Cloud: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ WhatsApp Cloud: '.$response->body());
         }
 
         return ['message_id' => $response->json('messages.0.id')];
@@ -211,14 +216,14 @@ class WhatsappService
                     'namespace' => $config['namespace'] ?? '',
                     'name' => $template,
                     'language' => ['code' => $lang, 'policy' => 'deterministic'],
-                    'components' => !empty($params) ? [
-                        ['type' => 'body', 'parameters' => array_map(fn($p) => ['type' => 'text', 'text' => $p], $params)]
+                    'components' => ! empty($params) ? [
+                        ['type' => 'body', 'parameters' => array_map(fn ($p) => ['type' => 'text', 'text' => $p], $params)],
                     ] : [],
                 ],
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ 360dialog: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ 360dialog: '.$response->body());
         }
 
         return ['message_id' => $response->json('messages.0.id')];
@@ -233,8 +238,8 @@ class WhatsappService
                 'text' => ['body' => $message],
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ 360dialog: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ 360dialog: '.$response->body());
         }
 
         return ['message_id' => $response->json('messages.0.id')];

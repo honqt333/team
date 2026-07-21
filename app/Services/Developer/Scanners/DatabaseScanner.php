@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Developer\Scanners;
 
 use App\Services\Developer\Contracts\ScannerInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class DatabaseScanner implements ScannerInterface
 {
@@ -44,8 +47,9 @@ class DatabaseScanner implements ScannerInterface
 
                 // 2. Check soft deletes columns presence on critical business tables
                 $criticalTables = ['customers', 'vehicles', 'work_orders', 'invoices', 'parts', 'suppliers', 'hr_employees'];
+
                 if (in_array($table, $criticalTables)) {
-                    if (!in_array('deleted_at', $columns)) {
+                    if (! in_array('deleted_at', $columns)) {
                         $findings[] = [
                             'severity' => 'high',
                             'file_path' => "database/schema/{$table}",
@@ -61,7 +65,8 @@ class DatabaseScanner implements ScannerInterface
                     foreach ($columns as $column) {
                         if (str_ends_with($column, '_id') && $column !== 'id') {
                             $indexExists = $this->checkIndexExists($table, $column);
-                            if (!$indexExists) {
+
+                            if (! $indexExists) {
                                 $findings[] = [
                                     'severity' => 'high',
                                     'file_path' => "database/schema/{$table}",
@@ -73,7 +78,7 @@ class DatabaseScanner implements ScannerInterface
                         }
                     }
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Fail silently for virtual tables
             }
         }
@@ -91,12 +96,14 @@ class DatabaseScanner implements ScannerInterface
 
         if ($driver === 'sqlite') {
             $results = DB::select("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';");
+
             foreach ($results as $row) {
                 $tables[] = $row->name;
             }
         } else {
             // MySQL, PostgreSQL, SQL Server fallback
             $results = DB::select('SHOW TABLES');
+
             foreach ($results as $row) {
                 $vars = get_object_vars($row);
                 $tables[] = reset($vars);
@@ -113,16 +120,16 @@ class DatabaseScanner implements ScannerInterface
     {
         try {
             $databaseName = DB::connection()->getDatabaseName();
-            $results = DB::select("
+            $results = DB::select('
                 SELECT INDEX_NAME 
                 FROM information_schema.statistics 
                 WHERE table_schema = ? 
                 AND table_name = ? 
                 AND column_name = ?
-            ", [$databaseName, $table, $column]);
+            ', [$databaseName, $table, $column]);
 
             return count($results) > 0;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return true; // Fallback to safe state if queries fail
         }
     }

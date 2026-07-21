@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
+use App\Models\Center;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,12 +19,12 @@ class RegistrationEmailVerificationTest extends TestCase
         // This is the user state immediately after a fresh
         // registration: logged in, but email_verified_at is NULL.
         $tenant = Tenant::factory()->create();
-        $center = \App\Models\Center::factory()->create([
+        $center = Center::factory()->create([
             'tenant_id' => $tenant->id,
             'is_active' => true,
             'is_main' => true,
         ]);
-        $user = \App\Models\User::factory()->create([
+        $user = User::factory()->create([
             'tenant_id' => $tenant->id,
             'current_center_id' => $center->id,
             'email_verified_at' => null,   // freshly registered, not verified
@@ -38,12 +42,12 @@ class RegistrationEmailVerificationTest extends TestCase
     public function test_user_with_verified_email_can_access_dashboard(): void
     {
         $tenant = Tenant::factory()->create();
-        $center = \App\Models\Center::factory()->create([
+        $center = Center::factory()->create([
             'tenant_id' => $tenant->id,
             'is_active' => true,
             'is_main' => true,
         ]);
-        $user = \App\Models\User::factory()->create([
+        $user = User::factory()->create([
             'tenant_id' => $tenant->id,
             'current_center_id' => $center->id,
             'email_verified_at' => now(),
@@ -58,12 +62,12 @@ class RegistrationEmailVerificationTest extends TestCase
     public function test_user_with_unverified_email_is_redirected_to_verification_notice(): void
     {
         $tenant = Tenant::factory()->create();
-        $center = \App\Models\Center::factory()->create([
+        $center = Center::factory()->create([
             'tenant_id' => $tenant->id,
             'is_active' => true,
             'is_main' => true,
         ]);
-        $user = \App\Models\User::factory()->create([
+        $user = User::factory()->create([
             'tenant_id' => $tenant->id,
             'current_center_id' => $center->id,
             'email_verified_at' => null,

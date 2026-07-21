@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\AI\Providers;
 
 use App\Services\AI\AiProvider;
 use App\Services\AI\CompletionRequest;
 use App\Services\AI\CompletionResponse;
+use Generator;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
@@ -54,9 +57,9 @@ class AnthropicProvider implements AiProvider
     }
 
     /**
-     * @return \Generator<int, string>
+     * @return Generator<int, string>
      */
-    public function stream(CompletionRequest $req): \Generator
+    public function stream(CompletionRequest $req): Generator
     {
         $response = $this->complete($req);
 

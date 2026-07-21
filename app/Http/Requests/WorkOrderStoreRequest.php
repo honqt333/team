@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
+use App\Models\Department;
+use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,7 +39,8 @@ class WorkOrderStoreRequest extends FormRequest
                 // Vehicle must belong to selected customer
                 function ($attribute, $value, $fail) {
                     if ($value && $this->customer_id) {
-                        $vehicle = \App\Models\Vehicle::find($value);
+                        $vehicle = Vehicle::find($value);
+
                         if ($vehicle && $vehicle->customer_id != $this->customer_id) {
                             $fail(__('validation.vehicle_customer_mismatch'));
                         }
@@ -44,9 +49,10 @@ class WorkOrderStoreRequest extends FormRequest
                 // Prevent creating work order for vehicle with open work order
                 function ($attribute, $value, $fail) {
                     if ($value) {
-                        $hasOpenWorkOrder = \App\Models\WorkOrder::where('vehicle_id', $value)
+                        $hasOpenWorkOrder = WorkOrder::where('vehicle_id', $value)
                             ->whereIn('status', ['draft', 'open', 'in_progress'])
                             ->exists();
+
                         if ($hasOpenWorkOrder) {
                             $fail(__('validation.vehicle_has_open_work_order'));
                         }
@@ -59,7 +65,7 @@ class WorkOrderStoreRequest extends FormRequest
                 Rule::in(WorkOrder::STATUSES),
             ],
             'notes' => ['nullable', 'string', 'max:2000'],
-            
+
             // New fields
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
@@ -69,7 +75,7 @@ class WorkOrderStoreRequest extends FormRequest
             'contact_phone' => ['nullable', 'string', 'max:20'],
             'entry_date' => ['nullable', 'date'],
             'expected_end_date' => ['nullable', 'date', 'after_or_equal:entry_date'],
-            
+
             'departments' => ['nullable', 'array'],
             'departments.*' => [
                 'required',
@@ -77,23 +83,24 @@ class WorkOrderStoreRequest extends FormRequest
                     if ($value === 'packages') {
                         return;
                     }
-                    $exists = \App\Models\Department::where('id', $value)
+                    $exists = Department::where('id', $value)
                         ->where('tenant_id', $tenantId)
                         ->where('center_id', $centerId)
                         ->exists();
-                    if (!$exists) {
+
+                    if (! $exists) {
                         $fail(__('validation.exists', ['attribute' => $attribute]));
                     }
-                }
+                },
             ],
-            
+
             // Items (Services)
             'items' => ['nullable', 'array'],
             'items.*.service_id' => ['nullable', 'integer', Rule::exists('services', 'id')],
             'items.*.title' => ['required', 'string', 'max:255'],
             'items.*.qty' => ['required', 'numeric', 'min:0.01'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
-            
+
             // Damage marks
             'damage_marks' => ['nullable', 'array'],
             'damage_marks.*.x' => ['required', 'numeric'],

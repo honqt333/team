@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -225,6 +227,7 @@ class SecurityRegressionTest extends TestCase
         $this->assertNotEmpty($files, 'No built JS bundles found');
 
         $bundleText = '';
+
         foreach ($files as $file) {
             $bundleText .= file_get_contents($file);
         }

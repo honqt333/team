@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\AI\Providers;
 
 use App\Services\AI\AiProvider;
 use App\Services\AI\CompletionRequest;
 use App\Services\AI\CompletionResponse;
+use Generator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use ReflectionProperty;
 use RuntimeException;
 
 class OpenAiProvider implements AiProvider
@@ -67,9 +71,9 @@ class OpenAiProvider implements AiProvider
     }
 
     /**
-     * @return \Generator<int, string>
+     * @return Generator<int, string>
      */
-    public function stream(CompletionRequest $req): \Generator
+    public function stream(CompletionRequest $req): Generator
     {
         $response = $this->complete($req);
 
@@ -114,7 +118,7 @@ class OpenAiProvider implements AiProvider
             return;
         }
 
-        $ref = new \ReflectionProperty($factory, 'stubCallbacks');
+        $ref = new ReflectionProperty($factory, 'stubCallbacks');
         $ref->setAccessible(true);
 
         /** @var Collection $stubCallbacks */

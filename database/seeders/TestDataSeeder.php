@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Center;
+use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class TestDataSeeder extends Seeder
 {
@@ -55,18 +59,18 @@ class TestDataSeeder extends Seeder
         );
 
         // Set the team id for the assignment context (CRITICAL for Spatie Teams)
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
 
         // Attach user to center
-        if (!$user->centers()->where('center_id', $center->id)->exists()) {
+        if (! $user->centers()->where('center_id', $center->id)->exists()) {
             $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
         }
 
         // Assign Super Admin Role (This includes all permissions)
-        $superAdminRole = \App\Models\Role::where('name', 'super_admin')
+        $superAdminRole = Role::where('name', 'super_admin')
             ->where('tenant_id', $tenant->id)
             ->first();
-            
+
         if ($superAdminRole) {
             $user->assignRole($superAdminRole);
         }

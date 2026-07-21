@@ -1,15 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Models\Department;
+use App\Models\Quote;
 use App\Models\Service;
-use App\Models\VehicleConditionItem;
 use App\Models\Setting;
+use App\Models\VehicleConditionCategory;
+use App\Models\WorkOrder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -64,27 +69,27 @@ class ServiceController
         // Get services from other branches under the same tenant for the catalog dropdown.
         // Grouped unique per (name_ar + department) — keeps one representative per service-department pair.
         $otherBranchesServices = Service::with(['department' => function ($query) {
-                $query->withoutGlobalScope('center_scoped');
-            }])
+            $query->withoutGlobalScope('center_scoped');
+        }])
             ->where('tenant_id', $tenantId)
             ->where('center_id', '!=', $centerId)
             ->whereNotIn('name_ar', $localServiceNames)
             ->where('type', '!=', Service::TYPE_PACKAGE)
             ->get()
-            ->unique(fn($s) => $s->name_ar . '|' . $s->name_en . '|' . ($s->department_id ?? 'null'))
+            ->unique(fn ($s) => $s->name_ar.'|'.$s->name_en.'|'.($s->department_id ?? 'null'))
             ->values()
-            ->map(fn($s) => [
-                'id'                 => $s->id,
-                'name_ar'            => $s->name_ar,
-                'name_en'            => $s->name_en,
-                'description_ar'     => $s->description_ar,
-                'description_en'     => $s->description_en,
-                'duration_value'     => $s->duration_value,
-                'duration_unit'      => $s->duration_unit,
-                'warranty_value'     => $s->warranty_value,
-                'warranty_unit'      => $s->warranty_unit,
-                'type'               => $s->type,
-                'department_id'      => $s->department_id,
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'name_ar' => $s->name_ar,
+                'name_en' => $s->name_en,
+                'description_ar' => $s->description_ar,
+                'description_en' => $s->description_en,
+                'duration_value' => $s->duration_value,
+                'duration_unit' => $s->duration_unit,
+                'warranty_value' => $s->warranty_value,
+                'warranty_unit' => $s->warranty_unit,
+                'type' => $s->type,
+                'department_id' => $s->department_id,
                 'department_name_ar' => $s->department?->name_ar,
                 'department_name_en' => $s->department?->name_en,
             ]);
@@ -103,22 +108,22 @@ class ServiceController
             ->where('type', Service::TYPE_PACKAGE)
             ->whereNotIn('name_ar', $localPackageNames)
             ->get()
-            ->unique(fn($s) => $s->name_ar . '|' . $s->name_en)
+            ->unique(fn ($s) => $s->name_ar.'|'.$s->name_en)
             ->values()
-            ->map(fn($s) => [
-                'id'                 => $s->id,
-                'name_ar'            => $s->name_ar,
-                'name_en'            => $s->name_en,
-                'description_ar'     => $s->description_ar,
-                'description_en'     => $s->description_en,
-                'base_price'         => 0,
-                'min_price'          => 0,
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'name_ar' => $s->name_ar,
+                'name_en' => $s->name_en,
+                'description_ar' => $s->description_ar,
+                'description_en' => $s->description_en,
+                'base_price' => 0,
+                'min_price' => 0,
                 'default_discount_type' => 'none',
                 'default_discount_value' => null,
                 'allow_price_override' => $s->allow_price_override,
-                'type'               => $s->type,
-                'is_active'          => true,
-                'items'              => $s->items->map(fn($item) => [
+                'type' => $s->type,
+                'is_active' => true,
+                'items' => $s->items->map(fn ($item) => [
                     'id' => $item->id,
                     'name_ar' => $item->name_ar,
                     'name_en' => $item->name_en,
@@ -128,14 +133,14 @@ class ServiceController
             ]);
 
         // Get inspection condition items
-        $conditionCategories = \App\Models\VehicleConditionCategory::with(['items.updatedBy:id,name', 'updatedBy:id,name'])
+        $conditionCategories = VehicleConditionCategory::with(['items.updatedBy:id,name', 'updatedBy:id,name'])
             ->orderedBySource()
             ->ordered()
             ->get();
-            
+
         $enableSystematicInspections = Setting::where('key', 'enable_systematic_inspections')->value('value') ?? 'true';
 
-        \Illuminate\Support\Facades\Log::info('Packages found in index:', ['count' => $packages->count(), 'sample' => $packages->take(1)->toArray()]);
+        Log::info('Packages found in index:', ['count' => $packages->count(), 'sample' => $packages->take(1)->toArray()]);
 
         return Inertia::render('Services/Index', [
             'departments' => $departments,
@@ -200,8 +205,8 @@ class ServiceController
         $validated['tenant_id'] = auth()->user()->tenant_id;
         $validated['center_id'] = $centerId;
         $validated['updated_by'] = auth()->id();
-        
-        \Illuminate\Support\Facades\Log::info('Creating service/package', $validated);
+
+        Log::info('Creating service/package', $validated);
 
         // Check if there is a soft-deleted service with the same name in this center
         $existingTrashed = Service::onlyTrashed()
@@ -213,18 +218,18 @@ class ServiceController
             $existingTrashed->restore();
             $existingTrashed->update($validated);
             $service = $existingTrashed;
-            \Illuminate\Support\Facades\Log::info('Service restored and updated from trash', ['id' => $service->id]);
+            Log::info('Service restored and updated from trash', ['id' => $service->id]);
         } else {
             $service = Service::create($validated);
-            \Illuminate\Support\Facades\Log::info('Service created', ['id' => $service->id, 'type' => $service->type]);
+            Log::info('Service created', ['id' => $service->id, 'type' => $service->type]);
         }
 
-        if ($validated['type'] === Service::TYPE_PACKAGE && !empty($validated['items'])) {
+        if ($validated['type'] === Service::TYPE_PACKAGE && ! empty($validated['items'])) {
             $items = collect($validated['items'])->mapWithKeys(function ($item) {
                 return [$item['id'] => ['quantity' => $item['quantity']]];
             });
             $service->items()->sync($items);
-            \Illuminate\Support\Facades\Log::info('Package items synced', ['items' => $items]);
+            Log::info('Package items synced', ['items' => $items]);
         }
 
         return back()->with('new_service_id', $service->id);
@@ -286,13 +291,13 @@ class ServiceController
         $this->authorize('delete', $service);
 
         // Check if service has related data in ACTIVE quotes
-        $quotes = \App\Models\Quote::whereHas('lines', function ($query) use ($service) {
-                $query->where('service_id', $service->id);
-            })
+        $quotes = Quote::whereHas('lines', function ($query) use ($service) {
+            $query->where('service_id', $service->id);
+        })
             ->whereIn('status', [
-                \App\Models\Quote::STATUS_DRAFT,
-                \App\Models\Quote::STATUS_SENT,
-                \App\Models\Quote::STATUS_APPROVED
+                Quote::STATUS_DRAFT,
+                Quote::STATUS_SENT,
+                Quote::STATUS_APPROVED,
             ])
             ->limit(5)
             ->pluck('code');
@@ -301,20 +306,20 @@ class ServiceController
             return back()->withErrors([
                 'service' => __('messages.service_has_quote_lines_with_codes', [
                     'count' => $quotes->count(),
-                    'codes' => $quotes->implode(', ')
-                ])
+                    'codes' => $quotes->implode(', '),
+                ]),
             ]);
         }
 
         // Check if service has related data in ACTIVE work orders
-        $workOrders = \App\Models\WorkOrder::whereHas('items', function ($query) use ($service) {
-                $query->where('service_id', $service->id);
-            })
+        $workOrders = WorkOrder::whereHas('items', function ($query) use ($service) {
+            $query->where('service_id', $service->id);
+        })
             ->whereIn('status', [
-                \App\Models\WorkOrder::STATUS_DRAFT,
-                \App\Models\WorkOrder::STATUS_OPEN,
-                \App\Models\WorkOrder::STATUS_IN_PROGRESS,
-                \App\Models\WorkOrder::STATUS_ON_HOLD
+                WorkOrder::STATUS_DRAFT,
+                WorkOrder::STATUS_OPEN,
+                WorkOrder::STATUS_IN_PROGRESS,
+                WorkOrder::STATUS_ON_HOLD,
             ])
             ->limit(5)
             ->pluck('code');
@@ -323,8 +328,8 @@ class ServiceController
             return back()->withErrors([
                 'service' => __('messages.service_has_work_order_items_with_codes', [
                     'count' => $workOrders->count(),
-                    'codes' => $workOrders->implode(', ')
-                ])
+                    'codes' => $workOrders->implode(', '),
+                ]),
             ]);
         }
 
@@ -338,7 +343,7 @@ class ServiceController
         $this->authorize('update', $service);
 
         $service->update([
-            'is_active' => !$service->is_active,
+            'is_active' => ! $service->is_active,
             'updated_by' => auth()->id(),
         ]);
 

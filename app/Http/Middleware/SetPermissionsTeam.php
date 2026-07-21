@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -13,7 +15,7 @@ class SetPermissionsTeam
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -21,15 +23,15 @@ class SetPermissionsTeam
             // Set the team id for permissions based on the user's tenant
             if ($user->tenant_id) {
                 $registrar = app(PermissionRegistrar::class);
-                
+
                 // Reset cached permissions to ensure fresh check
                 $registrar->forgetCachedPermissions();
                 $registrar->setPermissionsTeamId($user->tenant_id);
-                
+
                 // Force reload user roles
                 $user->unsetRelation('roles');
                 $user->unsetRelation('permissions');
-                
+
                 // Debug: log after setting
                 Log::channel('single')->debug('SetPermissionsTeam', [
                     'user_id' => $user->id,

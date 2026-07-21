@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners\Payment;
 
 use App\Events\Payment\PaymentRecorded;
@@ -8,6 +10,7 @@ use App\Models\WorkOrder;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 /**
  * Auto-create invoice when a payment brings a closed (done) WorkOrder
@@ -34,6 +37,7 @@ class HandleAutoInvoiceOnDoneWorkOrder
         }
 
         $workOrder = $payment->workOrder;
+
         if (! $workOrder) {
             return;
         }
@@ -80,7 +84,7 @@ class HandleAutoInvoiceOnDoneWorkOrder
                 actionUrl: '/app/invoices/'.$invoice->id,
                 actorId: $payment->received_by,
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             Log::warning('Auto-create invoice on done WO failed', [
                 'work_order_id' => $workOrder->id,
                 'payment_id' => $payment->id,

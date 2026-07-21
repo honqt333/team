@@ -92,6 +92,7 @@ AR;
     private function resolveSystemTenantId(): int
     {
         $tenant = Tenant::query()->withoutGlobalScopes()->orderBy('id')->first();
+
         if ($tenant !== null) {
             return (int) $tenant->id;
         }

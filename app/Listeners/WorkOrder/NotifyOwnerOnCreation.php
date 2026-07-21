@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners\WorkOrder;
 
 use App\Events\WorkOrder\WorkOrderCreated;
@@ -13,9 +15,9 @@ class NotifyOwnerOnCreation
             NotificationService::notifyOwner(
                 tenantId: $event->workOrder->tenant_id,
                 type: 'work_order.created',
-                title: 'أمر عمل جديد #' . ($event->workOrder->code ?? $event->workOrder->id),
+                title: 'أمر عمل جديد #'.($event->workOrder->code ?? $event->workOrder->id),
                 body: 'تم إنشاء أمر عمل جديد',
-                actionUrl: '/app/work-orders/' . $event->workOrder->id,
+                actionUrl: '/app/work-orders/'.$event->workOrder->id,
             );
         }
     }

@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\VehicleMake;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\Storage;
 
 /** @bypass-authorization-scanner - Protected at route middleware level (auth + center.context + EnsureTwoFactorEnabled) */
 class VehicleMakeController extends Controller
@@ -24,7 +26,7 @@ class VehicleMakeController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name_ar', 'like', "%{$search}%")
-                  ->orWhere('name_en', 'like', "%{$search}%");
+                    ->orWhere('name_en', 'like', "%{$search}%");
             });
         }
 
@@ -117,7 +119,7 @@ class VehicleMakeController extends Controller
             abort(403, __('common.cannot_modify_system_data'));
         }
 
-        $make->update(['is_active' => !$make->is_active]);
+        $make->update(['is_active' => ! $make->is_active]);
 
         return redirect()->back();
     }

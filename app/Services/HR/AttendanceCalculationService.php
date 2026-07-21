@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\HR;
 
 use App\Models\HR\AttendanceSettings;
@@ -22,14 +24,14 @@ class AttendanceCalculationService
     {
         $checkInTime = Carbon::parse($checkIn);
         $shiftStartTime = Carbon::parse($shiftStart);
-        
+
         // Add grace period to shift start
         $graceEnd = $shiftStartTime->copy()->addMinutes($this->settings->grace_period_minutes);
-        
+
         if ($checkInTime->lte($graceEnd)) {
             return 0; // Within grace period
         }
-        
+
         return $checkInTime->diffInMinutes($shiftStartTime);
     }
 
@@ -38,17 +40,17 @@ class AttendanceCalculationService
      */
     public function calculateEarlyLeaveMinutes(?string $checkOut, string $shiftEnd): int
     {
-        if (!$checkOut) {
+        if (! $checkOut) {
             return 0;
         }
-        
+
         $checkOutTime = Carbon::parse($checkOut);
         $shiftEndTime = Carbon::parse($shiftEnd);
-        
+
         if ($checkOutTime->gte($shiftEndTime)) {
             return 0; // Left on time or later
         }
-        
+
         return $shiftEndTime->diffInMinutes($checkOutTime);
     }
 
@@ -57,17 +59,17 @@ class AttendanceCalculationService
      */
     public function calculateOvertimeMinutes(?string $checkOut, string $shiftEnd): int
     {
-        if (!$checkOut || !$this->settings->overtime_enabled) {
+        if (! $checkOut || ! $this->settings->overtime_enabled) {
             return 0;
         }
-        
+
         $checkOutTime = Carbon::parse($checkOut);
         $shiftEndTime = Carbon::parse($shiftEnd);
-        
+
         if ($checkOutTime->lte($shiftEndTime)) {
             return 0; // Left on time or early
         }
-        
+
         return $checkOutTime->diffInMinutes($shiftEndTime);
     }
 
@@ -117,6 +119,7 @@ class AttendanceCalculationService
     public function calculateOvertimePayment(int $overtimeMinutes): float
     {
         $hours = $overtimeMinutes / 60;
+
         return round($hours * $this->settings->overtime_rate_per_hour, 2);
     }
 

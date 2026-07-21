@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exports;
 
 use App\Models\Vehicle;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class VehiclesExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize
+class VehiclesExport implements FromCollection, ShouldAutoSize, WithHeadings, WithStyles
 {
     public function collection()
     {
@@ -22,9 +24,9 @@ class VehiclesExport implements FromCollection, WithHeadings, WithStyles, Should
             ->with(['customer', 'make', 'model']);
 
         if ($search) {
-             $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('plate_number', 'like', "%{$search}%")
-                  ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
             });
         }
 

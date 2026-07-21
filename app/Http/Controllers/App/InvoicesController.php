@@ -1,20 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryUnit;
 use App\Models\Invoice;
-use App\Models\PurchaseOrder;
+use App\Models\InvoiceTemplate;
+use App\Models\PurchaseInvoice;
+use App\Models\PurchaseReturnInvoice;
+use App\Models\Supplier;
+use App\Models\Warehouse;
 use App\Models\WorkOrder;
 use App\Services\InvoiceService;
 use App\Services\NotificationService;
+use Exception;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
-
-use App\Models\Supplier;
-use App\Models\Warehouse;
-use App\Models\InventoryUnit;
+use Inertia\Inertia;
 
 class InvoicesController extends Controller
 {
@@ -62,7 +66,7 @@ class InvoicesController extends Controller
         }
 
         // Check work order status
-        if (!in_array($workOrder->status, ['completed', 'delivered', 'done'])) {
+        if (! in_array($workOrder->status, ['completed', 'delivered', 'done'])) {
             return back()->with('error', __('invoices.work_order_not_completed'));
         }
 
@@ -79,15 +83,15 @@ class InvoicesController extends Controller
             NotificationService::notifyOwner(
                 tenantId: auth()->user()->tenant_id,
                 type: 'invoice.created',
-                title: 'فاتورة جديدة #' . $invoice->invoice_number,
-                body: 'تم إنشاء فاتورة من أمر العمل #' . ($workOrder->code ?? $workOrder->id),
-                actionUrl: '/app/invoices/' . $invoice->id,
+                title: 'فاتورة جديدة #'.$invoice->invoice_number,
+                body: 'تم إنشاء فاتورة من أمر العمل #'.($workOrder->code ?? $workOrder->id),
+                actionUrl: '/app/invoices/'.$invoice->id,
                 actorId: auth()->id(),
             );
 
             return redirect()->route('app.invoices.show', $invoice->id)
                 ->with('success', __('invoices.created'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }
@@ -110,9 +114,10 @@ class InvoicesController extends Controller
             'companyTransaction',
         ]);
 
-        $template = \App\Models\InvoiceTemplate::getDefault($invoice->tenant_id, 'tax_invoice');
+        $template = InvoiceTemplate::getDefault($invoice->tenant_id, 'tax_invoice');
 
         $labels = $template->getAllLabels();
+
         if ($invoice->tenant->invoice_title) {
             $labels['document_title'] = $invoice->tenant->invoice_title;
         }
@@ -148,22 +153,22 @@ class InvoicesController extends Controller
             ->where('center_id', $centerId)
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
-                  ->from('company_transactions')
-                  ->whereColumn('company_transactions.invoice_id', 'invoices.id');
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.invoice_id', 'invoices.id');
             })
             ->count();
 
-        $purchasesCount = \App\Models\PurchaseInvoice::where('tenant_id', $tenantId)
+        $purchasesCount = PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
-                  ->from('company_transactions')
-                  ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
             })
             ->count();
 
         return Inertia::render('Invoices/Hub', [
-            'salesCount'     => $salesCount,
+            'salesCount' => $salesCount,
             'purchasesCount' => $purchasesCount,
         ]);
     }
@@ -180,26 +185,26 @@ class InvoicesController extends Controller
             ->where('center_id', $centerId)
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
-                  ->from('company_transactions')
-                  ->whereColumn('company_transactions.invoice_id', 'invoices.id');
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.invoice_id', 'invoices.id');
             })
             ->with(['customer', 'workOrder.items', 'workOrder.parts'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('invoice_number', 'like', "%{$search}%")
-                          ->orWhereHas('customer', fn($c) => $c->where('name', 'like', "%{$search}%"));
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($request->input('payment_status'), fn($q, $s) => $q->where('payment_status', $s))
-            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('issue_date', '>=', $d))
-            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
+            ->when($request->input('payment_status'), fn ($q, $s) => $q->where('payment_status', $s))
+            ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
             ->orderBy('issue_date', 'desc');
 
         $invoices = $query->paginate(25)->withQueryString();
 
         return Inertia::render('Invoices/Sales/Index', [
             'invoices' => $invoices,
-            'filters'  => $request->only(['search', 'payment_status', 'date_from', 'date_to']),
+            'filters' => $request->only(['search', 'payment_status', 'date_from', 'date_to']),
         ]);
     }
 
@@ -211,29 +216,29 @@ class InvoicesController extends Controller
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
-        $query = \App\Models\PurchaseInvoice::where('tenant_id', $tenantId)
+        $query = PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->whereNotExists(function ($q) {
                 $q->select(DB::raw(1))
-                  ->from('company_transactions')
-                  ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
+                    ->from('company_transactions')
+                    ->whereColumn('company_transactions.purchase_invoice_id', 'purchase_invoices.id');
             })
             ->with(['supplier', 'purchaseOrder'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('code', 'like', "%{$search}%")
-                          ->orWhere('invoice_number', 'like', "%{$search}%")
-                          ->orWhereHas('supplier', fn($s) => $s->where('name', 'like', "%{$search}%"));
+                        ->orWhere('invoice_number', 'like', "%{$search}%")
+                        ->orWhereHas('supplier', fn ($s) => $s->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($request->input('status'), fn($q, $s) => $q->where('status', $s))
-            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('issue_date', '>=', $d))
-            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
+            ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
+            ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
             ->orderBy('id', 'desc');
 
         $invoices = $query->paginate(25)->withQueryString();
 
-        $returns = \App\Models\PurchaseReturnInvoice::where('tenant_id', $tenantId)
+        $returns = PurchaseReturnInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->whereHas('purchaseInvoice', function ($q) {
                 $q->whereNotExists(function ($sub) {
@@ -246,11 +251,11 @@ class InvoicesController extends Controller
             ->when($request->input('search'), function ($q, $search) {
                 $q->where(function ($query) use ($search) {
                     $query->where('code', 'like', "%{$search}%")
-                          ->orWhereHas('purchaseInvoice.supplier', fn($s) => $s->where('name', 'like', "%{$search}%"));
+                        ->orWhereHas('purchaseInvoice.supplier', fn ($s) => $s->where('name', 'like', "%{$search}%"));
                 });
             })
-            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('return_date', '>=', $d))
-            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('return_date', '<=', $d))
+            ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('return_date', '>=', $d))
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('return_date', '<=', $d))
             ->orderBy('id', 'desc')
             ->paginate(25, ['*'], 'returns_page')
             ->withQueryString();
@@ -262,13 +267,13 @@ class InvoicesController extends Controller
 
         return Inertia::render('Invoices/Purchasing/Index', [
             'invoices' => $invoices,
-            'returns'  => $returns,
-            'filters'  => $request->only(['search', 'status', 'date_from', 'date_to']),
+            'returns' => $returns,
+            'filters' => $request->only(['search', 'status', 'date_from', 'date_to']),
             'statuses' => [
-                \App\Models\PurchaseInvoice::STATUS_DRAFT,
-                \App\Models\PurchaseInvoice::STATUS_OPEN,
-                \App\Models\PurchaseInvoice::STATUS_PAID,
-                \App\Models\PurchaseInvoice::STATUS_CANCELLED,
+                PurchaseInvoice::STATUS_DRAFT,
+                PurchaseInvoice::STATUS_OPEN,
+                PurchaseInvoice::STATUS_PAID,
+                PurchaseInvoice::STATUS_CANCELLED,
             ],
             'suppliers' => $suppliers,
             'defaultWarehouse' => $defaultWarehouse,

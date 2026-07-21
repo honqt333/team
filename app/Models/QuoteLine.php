@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
@@ -77,6 +79,7 @@ class QuoteLine extends Model
 
             // Calculate tax based on quote's tax_enabled_snapshot
             $quote = $line->quote;
+
             if ($quote && $quote->tax_enabled_snapshot) {
                 $taxRate = $quote->tax_rate_snapshot ?? 15; // Default 15%
                 $line->is_taxable = true;

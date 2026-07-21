@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
+use App\Support\TenancyContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,14 +13,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Service extends Model
 {
-    use HasFactory, TenantScoped, SoftDeletes;
+    use HasFactory, SoftDeletes, TenantScoped;
 
     protected static function boot(): void
     {
         parent::boot();
 
         static::creating(function (Model $model) {
-            if (empty($model->center_id) && $centerId = \App\Support\TenancyContext::centerId()) {
+            if (empty($model->center_id) && $centerId = TenancyContext::centerId()) {
                 $model->center_id = $centerId;
             }
         });
@@ -25,7 +28,9 @@ class Service extends Model
 
     // Service types
     public const TYPE_INTERNAL = 'internal';
+
     public const TYPE_EXTERNAL = 'external';
+
     public const TYPE_PACKAGE = 'package';
 
     protected $fillable = [
@@ -72,6 +77,7 @@ class Service extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
     }
 
@@ -81,6 +87,7 @@ class Service extends Model
     public function getDescriptionAttribute(): ?string
     {
         $locale = app()->getLocale();
+
         return $locale === 'en' ? ($this->description_en ?: $this->description_ar) : ($this->description_ar ?: $this->description_en);
     }
 
@@ -160,7 +167,7 @@ class Service extends Model
      */
     public function getFormattedDurationAttribute(): ?string
     {
-        if (!$this->estimated_minutes) {
+        if (! $this->estimated_minutes) {
             return null;
         }
 
@@ -172,6 +179,7 @@ class Service extends Model
         } elseif ($hours > 0) {
             return "{$hours}س";
         }
+
         return "{$minutes}د";
     }
 

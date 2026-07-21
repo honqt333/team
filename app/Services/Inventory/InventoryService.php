@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Inventory;
 
 use App\Models\InventoryBalance;
@@ -349,6 +351,7 @@ class InventoryService
     protected function resolveTenantId(int $warehouseId): ?int
     {
         $ctx = TenancyContext::tenantId();
+
         if ($ctx !== null) {
             return $ctx;
         }
@@ -367,6 +370,7 @@ class InventoryService
     protected function resolveCenterId(int $warehouseId): ?int
     {
         $ctx = TenancyContext::centerId();
+
         if ($ctx !== null) {
             return $ctx;
         }
@@ -587,6 +591,7 @@ class InventoryService
                 foreach ($transfer->items as $item) {
                     if ($item->send_move_id) {
                         $move = InventoryMove::find($item->send_move_id);
+
                         if ($move && $move->canBeReversed()) {
                             $this->reverseMove($move, $userId, 'Transfer cancelled: '.($reason ?? 'No reason'));
                         }

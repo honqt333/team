@@ -1,19 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Integration\Integration;
+use App\Models\Tenant;
 use App\Services\Sms\AuthenticaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Inertia\Inertia;
+use Log;
 
 class PhoneVerificationController extends Controller
 {
     // OTP Settings
     const OTP_COOLDOWN_SECONDS = 60;  // Time before allowing resend
+
     const OTP_MAX_ATTEMPTS = 5;       // Max resend attempts per hour
+
     const OTP_BLOCK_DURATION = 3600;  // Block duration in seconds (1 hour)
 
     /**
@@ -30,12 +35,13 @@ class PhoneVerificationController extends Controller
 
         // Check rate limiting
         $rateLimitResult = $this->checkRateLimit($phone);
-        if (!$rateLimitResult['allowed']) {
+
+        if (! $rateLimitResult['allowed']) {
             return back()->withErrors(['phone' => $rateLimitResult['message']]);
         }
 
         // Check if phone is unique (not already registered)
-        if (\App\Models\Tenant::where('phone', $phone)->exists()) {
+        if (Tenant::where('phone', $phone)->exists()) {
             return back()->withErrors(['phone' => __('auth.phone_already_registered')]);
         }
 
@@ -44,7 +50,7 @@ class PhoneVerificationController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if (!$integration || !$integration->isConfigured()) {
+        if (! $integration || ! $integration->isConfigured()) {
             return back()->withErrors(['phone' => __('auth.verification_unavailable')]);
         }
 
@@ -55,11 +61,11 @@ class PhoneVerificationController extends Controller
             // Store phone in session and update rate limit
             session(['phone_verification_number' => $phone]);
             $this->recordAttempt($phone);
-            
+
             // Store cooldown end time
             $cooldownEndsAt = now()->addSeconds(self::OTP_COOLDOWN_SECONDS)->timestamp;
             session(['otp_cooldown_ends_at' => $cooldownEndsAt]);
-            
+
             return back()->with([
                 'success' => __('auth.otp_sent'),
                 'cooldown_ends_at' => $cooldownEndsAt,
@@ -80,7 +86,7 @@ class PhoneVerificationController extends Controller
 
         $phone = session('phone_verification_number');
 
-        if (!$phone) {
+        if (! $phone) {
             return back()->withErrors(['otp' => __('auth.otp_request_again')]);
         }
 
@@ -89,7 +95,7 @@ class PhoneVerificationController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if (!$integration || !$integration->isConfigured()) {
+        if (! $integration || ! $integration->isConfigured()) {
             return back()->withErrors(['otp' => __('auth.verification_unavailable')]);
         }
 
@@ -97,7 +103,7 @@ class PhoneVerificationController extends Controller
         $result = $service->verifyOtp($phone, $request->otp);
 
         // Debug logging
-        \Log::info('Phone verification attempt', [
+        Log::info('Phone verification attempt', [
             'phone' => $phone,
             'otp' => $request->otp,
             'result' => $result,
@@ -107,10 +113,10 @@ class PhoneVerificationController extends Controller
             // Mark phone as verified in session
             session(['phone_verified' => true]);
             session(['verified_phone_number' => $phone]);
-            
+
             // Clear rate limit for this phone
-            Cache::forget('otp_attempts_' . $phone);
-            
+            Cache::forget('otp_attempts_'.$phone);
+
             return back()->with('success', __('auth.otp_verified'));
         }
 
@@ -132,22 +138,23 @@ class PhoneVerificationController extends Controller
      */
     protected function checkRateLimit(string $phone): array
     {
-        $cacheKey = 'otp_attempts_' . $phone;
+        $cacheKey = 'otp_attempts_'.$phone;
         $attempts = Cache::get($cacheKey, []);
 
         // Check if blocked
         if (count($attempts) >= self::OTP_MAX_ATTEMPTS) {
             $oldestAttempt = min($attempts);
             $blockEndsAt = $oldestAttempt + self::OTP_BLOCK_DURATION;
-            
+
             if (now()->timestamp < $blockEndsAt) {
                 $remainingMinutes = ceil(($blockEndsAt - now()->timestamp) / 60);
+
                 return [
                     'allowed' => false,
                     'message' => __('auth.rate_limit_exceeded', ['minutes' => $remainingMinutes]),
                 ];
             }
-            
+
             // Block period ended, reset attempts
             Cache::forget($cacheKey);
             $attempts = [];
@@ -155,8 +162,10 @@ class PhoneVerificationController extends Controller
 
         // Check cooldown
         $cooldownEndsAt = session('otp_cooldown_ends_at', 0);
+
         if (now()->timestamp < $cooldownEndsAt) {
             $remainingSeconds = max(1, (int) ($cooldownEndsAt - now()->timestamp));
+
             return [
                 'allowed' => false,
                 'message' => __('auth.resend_cooldown', ['seconds' => $remainingSeconds]),
@@ -171,16 +180,16 @@ class PhoneVerificationController extends Controller
      */
     protected function recordAttempt(string $phone): void
     {
-        $cacheKey = 'otp_attempts_' . $phone;
+        $cacheKey = 'otp_attempts_'.$phone;
         $attempts = Cache::get($cacheKey, []);
-        
+
         // Add current timestamp
         $attempts[] = now()->timestamp;
-        
+
         // Remove attempts older than 1 hour
         $oneHourAgo = now()->subHour()->timestamp;
-        $attempts = array_filter($attempts, fn($t) => $t > $oneHourAgo);
-        
+        $attempts = array_filter($attempts, fn ($t) => $t > $oneHourAgo);
+
         Cache::put($cacheKey, array_values($attempts), self::OTP_BLOCK_DURATION);
     }
 
@@ -194,19 +203,19 @@ class PhoneVerificationController extends Controller
 
         // If starts with 0, remove it and add +966
         if (str_starts_with($phone, '0')) {
-            $phone = '+966' . substr($phone, 1);
+            $phone = '+966'.substr($phone, 1);
         }
         // If starts with 5 (Saudi mobile), add +966
         elseif (str_starts_with($phone, '5')) {
-            $phone = '+966' . $phone;
+            $phone = '+966'.$phone;
         }
         // If starts with 966, add +
         elseif (str_starts_with($phone, '966')) {
-            $phone = '+' . $phone;
+            $phone = '+'.$phone;
         }
         // If doesn't start with +, add it
-        elseif (!str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+        elseif (! str_starts_with($phone, '+')) {
+            $phone = '+'.$phone;
         }
 
         return $phone;

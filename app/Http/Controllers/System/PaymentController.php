@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -25,10 +27,10 @@ class PaymentController extends Controller
     public function checkout(Subscription $subscription): Response
     {
         $subscription->load(['tenant', 'plan']);
-        
+
         // Get available gateways
         $gateways = $this->paymentManager->getAvailableGateways();
-        
+
         // Create pending payment record
         $payment = SubscriptionPayment::create([
             'tenant_id' => $subscription->tenant_id,
@@ -38,7 +40,7 @@ class PaymentController extends Controller
             'gateway' => config('payment.default'),
             'status' => 'pending',
         ]);
-        
+
         // Get payment form data
         $formData = $this->paymentManager->initiate([
             'amount' => $subscription->price,
@@ -51,7 +53,7 @@ class PaymentController extends Controller
                 'tenant_id' => $subscription->tenant_id,
             ],
         ]);
-        
+
         return Inertia::render('System/Payment/Checkout', [
             'subscription' => $subscription,
             'payment' => $payment,
@@ -70,7 +72,7 @@ class PaymentController extends Controller
             $request->all(),
             $payment->gateway
         );
-        
+
         if ($result['success']) {
             // Mark payment as successful
             $payment->markAsPaid($result['raw_response'] ?? []);
@@ -78,29 +80,30 @@ class PaymentController extends Controller
                 'gateway_payment_id' => $result['payment_id'] ?? null,
                 'payment_method' => $result['payment_method'] ?? null,
             ]);
-            
+
             // Activate subscription
             $subscription = $payment->subscription;
+
             if ($subscription) {
                 $subscription->update([
                     'status' => 'active',
                 ]);
-                
+
                 // Update tenant status
                 $subscription->tenant->update([
                     'status' => 'active',
                 ]);
             }
-            
+
             return redirect()->route('system.payment.success', ['payment' => $payment->id]);
         }
-        
+
         // Mark payment as failed
         $payment->markAsFailed(
             $result['message'] ?? 'فشل الدفع',
             $result['raw_response'] ?? []
         );
-        
+
         return redirect()->route('system.payment.failed', ['payment' => $payment->id]);
     }
 
@@ -110,7 +113,7 @@ class PaymentController extends Controller
     public function success(SubscriptionPayment $payment): Response
     {
         $payment->load(['subscription.plan', 'tenant']);
-        
+
         return Inertia::render('System/Payment/Success', [
             'payment' => $payment,
         ]);
@@ -122,7 +125,7 @@ class PaymentController extends Controller
     public function failed(SubscriptionPayment $payment): Response
     {
         $payment->load(['subscription.plan', 'tenant']);
-        
+
         return Inertia::render('System/Payment/Failed', [
             'payment' => $payment,
         ]);
@@ -136,7 +139,7 @@ class PaymentController extends Controller
         if ($payment->status !== 'failed') {
             return back()->with('error', 'لا يمكن إعادة المحاولة لهذه الدفعة');
         }
-        
+
         // Create new payment attempt
         $newPayment = SubscriptionPayment::create([
             'tenant_id' => $payment->tenant_id,
@@ -146,7 +149,7 @@ class PaymentController extends Controller
             'gateway' => $payment->gateway,
             'status' => 'pending',
         ]);
-        
+
         return redirect()->route('system.payment.checkout', ['subscription' => $payment->subscription_id]);
     }
 }

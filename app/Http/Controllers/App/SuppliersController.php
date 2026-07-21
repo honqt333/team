@@ -1,13 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
-use App\Models\Supplier;
 use App\Http\Requests\App\Purchasing\SupplierRequest;
+use App\Models\InventoryUnit;
+use App\Models\Supplier;
+use App\Models\Warehouse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class SuppliersController extends Controller
@@ -24,10 +29,10 @@ class SuppliersController extends Controller
         $centerId = $isSuperAdmin ? $request->center_id : auth()->user()->current_center_id;
 
         $query = Supplier::forTenant($tenantId)
-            ->when(!$isSuperAdmin || $centerId, fn($q) => $q->forCenter($centerId))
+            ->when(! $isSuperAdmin || $centerId, fn ($q) => $q->forCenter($centerId))
             ->search($request->input('search'))
-            ->when($request->input('status') === 'active', fn($q) => $q->active())
-            ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
+            ->when($request->input('status') === 'active', fn ($q) => $q->active())
+            ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
             ->withCount('purchaseOrders')
             ->orderBy('name');
 
@@ -36,6 +41,7 @@ class SuppliersController extends Controller
         // Calculate real balance using calculateBalance helper
         $suppliers->getCollection()->transform(function ($supplier) {
             $supplier->balance = $supplier->calculateBalance();
+
             return $supplier;
         });
 
@@ -48,14 +54,14 @@ class SuppliersController extends Controller
     public function show(Supplier $supplier)
     {
         $this->authorize('view', $supplier);
-        
+
         $supplier->loadCount('purchaseOrders');
         $supplier->load([
-            'purchaseInvoices' => fn($q) => $q->latest(),
-            'returnInvoices' => fn($q) => $q->with('purchaseInvoice')->latest('return_date'),
-            'payments' => fn($q) => $q->with(['receivedBy', 'purchaseInvoice'])->latest()
+            'purchaseInvoices' => fn ($q) => $q->latest(),
+            'returnInvoices' => fn ($q) => $q->with('purchaseInvoice')->latest('return_date'),
+            'payments' => fn ($q) => $q->with(['receivedBy', 'purchaseInvoice'])->latest(),
         ]);
-        
+
         $counts = [
             'orders' => $supplier->purchase_orders_count,
             'invoices' => $supplier->purchaseInvoices->count(),
@@ -70,9 +76,9 @@ class SuppliersController extends Controller
         $centerId = auth()->user()->current_center_id;
 
         $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
-        $defaultWarehouse = \App\Models\Warehouse::forCenter($centerId)->default()->first();
-        $warehouses = \App\Models\Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
-        $units = \App\Models\InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
+        $defaultWarehouse = Warehouse::forCenter($centerId)->default()->first();
+        $warehouses = Warehouse::forCenter($centerId)->active()->get(['id', 'name']);
+        $units = InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']);
 
         return Inertia::render('Purchasing/Suppliers/Show', [
             'supplier' => $supplier,
@@ -88,8 +94,6 @@ class SuppliersController extends Controller
         ]);
     }
 
-
-
     public function store(SupplierRequest $request)
     {
         $this->authorize('create', Supplier::class);
@@ -103,8 +107,6 @@ class SuppliersController extends Controller
         return redirect()->back()
             ->with('success', __('purchasing.suppliers.created'));
     }
-
-
 
     public function update(SupplierRequest $request, Supplier $supplier)
     {
@@ -133,10 +135,10 @@ class SuppliersController extends Controller
     {
         $this->authorize('update', $supplier);
 
-        $supplier->update(['is_active' => !$supplier->is_active]);
+        $supplier->update(['is_active' => ! $supplier->is_active]);
 
-        return back()->with('success', $supplier->is_active 
-            ? __('purchasing.suppliers.activated') 
+        return back()->with('success', $supplier->is_active
+            ? __('purchasing.suppliers.activated')
             : __('purchasing.suppliers.deactivated'));
     }
 
@@ -179,20 +181,21 @@ class SuppliersController extends Controller
         $suppliers = Supplier::forTenant($tenantId)
             ->forCenter($centerId)
             ->search($request->input('search'))
-            ->when($request->input('status') === 'active', fn($q) => $q->active())
-            ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
+            ->when($request->input('status') === 'active', fn ($q) => $q->active())
+            ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
             ->orderBy('name')
             ->get(['id', 'name', 'code', 'phone', 'email', 'type', 'tax_number', 'is_active']);
 
         // Attach real balance using calculateBalance helper
         $suppliers->transform(function ($supplier) {
             $supplier->balance = $supplier->calculateBalance();
+
             return $supplier;
         });
 
-        $spreadsheet = new Spreadsheet();
+        $spreadsheet = new Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
-        
+
         // Set RTL for Arabic
         $sheet->setRightToLeft(app()->getLocale() === 'ar');
 
@@ -208,17 +211,18 @@ class SuppliersController extends Controller
             __('purchasing.suppliers.balance'),
             __('common.status'),
         ];
-        
+
         $sheet->fromArray($headers, null, 'A1');
-        
+
         // Style headers
         $sheet->getStyle('A1:I1')->getFont()->setBold(true);
         $sheet->getStyle('A1:I1')->getFill()
-            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setRGB('E5E7EB');
 
         // Data
         $row = 2;
+
         foreach ($suppliers as $index => $supplier) {
             $sheet->fromArray([
                 $index + 1,
@@ -230,7 +234,7 @@ class SuppliersController extends Controller
                 $supplier->tax_number,
                 number_format($supplier->balance, 2),
                 $supplier->is_active ? __('common.active') : __('common.inactive'),
-            ], null, 'A' . $row);
+            ], null, 'A'.$row);
             $row++;
         }
 
@@ -239,11 +243,11 @@ class SuppliersController extends Controller
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        $filename = 'suppliers_' . date('Y-m-d_His') . '.xlsx';
-        
+        $filename = 'suppliers_'.date('Y-m-d_His').'.xlsx';
+
         $writer = new Xlsx($spreadsheet);
-        
-        return response()->streamDownload(function() use ($writer) {
+
+        return response()->streamDownload(function () use ($writer) {
             $writer->save('php://output');
         }, $filename, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

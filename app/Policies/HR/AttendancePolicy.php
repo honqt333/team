@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies\HR;
 
 use App\Models\HR\Attendance;
@@ -21,7 +23,7 @@ class AttendancePolicy
      */
     public function view(User $user, Attendance $attendance): bool
     {
-        if (!$user->hasPermissionTo(Permissions::HR_ATTENDANCE_VIEW)) {
+        if (! $user->hasPermissionTo(Permissions::HR_ATTENDANCE_VIEW)) {
             return false;
         }
 
@@ -42,7 +44,7 @@ class AttendancePolicy
      */
     public function update(User $user, Attendance $attendance): bool
     {
-        if (!$user->hasPermissionTo(Permissions::HR_ATTENDANCE_MANAGE)) {
+        if (! $user->hasPermissionTo(Permissions::HR_ATTENDANCE_MANAGE)) {
             return false;
         }
 
@@ -55,7 +57,7 @@ class AttendancePolicy
      */
     public function delete(User $user, Attendance $attendance): bool
     {
-        if (!$user->hasPermissionTo(Permissions::HR_ATTENDANCE_MANAGE)) {
+        if (! $user->hasPermissionTo(Permissions::HR_ATTENDANCE_MANAGE)) {
             return false;
         }
 

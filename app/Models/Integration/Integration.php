@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Integration;
 
 use Illuminate\Database\Eloquent\Model;
@@ -121,8 +123,8 @@ class Integration extends Model
      * Get integration for a specific purpose.
      * Falls back to default or any active integration if no specific purpose found.
      *
-     * @param  string  $type  The integration type (sms, whatsapp, email)
-     * @param  string  $purpose  The purpose (otp, notifications)
+     * @param string $type The integration type (sms, whatsapp, email)
+     * @param string $purpose The purpose (otp, notifications)
      */
     public static function getForPurpose(string $type, string $purpose): ?self
     {

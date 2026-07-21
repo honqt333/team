@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use Closure;
@@ -87,6 +89,7 @@ class SentryContext
         \Sentry\configureScope(function (Scope $scope) use ($request, $user, $tenantId, $correlationId): void {
             $scope->setTag('correlation_id', $correlationId);
             $scope->setTag('route', $request->method().' '.$request->path());
+
             if ($tenantId !== null) {
                 $scope->setTag('tenant_id', (string) $tenantId);
                 $scope->setUser([

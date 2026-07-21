@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
@@ -10,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InspectionTemplate extends Model
 {
-    use HasFactory, SoftDeletes, CenterScoped;
+    use CenterScoped, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',

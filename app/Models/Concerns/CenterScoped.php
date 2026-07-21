@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Concerns;
 
 use App\Support\TenancyContext;
@@ -23,21 +25,21 @@ trait CenterScoped
             // Only apply scope if both tenant and center context are available
             if ($tenantId !== null && $centerId !== null) {
                 // Check if model has 'source' column (via fillable or explicit property)
-                $hasSourceColumn = in_array('source', $model->getFillable()) 
+                $hasSourceColumn = in_array('source', $model->getFillable())
                     || (property_exists($model, 'hasSourceColumn') && $model->hasSourceColumn);
 
                 if ($hasSourceColumn) {
                     // Include center-scoped data OR system-level data (source = 'system')
                     $builder->where(function ($query) use ($table, $tenantId, $centerId) {
                         $query->where(function ($q) use ($table, $tenantId, $centerId) {
-                            $q->where($table . '.tenant_id', $tenantId)
-                              ->where($table . '.center_id', $centerId);
-                        })->orWhere($table . '.source', 'system');
+                            $q->where($table.'.tenant_id', $tenantId)
+                                ->where($table.'.center_id', $centerId);
+                        })->orWhere($table.'.source', 'system');
                     });
                 } else {
                     // Standard center scope without source check
-                    $builder->where($table . '.tenant_id', $tenantId)
-                            ->where($table . '.center_id', $centerId);
+                    $builder->where($table.'.tenant_id', $tenantId)
+                        ->where($table.'.center_id', $centerId);
                 }
             }
         });

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Services\AI\CompletionResponse;
@@ -13,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 class TrackAiUsage
 {
     /**
-     * @param  Closure(Request): (Response)  $next
+     * @param Closure(Request): (Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -79,7 +81,7 @@ class TrackAiUsage
     }
 
     /**
-     * @param  array<string, mixed>  $usage
+     * @param array<string, mixed> $usage
      */
     private function logUsage(Request $request, int $tenantId, array $usage): void
     {

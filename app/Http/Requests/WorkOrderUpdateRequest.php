@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
+use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -35,8 +38,10 @@ class WorkOrderUpdateRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $workOrder = $this->route('workOrder') ?? $this->route('work_order');
                     $customerId = $this->customer_id ?? ($workOrder ? $workOrder->customer_id : null);
+
                     if ($value && $customerId) {
-                        $vehicle = \App\Models\Vehicle::find($value);
+                        $vehicle = Vehicle::find($value);
+
                         if ($vehicle && $vehicle->customer_id != $customerId) {
                             $fail(__('validation.vehicle_customer_mismatch'));
                         }
@@ -49,7 +54,7 @@ class WorkOrderUpdateRequest extends FormRequest
                 Rule::in(WorkOrder::STATUSES),
             ],
             'notes' => ['nullable', 'string', 'max:2000'],
-            
+
             // New fields
             'customer_complaint' => ['nullable', 'string', 'max:5000'],
             'initial_assessment' => ['nullable', 'string', 'max:5000'],
@@ -59,7 +64,7 @@ class WorkOrderUpdateRequest extends FormRequest
             'contact_phone' => ['nullable', 'string', 'max:20'],
             'entry_date' => ['nullable', 'date'],
             'expected_end_date' => ['nullable', 'date', 'after_or_equal:entry_date'],
-            
+
             // Departments
             'departments' => ['nullable', 'array'],
             'departments.*' => [
@@ -68,7 +73,7 @@ class WorkOrderUpdateRequest extends FormRequest
                     ->where('tenant_id', $tenantId)
                     ->where('center_id', $centerId),
             ],
-            
+
             // Damage marks
             'damage_marks' => ['nullable', 'array'],
             'damage_marks.*.x' => ['required', 'numeric'],
@@ -97,11 +102,12 @@ class WorkOrderUpdateRequest extends FormRequest
             function ($validator) {
                 if ($this->status === WorkOrder::STATUS_CANCELLED) {
                     $workOrder = $this->route('workOrder') ?? $this->route('work_order');
-                    if ($workOrder && !$workOrder->canBeCancelled()) {
+
+                    if ($workOrder && ! $workOrder->canBeCancelled()) {
                         $validator->errors()->add('status', __('messages.cannot_cancel_has_relations'));
                     }
                 }
-            }
+            },
         ];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -8,6 +10,7 @@ use App\Services\NotificationService;
 use App\Services\QuoteConversionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class QuoteApprovalController extends Controller
 {
@@ -22,7 +25,7 @@ class QuoteApprovalController extends Controller
     {
         $this->authorize('approve', $quote);
 
-        if (!$quote->canBeApproved()) {
+        if (! $quote->canBeApproved()) {
             abort(403, 'This quote cannot be approved.');
         }
 
@@ -41,15 +44,15 @@ class QuoteApprovalController extends Controller
         // Then convert to work order
         try {
             $workOrder = $this->conversionService->convert($quote, auth()->user());
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Revert approval if conversion fails
             $quote->update([
                 'status' => Quote::STATUS_DRAFT,
                 'approved_at' => null,
                 'approved_by' => null,
             ]);
-            
-            abort(500, 'Failed to convert quote to work order: ' . $e->getMessage());
+
+            abort(500, 'Failed to convert quote to work order: '.$e->getMessage());
         }
 
         // Notify quote creator about approval
@@ -58,9 +61,9 @@ class QuoteApprovalController extends Controller
                 tenantId: $quote->tenant_id,
                 userId: $quote->created_by,
                 type: 'quote.approved',
-                title: 'تمت الموافقة على عرض السعر #' . $quote->code,
+                title: 'تمت الموافقة على عرض السعر #'.$quote->code,
                 body: 'تمت الموافقة على عرض السعر وتحويله إلى أمر عمل',
-                actionUrl: '/app/quotes/' . $quote->id,
+                actionUrl: '/app/quotes/'.$quote->id,
                 actorId: auth()->id(),
                 icon: 'check',
             );
@@ -76,7 +79,7 @@ class QuoteApprovalController extends Controller
     {
         $this->authorize('reject', $quote);
 
-        if (!$quote->canBeRejected()) {
+        if (! $quote->canBeRejected()) {
             abort(403, 'This quote cannot be rejected.');
         }
 
@@ -96,9 +99,9 @@ class QuoteApprovalController extends Controller
                 tenantId: $quote->tenant_id,
                 userId: $quote->created_by,
                 type: 'quote.rejected',
-                title: 'تم رفض عرض السعر #' . $quote->code,
+                title: 'تم رفض عرض السعر #'.$quote->code,
                 body: 'تم رفض عرض السعر',
-                actionUrl: '/app/quotes/' . $quote->id,
+                actionUrl: '/app/quotes/'.$quote->id,
                 actorId: auth()->id(),
                 icon: 'x',
             );

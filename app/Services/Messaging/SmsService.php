@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Messaging;
 
+use App\Models\Credits\SmsUsageLog;
+use App\Models\Credits\TenantSmsBalance;
 use App\Models\Integration\Integration;
 use App\Models\Integration\IntegrationLog;
-use App\Models\Credits\TenantSmsBalance;
-use App\Models\Credits\SmsUsageLog;
+use Exception;
 use Illuminate\Support\Facades\Http;
 
 class SmsService
@@ -22,15 +25,16 @@ class SmsService
      */
     public function send(string $to, string $message, ?int $tenantId = null): array
     {
-        if (!$this->integration || !$this->integration->is_active) {
-            throw new \Exception('لا يوجد مزود SMS مفعّل');
+        if (! $this->integration || ! $this->integration->is_active) {
+            throw new Exception('لا يوجد مزود SMS مفعّل');
         }
 
         // Check tenant balance if tenant specified
         if ($tenantId) {
             $balance = TenantSmsBalance::getOrCreate($tenantId);
-            if (!$balance->hasCredits()) {
-                throw new \Exception('رصيد SMS غير كافي');
+
+            if (! $balance->hasCredits()) {
+                throw new Exception('رصيد SMS غير كافي');
             }
         }
 
@@ -55,7 +59,7 @@ class SmsService
             // Deduct credits if tenant
             if ($tenantId) {
                 $balance->useCredits(1);
-                
+
                 SmsUsageLog::create([
                     'tenant_id' => $tenantId,
                     'phone_number' => $to,
@@ -72,7 +76,7 @@ class SmsService
                 'message_id' => $result['message_id'] ?? null,
                 'provider' => $this->integration->provider,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $responseTime = (int) ((microtime(true) - $startTime) * 1000);
 
             IntegrationLog::log(
@@ -101,7 +105,7 @@ class SmsService
             'unifonic' => $this->sendViaUnifonic($config, $to, $message),
             'twilio' => $this->sendViaTwilio($config, $to, $message),
             'msegat' => $this->sendViaMsegat($config, $to, $message),
-            default => throw new \Exception('مزود غير مدعوم: ' . $this->integration->provider),
+            default => throw new Exception('مزود غير مدعوم: '.$this->integration->provider),
         };
     }
 
@@ -114,11 +118,12 @@ class SmsService
             'Recipient' => $to,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ Unifonic: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ Unifonic: '.$response->body());
         }
 
         $data = $response->json();
+
         return ['message_id' => $data['MessageStatus']['MessageID'] ?? null];
     }
 
@@ -132,8 +137,8 @@ class SmsService
                 'Body' => $message,
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ Twilio: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ Twilio: '.$response->body());
         }
 
         return ['message_id' => $response->json('sid')];
@@ -149,8 +154,8 @@ class SmsService
             'msg' => $message,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ Msegat: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ Msegat: '.$response->body());
         }
 
         return ['message_id' => $response->json('id') ?? uniqid()];

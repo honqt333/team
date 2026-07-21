@@ -1,9 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Services;
 
-use App\Models\HR\EmployeeType;
-use App\Models\HR\JobTitle;
 use App\Models\InventoryUnit;
 use App\Models\Tenant;
 use App\Services\TenantSetupService;
@@ -16,13 +16,14 @@ class TenantSetupServiceTest extends TestCase
     use RefreshDatabase;
 
     protected TenantSetupService $setupService;
+
     protected Tenant $tenant;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->setupService = new TenantSetupService();
+        $this->setupService = new TenantSetupService;
         $this->tenant = Tenant::factory()->create();
     }
 

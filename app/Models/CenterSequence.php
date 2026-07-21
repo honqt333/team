@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
@@ -25,6 +27,7 @@ class CenterSequence extends Model
         // Pessimistic Locking to prevent gaps/duplicates
         return DB::transaction(function () use ($tenantId, $centerId, $type, $year) {
             $query = static::query();
+
             if ($centerId === null) {
                 $query = $query->withoutGlobalScope('center_scoped');
             }

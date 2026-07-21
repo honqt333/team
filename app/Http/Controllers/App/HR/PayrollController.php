@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
+use App\Models\Center;
 use App\Models\HR\Attendance;
 use App\Models\HR\AttendanceSettings;
 use App\Models\HR\Employee;
@@ -21,7 +24,7 @@ class PayrollController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', PayrollRun::class);
-        
+
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
 
@@ -41,7 +44,7 @@ class PayrollController extends Controller
             ->get();
 
         // Get centers list for filter dropdown
-        $centers = \App\Models\Center::where('tenant_id', $tenantId)
+        $centers = Center::where('tenant_id', $tenantId)
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
@@ -87,7 +90,7 @@ class PayrollController extends Controller
 
         $tenantId = TenancyContext::tenantId();
         $centerId = TenancyContext::centerId();
-        
+
         $periodStart = Carbon::parse($validated['period_start']);
         $periodEnd = Carbon::parse($validated['period_end']);
 
@@ -160,7 +163,7 @@ class PayrollController extends Controller
     private function processPayrollItems(PayrollRun $payrollRun)
     {
         $settings = AttendanceSettings::getForCenter($payrollRun->center_id);
-        
+
         // Get all active employees in this center
         $employees = Employee::where('tenant_id', $payrollRun->tenant_id)
             ->where('center_id', $payrollRun->center_id)
@@ -171,8 +174,8 @@ class PayrollController extends Controller
         foreach ($employees as $employee) {
             // Calculate attendance-based deductions
             $attendanceDeduction = $this->calculateAttendanceDeductions(
-                $employee, 
-                $payrollRun->period_start, 
+                $employee,
+                $payrollRun->period_start,
                 $payrollRun->period_end,
                 $settings
             );
@@ -235,6 +238,7 @@ class PayrollController extends Controller
         // Count absences
         $expectedWorkDays = 0;
         $currentDate = $start->copy();
+
         while ($currentDate->lte($end)) {
             if ($settings->isWorkingDay($currentDate->dayOfWeek)) {
                 $expectedWorkDays++;
@@ -244,7 +248,7 @@ class PayrollController extends Controller
 
         $presentDays = $attendances->where('status', '!=', 'absent')->count();
         $absentDays = max(0, $expectedWorkDays - $presentDays);
-        
+
         // Calculate absence deduction based on type
         if ($settings->absence_deduction_type === 'percentage') {
             // Daily Salary = (Base + Allowances) / 30
@@ -259,13 +263,13 @@ class PayrollController extends Controller
 
         return round($lateDeduction + $absenceDeduction, 2);
     }
-    
+
     /**
      * Calculate overtime payment.
      */
     private function calculateOvertimePayment(Employee $employee, Carbon $start, Carbon $end, AttendanceSettings $settings): float
     {
-        if (!$settings->overtime_enabled) {
+        if (! $settings->overtime_enabled) {
             return 0;
         }
 
@@ -274,6 +278,7 @@ class PayrollController extends Controller
             ->sum('overtime_minutes');
 
         $hours = $totalOvertimeMinutes / 60;
+
         return round($hours * $settings->overtime_rate_per_hour, 2);
     }
 
@@ -315,6 +320,7 @@ class PayrollController extends Controller
         // Mark associated Other Payments as paid
         // Note: Ideally we would link them to the payroll item, but for now we find them by date/employee
         $payrollRun->load('items');
+
         foreach ($payrollRun->items as $item) {
             $item->employee->otherPayments()
                 ->approved()
@@ -381,4 +387,3 @@ class PayrollController extends Controller
         ]);
     }
 }
-

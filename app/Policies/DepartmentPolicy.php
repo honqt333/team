@@ -1,11 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Department;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-use App\Support\Permissions;
 class DepartmentPolicy
 {
     use HandlesAuthorization;
@@ -23,7 +26,7 @@ class DepartmentPolicy
      */
     public function view(User $user, Department $department): bool
     {
-        if (!$user->can(Permissions::DEPARTMENTS_VIEW)) {
+        if (! $user->can(Permissions::DEPARTMENTS_VIEW)) {
             return false;
         }
 
@@ -44,7 +47,7 @@ class DepartmentPolicy
      */
     public function update(User $user, Department $department): bool
     {
-        if (!$user->can(Permissions::DEPARTMENTS_MANAGE)) {
+        if (! $user->can(Permissions::DEPARTMENTS_MANAGE)) {
             return false;
         }
 
@@ -57,7 +60,7 @@ class DepartmentPolicy
      */
     public function delete(User $user, Department $department): bool
     {
-        if (!$user->can(Permissions::DEPARTMENTS_MANAGE)) {
+        if (! $user->can(Permissions::DEPARTMENTS_MANAGE)) {
             return false;
         }
 

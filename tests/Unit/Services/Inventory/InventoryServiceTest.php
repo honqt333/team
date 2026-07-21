@@ -1,15 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Services\Inventory;
 
 use App\Models\Center;
 use App\Models\InventoryBalance;
-use App\Models\InventoryMove;
 use App\Models\Part;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Warehouse;
-use App\Services\WorkOrderPartsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,9 +18,13 @@ class InventoryServiceTest extends TestCase
     use RefreshDatabase;
 
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected Warehouse $warehouse;
+
     protected Part $part;
+
     protected User $user;
 
     protected function setUp(): void

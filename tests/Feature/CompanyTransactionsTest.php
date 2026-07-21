@@ -1,17 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Models\Tenant;
-use App\Models\User;
 use App\Models\Center;
-use App\Models\IncomeCategory;
 use App\Models\CompanyTransaction;
 use App\Models\Customer;
-use App\Models\Supplier;
-use App\Models\Invoice;
-use App\Models\PurchaseInvoice;
+use App\Models\IncomeCategory;
 use App\Models\InventoryUnit;
+use App\Models\Invoice;
+use App\Models\Supplier;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,9 +21,13 @@ class CompanyTransactionsTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected IncomeCategory $revenueCategory;
+
     protected IncomeCategory $expenseCategory;
 
     protected function setUp(): void
@@ -31,7 +36,7 @@ class CompanyTransactionsTest extends TestCase
 
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
-        
+
         $this->user = User::factory()->create([
             'tenant_id' => $this->tenant->id,
             'current_center_id' => $this->center->id,
@@ -44,7 +49,7 @@ class CompanyTransactionsTest extends TestCase
             'name_ar' => 'إيرادات الإيجار',
             'name_en' => 'Rent Revenues',
             'transaction_type' => 'revenue',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $this->expenseCategory = IncomeCategory::create([
@@ -52,7 +57,7 @@ class CompanyTransactionsTest extends TestCase
             'name_ar' => 'مصروفات الصيانة',
             'name_en' => 'Maintenance Expenses',
             'transaction_type' => 'expense',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         InventoryUnit::firstOrCreate(
@@ -60,7 +65,7 @@ class CompanyTransactionsTest extends TestCase
             [
                 'name_ar' => 'حبة',
                 'name_en' => 'Piece',
-                'is_active' => true
+                'is_active' => true,
             ]
         );
 
@@ -81,16 +86,16 @@ class CompanyTransactionsTest extends TestCase
             'is_taxable' => false,
             'tax_amount' => 0.00,
             'total_amount' => 1000.00,
-            'notes' => 'تجربة إضافة معاملة'
+            'notes' => 'تجربة إضافة معاملة',
         ]);
 
         $response->assertRedirect();
-        
+
         $this->assertDatabaseHas('company_transactions', [
             'tenant_id' => $this->tenant->id,
             'title' => 'إيراد إيجار المبنى الرئيسي',
             'amount' => 1000.00,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
     }
 
@@ -110,7 +115,7 @@ class CompanyTransactionsTest extends TestCase
             'is_taxable' => false,
             'total_amount' => 1000.00,
             'status' => 'draft',
-            'updated_by' => $this->user->id
+            'updated_by' => $this->user->id,
         ]);
 
         $response = $this->put(route('settings.company.transactions.update', $transaction->id), [
@@ -122,15 +127,15 @@ class CompanyTransactionsTest extends TestCase
             'is_taxable' => false,
             'tax_amount' => 0.00,
             'total_amount' => 2000.00,
-            'notes' => 'تعديل المعاملة'
+            'notes' => 'تعديل المعاملة',
         ]);
 
         $response->assertRedirect();
-        
+
         $this->assertDatabaseHas('company_transactions', [
             'id' => $transaction->id,
             'title' => 'إيراد إيجار معدل',
-            'amount' => 2000.00
+            'amount' => 2000.00,
         ]);
     }
 
@@ -150,15 +155,15 @@ class CompanyTransactionsTest extends TestCase
             'is_taxable' => false,
             'total_amount' => 500.00,
             'status' => 'draft',
-            'updated_by' => $this->user->id
+            'updated_by' => $this->user->id,
         ]);
 
         $response = $this->delete(route('settings.company.transactions.destroy', $transaction->id));
 
         $response->assertRedirect();
-        
+
         $this->assertSoftDeleted('company_transactions', [
-            'id' => $transaction->id
+            'id' => $transaction->id,
         ]);
     }
 
@@ -177,7 +182,7 @@ class CompanyTransactionsTest extends TestCase
             'is_taxable' => true,
             'tax_amount' => 150.00,
             'total_amount' => 1150.00,
-            'notes' => 'تجربة إضافة معاملة'
+            'notes' => 'تجربة إضافة معاملة',
         ]);
 
         $response->assertSessionHasErrors(['contact_id']);
@@ -187,7 +192,7 @@ class CompanyTransactionsTest extends TestCase
             'tenant_id' => $this->tenant->id,
             'center_id' => $this->center->id,
             'name' => 'العميل الإداري',
-            'phone' => '0500000000'
+            'phone' => '0500000000',
         ]);
 
         $responsePass = $this->post(route('settings.company.transactions.store'), [
@@ -201,7 +206,7 @@ class CompanyTransactionsTest extends TestCase
             'total_amount' => 1150.00,
             'contact_type' => 'customer',
             'contact_id' => $customer->id,
-            'notes' => 'تجربة إضافة معاملة'
+            'notes' => 'تجربة إضافة معاملة',
         ]);
 
         $responsePass->assertRedirect();
@@ -216,7 +221,7 @@ class CompanyTransactionsTest extends TestCase
             'tenant_id' => $this->tenant->id,
             'center_id' => $this->center->id,
             'name' => 'العميل الإداري',
-            'phone' => '0500000000'
+            'phone' => '0500000000',
         ]);
 
         $transaction = CompanyTransaction::create([
@@ -233,7 +238,7 @@ class CompanyTransactionsTest extends TestCase
             'contact_type' => 'customer',
             'contact_id' => $customer->id,
             'status' => 'draft',
-            'updated_by' => $this->user->id
+            'updated_by' => $this->user->id,
         ]);
 
         $response = $this->post(route('settings.company.transactions.approve', $transaction->id));
@@ -250,14 +255,14 @@ class CompanyTransactionsTest extends TestCase
             'customer_id' => $customer->id,
             'total_excl_tax' => 1000.00,
             'total_tax' => 150.00,
-            'total_incl_tax' => 1150.00
+            'total_incl_tax' => 1150.00,
         ]);
 
         $this->assertDatabaseHas('invoice_lines', [
             'invoice_id' => $transaction->invoice_id,
             'description' => 'بيع خدمات استشارية للشركة',
             'unit_price' => 1000.00,
-            'line_total_incl_tax' => 1150.00
+            'line_total_incl_tax' => 1150.00,
         ]);
     }
 
@@ -270,7 +275,7 @@ class CompanyTransactionsTest extends TestCase
             'tenant_id' => $this->tenant->id,
             'center_id' => $this->center->id,
             'name' => 'المورد الإداري',
-            'phone' => '0511111111'
+            'phone' => '0511111111',
         ]);
 
         $transaction = CompanyTransaction::create([
@@ -287,7 +292,7 @@ class CompanyTransactionsTest extends TestCase
             'contact_type' => 'supplier',
             'contact_id' => $supplier->id,
             'status' => 'draft',
-            'updated_by' => $this->user->id
+            'updated_by' => $this->user->id,
         ]);
 
         $response = $this->post(route('settings.company.transactions.approve', $transaction->id));
@@ -304,7 +309,7 @@ class CompanyTransactionsTest extends TestCase
             'supplier_id' => $supplier->id,
             'subtotal' => 5000.00,
             'tax_amount' => 750.00,
-            'total' => 5750.00
+            'total' => 5750.00,
         ]);
     }
 
@@ -320,7 +325,7 @@ class CompanyTransactionsTest extends TestCase
             'name_ar' => 'أخرى',
             'name_en' => 'Other',
             'transaction_type' => 'revenue',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $otherTransaction = CompanyTransaction::create([
@@ -333,7 +338,7 @@ class CompanyTransactionsTest extends TestCase
             'amount' => 99999.00,
             'is_taxable' => false,
             'total_amount' => 99999.00,
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
 
         // Attempting to update other tenant's transaction should result in error/not found
@@ -344,15 +349,15 @@ class CompanyTransactionsTest extends TestCase
             'income_category_id' => $this->revenueCategory->id,
             'amount' => 10.00,
             'is_taxable' => false,
-            'total_amount' => 10.00
+            'total_amount' => 10.00,
         ]);
-        
+
         $response->assertStatus(404); // Tenancy isolation throws ModelNotFoundException (404)
 
         // Let's assert that database record remains unchanged
         $this->assertDatabaseHas('company_transactions', [
             'id' => $otherTransaction->id,
-            'title' => 'صفقة سرية لشركة أخرى'
+            'title' => 'صفقة سرية لشركة أخرى',
         ]);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -12,6 +14,7 @@ use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Services\InvoiceService;
+use Exception;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -131,6 +134,7 @@ class CompanyTransactionController extends Controller
                     if ($transaction->transaction_type === 'revenue') {
                         // 1. Create Sales Invoice (Simplified type)
                         $customer = null;
+
                         if ($transaction->contact_type === 'customer' && $transaction->contact_id) {
                             $customer = Customer::find($transaction->contact_id);
                         }
@@ -153,6 +157,7 @@ class CompanyTransactionController extends Controller
                         }
 
                         $customerAddress = null;
+
                         if ($customer) {
                             $addressParts = array_filter([
                                 $customer->building_number ? 'مبنى '.$customer->building_number : null,
@@ -231,6 +236,7 @@ class CompanyTransactionController extends Controller
                     } elseif ($transaction->transaction_type === 'expense') {
                         // 2. Create Purchase Invoice
                         $supplier = null;
+
                         if ($transaction->contact_type === 'supplier' && $transaction->contact_id) {
                             $supplier = Supplier::find($transaction->contact_id);
                         }
@@ -313,7 +319,7 @@ class CompanyTransactionController extends Controller
             });
 
             return redirect()->back()->with('success', 'تم اعتماد المعاملة المالية وإصدار الفاتورة بنجاح');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', 'حدث خطأ أثناء الاعتماد: '.$e->getMessage());
         }
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Developer;
 
 use App\Models\Developer\AuditSnapshot;
@@ -7,15 +9,18 @@ use App\Models\Developer\AuditViolation;
 use App\Models\Developer\ComponentStat;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use Throwable;
 
 class AuditOrchestrator
 {
     /**
      * Run the complete codebase audit suite.
      */
-    public function runAudit(int $createdBy = null): AuditSnapshot
+    public function runAudit(?int $createdBy = null): AuditSnapshot
     {
-        Log::info("Developer Center: Audit requested, initializing scanners...");
+        Log::info('Developer Center: Audit requested, initializing scanners...');
 
         // Resolve registered scanners
         $scannerClasses = Config::get('developer_center.scanners', []);
@@ -26,23 +31,23 @@ class AuditOrchestrator
         foreach ($scannerClasses as $scannerClass) {
             try {
                 if (class_exists($scannerClass)) {
-                    $scanner = new $scannerClass();
-                    Log::info("Running scanner: " . $scanner->getName());
-                    
+                    $scanner = new $scannerClass;
+                    Log::info('Running scanner: '.$scanner->getName());
+
                     $findings = $scanner->run();
-                    
+
                     foreach ($findings as $finding) {
                         if (isset($finding['is_stat']) && $finding['is_stat'] === true) {
                             $uiStats[] = $finding;
                         } else {
                             $allViolations[] = array_merge($finding, [
-                                'category' => $scanner->getCategory()
+                                'category' => $scanner->getCategory(),
                             ]);
                         }
                     }
                 }
-            } catch (\Throwable $e) {
-                Log::error("Developer Center: Scanner [{$scannerClass}] failed: " . $e->getMessage());
+            } catch (Throwable $e) {
+                Log::error("Developer Center: Scanner [{$scannerClass}] failed: ".$e->getMessage());
             }
         }
 
@@ -64,6 +69,7 @@ class AuditOrchestrator
         foreach ($scores as $category => $defaultScore) {
             $categoryViolations = $grouped->get($category, collect());
             $deduction = 0.0;
+
             foreach ($categoryViolations as $violation) {
                 switch ($violation['severity']) {
                     case 'critical':
@@ -85,10 +91,10 @@ class AuditOrchestrator
 
         // Compute weighted overall score
         // 25% Security, 25% Testing, 20% Architecture, 15% Performance, 15% UI/Docs
-        $scoreOverall = (0.25 * $scores['security']) + 
-                        (0.25 * $scores['testing']) + 
-                        (0.20 * $scores['architecture']) + 
-                        (0.15 * $scores['performance']) + 
+        $scoreOverall = (0.25 * $scores['security']) +
+                        (0.25 * $scores['testing']) +
+                        (0.20 * $scores['architecture']) +
+                        (0.15 * $scores['performance']) +
                         (0.15 * (($scores['ui'] + $scores['documentation']) / 2));
 
         // Create the snapshot record
@@ -148,7 +154,8 @@ class AuditOrchestrator
 
         foreach ($directories as $dir) {
             if (is_dir($dir)) {
-                $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir));
+                $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir));
+
                 foreach ($iterator as $file) {
                     if ($file->isFile() && in_array($file->getExtension(), ['php', 'vue', 'js'])) {
                         $count++;

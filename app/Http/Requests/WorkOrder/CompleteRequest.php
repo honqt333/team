@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\WorkOrder;
 
-use App\Models\WorkOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CompleteRequest extends FormRequest
@@ -10,6 +11,7 @@ class CompleteRequest extends FormRequest
     public function authorize(): bool
     {
         $workOrder = $this->route('work_order') ?? $this->route('workOrder');
+
         return $workOrder
             && $workOrder->allItemsCompleted()
             && $this->user()->can('update', $workOrder);

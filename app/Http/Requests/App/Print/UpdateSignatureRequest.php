@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\App\Print;
 
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -66,11 +68,13 @@ class UpdateSignatureRequest extends FormRequest
         $data = $this->validated();
 
         $out = [];
+
         foreach (['name_ar', 'name_en', 'name'] as $field) {
             if (array_key_exists($field, $data)) {
                 $out[$field] = is_string($data[$field]) ? trim($data[$field]) : $data[$field];
             }
         }
+
         if (array_key_exists('show', $data)) {
             // Laravel's `boolean` validator already coerces 0/1/"0"/"1"
             // to a real bool, but we re-coerce defensively.

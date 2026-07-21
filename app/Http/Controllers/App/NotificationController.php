@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -47,7 +49,7 @@ class NotificationController extends Controller
 
         // Also fetch system announcements to mix into the bell dropdown
         $systemAnnouncements = SystemAnnouncement::forTenant($user->tenant_id)
-            ->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $user->tenant_id))
+            ->whereDoesntHave('reads', fn ($q) => $q->where('tenant_id', $user->tenant_id))
             ->latest('published_at')
             ->limit(5)
             ->get()
@@ -89,7 +91,7 @@ class NotificationController extends Controller
             ->count();
 
         $systemCount = SystemAnnouncement::forTenant($user->tenant_id)
-            ->whereDoesntHave('reads', fn($q) => $q->where('tenant_id', $user->tenant_id))
+            ->whereDoesntHave('reads', fn ($q) => $q->where('tenant_id', $user->tenant_id))
             ->count();
 
         return response()->json(['count' => $internalCount + $systemCount]);

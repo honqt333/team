@@ -1,19 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Traits\HasWorkOrderItemPartRelations;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorkOrderItemPart extends Model
 {
-    use CenterScoped, SoftDeletes, \App\Traits\HasWorkOrderItemPartRelations;
+    use CenterScoped, HasWorkOrderItemPartRelations, SoftDeletes;
 
     // Source constants
     public const SOURCE_WAREHOUSE = 'warehouse';
+
     public const SOURCE_EXTERNAL = 'external';
+
     public const SOURCE_CUSTOMER = 'customer';
 
     public const SOURCES = [
@@ -24,8 +28,11 @@ class WorkOrderItemPart extends Model
 
     // Status constants for inventory tracking
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_ISSUED = 'issued';
+
     public const STATUS_REVERSED = 'reversed';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $table = 'work_order_item_parts';
@@ -62,7 +69,7 @@ class WorkOrderItemPart extends Model
 
     protected $appends = [
         'tax_amount',
-        'grand_total'
+        'grand_total',
     ];
 
     protected $casts = [
@@ -94,7 +101,10 @@ class WorkOrderItemPart extends Model
             // total = (qty * unit_price) - discount
             $subtotal = bcmul($part->qty, $part->unit_price, 2);
             $part->total = bcsub($subtotal, $part->discount ?? 0, 2);
-            if ($part->total < 0) $part->total = 0;
+
+            if ($part->total < 0) {
+                $part->total = 0;
+            }
         });
 
         static::saved(function (WorkOrderItemPart $part) {
@@ -117,7 +127,8 @@ class WorkOrderItemPart extends Model
     public function getTaxAmountAttribute(): float
     {
         $workOrder = $this->workOrder;
-        if (!$workOrder || !$workOrder->tax_enabled_snapshot) {
+
+        if (! $workOrder || ! $workOrder->tax_enabled_snapshot) {
             return 0;
         }
 
@@ -129,6 +140,7 @@ class WorkOrderItemPart extends Model
             // formula: total - (total / (1 + (rate / 100)))
             $divisor = bcadd('1', bcdiv($rate, '100', 4), 4);
             $net = bcdiv($total, $divisor, 2);
+
             return (float) bcsub($total, $net, 2);
         }
 
@@ -140,20 +152,17 @@ class WorkOrderItemPart extends Model
     {
         $workOrder = $this->workOrder;
         $total = (string) $this->total;
-        
-        if (!$workOrder || !$workOrder->tax_enabled_snapshot || $workOrder->pricing_mode_snapshot === 'inclusive') {
+
+        if (! $workOrder || ! $workOrder->tax_enabled_snapshot || $workOrder->pricing_mode_snapshot === 'inclusive') {
             return (float) $total;
         }
 
         return (float) bcadd($total, (string) $this->tax_amount, 2);
     }
 
-
     // ─────────────────────────────────────────────────────────────
     // Relationships
     // ─────────────────────────────────────────────────────────────
-
-
 
     // ─────────────────────────────────────────────────────────────
     // Source Checks

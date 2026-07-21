@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\HR;
- 
+
 use App\Models\Concerns\TenantScoped;
-use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
- 
+use Illuminate\Database\Eloquent\Model;
+
 class HRRegulation extends Model
 {
     use TenantScoped;
- 
+
     protected $table = 'hr_regulations';
- 
+
     protected $fillable = [
         'tenant_id',
         'category',
@@ -23,12 +25,12 @@ class HRRegulation extends Model
         'created_by',
         'updated_by',
     ];
- 
+
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
- 
+
     public function updatedBy()
     {
         return $this->belongsTo(User::class, 'updated_by');

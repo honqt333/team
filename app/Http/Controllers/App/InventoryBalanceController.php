@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryBalance;
+use App\Models\InventoryCategory;
 use App\Models\Part;
 use App\Models\Warehouse;
 use Illuminate\Http\Request;
@@ -20,36 +23,36 @@ class InventoryBalanceController extends Controller
         $centerId = $user->current_center_id;
 
         // Get all warehouses for tenant centers
-        $warehouses = Warehouse::whereHas('center', function($q) use ($tenantId) {
-                $q->where('tenant_id', $tenantId);
-            })
+        $warehouses = Warehouse::whereHas('center', function ($q) use ($tenantId) {
+            $q->where('tenant_id', $tenantId);
+        })
             ->with('center:id,name_ar,name_en')
             ->get()
             ->map(function ($w) {
                 return [
                     'id' => $w->id,
-                    'name' => $w->name . ' - ' . ($w->center?->name ?? 'Main'),
+                    'name' => $w->name.' - '.($w->center?->name ?? 'Main'),
                 ];
             });
 
         // Determine which warehouse to show
         $selectedWarehouseId = $request->input('warehouse_id');
-        
+
         if ($selectedWarehouseId) {
-            $warehouse = Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))->find($selectedWarehouseId);
+            $warehouse = Warehouse::whereHas('center', fn ($q) => $q->where('tenant_id', $tenantId))->find($selectedWarehouseId);
         }
-        
+
         // Fallback to current center's default if not selected or not found
-        if (!isset($warehouse) || !$warehouse) {
-             $warehouse = Warehouse::forCenter($centerId)->default()->first() 
-                ?? Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))->first();
+        if (! isset($warehouse) || ! $warehouse) {
+            $warehouse = Warehouse::forCenter($centerId)->default()->first()
+               ?? Warehouse::whereHas('center', fn ($q) => $q->where('tenant_id', $tenantId))->first();
         }
 
         // If still no warehouse (e.g. new tenant), create one
-        if (!$warehouse) {
+        if (! $warehouse) {
             $warehouse = Warehouse::getOrCreateDefault($centerId);
-             // Re-fetch to get cleaner object if needed
-             $warehouse = Warehouse::find($warehouse->id);
+            // Re-fetch to get cleaner object if needed
+            $warehouse = Warehouse::find($warehouse->id);
         }
 
         // Whitelist allowed sort columns and order directions to prevent SQL injection.
@@ -60,30 +63,29 @@ class InventoryBalanceController extends Controller
         $order = strtolower($request->input('order')) === 'asc' ? 'asc' : 'desc';
 
         $query = InventoryBalance::forWarehouse($warehouse->id)
-            ->with(['part' => fn($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'description')->with(['category', 'unit'])])
+            ->with(['part' => fn ($q) => $q->select('id', 'sku', 'name_ar', 'name_en', 'unit_id', 'category_id', 'description')->with(['category', 'unit'])])
             ->when($request->input('search'), function ($q, $search) {
-                $q->whereHas('part', fn($pq) =>
-                    $pq->where('sku', 'like', "%{$search}%")
-                       ->orWhere('name_ar', 'like', "%{$search}%")
-                       ->orWhere('name_en', 'like', "%{$search}%")
+                $q->whereHas('part', fn ($pq) => $pq->where('sku', 'like', "%{$search}%")
+                    ->orWhere('name_ar', 'like', "%{$search}%")
+                    ->orWhere('name_en', 'like', "%{$search}%")
                 );
             })
             ->when($request->input('category'), function ($q, $catId) {
-                $q->whereHas('part', fn($pq) => $pq->where('category_id', $catId));
+                $q->whereHas('part', fn ($pq) => $pq->where('category_id', $catId));
             })
-            ->when($request->input('stock_status') === 'in_stock', fn($q) => $q->withStock())
-            ->when($request->input('stock_status') === 'low_stock', fn($q) => $q->lowStock())
-            ->when($request->input('stock_status') === 'out_of_stock', fn($q) => $q->where('qty_on_hand', '<=', 0));
+            ->when($request->input('stock_status') === 'in_stock', fn ($q) => $q->withStock())
+            ->when($request->input('stock_status') === 'low_stock', fn ($q) => $q->lowStock())
+            ->when($request->input('stock_status') === 'out_of_stock', fn ($q) => $q->where('qty_on_hand', '<=', 0));
 
         // Apply Sorting (sort is whitelisted above; order is forced to asc/desc)
         if ($sort === 'sku') {
             $query->join('parts', 'inventory_balances.part_id', '=', 'parts.id')
-                  ->orderBy('parts.sku', $order)
-                  ->select('inventory_balances.*');
+                ->orderBy('parts.sku', $order)
+                ->select('inventory_balances.*');
         } elseif ($sort === 'name') {
             $query->join('parts', 'inventory_balances.part_id', '=', 'parts.id')
-                  ->orderBy(app()->getLocale() === 'ar' ? 'parts.name_ar' : 'parts.name_en', $order)
-                  ->select('inventory_balances.*');
+                ->orderBy(app()->getLocale() === 'ar' ? 'parts.name_ar' : 'parts.name_en', $order)
+                ->select('inventory_balances.*');
         } else {
             $query->orderBy("inventory_balances.{$sort}", $order);
         }
@@ -91,7 +93,7 @@ class InventoryBalanceController extends Controller
         $balances = $query->paginate(25)->withQueryString();
 
         // Get categories for filter
-        $categories = \App\Models\InventoryCategory::where('tenant_id', $tenantId)
+        $categories = InventoryCategory::where('tenant_id', $tenantId)
             ->where('is_active', true)
             ->select('id', 'name_ar', 'name_en')
             ->get()
@@ -128,16 +130,17 @@ class InventoryBalanceController extends Controller
         $this->authorize('viewAny', InventoryBalance::class);
 
         $tenantId = auth()->user()->tenant_id;
-        
+
         $warehouseId = $request->query('warehouse_id');
+
         if ($warehouseId) {
-            $warehouse = Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))->find($warehouseId);
+            $warehouse = Warehouse::whereHas('center', fn ($q) => $q->where('tenant_id', $tenantId))->find($warehouseId);
         } else {
             $centerId = auth()->user()->current_center_id;
             $warehouse = Warehouse::forCenter($centerId)->default()->first();
         }
 
-        if (!$warehouse) {
+        if (! $warehouse) {
             return response()->json([
                 'qty_on_hand' => 0,
                 'wac_cost' => 0,

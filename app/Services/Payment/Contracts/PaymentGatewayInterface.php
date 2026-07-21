@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Payment\Contracts;
 
 /**
  * Payment Gateway Interface
- * 
+ *
  * All payment gateways must implement this interface.
  */
 interface PaymentGatewayInterface
@@ -27,16 +29,12 @@ interface PaymentGatewayInterface
 
     /**
      * Get payment details by ID.
-     *
-     * @param string $paymentId
-     * @return array|null
      */
     public function getPayment(string $paymentId): ?array;
 
     /**
      * Refund a payment.
      *
-     * @param string $paymentId
      * @param float|null $amount Partial refund amount, null for full refund
      * @return array Contains 'success', 'refund_id', 'message'
      */
@@ -44,15 +42,11 @@ interface PaymentGatewayInterface
 
     /**
      * Get the gateway name.
-     *
-     * @return string
      */
     public function getName(): string;
 
     /**
      * Check if gateway is properly configured.
-     *
-     * @return bool
      */
     public function isConfigured(): bool;
 }

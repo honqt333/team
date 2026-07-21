@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies\HR;
 
 use App\Models\HR\Employee;
@@ -30,7 +32,7 @@ class EmployeePolicy
      */
     public function view(User $user, Employee $employee): bool
     {
-        if (!$user->hasPermissionTo(Permissions::HR_EMPLOYEES_VIEW)) {
+        if (! $user->hasPermissionTo(Permissions::HR_EMPLOYEES_VIEW)) {
             return false;
         }
 
@@ -51,7 +53,7 @@ class EmployeePolicy
      */
     public function update(User $user, Employee $employee): bool
     {
-        if (!$user->hasPermissionTo(Permissions::HR_EMPLOYEES_UPDATE)) {
+        if (! $user->hasPermissionTo(Permissions::HR_EMPLOYEES_UPDATE)) {
             return false;
         }
 
@@ -64,7 +66,7 @@ class EmployeePolicy
      */
     public function delete(User $user, Employee $employee): bool
     {
-        if (!$user->hasPermissionTo(Permissions::HR_EMPLOYEES_DELETE)) {
+        if (! $user->hasPermissionTo(Permissions::HR_EMPLOYEES_DELETE)) {
             return false;
         }
 

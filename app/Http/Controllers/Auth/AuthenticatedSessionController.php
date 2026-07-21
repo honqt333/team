@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -10,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\PermissionRegistrar;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -40,6 +43,7 @@ class AuthenticatedSessionController extends Controller
         // Check if this is an admin login
         if (session('is_admin_login')) {
             session()->forget('is_admin_login');
+
             return redirect('/system');
         }
 
@@ -47,8 +51,9 @@ class AuthenticatedSessionController extends Controller
         $user = $request->user();
 
         // Setup center context if needed
-        if ($user && (!$user->current_center_id || !$user->centers()->where('centers.id', $user->current_center_id)->exists())) {
+        if ($user && (! $user->current_center_id || ! $user->centers()->where('centers.id', $user->current_center_id)->exists())) {
             $firstCenter = $user->centers()->first();
+
             if ($firstCenter) {
                 $user->update(['current_center_id' => $firstCenter->id]);
             }
@@ -58,12 +63,13 @@ class AuthenticatedSessionController extends Controller
         if ($user && $user->two_factor_confirmed_at !== null) {
             $request->session()->put('2fa:user_id', $user->id);
             Auth::guard('web')->logout();
+
             return redirect()->route('app.2fa.challenge');
         }
 
         // Set team context for role checking (required by Spatie Permission)
         if ($user->tenant_id) {
-            app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+            app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
         }
 
         // Role-based redirect
@@ -73,10 +79,11 @@ class AuthenticatedSessionController extends Controller
 
         // Clear API/JSON intended routes to prevent post-login Inertia errors
         $intended = $request->session()->get('url.intended');
+
         if ($intended && (str_contains($intended, '/api/') || str_contains($intended, '/unread-count') || $request->expectsJson())) {
             $request->session()->forget('url.intended');
         }
-        
+
         if ($isOnlyEmployee) {
             return redirect()->intended(route('employee.dashboard', absolute: false));
         }

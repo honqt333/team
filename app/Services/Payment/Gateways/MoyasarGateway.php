@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Payment\Gateways;
 
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class MoyasarGateway implements PaymentGatewayInterface
 {
     protected array $config;
+
     protected string $baseUrl;
 
     public function __construct()
@@ -24,7 +28,7 @@ class MoyasarGateway implements PaymentGatewayInterface
 
     public function isConfigured(): bool
     {
-        return !empty($this->config['publishable_key']) && !empty($this->config['secret_key']);
+        return ! empty($this->config['publishable_key']) && ! empty($this->config['secret_key']);
     }
 
     /**
@@ -51,8 +55,8 @@ class MoyasarGateway implements PaymentGatewayInterface
     {
         try {
             $paymentId = $data['id'] ?? $data['payment_id'] ?? null;
-            
-            if (!$paymentId) {
+
+            if (! $paymentId) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -61,8 +65,8 @@ class MoyasarGateway implements PaymentGatewayInterface
             }
 
             $payment = $this->getPayment($paymentId);
-            
-            if (!$payment) {
+
+            if (! $payment) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -71,7 +75,7 @@ class MoyasarGateway implements PaymentGatewayInterface
             }
 
             $status = $payment['status'] ?? 'failed';
-            
+
             return [
                 'success' => $status === 'paid',
                 'payment_id' => $paymentId,
@@ -82,8 +86,9 @@ class MoyasarGateway implements PaymentGatewayInterface
                 'payment_method' => $payment['source']['type'] ?? null,
                 'raw_response' => $payment,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Moyasar verification failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'status' => 'error',
@@ -106,9 +111,11 @@ class MoyasarGateway implements PaymentGatewayInterface
             }
 
             Log::error('Moyasar getPayment failed', ['response' => $response->body()]);
+
             return null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Moyasar getPayment exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -120,6 +127,7 @@ class MoyasarGateway implements PaymentGatewayInterface
     {
         try {
             $payload = [];
+
             if ($amount !== null) {
                 $payload['amount'] = (int) ($amount * 100);
             }
@@ -139,8 +147,9 @@ class MoyasarGateway implements PaymentGatewayInterface
                 'success' => false,
                 'message' => $response->json('message') ?? 'Refund failed',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Moyasar refund failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),

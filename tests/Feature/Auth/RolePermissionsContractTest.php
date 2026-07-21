@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Services\TenantSetupService;
@@ -34,18 +36,18 @@ class RolePermissionsContractTest extends TestCase
      * is changed and the change is reviewed.
      */
     private const EXPECTED_PERMISSION_COUNTS = [
-        'super_admin'    => 120,
+        'super_admin' => 120,
         'branch_manager' => 30,
-        'receptionist'   => 13,
-        'technician'     => 4,
-        'accountant'     => 13,
-        'hr'             => 20,
-        'employee'       => 6,
+        'receptionist' => 13,
+        'technician' => 4,
+        'accountant' => 13,
+        'hr' => 20,
+        'employee' => 6,
     ];
 
     public function test_every_role_has_unique_permissions(): void
     {
-        $svc = new TenantSetupService();
+        $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
 
         foreach ($roles as $name => $data) {
@@ -60,7 +62,7 @@ class RolePermissionsContractTest extends TestCase
 
     public function test_each_role_has_the_audited_baseline_count(): void
     {
-        $svc = new TenantSetupService();
+        $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
 
         foreach (self::EXPECTED_PERMISSION_COUNTS as $name => $expected) {
@@ -75,7 +77,7 @@ class RolePermissionsContractTest extends TestCase
 
     public function test_super_admin_has_every_registered_permission(): void
     {
-        $svc = new TenantSetupService();
+        $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
 
         $expected = Permissions::all();
@@ -92,7 +94,7 @@ class RolePermissionsContractTest extends TestCase
 
     public function test_no_role_grants_unknown_permissions(): void
     {
-        $svc = new TenantSetupService();
+        $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
         $registered = Permissions::all();
 
@@ -113,10 +115,11 @@ class RolePermissionsContractTest extends TestCase
         // must also appear in at least one role, otherwise it is
         // dead code that future devs will assume is "live" but
         // never has a chance to be granted.
-        $svc = new TenantSetupService();
+        $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
 
         $allGranted = [];
+
         foreach ($roles as $data) {
             foreach ($data['permissions'] as $perm) {
                 $allGranted[] = $perm;
@@ -131,7 +134,7 @@ class RolePermissionsContractTest extends TestCase
         $orphans = array_diff($registered, $allGranted);
         $this->assertEmpty(
             $orphans,
-            'These permissions are registered but never granted to any role: ' . implode(', ', $orphans)
+            'These permissions are registered but never granted to any role: '.implode(', ', $orphans)
         );
     }
 
@@ -151,11 +154,11 @@ class RolePermissionsContractTest extends TestCase
 
         $this->assertEmpty(
             $missing,
-            'These permissions are registered but missing from Permissions::byModule(): ' . implode(', ', $missing)
+            'These permissions are registered but missing from Permissions::byModule(): '.implode(', ', $missing)
         );
         $this->assertEmpty(
             $extra,
-            'Permissions::byModule() lists permissions that are not in Permissions: ' . implode(', ', $extra)
+            'Permissions::byModule() lists permissions that are not in Permissions: '.implode(', ', $extra)
         );
     }
 
@@ -164,13 +167,14 @@ class RolePermissionsContractTest extends TestCase
         // Hard constraint: the `employee` role must NEVER grant
         // any administrative or shared permission — it exists
         // only to power the /app/my self-service portal.
-        $svc = new TenantSetupService();
+        $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
 
         $allowedPrefixes = ['employee.'];
 
         foreach ($roles['employee']['permissions'] as $perm) {
             $isAllowed = false;
+
             foreach ($allowedPrefixes as $prefix) {
                 if (str_starts_with($perm, $prefix)) {
                     $isAllowed = true;
@@ -179,8 +183,8 @@ class RolePermissionsContractTest extends TestCase
             }
             $this->assertTrue(
                 $isAllowed,
-                "Employee role grants a non-self-service permission: '{$perm}'. " .
-                "Employee accounts should only have employee.* permissions."
+                "Employee role grants a non-self-service permission: '{$perm}'. ".
+                'Employee accounts should only have employee.* permissions.'
             );
         }
     }
@@ -189,7 +193,7 @@ class RolePermissionsContractTest extends TestCase
     {
         // Audit rule: branch_manager is operational, not admin.
         // It must never have *DELETE / DESTROY permissions.
-        $svc = new TenantSetupService();
+        $svc = new TenantSetupService;
         $roles = $svc->getDefaultRoles();
 
         foreach ($roles['branch_manager']['permissions'] as $perm) {

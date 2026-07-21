@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
-use App\Models\SystemAnnouncement;
 use App\Models\NotificationSendLog;
+use App\Models\SystemAnnouncement;
 use App\Models\Tenant;
-use App\Services\Messaging\SmsService;
 use App\Services\Messaging\EmailService;
+use App\Services\Messaging\SmsService;
+use Exception;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,14 +23,14 @@ class AnnouncementsController extends Controller
     public function index(Request $request): Response
     {
         $query = SystemAnnouncement::with('admin')
-            ->withCount(['reads', 'sendLogs as sent_count' => fn($q) => $q->where('status', 'sent')]);
-        
+            ->withCount(['reads', 'sendLogs as sent_count' => fn ($q) => $q->where('status', 'sent')]);
+
         if ($request->status === 'published') {
             $query->where('is_published', true);
         } elseif ($request->status === 'draft') {
             $query->where('is_published', false);
         }
-        
+
         $announcements = $query->latest()->paginate(20)->withQueryString();
 
         return Inertia::render('System/Announcements/Index', [
@@ -43,7 +45,7 @@ class AnnouncementsController extends Controller
     public function create(): Response
     {
         $tenants = Tenant::select('id', 'trade_name', 'name')->get();
-        
+
         return Inertia::render('System/Announcements/Create', [
             'tenants' => $tenants,
         ]);
@@ -79,7 +81,7 @@ class AnnouncementsController extends Controller
     public function show(SystemAnnouncement $announcement): Response
     {
         $announcement->load(['admin', 'sendLogs.tenant']);
-        
+
         $stats = [
             'reads_count' => $announcement->reads()->count(),
             'sent_count' => $announcement->sendLogs()->where('status', 'sent')->count(),
@@ -116,6 +118,7 @@ class AnnouncementsController extends Controller
     public function unpublish(SystemAnnouncement $announcement)
     {
         $announcement->update(['is_published' => false]);
+
         return back()->with('success', 'تم إيقاف الإعلان');
     }
 
@@ -125,6 +128,7 @@ class AnnouncementsController extends Controller
     public function destroy(SystemAnnouncement $announcement)
     {
         $announcement->delete();
+
         return redirect()->route('system.announcements.index')
             ->with('success', 'تم حذف الإعلان');
     }
@@ -139,7 +143,9 @@ class AnnouncementsController extends Controller
 
         foreach ($tenants as $tenant) {
             foreach ($channels as $channel) {
-                if ($channel === 'in_app') continue; // In-app is automatic
+                if ($channel === 'in_app') {
+                    continue;
+                } // In-app is automatic
 
                 try {
                     match ($channel) {
@@ -149,7 +155,7 @@ class AnnouncementsController extends Controller
                     };
 
                     NotificationSendLog::logSend($announcement->id, $tenant->id, $channel, 'sent');
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     NotificationSendLog::logSend($announcement->id, $tenant->id, $channel, 'failed', $e->getMessage());
                 }
             }
@@ -159,9 +165,12 @@ class AnnouncementsController extends Controller
     protected function sendEmail(SystemAnnouncement $announcement, Tenant $tenant): void
     {
         $email = $tenant->email ?? $tenant->users()->first()?->email;
-        if (!$email) return;
 
-        $emailService = new EmailService();
+        if (! $email) {
+            return;
+        }
+
+        $emailService = new EmailService;
         $emailService->send(
             $email,
             $announcement->title,
@@ -174,9 +183,12 @@ class AnnouncementsController extends Controller
     protected function sendSms(SystemAnnouncement $announcement, Tenant $tenant): void
     {
         $phone = $tenant->phone ?? $tenant->users()->first()?->phone;
-        if (!$phone) return;
 
-        $smsService = new SmsService();
+        if (! $phone) {
+            return;
+        }
+
+        $smsService = new SmsService;
         $smsService->send($phone, strip_tags($announcement->content), $tenant->id);
     }
 }

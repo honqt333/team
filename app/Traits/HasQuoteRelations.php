@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
-use App\Models\Tenant;
 use App\Models\Center;
 use App\Models\Customer;
-use App\Models\Vehicle;
+use App\Models\Department;
 use App\Models\QuoteLine;
 use App\Models\QuotePart;
+use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Models\WorkOrder;
-use App\Models\Department;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;

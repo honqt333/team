@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Concerns\TenantScoped;
 
 class TenantZatcaSetting extends Model
 {
     use TenantScoped;
+
     protected $fillable = [
         'tenant_id',
         'qr_enabled',

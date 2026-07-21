@@ -1,16 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Services\TwoFactorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
-
-use App\Services\TwoFactorService;
 
 class ProfileController extends Controller
 {
@@ -27,36 +28,36 @@ class ProfileController extends Controller
     public function index(): Response
     {
         $admin = Auth::guard('admin')->user();
-        
-        if (!$admin) {
+
+        if (! $admin) {
             abort(401, 'Unauthorized');
         }
-        
+
         // Generate secret if not already set
         $secret = $admin->two_factor_secret;
         $isEnabled = $admin->two_factor_confirmed_at !== null;
-        
-        if (!$secret && !$isEnabled) {
+
+        if (! $secret && ! $isEnabled) {
             $secret = $this->twoFactor->generateSecret();
             $admin->update(['two_factor_secret' => encrypt($secret)]);
-        } elseif ($secret && !$isEnabled) {
+        } elseif ($secret && ! $isEnabled) {
             $secret = decrypt($secret);
         }
 
-        $qrCode = !$isEnabled ? $this->twoFactor->generateQrCode($admin->email, $secret) : null;
+        $qrCode = ! $isEnabled ? $this->twoFactor->generateQrCode($admin->email, $secret) : null;
 
         return Inertia::render('System/Profile/Index', [
             'admin' => $admin,
             'security' => [
                 'isEnabled' => $isEnabled,
                 'isEnforced' => false, // System admins might not enforce on themselves or it's global?
-                'secret' => !$isEnabled ? $secret : null,
+                'secret' => ! $isEnabled ? $secret : null,
                 'qrCode' => $qrCode,
-                'recoveryCodes' => $isEnabled && $admin->two_factor_recovery_codes 
-                    ? json_decode(decrypt($admin->two_factor_recovery_codes), true) 
+                'recoveryCodes' => $isEnabled && $admin->two_factor_recovery_codes
+                    ? json_decode(decrypt($admin->two_factor_recovery_codes), true)
                     : null,
                 'smsEnabled' => $this->twoFactor->isSmsEnabled($admin) ?? false,
-            ]
+            ],
         ]);
     }
 
@@ -69,8 +70,8 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:admin_users,email,' . $admin->id,
-            'phone' => 'nullable|string|max:20|unique:admin_users,phone,' . $admin->id,
+            'email' => 'required|email|unique:admin_users,email,'.$admin->id,
+            'phone' => 'nullable|string|max:20|unique:admin_users,phone,'.$admin->id,
         ]);
 
         $admin->update($validated);

@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
 use Database\Seeders\InitialSystemSeeder;
+use Database\Seeders\RolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
@@ -36,7 +39,7 @@ class MainAdminSystemAccessTest extends TestCase
         // InitialSystemSeeder depends on RolesSeeder having run
         // first, since the seeder assigns the tenant's super_admin
         // role. DatabaseSeeder already calls RolesSeeder.
-        $this->seed(\Database\Seeders\RolesSeeder::class);
+        $this->seed(RolesSeeder::class);
     }
 
     public function test_initial_seeder_marks_main_admin_as_system_admin(): void

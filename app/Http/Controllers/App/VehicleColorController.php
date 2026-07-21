@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -23,7 +25,7 @@ class VehicleColorController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name_ar', 'like', "%{$search}%")
-                  ->orWhere('name_en', 'like', "%{$search}%");
+                    ->orWhere('name_en', 'like', "%{$search}%");
             });
         }
 
@@ -105,7 +107,7 @@ class VehicleColorController extends Controller
             abort(403, __('common.cannot_modify_system_data'));
         }
 
-        $color->update(['is_active' => !$color->is_active]);
+        $color->update(['is_active' => ! $color->is_active]);
 
         return redirect()->back();
     }

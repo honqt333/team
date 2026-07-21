@@ -436,6 +436,7 @@ class WorkOrderSuggestionTest extends TestCase
         $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
 
         app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+
         foreach ($tenantPermissions as $permissionName) {
             $user->givePermissionTo($permissionName);
         }
@@ -528,7 +529,7 @@ class WorkOrderSuggestionTest extends TestCase
     }
 
     /**
-     * @param  array<string, mixed>  $overrides
+     * @param array<string, mixed> $overrides
      */
     private function createServiceFor(Tenant $tenant, Center $center, array $overrides = []): Service
     {

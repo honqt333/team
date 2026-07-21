@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\WorkOrder;
 
 use App\Http\Requests\Concerns\TenantAware;
-use App\Models\WorkOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AddItemRequest extends FormRequest
@@ -13,6 +14,7 @@ class AddItemRequest extends FormRequest
     public function authorize(): bool
     {
         $workOrder = $this->route('work_order') ?? $this->route('workOrder');
+
         return $workOrder
             && $workOrder->canBeEdited()
             && $this->user()->can('update', $workOrder);

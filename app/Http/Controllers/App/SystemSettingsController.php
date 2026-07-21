@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -51,6 +53,7 @@ class SystemSettingsController extends Controller
         ];
 
         $documents = [];
+
         foreach ($documentTypes as $key => $name) {
             $existing = $printSettings['documents'][$key] ?? [];
             $documents[$key] = [
@@ -98,6 +101,7 @@ class SystemSettingsController extends Controller
                     'settings' => 'required|array',
                     'settings.sms_2fa_enabled' => 'boolean',
                 ]);
+
                 if (isset($request->settings['sms_2fa_enabled'])) {
                     $tenant->update(['sms_2fa_enabled' => $request->settings['sms_2fa_enabled']]);
                 }
@@ -120,6 +124,7 @@ class SystemSettingsController extends Controller
 
                 foreach ($newDocuments as $key => $doc) {
                     $oldDoc = $currentSettings['documents'][$key] ?? null;
+
                     // Simplified check: if any boolean or string field changed
                     if (json_encode($doc) !== json_encode($oldDoc)) {
                         $newDocuments[$key]['updated_at'] = now()->format('Y-m-d H:i:s');

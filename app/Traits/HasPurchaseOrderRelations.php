@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
-use App\Models\Tenant;
 use App\Models\Center;
-use App\Models\Supplier;
-use App\Models\Warehouse;
-use App\Models\PurchaseOrderItem;
 use App\Models\GoodsReceivedNote;
+use App\Models\PurchaseOrderItem;
+use App\Models\Supplier;
+use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 

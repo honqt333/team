@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
+use App\Models\VehicleMake;
+use App\Models\VehicleModel;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -39,9 +43,10 @@ class VehicleStoreRequest extends FormRequest
                     if ($value === '__other__') {
                         return;
                     }
+
                     // If numeric, must exist in database
-                    if (!empty($value) && is_numeric($value)) {
-                        if (!\App\Models\VehicleMake::find($value)) {
+                    if (! empty($value) && is_numeric($value)) {
+                        if (! VehicleMake::find($value)) {
                             $fail(__('validation.exists', ['attribute' => __('vehicles.form.make')]));
                         }
                     }
@@ -54,10 +59,12 @@ class VehicleStoreRequest extends FormRequest
                     if ($value === '__other__') {
                         return;
                     }
+
                     // If numeric, must exist in database and belong to selected make
-                    if (!empty($value) && is_numeric($value)) {
-                        $model = \App\Models\VehicleModel::find($value);
-                        if (!$model) {
+                    if (! empty($value) && is_numeric($value)) {
+                        $model = VehicleModel::find($value);
+
+                        if (! $model) {
                             $fail(__('validation.exists', ['attribute' => __('vehicles.form.model')]));
                         } elseif ($this->make_id && is_numeric($this->make_id) && $model->make_id != $this->make_id) {
                             $fail(__('validation.model_make_mismatch'));
@@ -81,7 +88,7 @@ class VehicleStoreRequest extends FormRequest
                 'string',
                 'max:100',
             ],
-            'year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'year' => ['nullable', 'integer', 'min:1900', 'max:'.(date('Y') + 1)],
             'color' => ['nullable', 'string', 'max:50'],
             'vin' => ['nullable', 'string', 'regex:/^[A-Za-z0-9]+$/', 'max:50'],
             'odometer' => ['nullable', 'integer', 'min:0'],

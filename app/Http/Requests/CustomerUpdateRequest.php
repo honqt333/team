@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Support\TenancyContext;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -42,7 +45,7 @@ class CustomerUpdateRequest extends FormRequest
      */
     private function normalizePhoneNumber(?string $number): ?string
     {
-        if (!$number) {
+        if (! $number) {
             return null;
         }
 
@@ -59,22 +62,22 @@ class CustomerUpdateRequest extends FormRequest
 
         // If it starts with 00966, convert to +966
         if (str_starts_with($number, '00966')) {
-            $number = '+966' . substr($number, 5);
+            $number = '+966'.substr($number, 5);
         }
 
         // If it starts with 05, convert to +9665
         if (str_starts_with($number, '05') && strlen($number) === 10) {
-            $number = '+966' . substr($number, 1);
+            $number = '+966'.substr($number, 1);
         }
 
         // If it starts with 5, convert to +9665
         if (str_starts_with($number, '5') && strlen($number) === 9) {
-            $number = '+966' . $number;
+            $number = '+966'.$number;
         }
 
         // If it starts with 966 and doesn't start with +, add +
-        if (str_starts_with($number, '966') && !str_starts_with($number, '+')) {
-            $number = '+' . $number;
+        if (str_starts_with($number, '966') && ! str_starts_with($number, '+')) {
+            $number = '+'.$number;
         }
 
         return $number;
@@ -83,7 +86,7 @@ class CustomerUpdateRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -95,13 +98,14 @@ class CustomerUpdateRequest extends FormRequest
             'type' => ['sometimes', 'string', Rule::in(['individual', 'company', 'government'])],
             'name' => ['sometimes', 'string', 'max:255'],
             'contact_name' => [
-                Rule::requiredIf(function() {
+                Rule::requiredIf(function () {
                     $type = $this->type ?? $this->route('customer')?->type;
+
                     return in_array($type, ['company', 'government']);
                 }),
                 'nullable',
                 'string',
-                'max:255'
+                'max:255',
             ],
             'phone' => [
                 'sometimes',

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\AI;
 
 use InvalidArgumentException;
@@ -7,7 +9,7 @@ use InvalidArgumentException;
 final readonly class CompletionRequest
 {
     /**
-     * @param  array<int, array{role: string, content: string|array<mixed>}>  $messages
+     * @param array<int, array{role: string, content: string|array<mixed>}> $messages
      */
     public function __construct(
         public string $model,

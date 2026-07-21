@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -180,6 +182,7 @@ class SubscriptionsController extends Controller
         ]);
 
         $newStatus = $subscription->status;
+
         if (in_array($subscription->status, ['expired', 'suspended', 'cancelled'])) {
             $newStatus = ($subscription->plan && $subscription->plan->slug === 'trial') ? 'trialing' : 'active';
         }
@@ -192,6 +195,7 @@ class SubscriptionsController extends Controller
         // Sync tenant status and dates
         $tenantStatus = ($newStatus === 'trialing') ? 'trial' : 'active';
         $tenantUpdate = ['status' => $tenantStatus];
+
         if ($newStatus === 'trialing') {
             $tenantUpdate['trial_ends_at'] = $subscription->ends_at;
         }

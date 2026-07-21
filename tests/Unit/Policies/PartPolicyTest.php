@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Policies;
 
 use App\Models\Center;
@@ -10,6 +12,7 @@ use App\Policies\PartPolicy;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class PartPolicyTest extends TestCase
@@ -17,20 +20,24 @@ class PartPolicyTest extends TestCase
     use RefreshDatabase;
 
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected User $adminUser;
+
     protected User $regularUser;
+
     protected PartPolicy $policy;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new PartPolicy();
+        $this->policy = new PartPolicy;
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
 
         $permissions = [
             Permissions::INVENTORY_VIEW,

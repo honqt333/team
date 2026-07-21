@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\HR;
 
 use App\Http\Controllers\Controller;
@@ -14,10 +16,10 @@ class BiometricAttendanceController extends Controller
 {
     /**
      * تسجيل حضور/انصراف من جهاز البصمة
-     * 
+     *
      * POST /api/v1/attendance/clock
      * Headers: Authorization: Bearer {device_api_token}
-     * 
+     *
      * Body:
      * {
      *   "employee_identifier": "EMP-0001" or "1234567890" (national_id) or "bio-001" (biometric_id),
@@ -30,12 +32,12 @@ class BiometricAttendanceController extends Controller
     {
         // Get API token from header
         $token = $request->bearerToken();
-        
-        if (!$token) {
+
+        if (! $token) {
             return response()->json([
                 'success' => false,
                 'error' => 'missing_token',
-                'message' => 'API token is required'
+                'message' => 'API token is required',
             ], 401);
         }
 
@@ -44,11 +46,11 @@ class BiometricAttendanceController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if (!$device) {
+        if (! $device) {
             return response()->json([
                 'success' => false,
                 'error' => 'invalid_token',
-                'message' => 'Invalid or inactive API token'
+                'message' => 'Invalid or inactive API token',
             ], 401);
         }
 
@@ -69,7 +71,7 @@ class BiometricAttendanceController extends Controller
             })
             ->first();
 
-        if (!$employee) {
+        if (! $employee) {
             Log::warning('Biometric: Employee not found', [
                 'identifier' => $validated['employee_identifier'],
                 'device_id' => $device->id,
@@ -78,13 +80,13 @@ class BiometricAttendanceController extends Controller
             return response()->json([
                 'success' => false,
                 'error' => 'employee_not_found',
-                'message' => 'Employee not found with the provided identifier'
+                'message' => 'Employee not found with the provided identifier',
             ], 404);
         }
 
         // Parse timestamp
-        $timestamp = isset($validated['timestamp']) 
-            ? Carbon::parse($validated['timestamp']) 
+        $timestamp = isset($validated['timestamp'])
+            ? Carbon::parse($validated['timestamp'])
             : now();
 
         $date = $timestamp->format('Y-m-d');
@@ -101,7 +103,7 @@ class BiometricAttendanceController extends Controller
         // Update based on action
         if ($validated['action'] === 'check_in') {
             // Only set check_in if not already set
-            if (!$attendance->check_in) {
+            if (! $attendance->check_in) {
                 $attendance->check_in = $time;
                 $attendance->status = 'present';
             }
@@ -135,24 +137,24 @@ class BiometricAttendanceController extends Controller
                 'action' => $validated['action'],
                 'time' => $time,
                 'date' => $date,
-            ]
+            ],
         ]);
     }
 
     /**
      * استقبال دفعة من سجلات الحضور (Batch)
-     * 
+     *
      * POST /api/v1/attendance/batch
      */
     public function batch(Request $request)
     {
         $token = $request->bearerToken();
-        
-        if (!$token) {
+
+        if (! $token) {
             return response()->json([
                 'success' => false,
                 'error' => 'missing_token',
-                'message' => 'API token is required'
+                'message' => 'API token is required',
             ], 401);
         }
 
@@ -160,11 +162,11 @@ class BiometricAttendanceController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if (!$device) {
+        if (! $device) {
             return response()->json([
                 'success' => false,
                 'error' => 'invalid_token',
-                'message' => 'Invalid or inactive API token'
+                'message' => 'Invalid or inactive API token',
             ], 401);
         }
 
@@ -191,7 +193,7 @@ class BiometricAttendanceController extends Controller
                 })
                 ->first();
 
-            if (!$employee) {
+            if (! $employee) {
                 $results['failed']++;
                 $results['errors'][] = [
                     'index' => $index,
@@ -213,7 +215,7 @@ class BiometricAttendanceController extends Controller
             ]);
 
             if ($record['action'] === 'check_in') {
-                if (!$attendance->check_in) {
+                if (! $attendance->check_in) {
                     $attendance->check_in = $time;
                     $attendance->status = 'present';
                 }
@@ -241,14 +243,14 @@ class BiometricAttendanceController extends Controller
 
     /**
      * التحقق من صلاحية الـ Token
-     * 
+     *
      * GET /api/v1/attendance/ping
      */
     public function ping(Request $request)
     {
         $token = $request->bearerToken();
-        
-        if (!$token) {
+
+        if (! $token) {
             return response()->json(['success' => false, 'error' => 'missing_token'], 401);
         }
 
@@ -256,7 +258,7 @@ class BiometricAttendanceController extends Controller
             ->where('is_active', true)
             ->first();
 
-        if (!$device) {
+        if (! $device) {
             return response()->json(['success' => false, 'error' => 'invalid_token'], 401);
         }
 
@@ -267,7 +269,7 @@ class BiometricAttendanceController extends Controller
                 'device_name' => $device->name,
                 'center_id' => $device->center_id,
                 'last_sync' => $device->last_sync_at?->toIso8601String(),
-            ]
+            ],
         ]);
     }
 }

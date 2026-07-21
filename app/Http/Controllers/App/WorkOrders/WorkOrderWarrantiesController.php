@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Models\WorkOrderItem;
@@ -23,9 +25,9 @@ class WorkOrderWarrantiesController
             ->where('tenant_id', $tenantId)
             ->whereHas('workOrder', function ($q) use ($vehicle_id, $tenantId) {
                 $q->withoutGlobalScope('center_scoped')
-                  ->where('tenant_id', $tenantId)
-                  ->where('vehicle_id', $vehicle_id)
-                  ->where('status', 'done'); // completed work orders
+                    ->where('tenant_id', $tenantId)
+                    ->where('vehicle_id', $vehicle_id)
+                    ->where('status', 'done'); // completed work orders
             })
             ->where('status', WorkOrderItem::STATUS_COMPLETED)
             ->whereNotNull('warranty_expires_at')
@@ -40,9 +42,9 @@ class WorkOrderWarrantiesController
                     ->where('tenant_id', $tenantId)
                     ->whereHas('workOrder', function ($q) use ($vehicle_id, $tenantId) {
                         $q->withoutGlobalScope('center_scoped')
-                          ->where('tenant_id', $tenantId)
-                          ->where('vehicle_id', $vehicle_id)
-                          ->where('status', 'done');
+                            ->where('tenant_id', $tenantId)
+                            ->where('vehicle_id', $vehicle_id)
+                            ->where('status', 'done');
                     })
                     ->where('is_warranty', true)
                     ->where('title', $item->title)
@@ -78,7 +80,7 @@ class WorkOrderWarrantiesController
             });
 
         return response()->json([
-            'active_warranties' => $activeWarranties
+            'active_warranties' => $activeWarranties,
         ]);
     }
 }

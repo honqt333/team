@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -14,7 +16,9 @@ class VehicleSettingsHierarchyTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Tenant $tenant;
+
     protected Center $center;
 
     protected function setUp(): void
@@ -24,7 +28,7 @@ class VehicleSettingsHierarchyTest extends TestCase
         // Create tenant and center
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
-        
+
         // Create user with tenant context
         // TenancyContext derives tenant/center from authenticated user
         $this->user = User::factory()->create([
@@ -57,7 +61,7 @@ class VehicleSettingsHierarchyTest extends TestCase
         ]);
 
         $response->assertStatus(403);
-        
+
         // Verify data unchanged
         $this->assertDatabaseHas('vehicle_makes', [
             'id' => $systemMake->id,
@@ -84,7 +88,7 @@ class VehicleSettingsHierarchyTest extends TestCase
         $response = $this->delete(route('settings.makes.destroy', $systemMake));
 
         $response->assertStatus(403);
-        
+
         // Verify data still exists
         $this->assertDatabaseHas('vehicle_makes', [
             'id' => $systemMake->id,

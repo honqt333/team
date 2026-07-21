@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\GoodsReceivedNote;
 use App\Models\PurchaseOrder;
 use App\Services\Purchasing\PurchasingService;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -25,7 +28,7 @@ class GoodsReceivedNotesController extends Controller
         $purchaseOrder->load(['items.part', 'supplier', 'warehouse']);
 
         // Prepare items with pending quantities
-        $pendingItems = $purchaseOrder->items->map(fn($item) => [
+        $pendingItems = $purchaseOrder->items->map(fn ($item) => [
             'purchase_order_item_id' => $item->id,
             'part_id' => $item->part_id,
             'part' => $item->part,
@@ -33,7 +36,7 @@ class GoodsReceivedNotesController extends Controller
             'qty_received' => $item->qty_received,
             'qty_pending' => $item->qty_pending,
             'unit_cost' => $item->unit_cost,
-        ])->filter(fn($item) => $item['qty_pending'] > 0);
+        ])->filter(fn ($item) => $item['qty_pending'] > 0);
 
         return Inertia::render('Purchasing/GRN/Form', [
             'purchaseOrder' => $purchaseOrder,
@@ -135,8 +138,9 @@ class GoodsReceivedNotesController extends Controller
 
         try {
             $this->purchasingService->createInvoiceFromGrn($goodsReceivedNote);
+
             return back()->with('success', __('invoices.created'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }

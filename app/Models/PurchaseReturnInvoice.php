@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
@@ -12,7 +14,7 @@ class PurchaseReturnInvoice extends Model
 
     protected $fillable = [
         'tenant_id', 'center_id', 'purchase_invoice_id', 'code', 'return_date',
-        'subtotal', 'tax_amount', 'total', 'create_debit_note', 'debit_note_date', 'notes', 'attachment_path'
+        'subtotal', 'tax_amount', 'total', 'create_debit_note', 'debit_note_date', 'notes', 'attachment_path',
     ];
 
     protected $casts = [
@@ -25,10 +27,25 @@ class PurchaseReturnInvoice extends Model
     ];
 
     // Relationships
-    public function purchaseInvoice() { return $this->belongsTo(PurchaseInvoice::class); }
-    public function lines() { return $this->hasMany(PurchaseReturnInvoiceLine::class); }
-    public function tenant() { return $this->belongsTo(Tenant::class); }
-    public function center() { return $this->belongsTo(Center::class); }
+    public function purchaseInvoice()
+    {
+        return $this->belongsTo(PurchaseInvoice::class);
+    }
+
+    public function lines()
+    {
+        return $this->hasMany(PurchaseReturnInvoiceLine::class);
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function center()
+    {
+        return $this->belongsTo(Center::class);
+    }
 
     // Code generator: PRET-0001
     public static function generateCode(int $tenantId): string
@@ -39,13 +56,15 @@ class PurchaseReturnInvoice extends Model
             ->first();
 
         $nextNumber = 1;
+
         if ($last && $last->code) {
             $lastNumber = (int) preg_replace('/[^0-9]/', '', $last->code);
+
             if ($lastNumber > 0) {
                 $nextNumber = $lastNumber + 1;
             }
         }
 
-        return 'PRET-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        return 'PRET-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 }

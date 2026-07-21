@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -203,7 +205,7 @@ class CustomersCrudTest extends TestCase
                 'id' => $customer->id,
                 'name' => 'Existing Customer',
                 'phone' => '+966501234567',
-            ]
+            ],
         ]);
 
         // 3. Check the existing phone number with local formatting (unnormalized 0501234567)
@@ -214,7 +216,7 @@ class CustomersCrudTest extends TestCase
             'customer' => [
                 'id' => $customer->id,
                 'name' => 'Existing Customer',
-            ]
+            ],
         ]);
     }
 }

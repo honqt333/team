@@ -1,22 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
+use App\Traits\HasInventoryTransferRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class InventoryTransfer extends Model
 {
-    use HasFactory, SoftDeletes, TenantScoped, \App\Traits\HasInventoryTransferRelations;
+    use HasFactory, HasInventoryTransferRelations, SoftDeletes, TenantScoped;
 
     // Status constants
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_SENT = 'sent';
+
     public const STATUS_RECEIVED = 'received';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
@@ -52,8 +56,6 @@ class InventoryTransfer extends Model
     // ─────────────────────────────────────────────────────────────
     // Relationships
     // ─────────────────────────────────────────────────────────────
-
-
 
     // ─────────────────────────────────────────────────────────────
     // Status Checks

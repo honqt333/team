@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Part;
 use App\Models\Warehouse;
 use App\Models\WorkOrder;
-use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\WorkOrderPartsService;
@@ -54,15 +55,15 @@ class WorkOrderPartsController extends Controller
 
         // Check stock availability for warehouse source
         $allowNegative = auth()->user()->can('inventory.override_negative_stock');
-        
-        if ($validated['source'] === 'warehouse' && !$allowNegative) {
+
+        if ($validated['source'] === 'warehouse' && ! $allowNegative) {
             $stock = $this->partsService->checkStock(
                 $validated['warehouse_id'],
                 $validated['part_id'],
                 $validated['qty']
             );
-            
-            if (!$stock['sufficient']) {
+
+            if (! $stock['sufficient']) {
                 return back()->with('error', __('inventory.stock.insufficient', [
                     'available' => $stock['on_hand'],
                     'requested' => $validated['qty'],
@@ -71,13 +72,14 @@ class WorkOrderPartsController extends Controller
         }
 
         // Validate min price if warehouse part and not included in package
-        if ($validated['source'] === 'warehouse' && !empty($validated['part_id']) && !($validated['include_in_package'] ?? false)) {
+        if ($validated['source'] === 'warehouse' && ! empty($validated['part_id']) && ! ($validated['include_in_package'] ?? false)) {
             $part = Part::find($validated['part_id']);
+
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?: 1);
                 $unitDiscount = (float) ($validated['discount'] ?? 0) / $qty;
                 $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
-                
+
                 if ($finalPrice < (float) $part->min_sale_price) {
                     return back()->with('error', __('pricing.final_price_below_minimum', [
                         'final' => number_format($finalPrice, 2),
@@ -106,6 +108,7 @@ class WorkOrderPartsController extends Controller
     public function update(Request $request, WorkOrderItemPart $workOrderPart)
     {
         $workOrder = $workOrderPart->workOrderItem?->workOrder;
+
         if ($workOrder) {
             $this->authorize('update', $workOrder);
         }
@@ -130,14 +133,16 @@ class WorkOrderPartsController extends Controller
         $source = $validated['source'] ?? $workOrderPart->source;
         $partId = $validated['part_id'] ?? $workOrderPart->part_id;
         $includeInPackage = $validated['include_in_package'] ?? $workOrderPart->include_in_package;
-        if ($source === 'warehouse' && !empty($partId) && !$includeInPackage) {
+
+        if ($source === 'warehouse' && ! empty($partId) && ! $includeInPackage) {
             $part = Part::find($partId);
+
             if ($part && $part->min_sale_price > 0) {
                 $qty = (float) ($validated['qty'] ?? $workOrderPart->qty);
                 $unitDiscount = (float) ($validated['discount'] ?? $workOrderPart->discount) / $qty;
                 $unitPrice = (float) ($validated['unit_price'] ?? $workOrderPart->unit_price);
                 $finalPrice = $unitPrice - $unitDiscount;
-                
+
                 if ($finalPrice < (float) $part->min_sale_price) {
                     return back()->with('error', __('pricing.final_price_below_minimum', [
                         'final' => number_format($finalPrice, 2),
@@ -151,7 +156,8 @@ class WorkOrderPartsController extends Controller
 
         // Validate stock availability if increasing quantity for warehouse part
         $source = $validated['source'] ?? $workOrderPart->source;
-        if ($source === 'warehouse' && !$allowNegative) {
+
+        if ($source === 'warehouse' && ! $allowNegative) {
             $partId = $validated['part_id'] ?? $workOrderPart->part_id;
             $warehouseId = $validated['warehouse_id'] ?? $workOrderPart->warehouse_id;
             $oldQty = (float) $workOrderPart->qty;
@@ -160,7 +166,8 @@ class WorkOrderPartsController extends Controller
 
             if ($delta > 0) {
                 $stock = $this->partsService->checkStock($warehouseId, $partId, $delta);
-                if (!$stock['sufficient']) {
+
+                if (! $stock['sufficient']) {
                     return back()->with('error', __('inventory.stock.insufficient', [
                         'available' => $stock['on_hand'],
                         'requested' => $delta,
@@ -171,6 +178,7 @@ class WorkOrderPartsController extends Controller
 
         try {
             $this->partsService->updatePart($workOrderPart, $validated, $allowNegative);
+
             return back()->with('success', __('common.updated'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
@@ -183,12 +191,14 @@ class WorkOrderPartsController extends Controller
     public function destroy(WorkOrderItemPart $workOrderPart)
     {
         $workOrder = $workOrderPart->workOrderItem?->workOrder;
+
         if ($workOrder) {
             $this->authorize('update', $workOrder);
         }
 
         try {
             $this->partsService->removePart($workOrderPart, auth()->id());
+
             return back()->with('success', __('common.deleted'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
@@ -202,12 +212,13 @@ class WorkOrderPartsController extends Controller
     {
         $this->authorize('reverse', $workOrderPart);
 
-        if (!$workOrderPart->canBeReversed()) {
+        if (! $workOrderPart->canBeReversed()) {
             return back()->with('error', __('inventory.moves.cannot_reverse'));
         }
 
         try {
             $this->partsService->reversePartIssue($workOrderPart, auth()->id());
+
             return back()->with('success', __('inventory.moves.reversed'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());

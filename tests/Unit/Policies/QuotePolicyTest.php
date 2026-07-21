@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Policies;
 
 use App\Models\Center;
@@ -12,6 +14,7 @@ use App\Policies\QuotePolicy;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class QuotePolicyTest extends TestCase
@@ -19,20 +22,24 @@ class QuotePolicyTest extends TestCase
     use RefreshDatabase;
 
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected User $adminUser;
+
     protected User $regularUser;
+
     protected QuotePolicy $policy;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new QuotePolicy();
+        $this->policy = new QuotePolicy;
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
 
         $permissions = [
             Permissions::QUOTES_VIEW,

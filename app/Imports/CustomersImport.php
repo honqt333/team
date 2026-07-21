@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Imports;
 
 use App\Models\Customer;
+use Exception;
+use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithStartRow;
-use Maatwebsite\Excel\Concerns\Importable;
 
 class CustomersImport implements ToModel, WithStartRow
 {
     use Importable;
 
     protected int $imported = 0;
+
     protected array $importErrors = [];
 
     /**
@@ -42,13 +46,14 @@ class CustomersImport implements ToModel, WithStartRow
         }
 
         // Validate type
-        if (!in_array($type, ['individual', 'company', 'government'])) {
+        if (! in_array($type, ['individual', 'company', 'government'])) {
             $type = 'individual';
         }
 
         // Check for duplicate phone
         if (Customer::where('phone', $phone)->exists()) {
             $this->importErrors[] = "رقم الهاتف {$phone} موجود مسبقاً";
+
             return null;
         }
 
@@ -65,8 +70,9 @@ class CustomersImport implements ToModel, WithStartRow
                 'tax_number' => $taxNumber,
                 'notes' => $notes,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->importErrors[] = "خطأ في استيراد: {$name}";
+
             return null;
         }
     }

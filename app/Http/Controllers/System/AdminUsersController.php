@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
-use App\Models\AdminUser;
 use App\Models\AdminActivityLog;
+use App\Models\AdminUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -19,19 +21,19 @@ class AdminUsersController extends Controller
     public function index(Request $request): Response
     {
         $query = AdminUser::withCount('activityLogs');
-        
+
         if ($request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
-        
+
         if ($request->role) {
             $query->where('role', $request->role);
         }
-        
+
         $admins = $query->latest()->paginate(20)->withQueryString();
 
         return Inertia::render('System/AdminUsers/Index', [
@@ -101,7 +103,7 @@ class AdminUsersController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:admin_users,email,' . $adminUser->id,
+            'email' => 'required|email|unique:admin_users,email,'.$adminUser->id,
             'phone' => 'nullable|string|max:20',
             'password' => ['nullable', Password::defaults()],
             'role' => 'required|in:super_admin,admin,support',
@@ -146,15 +148,15 @@ class AdminUsersController extends Controller
     public function activityLog(Request $request): Response
     {
         $query = AdminActivityLog::with('admin');
-        
+
         if ($request->admin_id) {
             $query->where('admin_user_id', $request->admin_id);
         }
-        
+
         if ($request->action) {
             $query->where('action', $request->action);
         }
-        
+
         $logs = $query->latest()->paginate(50)->withQueryString();
         $admins = AdminUser::select('id', 'name')->get();
 

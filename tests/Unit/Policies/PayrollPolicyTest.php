@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Policies;
 
 use App\Models\Center;
@@ -9,6 +11,7 @@ use App\Policies\PayrollPolicy;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class PayrollPolicyTest extends TestCase
@@ -16,20 +19,24 @@ class PayrollPolicyTest extends TestCase
     use RefreshDatabase;
 
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected User $adminUser;
+
     protected User $regularUser;
+
     protected PayrollPolicy $policy;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new PayrollPolicy();
+        $this->policy = new PayrollPolicy;
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
 
         $permissions = [
             Permissions::PAYROLL_VIEW,

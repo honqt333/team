@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class VehicleMileageController extends Controller
 {
@@ -60,7 +61,7 @@ class VehicleMileageController extends Controller
 
         return response()->json([
             'message' => 'Mileage log deleted successfully',
-            'odometer' => $vehicle->odometer
+            'odometer' => $vehicle->odometer,
         ]);
     }
 }

@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Credits;
 
-use App\Models\Tenant;
 use App\Models\Center;
+use App\Models\Concerns\CenterScoped;
+use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Concerns\CenterScoped;
 
 class SmsUsageLog extends Model
 {
     use CenterScoped;
+
     protected $fillable = [
         'tenant_id',
         'center_id',

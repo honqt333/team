@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Center;
@@ -86,14 +88,15 @@ class IsolationTestSeeder extends Seeder
         );
 
         // ربط المستخدم بالمركز
-        if (!$user2->centers()->where('center_id', $center2->id)->exists()) {
+        if (! $user2->centers()->where('center_id', $center2->id)->exists()) {
             $user2->centers()->attach($center2->id, ['tenant_id' => $tenant2->id]);
         }
 
         // إعطاء الصلاحيات
         $permissions = Permission::all();
+
         foreach ($permissions as $permission) {
-            if (!$user2->hasPermissionTo($permission->name)) {
+            if (! $user2->hasPermissionTo($permission->name)) {
                 $user2->givePermissionTo($permission->name);
             }
         }

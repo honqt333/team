@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -14,7 +16,9 @@ class IncomeCategorySettingsTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Tenant $tenant;
+
     protected Center $center;
 
     protected function setUp(): void
@@ -24,7 +28,7 @@ class IncomeCategorySettingsTest extends TestCase
         // Create tenant and center
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
-        
+
         // Create user with tenant context
         $this->user = User::factory()->create([
             'tenant_id' => $this->tenant->id,
@@ -75,7 +79,7 @@ class IncomeCategorySettingsTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        
+
         // Verify database contains the created category with the correct tenant_id
         $this->assertDatabaseHas('income_categories', [
             'tenant_id' => $this->tenant->id,
@@ -138,7 +142,7 @@ class IncomeCategorySettingsTest extends TestCase
         $response = $this->patch(route('settings.income-categories.toggle', $category));
 
         $response->assertRedirect();
-        
+
         $this->assertDatabaseHas('income_categories', [
             'id' => $category->id,
             'is_active' => 0,
@@ -177,7 +181,7 @@ class IncomeCategorySettingsTest extends TestCase
     {
         // Create another tenant
         $otherTenant = Tenant::factory()->create();
-        
+
         // Create category for the other tenant
         $otherCategory = IncomeCategory::create([
             'tenant_id' => $otherTenant->id,

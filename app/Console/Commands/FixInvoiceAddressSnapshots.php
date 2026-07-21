@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Invoice;
@@ -19,6 +21,7 @@ class FixInvoiceAddressSnapshots extends Command
 
         if ($invoices->isEmpty()) {
             $this->info('No invoices found with raw translation keys in their address snapshots.');
+
             return self::SUCCESS;
         }
 
@@ -41,9 +44,9 @@ class FixInvoiceAddressSnapshots extends Command
             $this->line(sprintf('  Old: %s', $oldAddress));
             $this->line(sprintf('  New: %s', $newAddress));
 
-            if (!$dryRun) {
+            if (! $dryRun) {
                 $invoice->update([
-                    'customer_address_snapshot' => $newAddress
+                    'customer_address_snapshot' => $newAddress,
                 ]);
                 $fixedCount++;
             }

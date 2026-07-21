@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Center;
@@ -17,7 +19,7 @@ class InspectionTemplateSeeder extends Seeder
         $tenant = Tenant::first();
         $center = Center::where('tenant_id', $tenant->id)->first();
 
-        if (!$tenant || !$center) {
+        if (! $tenant || ! $center) {
             return;
         }
 
@@ -26,11 +28,11 @@ class InspectionTemplateSeeder extends Seeder
             'center_id' => $center->id,
             'name' => [
                 'ar' => 'فحص النقاط الأساسية',
-                'en' => 'Basic Point Inspection'
+                'en' => 'Basic Point Inspection',
             ],
             'description' => [
                 'ar' => 'فحص سريع يشمل أهم نقاط السلامة في المركبة',
-                'en' => 'A quick check covering the most important safety points of the vehicle'
+                'en' => 'A quick check covering the most important safety points of the vehicle',
             ],
         ]);
 
@@ -42,7 +44,7 @@ class InspectionTemplateSeeder extends Seeder
                     ['ar' => 'سائل التبريد', 'en' => 'Engine Coolant Level'],
                     ['ar' => 'زيت الفرامل', 'en' => 'Brake Fluid Level'],
                     ['ar' => 'حالة البطارية', 'en' => 'Battery Condition'],
-                ]
+                ],
             ],
             [
                 'category' => ['ar' => 'الإطارات والفرامل', 'en' => 'Tires and Brakes'],
@@ -50,7 +52,7 @@ class InspectionTemplateSeeder extends Seeder
                     ['ar' => 'ضغط الإطارات', 'en' => 'Tire Pressure'],
                     ['ar' => 'حالة فحمات الفرامل الأمامية', 'en' => 'Front Brake Pads Condition'],
                     ['ar' => 'حالة فحمات الفرامل الخلفية', 'en' => 'Rear Brake Pads Condition'],
-                ]
+                ],
             ],
             [
                 'category' => ['ar' => 'الأنوار والسوائل الأخرى', 'en' => 'Lights and Other Fluids'],
@@ -58,18 +60,19 @@ class InspectionTemplateSeeder extends Seeder
                     ['ar' => 'الأنوار الأمامية والخلفية', 'en' => 'Exterior Lights'],
                     ['ar' => 'مساحات الزجاج', 'en' => 'Wiper Blades'],
                     ['ar' => 'سائل المساحات', 'en' => 'Washer Fluid'],
-                ]
+                ],
             ],
         ];
 
         $order = 1;
+
         foreach ($items as $catGroup) {
             foreach ($catGroup['items'] as $itemData) {
                 $template->items()->create([
                     'category' => $catGroup['category'],
                     'name' => [
                         'ar' => $itemData['ar'],
-                        'en' => $itemData['en']
+                        'en' => $itemData['en'],
                     ],
                     'sort_order' => $order++,
                 ]);

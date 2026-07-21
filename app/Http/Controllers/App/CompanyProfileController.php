@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -259,6 +261,7 @@ class CompanyProfileController extends Controller
         $tenant = auth()->user()->tenant;
 
         $errors = $this->validateSection($section, $data, $tenant);
+
         if ($errors) {
             return back()->withErrors($errors);
         }
@@ -412,9 +415,11 @@ class CompanyProfileController extends Controller
                             // Only allow specific tokens
                             $allowed = ['{SEQ}', '{YYYY}', '{YY}', '{MM}', '{DD}', '{CENTER}'];
                             $cleaned = $value;
+
                             foreach ($allowed as $token) {
                                 $cleaned = str_replace($token, '', $cleaned);
                             }
+
                             // Check for remaining curly braces (invalid tokens)
                             if (preg_match('/\{[^}]+\}/', $cleaned)) {
                                 $fail(__('company_profile.numbering.invalid_tokens'));

@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Developer\Scanners;
 
 use App\Services\Developer\Contracts\ScannerInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class UiScanner implements ScannerInterface
 {
@@ -29,9 +33,11 @@ class UiScanner implements ScannerInterface
         $componentsPath = base_path('resources/js/Components');
 
         $vueFiles = [];
+
         foreach ([$pagesPath, $componentsPath] as $path) {
             if (is_dir($path)) {
-                $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
+                $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path));
+
                 foreach ($iterator as $file) {
                     if ($file->isFile() && $file->getExtension() === 'vue') {
                         $vueFiles[] = $file->getPathname();
@@ -45,24 +51,25 @@ class UiScanner implements ScannerInterface
 
         foreach ($vueFiles as $filePath) {
             $relativePath = str_replace(base_path(), '', $filePath);
-            
+
             // Execute Node script AST parser
             $escapedPath = escapeshellarg($filePath);
-            $command = "node " . base_path('scripts/vue_sfc_parser.js') . " {$escapedPath} 2>&1";
+            $command = 'node '.base_path('scripts/vue_sfc_parser.js')." {$escapedPath} 2>&1";
             $output = shell_exec($command);
 
-            if ($output && !str_starts_with($output, 'JSON_ERROR')) {
+            if ($output && ! str_starts_with($output, 'JSON_ERROR')) {
                 $parsed = json_decode($output, true);
+
                 if (json_last_error() === JSON_ERROR_NONE && $parsed) {
-                    
+
                     // 1. Alert if not using script setup (standard rule)
-                    if (!$parsed['hasScriptSetup']) {
+                    if (! $parsed['hasScriptSetup']) {
                         $findings[] = [
                             'severity' => 'medium',
                             'file_path' => $relativePath,
                             'line_number' => 1,
                             'violation_code' => 'missing_script_setup',
-                            'description' => "Vue component does not use <script setup>. Options API or legacy syntax is deprecated.",
+                            'description' => 'Vue component does not use <script setup>. Options API or legacy syntax is deprecated.',
                         ];
                     }
 
@@ -70,6 +77,7 @@ class UiScanner implements ScannerInterface
                     if (isset($parsed['rawElements']) && is_array($parsed['rawElements'])) {
                         foreach ($parsed['rawElements'] as $el) {
                             $comp = $el['component'];
+
                             if (isset($componentStats[$comp])) {
                                 $componentStats[$comp]['compliant'] += $el['compliantCount'];
                                 $componentStats[$comp]['violations'] += $el['violationCount'];
@@ -82,7 +90,7 @@ class UiScanner implements ScannerInterface
                                     'severity' => 'medium',
                                     'file_path' => $relativePath,
                                     'line_number' => null,
-                                    'violation_code' => 'raw_html_' . $el['name'] . '_used',
+                                    'violation_code' => 'raw_html_'.$el['name'].'_used',
                                     'description' => "Raw HTML tag <{$el['name']}> is used {$el['violationCount']} time(s). Replace with standard UI component <{$friendlyComponent}>.",
                                 ];
                             }

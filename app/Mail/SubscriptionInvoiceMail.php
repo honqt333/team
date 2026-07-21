@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Models\Billing\SubscriptionInvoice;
@@ -17,6 +19,7 @@ class SubscriptionInvoiceMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public SubscriptionInvoice $invoice;
+
     protected ?string $pdfPath = null;
 
     public function __construct(SubscriptionInvoice $invoice)
@@ -26,10 +29,10 @@ class SubscriptionInvoiceMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        $subject = $this->invoice->status === 'paid' 
+        $subject = $this->invoice->status === 'paid'
             ? "فاتورة مدفوعة - {$this->invoice->invoice_number}"
             : "فاتورة اشتراك جديدة - {$this->invoice->invoice_number}";
-            
+
         return new Envelope(
             subject: $subject,
         );
@@ -52,7 +55,7 @@ class SubscriptionInvoiceMail extends Mailable implements ShouldQueue
         // Generate PDF and attach
         $service = app(SubscriptionInvoiceService::class);
         $pdfPath = $service->getPdfPath($this->invoice);
-        
+
         if ($pdfPath && file_exists($pdfPath)) {
             return [
                 Attachment::fromPath($pdfPath)
@@ -60,7 +63,7 @@ class SubscriptionInvoiceMail extends Mailable implements ShouldQueue
                     ->withMime('application/pdf'),
             ];
         }
-        
+
         return [];
     }
 }

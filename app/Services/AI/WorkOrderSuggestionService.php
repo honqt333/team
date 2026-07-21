@@ -337,7 +337,7 @@ AR;
     }
 
     /**
-     * @param  Collection<int, array<string, mixed>>  $catalogRows
+     * @param Collection<int, array<string, mixed>> $catalogRows
      * @return array<int, array{role: string, content: string}>
      */
     private function buildMessages(
@@ -362,6 +362,7 @@ AR;
         $userBody .= "كتالوج المركز المتاح:\n";
 
         $counter = 0;
+
         foreach ($catalogRows as $row) {
             $counter++;
             $dept = (string) ($row['department_name_ar'] ?: $row['department_name_en'] ?: '');
@@ -404,6 +405,7 @@ AR;
                 'provider' => $providerName,
                 'raw_excerpt' => mb_substr($raw, 0, 400),
             ]);
+
             throw new WorkOrderAiInvalidResponseException(
                 __('work_orders.suggestions.errors.invalid_response'),
                 $providerName,
@@ -445,6 +447,7 @@ AR;
 
         // Find the first '{' that looks like a JSON object start.
         $start = strpos($stripped, '{');
+
         if ($start === false) {
             return null;
         }
@@ -453,37 +456,45 @@ AR;
         $inString = false;
         $escape = false;
         $length = strlen($stripped);
+
         for ($i = $start; $i < $length; $i++) {
             $char = $stripped[$i];
+
             if ($escape) {
                 $escape = false;
 
                 continue;
             }
+
             if ($inString) {
                 if ($char === '\\') {
                     $escape = true;
 
                     continue;
                 }
+
                 if ($char === '"') {
                     $inString = false;
                 }
 
                 continue;
             }
+
             if ($char === '"') {
                 $inString = true;
 
                 continue;
             }
+
             if ($char === '{') {
                 $depth++;
 
                 continue;
             }
+
             if ($char === '}') {
                 $depth--;
+
                 if ($depth === 0) {
                     return substr($stripped, $start, $i - $start + 1);
                 }
@@ -500,8 +511,8 @@ AR;
      * are aligned with the local `name` selection based on the current
      * locale.
      *
-     * @param  array<int, array<string, mixed>>  $rawSuggestions
-     * @param  Collection<int, array<string, mixed>>  $catalogRows
+     * @param array<int, array<string, mixed>> $rawSuggestions
+     * @param Collection<int, array<string, mixed>> $catalogRows
      * @return array{items: array<int, array<string, mixed>>, total_candidates: int}
      */
     private function hydrateSuggestions(
@@ -520,10 +531,12 @@ AR;
         foreach ($rawSuggestions as $raw) {
             $type = (string) ($raw['item_type'] ?? '');
             $id = (int) ($raw['item_id'] ?? 0);
+
             if ($id <= 0 || ! in_array($type, ['service', 'part'], true)) {
                 continue;
             }
             $key = $type.':'.$id;
+
             if (isset($seen[$key])) {
                 continue;
             }
@@ -545,6 +558,7 @@ AR;
         $resolvedParts = $this->refetchParts($partIds, $tenantId, $centerId);
 
         $result = [];
+
         foreach ($deduped as $raw) {
             $type = (string) $raw['item_type'];
             $id = (int) $raw['item_id'];
@@ -553,6 +567,7 @@ AR;
             if ($type === 'service') {
                 /** @var Service|null $service */
                 $service = $resolvedServices[$id] ?? null;
+
                 if ($service === null) {
                     continue; // hallucinated — drop
                 }
@@ -563,6 +578,7 @@ AR;
 
             /** @var Part|null $part */
             $part = $resolvedParts[$id] ?? null;
+
             if ($part === null) {
                 continue; // hallucinated — drop
             }
@@ -582,7 +598,7 @@ AR;
     /**
      * Re-fetch services by id, scoped to (tenant_id, center_id).
      *
-     * @param  array<int, int>  $ids
+     * @param array<int, int> $ids
      * @return array<int, Service>
      */
     private function refetchServices(array $ids, int $tenantId, int $centerId): array
@@ -610,7 +626,7 @@ AR;
      * — detected defensively with `Schema::hasColumn()` so this code
      * does not need to change.
      *
-     * @param  array<int, int>  $ids
+     * @param array<int, int> $ids
      * @return array<int, Part>
      */
     private function refetchParts(array $ids, int $tenantId, int $centerId): array
@@ -635,7 +651,7 @@ AR;
     }
 
     /**
-     * @param  array<string, mixed>  $raw
+     * @param array<string, mixed> $raw
      * @return array<string, mixed>
      */
     private function presentService(
@@ -672,7 +688,7 @@ AR;
     }
 
     /**
-     * @param  array<string, mixed>  $raw
+     * @param array<string, mixed> $raw
      * @return array<string, mixed>
      */
     private function presentPart(
@@ -728,9 +744,11 @@ AR;
     private function safeQty(mixed $value): int
     {
         $qty = (int) $value;
+
         if ($qty < 1) {
             return 1;
         }
+
         if ($qty > 4) {
             return 4;
         }
@@ -743,6 +761,7 @@ AR;
         if ($value < 0.0) {
             return 0.0;
         }
+
         if ($value > 1.0) {
             return 1.0;
         }

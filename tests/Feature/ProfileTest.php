@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Tenant;
 use App\Models\Center;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -21,8 +23,9 @@ class ProfileTest extends TestCase
             'tenant_id' => $tenant->id,
             'current_center_id' => $center->id,
         ]);
-        
+
         $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
+
         return $user;
     }
 

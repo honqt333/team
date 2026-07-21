@@ -1,9 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Developer\Scanners;
 
 use App\Services\Developer\Contracts\ScannerInterface;
 use Illuminate\Support\Facades\Config;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class ArchitectureScanner implements ScannerInterface
 {
@@ -27,8 +31,10 @@ class ArchitectureScanner implements ScannerInterface
 
         // Scan App Controllers
         $controllersPath = base_path('app/Http/Controllers');
+
         if (is_dir($controllersPath)) {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($controllersPath));
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($controllersPath));
+
             foreach ($iterator as $file) {
                 if ($file->isFile() && $file->getExtension() === 'php') {
                     $content = file_get_contents($file->getPathname());
@@ -63,8 +69,10 @@ class ArchitectureScanner implements ScannerInterface
 
         // Scan Models
         $modelsPath = base_path('app/Models');
+
         if (is_dir($modelsPath)) {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($modelsPath));
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($modelsPath));
+
             foreach ($iterator as $file) {
                 if ($file->isFile() && $file->getExtension() === 'php') {
                     $content = file_get_contents($file->getPathname());
@@ -99,8 +107,10 @@ class ArchitectureScanner implements ScannerInterface
 
         // Scan Vue Files for Large Files
         $jsPath = base_path('resources/js');
+
         if (is_dir($jsPath)) {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($jsPath));
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($jsPath));
+
             foreach ($iterator as $file) {
                 if ($file->isFile() && in_array($file->getExtension(), ['vue', 'js'])) {
                     $content = file_get_contents($file->getPathname());

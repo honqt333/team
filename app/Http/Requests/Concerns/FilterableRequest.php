@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Concerns;
 
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +17,7 @@ trait FilterableRequest
                 }
             });
         }
+
         return $query;
     }
 
@@ -23,9 +26,11 @@ trait FilterableRequest
         if ($from = $this->input('date_from')) {
             $query->whereDate($column, '>=', $from);
         }
+
         if ($to = $this->input('date_to')) {
             $query->whereDate($column, '<=', $to);
         }
+
         return $query;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\HR;
 
 use App\Models\Center;
@@ -8,15 +10,13 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PayrollRun extends Model
 {
-    use TenantScoped;
-
     use HasFactory, SoftDeletes;
+    use TenantScoped;
 
     protected $table = 'hr_payroll_runs';
 

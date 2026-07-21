@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Policies;
 
 use App\Models\Center;
@@ -10,6 +12,7 @@ use App\Policies\WorkOrderPolicy;
 use App\Support\Permissions;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class WorkOrderPolicyTest extends TestCase
@@ -17,20 +20,24 @@ class WorkOrderPolicyTest extends TestCase
     use RefreshDatabase;
 
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected User $adminUser;
+
     protected User $regularUser;
+
     protected WorkOrderPolicy $policy;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->policy = new WorkOrderPolicy();
+        $this->policy = new WorkOrderPolicy;
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
 
         $permissions = [
             Permissions::WORK_ORDERS_VIEW,

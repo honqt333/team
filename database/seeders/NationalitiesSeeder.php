@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -25,6 +26,7 @@ class NationalitiesSeeder extends Seeder
         // sections, ignoring any later generic duplicates).
         $unique = [];
         $seenCodes = [];
+
         foreach ($nationalities as $nationality) {
             if (in_array($nationality['code'], $seenCodes, true)) {
                 continue;
@@ -125,7 +127,7 @@ class NationalitiesSeeder extends Seeder
             ['code' => 'THA', 'name_en' => 'Thailand',            'name_ar' => 'تايلاند'],
             ['code' => 'TLS', 'name_en' => 'Timor-Leste',         'name_ar' => 'تيمور الشرقية'],
             ['code' => 'TKM', 'name_en' => 'Turkmenistan',        'name_ar' => 'تركمانستان'],
-            ['code' => 'ARE', 'name_en' => 'United Arab Emirates','name_ar' => 'الإمارات العربية المتحدة'],
+            ['code' => 'ARE', 'name_en' => 'United Arab Emirates', 'name_ar' => 'الإمارات العربية المتحدة'],
             ['code' => 'UZB', 'name_en' => 'Uzbekistan',          'name_ar' => 'أوزبكستان'],
             ['code' => 'VNM', 'name_en' => 'Vietnam',             'name_ar' => 'فيتنام'],
             ['code' => 'YEM', 'name_en' => 'Yemen',               'name_ar' => 'اليمن'],
@@ -136,7 +138,7 @@ class NationalitiesSeeder extends Seeder
             ['code' => 'AUT', 'name_en' => 'Austria',             'name_ar' => 'النمسا'],
             ['code' => 'BLR', 'name_en' => 'Belarus',             'name_ar' => 'بيلاروسيا'],
             ['code' => 'BEL', 'name_en' => 'Belgium',             'name_ar' => 'بلجيكا'],
-            ['code' => 'BIH', 'name_en' => 'Bosnia and Herzegovina','name_ar' => 'البوسنة والهرسك'],
+            ['code' => 'BIH', 'name_en' => 'Bosnia and Herzegovina', 'name_ar' => 'البوسنة والهرسك'],
             ['code' => 'BGR', 'name_en' => 'Bulgaria',            'name_ar' => 'بلغاريا'],
             ['code' => 'HRV', 'name_en' => 'Croatia',             'name_ar' => 'كرواتيا'],
             ['code' => 'CYP', 'name_en' => 'Cyprus',              'name_ar' => 'قبرص'],
@@ -198,9 +200,9 @@ class NationalitiesSeeder extends Seeder
             ['code' => 'MEX', 'name_en' => 'Mexico',              'name_ar' => 'المكسيك'],
             ['code' => 'NIC', 'name_en' => 'Nicaragua',           'name_ar' => 'نيكاراغوا'],
             ['code' => 'PAN', 'name_en' => 'Panama',              'name_ar' => 'بنما'],
-            ['code' => 'KNA', 'name_en' => 'Saint Kitts and Nevis','name_ar' => 'سانت كيتس ونيفيس'],
+            ['code' => 'KNA', 'name_en' => 'Saint Kitts and Nevis', 'name_ar' => 'سانت كيتس ونيفيس'],
             ['code' => 'LCA', 'name_en' => 'Saint Lucia',         'name_ar' => 'سانت لوسيا'],
-            ['code' => 'VCT', 'name_en' => 'Saint Vincent and the Grenadines','name_ar' => 'سانت فنسنت والغرينادين'],
+            ['code' => 'VCT', 'name_en' => 'Saint Vincent and the Grenadines', 'name_ar' => 'سانت فنسنت والغرينادين'],
             ['code' => 'TTO', 'name_en' => 'Trinidad and Tobago', 'name_ar' => 'ترينيداد وتوباغو'],
             ['code' => 'USA', 'name_en' => 'United States',       'name_ar' => 'الولايات المتحدة الأمريكية'],
 
@@ -226,10 +228,10 @@ class NationalitiesSeeder extends Seeder
             ['code' => 'BDI', 'name_en' => 'Burundi',             'name_ar' => 'بوروندي'],
             ['code' => 'CPV', 'name_en' => 'Cape Verde',          'name_ar' => 'الرأس الأخضر'],
             ['code' => 'CMR', 'name_en' => 'Cameroon',            'name_ar' => 'الكاميرون'],
-            ['code' => 'CAF', 'name_en' => 'Central African Republic','name_ar' => 'جمهورية أفريقيا الوسطى'],
+            ['code' => 'CAF', 'name_en' => 'Central African Republic', 'name_ar' => 'جمهورية أفريقيا الوسطى'],
             ['code' => 'TCD', 'name_en' => 'Chad',                'name_ar' => 'تشاد'],
             ['code' => 'COM', 'name_en' => 'Comoros',             'name_ar' => 'جزر القمر'],
-            ['code' => 'COG', 'name_en' => 'Republic of the Congo','name_ar' => 'جمهورية الكونغو'],
+            ['code' => 'COG', 'name_en' => 'Republic of the Congo', 'name_ar' => 'جمهورية الكونغو'],
             ['code' => 'COD', 'name_en' => 'DR Congo',            'name_ar' => 'جمهورية الكونغو الديمقراطية'],
             ['code' => 'CIV', 'name_en' => 'Côte d\'Ivoire',     'name_ar' => 'ساحل العاج'],
             ['code' => 'DJI', 'name_en' => 'Djibouti',            'name_ar' => 'جيبوتي'],
@@ -255,7 +257,7 @@ class NationalitiesSeeder extends Seeder
             ['code' => 'NER', 'name_en' => 'Niger',               'name_ar' => 'النيجر'],
             ['code' => 'NGA', 'name_en' => 'Nigeria',             'name_ar' => 'نيجيريا'],
             ['code' => 'RWA', 'name_en' => 'Rwanda',              'name_ar' => 'رواندا'],
-            ['code' => 'STP', 'name_en' => 'São Tomé and Príncipe','name_ar' => 'ساو تومي وبرينسيبي'],
+            ['code' => 'STP', 'name_en' => 'São Tomé and Príncipe', 'name_ar' => 'ساو تومي وبرينسيبي'],
             ['code' => 'SEN', 'name_en' => 'Senegal',             'name_ar' => 'السنغال'],
             ['code' => 'SYC', 'name_en' => 'Seychelles',          'name_ar' => 'سيشل'],
             ['code' => 'SLE', 'name_en' => 'Sierra Leone',        'name_ar' => 'سيراليون'],

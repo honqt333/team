@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Mail;
 
 use App\Models\Billing\Subscription;
@@ -15,6 +17,7 @@ class SubscriptionRenewalReminderMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public Subscription $subscription;
+
     public int $daysRemaining;
 
     public function __construct(Subscription $subscription, int $daysRemaining)
@@ -26,6 +29,7 @@ class SubscriptionRenewalReminderMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         $days = $this->daysRemaining === 1 ? 'غداً' : "خلال {$this->daysRemaining} أيام";
+
         return new Envelope(
             subject: "⏰ تذكير: اشتراكك ينتهي {$days}",
         );

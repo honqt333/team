@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryUnit;
+use App\Models\Payment;
 use App\Models\PurchaseInvoice;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-
 use App\Models\Supplier;
 use App\Models\Warehouse;
-use App\Models\InventoryUnit;
 use App\Services\Purchasing\PurchasingService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class PurchaseInvoicesController extends Controller
 {
@@ -28,14 +31,13 @@ class PurchaseInvoicesController extends Controller
         $query = PurchaseInvoice::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->with(['supplier', 'purchaseOrder'])
-            ->when($request->input('search'), fn($q, $s) =>
-                $q->where('code', 'like', "%{$s}%")
-                  ->orWhere('invoice_number', 'like', "%{$s}%")
-                  ->orWhereHas('supplier', fn($sq) => $sq->where('name', 'like', "%{$s}%"))
+            ->when($request->input('search'), fn ($q, $s) => $q->where('code', 'like', "%{$s}%")
+                ->orWhere('invoice_number', 'like', "%{$s}%")
+                ->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', "%{$s}%"))
             )
-            ->when($request->input('status'), fn($q, $s) => $q->where('status', $s))
-            ->when($request->input('date_from'), fn($q, $d) => $q->whereDate('issue_date', '>=', $d))
-            ->when($request->input('date_to'), fn($q, $d) => $q->whereDate('issue_date', '<=', $d))
+            ->when($request->input('status'), fn ($q, $s) => $q->where('status', $s))
+            ->when($request->input('date_from'), fn ($q, $d) => $q->whereDate('issue_date', '>=', $d))
+            ->when($request->input('date_to'), fn ($q, $d) => $q->whereDate('issue_date', '<=', $d))
             ->orderBy('id', 'desc');
 
         $suppliers = Supplier::forTenant($tenantId)->forCenter($centerId)->active()->get(['id', 'name']);
@@ -45,12 +47,12 @@ class PurchaseInvoicesController extends Controller
 
         return Inertia::render('Purchasing/Invoices/Index', [
             'invoices' => $query->paginate(25)->withQueryString(),
-            'filters'  => $request->only(['search', 'status', 'date_from', 'date_to']),
-            'stats'    => [
-                'total'  => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->count(),
-                'open'   => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'open')->count(),
-                'paid'   => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'paid')->count(),
-                'draft'  => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'draft')->count(),
+            'filters' => $request->only(['search', 'status', 'date_from', 'date_to']),
+            'stats' => [
+                'total' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->count(),
+                'open' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'open')->count(),
+                'paid' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'paid')->count(),
+                'draft' => PurchaseInvoice::where('tenant_id', $tenantId)->where('center_id', $centerId)->where('status', 'draft')->count(),
             ],
             'suppliers' => $suppliers,
             'defaultWarehouse' => $defaultWarehouse,
@@ -103,15 +105,15 @@ class PurchaseInvoicesController extends Controller
         $this->authorize('view', $purchaseInvoice);
 
         $purchaseInvoice->load([
-            'supplier', 
-            'purchaseOrder', 
-            'lines.part', 
-            'lines.returnLines', 
-            'center.address', 
+            'supplier',
+            'purchaseOrder',
+            'lines.part',
+            'lines.returnLines',
+            'center.address',
             'payments.receivedBy',
             'returnInvoices.lines.part',
             'companyTransaction.incomeCategory',
-            'tenant.address'
+            'tenant.address',
         ]);
 
         return Inertia::render('Purchasing/Invoices/Show', [
@@ -128,14 +130,14 @@ class PurchaseInvoicesController extends Controller
         ]);
 
         if ($purchaseInvoice->attachment_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($purchaseInvoice->attachment_path);
+            Storage::disk('public')->delete($purchaseInvoice->attachment_path);
         }
 
         $file = $request->file('attachment');
-        $path = $file->store('purchases/invoices/' . $purchaseInvoice->id, 'public');
+        $path = $file->store('purchases/invoices/'.$purchaseInvoice->id, 'public');
 
         $purchaseInvoice->update([
-            'attachment_path' => $path
+            'attachment_path' => $path,
         ]);
 
         return back()->with('success', __('messages.attachment_uploaded') ?? 'تم رفع المرفق بنجاح');
@@ -146,9 +148,9 @@ class PurchaseInvoicesController extends Controller
         $this->authorize('update', $purchaseInvoice);
 
         if ($purchaseInvoice->attachment_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($purchaseInvoice->attachment_path);
+            Storage::disk('public')->delete($purchaseInvoice->attachment_path);
             $purchaseInvoice->update([
-                'attachment_path' => null
+                'attachment_path' => null,
             ]);
         }
 
@@ -160,7 +162,7 @@ class PurchaseInvoicesController extends Controller
         $this->authorize('managePayments', $purchaseInvoice);
 
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:0.01|max:' . $purchaseInvoice->balance,
+            'amount' => 'required|numeric|min:0.01|max:'.$purchaseInvoice->balance,
             'payment_method' => 'required|string',
             'payment_date' => 'nullable|date',
             'reference' => 'nullable|string|max:100',
@@ -168,7 +170,7 @@ class PurchaseInvoicesController extends Controller
         ]);
 
         // Create the individual payment record
-        \App\Models\Payment::create([
+        Payment::create([
             'tenant_id' => $purchaseInvoice->tenant_id,
             'center_id' => $purchaseInvoice->center_id,
             'purchase_invoice_id' => $purchaseInvoice->id,
@@ -178,7 +180,7 @@ class PurchaseInvoicesController extends Controller
             'reference' => $validated['reference'] ?? null,
             'notes' => $validated['notes'] ?? null,
             'received_by' => auth()->id(),
-            'type' => \App\Models\Payment::TYPE_PAYMENT,
+            'type' => Payment::TYPE_PAYMENT,
         ]);
 
         $newBalance = max(0, $purchaseInvoice->balance - (float) $validated['amount']);
@@ -200,10 +202,10 @@ class PurchaseInvoicesController extends Controller
         $this->authorize('view', $purchaseInvoice);
 
         $purchaseInvoice->load([
-            'supplier', 
-            'purchaseOrder', 
-            'lines.part', 
-            'center.address', 
+            'supplier',
+            'purchaseOrder',
+            'lines.part',
+            'center.address',
             'payments.receivedBy',
             'tenant.address',
             'companyTransaction.incomeCategory',
@@ -214,4 +216,3 @@ class PurchaseInvoicesController extends Controller
         ]);
     }
 }
-

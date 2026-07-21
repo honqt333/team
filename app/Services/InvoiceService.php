@@ -1,11 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\CenterSequence;
 use App\Models\Invoice;
+use App\Models\InvoiceTemplate;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderItem;
+use App\Models\WorkOrderItemPart;
 use App\Services\Optimization\TaxCalculator;
+use Exception;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceService
@@ -22,31 +28,32 @@ class InvoiceService
      */
     public function createFromWorkOrder(WorkOrder $workOrder, $user, array $additionalData = []): Invoice
     {
-        return DB::transaction(function () use ($workOrder, $user, $additionalData) {
+        return DB::transaction(function () use ($workOrder, $additionalData) {
             // Re-fetch items + parts directly to avoid stale/empty relations
             // (the caller's $workOrder may not have eager-loaded them).
-            $activeItems = \App\Models\WorkOrderItem::where('work_order_id', $workOrder->id)
-                ->where('status', '!=', \App\Models\WorkOrderItem::STATUS_CANCELLED)
+            $activeItems = WorkOrderItem::where('work_order_id', $workOrder->id)
+                ->where('status', '!=', WorkOrderItem::STATUS_CANCELLED)
                 ->get();
-            $activeParts = \App\Models\WorkOrderItemPart::where('work_order_id', $workOrder->id)
+            $activeParts = WorkOrderItemPart::where('work_order_id', $workOrder->id)
                 ->whereNotIn('status', [
-                    \App\Models\WorkOrderItemPart::STATUS_CANCELLED,
-                    \App\Models\WorkOrderItemPart::STATUS_REVERSED,
+                    WorkOrderItemPart::STATUS_CANCELLED,
+                    WorkOrderItemPart::STATUS_REVERSED,
                 ])
                 ->get();
             $activeItemIds = $activeItems->pluck('id')->all();
 
             $customer = $workOrder->customer;
             $customerAddress = null;
+
             if ($customer) {
                 $addressParts = array_filter([
-                    $customer->building_number ? __('common.building') . ' ' . $customer->building_number : null,
+                    $customer->building_number ? __('common.building').' '.$customer->building_number : null,
                     $customer->address_line ?: null,
-                    $customer->district ? __('common.district') . ' ' . $customer->district : null,
+                    $customer->district ? __('common.district').' '.$customer->district : null,
                     $customer->city ?: null,
-                    $customer->postal_code ? __('common.postal_code') . ' ' . $customer->postal_code : null,
+                    $customer->postal_code ? __('common.postal_code').' '.$customer->postal_code : null,
                 ]);
-                $customerAddress = !empty($addressParts) ? implode('، ', $addressParts) : null;
+                $customerAddress = ! empty($addressParts) ? implode('، ', $addressParts) : null;
             }
 
             // 1. Create Invoice Draft (No Number yet)
@@ -55,7 +62,7 @@ class InvoiceService
                 'center_id' => $workOrder->center_id,
                 'customer_id' => $workOrder->customer_id,
                 'work_order_id' => $workOrder->id,
-                'invoice_number' => 'DRAFT-' . $workOrder->code, // Temporary
+                'invoice_number' => 'DRAFT-'.$workOrder->code, // Temporary
                 'issue_date' => now(),
                 'supply_date' => now(),
                 'due_date' => $additionalData['due_date'] ?? null,
@@ -66,7 +73,7 @@ class InvoiceService
                 'customer_name_snapshot' => $customer?->name,
                 'customer_vat_snapshot' => $customer?->tax_number,
                 'customer_address_snapshot' => $customerAddress,
-                
+
                 // Tax settings
                 'tax_enabled_snapshot' => $workOrder->tax_enabled_snapshot,
                 'pricing_mode_snapshot' => $workOrder->pricing_mode_snapshot,
@@ -83,16 +90,16 @@ class InvoiceService
 
             // 2. Convert WO Items (Services) to Invoice Lines
             foreach ($activeItems as $item) {
-                $isStandard = $item->service && 
-                    trim($item->service->name_ar) !== 'أخرى' && 
+                $isStandard = $item->service &&
+                    trim($item->service->name_ar) !== 'أخرى' &&
                     strtolower(trim($item->service->name_en)) !== 'other';
-                
+
                 if ($isStandard) {
                     $description = $item->service->name;
                 } else {
                     $description = $item->title;
                 }
-                
+
                 // Append warranty if exists
                 if ($item->warranty_value_snapshot && $item->warranty_unit_snapshot) {
                     $locale = app()->getLocale();
@@ -108,9 +115,9 @@ class InvoiceService
                             'weeks' => $item->warranty_value_snapshot == 1 ? 'week' : 'weeks',
                             'months' => $item->warranty_value_snapshot == 1 ? 'month' : 'months',
                             'years' => $item->warranty_value_snapshot == 1 ? 'year' : 'years',
-                        ]
+                        ],
                     ];
-                    
+
                     $unitLabel = $units[$locale][$item->warranty_unit_snapshot] ?? $item->warranty_unit_snapshot;
                     $label = $locale === 'ar' ? 'ضمان الخدمة' : 'Service Warranty';
                     $description .= " - {$label} {$item->warranty_value_snapshot} {$unitLabel}";
@@ -126,21 +133,22 @@ class InvoiceService
                 // WorkOrderItem.line_total_excl_tax / line_total_incl_tax columns
                 // (those have been observed as 0 on the WO side, which produced
                 // empty "amount" cells in the invoice cost box).
-                $qty          = (float) $item->qty;
-                $unitPrice    = (float) $item->unit_price;
-                $discountAmt  = (float) ($item->discount_amount ?? 0);
-                $taxEnabled   = (bool) ($workOrder->tax_enabled_snapshot ?? false);
-                $taxRate      = $taxEnabled ? (float) ($item->tax_rate_snapshot ?? 0) : 0.0;
-                $isInclusive  = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
+                $qty = (float) $item->qty;
+                $unitPrice = (float) $item->unit_price;
+                $discountAmt = (float) ($item->discount_amount ?? 0);
+                $taxEnabled = (bool) ($workOrder->tax_enabled_snapshot ?? false);
+                $taxRate = $taxEnabled ? (float) ($item->tax_rate_snapshot ?? 0) : 0.0;
+                $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
 
                 $net = max(0, ($qty * $unitPrice) - $discountAmt);
+
                 if ($isInclusive && $taxEnabled) {
                     $lineIncl = round($net, 2);
                     $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
-                    $taxAmt   = round($lineIncl - $lineExcl, 2);
+                    $taxAmt = round($lineIncl - $lineExcl, 2);
                 } else {
                     $lineExcl = round($net, 2);
-                    $taxAmt   = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
+                    $taxAmt = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
                     $lineIncl = round($lineExcl + $taxAmt, 2);
                 }
 
@@ -165,7 +173,7 @@ class InvoiceService
 
             // 3. Convert WO Parts to Invoice Lines
             foreach ($activeParts as $part) {
-                if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+                if ($part->work_order_item_id !== null && ! in_array($part->work_order_item_id, $activeItemIds)) {
                     continue;
                 }
 
@@ -174,21 +182,22 @@ class InvoiceService
                 }
 
                 // Same defensive recompute as services — don't trust WO part totals.
-                $qty         = (float) $part->qty;
-                $unitPrice   = (float) $part->unit_price;
+                $qty = (float) $part->qty;
+                $unitPrice = (float) $part->unit_price;
                 $discountAmt = (float) ($part->discount ?? 0);
-                $taxEnabled  = (bool) ($workOrder->tax_enabled_snapshot ?? false);
-                $taxRate     = $taxEnabled ? (float) ($workOrder->tax_rate_snapshot ?? 15.00) : 0.0;
+                $taxEnabled = (bool) ($workOrder->tax_enabled_snapshot ?? false);
+                $taxRate = $taxEnabled ? (float) ($workOrder->tax_rate_snapshot ?? 15.00) : 0.0;
                 $isInclusive = ($workOrder->pricing_mode_snapshot ?? 'exclusive') === 'inclusive';
 
                 $net = max(0, ($qty * $unitPrice) - $discountAmt);
+
                 if ($isInclusive && $taxEnabled) {
                     $lineIncl = round($net, 2);
                     $lineExcl = $taxRate > 0 ? round($net / (1 + ($taxRate / 100)), 2) : $net;
-                    $taxAmt   = round($lineIncl - $lineExcl, 2);
+                    $taxAmt = round($lineIncl - $lineExcl, 2);
                 } else {
                     $lineExcl = round($net, 2);
-                    $taxAmt   = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
+                    $taxAmt = $taxEnabled ? round($lineExcl * ($taxRate / 100), 2) : 0.0;
                     $lineIncl = round($lineExcl + $taxAmt, 2);
                 }
 
@@ -219,19 +228,19 @@ class InvoiceService
             $lines = $invoice->lines()->get();
             $sumExcl = $lines->sum('line_total_excl_tax');
             $sumIncl = $lines->sum('line_total_incl_tax');
-            $sumTax  = $lines->sum('tax_amount');
+            $sumTax = $lines->sum('tax_amount');
 
             $invoice->update([
-                'total_excl_tax'      => round($sumExcl, 2),
-                'total_tax'           => round($sumTax, 2),
-                'total_incl_tax'      => round($sumIncl, 2),
-                'total_taxable_amount'=> round($sumExcl, 2),
+                'total_excl_tax' => round($sumExcl, 2),
+                'total_tax' => round($sumTax, 2),
+                'total_incl_tax' => round($sumIncl, 2),
+                'total_taxable_amount' => round($sumExcl, 2),
             ]);
 
             // 6. Recalculate and sync invoice payment status
             $invoice->refresh();
             $invoice->updatePaymentStatus();
-            
+
             return $invoice;
         });
     }
@@ -243,7 +252,7 @@ class InvoiceService
     public function issueInvoice(Invoice $invoice): Invoice
     {
         if ($invoice->status !== 'draft') {
-            throw new \Exception("Only draft invoices can be issued.");
+            throw new Exception('Only draft invoices can be issued.');
         }
 
         return DB::transaction(function () use ($invoice) {
@@ -258,8 +267,8 @@ class InvoiceService
 
             // 2. Generate ICV (Invoice Counter Value) for ZATCA
             // Must be strictly increasing per center (no gaps allowed in the chain)
-            $icv = CenterSequence::getNextValue($tenantId, $centerId, 'icv'); 
-            
+            $icv = CenterSequence::getNextValue($tenantId, $centerId, 'icv');
+
             // 3. Update Invoice
             $invoice->update([
                 'status' => 'valid',
@@ -267,7 +276,7 @@ class InvoiceService
                 'issue_date' => now(),
                 // 'icv' => $icv, // Add column if needed in schema, currently storing in ZATCA payload
             ]);
-            
+
             // TODO: ZATCA Chaining logic (Prev Hash) would happen here.
 
             return $invoice;
@@ -293,26 +302,28 @@ class InvoiceService
         ]);
 
         // Filter out cancelled items
-        $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== \App\Models\WorkOrderItem::STATUS_CANCELLED);
+        $filteredItems = $workOrder->items->filter(fn ($item) => $item->status !== WorkOrderItem::STATUS_CANCELLED);
         $workOrder->setRelation('items', $filteredItems->values());
 
         $activeItemIds = $filteredItems->pluck('id')->all();
         $activeParts = $workOrder->parts->filter(function ($part) use ($activeItemIds) {
-            if (in_array($part->status, [\App\Models\WorkOrderItemPart::STATUS_CANCELLED, \App\Models\WorkOrderItemPart::STATUS_REVERSED])) {
+            if (in_array($part->status, [WorkOrderItemPart::STATUS_CANCELLED, WorkOrderItemPart::STATUS_REVERSED])) {
                 return false;
             }
-            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+
+            if ($part->work_order_item_id !== null && ! in_array($part->work_order_item_id, $activeItemIds)) {
                 return false;
             }
+
             return true;
         })->values();
 
         $tenant = $workOrder->tenant;
         $taxSettings = $tenant->taxSettings;
-        $template = \App\Models\InvoiceTemplate::getDefault($tenant->id, 'proforma');
+        $template = InvoiceTemplate::getDefault($tenant->id, 'proforma');
 
-        $servicesTotal = $filteredItems->sum(fn($item) => $item->line_total ?? ($item->qty * $item->unit_price));
-        $partsTotal = $activeParts->sum(fn($part) => ((float)$part->unit_price * (float)$part->qty) - (float)($part->discount ?? 0));
+        $servicesTotal = $filteredItems->sum(fn ($item) => $item->line_total ?? ($item->qty * $item->unit_price));
+        $partsTotal = $activeParts->sum(fn ($part) => ((float) $part->unit_price * (float) $part->qty) - (float) ($part->discount ?? 0));
         $grandTotal = $servicesTotal + $partsTotal;
 
         return [
@@ -346,7 +357,7 @@ class InvoiceService
     public function generateZatcaQr(Invoice $invoice): string
     {
         $tenant = $invoice->tenant;
-        
+
         // TLV encoding for ZATCA
         $tlv = '';
         $tlv .= $this->tlvEncode(1, $tenant->legal_name ?? $tenant->name); // Seller Name
@@ -363,6 +374,6 @@ class InvoiceService
      */
     protected function tlvEncode(int $tag, string $value): string
     {
-        return chr($tag) . chr(strlen($value)) . $value;
+        return chr($tag).chr(strlen($value)).$value;
     }
 }

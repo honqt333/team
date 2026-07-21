@@ -1,24 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
+use App\Support\TenancyContext;
+use App\Traits\HasVehicleRelations;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Concerns\TenantScoped;
 
 class Vehicle extends Model
 {
-    use HasFactory, TenantScoped, SoftDeletes, \App\Traits\HasVehicleRelations;
+    use HasFactory, HasVehicleRelations, SoftDeletes, TenantScoped;
 
     protected static function boot(): void
     {
         parent::boot();
 
         static::creating(function (Model $model) {
-            if (empty($model->center_id) && $centerId = \App\Support\TenancyContext::centerId()) {
+            if (empty($model->center_id) && $centerId = TenancyContext::centerId()) {
                 $model->center_id = $centerId;
             }
         });
@@ -46,8 +49,6 @@ class Vehicle extends Model
     ];
 
     protected $appends = ['display_make', 'display_model', 'display_name'];
-
-
 
     /**
      * Get the display name of the make (from system or custom).
@@ -80,18 +81,17 @@ class Vehicle extends Model
                     $this->display_make,
                     $this->display_model,
                 ]);
-                
+
                 $name = implode(' ', $parts);
-                
+
                 if ($this->year) {
                     $name .= " ({$this->year})";
                 }
-                
+
                 return $name ?: $this->plate_number;
+
                 return $name ?: $this->plate_number;
             },
         );
     }
-
-
 }

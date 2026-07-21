@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -7,7 +9,6 @@ use App\Models\VehicleConditionItem;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderInspection;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class WorkOrderInspectionController extends Controller
 {
@@ -21,8 +22,8 @@ class WorkOrderInspectionController extends Controller
         $this->authorize('view', $workOrder);
 
         $items = VehicleConditionItem::whereHas('category', function ($query) {
-                $query->where('is_active', true);
-            })
+            $query->where('is_active', true);
+        })
             ->where('is_active', true)
             ->with('category')
             ->orderedBySource()
@@ -57,7 +58,7 @@ class WorkOrderInspectionController extends Controller
         ]);
 
         $workOrder->logActivity('inspection_completed', __('work_orders.activities.actions.inspection_completed', [
-            'template' => __('services_management.inspections')
+            'template' => __('services_management.inspections'),
         ]));
 
         return back()->with('success', __('messages.inspection_saved'));
@@ -69,6 +70,7 @@ class WorkOrderInspectionController extends Controller
     public function show(WorkOrder $workOrder, WorkOrderInspection $inspection)
     {
         $this->authorize('view', $inspection);
+
         // Defense in depth: the inspection must belong to the work order in the URL
         if ($inspection->work_order_id !== $workOrder->id) {
             abort(404);

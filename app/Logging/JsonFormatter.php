@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Logging;
 
+use DateTimeInterface;
+use DateTimeZone;
 use Monolog\Formatter\NormalizerFormatter;
 use Monolog\LogRecord;
 use Throwable;
@@ -43,7 +47,7 @@ class JsonFormatter extends NormalizerFormatter
     public function __construct()
     {
         // ISO 8601 with microseconds, UTC.
-        parent::__construct(\DateTimeInterface::RFC3339_EXTENDED);
+        parent::__construct(DateTimeInterface::RFC3339_EXTENDED);
     }
 
     public function format(LogRecord $record): string
@@ -54,7 +58,7 @@ class JsonFormatter extends NormalizerFormatter
 
         $payload = [
             // ISO 8601 / RFC 3339 with microseconds, forced to UTC.
-            'timestamp' => $record->datetime->setTimezone(new \DateTimeZone('UTC'))
+            'timestamp' => $record->datetime->setTimezone(new DateTimeZone('UTC'))
                 ->format('Y-m-d\TH:i:s.u\Z'),
             'level' => strtolower($record->level->getName()),
             'message' => $record->message,
@@ -73,6 +77,7 @@ class JsonFormatter extends NormalizerFormatter
         if (! empty($contextData)) {
             $payload['context'] = $contextData;
         }
+
         if (! empty($extraData)) {
             $payload['extra'] = $extraData;
         }
@@ -81,7 +86,7 @@ class JsonFormatter extends NormalizerFormatter
     }
 
     /**
-     * @param  Throwable|mixed  $data
+     * @param Throwable|mixed $data
      */
     protected function normalize($data, int $depth = 0): mixed
     {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -19,25 +21,25 @@ class InventoryPermissionsSeeder extends Seeder
             'inventory.parts.create',
             'inventory.parts.update',
             'inventory.parts.deactivate',
-            
+
             // Stock
             'inventory.stock.view',
-            
+
             // Ledger
             'inventory.ledger.view',
-            
+
             // Receipts
             'inventory.receipts.view',
             'inventory.receipts.create',
             'inventory.receipts.post',
             'inventory.receipts.cancel',
-            
+
             // Adjustments
             'inventory.adjustments.view',
             'inventory.adjustments.create',
             'inventory.adjustments.post',
             'inventory.adjustments.cancel',
-            
+
             // Issue
             'inventory.issue.view',
             'inventory.issue.create',
@@ -46,17 +48,17 @@ class InventoryPermissionsSeeder extends Seeder
             // Moves
             'inventory.moves.view',
             'inventory.moves.create',
-            
+
             // Transfers (Sprint 4)
             'inventory.transfers.view',
             'inventory.transfers.create',
             'inventory.transfers.send',
             'inventory.transfers.receive',
             'inventory.transfers.cancel',
-            
+
             // Override
             'inventory.override_negative_stock',
-            
+
             // Purchasing (Sprint 2)
             'purchasing.suppliers.view',
             'purchasing.suppliers.create',

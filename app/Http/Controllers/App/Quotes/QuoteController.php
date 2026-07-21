@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\Quotes;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuoteRequest;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\InventoryUnit;
 use App\Models\Quote;
 use App\Models\QuoteLine;
 use App\Models\Service;
 use App\Models\Vehicle;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
-use App\Models\VehicleModel;
 use App\Models\VehicleMileageLog;
+use App\Models\VehicleModel;
 use App\Services\NotificationService;
 use App\Support\TenancyContext;
 use Illuminate\Http\JsonResponse;
@@ -29,17 +32,17 @@ class QuoteController extends Controller
      */
     public function apiIndex(Request $request): JsonResponse
     {
-        $this->authorize("viewAny", Quote::class);
+        $this->authorize('viewAny', Quote::class);
 
-        $quotes = Quote::with(["customer", "vehicle.make",
-            "vehicle.customer", "vehicle.model", "convertedWorkOrder:id,code"])
+        $quotes = Quote::with(['customer', 'vehicle.make',
+            'vehicle.customer', 'vehicle.model', 'convertedWorkOrder:id,code'])
             ->withCount(['lines', 'parts'])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where("id", "like", "%{$search}%")
-                      ->orWhere("code", "like", "%{$search}%")
-                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
-                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                    $q->where('id', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', "%{$search}%"));
                 });
             })
             ->when($request->status && $request->status !== 'all', function ($query) use ($request) {
@@ -51,13 +54,14 @@ class QuoteController extends Controller
             })
             ->when($request->date_range && $request->date_range !== 'all', function ($query, $range) {
                 $now = now();
-                $date = match($range) {
+                $date = match ($range) {
                     'today' => $now->startOfDay(),
                     'week' => $now->subDays(7),
                     'month' => $now->subMonth(),
                     '30days' => $now->subDays(30),
                     default => null
                 };
+
                 if ($date) {
                     $query->where('created_at', '>=', $date);
                 }
@@ -68,7 +72,7 @@ class QuoteController extends Controller
             ->when($request->date_to, function ($query, $date) {
                 $query->whereDate('created_at', '<=', $date);
             })
-            ->orderByDesc("created_at")
+            ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
 
@@ -80,7 +84,7 @@ class QuoteController extends Controller
      */
     public function index(Request $request): Response
     {
-        $this->authorize("viewAny", Quote::class);
+        $this->authorize('viewAny', Quote::class);
 
         $status = $request->input('status', 'pending');
 
@@ -92,15 +96,15 @@ class QuoteController extends Controller
             'rejected' => Quote::where('status', Quote::STATUS_REJECTED)->count(),
         ];
 
-        $quotes = Quote::with(["customer", "vehicle.make",
-            "vehicle.customer", "vehicle.model", "convertedWorkOrder:id,code"])
+        $quotes = Quote::with(['customer', 'vehicle.make',
+            'vehicle.customer', 'vehicle.model', 'convertedWorkOrder:id,code'])
             ->withCount(['lines', 'parts'])
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where("id", "like", "%{$search}%")
-                      ->orWhere("code", "like", "%{$search}%")
-                      ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
-                      ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                    $q->where('id', 'like', "%{$search}%")
+                        ->orWhere('code', 'like', "%{$search}%")
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"))
+                        ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', "%{$search}%"));
                 });
             })
             ->when($status && $status !== 'all', function ($query) use ($status) {
@@ -112,13 +116,14 @@ class QuoteController extends Controller
             })
             ->when($request->date_range && $request->date_range !== 'all', function ($query, $range) {
                 $now = now();
-                $date = match($range) {
+                $date = match ($range) {
                     'today' => $now->startOfDay(),
                     'week' => $now->subDays(7),
                     'month' => $now->subMonth(),
                     '30days' => $now->subDays(30),
                     default => null
                 };
+
                 if ($date) {
                     $query->where('created_at', '>=', $date);
                 }
@@ -129,12 +134,12 @@ class QuoteController extends Controller
             ->when($request->date_to, function ($query, $date) {
                 $query->whereDate('created_at', '<=', $date);
             })
-            ->orderByDesc("created_at")
+            ->orderByDesc('created_at')
             ->paginate(20)
             ->withQueryString();
 
         $customers = Customer::orderBy('name')->get();
-        
+
         $services = Service::where('is_active', true)
             ->with('department')
             ->orderBy('sort_order')
@@ -149,6 +154,7 @@ class QuoteController extends Controller
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
 
         $modelsByMake = [];
+
         foreach ($makes as $make) {
             $modelsByMake[$make->id] = $make->models()->ordered()->get(['id', 'name_ar', 'name_en']);
         }
@@ -172,7 +178,7 @@ class QuoteController extends Controller
     public function search(Request $request): JsonResponse
     {
         $query = $request->input('q', '');
-        
+
         if (strlen($query) < 2) {
             return response()->json([]);
         }
@@ -180,10 +186,10 @@ class QuoteController extends Controller
         $vehicles = Vehicle::with(['customer', 'make', 'model'])
             ->where(function ($q) use ($query) {
                 $q->where('plate_number', 'like', "%{$query}%")
-                  ->orWhereHas('customer', function ($cq) use ($query) {
-                      $cq->where('name', 'like', "%{$query}%")
-                         ->orWhere('phone', 'like', "%{$query}%");
-                  });
+                    ->orWhereHas('customer', function ($cq) use ($query) {
+                        $cq->where('name', 'like', "%{$query}%")
+                            ->orWhere('phone', 'like', "%{$query}%");
+                    });
             })
             ->limit(10)
             ->get();
@@ -192,7 +198,7 @@ class QuoteController extends Controller
             $openQuote = Quote::where('vehicle_id', $vehicle->id)
                 ->whereIn('status', [Quote::STATUS_DRAFT, Quote::STATUS_SENT])
                 ->first();
-            
+
             $vehicleData = $vehicle->toArray();
             $vehicleData['has_open_quote'] = (bool) $openQuote;
             $vehicleData['open_quote'] = $openQuote ? [
@@ -200,7 +206,7 @@ class QuoteController extends Controller
                 'code' => $openQuote->code,
                 'status' => $openQuote->status,
             ] : null;
-            
+
             return $vehicleData;
         });
 
@@ -220,7 +226,7 @@ class QuoteController extends Controller
 
         if ($openQuote) {
             return redirect()->back()->withErrors([
-                'vehicle_id' => __('quotes.has_open_quote_error', ['code' => $openQuote->code])
+                'vehicle_id' => __('quotes.has_open_quote_error', ['code' => $openQuote->code]),
             ]);
         }
 
@@ -244,6 +250,7 @@ class QuoteController extends Controller
         if ($request->has('departments') && is_array($request->departments)) {
             $departments = $request->departments;
             $showPackages = false;
+
             if (($key = array_search('packages', $departments)) !== false) {
                 $showPackages = true;
                 unset($departments[$key]);
@@ -254,10 +261,11 @@ class QuoteController extends Controller
             $quote->departments()->sync($departments);
         }
 
-        if (!empty($request->lines)) {
+        if (! empty($request->lines)) {
             foreach ($request->lines as $lineData) {
                 $service = null;
-                if (!empty($lineData['service_id'])) {
+
+                if (! empty($lineData['service_id'])) {
                     $service = Service::find($lineData['service_id']);
                 }
 
@@ -281,7 +289,7 @@ class QuoteController extends Controller
 
         if ($request->has('odometer') && $request->odometer !== null) {
             $vehicle = $quote->vehicle;
-            
+
             VehicleMileageLog::create([
                 'vehicle_id' => $vehicle->id,
                 'mileage' => $request->odometer,
@@ -300,13 +308,13 @@ class QuoteController extends Controller
         NotificationService::notifyOwner(
             tenantId: $tenantId,
             type: 'quote.created',
-            title: 'عرض سعر جديد #' . $quote->code,
+            title: 'عرض سعر جديد #'.$quote->code,
             body: 'تم إنشاء عرض سعر جديد',
-            actionUrl: '/app/quotes/' . $quote->id,
+            actionUrl: '/app/quotes/'.$quote->id,
             actorId: auth()->id(),
         );
 
-        return redirect()->route("app.quotes.show", $quote);
+        return redirect()->route('app.quotes.show', $quote);
     }
 
     /**
@@ -316,7 +324,7 @@ class QuoteController extends Controller
     {
         $this->authorize('update', $quote);
 
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'This quote cannot be edited.');
         }
 
@@ -331,7 +339,7 @@ class QuoteController extends Controller
 
         if ($request->has('odometer') && $request->odometer !== null) {
             $vehicle = $quote->vehicle;
-            
+
             $existingLog = VehicleMileageLog::where('reference_type', Quote::class)
                 ->where('reference_id', $quote->id)
                 ->first();
@@ -364,6 +372,7 @@ class QuoteController extends Controller
         if ($request->has('departments')) {
             $departments = $request->departments ?? [];
             $showPackages = false;
+
             if (($key = array_search('packages', $departments)) !== false) {
                 $showPackages = true;
                 unset($departments[$key]);
@@ -378,7 +387,8 @@ class QuoteController extends Controller
 
             foreach ($request->lines as $lineData) {
                 $service = null;
-                if (!empty($lineData['service_id'])) {
+
+                if (! empty($lineData['service_id'])) {
                     $service = Service::find($lineData['service_id']);
                 }
 
@@ -414,7 +424,7 @@ class QuoteController extends Controller
     {
         $this->authorize('delete', $quote);
 
-        if (!$quote->isDraft()) {
+        if (! $quote->isDraft()) {
             abort(403, 'Only draft quotes can be deleted.');
         }
 
@@ -437,7 +447,7 @@ class QuoteController extends Controller
             'vehicle.customer',
             'vehicle.model',
             'lines.service.department',
-            'parts.part' => fn($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
+            'parts.part' => fn ($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
             'parts.quoteLine.service',
             'departments',
             'createdByUser',
@@ -448,6 +458,7 @@ class QuoteController extends Controller
             if ($line->service?->type === Service::TYPE_PACKAGE) {
                 return 'packages';
             }
+
             return $line->department_id ?? $line->service?->department_id ?? 0;
         });
 
@@ -468,7 +479,7 @@ class QuoteController extends Controller
             ->get()
             ->groupBy('make_id');
 
-        $inventoryUnits = \App\Models\InventoryUnit::where('is_active', true)
+        $inventoryUnits = InventoryUnit::where('is_active', true)
             ->orderBy('name_ar')
             ->get();
 

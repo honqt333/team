@@ -1,11 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Quote;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-use App\Support\Permissions;
 class QuotePolicy
 {
     use HandlesAuthorization;
@@ -39,7 +42,7 @@ class QuotePolicy
      */
     public function update(User $user, Quote $quote): bool
     {
-        if (!$user->can(Permissions::QUOTES_UPDATE)) {
+        if (! $user->can(Permissions::QUOTES_UPDATE)) {
             return false;
         }
 
@@ -52,7 +55,7 @@ class QuotePolicy
      */
     public function delete(User $user, Quote $quote): bool
     {
-        if (!$user->can(Permissions::QUOTES_DELETE)) {
+        if (! $user->can(Permissions::QUOTES_DELETE)) {
             return false;
         }
 
@@ -65,7 +68,7 @@ class QuotePolicy
      */
     public function approve(User $user, Quote $quote): bool
     {
-        if (!$user->can(Permissions::QUOTES_APPROVE)) {
+        if (! $user->can(Permissions::QUOTES_APPROVE)) {
             return false;
         }
 
@@ -77,7 +80,7 @@ class QuotePolicy
      */
     public function reject(User $user, Quote $quote): bool
     {
-        if (!$user->can(Permissions::QUOTES_APPROVE)) {
+        if (! $user->can(Permissions::QUOTES_APPROVE)) {
             return false;
         }
 

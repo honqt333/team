@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
+use App\Models\Customer;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -104,7 +107,7 @@ class SystemAccessControlTest extends TestCase
         // Tenant 2 with a customer
         $otherTenant = Tenant::factory()->create();
         $otherCenter = Center::factory()->create(['tenant_id' => $otherTenant->id]);
-        $otherCustomer = \App\Models\Customer::factory()->create([
+        $otherCustomer = Customer::factory()->create([
             'tenant_id' => $otherTenant->id,
             'center_id' => $otherCenter->id,
         ]);

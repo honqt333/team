@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Center;
@@ -20,6 +22,7 @@ class WarehouseFactory extends Factory
             'tenant_id' => function (array $attrs) {
                 if (! empty($attrs['center_id'])) {
                     $center = Center::query()->withoutGlobalScopes()->find($attrs['center_id']);
+
                     if ($center) {
                         return $center->tenant_id;
                     }

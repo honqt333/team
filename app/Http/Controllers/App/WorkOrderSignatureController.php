@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -38,7 +40,7 @@ class WorkOrderSignatureController extends Controller
         }
 
         // Generate filename and path
-        $filename = "signature_{$type}_" . Str::random(10) . ".{$extension}";
+        $filename = "signature_{$type}_".Str::random(10).".{$extension}";
         $path = "work_orders/{$workOrder->id}/signatures/{$filename}";
 
         // Store file

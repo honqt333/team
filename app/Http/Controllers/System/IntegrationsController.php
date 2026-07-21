@@ -1,14 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Integration\Integration;
 use App\Models\Integration\IntegrationLog;
+use App\Services\Sms\AuthenticaService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Inertia\Inertia;
 use Inertia\Response;
+use Mail;
 
 class IntegrationsController extends Controller
 {
@@ -18,13 +23,13 @@ class IntegrationsController extends Controller
     public function index(): Response
     {
         $integrations = Integration::orderBy('type')->orderBy('sort_order')->get();
-        
+
         $grouped = [
             'sms' => $integrations->where('type', 'sms')->values(),
             'whatsapp' => $integrations->where('type', 'whatsapp')->values(),
             'email' => $integrations->where('type', 'email')->values(),
         ];
-        
+
         $providers = [
             'sms' => Integration::getProviders('sms'),
             'whatsapp' => Integration::getProviders('whatsapp'),
@@ -67,8 +72,8 @@ class IntegrationsController extends Controller
         ]);
 
         $providers = Integration::getProviders($validated['type']);
-        
-        if (!isset($providers[$validated['provider']])) {
+
+        if (! isset($providers[$validated['provider']])) {
             return back()->withErrors(['provider' => 'المزود غير متاح']);
         }
 
@@ -94,24 +99,25 @@ class IntegrationsController extends Controller
     public function update(Request $request, Integration $integration)
     {
         $configFields = Integration::getConfigFields($integration->provider);
-        
+
         $rules = [
-            'is_active' => 'boolean', 
+            'is_active' => 'boolean',
             'is_default' => 'boolean',
             'purpose' => 'nullable|string|in:all,otp,notifications',
         ];
+
         foreach ($configFields as $field) {
             $type = ($field['type'] ?? 'text') === 'number' ? 'numeric' : 'string';
             $isRequired = ($field['required'] ?? false) ? 'required' : 'nullable';
             $rules["config.{$field['key']}"] = "$isRequired|$type";
         }
-        
+
         $validated = $request->validate($rules);
 
         // Preserve existing sensitive values if not provided
         $newConfig = $validated['config'] ?? [];
         $existingConfig = $integration->config ?? [];
-        
+
         foreach ($configFields as $field) {
             if ($field['type'] === 'password' && empty($newConfig[$field['key']])) {
                 $newConfig[$field['key']] = $existingConfig[$field['key']] ?? '';
@@ -162,7 +168,7 @@ class IntegrationsController extends Controller
             );
 
             return back()->with('success', 'تم إرسال رسالة الاختبار بنجاح');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $responseTime = (int) ((microtime(true) - $startTime) * 1000);
 
             IntegrationLog::log(
@@ -175,7 +181,7 @@ class IntegrationsController extends Controller
                 $responseTime
             );
 
-            return back()->withErrors(['test' => 'فشل الاختبار: ' . $e->getMessage()]);
+            return back()->withErrors(['test' => 'فشل الاختبار: '.$e->getMessage()]);
         }
     }
 
@@ -185,6 +191,7 @@ class IntegrationsController extends Controller
     public function destroy(Integration $integration)
     {
         $integration->delete();
+
         return redirect()->route('system.integrations.index')
             ->with('success', 'تم حذف التكامل');
     }
@@ -202,7 +209,7 @@ class IntegrationsController extends Controller
             'whatsapp_cloud' => $this->testWhatsAppCloud($config, $recipient),
             'smtp' => $this->testSmtp($config, $recipient),
             'authentica' => $this->testAuthentica($config, $recipient),
-            default => throw new \Exception('المزود غير مدعوم للاختبار'),
+            default => throw new Exception('المزود غير مدعوم للاختبار'),
         };
     }
 
@@ -215,8 +222,8 @@ class IntegrationsController extends Controller
             'Recipient' => $phone,
         ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('فشل في إرسال الرسالة: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('فشل في إرسال الرسالة: '.$response->body());
         }
 
         return $response->json();
@@ -232,8 +239,8 @@ class IntegrationsController extends Controller
                 'Body' => 'رسالة اختبار من خدمة برو / Khidmh Pro',
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('فشل في إرسال الرسالة: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('فشل في إرسال الرسالة: '.$response->body());
         }
 
         return $response->json();
@@ -249,8 +256,8 @@ class IntegrationsController extends Controller
                 'text' => ['body' => 'رسالة اختبار من خدمة برو / Khidmh Pro ✅'],
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('فشل في إرسال الرسالة: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('فشل في إرسال الرسالة: '.$response->body());
         }
 
         return $response->json();
@@ -270,7 +277,7 @@ class IntegrationsController extends Controller
             ],
         ]);
 
-        \Mail::mailer('test_smtp')->raw('رسالة اختبار من خدمة برو / Khidmh Pro', function ($message) use ($config, $email) {
+        Mail::mailer('test_smtp')->raw('رسالة اختبار من خدمة برو / Khidmh Pro', function ($message) use ($config, $email) {
             $message->from($config['from_address'], $config['from_name'] ?? 'Khidmh Pro');
             $message->to($email);
             $message->subject('اختبار البريد الإلكتروني');
@@ -281,11 +288,11 @@ class IntegrationsController extends Controller
 
     private function testAuthentica(array $config, string $phone): array
     {
-        $service = new \App\Services\Sms\AuthenticaService($config['api_key'] ?? '');
+        $service = new AuthenticaService($config['api_key'] ?? '');
         $result = $service->sendOtp($phone);
 
-        if (!$result['success']) {
-            throw new \Exception('فشل في إرسال الرسالة: ' . ($result['message'] ?? 'خطأ غير معروف'));
+        if (! $result['success']) {
+            throw new Exception('فشل في إرسال الرسالة: '.($result['message'] ?? 'خطأ غير معروف'));
         }
 
         return $result['data'];
@@ -304,7 +311,7 @@ class IntegrationsController extends Controller
         }
 
         $config = $integration->config ?? [];
-        $service = new \App\Services\Sms\AuthenticaService($config['api_key'] ?? '');
+        $service = new AuthenticaService($config['api_key'] ?? '');
         $result = $service->getBalance();
 
         return response()->json($result);

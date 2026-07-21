@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -8,6 +10,9 @@ use App\Models\Tenant;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Services\InvoiceService;
+use App\Services\Optimization\TaxCalculator;
+use DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,44 +34,44 @@ class AutoInvoiceOnFullPaymentTest extends TestCase
         $customer = Customer::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
-            'name'      => 'Cust1',
-            'phone'     => '1234567890',
+            'name' => 'Cust1',
+            'phone' => '1234567890',
         ]);
         $vehicle = Vehicle::create([
-            'tenant_id'    => $tenant->id,
-            'center_id'    => $center->id,
-            'customer_id'  => $customer->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
             'plate_number' => 'ABC123',
-            'make'         => 'Toyota',
-            'model'        => 'Camry',
-            'year'         => 2024,
+            'make' => 'Toyota',
+            'model' => 'Camry',
+            'year' => 2024,
         ]);
 
         $wo = WorkOrder::create([
-            'tenant_id'             => $tenant->id,
-            'center_id'             => $center->id,
-            'customer_id'           => $customer->id,
-            'vehicle_id'            => $vehicle->id,
-            'code'                  => 'WO-TEST-DONE',
-            'status'                => 'done',
-            'currency_code'         => 'SAR',
-            'tax_enabled_snapshot'  => true,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-TEST-DONE',
+            'status' => 'done',
+            'currency_code' => 'SAR',
+            'tax_enabled_snapshot' => true,
             'pricing_mode_snapshot' => 'exclusive',
-            'tax_rate_snapshot'     => 15.00,
-            'total_incl_tax'        => $total,
+            'tax_rate_snapshot' => 15.00,
+            'total_incl_tax' => $total,
         ]);
 
         // Need at least one item so the WO has a real total to invoice.
         WorkOrderItem::create([
-            'work_order_id'     => $wo->id,
-            'tenant_id'         => $wo->tenant_id,
-            'center_id'         => $wo->center_id,
-            'title'             => 'Service',
-            'qty'               => 1,
-            'unit_price'        => $total / 1.15,
-            'is_taxable'        => true,
+            'work_order_id' => $wo->id,
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'title' => 'Service',
+            'qty' => 1,
+            'unit_price' => $total / 1.15,
+            'is_taxable' => true,
             'tax_rate_snapshot' => 15.00,
-            'status'            => WorkOrderItem::STATUS_COMPLETED,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
         ]);
         $wo->refresh();
 
@@ -79,12 +84,12 @@ class AutoInvoiceOnFullPaymentTest extends TestCase
         [$wo] = $this->makeDoneWo(1000.00);
 
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'type'           => 'payment',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'type' => 'payment',
             'payment_method' => 'cash',
-            'amount'         => 400.00,
-            'payment_date'   => now(),
+            'amount' => 400.00,
+            'payment_date' => now(),
         ]);
 
         $wo->refresh();
@@ -98,12 +103,12 @@ class AutoInvoiceOnFullPaymentTest extends TestCase
 
         // First payment: partial
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'type'           => 'payment',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'type' => 'payment',
             'payment_method' => 'cash',
-            'amount'         => 600.00,
-            'payment_date'   => now(),
+            'amount' => 600.00,
+            'payment_date' => now(),
         ]);
 
         $wo->refresh();
@@ -111,12 +116,12 @@ class AutoInvoiceOnFullPaymentTest extends TestCase
 
         // Final payment — should trigger auto-invoice
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'type'           => 'payment',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'type' => 'payment',
             'payment_method' => 'cash',
-            'amount'         => 400.00,
-            'payment_date'   => now(),
+            'amount' => 400.00,
+            'payment_date' => now(),
         ]);
 
         $wo->refresh();
@@ -135,12 +140,12 @@ class AutoInvoiceOnFullPaymentTest extends TestCase
         $wo->update(['status' => 'in_progress']);
 
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'type'           => 'payment',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'type' => 'payment',
             'payment_method' => 'cash',
-            'amount'         => 1000.00,
-            'payment_date'   => now(),
+            'amount' => 1000.00,
+            'payment_date' => now(),
         ]);
 
         $wo->refresh();
@@ -156,12 +161,12 @@ class AutoInvoiceOnFullPaymentTest extends TestCase
         // would not satisfy the rule anyway, but make sure the refund path
         // also doesn't trip the auto-invoice logic.
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'type'           => 'refund',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'type' => 'refund',
             'payment_method' => 'cash',
-            'amount'         => 100.00,
-            'payment_date'   => now(),
+            'amount' => 100.00,
+            'payment_date' => now(),
         ]);
 
         $wo->refresh();
@@ -177,21 +182,21 @@ class AutoInvoiceOnFullPaymentTest extends TestCase
         // exit time). The WO's outstanding balance drops to 0 once payments
         // land on it.
         $wo->update(['total_incl_tax' => 0, 'status' => 'in_progress']); // avoid status check
-        $svc = new \App\Services\InvoiceService(new \App\Services\Optimization\TaxCalculator());
+        $svc = new InvoiceService(new TaxCalculator);
         $invoice = $svc->createFromWorkOrder($wo->fresh(), null);
         $wo->refresh();
 
         // Now pay against the WO. The new payment should NOT spawn a second
         // invoice because one already exists.
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'type'           => 'payment',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'type' => 'payment',
             'payment_method' => 'cash',
-            'amount'         => 0.00, // trivial
-            'payment_date'   => now(),
+            'amount' => 0.00, // trivial
+            'payment_date' => now(),
         ]);
 
-        $this->assertSame(1, $wo->invoice()->count() ?: (int) \DB::table('invoices')->where('work_order_id', $wo->id)->count());
+        $this->assertSame(1, $wo->invoice()->count() ?: (int) DB::table('invoices')->where('work_order_id', $wo->id)->count());
     }
 }

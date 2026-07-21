@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -23,7 +25,7 @@ class IncomeCategoryController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name_ar', 'like', "%{$search}%")
-                  ->orWhere('name_en', 'like', "%{$search}%");
+                    ->orWhere('name_en', 'like', "%{$search}%");
             });
         }
 
@@ -96,7 +98,7 @@ class IncomeCategoryController extends Controller
      */
     public function toggleActive(IncomeCategory $incomeCategory): RedirectResponse
     {
-        $incomeCategory->update(['is_active' => !$incomeCategory->is_active]);
+        $incomeCategory->update(['is_active' => ! $incomeCategory->is_active]);
 
         return redirect()->back()->with('success', 'تم تعديل حالة النشاط بنجاح');
     }

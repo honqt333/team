@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Service;
@@ -14,7 +16,7 @@ class WorkOrderItemFactory extends Factory
     public function definition(): array
     {
         $unitPrice = $this->faker->randomFloat(2, 50, 500);
-        
+
         return [
             'work_order_id' => WorkOrder::factory(),
             'service_id' => Service::factory(),

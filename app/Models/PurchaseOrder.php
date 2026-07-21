@@ -1,22 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
+use App\Traits\HasPurchaseOrderRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory, SoftDeletes, TenantScoped, \App\Traits\HasPurchaseOrderRelations;
+    use HasFactory, HasPurchaseOrderRelations, SoftDeletes, TenantScoped;
 
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_SENT = 'sent';
+
     public const STATUS_PARTIAL = 'partial';
+
     public const STATUS_RECEIVED = 'received';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
@@ -57,8 +62,6 @@ class PurchaseOrder extends Model
     // ─────────────────────────────────────────────────────────────
     // Relationships
     // ─────────────────────────────────────────────────────────────
-
-
 
     // ─────────────────────────────────────────────────────────────
     // Scopes
@@ -120,7 +123,7 @@ class PurchaseOrder extends Model
 
     public function canBeCancelled(): bool
     {
-        return !$this->isReceived() && !$this->isCancelled();
+        return ! $this->isReceived() && ! $this->isCancelled();
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -147,7 +150,7 @@ class PurchaseOrder extends Model
     {
         $year = now()->year;
         $prefix = "PO-{$year}-";
-        
+
         $lastCode = static::forTenant($tenantId)
             ->where('code', 'like', "{$prefix}%")
             ->orderBy('code', 'desc')
@@ -160,6 +163,6 @@ class PurchaseOrder extends Model
             $nextNumber = 1;
         }
 
-        return $prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        return $prefix.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
     }
 }

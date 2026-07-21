@@ -1,10 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminUser;
+use App\Models\User;
 use App\Services\TwoFactorService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -25,26 +29,26 @@ class TwoFactorController extends Controller
     public function setup(): Response
     {
         $user = auth()->user();
-        
+
         // Generate secret if not already set
         $secret = $user->two_factor_secret;
         $isEnabled = $user->two_factor_confirmed_at !== null;
-        
-        if (!$secret && !$isEnabled) {
+
+        if (! $secret && ! $isEnabled) {
             $secret = $this->twoFactor->generateSecret();
             $user->update(['two_factor_secret' => encrypt($secret)]);
-        } elseif ($secret && !$isEnabled) {
+        } elseif ($secret && ! $isEnabled) {
             $secret = decrypt($secret);
         }
 
-        $qrCode = !$isEnabled ? $this->twoFactor->generateQrCode($user->email, $secret) : null;
+        $qrCode = ! $isEnabled ? $this->twoFactor->generateQrCode($user->email, $secret) : null;
 
         return Inertia::render('System/Security/TwoFactorSetup', [
-            'secret' => !$isEnabled ? $secret : null,
+            'secret' => ! $isEnabled ? $secret : null,
             'qrCode' => $qrCode,
             'isEnabled' => $isEnabled,
-            'recoveryCodes' => $isEnabled && $user->two_factor_recovery_codes 
-                ? json_decode(decrypt($user->two_factor_recovery_codes), true) 
+            'recoveryCodes' => $isEnabled && $user->two_factor_recovery_codes
+                ? json_decode(decrypt($user->two_factor_recovery_codes), true)
                 : null,
         ]);
     }
@@ -59,18 +63,19 @@ class TwoFactorController extends Controller
         ]);
 
         $user = auth()->user();
-        
+
         if ($request->method === 'sms') {
-             if (!$user->phone) {
-                 return back()->withErrors(['method' => 'يجب تسجيل رقم الهاتف أولاً لاستخدام الرسائل النصية']);
-             }
-             
-             try {
-                 $this->twoFactor->sendCodeViaSms($user);
-             } catch (\Exception $e) {
-                 return back()->withErrors(['method' => $e->getMessage()]);
-             }
-             return back()->with('success', 'تم إرسال رمز التحقق إلى هاتفك');
+            if (! $user->phone) {
+                return back()->withErrors(['method' => 'يجب تسجيل رقم الهاتف أولاً لاستخدام الرسائل النصية']);
+            }
+
+            try {
+                $this->twoFactor->sendCodeViaSms($user);
+            } catch (Exception $e) {
+                return back()->withErrors(['method' => $e->getMessage()]);
+            }
+
+            return back()->with('success', 'تم إرسال رمز التحقق إلى هاتفك');
         }
 
         // Email
@@ -91,7 +96,7 @@ class TwoFactorController extends Controller
         $user = auth()->user();
         $secret = decrypt($user->two_factor_secret);
 
-        if (!$this->twoFactor->verify($secret, $request->code)) {
+        if (! $this->twoFactor->verify($secret, $request->code)) {
             return back()->withErrors(['code' => 'رمز التحقق غير صحيح']);
         }
 
@@ -117,7 +122,7 @@ class TwoFactorController extends Controller
 
         $user = auth()->user();
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             return back()->withErrors(['password' => 'كلمة المرور غير صحيحة']);
         }
 
@@ -141,7 +146,7 @@ class TwoFactorController extends Controller
 
         $user = auth()->user();
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             return back()->withErrors(['password' => 'كلمة المرور غير صحيحة']);
         }
 
@@ -173,16 +178,16 @@ class TwoFactorController extends Controller
 
         $userId = session('2fa:user_id');
         $userType = session('2fa:user_type', 'admin');
-        
-        if (!$userId) {
+
+        if (! $userId) {
             return redirect()->route('login');
         }
 
-        $user = $userType === 'admin' 
+        $user = $userType === 'admin'
             ? AdminUser::find($userId)
-            : \App\Models\User::find($userId);
+            : User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
@@ -190,15 +195,15 @@ class TwoFactorController extends Controller
 
         // Verify TOTP code
         if ($request->code) {
-            if (!$this->twoFactor->verify($secret, $request->code)) {
+            if (! $this->twoFactor->verify($secret, $request->code)) {
                 return back()->withErrors(['code' => 'رمز التحقق غير صحيح']);
             }
-        } 
+        }
         // Verify recovery code
         elseif ($request->recovery_code) {
             $recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
-            
-            if (!$this->twoFactor->verifyRecoveryCode($request->recovery_code, $recoveryCodes)) {
+
+            if (! $this->twoFactor->verifyRecoveryCode($request->recovery_code, $recoveryCodes)) {
                 return back()->withErrors(['recovery_code' => 'رمز الاسترداد غير صحيح']);
             }
 

@@ -1,21 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
+use App\Exports\VehiclesExport;
 use App\Http\Requests\VehicleStoreRequest;
 use App\Http\Requests\VehicleUpdateRequest;
 use App\Models\Customer;
-use App\Models\Vehicle;
-use App\Models\VehicleMake;
-use App\Models\VehicleColor;
-use App\Models\WorkOrder;
-use App\Models\Quote;
 use App\Models\Department;
+use App\Models\Invoice;
 use App\Models\Service;
-use App\Models\VehicleModel;
+use App\Models\Vehicle;
+use App\Models\VehicleColor;
+use App\Models\VehicleMake;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 class VehicleController
 {
@@ -27,12 +30,12 @@ class VehicleController
     public function export()
     {
         $this->authorize('viewAny', Vehicle::class);
-        
-        $search = request('search');
-        $filename = 'vehicles_' . date('Y-m-d_His') . '.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\VehiclesExport($search),
+        $search = request('search');
+        $filename = 'vehicles_'.date('Y-m-d_His').'.xlsx';
+
+        return Excel::download(
+            new VehiclesExport($search),
             $filename
         );
     }
@@ -49,13 +52,12 @@ class VehicleController
 
     }
 
-
     public function apiIndex(Request $request)
     {
         $this->authorize('viewAny', Vehicle::class);
 
         $user = auth()->user();
-        
+
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
             ->with(['customer', 'make', 'model'])
@@ -65,14 +67,14 @@ class VehicleController
                     'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G', 'ك' => 'K', 'ل' => 'L',
                     'م' => 'Z', 'ن' => 'N', 'هـ' => 'H', 'ه' => 'H', 'و' => 'U', 'ي' => 'V',
                     '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
-                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'
+                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
                 ];
                 $plateSearch = strtr(mb_strtoupper($search, 'UTF-8'), $arabicToEnglish);
                 $plateSearch = str_replace(' ', '%', $plateSearch);
 
                 $query->where(function ($q) use ($search, $plateSearch) {
                     $q->where('plate_number', 'like', "%{$plateSearch}%")
-                      ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
             ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
@@ -90,7 +92,7 @@ class VehicleController
         $this->authorize('viewAny', Vehicle::class);
 
         $user = $request->user();
-        
+
         $vehicles = Vehicle::query()
             ->where('tenant_id', $user->tenant_id)
             ->with(['customer', 'make', 'model'])
@@ -100,14 +102,14 @@ class VehicleController
                     'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G', 'ك' => 'K', 'ل' => 'L',
                     'م' => 'Z', 'ن' => 'N', 'هـ' => 'H', 'ه' => 'H', 'و' => 'U', 'ي' => 'V',
                     '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
-                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9'
+                    '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
                 ];
                 $plateSearch = strtr(mb_strtoupper($search, 'UTF-8'), $arabicToEnglish);
                 $plateSearch = str_replace(' ', '%', $plateSearch);
 
                 $query->where(function ($q) use ($search, $plateSearch) {
                     $q->where('plate_number', 'like', "%{$plateSearch}%")
-                      ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
+                        ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"));
                 });
             })
             ->when($request->make_id, fn ($q, $makeId) => $q->where('make_id', $makeId))
@@ -124,16 +126,15 @@ class VehicleController
             ->orderBy('name')
             ->get();
 
-
-
         // Get all makes
         $makes = VehicleMake::ordered()->get(['id', 'name_ar', 'name_en']);
-        
+
         // Get active colors
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
 
         // Build modelsByMake map
         $modelsByMake = [];
+
         foreach ($makes as $make) {
             $modelsByMake[$make->id] = $make->models()->ordered()->get(['id', 'name_ar', 'name_en']);
         }
@@ -153,7 +154,7 @@ class VehicleController
         $this->authorize('create', Vehicle::class);
 
         $user = $request->user();
-        
+
         $data = $request->validated();
         $data['tenant_id'] = $user->tenant_id;
         $data['center_id'] = $user->current_center_id;
@@ -162,12 +163,13 @@ class VehicleController
         if ($request->make_id === '__other__' || $request->make_id === null) {
             $data['make_id'] = null;
         }
+
         if ($request->model_id === '__other__' || $request->model_id === null) {
             $data['model_id'] = null;
         }
 
         $vehicle = Vehicle::create($data);
-        
+
         // Record initial mileage log if provided
         if ($request->odometer > 0) {
             $vehicle->mileageLogs()->create([
@@ -191,10 +193,10 @@ class VehicleController
 
         // Load relationships
         $vehicle->load([
-            'customer', 
-            'make', 
-            'model', 
-            'mileageLogs' => fn($q) => $q->with('creator')->latest()
+            'customer',
+            'make',
+            'model',
+            'mileageLogs' => fn ($q) => $q->with('creator')->latest(),
         ]);
 
         // Get all related data (bypassing center_scoped to support tenant-wide vehicle history)
@@ -203,17 +205,17 @@ class VehicleController
             ->with(['vehicle.make', 'vehicle.model', 'items.service', 'parts', 'generalNotes.user', 'invoice'])
             ->latest()
             ->get();
-            
+
         $workOrders->each->append(['total', 'total_paid', 'balance', 'bad_debt']);
-        
+
         $quotes = $vehicle->quotes()
             ->withoutGlobalScope('center_scoped')
             ->with(['vehicle.make', 'vehicle.model'])
             ->latest()
             ->get();
-        
+
         // Fetch invoices via work orders
-        $invoices = \App\Models\Invoice::withoutGlobalScope('center_scoped')
+        $invoices = Invoice::withoutGlobalScope('center_scoped')
             ->whereIn('work_order_id', $workOrders->pluck('id'))
             ->with('customer')
             ->latest()
@@ -236,9 +238,10 @@ class VehicleController
         $colors = VehicleColor::active()->ordered()->get(['id', 'name_ar', 'name_en', 'hex_code']);
         $departments = Department::where('is_active', true)->orderBy('sort_order')->get();
         $services = Service::where('is_active', true)->with('department')->orderBy('sort_order')->get();
-        
+
         // Build modelsByMake map
         $modelsByMake = [];
+
         foreach ($makes as $make) {
             $modelsByMake[$make->id] = $make->models()->ordered()->get(['id', 'name_ar', 'name_en']);
         }
@@ -269,15 +272,17 @@ class VehicleController
         if ($request->make_id === '__other__' || $request->make_id === null) {
             $data['make_id'] = null;
         }
+
         if ($request->model_id === '__other__' || $request->model_id === null) {
             $data['model_id'] = null;
         }
 
-        $oldOdometer = (int)$vehicle->odometer;
+        $oldOdometer = (int) $vehicle->odometer;
         $vehicle->update($data);
 
         // Record mileage log if odometer changed manually
-        $newOdometer = (int)$request->odometer;
+        $newOdometer = (int) $request->odometer;
+
         if ($newOdometer !== $oldOdometer && $newOdometer > 0) {
             $vehicle->mileageLogs()->create([
                 'mileage' => $newOdometer,
@@ -291,12 +296,12 @@ class VehicleController
         return back()->with('success', 'Vehicle updated successfully.');
     }
 
-    public function checkPlate(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    public function checkPlate(Request $request): JsonResponse
     {
         $tenantId = auth()->user()->tenant_id;
         $plateNumber = $request->query('plate_number');
 
-        if (!$plateNumber) {
+        if (! $plateNumber) {
             return response()->json(['exists' => false]);
         }
 
@@ -323,7 +328,7 @@ class VehicleController
                     'year' => $vehicle->year,
                     'vin' => $vehicle->vin,
                     'color' => $vehicle->color_name_ar ?? $vehicle->color_name_en,
-                ]
+                ],
             ]);
         }
 

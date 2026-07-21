@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
+use Spatie\Permission\PermissionRegistrar;
 
 class SetPasswordController extends Controller
 {
@@ -17,7 +20,7 @@ class SetPasswordController extends Controller
      */
     public function show(Request $request, User $user)
     {
-        if (!$request->hasValidSignature()) {
+        if (! $request->hasValidSignature()) {
             abort(403, 'Invalid or expired invitation link.');
         }
 
@@ -31,7 +34,7 @@ class SetPasswordController extends Controller
             'signature_params' => [
                 'expires' => $request->query('expires'),
                 'signature' => $request->query('signature'),
-            ]
+            ],
         ]);
     }
 
@@ -40,7 +43,7 @@ class SetPasswordController extends Controller
      */
     public function store(Request $request, User $user)
     {
-        if (!$request->hasValidSignature()) {
+        if (! $request->hasValidSignature()) {
             abort(403, 'Invalid or expired invitation link.');
         }
 
@@ -58,14 +61,14 @@ class SetPasswordController extends Controller
 
         // Set team context for role checking (required by Spatie Permission)
         if ($user->tenant_id) {
-            app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+            app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
         }
 
         // Role-based redirect
         // If user ONLY has 'employee' role, redirect to employee portal
         $roles = $user->getRoleNames()->toArray();
         $isOnlyEmployee = count($roles) === 1 && in_array('employee', $roles);
-        
+
         if ($isOnlyEmployee) {
             return redirect()->intended(route('employee.dashboard'));
         }

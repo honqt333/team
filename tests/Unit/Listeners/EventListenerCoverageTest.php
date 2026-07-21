@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Listeners;
 
 use App\Events\Auth\LoginFailed;
@@ -13,12 +15,12 @@ use App\Listeners\Payment\UpdateInvoiceStatusOnPayment;
 use App\Listeners\WorkOrder\LogActivityOnStatusChange;
 use App\Listeners\WorkOrder\NotifyOwnerOnCreation;
 use App\Models\Center;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\WorkOrder;
-use App\Models\WorkOrderActivity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -27,7 +29,9 @@ class EventListenerCoverageTest extends TestCase
     use RefreshDatabase;
 
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected User $user;
 
     protected function setUp(): void
@@ -49,7 +53,7 @@ class EventListenerCoverageTest extends TestCase
             'status' => 'in_progress',
         ]);
 
-        $listener = new LogActivityOnStatusChange();
+        $listener = new LogActivityOnStatusChange;
         $event = new WorkOrderStatusChanged($workOrder, 'pending', 'in_progress', $this->user->id);
 
         $listener->handle($event);
@@ -68,7 +72,7 @@ class EventListenerCoverageTest extends TestCase
             'center_id' => $this->center->id,
         ]);
 
-        $listener = new NotifyOwnerOnCreation();
+        $listener = new NotifyOwnerOnCreation;
         $event = new WorkOrderCreated($workOrder);
 
         $listener->handle($event);
@@ -78,7 +82,7 @@ class EventListenerCoverageTest extends TestCase
 
     public function test_update_invoice_status_on_payment_updates_linked_invoice()
     {
-        $customer = \App\Models\Customer::factory()->create(['tenant_id' => $this->tenant->id, 'center_id' => $this->center->id]);
+        $customer = Customer::factory()->create(['tenant_id' => $this->tenant->id, 'center_id' => $this->center->id]);
 
         $invoice = Invoice::create([
             'tenant_id' => $this->tenant->id,
@@ -103,7 +107,7 @@ class EventListenerCoverageTest extends TestCase
             'payment_date' => now(),
         ]);
 
-        $listener = new UpdateInvoiceStatusOnPayment();
+        $listener = new UpdateInvoiceStatusOnPayment;
         $event = new PaymentRecorded($payment);
 
         $listener->handle($event);
@@ -114,7 +118,7 @@ class EventListenerCoverageTest extends TestCase
 
     public function test_log_successful_login_runs_without_exception()
     {
-        $listener = new LogSuccessfulLogin();
+        $listener = new LogSuccessfulLogin;
         $event = new LoginSuccessful($this->user, '127.0.0.1', 'PHPUnit');
 
         $listener->handle($event);
@@ -124,7 +128,7 @@ class EventListenerCoverageTest extends TestCase
 
     public function test_log_failed_login_runs_without_exception()
     {
-        $listener = new LogFailedLogin();
+        $listener = new LogFailedLogin;
         $event = new LoginFailed('unknown@example.com', '127.0.0.1', 'PHPUnit');
 
         $listener->handle($event);

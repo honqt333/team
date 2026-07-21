@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\WorkOrder;
 use App\Models\Customer;
 use App\Models\Vehicle;
+use App\Models\WorkOrder;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class WorkOrderController extends Controller
 {
@@ -31,7 +33,7 @@ class WorkOrderController extends Controller
     public function customerSearch(Request $request): JsonResponse
     {
         $query = $request->input('q', '');
-        
+
         if (strlen($query) < 2) {
             return response()->json([]);
         }
@@ -40,15 +42,15 @@ class WorkOrderController extends Controller
         $phoneSuffix = $this->getCleanPhoneSuffix($query);
 
         $customers = Customer::where(function ($q) use ($query, $normalizedQuery, $phoneSuffix) {
-                $q->where('name', 'like', "%{$query}%")
-                  ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(name, 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ة', 'ه') LIKE ?", ["%{$normalizedQuery}%"]);
-                  
-                if ($phoneSuffix !== null) {
-                    $q->orWhere('phone', 'like', "%{$phoneSuffix}%");
-                } else {
-                    $q->orWhere('phone', 'like', "%{$query}%");
-                }
-            })
+            $q->where('name', 'like', "%{$query}%")
+                ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(name, 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ة', 'ه') LIKE ?", ["%{$normalizedQuery}%"]);
+
+            if ($phoneSuffix !== null) {
+                $q->orWhere('phone', 'like', "%{$phoneSuffix}%");
+            } else {
+                $q->orWhere('phone', 'like', "%{$query}%");
+            }
+        })
             ->select('id', 'name', 'phone', 'type')
             ->limit(10)
             ->get();
@@ -63,7 +65,7 @@ class WorkOrderController extends Controller
     {
         $customerId = $request->input('customer_id');
 
-        if (!$customerId) {
+        if (! $customerId) {
             return response()->json([]);
         }
 
@@ -80,7 +82,7 @@ class WorkOrderController extends Controller
     public function vehicleSearch(Request $request): JsonResponse
     {
         $query = $request->input('q', '');
-        
+
         if (strlen($query) < 2) {
             return response()->json([]);
         }
@@ -101,8 +103,8 @@ class WorkOrderController extends Controller
                 // Customer search
                 $q->orWhereHas('customer', function ($customerQuery) use ($query, $normalizedQuery, $phoneSuffix) {
                     $customerQuery->where('name', 'like', "%{$query}%")
-                                  ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(name, 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ة', 'ه') LIKE ?", ["%{$normalizedQuery}%"]);
-                    
+                        ->orWhereRaw("REPLACE(REPLACE(REPLACE(REPLACE(name, 'أ', 'ا'), 'إ', 'ا'), 'آ', 'ا'), 'ة', 'ه') LIKE ?", ["%{$normalizedQuery}%"]);
+
                     if ($phoneSuffix !== null) {
                         $customerQuery->orWhere('phone', 'like', "%{$phoneSuffix}%");
                     } else {
@@ -118,7 +120,7 @@ class WorkOrderController extends Controller
             $openWorkOrder = WorkOrder::where('vehicle_id', $vehicle->id)
                 ->whereIn('status', ['draft', 'open', 'in_progress'])
                 ->first(['id', 'code', 'status']);
-            
+
             $vehicle->has_open_work_order = $openWorkOrder !== null;
             $vehicle->open_work_order = $openWorkOrder;
         });
@@ -133,27 +135,33 @@ class WorkOrderController extends Controller
         $str = str_replace(['أ', 'إ', 'آ'], 'ا', $str);
         $str = str_replace('ة', 'ه', $str);
         $str = str_replace('ى', 'ي', $str);
+
         return trim($str);
     }
 
     private function getCleanPhoneSuffix(string $query): ?string
     {
         $digits = preg_replace('/\D/', '', $query);
+
         if (strlen($digits) >= 5) {
             $suffix = $digits;
+
             if (str_starts_with($suffix, '966')) {
                 $suffix = substr($suffix, 3);
             } elseif (str_starts_with($suffix, '00966')) {
                 $suffix = substr($suffix, 5);
             }
+
             return ltrim($suffix, '0');
         }
+
         return null;
     }
 
     private function getPlateSearchTerms(string $query): array
     {
         $cleanQuery = str_replace([' ', '-'], '', $query);
+
         if (empty($cleanQuery)) {
             return [];
         }
@@ -166,12 +174,12 @@ class WorkOrderController extends Controller
             'س' => 'S', 'ص' => 'X', 'ط' => 'T', 'ع' => 'E', 'ق' => 'G',
             'ك' => 'K', 'ل' => 'L', 'م' => 'Z', 'ن' => 'N', 'ه' => 'H',
             'و' => 'U', 'ي' => 'V',
-            
+
             'A' => 'أ', 'B' => 'ب', 'J' => 'ح', 'D' => 'د', 'R' => 'ر',
             'S' => 'س', 'X' => 'ص', 'T' => 'ط', 'E' => 'ع', 'G' => 'ق',
             'K' => 'ك', 'L' => 'ل', 'Z' => 'م', 'N' => 'ن', 'H' => 'ه',
             'U' => 'و', 'V' => 'ي',
-            
+
             // Hindi digits to English digits
             '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
             '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
@@ -180,8 +188,10 @@ class WorkOrderController extends Controller
         // Convert string to array of chars
         $chars = mb_str_split($cleanQuery);
         $translatedChars = [];
+
         foreach ($chars as $char) {
             $upperChar = mb_strtoupper($char);
+
             if (isset($plateMapping[$upperChar])) {
                 $translatedChars[] = $plateMapping[$upperChar];
             } else {

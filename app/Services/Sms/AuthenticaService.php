@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Sms;
 
 use App\Models\Integration\Integration;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AuthenticaService
 {
     protected string $apiKey;
+
     protected string $baseUrl = 'https://api.authentica.sa';
 
     public function __construct(string $apiKey)
@@ -61,7 +65,7 @@ class AuthenticaService
                 'message' => $response->json('message') ?? 'Failed to send OTP',
                 'data' => $response->json(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Authentica sendOtp exception', [
                 'phone' => $phone,
                 'error' => $e->getMessage(),
@@ -98,7 +102,7 @@ class AuthenticaService
                 $data = $response->json();
                 // Authentica returns 'status' not 'valid' or 'success'
                 $isValid = ($data['status'] ?? false) || ($data['valid'] ?? false) || ($data['success'] ?? false);
-                
+
                 return [
                     'success' => $isValid,
                     'message' => $isValid ? 'OTP verified successfully' : ($data['message'] ?? 'Invalid OTP'),
@@ -111,7 +115,7 @@ class AuthenticaService
                 'message' => $response->json('message') ?? 'Verification failed',
                 'data' => $response->json(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Authentica verifyOtp exception', [
                 'phone' => $phone,
                 'error' => $e->getMessage(),
@@ -129,7 +133,6 @@ class AuthenticaService
      * Send OTP via WhatsApp.
      *
      * @param string $phone Phone number with country code
-     * @return array
      */
     public function sendOtpWhatsApp(string $phone): array
     {
@@ -156,7 +159,7 @@ class AuthenticaService
                 'message' => $response->json('message') ?? 'Failed to send OTP',
                 'data' => $response->json(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -183,6 +186,7 @@ class AuthenticaService
                 $data = $response->json();
                 // Authentica returns balance in data.balance
                 $balance = $data['data']['balance'] ?? $data['balance'] ?? $data['credits'] ?? $data['remaining'] ?? null;
+
                 return [
                     'success' => true,
                     'balance' => $balance,
@@ -202,7 +206,7 @@ class AuthenticaService
                 'message' => $response->json('message') ?? 'Failed to get balance',
                 'data' => $response->json(),
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Authentica getBalance exception', [
                 'error' => $e->getMessage(),
             ]);

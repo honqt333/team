@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
@@ -12,14 +14,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkOrderItem extends Model
 {
-    use HasFactory, CenterScoped;
+    use CenterScoped, HasFactory;
 
     // Status constants
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_READY_FOR_QC = 'ready_for_qc';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_ON_HOLD = 'on_hold';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
@@ -69,10 +76,11 @@ class WorkOrderItem extends Model
             $item->total = $computed['line_total'];
 
             if ($item->isDirty('status')) {
-                if ($item->status === self::STATUS_IN_PROGRESS && !$item->started_at) {
+                if ($item->status === self::STATUS_IN_PROGRESS && ! $item->started_at) {
                     $item->started_at = now();
                 }
-                if ($item->status === self::STATUS_COMPLETED && !$item->completed_at) {
+
+                if ($item->status === self::STATUS_COMPLETED && ! $item->completed_at) {
                     $item->completed_at = now();
 
                     if ($item->is_warranty) {
@@ -155,6 +163,7 @@ class WorkOrderItem extends Model
 
         if ($newStatus === self::STATUS_PENDING) {
             $parentStatus = $this->workOrder()->first()?->status;
+
             if (in_array($parentStatus, [WorkOrder::STATUS_IN_PROGRESS, WorkOrder::STATUS_READY_FOR_QC, WorkOrder::STATUS_DONE])) {
                 if ($this->status !== self::STATUS_PENDING) {
                     return false;
@@ -165,17 +174,55 @@ class WorkOrderItem extends Model
         return true;
     }
 
-    public function canModifyPrice(): bool { return !$this->price_locked; }
-    public function isCompleted(): bool { return $this->status === self::STATUS_COMPLETED; }
-    public function isPending(): bool { return $this->status === self::STATUS_PENDING; }
-    public function isOnHold(): bool { return $this->status === self::STATUS_ON_HOLD; }
-    public function isCancelled(): bool { return $this->status === self::STATUS_CANCELLED; }
+    public function canModifyPrice(): bool
+    {
+        return ! $this->price_locked;
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    public function isOnHold(): bool
+    {
+        return $this->status === self::STATUS_ON_HOLD;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
 
     // ==================== Accessors ====================
 
-    public function getTechniciansCountAttribute(): int { return $this->technicians()->count(); }
-    public function getPartsCountAttribute(): int { return $this->parts()->count(); }
-    public function getNotesCountAttribute(): int { return $this->itemNotes()->count(); }
-    public function getPartsTotalAttribute(): float { return $this->parts->sum('total'); }
-    public function getGrandTotalAttribute(): float { return $this->total + $this->parts_total; }
+    public function getTechniciansCountAttribute(): int
+    {
+        return $this->technicians()->count();
+    }
+
+    public function getPartsCountAttribute(): int
+    {
+        return $this->parts()->count();
+    }
+
+    public function getNotesCountAttribute(): int
+    {
+        return $this->itemNotes()->count();
+    }
+
+    public function getPartsTotalAttribute(): float
+    {
+        return $this->parts->sum('total');
+    }
+
+    public function getGrandTotalAttribute(): float
+    {
+        return $this->total + $this->parts_total;
+    }
 }

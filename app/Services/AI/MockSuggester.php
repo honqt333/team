@@ -33,7 +33,7 @@ class MockSuggester
     /**
      * Generate ranked suggestions for the given complaint.
      *
-     * @param  Collection<int, array{item_type: string, item_id: int, name_ar: string, name_en: string, description_ar?: string, description_en?: string}>  $catalog
+     * @param Collection<int, array{item_type: string, item_id: int, name_ar: string, name_en: string, description_ar?: string, description_en?: string}> $catalog
      * @return array<int, array{item_type: string, item_id: int, name: string, name_en?: string, reason: string, confidence: float, qty: int}>
      */
     public function suggestForComplaint(
@@ -77,6 +77,7 @@ class MockSuggester
             ->take($effectiveLimit);
 
         $results = [];
+
         foreach ($scored as $row) {
             /** @var array<string, mixed> $item */
             $item = $row['item'];
@@ -110,6 +111,7 @@ class MockSuggester
     private function tokenize(string $text): array
     {
         $normalized = Str::lower(trim($text));
+
         if ($normalized === '') {
             return [];
         }
@@ -122,6 +124,7 @@ class MockSuggester
         $parts = preg_split('/[^\p{L}\p{N}]+/u', $normalized) ?: [];
 
         $tokens = [];
+
         foreach ($parts as $part) {
             if ($part === '') {
                 continue;
@@ -138,8 +141,8 @@ class MockSuggester
      * Uses Szymkiewicz–Simpson-style overlap over the smaller set,
      * normalized by the larger of the two — gives a value in [0, 1].
      *
-     * @param  array<int, string>  $complaintTokens
-     * @param  array<int, string>  $itemTokens
+     * @param array<int, string> $complaintTokens
+     * @param array<int, string> $itemTokens
      */
     private function score(array $complaintTokens, array $itemTokens): float
     {
@@ -149,6 +152,7 @@ class MockSuggester
 
         $complaintSet = array_flip($complaintTokens);
         $matched = 0;
+
         foreach ($itemTokens as $token) {
             if (isset($complaintSet[$token])) {
                 $matched++;
@@ -161,14 +165,15 @@ class MockSuggester
     }
 
     /**
-     * @param  array<int, string>  $complaintTokens
-     * @param  array<int, string>  $itemTokens
+     * @param array<int, string> $complaintTokens
+     * @param array<int, string> $itemTokens
      * @return array<int, string>
      */
     private function matchedTokens(array $complaintTokens, array $itemTokens): array
     {
         $complaintSet = array_flip($complaintTokens);
         $hits = [];
+
         foreach ($itemTokens as $token) {
             if (isset($complaintSet[$token])) {
                 $hits[] = $token;
@@ -192,7 +197,7 @@ class MockSuggester
      * Build a short human-readable reason explaining why the item
      * matched. Bilingual — falls back to English for an `en` locale.
      *
-     * @param  array<int, string>  $matched
+     * @param array<int, string> $matched
      */
     private function reason(array $matched, float $confidence): string
     {
@@ -217,6 +222,7 @@ class MockSuggester
         if ($confidence >= 0.7) {
             return 'high';
         }
+
         if ($confidence >= 0.4) {
             return 'medium';
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -17,13 +19,13 @@ class LocaleController extends Controller
         ]);
 
         $locale = $request->locale;
-        
+
         // Store in session
         session(['locale' => $locale]);
-        
+
         // Set for current request
         App::setLocale($locale);
-        
+
         return redirect()->back();
     }
 

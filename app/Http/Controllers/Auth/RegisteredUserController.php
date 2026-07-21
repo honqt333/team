@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -56,6 +58,7 @@ class RegisteredUserController extends Controller
 
         // Check if phone already exists for any tenant
         $formattedPhone = $this->formatPhoneNumber($request->phone);
+
         if (Tenant::where('phone', $formattedPhone)->exists()) {
             return back()->withErrors(['phone' => __('auth.phone_already_registered')]);
         }

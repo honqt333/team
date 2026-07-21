@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -13,7 +15,9 @@ use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Services\QuoteConversionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use InvalidArgumentException;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class QuotesTest extends TestCase
@@ -21,10 +25,15 @@ class QuotesTest extends TestCase
     use RefreshDatabase;
 
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected User $user;
+
     protected Customer $customer;
+
     protected Vehicle $vehicle;
+
     protected Service $service;
 
     protected function setUp(): void
@@ -37,10 +46,10 @@ class QuotesTest extends TestCase
             'tenant_id' => $this->tenant->id,
             'current_center_id' => $this->center->id,
         ]);
-        
+
         // Assign user to center via pivot table
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
-        
+
         $this->customer = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,
             'center_id' => $this->center->id,
@@ -65,7 +74,7 @@ class QuotesTest extends TestCase
         Permission::create(['name' => 'quotes.approve', 'guard_name' => 'web']);
 
         // Set the team id for permissions based on the user's tenant
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
 
         $this->user->givePermissionTo([
             'quotes.view',
@@ -240,10 +249,10 @@ class QuotesTest extends TestCase
             'tenant_id' => $this->tenant->id,
             'current_center_id' => $this->center->id,
         ]);
-        
+
         // Set the team id for permissions
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
-        
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+
         $userWithoutPermission->givePermissionTo(['quotes.view', 'quotes.create']);
 
         $this->actingAsWithTeam($userWithoutPermission);
@@ -291,7 +300,7 @@ class QuotesTest extends TestCase
 
         $conversionService = app(QuoteConversionService::class);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Quote has already been converted.');
 
         $conversionService->convert($quote, $this->user);
@@ -326,8 +335,8 @@ class QuotesTest extends TestCase
 
         // Now try with discount that would go below min price
         // PricingHelper should throw InvalidArgumentException when final price < min price
-        $this->expectException(\InvalidArgumentException::class);
-        
+        $this->expectException(InvalidArgumentException::class);
+
         $line->discount_value = 25;
         $line->save();
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
@@ -25,6 +27,7 @@ class EmployeeFinancialsController extends Controller
         ]);
 
         $syncData = [];
+
         foreach ($validated['allowances'] ?? [] as $allowance) {
             $syncData[$allowance['id']] = [
                 'custom_amount' => $allowance['custom_amount'] ?? null,
@@ -56,6 +59,7 @@ class EmployeeFinancialsController extends Controller
         ]);
 
         $syncData = [];
+
         foreach ($validated['deductions'] ?? [] as $deduction) {
             $syncData[$deduction['id']] = [
                 'custom_amount' => $deduction['custom_amount'] ?? null,
@@ -76,7 +80,7 @@ class EmployeeFinancialsController extends Controller
     public function updateBankInfo(Request $request, Employee $employee)
     {
         $this->authorize('update', $employee);
-        
+
         $validated = $request->validate([
             'bank_name' => 'nullable|string|max:100',
             'bank_iban' => 'nullable|string|max:34',
@@ -95,7 +99,7 @@ class EmployeeFinancialsController extends Controller
     public function updateFinancialInfo(Request $request, Employee $employee)
     {
         $this->authorize('update', $employee);
-        
+
         $validated = $request->validate([
             'base_salary' => 'required|numeric|min:0',
             'gosi_rate' => 'nullable|numeric|min:0|max:100',

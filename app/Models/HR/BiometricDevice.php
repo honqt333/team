@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\HR;
 
 use App\Models\Center;
@@ -70,6 +72,7 @@ class BiometricDevice extends Model
     {
         $this->api_token = Str::random(64);
         $this->save();
+
         return $this->api_token;
     }
 

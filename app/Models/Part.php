@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Models\Concerns\TenantScoped;
 
 class Part extends Model
 {
@@ -38,19 +40,19 @@ class Part extends Model
     {
         // Safely check if the column exists in the attributes to avoid crashes if migration hasn't run
         $imagePath = array_key_exists('image_path', $this->attributes) ? $this->attributes['image_path'] : null;
-        
-        return $imagePath 
-            ? asset('storage/' . $imagePath) 
-            : "https://ui-avatars.com/api/?name=" . urlencode($this->name_ar) . "&color=7F9CF5&background=EBF4FF";
+
+        return $imagePath
+            ? asset('storage/'.$imagePath)
+            : 'https://ui-avatars.com/api/?name='.urlencode($this->name_ar).'&color=7F9CF5&background=EBF4FF';
     }
 
     protected $casts = [
-        'is_active'                   => 'boolean',
-        'default_sale_price'          => 'decimal:2',
-        'min_sale_price'              => 'decimal:2',
-        'min_qty'                     => 'decimal:3',
-        'reorder_qty'                 => 'decimal:3',
-        'purchase_conversion_factor'  => 'decimal:4',
+        'is_active' => 'boolean',
+        'default_sale_price' => 'decimal:2',
+        'min_sale_price' => 'decimal:2',
+        'min_qty' => 'decimal:3',
+        'reorder_qty' => 'decimal:3',
+        'purchase_conversion_factor' => 'decimal:4',
     ];
 
     // ─────────────────────────────────────────────────────────────
@@ -109,8 +111,8 @@ class Part extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('sku', 'like', "%{$search}%")
-              ->orWhere('name_ar', 'like', "%{$search}%")
-              ->orWhere('name_en', 'like', "%{$search}%");
+                ->orWhere('name_ar', 'like', "%{$search}%")
+                ->orWhere('name_en', 'like', "%{$search}%");
         });
     }
 
@@ -121,6 +123,7 @@ class Part extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'ar' ? $this->name_ar : ($this->name_en ?: $this->name_ar);
     }
 

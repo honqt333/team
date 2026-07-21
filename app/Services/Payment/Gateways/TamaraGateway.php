@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Payment\Gateways;
 
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class TamaraGateway implements PaymentGatewayInterface
 {
     protected array $config;
+
     protected string $baseUrl;
 
     public function __construct()
@@ -24,7 +28,7 @@ class TamaraGateway implements PaymentGatewayInterface
 
     public function isConfigured(): bool
     {
-        return !empty($this->config['api_token']);
+        return ! empty($this->config['api_token']);
     }
 
     /**
@@ -34,7 +38,7 @@ class TamaraGateway implements PaymentGatewayInterface
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['api_token'],
+                'Authorization' => 'Bearer '.$this->config['api_token'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/checkout", [
                 'order_reference_id' => $data['reference'] ?? uniqid('sub_'),
@@ -89,6 +93,7 @@ class TamaraGateway implements PaymentGatewayInterface
 
             if ($response->successful()) {
                 $result = $response->json();
+
                 return [
                     'success' => true,
                     'gateway' => 'tamara',
@@ -100,12 +105,14 @@ class TamaraGateway implements PaymentGatewayInterface
             }
 
             Log::error('Tamara initiate failed', ['response' => $response->json()]);
+
             return [
                 'success' => false,
                 'message' => $response->json('message') ?? 'Failed to create Tamara session',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tamara initiate exception', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -120,8 +127,8 @@ class TamaraGateway implements PaymentGatewayInterface
     {
         try {
             $orderId = $data['order_id'] ?? $data['id'] ?? null;
-            
-            if (!$orderId) {
+
+            if (! $orderId) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -130,8 +137,8 @@ class TamaraGateway implements PaymentGatewayInterface
             }
 
             $order = $this->getPayment($orderId);
-            
-            if (!$order) {
+
+            if (! $order) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -140,7 +147,7 @@ class TamaraGateway implements PaymentGatewayInterface
             }
 
             $status = strtolower($order['status'] ?? 'failed');
-            
+
             return [
                 'success' => in_array($status, ['approved', 'captured', 'fully_captured']),
                 'payment_id' => $orderId,
@@ -150,8 +157,9 @@ class TamaraGateway implements PaymentGatewayInterface
                 'payment_method' => 'tamara',
                 'raw_response' => $order,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tamara verification failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'status' => 'error',
@@ -167,7 +175,7 @@ class TamaraGateway implements PaymentGatewayInterface
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['api_token'],
+                'Authorization' => 'Bearer '.$this->config['api_token'],
             ])->get("{$this->baseUrl}/orders/{$orderId}");
 
             if ($response->successful()) {
@@ -175,8 +183,9 @@ class TamaraGateway implements PaymentGatewayInterface
             }
 
             return null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tamara getPayment exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -191,7 +200,7 @@ class TamaraGateway implements PaymentGatewayInterface
             $refundAmount = $amount ?? ($order['total_amount']['amount'] ?? 0);
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['api_token'],
+                'Authorization' => 'Bearer '.$this->config['api_token'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/orders/{$orderId}/refunds", [
                 'total_amount' => [
@@ -212,8 +221,9 @@ class TamaraGateway implements PaymentGatewayInterface
                 'success' => false,
                 'message' => $response->json('message') ?? 'Refund failed',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tamara refund failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),

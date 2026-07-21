@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
+use App\Enums\PaymentType;
+use App\Models\VehicleMileageLog;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
-use App\Models\VehicleMileageLog;
 use Carbon\Carbon;
 
 trait HasWorkOrderOperations
@@ -29,8 +32,9 @@ trait HasWorkOrderOperations
     public function getTotalPaidAttribute(): float
     {
         if ($this->relationLoaded('payments')) {
-            return (float) $this->payments->sum(fn($p) => ($p->type === 'payment' || $p->type === \App\Enums\PaymentType::PAYMENT || $p->type === 'bad_debt' || $p->type === \App\Enums\PaymentType::BAD_DEBT) ? $p->amount : -$p->amount);
+            return (float) $this->payments->sum(fn ($p) => ($p->type === 'payment' || $p->type === PaymentType::PAYMENT || $p->type === 'bad_debt' || $p->type === PaymentType::BAD_DEBT) ? $p->amount : -$p->amount);
         }
+
         return (float) $this->payments()->selectRaw('SUM(CASE WHEN type IN ("payment", "bad_debt") THEN amount WHEN type = "refund" THEN -amount ELSE 0 END) as paid')->value('paid');
     }
 
@@ -40,8 +44,9 @@ trait HasWorkOrderOperations
     public function getBadDebtAttribute(): float
     {
         if ($this->relationLoaded('payments')) {
-            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === \App\Enums\PaymentType::BAD_DEBT) ? $p->amount : 0);
+            return (float) $this->payments->sum(fn ($p) => ($p->type === 'bad_debt' || $p->type === PaymentType::BAD_DEBT) ? $p->amount : 0);
         }
+
         return (float) $this->payments()->where('type', 'bad_debt')->sum('amount');
     }
 
@@ -58,10 +63,15 @@ trait HasWorkOrderOperations
      */
     public function getTotalDiscountAttribute(): float
     {
-        if (!$this->relationLoaded('items')) $this->load('items');
-        if (!$this->relationLoaded('parts')) $this->load('parts');
+        if (! $this->relationLoaded('items')) {
+            $this->load('items');
+        }
 
-        $activeItems = $this->items->reject(fn($item) => $item->status === WorkOrderItem::STATUS_CANCELLED);
+        if (! $this->relationLoaded('parts')) {
+            $this->load('parts');
+        }
+
+        $activeItems = $this->items->reject(fn ($item) => $item->status === WorkOrderItem::STATUS_CANCELLED);
         $servicesDiscount = (float) $activeItems->sum('discount_amount');
 
         $activeItemIds = $activeItems->pluck('id')->all();
@@ -69,9 +79,11 @@ trait HasWorkOrderOperations
             if (in_array($part->status, [WorkOrderItemPart::STATUS_CANCELLED, WorkOrderItemPart::STATUS_REVERSED])) {
                 return false;
             }
-            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+
+            if ($part->work_order_item_id !== null && ! in_array($part->work_order_item_id, $activeItemIds)) {
                 return false;
             }
+
             return true;
         });
         $partsDiscount = (float) $activeParts->sum('discount');
@@ -123,7 +135,7 @@ trait HasWorkOrderOperations
      */
     public function putOnHold(?string $reason = null): bool
     {
-        if (!$this->canBeOnHold()) {
+        if (! $this->canBeOnHold()) {
             return false;
         }
 
@@ -180,7 +192,8 @@ trait HasWorkOrderOperations
         }
 
         $hasCompleted = $this->items()->where('status', WorkOrderItem::STATUS_COMPLETED)->exists();
-        if (!$hasCompleted) {
+
+        if (! $hasCompleted) {
             return false;
         }
 
@@ -197,7 +210,7 @@ trait HasWorkOrderOperations
      */
     public function canVehicleExit(): bool
     {
-        return $this->allItemsCompleted() 
+        return $this->allItemsCompleted()
             && $this->status !== self::STATUS_ON_HOLD
             && $this->status !== self::STATUS_CANCELLED;
     }
@@ -207,15 +220,15 @@ trait HasWorkOrderOperations
      */
     public function markAsCompleted(?Carbon $exitDate = null, ?string $notes = null): bool
     {
-        if (!$this->canVehicleExit()) {
+        if (! $this->canVehicleExit()) {
             return false;
         }
 
         if ($this->odometer !== null) {
             $vehicle = $this->vehicle;
-            
-            if (!$vehicle->allow_lower_mileage && $vehicle->odometer !== null && $this->odometer < $vehicle->odometer) {
-                return false; 
+
+            if (! $vehicle->allow_lower_mileage && $vehicle->odometer !== null && $this->odometer < $vehicle->odometer) {
+                return false;
             }
 
             VehicleMileageLog::create([

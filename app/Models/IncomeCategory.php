@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class IncomeCategory extends Model
 {
-    use TenantScoped, SoftDeletes;
+    use SoftDeletes, TenantScoped;
 
     protected $fillable = [
         'tenant_id',
@@ -32,6 +34,7 @@ class IncomeCategory extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
     }
 

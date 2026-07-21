@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\FilterableRequest;
@@ -9,7 +11,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ReportFilterRequest extends FormRequest
 {
-    use PaginatesRequest, SortableRequest, FilterableRequest;
+    use FilterableRequest, PaginatesRequest, SortableRequest;
 
     public function authorize(): bool
     {

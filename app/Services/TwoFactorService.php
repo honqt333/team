@@ -1,13 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-use Illuminate\Support\Str;
-use PragmaRX\Google2FA\Google2FA;
+use App\Mail\TemplateMail;
+use App\Mail\TwoFactorCodeMail;
+use App\Models\AdminUser;
+use App\Models\CommunicationTemplate;
+use App\Models\Integration\Integration;
+use App\Models\Setting;
+use App\Models\User;
+use App\Services\Email\SmtpConfigService;
+use App\Services\Sms\AuthenticaService;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
+use Exception;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use PragmaRX\Google2FA\Google2FA;
 
 class TwoFactorService
 {
@@ -15,7 +29,7 @@ class TwoFactorService
 
     public function __construct()
     {
-        $this->google2fa = new Google2FA();
+        $this->google2fa = new Google2FA;
     }
 
     /**
@@ -39,10 +53,11 @@ class TwoFactorService
 
         $renderer = new ImageRenderer(
             new RendererStyle(200),
-            new SvgImageBackEnd()
+            new SvgImageBackEnd
         );
-        
+
         $writer = new Writer($renderer);
+
         return $writer->writeString($otpAuthUrl);
     }
 
@@ -60,9 +75,11 @@ class TwoFactorService
     public function generateRecoveryCodes(int $count = 8): array
     {
         $codes = [];
+
         for ($i = 0; $i < $count; $i++) {
-            $codes[] = Str::upper(Str::random(4) . '-' . Str::random(4));
+            $codes[] = Str::upper(Str::random(4).'-'.Str::random(4));
         }
+
         return $codes;
     }
 
@@ -79,119 +96,129 @@ class TwoFactorService
      */
     public function removeRecoveryCode(string $usedCode, array $codes): array
     {
-        return array_values(array_filter($codes, fn($code) => $code !== Str::upper($usedCode)));
+        return array_values(array_filter($codes, fn ($code) => $code !== Str::upper($usedCode)));
     }
 
-
     /**
      * Send 2FA code via email or SMS based on preference.
      */
     /**
      * Send 2FA code via email or SMS based on preference.
      */
-    public function sendCode(\App\Models\User|\App\Models\AdminUser $user): void
+    public function sendCode(User|AdminUser $user): void
     {
         // Check preference
         $type = $user->two_factor_type ?? 'email'; // Default to email if column missing
 
         if ($type === 'sms' && $this->isSmsEnabled($user)) {
-             \Illuminate\Support\Facades\Cache::put('2fa_login_' . $user->id, 'sms_sent', now()->addMinutes(10));
-             $this->sendCodeViaSms($user);
+            Cache::put('2fa_login_'.$user->id, 'sms_sent', now()->addMinutes(10));
+            $this->sendCodeViaSms($user);
         } else {
-             $this->sendCodeViaEmail($user);
+            $this->sendCodeViaEmail($user);
         }
     }
 
     /**
      * Send 2FA code via Email.
      */
-    public function sendCodeViaEmail(\App\Models\User|\App\Models\AdminUser $user): void
+    public function sendCodeViaEmail(User|AdminUser $user): void
     {
-        \App\Services\Email\SmtpConfigService::class;
-        app(\App\Services\Email\SmtpConfigService::class)->apply();
+        SmtpConfigService::class;
+        app(SmtpConfigService::class)->apply();
         $code = (string) rand(100000, 999999);
         // Cache code for verification
-        \Illuminate\Support\Facades\Cache::put('2fa_login_' . $user->id, $code, now()->addMinutes(10));
+        Cache::put('2fa_login_'.$user->id, $code, now()->addMinutes(10));
         $this->sendCodeWithTemplate($user, $code);
     }
 
     /**
      * Send 2FA code via SMS using Authentica.
      */
-    public function sendCodeViaSms(\App\Models\User|\App\Models\AdminUser $user): void
+    public function sendCodeViaSms(User|AdminUser $user): void
     {
         $phone = $user->phone;
-        
-        if (!$phone) {
-            throw new \Exception('رقم الهاتف غير مسجل');
+
+        if (! $phone) {
+            throw new Exception('رقم الهاتف غير مسجل');
         }
 
         // Get OTP-specific SMS provider (or fall back to default)
-        $integration = \App\Models\Integration\Integration::getForPurpose('sms', 'otp');
+        $integration = Integration::getForPurpose('sms', 'otp');
 
-        if (!$integration || !$integration->isConfigured()) {
-            throw new \Exception('خدمة الرسائل غير متاحة');
+        if (! $integration || ! $integration->isConfigured()) {
+            throw new Exception('خدمة الرسائل غير متاحة');
         }
-        
+
         // For Authentica, use OTP API; for others, send regular SMS with code
         if ($integration->provider !== 'authentica') {
-            throw new \Exception('مزود SMS الحالي لا يدعم التحقق الثنائي');
+            throw new Exception('مزود SMS الحالي لا يدعم التحقق الثنائي');
         }
 
         $formattedPhone = $this->formatPhoneNumber($phone);
-        
-        $service = \App\Services\Sms\AuthenticaService::fromIntegration($integration);
-        $service->sendOtp($formattedPhone); 
+
+        $service = AuthenticaService::fromIntegration($integration);
+        $service->sendOtp($formattedPhone);
     }
 
     protected function formatPhoneNumber(string $phone): string
     {
         $phone = preg_replace('/[\s\-]/', '', $phone);
-        if (str_starts_with($phone, '0')) return '+966' . substr($phone, 1);
-        if (str_starts_with($phone, '5')) return '+966' . $phone;
-        if (!str_starts_with($phone, '+')) return '+966' . $phone;
+
+        if (str_starts_with($phone, '0')) {
+            return '+966'.substr($phone, 1);
+        }
+
+        if (str_starts_with($phone, '5')) {
+            return '+966'.$phone;
+        }
+
+        if (! str_starts_with($phone, '+')) {
+            return '+966'.$phone;
+        }
+
         return $phone;
     }
 
     /**
      * Verify SMS code using Authentica.
      */
-    public function verifySmsCode(\App\Models\User|\App\Models\AdminUser $user, string $code): bool
+    public function verifySmsCode(User|AdminUser $user, string $code): bool
     {
         // Get OTP-specific SMS provider
-        $integration = \App\Models\Integration\Integration::getForPurpose('sms', 'otp');
+        $integration = Integration::getForPurpose('sms', 'otp');
 
-        if (!$integration || !$integration->isConfigured() || $integration->provider !== 'authentica') {
+        if (! $integration || ! $integration->isConfigured() || $integration->provider !== 'authentica') {
             return false;
         }
 
         $phone = $user->phone;
         $formattedPhone = $this->formatPhoneNumber($phone);
-        
-        $service = \App\Services\Sms\AuthenticaService::fromIntegration($integration);
+
+        $service = AuthenticaService::fromIntegration($integration);
         $result = $service->verifyOtp($formattedPhone, $code);
-        
+
         return $result['success'];
     }
 
     /**
      * Check if SMS 2FA is enabled globally.
      */
-    public function isSmsEnabled(\App\Models\User|\App\Models\AdminUser|null $user = null): bool
+    public function isSmsEnabled(User|AdminUser|null $user = null): bool
     {
-        return \App\Models\Setting::get('security.2fa_sms_enabled', 'false') === 'true';
+        return Setting::get('security.2fa_sms_enabled', 'false') === 'true';
     }
 
-    public function sendCodeWithTemplate(\App\Models\User|\App\Models\AdminUser $user, string $code): void
+    public function sendCodeWithTemplate(User|AdminUser $user, string $code): void
     {
-        app(\App\Services\Email\SmtpConfigService::class)->apply();
+        app(SmtpConfigService::class)->apply();
 
         // Get Template
-        $template = \App\Models\CommunicationTemplate::getByCode('2fa_verification');
-        
-        if (!$template) {
+        $template = CommunicationTemplate::getByCode('2fa_verification');
+
+        if (! $template) {
             // Fallback to hardcoded if template missing (safety)
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\TwoFactorCodeMail($code));
+            Mail::to($user->email)->send(new TwoFactorCodeMail($code));
+
             return;
         }
 
@@ -208,6 +235,6 @@ class TwoFactorService
             $template->content
         );
 
-        \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\TemplateMail($subject, $content));
+        Mail::to($user->email)->send(new TemplateMail($subject, $content));
     }
 }

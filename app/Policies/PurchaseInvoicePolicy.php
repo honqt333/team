@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\PurchaseInvoice;
@@ -79,4 +81,3 @@ class PurchaseInvoicePolicy
             && $user->tenant_id === $return->tenant_id;
     }
 }
-

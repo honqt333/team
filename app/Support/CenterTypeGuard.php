@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
 use App\Models\Center;
@@ -33,11 +35,11 @@ class CenterTypeGuard
      *
      * Idempotent — safe to call on a center that is already main.
      *
-     * @param  Center  $center  The center being saved.
-     * @param  array   $payload The validated request payload (may contain
-     *                          `center_type` and/or `is_main`).
-     * @return array   Mutated payload (with normalized `is_main` and
-     *                 `center_type` if the center was promoted).
+     * @param Center $center The center being saved.
+     * @param array $payload The validated request payload (may contain
+     *                       `center_type` and/or `is_main`).
+     * @return array Mutated payload (with normalized `is_main` and
+     *               `center_type` if the center was promoted).
      */
     public static function applyMainRule(Center $center, array $payload): array
     {
@@ -58,7 +60,7 @@ class CenterTypeGuard
                 ->where('id', '!=', $center->id)
                 ->where(function ($q) {
                     $q->where('is_main', true)
-                      ->orWhere('center_type', 'main');
+                        ->orWhere('center_type', 'main');
                 })
                 ->update([
                     'is_main' => false,
@@ -69,6 +71,7 @@ class CenterTypeGuard
             // (using a direct DB update to keep the in-memory model
             // consistent after the transaction)
             $center->refresh();
+
             if (! $center->is_main || $center->center_type !== 'main') {
                 $center->forceFill([
                     'is_main' => true,

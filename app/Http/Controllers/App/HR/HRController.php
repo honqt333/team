@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
@@ -58,11 +60,11 @@ class HRController extends Controller
         $departmentsStats = Department::where('tenant_id', $tenantId)
             ->where('center_id', $centerId)
             ->active()
-            ->withCount(['employees' => function($q) use ($centerId) {
+            ->withCount(['employees' => function ($q) use ($centerId) {
                 $q->where('center_id', $centerId); // Ensure employee is also in this center
             }])
             ->get()
-            ->map(function($dept) {
+            ->map(function ($dept) {
                 return [
                     'name' => $dept->name, // Accessor handles locale
                     'count' => $dept->employees_count,

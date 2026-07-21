@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\HR\Employee;
@@ -14,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 
@@ -66,12 +70,12 @@ class User extends Authenticatable implements MustVerifyEmail
         string $type = 'totp'
     ): void {
         $encryptedSecret = ! empty($secret)
-            ? \Illuminate\Support\Facades\Crypt::encryptString($secret)
+            ? Crypt::encryptString($secret)
             : null;
 
         $this->forceFill([
             'two_factor_secret' => $encryptedSecret,
-            'two_factor_recovery_codes' => \Illuminate\Support\Facades\Crypt::encryptString(json_encode($recoveryCodes)),
+            'two_factor_recovery_codes' => Crypt::encryptString(json_encode($recoveryCodes)),
             'two_factor_confirmed_at' => now(),
             'two_factor_type' => $type,
         ])->save();
@@ -96,12 +100,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public function regenerateRecoveryCodes(): array
     {
         $codes = [];
+
         for ($i = 0; $i < 8; $i++) {
-            $codes[] = \Illuminate\Support\Str::random(10);
+            $codes[] = Str::random(10);
         }
 
         $this->forceFill([
-            'two_factor_recovery_codes' => \Illuminate\Support\Facades\Crypt::encryptString(json_encode($codes)),
+            'two_factor_recovery_codes' => Crypt::encryptString(json_encode($codes)),
         ])->save();
 
         return $codes;
@@ -147,6 +152,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         // 1. Check if user is an employee and has an HR photo
         $hrPhoto = $this->employee?->photo_path;
+
         if ($hrPhoto) {
             return asset('storage/'.$hrPhoto);
         }

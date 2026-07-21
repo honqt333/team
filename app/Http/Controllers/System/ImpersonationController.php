@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -18,52 +20,53 @@ class ImpersonationController extends Controller
     {
         // Find the first admin user of this tenant
         $tenantUser = User::where('tenant_id', $tenant->id)
-            ->whereHas('roles', fn($q) => $q->where('name', 'admin'))
+            ->whereHas('roles', fn ($q) => $q->where('name', 'admin'))
             ->first();
-        
-        if (!$tenantUser) {
+
+        if (! $tenantUser) {
             // Fallback to any user of this tenant
             $tenantUser = User::where('tenant_id', $tenant->id)->first();
         }
-        
-        if (!$tenantUser) {
+
+        if (! $tenantUser) {
             return back()->with('error', 'لا يوجد مستخدمين لهذا المستأجر');
         }
-        
+
         // Store original user ID for returning later
         Session::put('impersonating_from', Auth::id());
         Session::put('impersonating_tenant', $tenant->id);
-        
+
         // Login as the tenant user
         Auth::login($tenantUser);
-        
+
         return redirect('/dashboard')->with('success', "أنت الآن داخل حساب: {$tenant->trade_name}");
     }
-    
+
     /**
      * Stop impersonating and return to system admin.
      */
     public function stop(): RedirectResponse
     {
         $originalUserId = Session::get('impersonating_from');
-        
-        if (!$originalUserId) {
+
+        if (! $originalUserId) {
             return redirect('/dashboard');
         }
-        
+
         // Restore original admin
         $originalUser = User::find($originalUserId);
+
         if ($originalUser) {
             Auth::login($originalUser);
         }
-        
+
         // Clear impersonation session
         Session::forget('impersonating_from');
         Session::forget('impersonating_tenant');
-        
+
         return redirect('/system')->with('success', 'تم العودة للوحة النظام');
     }
-    
+
     /**
      * Check if currently impersonating.
      */
@@ -71,7 +74,7 @@ class ImpersonationController extends Controller
     {
         return Session::has('impersonating_from');
     }
-    
+
     /**
      * Get impersonated tenant ID.
      */

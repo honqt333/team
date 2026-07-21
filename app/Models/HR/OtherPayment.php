@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\HR;
 
 use App\Models\Concerns\TenantScoped;
@@ -38,13 +40,19 @@ class OtherPayment extends Model
     // ─────────────────────────────────────────────────────────────
 
     public const TYPE_ADVANCE = 'advance';
+
     public const TYPE_BONUS = 'bonus';
+
     public const TYPE_COMPENSATION = 'compensation';
+
     public const TYPE_PENALTY = 'penalty';
+
     public const TYPE_OTHER = 'other';
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_PAID = 'paid';
 
     // ─────────────────────────────────────────────────────────────

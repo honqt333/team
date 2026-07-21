@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
@@ -104,7 +106,7 @@ class InvoiceTemplate extends Model
             ->where('is_default', true)
             ->first();
 
-        if (!$template) {
+        if (! $template) {
             $template = static::create([
                 'tenant_id' => $tenantId,
                 'name' => $type === 'proforma' ? 'فاتورة أولية' : 'فاتورة ضريبية',

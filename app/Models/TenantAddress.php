@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Concerns\TenantScoped;
 
 class TenantAddress extends Model
 {
@@ -23,7 +25,6 @@ class TenantAddress extends Model
         'longitude',
     ];
 
-    
     protected $casts = [
         'latitude' => 'float',
         'longitude' => 'float',

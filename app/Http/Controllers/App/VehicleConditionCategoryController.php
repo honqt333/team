@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -65,7 +67,7 @@ class VehicleConditionCategoryController extends Controller
             abort(403, __('common.cannot_modify_system_data'));
         }
 
-        $conditionCategory->update(['is_active' => !$conditionCategory->is_active]);
+        $conditionCategory->update(['is_active' => ! $conditionCategory->is_active]);
 
         return redirect()->back();
     }

@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Models\Service;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
+use App\Services\Inventory\WorkOrderPartsService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
@@ -58,7 +61,7 @@ class WorkOrderItemController
             'pending_notes.*.content' => ['required_with:pending_notes', 'string'],
         ]);
 
-        $service = $validated['service_id'] ? \App\Models\Service::find($validated['service_id']) : null;
+        $service = $validated['service_id'] ? Service::find($validated['service_id']) : null;
 
         $line = $work_order->items()->create([
             'tenant_id' => $work_order->tenant_id,
@@ -84,18 +87,21 @@ class WorkOrderItemController
 
         // Auto-extend expected_end_date
         $maxItemDate = $line->due_date ?? $line->started_at ?? null;
+
         if ($maxItemDate) {
             $expectedEndDate = $work_order->expected_end_date ? Carbon::parse($work_order->expected_end_date) : null;
-            if (!$expectedEndDate || Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
+
+            if (! $expectedEndDate || Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
                 $work_order->update(['expected_end_date' => $maxItemDate]);
-                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى ' . Carbon::parse($maxItemDate)->format('Y-m-d') . ' تلقائياً لتجاوزه بمدة الخدمة');
+                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى '.Carbon::parse($maxItemDate)->format('Y-m-d').' تلقائياً لتجاوزه بمدة الخدمة');
             }
         }
 
         // Save pending parts
-        if (!empty($request->pending_parts)) {
-            $partsService = app(\App\Services\Inventory\WorkOrderPartsService::class);
+        if (! empty($request->pending_parts)) {
+            $partsService = app(WorkOrderPartsService::class);
             $allowNegative = auth()->user()->can('inventory.override_negative_stock');
+
             foreach ($request->pending_parts as $partData) {
                 $partsService->addPart([
                     'work_order_id' => $work_order->id,
@@ -119,17 +125,17 @@ class WorkOrderItemController
         }
 
         // Save pending technicians
-        if (!empty($request->pending_technicians)) {
+        if (! empty($request->pending_technicians)) {
             foreach ($request->pending_technicians as $tech) {
                 $line->technicians()->attach($tech['user_id'], [
                     'assigned_at' => now(),
-                    'share' => $tech['share'] ?? 100.00
+                    'share' => $tech['share'] ?? 100.00,
                 ]);
             }
         }
 
         // Save pending notes
-        if (!empty($request->pending_notes)) {
+        if (! empty($request->pending_notes)) {
             foreach ($request->pending_notes as $note) {
                 $line->itemNotes()->create([
                     'work_order_id' => $work_order->id,
@@ -157,7 +163,7 @@ class WorkOrderItemController
             'unit_price' => 'required|numeric|min:0',
             'discount_type' => 'nullable|string|in:none,fixed,percentage',
             'discount_value' => 'nullable|numeric|min:0',
-            'status' => 'nullable|in:' . implode(',', WorkOrderItem::STATUSES),
+            'status' => 'nullable|in:'.implode(',', WorkOrderItem::STATUSES),
             'duration_value' => 'nullable|integer|min:0',
             'duration_unit' => 'nullable|string|max:50',
             'warranty_value_snapshot' => 'nullable|integer|min:0',
@@ -175,10 +181,11 @@ class WorkOrderItemController
 
         if ($request->has('technicians')) {
             $syncData = [];
+
             foreach ($request->input('technicians', []) as $tech) {
                 $syncData[$tech['user_id']] = [
                     'assigned_at' => now(),
-                    'share' => $tech['share'] ?? 100.00
+                    'share' => $tech['share'] ?? 100.00,
                 ];
             }
             $item->technicians()->sync($syncData);
@@ -186,11 +193,13 @@ class WorkOrderItemController
 
         // Auto-extend expected_end_date
         $maxItemDate = $item->due_date ?? $item->started_at ?? null;
+
         if ($maxItemDate) {
             $expectedEndDate = $work_order->expected_end_date ? Carbon::parse($work_order->expected_end_date) : null;
-            if (!$expectedEndDate || Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
+
+            if (! $expectedEndDate || Carbon::parse($maxItemDate)->gt($expectedEndDate)) {
                 $work_order->update(['expected_end_date' => $maxItemDate]);
-                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى ' . Carbon::parse($maxItemDate)->format('Y-m-d') . ' تلقائياً لتجاوزه بمدة الخدمة');
+                $work_order->logActivity('expected_end_date_updated', 'تم تمديد تاريخ تسليم كرت العمل المتوقع إلى '.Carbon::parse($maxItemDate)->format('Y-m-d').' تلقائياً لتجاوزه بمدة الخدمة');
             }
         }
 
@@ -209,7 +218,7 @@ class WorkOrderItemController
         $hasActiveParts = $item->parts()
             ->whereNotIn('status', [
                 WorkOrderItemPart::STATUS_CANCELLED,
-                WorkOrderItemPart::STATUS_REVERSED
+                WorkOrderItemPart::STATUS_REVERSED,
             ])
             ->exists();
 
@@ -223,7 +232,7 @@ class WorkOrderItemController
             'item_status_updated',
             __('work_orders.activities.actions.item_status_updated', [
                 'title' => $item->title,
-                'status' => __('work_orders.item_status.cancelled')
+                'status' => __('work_orders.item_status.cancelled'),
             ])
         );
 
@@ -243,6 +252,7 @@ class WorkOrderItemController
 
         if ($validated['department_id'] === 'packages') {
             $work_order->update(['show_packages_section' => true]);
+
             return redirect()->back()->with('success', __('messages.department_added'));
         }
 
@@ -254,7 +264,7 @@ class WorkOrderItemController
             ->where('department_id', $validated['department_id'])
             ->exists();
 
-        if (!$alreadyAttached) {
+        if (! $alreadyAttached) {
             $work_order->departments()->attach($validated['department_id']);
         }
 
@@ -270,7 +280,7 @@ class WorkOrderItemController
 
         if ($department_id === 'packages') {
             $hasPackages = $work_order->items()
-                ->whereHas('service', fn($q) => $q->where('type', Service::TYPE_PACKAGE))
+                ->whereHas('service', fn ($q) => $q->where('type', Service::TYPE_PACKAGE))
                 ->exists();
 
             if ($hasPackages) {
@@ -278,10 +288,11 @@ class WorkOrderItemController
             }
 
             $work_order->update(['show_packages_section' => false]);
+
             return redirect()->back()->with('success', __('messages.department_removed'));
         }
 
-        if (!is_numeric($department_id)) {
+        if (! is_numeric($department_id)) {
             abort(404);
         }
         $departmentId = (int) $department_id;

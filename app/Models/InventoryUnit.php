@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Models\Concerns\TenantScoped;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\TenantScoped;
 
 class InventoryUnit extends Model
 {
@@ -30,6 +32,7 @@ class InventoryUnit extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'ar' ? $this->name_ar : ($this->name_en ?: $this->name_ar);
     }
 }

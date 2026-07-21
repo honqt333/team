@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
@@ -73,6 +75,7 @@ class HRPayrollSettingsController extends Controller
     public function destroyAllowance(Allowance $allowance)
     {
         $allowance->delete();
+
         return back()->with('success', __('messages.deleted_successfully'));
     }
 
@@ -139,6 +142,7 @@ class HRPayrollSettingsController extends Controller
     public function destroyDeduction(Deduction $deduction)
     {
         $deduction->delete();
+
         return back()->with('success', __('messages.deleted_successfully'));
     }
 }

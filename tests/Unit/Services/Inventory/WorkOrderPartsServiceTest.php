@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Services\Inventory;
 
 use App\Models\Center;
@@ -20,19 +22,26 @@ class WorkOrderPartsServiceTest extends TestCase
     use RefreshDatabase;
 
     protected WorkOrderPartsService $partsService;
+
     protected InventoryService $inventoryService;
+
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected Warehouse $warehouse;
+
     protected Part $part;
+
     protected WorkOrder $workOrder;
+
     protected WorkOrderItem $item;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->inventoryService = new InventoryService();
+        $this->inventoryService = new InventoryService;
         $this->partsService = new WorkOrderPartsService($this->inventoryService);
 
         $this->tenant = Tenant::factory()->create();
@@ -84,7 +93,7 @@ class WorkOrderPartsServiceTest extends TestCase
         $this->assertNotNull($partLine->inventory_move_id);
 
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)->where('part_id', $this->part->id)->first();
-        $this->assertEquals(8.00, (float)$balance->qty_on_hand);
+        $this->assertEquals(8.00, (float) $balance->qty_on_hand);
     }
 
     public function test_add_part_from_external_source_does_not_deduct_inventory()
@@ -106,7 +115,7 @@ class WorkOrderPartsServiceTest extends TestCase
         $this->assertNull($partLine->inventory_move_id);
 
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)->where('part_id', $this->part->id)->first();
-        $this->assertEquals(10.00, (float)$balance->qty_on_hand);
+        $this->assertEquals(10.00, (float) $balance->qty_on_hand);
     }
 
     public function test_update_part_handles_qty_increase_and_decrease()
@@ -126,17 +135,17 @@ class WorkOrderPartsServiceTest extends TestCase
 
         // Increase quantity to 5
         $updatedLine = $this->partsService->updatePart($partLine, ['qty' => 5.00]);
-        $this->assertEquals(5.00, (float)$updatedLine->qty);
-        
+        $this->assertEquals(5.00, (float) $updatedLine->qty);
+
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)->where('part_id', $this->part->id)->first();
-        $this->assertEquals(5.00, (float)$balance->qty_on_hand);
+        $this->assertEquals(5.00, (float) $balance->qty_on_hand);
 
         // Decrease quantity to 1
         $reducedLine = $this->partsService->updatePart($updatedLine, ['qty' => 1.00]);
-        $this->assertEquals(1.00, (float)$reducedLine->qty);
+        $this->assertEquals(1.00, (float) $reducedLine->qty);
 
         $balanceRefresh = InventoryBalance::where('warehouse_id', $this->warehouse->id)->where('part_id', $this->part->id)->first();
-        $this->assertEquals(9.00, (float)$balanceRefresh->qty_on_hand);
+        $this->assertEquals(9.00, (float) $balanceRefresh->qty_on_hand);
     }
 
     public function test_remove_part_reverses_inventory_and_soft_deletes()
@@ -159,7 +168,7 @@ class WorkOrderPartsServiceTest extends TestCase
         $this->assertSoftDeleted('work_order_item_parts', ['id' => $partLine->id]);
 
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)->where('part_id', $this->part->id)->first();
-        $this->assertEquals(10.00, (float)$balance->qty_on_hand);
+        $this->assertEquals(10.00, (float) $balance->qty_on_hand);
     }
 
     public function test_check_stock_returns_accurate_on_hand_and_shortage()

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -86,6 +88,7 @@ class SystemAnnouncement extends Model
         if (! $this->is_published) {
             return false;
         }
+
         if ($this->expires_at && $this->expires_at->isPast()) {
             return false;
         }

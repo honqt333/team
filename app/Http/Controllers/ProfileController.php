@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
@@ -60,6 +62,7 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
     /**
      * Switch the current center context.
      */
@@ -72,8 +75,8 @@ class ProfileController extends Controller
         $user = $request->user();
 
         // Verify user belongs to this center
-        if (!$user->centers()->where('centers.id', $validated['center_id'])->exists()) {
-             abort(403, 'Unauthorized access to center');
+        if (! $user->centers()->where('centers.id', $validated['center_id'])->exists()) {
+            abort(403, 'Unauthorized access to center');
         }
 
         $user->update(['current_center_id' => $validated['center_id']]);

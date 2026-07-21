@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\Role;
 use App\Support\Permissions;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use App\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleController extends Controller
 {
@@ -24,7 +27,7 @@ class RoleController extends Controller
         return Inertia::render('Settings/Roles/Index', [
             'roles' => $roles,
             'groupedPermissions' => Permissions::byModule(),
-            'permissionDescriptions' => collect(Permissions::all())->mapWithKeys(fn($p) => [$p => Permissions::describe($p)]),
+            'permissionDescriptions' => collect(Permissions::all())->mapWithKeys(fn ($p) => [$p => Permissions::describe($p)]),
         ]);
     }
 
@@ -34,10 +37,10 @@ class RoleController extends Controller
 
         $validated = $request->validate([
             'name' => [
-                'required', 
-                'string', 
+                'required',
+                'string',
                 'max:255',
-                Rule::unique('roles')->where(fn ($query) => $query->where('tenant_id', TenancyContext::tenantId()))
+                Rule::unique('roles')->where(fn ($query) => $query->where('tenant_id', TenancyContext::tenantId())),
             ],
             'label_ar' => ['nullable', 'string', 'max:255'],
             'label_en' => ['nullable', 'string', 'max:255'],
@@ -55,12 +58,12 @@ class RoleController extends Controller
             'guard_name' => 'web',
         ]);
 
-        if (!empty($validated['permissions'])) {
+        if (! empty($validated['permissions'])) {
             // Temporarily unset team ID to find global permissions
-            $registrar = app(\Spatie\Permission\PermissionRegistrar::class);
+            $registrar = app(PermissionRegistrar::class);
             $currentTeamId = $registrar->getPermissionsTeamId();
             $registrar->setPermissionsTeamId(null);
-            
+
             try {
                 $role->syncPermissions($validated['permissions']);
             } finally {
@@ -94,10 +97,10 @@ class RoleController extends Controller
 
         $validated = $request->validate([
             'name' => [
-                'required', 
-                'string', 
+                'required',
+                'string',
                 'max:255',
-                Rule::unique('roles')->ignore($role->id)->where(fn ($query) => $query->where('tenant_id', TenancyContext::tenantId()))
+                Rule::unique('roles')->ignore($role->id)->where(fn ($query) => $query->where('tenant_id', TenancyContext::tenantId())),
             ],
             'label_ar' => ['nullable', 'string', 'max:255'],
             'label_en' => ['nullable', 'string', 'max:255'],
@@ -115,10 +118,10 @@ class RoleController extends Controller
 
         if (isset($validated['permissions'])) {
             // Temporarily unset team ID to find global permissions
-            $registrar = app(\Spatie\Permission\PermissionRegistrar::class);
+            $registrar = app(PermissionRegistrar::class);
             $currentTeamId = $registrar->getPermissionsTeamId();
             $registrar->setPermissionsTeamId(null);
-            
+
             try {
                 $role->syncPermissions($validated['permissions']);
             } finally {

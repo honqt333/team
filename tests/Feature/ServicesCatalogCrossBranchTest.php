@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -59,7 +61,7 @@ class ServicesCatalogCrossBranchTest extends TestCase
     public function test_services_catalog_scopes_local_services_and_exposes_other_branches(): void
     {
         $tenant = Tenant::factory()->create();
-        
+
         // Branch A
         $centerA = Center::factory()->create(['tenant_id' => $tenant->id]);
         $userA = $this->createUserWithPermissions(['services.view'], $tenant, $centerA);
@@ -109,17 +111,17 @@ class ServicesCatalogCrossBranchTest extends TestCase
         $otherBranchesServices = $response->viewData('page')['props']['otherBranchesServices'];
         $this->assertCount(1, $otherBranchesServices);
         $this->assertEquals($serviceB->name_ar, $otherBranchesServices[0]['name_ar']);
-        
+
         // Assert other tenant's service is isolated
         $this->assertEmpty(
-            collect($otherBranchesServices)->filter(fn($s) => $s['name_ar'] === $serviceC->name_ar)
+            collect($otherBranchesServices)->filter(fn ($s) => $s['name_ar'] === $serviceC->name_ar)
         );
     }
 
     public function test_user_can_clone_service_from_other_branch_catalog_with_custom_pricing(): void
     {
         $tenant = Tenant::factory()->create();
-        
+
         // Branch A
         $centerA = Center::factory()->create(['tenant_id' => $tenant->id]);
         $userA = $this->createUserWithPermissions(['services.view', 'services.create'], $tenant, $centerA);
@@ -165,7 +167,7 @@ class ServicesCatalogCrossBranchTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        
+
         // Assert a new service row was created for Center A
         $this->assertDatabaseHas('services', [
             'center_id' => $centerA->id,

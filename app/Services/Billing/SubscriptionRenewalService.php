@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Billing;
 
+use App\Mail\SubscriptionExpiredMail;
 use App\Mail\SubscriptionInvoiceMail;
 use App\Mail\SubscriptionRenewalReminderMail;
-use App\Mail\SubscriptionExpiredMail;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -60,7 +63,7 @@ class SubscriptionRenewalService
             try {
                 $this->renewSubscription($subscription);
                 $results['renewed']++;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Subscription renewal failed', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
@@ -97,7 +100,7 @@ class SubscriptionRenewalService
         if ($subscription->tenant->email) {
             try {
                 Mail::to($subscription->tenant->email)->send(new SubscriptionInvoiceMail($invoice));
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::warning('Failed to send renewal invoice email', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
@@ -124,7 +127,7 @@ class SubscriptionRenewalService
 
         foreach ($reminderDays as $days) {
             $expirationDate = now()->addDays($days)->toDateString();
-            
+
             $subscriptions = Subscription::where('status', 'active')
                 ->whereDate('ends_at', $expirationDate)
                 ->with(['tenant', 'plan'])
@@ -137,7 +140,7 @@ class SubscriptionRenewalService
                             new SubscriptionRenewalReminderMail($subscription, $days)
                         );
                         $results['reminders_sent']++;
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         Log::warning('Failed to send renewal reminder', [
                             'subscription_id' => $subscription->id,
                             'error' => $e->getMessage(),
@@ -181,7 +184,7 @@ class SubscriptionRenewalService
                     'subscription_id' => $subscription->id,
                     'tenant' => $subscription->tenant->trade_name,
                 ]);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error('Subscription expiration failed', [
                     'subscription_id' => $subscription->id,
                     'error' => $e->getMessage(),
@@ -195,8 +198,8 @@ class SubscriptionRenewalService
      */
     public function canRenew(Subscription $subscription): bool
     {
-        return $subscription->status === 'active' 
-            && $subscription->auto_renew 
+        return $subscription->status === 'active'
+            && $subscription->auto_renew
             && $subscription->plan;
     }
 
@@ -206,7 +209,7 @@ class SubscriptionRenewalService
     public function toggleAutoRenew(Subscription $subscription): bool
     {
         $subscription->update([
-            'auto_renew' => !$subscription->auto_renew,
+            'auto_renew' => ! $subscription->auto_renew,
         ]);
 
         return $subscription->auto_renew;

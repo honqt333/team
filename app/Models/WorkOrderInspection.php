@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WorkOrderInspection extends Model
 {
-    use HasFactory, CenterScoped;
+    use CenterScoped, HasFactory;
 
     protected $fillable = [
         'tenant_id',

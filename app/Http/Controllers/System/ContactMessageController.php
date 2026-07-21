@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -17,8 +19,8 @@ class ContactMessageController extends Controller
         $messages = ContactMessage::query()
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('subject', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('subject', 'like', "%{$search}%");
             })
             ->orderBy('created_at', 'desc')
             ->paginate(15)
@@ -36,7 +38,7 @@ class ContactMessageController extends Controller
     public function markAsRead(ContactMessage $contactMessage)
     {
         $contactMessage->update(['is_read' => true]);
-        
+
         return back()->with('success', 'تم تحديث حالة الرسالة بنجاح.');
     }
 

@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
 use App\Actions\WorkOrder\UpdateWorkOrderAction;
-use App\Models\User;
-use App\Models\WorkOrder;
-use App\Models\Tenant;
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Tenant;
+use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\WorkOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,12 +21,12 @@ class UpdateWorkOrderActionTest extends TestCase
     public function test_it_updates_a_work_order()
     {
         $tenant = Tenant::create(['name' => 'Test Tenant', 'slug' => 'test-tenant']);
-        
+
         $center = Center::create([
-            'tenant_id' => $tenant->id, 
-            'name' => 'Test Center', 
+            'tenant_id' => $tenant->id,
+            'name' => 'Test Center',
             'slug' => 'test-center',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $user = User::create([
@@ -39,9 +41,9 @@ class UpdateWorkOrderActionTest extends TestCase
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
             'name' => 'Test Customer',
-            'phone' => '1234567890'
+            'phone' => '1234567890',
         ]);
-        
+
         $vehicle = Vehicle::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
@@ -49,7 +51,7 @@ class UpdateWorkOrderActionTest extends TestCase
             'plate_number' => 'ABC 1234',
             'make_other' => 'Toyota',
             'model_other' => 'Camry',
-            'year' => 2020
+            'year' => 2020,
         ]);
 
         $workOrder = WorkOrder::create([
@@ -75,7 +77,7 @@ class UpdateWorkOrderActionTest extends TestCase
             ],
         ];
 
-        $action = new UpdateWorkOrderAction();
+        $action = new UpdateWorkOrderAction;
         $updatedWorkOrder = $action->execute($workOrder, $user, $data);
 
         $this->assertEquals(WorkOrder::STATUS_DONE, $updatedWorkOrder->status);

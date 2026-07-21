@@ -1,10 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Auth;
 
+use App\Models\AdminUser;
 use Illuminate\Auth\Events\Lockout;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -22,7 +27,7 @@ class LoginRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -36,7 +41,7 @@ class LoginRequest extends FormRequest
      * Attempt to authenticate the request's credentials.
      * Checks admin_users first, then users table.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function authenticate(): void
     {
@@ -55,15 +60,16 @@ class LoginRequest extends FormRequest
 
         if ($asAdmin) {
             // Admin login — must match an active AdminUser
-            $adminUser = \App\Models\AdminUser::where('email', $email)
+            $adminUser = AdminUser::where('email', $email)
                 ->where('is_active', true)
                 ->first();
 
-            if ($adminUser && \Illuminate\Support\Facades\Hash::check($password, $adminUser->password)) {
+            if ($adminUser && Hash::check($password, $adminUser->password)) {
                 Auth::guard('admin')->login($adminUser, $remember);
                 $adminUser->updateLoginInfo();
                 RateLimiter::clear($this->throttleKey());
                 session(['is_admin_login' => true]);
+
                 return;
             }
         } else {
@@ -71,6 +77,7 @@ class LoginRequest extends FormRequest
             if (Auth::attempt($this->only('email', 'password') + ['is_active' => true], $remember)) {
                 RateLimiter::clear($this->throttleKey());
                 session(['is_admin_login' => false]);
+
                 return;
             }
         }
@@ -85,7 +92,7 @@ class LoginRequest extends FormRequest
     /**
      * Ensure the login request is not rate limited.
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function ensureIsNotRateLimited(): void
     {

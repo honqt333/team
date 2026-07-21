@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\AI\Providers;
 
 use App\Services\AI\AiProvider;
 use App\Services\AI\CompletionRequest;
 use App\Services\AI\CompletionResponse;
+use Generator;
 
 class MockProvider implements AiProvider
 {
@@ -32,9 +35,9 @@ class MockProvider implements AiProvider
     }
 
     /**
-     * @return \Generator<int, string>
+     * @return Generator<int, string>
      */
-    public function stream(CompletionRequest $req): \Generator
+    public function stream(CompletionRequest $req): Generator
     {
         $response = $this->complete($req);
 

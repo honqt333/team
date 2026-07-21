@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -27,6 +29,7 @@ class GeneralSettingsController extends Controller
 
         // Convert boolean to 'true'/'false' string
         $value = $request->value;
+
         if (is_bool($value)) {
             $value = $value ? 'true' : 'false';
         } elseif ($value === true || $value === 'true' || $value === '1' || $value === 1) {

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -9,9 +11,12 @@ use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
+use DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 class TenantsController extends Controller
 {
@@ -73,6 +78,7 @@ class TenantsController extends Controller
         // Calculate storage size (photos, documents)
         $storagePath = storage_path("app/public/tenants/{$tenant->id}");
         $storageSize = 0;
+
         if (is_dir($storagePath)) {
             $storageSize = $this->getDirectorySize($storagePath);
         }
@@ -174,7 +180,7 @@ class TenantsController extends Controller
             return back()->with('error', 'اسم المستأجر غير متطابق');
         }
 
-        \DB::transaction(function () use ($tenant) {
+        DB::transaction(function () use ($tenant) {
             $centerIds = $tenant->centers()->pluck('id');
 
             // 1. Delete customers first (restrictOnDelete on center_id and tenant_id)
@@ -208,9 +214,10 @@ class TenantsController extends Controller
     private function getDirectorySize(string $path): int
     {
         $size = 0;
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS)
+        $files = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS)
         );
+
         foreach ($files as $file) {
             $size += $file->getSize();
         }

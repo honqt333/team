@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\Quotes;
 
 use App\Http\Controllers\Controller;
+use App\Models\InventoryBalance;
 use App\Models\Quote;
 use App\Models\QuotePart;
 use App\Models\Warehouse;
-use App\Models\InventoryBalance;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +24,7 @@ class QuotePartsController extends Controller
     {
         $this->authorize('update', $quote);
 
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot add parts to a converted or approved quote.');
         }
 
@@ -41,26 +43,26 @@ class QuotePartsController extends Controller
             'hide_on_print' => ['boolean'],
         ]);
 
-        if ($validated['source'] === 'warehouse' && !empty($validated['part_id']) && !($validated['include_in_package'] ?? false)) {
+        if ($validated['source'] === 'warehouse' && ! empty($validated['part_id']) && ! ($validated['include_in_package'] ?? false)) {
             $partId = (int) $validated['part_id'];
             $qty = (float) ($validated['qty'] ?: 1);
             $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? 0) / $qty) : 0;
             $finalPrice = (float) $validated['unit_price'] - $unitDiscount;
-            
+
             $user = auth()->user();
             $warehouse = Warehouse::forCenter($user->current_center_id)->default()->first();
-            
+
             if ($warehouse) {
                 $balance = InventoryBalance::where('part_id', $partId)
                     ->where('warehouse_id', $warehouse->id)
                     ->first();
-                
+
                 if ($balance && $balance->min_sale_price > 0 && $finalPrice < (float) $balance->min_sale_price) {
                     return redirect()->back()->withErrors([
                         'unit_price' => __('pricing.final_price_below_minimum', [
                             'final' => number_format($finalPrice, 2),
                             'min' => number_format((float) $balance->min_sale_price, 2),
-                        ])
+                        ]),
                     ]);
                 }
             }
@@ -81,7 +83,7 @@ class QuotePartsController extends Controller
     {
         $this->authorize('update', $quote);
 
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot update parts of a converted or approved quote.');
         }
 
@@ -107,26 +109,27 @@ class QuotePartsController extends Controller
         $source = $validated['source'] ?? $quotePart->source;
         $partId = $validated['part_id'] ?? $quotePart->part_id;
         $includeInPackage = $validated['include_in_package'] ?? $quotePart->include_in_package;
-        if ($source === 'warehouse' && !empty($partId) && !$includeInPackage) {
+
+        if ($source === 'warehouse' && ! empty($partId) && ! $includeInPackage) {
             $qty = (float) ($validated['qty'] ?? $quotePart->qty);
             $unitDiscount = $qty > 0 ? ((float) ($validated['discount'] ?? $quotePart->discount) / $qty) : 0;
             $unitPrice = (float) ($validated['unit_price'] ?? $quotePart->unit_price);
             $finalPrice = $unitPrice - $unitDiscount;
-            
+
             $user = auth()->user();
             $warehouse = Warehouse::forCenter($user->current_center_id)->default()->first();
-            
+
             if ($warehouse) {
                 $balance = InventoryBalance::where('part_id', $partId)
                     ->where('warehouse_id', $warehouse->id)
                     ->first();
-                
+
                 if ($balance && $balance->min_sale_price > 0 && $finalPrice < (float) $balance->min_sale_price) {
                     return redirect()->back()->withErrors([
                         'unit_price' => __('pricing.final_price_below_minimum', [
                             'final' => number_format($finalPrice, 2),
                             'min' => number_format((float) $balance->min_sale_price, 2),
-                        ])
+                        ]),
                     ]);
                 }
             }
@@ -147,7 +150,7 @@ class QuotePartsController extends Controller
     {
         $this->authorize('update', $quote);
 
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot delete parts from a converted or approved quote.');
         }
 

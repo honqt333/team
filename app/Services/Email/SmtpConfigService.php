@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Email;
 
 use App\Models\Integration\Integration;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Single source of truth for SMTP configuration.
@@ -39,6 +41,7 @@ class SmtpConfigService
 
         if ($config === null) {
             Log::warning('SmtpConfigService: no default email integration configured. Falling back to mail.* config.');
+
             return;
         }
 
@@ -79,7 +82,7 @@ class SmtpConfigService
         // (pre-migration) or in a unit-test environment that has not
         // loaded the schema. Bail out cleanly so we never throw during
         // boot or a request bootstrap.
-        if (! \Illuminate\Support\Facades\Schema::hasTable('integrations')) {
+        if (! Schema::hasTable('integrations')) {
             return null;
         }
 

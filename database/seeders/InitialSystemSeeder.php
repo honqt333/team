@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Center;
@@ -14,7 +16,7 @@ class InitialSystemSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Creates the primary production-ready admin user and center.
      */
     public function run(): void
@@ -67,20 +69,20 @@ class InitialSystemSeeder extends Seeder
         }
 
         // 4. Attach User to Center
-        if (!$user->centers()->where('center_id', $center->id)->exists()) {
+        if (! $user->centers()->where('center_id', $center->id)->exists()) {
             $user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
         }
 
         // 5. Assign Super Admin Role
         // Note: RolesSeeder MUST have run before this for the tenants.
         app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
-        
+
         $superAdminRole = Role::where('name', 'super_admin')
             ->where('tenant_id', $tenant->id)
             ->first();
-            
+
         if ($superAdminRole) {
-            if (!$user->hasRole('super_admin')) {
+            if (! $user->hasRole('super_admin')) {
                 $user->assignRole($superAdminRole);
             }
         }

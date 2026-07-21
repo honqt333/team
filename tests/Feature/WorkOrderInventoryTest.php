@@ -1,11 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\InventoryBalance;
 use App\Models\InventoryMove;
 use App\Models\Part;
+use App\Models\Quote;
+use App\Models\QuoteLine;
+use App\Models\QuotePart;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -14,6 +19,7 @@ use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Services\Inventory\InventoryService;
 use App\Services\Inventory\WorkOrderPartsService;
+use App\Services\QuoteConversionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
@@ -23,41 +29,47 @@ class WorkOrderInventoryTest extends TestCase
     use RefreshDatabase;
 
     protected WorkOrderPartsService $partsService;
+
     protected InventoryService $inventoryService;
+
     protected User $user;
+
     protected Warehouse $warehouse;
+
     protected Part $part;
+
     protected WorkOrder $workOrder;
+
     protected WorkOrderItem $workOrderItem;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->inventoryService = app(InventoryService::class);
         $this->partsService = app(WorkOrderPartsService::class);
-        
+
         // Create tenant and center
         $tenant = Tenant::factory()->create();
         $center = Center::factory()->create(['tenant_id' => $tenant->id]);
-        
+
         $this->user = User::factory()->create(['tenant_id' => $tenant->id, 'current_center_id' => $center->id]);
         $this->warehouse = Warehouse::getOrCreateDefault($center->id);
         $this->part = Part::factory()->create(['tenant_id' => $tenant->id, 'sku' => 'TEST-001']);
-        
+
         // Create work order
         $this->workOrder = WorkOrder::factory()->create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
         ]);
-        
+
         $this->workOrderItem = WorkOrderItem::factory()->create([
             'work_order_id' => $this->workOrder->id,
         ]);
-        
+
         // Add stock
         $this->inventoryService->receipt($this->warehouse->id, $this->part->id, 100, 50.00);
-        
+
         $this->actingAs($this->user);
     }
 
@@ -87,7 +99,7 @@ class WorkOrderInventoryTest extends TestCase
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)
             ->where('part_id', $this->part->id)
             ->first();
-        
+
         $this->assertEquals(90, $balance->qty_on_hand); // 100 - 10
 
         // Check move was created
@@ -142,7 +154,7 @@ class WorkOrderInventoryTest extends TestCase
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)
             ->where('part_id', $this->part->id)
             ->first();
-        
+
         $this->assertEquals(85, $balance->qty_on_hand); // 100 - 10 - 5
     }
 
@@ -173,7 +185,7 @@ class WorkOrderInventoryTest extends TestCase
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)
             ->where('part_id', $this->part->id)
             ->first();
-        
+
         $this->assertEquals(93, $balance->qty_on_hand); // 100 - 10 + 3
     }
 
@@ -201,7 +213,7 @@ class WorkOrderInventoryTest extends TestCase
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)
             ->where('part_id', $this->part->id)
             ->first();
-        
+
         $this->assertEquals(100, $balance->qty_on_hand); // Back to original
 
         // Check status
@@ -234,7 +246,7 @@ class WorkOrderInventoryTest extends TestCase
         $balance = InventoryBalance::where('warehouse_id', $this->warehouse->id)
             ->where('part_id', $this->part->id)
             ->first();
-        
+
         $this->assertEquals(100, $balance->qty_on_hand);
     }
 
@@ -242,15 +254,15 @@ class WorkOrderInventoryTest extends TestCase
     public function it_checks_stock_availability()
     {
         $stock = $this->partsService->checkStock($this->warehouse->id, $this->part->id, 50);
-        
+
         $this->assertTrue($stock['sufficient']);
         $this->assertEquals(100, $stock['on_hand']);
         $this->assertEquals(50, $stock['requested']);
         $this->assertEquals(0, $stock['shortage']);
-        
+
         // Check insufficient
         $stock = $this->partsService->checkStock($this->warehouse->id, $this->part->id, 150);
-        
+
         $this->assertFalse($stock['sufficient']);
         $this->assertEquals(50, $stock['shortage']);
     }
@@ -259,20 +271,20 @@ class WorkOrderInventoryTest extends TestCase
     public function it_issues_warehouse_parts_from_inventory_on_quote_conversion()
     {
         // 1. Create a Quote
-        $quote = \App\Models\Quote::create([
+        $quote = Quote::create([
             'tenant_id' => $this->workOrder->tenant_id,
             'center_id' => $this->workOrder->center_id,
             'customer_id' => $this->workOrder->customer_id,
             'vehicle_id' => $this->workOrder->vehicle_id,
             'code' => 'QT-CONV-TEST',
-            'status' => \App\Models\Quote::STATUS_APPROVED,
+            'status' => Quote::STATUS_APPROVED,
             'approved_at' => now(),
             'approved_by' => $this->user->id,
             'created_by' => $this->user->id,
         ]);
 
         // 2. Create Quote Line (Service)
-        $quoteLine = \App\Models\QuoteLine::create([
+        $quoteLine = QuoteLine::create([
             'quote_id' => $quote->id,
             'service_id' => $this->workOrderItem->service_id,
             'description' => 'Test Service',
@@ -281,7 +293,7 @@ class WorkOrderInventoryTest extends TestCase
         ]);
 
         // 3. Create Quote Part (Warehouse Sourced)
-        \App\Models\QuotePart::create([
+        QuotePart::create([
             'quote_id' => $quote->id,
             'quote_line_id' => $quoteLine->id,
             'part_id' => $this->part->id,
@@ -292,12 +304,12 @@ class WorkOrderInventoryTest extends TestCase
         ]);
 
         // 4. Convert Quote to Work Order
-        $conversionService = app(\App\Services\QuoteConversionService::class);
+        $conversionService = app(QuoteConversionService::class);
         $newWorkOrder = $conversionService->convert($quote, $this->user);
 
         // 5. Assertions
         $this->assertNotNull($newWorkOrder);
-        
+
         // Assert that the Work Order Item Part is created and has correct status and inventory move linked
         $woPart = $newWorkOrder->parts->first();
         $this->assertNotNull($woPart);

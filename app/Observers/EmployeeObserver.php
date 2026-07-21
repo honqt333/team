@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\HR\Employee;
@@ -7,6 +9,7 @@ use App\Models\User;
 use App\Notifications\WelcomeEmployeeInvitation;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Log;
 use Spatie\Permission\PermissionRegistrar;
 
 class EmployeeObserver
@@ -28,12 +31,13 @@ class EmployeeObserver
         // If email changed
         if ($employee->isDirty('email')) {
             $user = $employee->user ?? User::find($employee->user_id);
+
             if ($user) {
                 // Update the linked user's email so they can log in
                 $user->update(['email' => $employee->email]);
                 // Send new activation/invitation email
                 $user->notify(new WelcomeEmployeeInvitation);
-                \Log::info("EmployeeObserver: Email updated and new invitation sent for employee {$employee->id}");
+                Log::info("EmployeeObserver: Email updated and new invitation sent for employee {$employee->id}");
             } else {
                 $this->handleUserCreation($employee);
             }
@@ -42,9 +46,10 @@ class EmployeeObserver
         // If phone changed
         if ($employee->isDirty('phone')) {
             $user = $employee->user ?? User::find($employee->user_id);
+
             if ($user) {
                 $user->update(['phone' => $employee->phone]);
-                \Log::info("EmployeeObserver: Phone updated for employee {$employee->id}");
+                Log::info("EmployeeObserver: Phone updated for employee {$employee->id}");
             }
         }
 
@@ -76,7 +81,7 @@ class EmployeeObserver
     {
         // Skip if no email
         if (empty($employee->email)) {
-            \Log::warning("EmployeeObserver: Skipping user creation for employee {$employee->id} - no email");
+            Log::warning("EmployeeObserver: Skipping user creation for employee {$employee->id} - no email");
 
             return;
         }
@@ -113,6 +118,7 @@ class EmployeeObserver
             if ($employee->center_id && ! $user->centers->contains($employee->center_id)) {
                 $user->centers()->attach($employee->center_id, ['tenant_id' => $employee->tenant_id]);
             }
+
             // Update current center if not set
             if (! $user->current_center_id && $employee->center_id) {
                 $user->update(['current_center_id' => $employee->center_id]);
@@ -134,6 +140,7 @@ class EmployeeObserver
         // Assign additional role from Job Title if defined
         if ($employee->jobTitle && $employee->jobTitle->default_role_name) {
             $additionalRole = $employee->jobTitle->default_role_name;
+
             if ($additionalRole !== 'employee' && ! $user->hasRole($additionalRole)) {
                 $user->assignRole($additionalRole);
             }
@@ -142,7 +149,7 @@ class EmployeeObserver
         // Send invitation email for new users
         if ($isNewUser) {
             $user->notify(new WelcomeEmployeeInvitation);
-            \Log::info("EmployeeObserver: Created user and sent invite for employee {$employee->id}");
+            Log::info("EmployeeObserver: Created user and sent invite for employee {$employee->id}");
         }
     }
 }

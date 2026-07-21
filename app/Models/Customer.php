@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
+use App\Support\TenancyContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,7 +21,7 @@ class Customer extends Model
         parent::boot();
 
         static::creating(function (Model $model) {
-            if (empty($model->center_id) && $centerId = \App\Support\TenancyContext::centerId()) {
+            if (empty($model->center_id) && $centerId = TenancyContext::centerId()) {
                 $model->center_id = $centerId;
             }
         });
@@ -26,7 +29,9 @@ class Customer extends Model
 
     // Type constants
     public const TYPE_INDIVIDUAL = 'individual';
+
     public const TYPE_COMPANY = 'company';
+
     public const TYPE_GOVERNMENT = 'government';
 
     public const TYPES = [

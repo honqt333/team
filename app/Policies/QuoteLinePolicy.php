@@ -1,11 +1,14 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\QuoteLine;
 use App\Models\User;
+use App\Support\Permissions;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-use App\Support\Permissions;
 class QuoteLinePolicy
 {
     use HandlesAuthorization;
@@ -17,7 +20,7 @@ class QuoteLinePolicy
     public function update(User $user, QuoteLine $line): bool
     {
         // Load quote relationship if not loaded
-        if (!$line->relationLoaded('quote')) {
+        if (! $line->relationLoaded('quote')) {
             $line->load('quote');
         }
 
@@ -37,7 +40,7 @@ class QuoteLinePolicy
     public function delete(User $user, QuoteLine $line): bool
     {
         // Load quote relationship if not loaded
-        if (!$line->relationLoaded('quote')) {
+        if (! $line->relationLoaded('quote')) {
             $line->load('quote');
         }
 

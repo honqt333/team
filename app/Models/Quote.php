@@ -1,25 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
+use App\Traits\HasQuoteRelations;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Quote extends Model
 {
-    use SoftDeletes, CenterScoped, HasTaxSnapshot, \App\Traits\HasQuoteRelations;
+    use CenterScoped, HasQuoteRelations, HasTaxSnapshot, SoftDeletes;
 
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_SENT = 'sent';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_CONVERTED = 'converted';
 
     public const STATUSES = [
@@ -83,8 +87,6 @@ class Quote extends Model
     // Relationships
     // ─────────────────────────────────────────────────────────────
 
-
-
     // ─────────────────────────────────────────────────────────────
     // Boot - Auto UUID
     // ─────────────────────────────────────────────────────────────
@@ -117,12 +119,12 @@ class Quote extends Model
                 ->first();
 
             if ($lastQuote && preg_match('/QT-(\d+)/', $lastQuote->code, $matches)) {
-                $nextNumber = (int)$matches[1] + 1;
+                $nextNumber = (int) $matches[1] + 1;
             } else {
                 $nextNumber = 1;
             }
 
-            return 'QT-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            return 'QT-'.str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
         });
     }
 
@@ -184,46 +186,57 @@ class Quote extends Model
             $this->refreshTaxSnapshot();
 
             // Load relationships if not loaded to ensure we can iterate them
-            if (!$this->relationLoaded('lines')) $this->load('lines');
-            if (!$this->relationLoaded('parts')) $this->load('parts');
+            if (! $this->relationLoaded('lines')) {
+                $this->load('lines');
+            }
+
+            if (! $this->relationLoaded('parts')) {
+                $this->load('parts');
+            }
 
             // Re-save all lines and parts so they recalculate with the new tax snapshot
             foreach ($this->lines as $line) {
                 $line->save();
             }
+
             foreach ($this->parts as $part) {
                 $part->save();
             }
         }
 
         // Load relationships if not loaded to ensure all items are summed
-        if (!$this->relationLoaded('lines')) $this->load('lines');
-        if (!$this->relationLoaded('parts')) $this->load('parts');
+        if (! $this->relationLoaded('lines')) {
+            $this->load('lines');
+        }
+
+        if (! $this->relationLoaded('parts')) {
+            $this->load('parts');
+        }
 
         // Services totals
-        $servicesPrice = $this->lines->sum(fn($l) => (float)$l->unit_price * (float)$l->qty);
+        $servicesPrice = $this->lines->sum(fn ($l) => (float) $l->unit_price * (float) $l->qty);
         $servicesDiscount = $this->lines->sum('discount_amount');
         $servicesTax = $this->lines->sum('tax_amount');
         $servicesTotal = $this->lines->sum('line_total'); // This is total_incl_tax usually
 
         // Parts totals - process all parts
         $allParts = $this->parts;
-        $partsPrice = $allParts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
+        $partsPrice = $allParts->sum(fn ($p) => (float) $p->unit_price * (float) $p->qty);
         $partsDiscount = $allParts->sum('discount');
         $partsTax = $allParts->sum('tax_amount');
-        $partsTotal = $allParts->sum(fn($p) => (float)($p->total_incl_tax ?: $p->total));
+        $partsTotal = $allParts->sum(fn ($p) => (float) ($p->total_incl_tax ?: $p->total));
 
         // Update Quote Totals
         $this->subtotal = $servicesPrice + $partsPrice;
         $this->total_discount = $servicesDiscount + $partsDiscount;
         $this->total_tax = $servicesTax + $partsTax;
-        
+
         if ($this->pricing_mode_snapshot === 'inclusive') {
-             $this->total_incl_tax = ($servicesTotal ?: ($servicesPrice - $servicesDiscount)) + $partsTotal;
-             $this->total_excl_tax = $this->total_incl_tax - $this->total_tax;
+            $this->total_incl_tax = ($servicesTotal ?: ($servicesPrice - $servicesDiscount)) + $partsTotal;
+            $this->total_excl_tax = $this->total_incl_tax - $this->total_tax;
         } else {
-             $this->total_excl_tax = ($servicesPrice - $servicesDiscount) + ($partsPrice - $partsDiscount);
-             $this->total_incl_tax = $this->total_excl_tax + $this->total_tax;
+            $this->total_excl_tax = ($servicesPrice - $servicesDiscount) + ($partsPrice - $partsDiscount);
+            $this->total_incl_tax = $this->total_excl_tax + $this->total_tax;
         }
 
         $this->total = $this->total_incl_tax;

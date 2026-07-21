@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class CustomersTemplateExport implements FromArray, WithHeadings, WithStyles, ShouldAutoSize
+class CustomersTemplateExport implements FromArray, ShouldAutoSize, WithHeadings, WithStyles
 {
     public function array(): array
     {
@@ -47,7 +50,7 @@ class CustomersTemplateExport implements FromArray, WithHeadings, WithStyles, Sh
         $sheet->getStyle('A1:H1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'color' => ['rgb' => '4F46E5'],
             ],
         ]);
@@ -55,7 +58,7 @@ class CustomersTemplateExport implements FromArray, WithHeadings, WithStyles, Sh
         // Style sample row
         $sheet->getStyle('A2:H2')->applyFromArray([
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'color' => ['rgb' => 'F3F4F6'],
             ],
             'font' => ['italic' => true, 'color' => ['rgb' => '6B7280']],

@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Billing;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Concerns\TenantScoped;
 
 class Subscription extends Model
 {
@@ -60,7 +62,7 @@ class Subscription extends Model
      */
     public function isActive(): bool
     {
-        return $this->status === 'active' && (!$this->ends_at || $this->ends_at->isFuture());
+        return $this->status === 'active' && (! $this->ends_at || $this->ends_at->isFuture());
     }
 
     /**
@@ -79,9 +81,11 @@ class Subscription extends Model
         if ($this->onTrial()) {
             return max(0, now()->diffInDays($this->trial_ends_at, false));
         }
+
         if ($this->ends_at) {
             return max(0, now()->diffInDays($this->ends_at, false));
         }
+
         return 0;
     }
 }

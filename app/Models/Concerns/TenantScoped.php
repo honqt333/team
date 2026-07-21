@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Concerns;
 
 use App\Support\TenancyContext;
@@ -21,7 +23,7 @@ trait TenantScoped
 
             // Only apply scope if tenant context is available
             if ($tenantId !== null) {
-                $builder->where($table . '.tenant_id', $tenantId);
+                $builder->where($table.'.tenant_id', $tenantId);
             }
         });
 

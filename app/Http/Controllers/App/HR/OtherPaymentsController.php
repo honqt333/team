@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
 use App\Models\HR\Employee;
 use App\Models\HR\OtherPayment;
-use App\Support\TenancyContext;
 use Illuminate\Http\Request;
 
 class OtherPaymentsController extends Controller
 {
-
     /**
      * Display a listing of other payments.
      */
@@ -19,13 +19,13 @@ class OtherPaymentsController extends Controller
         $this->authorize('viewAny', Employee::class);
 
         $user = auth()->user();
-        
+
         // Get center from query param - empty string or null means show all
         $centerId = $request->get('center_id');
-        
+
         $payments = OtherPayment::with(['employee', 'createdBy'])
             ->where('tenant_id', $user->tenant_id)
-            ->when($centerId && $centerId !== '', fn($q) => $q->where('center_id', $centerId))
+            ->when($centerId && $centerId !== '', fn ($q) => $q->where('center_id', $centerId))
             ->latest()
             ->paginate(15);
 

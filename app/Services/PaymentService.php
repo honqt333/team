@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Invoice;
@@ -22,18 +24,18 @@ class PaymentService
     {
         return DB::transaction(function () use ($invoice, $data) {
             $payment = Payment::create([
-                'tenant_id'      => $invoice->tenant_id,
-                'center_id'      => $invoice->center_id,
-                'invoice_id'     => $invoice->id,
+                'tenant_id' => $invoice->tenant_id,
+                'center_id' => $invoice->center_id,
+                'invoice_id' => $invoice->id,
                 // Mirror the WO link so the payment shows up on both sides.
-                'work_order_id'  => $invoice->work_order_id,
-                'amount'         => $data['amount'],
-                'payment_date'   => $data['payment_date'] ?? now(),
+                'work_order_id' => $invoice->work_order_id,
+                'amount' => $data['amount'],
+                'payment_date' => $data['payment_date'] ?? now(),
                 'payment_method' => $data['payment_method'] ?? 'cash',
-                'reference'      => $data['reference'] ?? null,
-                'notes'          => $data['notes'] ?? null,
-                'received_by'    => $data['received_by'] ?? auth()->id(),
-                'type'           => $data['type'] ?? 'payment',
+                'reference' => $data['reference'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'received_by' => $data['received_by'] ?? auth()->id(),
+                'type' => $data['type'] ?? 'payment',
             ]);
 
             // Update invoice payment status
@@ -68,11 +70,11 @@ class PaymentService
         $payments = $invoice->payments()->with('receivedBy')->orderBy('payment_date', 'desc')->get();
 
         return [
-            'payments'       => $payments,
-            'total_paid'     => $invoice->total_paid,
-            'balance'        => $invoice->balance,
+            'payments' => $payments,
+            'total_paid' => $invoice->total_paid,
+            'balance' => $invoice->balance,
             'payment_status' => $invoice->payment_status,
-            'is_paid'        => $invoice->is_paid,
+            'is_paid' => $invoice->is_paid,
         ];
     }
 
@@ -82,9 +84,9 @@ class PaymentService
     public function recordFullPayment(Invoice $invoice, string $method = 'cash', ?string $reference = null): Payment
     {
         return $this->recordPayment($invoice, [
-            'amount'         => $invoice->balance,
+            'amount' => $invoice->balance,
             'payment_method' => $method,
-            'reference'      => $reference,
+            'reference' => $reference,
         ]);
     }
 }

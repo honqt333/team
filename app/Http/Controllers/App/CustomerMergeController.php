@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
+use App\Actions\Customer\MergeCustomerAction;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-use App\Actions\Customer\MergeCustomerAction;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 
 class CustomerMergeController extends Controller
@@ -15,7 +18,7 @@ class CustomerMergeController extends Controller
     /**
      * Get merge data for customer.
      */
-    public function mergeData(Customer $customer): \Illuminate\Http\JsonResponse
+    public function mergeData(Customer $customer): JsonResponse
     {
         $this->authorize('update', $customer);
 
@@ -23,7 +26,7 @@ class CustomerMergeController extends Controller
             ->where('type', $customer->type)
             ->withCount(['vehicles', 'quotes', 'workOrders'])
             ->orderBy('name');
-        
+
         $otherCustomers = $query->get();
 
         return response()->json([
@@ -36,7 +39,7 @@ class CustomerMergeController extends Controller
                 'quotes_count' => $customer->quotes()->count(),
                 'work_orders_count' => $customer->workOrders()->count(),
             ],
-            'targets' => $otherCustomers->map(fn($c) => [
+            'targets' => $otherCustomers->map(fn ($c) => [
                 'id' => $c->id,
                 'name' => $c->name,
                 'phone' => $c->phone,

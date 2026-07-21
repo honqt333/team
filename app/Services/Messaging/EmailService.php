@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Messaging;
 
 use App\Models\Integration\Integration;
 use App\Models\Integration\IntegrationLog;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -26,7 +29,7 @@ class EmailService
         bool $isHtml = true,
         ?int $tenantId = null
     ): array {
-        if (!$this->integration || !$this->integration->is_active) {
+        if (! $this->integration || ! $this->integration->is_active) {
             // Fallback to default Laravel mailer
             return $this->sendViaDefaultMailer($to, $subject, $body, $isHtml);
         }
@@ -49,7 +52,7 @@ class EmailService
             );
 
             return ['success' => true, 'message_id' => $result['message_id'] ?? null];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $responseTime = (int) ((microtime(true) - $startTime) * 1000);
 
             IntegrationLog::log(
@@ -75,7 +78,7 @@ class EmailService
             'smtp' => $this->sendViaSmtp($config, $to, $subject, $body, $isHtml),
             'mailgun' => $this->sendViaMailgun($config, $to, $subject, $body, $isHtml),
             'sendgrid' => $this->sendViaSendgrid($config, $to, $subject, $body, $isHtml),
-            default => throw new \Exception('مزود غير مدعوم'),
+            default => throw new Exception('مزود غير مدعوم'),
         };
     }
 
@@ -114,14 +117,14 @@ class EmailService
         $response = Http::withBasicAuth('api', $config['api_key'])
             ->asForm()
             ->post("https://api.mailgun.net/v3/{$config['domain']}/messages", [
-                'from' => ($config['from_name'] ?? 'Khidma Pro') . ' <' . $config['from_address'] . '>',
+                'from' => ($config['from_name'] ?? 'Khidma Pro').' <'.$config['from_address'].'>',
                 'to' => $to,
                 'subject' => $subject,
                 $isHtml ? 'html' : 'text' => $body,
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ Mailgun: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ Mailgun: '.$response->body());
         }
 
         return ['message_id' => $response->json('id')];
@@ -137,8 +140,8 @@ class EmailService
                 'content' => [['type' => $isHtml ? 'text/html' : 'text/plain', 'value' => $body]],
             ]);
 
-        if (!$response->successful()) {
-            throw new \Exception('خطأ SendGrid: ' . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('خطأ SendGrid: '.$response->body());
         }
 
         return ['message_id' => $response->header('X-Message-Id') ?? uniqid('sg_')];
@@ -147,9 +150,9 @@ class EmailService
     protected function sendViaDefaultMailer(string $to, string $subject, string $body, bool $isHtml): array
     {
         if ($isHtml) {
-            Mail::html($body, fn($msg) => $msg->to($to)->subject($subject));
+            Mail::html($body, fn ($msg) => $msg->to($to)->subject($subject));
         } else {
-            Mail::raw($body, fn($msg) => $msg->to($to)->subject($subject));
+            Mail::raw($body, fn ($msg) => $msg->to($to)->subject($subject));
         }
 
         return ['success' => true, 'message_id' => uniqid('default_')];

@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\App\Print;
 
+use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
@@ -51,7 +54,7 @@ class UploadSignatureRequest extends FormRequest
                 // understand SVG vectors. We need a custom check that
                 // validates raster images via getimagesize() AND accepts
                 // SVG when the content is a real SVG document.
-                function (string $attribute, mixed $value, \Closure $fail): void {
+                function (string $attribute, mixed $value, Closure $fail): void {
                     if (! $value instanceof UploadedFile) {
                         return;
                     }
@@ -62,6 +65,7 @@ class UploadSignatureRequest extends FormRequest
                     if ($clientExt === 'svg' || str_contains($clientMime, 'svg')) {
                         // Reject SVGs that try to include executable JS
                         $head = file_get_contents($value->getRealPath(), false, null, 0, 4096) ?: '';
+
                         if (! str_contains($head, '<svg')) {
                             $fail(__('validation.mimes', [
                                 'attribute' => __('validation.attributes.signature'),
@@ -86,6 +90,7 @@ class UploadSignatureRequest extends FormRequest
                             'data:image',
                         ];
                         $lower = strtolower($head);
+
                         foreach ($xssPatterns as $needle) {
                             if (str_contains($lower, $needle)) {
                                 $fail(__('validation.regex', [
@@ -95,6 +100,7 @@ class UploadSignatureRequest extends FormRequest
                                 return;
                             }
                         }
+
                         // Event handler attributes (onload=, onerror=,
                         // onclick=, onbegin=, onmouseover=, ...).
                         if (preg_match('/\son[a-z]+\s*=/i', $head) === 1) {
@@ -111,16 +117,18 @@ class UploadSignatureRequest extends FormRequest
                     // For raster: defer to Laravel's image rule semantics
                     // by checking the size function.
                     $size = @getimagesize($value->getRealPath());
+
                     if ($size === false) {
                         $fail(__('validation.image', ['attribute' => __('validation.attributes.signature')]));
                     }
                 },
                 // Reject obvious double-extension / null-byte tricks
-                function (string $attribute, mixed $value, \Closure $fail): void {
+                function (string $attribute, mixed $value, Closure $fail): void {
                     if (! $value instanceof UploadedFile) {
                         return;
                     }
                     $name = $value->getClientOriginalName();
+
                     if (str_contains($name, "\0") || str_contains($name, '/') || str_contains($name, '\\')) {
                         $fail(__('validation.regex', ['attribute' => $attribute]));
                     }
@@ -130,12 +138,13 @@ class UploadSignatureRequest extends FormRequest
                 // that could execute script in a browser context. The list of
                 // patterns is intentionally narrow: signatures are simple
                 // stroke/curve/path data. Anything more exotic is rejected.
-                function (string $attribute, mixed $value, \Closure $fail): void {
+                function (string $attribute, mixed $value, Closure $fail): void {
                     if (! $value instanceof UploadedFile) {
                         return;
                     }
                     $clientMime = (string) $value->getMimeType();
                     $clientExt = strtolower($value->getClientOriginalExtension());
+
                     if ($clientExt !== 'svg' && ! str_contains($clientMime, 'svg')) {
                         // Raster image — XSS check is not applicable.
                         return;

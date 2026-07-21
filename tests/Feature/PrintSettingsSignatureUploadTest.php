@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -548,6 +550,7 @@ class PrintSettingsSignatureUploadTest extends TestCase
         // Must be a flat list of three, not a nested list.
         $this->assertIsList($sigs, 'signatures must be a flat list');
         $this->assertCount(3, $sigs);
+
         foreach ($sigs as $sig) {
             $this->assertIsArray($sig);
             $this->assertArrayHasKey('id', $sig, 'each entry must be a signature object with id');
@@ -865,6 +868,7 @@ class PrintSettingsSignatureUploadTest extends TestCase
     {
         // Seed three signatures in a known order
         $ids = [];
+
         foreach (['الأول', 'الثاني', 'الثالث'] as $name) {
             $resp = $this->actingAs($this->user)
                 ->postJson(route('settings.print.signatures.store'), [

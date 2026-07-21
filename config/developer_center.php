@@ -1,5 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Services\Developer\Scanners\ArchitectureScanner;
+use App\Services\Developer\Scanners\BusinessLogicScanner;
+use App\Services\Developer\Scanners\DatabaseScanner;
+use App\Services\Developer\Scanners\PerformanceScanner;
+use App\Services\Developer\Scanners\SecurityScanner;
+use App\Services\Developer\Scanners\TestScanner;
+use App\Services\Developer\Scanners\UiScanner;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -12,13 +22,13 @@ return [
     |
     */
     'scanners' => [
-        App\Services\Developer\Scanners\ArchitectureScanner::class,
-        App\Services\Developer\Scanners\SecurityScanner::class,
-        App\Services\Developer\Scanners\UiScanner::class,
-        App\Services\Developer\Scanners\DatabaseScanner::class,
-        App\Services\Developer\Scanners\PerformanceScanner::class,
-        App\Services\Developer\Scanners\TestScanner::class,
-        App\Services\Developer\Scanners\BusinessLogicScanner::class,
+        ArchitectureScanner::class,
+        SecurityScanner::class,
+        UiScanner::class,
+        DatabaseScanner::class,
+        PerformanceScanner::class,
+        TestScanner::class,
+        BusinessLogicScanner::class,
     ],
 
     /*

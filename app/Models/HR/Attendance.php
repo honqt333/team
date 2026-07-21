@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\HR;
 
 use App\Models\Center;
@@ -53,6 +55,7 @@ class Attendance extends Model
     {
         return $this->belongsTo(Employee::class);
     }
+
     /**
      * احتساب دقائق التأخير والانصراف المبكر والأوقات الإضافية
      * يدعم نظام الورديات إذا كان مفعلاً، وإلا يستخدم الأوقات الثابتة
@@ -60,8 +63,10 @@ class Attendance extends Model
     public function calculateTimes(): void
     {
         $employee = $this->employee;
-        
-        if (!$employee) return;
+
+        if (! $employee) {
+            return;
+        }
 
         // Get center settings for grace period
         $settings = AttendanceSettings::getForCenter($this->center_id);
@@ -73,20 +78,20 @@ class Attendance extends Model
 
         // الحصول على أوقات الدوام من نظام الورديات فقط
         $shift = $employee->getShiftForDate($this->date);
-        
+
         // لا وردية = لا يُحسب التأخير
-        if (!$shift) {
+        if (! $shift) {
             return;
         }
-        
+
         $shiftStartTime = $shift->start_time;
         $shiftEndTime = $shift->end_time;
 
         // حساب التأخير
         if ($this->check_in && $shiftStartTime) {
-            $shiftStart = Carbon::parse($this->date->format('Y-m-d') . ' ' . $shiftStartTime);
-            $checkIn = Carbon::parse($this->date->format('Y-m-d') . ' ' . Carbon::parse($this->check_in)->format('H:i'));
-            
+            $shiftStart = Carbon::parse($this->date->format('Y-m-d').' '.$shiftStartTime);
+            $checkIn = Carbon::parse($this->date->format('Y-m-d').' '.Carbon::parse($this->check_in)->format('H:i'));
+
             if ($checkIn->gt($shiftStart)) {
                 $lateMinutes = abs($checkIn->diffInMinutes($shiftStart));
                 // تطبيق فترة السماح
@@ -96,14 +101,14 @@ class Attendance extends Model
 
         // حساب الانصراف المبكر والوقت الإضافي
         if ($this->check_out && $shiftEndTime) {
-            $shiftEnd = Carbon::parse($this->date->format('Y-m-d') . ' ' . $shiftEndTime);
-            $checkOut = Carbon::parse($this->date->format('Y-m-d') . ' ' . Carbon::parse($this->check_out)->format('H:i'));
-            
+            $shiftEnd = Carbon::parse($this->date->format('Y-m-d').' '.$shiftEndTime);
+            $checkOut = Carbon::parse($this->date->format('Y-m-d').' '.Carbon::parse($this->check_out)->format('H:i'));
+
             // التعامل مع الورديات الليلية (تمتد لليوم التالي)
             if ($shift && $shift->is_overnight && $shiftEnd->lt($shiftStart)) {
                 $shiftEnd->addDay();
             }
-            
+
             if ($checkOut->lt($shiftEnd)) {
                 // انصراف مبكر
                 $this->early_leave_minutes = abs($shiftEnd->diffInMinutes($checkOut));

@@ -1,24 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
-use App\Models\Tenant;
 use App\Models\Center;
-use App\Models\User;
 use App\Models\Department;
-use App\Models\Nationality;
-use App\Models\HR\JobTitle;
-use App\Models\HR\EmployeeType;
 use App\Models\HR\Allowance;
-use App\Models\HR\Deduction;
 use App\Models\HR\Attendance;
-use App\Models\HR\Leave;
-use App\Models\HR\PayrollItem;
-use App\Models\HR\OtherPayment;
-use App\Models\HR\Shift;
-use App\Models\HR\EmployeeShift;
-use App\Models\HR\EmployeeDocument;
+use App\Models\HR\Deduction;
 use App\Models\HR\EmployeeContract;
+use App\Models\HR\EmployeeDocument;
+use App\Models\HR\EmployeeShift;
+use App\Models\HR\EmployeeType;
+use App\Models\HR\JobTitle;
+use App\Models\HR\Leave;
+use App\Models\HR\OtherPayment;
+use App\Models\HR\PayrollItem;
+use App\Models\HR\Shift;
+use App\Models\Nationality;
+use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;

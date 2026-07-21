@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\Quotes;
 
 use App\Http\Controllers\Controller;
@@ -26,7 +28,7 @@ class QuotePrintController extends Controller
             'vehicle.customer',
             'vehicle.model',
             'lines.service.department',
-            'parts.part' => fn($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
+            'parts.part' => fn ($q) => $q->with('inventoryBalances')->withSum('inventoryBalances', 'qty_on_hand'),
             'parts.quoteLine',
             'departments',
             'createdByUser',

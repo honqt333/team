@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Support;
 
 use InvalidArgumentException;
@@ -44,6 +46,7 @@ class PricingHelper
         ?float $discountValue
     ): float {
         $discountAmount = self::computeDiscountAmount($unitPrice, $discountType, $discountValue);
+
         return max(0, $unitPrice - $discountAmount);
     }
 
@@ -106,10 +109,6 @@ class PricingHelper
 
     /**
      * Validate that a discount configuration is valid.
-     *
-     * @param string $type
-     * @param float|null $value
-     * @return bool
      */
     public static function isValidDiscount(string $type, ?float $value): bool
     {

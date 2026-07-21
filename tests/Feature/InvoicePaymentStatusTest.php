@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -31,36 +33,36 @@ class InvoicePaymentStatusTest extends TestCase
         $customer = Customer::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
-            'name'      => 'Cust1',
-            'phone'     => '1234567890',
+            'name' => 'Cust1',
+            'phone' => '1234567890',
         ]);
 
         return Invoice::create([
-            'tenant_id'              => $tenant->id,
-            'center_id'              => $center->id,
-            'customer_id'            => $customer->id,
-            'invoice_number'         => 'INV-TEST-001',
-            'status'                 => 'valid',
-            'issue_date'             => now(),
-            'supply_date'            => now(),
-            'total_excl_tax'         => $totalInclTax,
-            'total_tax'              => 0,
-            'total_incl_tax'         => $totalInclTax,
-            'total_paid'             => 0,
-            'payment_status'         => 'unpaid',
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'invoice_number' => 'INV-TEST-001',
+            'status' => 'valid',
+            'issue_date' => now(),
+            'supply_date' => now(),
+            'total_excl_tax' => $totalInclTax,
+            'total_tax' => 0,
+            'total_incl_tax' => $totalInclTax,
+            'total_paid' => 0,
+            'payment_status' => 'unpaid',
         ]);
     }
 
     private function makePayment(Invoice $invoice, float $amount, string $type = 'payment'): Payment
     {
         return Payment::create([
-            'tenant_id'     => $invoice->tenant_id,
-            'center_id'     => $invoice->center_id,
-            'invoice_id'    => $invoice->id,
-            'amount'        => $amount,
-            'payment_date'  => now(),
-            'payment_method'=> 'cash',
-            'type'          => $type,
+            'tenant_id' => $invoice->tenant_id,
+            'center_id' => $invoice->center_id,
+            'invoice_id' => $invoice->id,
+            'amount' => $amount,
+            'payment_date' => now(),
+            'payment_method' => 'cash',
+            'type' => $type,
         ]);
     }
 

@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemNote;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class WorkOrderNotesController
@@ -34,10 +36,10 @@ class WorkOrderNotesController
         $note->load('user');
 
         $message = __('messages.note_added');
-        
+
         $notes = $item->itemNotes()->with('user.roles')->latest()->get();
-        
-        return $request->wantsJson() && !$request->hasHeader('X-Inertia')
+
+        return $request->wantsJson() && ! $request->hasHeader('X-Inertia')
             ? response()->json(['success' => $message, 'notes' => $notes])
             : redirect()->back()->with('success', $message);
     }
@@ -52,10 +54,10 @@ class WorkOrderNotesController
         $note->delete();
 
         $message = __('messages.note_deleted');
-        
+
         $notes = $item->itemNotes()->with('user.roles')->latest()->get();
-        
-        return request()->wantsJson() && !request()->hasHeader('X-Inertia')
+
+        return request()->wantsJson() && ! request()->hasHeader('X-Inertia')
             ? response()->json(['success' => $message, 'notes' => $notes])
             : redirect()->back()->with('success', $message);
     }
@@ -80,7 +82,8 @@ class WorkOrderNotesController
         $note->load('user');
 
         $message = __('messages.note_added');
-        return $request->wantsJson() && !$request->hasHeader('X-Inertia')
+
+        return $request->wantsJson() && ! $request->hasHeader('X-Inertia')
             ? response()->json(['success' => $message, 'note' => $note])
             : redirect()->back()->with('success', $message);
     }
@@ -95,7 +98,8 @@ class WorkOrderNotesController
         $note->delete();
 
         $message = __('messages.note_deleted');
-        return request()->wantsJson() && !request()->hasHeader('X-Inertia')
+
+        return request()->wantsJson() && ! request()->hasHeader('X-Inertia')
             ? response()->json(['success' => $message])
             : redirect()->back()->with('success', $message);
     }

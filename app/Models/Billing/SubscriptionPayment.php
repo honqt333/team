@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Billing;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Concerns\TenantScoped;
 
 class SubscriptionPayment extends Model
 {
@@ -59,13 +61,14 @@ class SubscriptionPayment extends Model
     /**
      * Mark as initiated.
      */
-    public function markAsInitiated(string $gatewayPaymentId = null): self
+    public function markAsInitiated(?string $gatewayPaymentId = null): self
     {
         $this->update([
             'status' => 'initiated',
             'gateway_payment_id' => $gatewayPaymentId,
             'initiated_at' => now(),
         ]);
+
         return $this;
     }
 
@@ -79,19 +82,21 @@ class SubscriptionPayment extends Model
             'gateway_response' => $response,
             'paid_at' => now(),
         ]);
+
         return $this;
     }
 
     /**
      * Mark as failed.
      */
-    public function markAsFailed(string $reason = null, array $response = []): self
+    public function markAsFailed(?string $reason = null, array $response = []): self
     {
         $this->update([
             'status' => 'failed',
             'failure_reason' => $reason,
             'gateway_response' => $response,
         ]);
+
         return $this;
     }
 

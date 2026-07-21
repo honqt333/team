@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
-use App\Models\Supplier;
-use App\Models\PurchaseOrder;
-use App\Models\PurchaseInvoiceLine;
-use App\Models\Tenant;
 use App\Models\Center;
-use App\Models\Payment;
-use App\Models\PurchaseReturnInvoice;
 use App\Models\CompanyTransaction;
+use App\Models\Payment;
+use App\Models\PurchaseInvoiceLine;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseReturnInvoice;
+use App\Models\Supplier;
+use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;

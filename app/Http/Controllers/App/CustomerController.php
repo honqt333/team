@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
-use App\Http\Requests\Customer\CustomerMergeRequest;
 use App\Http\Requests\Customer\CustomerStoreRequest;
 use App\Http\Requests\Customer\CustomerUpdateRequest;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\Payment;
 use App\Models\Service;
 use App\Models\VehicleColor;
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
-use App\Actions\Customer\MergeCustomerAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -35,8 +37,8 @@ class CustomerController
             $search = request('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -76,7 +78,7 @@ class CustomerController
         $this->authorize('viewAny', Customer::class);
 
         $query = $this->buildCustomerQuery();
-        
+
         // TODO: Implement print functionality
         // For now, redirect to index
         return Inertia::render('Customers/Index', [
@@ -119,7 +121,7 @@ class CustomerController
         // Get related data with proper eager loading - NO duplicate queries
         // Fix: Using $customer->vehicles directly (already loaded above)
         $vehicles = $customer->vehicles;
-        
+
         // Get work orders with all needed relationships in single query (bypassing center_scoped to show tenant-wide history)
         $workOrders = $customer->workOrders()
             ->withoutGlobalScope('center_scoped')
@@ -127,12 +129,12 @@ class CustomerController
                 'vehicle.make',
                 'vehicle.model',
                 'payments.receivedBy',
-                'invoice'
+                'invoice',
             ])
             ->latest()
             ->get();
         $workOrders->each->append(['total', 'total_paid', 'balance', 'bad_debt']);
-        
+
         // Get quotes with vehicle relationships
         $quotes = $customer->quotes()
             ->withoutGlobalScope('center_scoped')
@@ -141,14 +143,14 @@ class CustomerController
             ->get();
 
         // Get all payments from customer's work orders or direct invoices
-        $payments = \App\Models\Payment::where(function($query) use ($customer) {
-                $query->whereHas('workOrder', function($q) use ($customer) {
-                    $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
-                })
-                ->orWhereHas('invoice', function($q) use ($customer) {
+        $payments = Payment::where(function ($query) use ($customer) {
+            $query->whereHas('workOrder', function ($q) use ($customer) {
+                $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
+            })
+                ->orWhereHas('invoice', function ($q) use ($customer) {
                     $q->withoutGlobalScope('center_scoped')->where('customer_id', $customer->id);
                 });
-            })
+        })
             ->with(['receivedBy', 'workOrder', 'invoice'])
             ->latest('payment_date')
             ->get();
@@ -223,12 +225,12 @@ class CustomerController
         return redirect()->route('customers.index')->with('success', __('messages.customer_deleted'));
     }
 
-    public function checkPhone(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
+    public function checkPhone(Request $request): JsonResponse
     {
         $tenantId = auth()->user()->tenant_id;
         $phone = $request->query('phone');
 
-        if (!$phone) {
+        if (! $phone) {
             return response()->json(['exists' => false]);
         }
 
@@ -245,22 +247,22 @@ class CustomerController
 
         // If it starts with 00966, convert to +966
         if (str_starts_with($phone, '00966')) {
-            $phone = '+966' . substr($phone, 5);
+            $phone = '+966'.substr($phone, 5);
         }
 
         // If it starts with 05, convert to +9665
         if (str_starts_with($phone, '05') && strlen($phone) === 10) {
-            $phone = '+966' . substr($phone, 1);
+            $phone = '+966'.substr($phone, 1);
         }
 
         // If it starts with 5, convert to +9665
         if (str_starts_with($phone, '5') && strlen($phone) === 9) {
-            $phone = '+966' . $phone;
+            $phone = '+966'.$phone;
         }
 
         // If it starts with 966 and doesn't start with +, add +
-        if (str_starts_with($phone, '966') && !str_starts_with($phone, '+')) {
-            $phone = '+' . $phone;
+        if (str_starts_with($phone, '966') && ! str_starts_with($phone, '+')) {
+            $phone = '+'.$phone;
         }
 
         // Find customer under same tenant
@@ -280,7 +282,7 @@ class CustomerController
                     'type' => $customer->type,
                     'tax_number' => $customer->tax_number,
                     'address_line' => $customer->address_line,
-                ]
+                ],
             ]);
         }
 

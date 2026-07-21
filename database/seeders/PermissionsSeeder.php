@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Support\Permissions;
@@ -10,7 +12,7 @@ class PermissionsSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * This seeder uses the centralized Permissions class to ensure
      * consistency between defined permissions and database records.
      */
@@ -23,16 +25,17 @@ class PermissionsSeeder extends Seeder
         foreach ($allPermissions as $permission) {
             Permission::firstOrCreate([
                 'name' => $permission,
-                'guard_name' => 'web'
+                'guard_name' => 'web',
             ]);
         }
 
-        $this->command->info('Created ' . count($allPermissions) . ' permissions.');
-        
+        $this->command->info('Created '.count($allPermissions).' permissions.');
+
         // Display permissions by module for better visibility
         $byModule = Permissions::byModule();
+
         foreach ($byModule as $module => $permissions) {
-            $this->command->info("  [{$module}]: " . count($permissions) . ' permissions');
+            $this->command->info("  [{$module}]: ".count($permissions).' permissions');
         }
     }
 }

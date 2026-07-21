@@ -1,13 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
-use App\Models\InventoryUnit;
 use App\Models\InventoryCategory;
-use App\Models\Part;
 use App\Models\InventoryMove;
 use App\Models\InventoryTransfer;
+use App\Models\InventoryUnit;
+use App\Models\Part;
+use App\Support\Permissions;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,14 +23,14 @@ class InventorySettingsController extends Controller
      */
     public function hub(): Response
     {
-        $this->authorize(\App\Support\Permissions::INVENTORY_VIEW);
+        $this->authorize(Permissions::INVENTORY_VIEW);
 
         $tenantId = auth()->user()->tenant_id;
         $centerId = auth()->user()->current_center_id;
 
         return Inertia::render('Inventory/Hub', [
             'partsCount' => Part::where('tenant_id', $tenantId)->where('is_active', true)->count(),
-            'todayMovesCount' => InventoryMove::whereHas('warehouse', fn($q) => $q->where('center_id', $centerId))
+            'todayMovesCount' => InventoryMove::whereHas('warehouse', fn ($q) => $q->where('center_id', $centerId))
                 ->whereDate('posted_at', today())
                 ->count(),
             'pendingTransfersCount' => InventoryTransfer::where('tenant_id', $tenantId)
@@ -40,7 +44,7 @@ class InventorySettingsController extends Controller
      */
     public function index(): Response
     {
-        $this->authorize(\App\Support\Permissions::INVENTORY_SETTINGS_MANAGE);
+        $this->authorize(Permissions::INVENTORY_SETTINGS_MANAGE);
 
         $tenantId = auth()->user()->tenant_id;
 
@@ -56,7 +60,7 @@ class InventorySettingsController extends Controller
 
     public function storeUnit(Request $request)
     {
-        $this->authorize(\App\Support\Permissions::INVENTORY_SETTINGS_MANAGE);
+        $this->authorize(Permissions::INVENTORY_SETTINGS_MANAGE);
 
         $validated = $request->validate([
             'name_ar' => 'required|string|max:100',
@@ -77,7 +81,7 @@ class InventorySettingsController extends Controller
 
     public function updateUnit(Request $request, InventoryUnit $unit)
     {
-        $this->authorize(\App\Support\Permissions::INVENTORY_SETTINGS_MANAGE);
+        $this->authorize(Permissions::INVENTORY_SETTINGS_MANAGE);
         $this->authorizeForTenant($unit);
 
         $validated = $request->validate([
@@ -95,12 +99,14 @@ class InventorySettingsController extends Controller
     public function destroyUnit(InventoryUnit $unit)
     {
         $this->authorizeForTenant($unit);
+
         try {
             $unit->delete();
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($e->getCode() == 23000) {
                 return back()->with('error', __('common.cannot_delete_has_data'));
             }
+
             throw $e;
         }
 
@@ -149,12 +155,14 @@ class InventorySettingsController extends Controller
     public function destroyCategory(InventoryCategory $category)
     {
         $this->authorizeForTenant($category);
+
         try {
             $category->delete();
-        } catch (\Illuminate\Database\QueryException $e) {
+        } catch (QueryException $e) {
             if ($e->getCode() == 23000) {
                 return back()->with('error', __('common.cannot_delete_has_data'));
             }
+
             throw $e;
         }
 

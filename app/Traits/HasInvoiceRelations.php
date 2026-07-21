@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
+use App\Models\Center;
+use App\Models\CompanyTransaction;
+use App\Models\Customer;
 use App\Models\InvoiceLine;
 use App\Models\Payment;
-use App\Models\WorkOrder;
-use App\Models\Center;
-use App\Models\Customer;
 use App\Models\Tenant;
-use App\Models\CompanyTransaction;
+use App\Models\WorkOrder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -29,7 +31,7 @@ trait HasInvoiceRelations
     {
         return $this->belongsTo(WorkOrder::class);
     }
-    
+
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class);

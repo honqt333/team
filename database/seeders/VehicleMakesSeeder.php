@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\VehicleMake;
@@ -28,7 +30,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Rush', 'ar' => 'راش'],
                     ['en' => 'Supra', 'ar' => 'سوبرا'],
                     ['en' => 'C-HR', 'ar' => 'سي اتش آر'],
-                ]
+                ],
             ],
             'Lexus' => [
                 'name_ar' => 'لكزس',
@@ -41,7 +43,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'GX', 'ar' => 'GX'],
                     ['en' => 'NX', 'ar' => 'NX'],
                     ['en' => 'UX', 'ar' => 'UX'],
-                ]
+                ],
             ],
             'Hyundai' => [
                 'name_ar' => 'هيونداي',
@@ -58,7 +60,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'H1', 'ar' => 'إتش 1'],
                     ['en' => 'Grandeur', 'ar' => 'غراندور'],
                     ['en' => 'Stararia', 'ar' => 'ستاريا'],
-                ]
+                ],
             ],
             'Kia' => [
                 'name_ar' => 'كيا',
@@ -75,7 +77,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Pegas', 'ar' => 'بيجاس'],
                     ['en' => 'Sonet', 'ar' => 'سونيت'],
                     ['en' => 'Picanto', 'ar' => 'بيكانتو'],
-                ]
+                ],
             ],
             'Nissan' => [
                 'name_ar' => 'نيسان',
@@ -90,7 +92,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Navara', 'ar' => 'نافارا'],
                     ['en' => 'Kicks', 'ar' => 'كيكس'],
                     ['en' => 'Urvan', 'ar' => 'أورفان'],
-                ]
+                ],
             ],
             'Honda' => [
                 'name_ar' => 'هوندا',
@@ -102,7 +104,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Pilot', 'ar' => 'بايلوت'],
                     ['en' => 'Odyssey', 'ar' => 'أوديسي'],
                     ['en' => 'HR-V', 'ar' => 'إتش آر في'],
-                ]
+                ],
             ],
             'Mazda' => [
                 'name_ar' => 'مازدا',
@@ -114,7 +116,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'CX-30', 'ar' => 'سي إكس 30'],
                     ['en' => 'CX-3', 'ar' => 'سي إكس 3'],
                     ['en' => 'CX-60', 'ar' => 'سي إكس 60'],
-                ]
+                ],
             ],
             'Ford' => [
                 'name_ar' => 'فورد',
@@ -128,7 +130,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Territory', 'ar' => 'تيريتوري'],
                     ['en' => 'Ranger', 'ar' => 'رينجر'],
                     ['en' => 'Crown Victoria', 'ar' => 'كراون فكتوريا'],
-                ]
+                ],
             ],
             'Chevrolet' => [
                 'name_ar' => 'شيفروليه',
@@ -142,7 +144,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Cruze', 'ar' => 'كروز'],
                     ['en' => 'Spark', 'ar' => 'سبارك'],
                     ['en' => 'Traverse', 'ar' => 'ترافيرس'],
-                ]
+                ],
             ],
             'GMC' => [
                 'name_ar' => 'جي إم سي',
@@ -152,7 +154,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Acadia', 'ar' => 'أكاديا'],
                     ['en' => 'Terrain', 'ar' => 'تيرين'],
                     ['en' => 'Savana', 'ar' => 'سافانا'],
-                ]
+                ],
             ],
             'Jeep' => [
                 'name_ar' => 'جيب',
@@ -162,7 +164,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Cherokee', 'ar' => 'شيروكي'],
                     ['en' => 'Compass', 'ar' => 'كومباس'],
                     ['en' => 'Gladiator', 'ar' => 'غلاديتور'],
-                ]
+                ],
             ],
             'Dodge' => [
                 'name_ar' => 'دودج',
@@ -171,14 +173,14 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Challenger', 'ar' => 'تشالنجر'],
                     ['en' => 'Durango', 'ar' => 'دورانجو'],
                     ['en' => 'Ram', 'ar' => 'رام'],
-                ]
+                ],
             ],
             'Chrysler' => [
                 'name_ar' => 'كرايسلر',
                 'models' => [
                     ['en' => '300C', 'ar' => '300 سي'],
                     ['en' => 'Pacifica', 'ar' => 'باسيفيكا'],
-                ]
+                ],
             ],
             'Cadillac' => [
                 'name_ar' => 'كاديلاك',
@@ -187,7 +189,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'CTS', 'ar' => 'سي تي إس'],
                     ['en' => 'XT5', 'ar' => 'إكس تي 5'],
                     ['en' => 'CT6', 'ar' => 'سي تي 6'],
-                ]
+                ],
             ],
             'Lincoln' => [
                 'name_ar' => 'لينكون',
@@ -195,7 +197,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Navigator', 'ar' => 'نافيجاتور'],
                     ['en' => 'Aviator', 'ar' => 'أفياتور'],
                     ['en' => 'Continental', 'ar' => 'كونتيننتال'],
-                ]
+                ],
             ],
             'BMW' => [
                 'name_ar' => 'بي إم دبليو',
@@ -207,7 +209,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'X6', 'ar' => 'إكس 6'],
                     ['en' => 'X7', 'ar' => 'إكس 7'],
                     ['en' => 'i8', 'ar' => 'آي 8'],
-                ]
+                ],
             ],
             'Mercedes-Benz' => [
                 'name_ar' => 'مرسيدس بنز',
@@ -220,7 +222,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'GLE', 'ar' => 'جي إل إي'],
                     ['en' => 'GLS', 'ar' => 'جي إل إس'],
                     ['en' => 'A-Class', 'ar' => 'الفئة A'],
-                ]
+                ],
             ],
             'Audi' => [
                 'name_ar' => 'أودي',
@@ -232,7 +234,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Q7', 'ar' => 'كيو 7'],
                     ['en' => 'Q8', 'ar' => 'كيو 8'],
                     ['en' => 'e-tron', 'ar' => 'إي ترون'],
-                ]
+                ],
             ],
             'Porsche' => [
                 'name_ar' => 'بورش',
@@ -242,7 +244,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Macan', 'ar' => 'ماكان'],
                     ['en' => '911', 'ar' => '911'],
                     ['en' => 'Taycan', 'ar' => 'تايكان'],
-                ]
+                ],
             ],
             'Land Rover' => [
                 'name_ar' => 'لاند روفر',
@@ -253,7 +255,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Range Rover Evoque', 'ar' => 'رينج روفر إيفوك'],
                     ['en' => 'Defender', 'ar' => 'ديفندر'],
                     ['en' => 'Discovery', 'ar' => 'ديسكفري'],
-                ]
+                ],
             ],
             'Jaguar' => [
                 'name_ar' => 'جاكوار',
@@ -261,7 +263,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'F-Pace', 'ar' => 'إف بيس'],
                     ['en' => 'XF', 'ar' => 'إكس إف'],
                     ['en' => 'XJ', 'ar' => 'إكس جي'],
-                ]
+                ],
             ],
             'Volkswagen' => [
                 'name_ar' => 'فولكس فاجن',
@@ -272,7 +274,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Touareg', 'ar' => 'طوارق'],
                     ['en' => 'Tiguan', 'ar' => 'تيجوان'],
                     ['en' => 'Teramont', 'ar' => 'تيرامونت'],
-                ]
+                ],
             ],
             'Volvo' => [
                 'name_ar' => 'فولفو',
@@ -280,7 +282,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'XC90', 'ar' => 'إكس سي 90'],
                     ['en' => 'XC60', 'ar' => 'إكس سي 60'],
                     ['en' => 'S90', 'ar' => 'إس 90'],
-                ]
+                ],
             ],
             'Infiniti' => [
                 'name_ar' => 'إنفينيتي',
@@ -288,7 +290,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'QX80', 'ar' => 'كيو إكس 80'],
                     ['en' => 'QX60', 'ar' => 'كيو إكس 60'],
                     ['en' => 'Q50', 'ar' => 'كيو 50'],
-                ]
+                ],
             ],
             'Changan' => [
                 'name_ar' => 'شانجان',
@@ -300,7 +302,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Alsvin', 'ar' => 'ألسفن'],
                     ['en' => 'UNI-K', 'ar' => 'يوني كي'],
                     ['en' => 'UNI-T', 'ar' => 'يوني تي'],
-                ]
+                ],
             ],
             'Geely' => [
                 'name_ar' => 'جيلي',
@@ -311,7 +313,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Monjaro', 'ar' => 'مونجارو'],
                     ['en' => 'Okavango', 'ar' => 'أوكافانجو'],
                     ['en' => 'Geometry C', 'ar' => 'جيومتري سي'],
-                ]
+                ],
             ],
             'MG' => [
                 'name_ar' => 'إم جي',
@@ -321,7 +323,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'MG ZS', 'ar' => 'إم جي زد إس'],
                     ['en' => 'MG HS', 'ar' => 'إم جي إتش إس'],
                     ['en' => 'RX8', 'ar' => 'أر إكس 8'],
-                ]
+                ],
             ],
             'Haval' => [
                 'name_ar' => 'هافال',
@@ -330,7 +332,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Jolion', 'ar' => 'جوليان'],
                     ['en' => 'Dargo', 'ar' => 'دارغو'],
                     ['en' => 'H9', 'ar' => 'إتش 9'],
-                ]
+                ],
             ],
             'BYD' => [
                 'name_ar' => 'بي واي دي',
@@ -340,7 +342,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Qin Plus', 'ar' => 'تشين بلس'],
                     ['en' => 'Tang', 'ar' => 'تانغ'],
                     ['en' => 'Atto 3', 'ar' => 'أتو 3'],
-                ]
+                ],
             ],
             'Genesis' => [
                 'name_ar' => 'جينيسيس',
@@ -350,7 +352,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'G90', 'ar' => 'جي 90'],
                     ['en' => 'GV80', 'ar' => 'جي في 80'],
                     ['en' => 'GV70', 'ar' => 'جي في 70'],
-                ]
+                ],
             ],
             'Suzuki' => [
                 'name_ar' => 'سوزوكي',
@@ -360,7 +362,7 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Dzire', 'ar' => 'ديزاير'],
                     ['en' => 'Baleno', 'ar' => 'بالينو'],
                     ['en' => 'Ertiga', 'ar' => 'أرتيجا'],
-                ]
+                ],
             ],
             'Mitsubishi' => [
                 'name_ar' => 'ميتسوبيشي',
@@ -372,14 +374,14 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Eclipse Cross', 'ar' => 'إكليبس كروس'],
                     ['en' => 'Mirage', 'ar' => 'ميراج'],
                     ['en' => 'Montero Sport', 'ar' => 'مونتيرو سبورت'],
-                ]
+                ],
             ],
             'Isuzu' => [
                 'name_ar' => 'ايسوزو',
                 'models' => [
                     ['en' => 'D-Max', 'ar' => 'دي ماكس'],
                     ['en' => 'MU-X', 'ar' => 'ام يو اكس'],
-                ]
+                ],
             ],
             'Tesla' => [
                 'name_ar' => 'تسلا',
@@ -388,21 +390,21 @@ class VehicleMakesSeeder extends Seeder
                     ['en' => 'Model Y', 'ar' => 'موديل واي'],
                     ['en' => 'Model S', 'ar' => 'موديل إس'],
                     ['en' => 'Model X', 'ar' => 'موديل إكس'],
-                ]
+                ],
             ],
             'Great Wall' => [
                 'name_ar' => 'جريت وول',
                 'models' => [
                     ['en' => 'Poer', 'ar' => 'باور'],
                     ['en' => 'Wingle', 'ar' => 'وينجل'],
-                ]
+                ],
             ],
         ];
 
         foreach ($makes as $makeName => $makeData) {
             $make = VehicleMake::updateOrCreate([
                 'name_en' => $makeName,
-                'source' => 'system'
+                'source' => 'system',
             ], [
                 'name_ar' => $makeData['name_ar'],
                 'is_active' => true,
@@ -414,7 +416,7 @@ class VehicleMakesSeeder extends Seeder
                 VehicleModel::updateOrCreate([
                     'make_id' => $make->id,
                     'name_en' => $modelData['en'],
-                    'source' => 'system'
+                    'source' => 'system',
                 ], [
                     'name_ar' => $modelData['ar'],
                     'is_active' => true,

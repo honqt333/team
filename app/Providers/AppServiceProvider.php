@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use App\Models\AdminUser;
@@ -157,6 +159,7 @@ class AppServiceProvider extends ServiceProvider
             if ($user instanceof AdminUser) {
                 return $user->isSuperAdmin() ? true : null;
             }
+
             if ($user instanceof User && $user->is_system_admin) {
                 return true;
             }

@@ -1,13 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
-use App\Models\Part;
 use App\Models\InventoryBalance;
+use App\Models\InventoryCategory;
+use App\Models\InventoryUnit;
+use App\Models\Part;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -25,24 +30,24 @@ class PartsController extends Controller
 
         $query = Part::forTenant($tenantId)
             ->search($request->input('search'))
-            ->when($request->input('status') === 'active', fn($q) => $q->active())
-            ->when($request->input('status') === 'inactive', fn($q) => $q->where('is_active', false))
-            ->when($request->input('category'), fn($q, $catId) => $q->where('category_id', $catId))
+            ->when($request->input('status') === 'active', fn ($q) => $q->active())
+            ->when($request->input('status') === 'inactive', fn ($q) => $q->where('is_active', false))
+            ->when($request->input('category'), fn ($q, $catId) => $q->where('category_id', $catId))
             ->with(['unit', 'category', 'inventoryBalances.warehouse.center'])
             ->withSum('inventoryBalances', 'qty_on_hand')
             ->orderBy('name_ar');
 
         $parts = $query->paginate(25)->withQueryString();
 
-        $units = \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get();
-        $categories = \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get();
+        $units = InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get();
+        $categories = InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get();
 
-        $warehouses = Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))
+        $warehouses = Warehouse::whereHas('center', fn ($q) => $q->where('tenant_id', $tenantId))
             ->where('is_active', true)
             ->with('center')
             ->orderBy('name')
             ->get(['id', 'name', 'center_id', 'is_default'])
-            ->map(fn($w) => [
+            ->map(fn ($w) => [
                 'id' => $w->id,
                 'name' => $w->name,
                 'center_id' => $w->center_id,
@@ -118,7 +123,7 @@ class PartsController extends Controller
         $part = Part::create($validated);
 
         // Handle warehouse stock entries
-        if (!empty($warehouseData)) {
+        if (! empty($warehouseData)) {
             $this->syncWarehouseBalances($part, $warehouseData, $userId);
         }
 
@@ -172,18 +177,19 @@ class PartsController extends Controller
 
         if ($request->hasFile('image')) {
             if ($part->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($part->image_path);
+                Storage::disk('public')->delete($part->image_path);
             }
             $validated['image_path'] = $request->file('image')->store('parts', 'public');
         } elseif ($request->boolean('remove_image')) {
             if ($part->image_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($part->image_path);
+                Storage::disk('public')->delete($part->image_path);
             }
             $validated['image_path'] = null;
         }
 
         // Extract warehouse_data before updating the part (not a DB column)
         $warehouseData = null;
+
         if (array_key_exists('warehouse_data', $validated)) {
             $warehouseData = $validated['warehouse_data'] ?? [];
             unset($validated['warehouse_data']);
@@ -205,10 +211,10 @@ class PartsController extends Controller
     {
         $this->authorize('update', $part);
 
-        $part->update(['is_active' => !$part->is_active]);
+        $part->update(['is_active' => ! $part->is_active]);
 
-        return back()->with('success', $part->is_active 
-            ? __('inventory.parts.activated') 
+        return back()->with('success', $part->is_active
+            ? __('inventory.parts.activated')
             : __('inventory.parts.deactivated'));
     }
 
@@ -227,19 +233,19 @@ class PartsController extends Controller
             ->with(['warehouse.center', 'reference'])
             ->orderBy('posted_at', 'desc')
             ->paginate(20);
-            
+
         return Inertia::render('Inventory/Parts/Show', [
             'part' => $part,
             'balances' => $balances,
             'moves' => $moves,
-            'units' => \App\Models\InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
-            'categories' => \App\Models\InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
-            'warehouses' => Warehouse::whereHas('center', fn($q) => $q->where('tenant_id', $tenantId))
+            'units' => InventoryUnit::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+            'categories' => InventoryCategory::where('tenant_id', $tenantId)->where('is_active', true)->get(),
+            'warehouses' => Warehouse::whereHas('center', fn ($q) => $q->where('tenant_id', $tenantId))
                 ->where('is_active', true)
                 ->with('center')
                 ->orderBy('name')
                 ->get(['id', 'name', 'center_id', 'is_default'])
-                ->map(fn($w) => [
+                ->map(fn ($w) => [
                     'id' => $w->id,
                     'name' => $w->name,
                     'center_id' => $w->center_id,
@@ -343,7 +349,7 @@ class PartsController extends Controller
             ->search($request->input('q'))
             ->with(['unit', 'purchaseUnit', 'inventoryBalances.warehouse'])
             ->withSum('inventoryBalances', 'qty_on_hand')
-            ->when($request->boolean('hide_out_of_stock'), function($query) {
+            ->when($request->boolean('hide_out_of_stock'), function ($query) {
                 $query->having('inventory_balances_sum_qty_on_hand', '>', 0);
             })
             ->limit(50)

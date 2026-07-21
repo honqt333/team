@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
+use App\Models\VehicleModel;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -41,7 +44,8 @@ class VehicleUpdateRequest extends FormRequest
                 'exists:vehicle_models,id',
                 function ($attribute, $value, $fail) {
                     if ($value && $this->make_id) {
-                        $model = \App\Models\VehicleModel::find($value);
+                        $model = VehicleModel::find($value);
+
                         if ($model && $model->make_id != $this->make_id) {
                             $fail(__('validation.model_make_mismatch'));
                         }
@@ -60,7 +64,7 @@ class VehicleUpdateRequest extends FormRequest
                 'max:100',
                 'required_if:model_id,null,__other__',
             ],
-            'year' => ['nullable', 'integer', 'min:1900', 'max:' . (date('Y') + 1)],
+            'year' => ['nullable', 'integer', 'min:1900', 'max:'.(date('Y') + 1)],
             'color' => ['nullable', 'string', 'max:50'],
             'vin' => ['nullable', 'string', 'regex:/^[A-Za-z0-9]+$/', 'max:50'],
             'odometer' => ['nullable', 'integer', 'min:0'],

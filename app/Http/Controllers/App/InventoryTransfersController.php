@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -9,6 +11,7 @@ use App\Models\Part;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -37,7 +40,7 @@ class InventoryTransfersController extends Controller
 
         // Search
         if ($request->filled('search')) {
-            $query->where('code', 'like', '%' . $request->search . '%');
+            $query->where('code', 'like', '%'.$request->search.'%');
         }
 
         $transfers = $query->paginate(20)->withQueryString();
@@ -138,7 +141,7 @@ class InventoryTransfersController extends Controller
     {
         $this->authorize('update', $transfer);
 
-        if (!$transfer->canBeModified()) {
+        if (! $transfer->canBeModified()) {
             return back()->with('error', __('inventory.transfers.cannot_modify'));
         }
 
@@ -150,6 +153,7 @@ class InventoryTransfersController extends Controller
 
         // Check if part already exists
         $existing = $transfer->items()->where('part_id', $validated['part_id'])->first();
+
         if ($existing) {
             return back()->with('error', __('inventory.transfers.item_exists'));
         }
@@ -171,7 +175,7 @@ class InventoryTransfersController extends Controller
     {
         $this->authorize('update', $transfer);
 
-        if (!$transfer->canBeModified()) {
+        if (! $transfer->canBeModified()) {
             return back()->with('error', __('inventory.transfers.cannot_modify'));
         }
 
@@ -190,6 +194,7 @@ class InventoryTransfersController extends Controller
         try {
             $this->inventoryService->sendTransfer($transfer, auth()->id());
             $this->logActivity('send', $transfer, "Sent transfer from warehouse {$transfer->from_warehouse_id} to {$transfer->to_warehouse_id}");
+
             return back()->with('success', __('inventory.transfers.sent'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
@@ -214,7 +219,8 @@ class InventoryTransfersController extends Controller
                 $validated['received_qtys'] ?? [],
                 auth()->id()
             );
-            $this->logActivity('receive', $transfer, "Received transfer items");
+            $this->logActivity('receive', $transfer, 'Received transfer items');
+
             return back()->with('success', __('inventory.transfers.received'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
@@ -238,7 +244,8 @@ class InventoryTransfersController extends Controller
                 auth()->id(),
                 $validated['reason'] ?? null
             );
-            $this->logActivity('cancel', $transfer, "Cancelled transfer. Reason: " . ($validated['reason'] ?? 'N/A'));
+            $this->logActivity('cancel', $transfer, 'Cancelled transfer. Reason: '.($validated['reason'] ?? 'N/A'));
+
             return back()->with('success', __('inventory.transfers.cancelled'));
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->with('error', $e->getMessage());
@@ -250,7 +257,7 @@ class InventoryTransfersController extends Controller
      */
     protected function logActivity(string $action, InventoryTransfer $transfer, ?string $description = null): void
     {
-        \Illuminate\Support\Facades\Log::info("Inventory Transfer Action: {$action}", [
+        Log::info("Inventory Transfer Action: {$action}", [
             'transfer_id' => $transfer->id,
             'code' => $transfer->code,
             'user_id' => auth()->id(),

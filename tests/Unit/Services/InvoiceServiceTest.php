@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Services;
 
 use App\Models\Center;
@@ -15,6 +17,7 @@ use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
 use App\Services\InvoiceService;
 use App\Services\Optimization\TaxCalculator;
+use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,16 +26,20 @@ class InvoiceServiceTest extends TestCase
     use RefreshDatabase;
 
     protected InvoiceService $invoiceService;
+
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected User $user;
+
     protected Customer $customer;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->invoiceService = new InvoiceService(new TaxCalculator());
+        $this->invoiceService = new InvoiceService(new TaxCalculator);
 
         $this->tenant = Tenant::factory()->create(['name' => 'Test Repair Shop', 'legal_name' => 'Test Repair LLC']);
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id, 'name' => 'Main Branch']);
@@ -71,7 +78,7 @@ class InvoiceServiceTest extends TestCase
         ]);
 
         $service = Service::factory()->create(['tenant_id' => $this->tenant->id, 'name_ar' => 'فحص كمبيوتر']);
-        
+
         $item = WorkOrderItem::create([
             'work_order_id' => $workOrder->id,
             'tenant_id' => $this->tenant->id,
@@ -88,7 +95,7 @@ class InvoiceServiceTest extends TestCase
         ]);
 
         $part = Part::factory()->create(['tenant_id' => $this->tenant->id, 'name_ar' => 'فلتر زيت']);
-        
+
         WorkOrderItemPart::create([
             'work_order_id' => $workOrder->id,
             'work_order_item_id' => $item->id,
@@ -110,9 +117,9 @@ class InvoiceServiceTest extends TestCase
         $this->assertEquals('DRAFT-WO-000099', $invoice->invoice_number);
         $this->assertEquals($this->customer->name, $invoice->customer_name_snapshot);
         $this->assertCount(2, $invoice->lines);
-        $this->assertEquals(200.00, (float)$invoice->total_excl_tax);
-        $this->assertEquals(30.00, (float)$invoice->total_tax);
-        $this->assertEquals(230.00, (float)$invoice->total_incl_tax);
+        $this->assertEquals(200.00, (float) $invoice->total_excl_tax);
+        $this->assertEquals(30.00, (float) $invoice->total_tax);
+        $this->assertEquals(230.00, (float) $invoice->total_incl_tax);
     }
 
     public function test_create_from_work_order_ignores_cancelled_items_and_parts()
@@ -163,7 +170,7 @@ class InvoiceServiceTest extends TestCase
 
         $this->assertCount(1, $invoice->lines);
         $this->assertEquals('خدمة نشطة', $invoice->lines->first()->description);
-        $this->assertEquals(100.00, (float)$invoice->total_excl_tax);
+        $this->assertEquals(100.00, (float) $invoice->total_excl_tax);
     }
 
     public function test_issue_invoice_assigns_sequential_invoice_number_and_status()
@@ -185,7 +192,7 @@ class InvoiceServiceTest extends TestCase
         $issuedInvoice = $this->invoiceService->issueInvoice($invoice);
 
         $this->assertEquals('valid', $issuedInvoice->status);
-        $this->assertStringStartsWith('INV-' . $this->center->id . '-' . now()->year, $issuedInvoice->invoice_number);
+        $this->assertStringStartsWith('INV-'.$this->center->id.'-'.now()->year, $issuedInvoice->invoice_number);
     }
 
     public function test_issue_invoice_throws_exception_if_not_draft()
@@ -204,7 +211,7 @@ class InvoiceServiceTest extends TestCase
             'total_incl_tax' => 115.00,
         ]);
 
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         $this->expectExceptionMessage('Only draft invoices can be issued.');
 
         $this->invoiceService->issueInvoice($invoice);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\VehicleMake;
@@ -81,44 +83,46 @@ class VehicleDataSeeder extends Seeder
     {
         // Path to logos
         $logosPath = storage_path('app/temp_data/logos_repo/logos/optimized');
-        
+
         // Load JSON
         $jsonPath = storage_path('app/temp_data/car-list.json');
-        if (!File::exists($jsonPath)) {
-             $this->command->error("JSON file not found at $jsonPath");
-             return;
+
+        if (! File::exists($jsonPath)) {
+            $this->command->error("JSON file not found at $jsonPath");
+
+            return;
         }
-        
+
         $data = json_decode(File::get($jsonPath), true);
-        
+
         $this->command->info('Seed started...');
 
         foreach ($data as $item) {
             $brandName = $item['brand'];
             $models = $item['models'];
-            
+
             // Find logo
             $logoFile = $this->findLogo($logosPath, $brandName);
             $logoPath = null;
-            
+
             if ($logoFile) {
                 // Determine destination
                 $ext = pathinfo($logoFile, PATHINFO_EXTENSION);
                 $hash = Str::random(40);
                 $filename = "makes/{$hash}.{$ext}";
-                
+
                 // Copy file to public storage
                 if (File::exists($logoFile)) {
                     // Ensure directory exists
-                    if (!Storage::disk('public')->exists('makes')) {
+                    if (! Storage::disk('public')->exists('makes')) {
                         Storage::disk('public')->makeDirectory('makes');
                     }
-                    
+
                     Storage::disk('public')->put($filename, File::get($logoFile));
                     $logoPath = $filename;
                 }
             }
-            
+
             // Create Make
             $make = VehicleMake::firstOrCreate(
                 ['name_en' => $brandName],
@@ -129,27 +133,28 @@ class VehicleDataSeeder extends Seeder
                     'is_active' => true,
                 ]
             );
-            
+
             // Update logo if allowed (e.g. was missing)
-            if ($make->wasRecentlyCreated === false && !$make->logo_path && $logoPath) {
+            if ($make->wasRecentlyCreated === false && ! $make->logo_path && $logoPath) {
                 $make->update(['logo_path' => $logoPath]);
             }
-            
+
             // Create Models
             // We'll chunk to avoid crazy number of queries if possible, but firstOrCreate is safer individually
             $count = 0;
+
             foreach ($models as $modelName) {
                 // Ensure unique combination
                 // We use name_en as the identifying logic for duplicates if name_ar is just a copy
-                
+
                 // Check if exists
                 $exists = VehicleModel::where('make_id', $make->id)
-                    ->where(function($q) use ($modelName) {
+                    ->where(function ($q) use ($modelName) {
                         $q->where('name_en', $modelName)
-                          ->orWhere('name_ar', $modelName);
+                            ->orWhere('name_ar', $modelName);
                     })->exists();
 
-                if (!$exists) {
+                if (! $exists) {
                     VehicleModel::create([
                         'make_id' => $make->id,
                         'name_ar' => $modelName, // Default fallback
@@ -162,34 +167,37 @@ class VehicleDataSeeder extends Seeder
             }
             $this->command->info("Processed $brandName: Added/Updated with $count new models.");
         }
-        
+
         $this->command->info('Seeding completed.');
     }
-    
+
     protected function findLogo($basePath, $brandName)
     {
         // Try exact match slug
-        $slug = Str::slug($brandName); 
-        
+        $slug = Str::slug($brandName);
+
         $extensions = ['png', 'jpg', 'jpeg', 'svg'];
-        
+
         foreach ($extensions as $ext) {
             $path = "{$basePath}/{$slug}.{$ext}";
+
             if (File::exists($path)) {
                 return $path;
             }
         }
-        
+
         // Try iterating directory for loose match on filename
         // This is slow if directory is huge, but it's ~400 files, acceptable for local seed
         $files = File::files($basePath);
+
         foreach ($files as $file) {
-             $filename = pathinfo($file->getFilename(), PATHINFO_FILENAME);
-             if (Str::slug($filename) === $slug) {
-                 return $file->getPathname();
-             }
+            $filename = pathinfo($file->getFilename(), PATHINFO_FILENAME);
+
+            if (Str::slug($filename) === $slug) {
+                return $file->getPathname();
+            }
         }
-        
+
         return null; // Not found
     }
 }

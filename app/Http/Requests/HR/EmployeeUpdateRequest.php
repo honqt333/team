@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\HR;
 
 use App\Http\Requests\Concerns\TenantAware;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class EmployeeUpdateRequest extends FormRequest
 {

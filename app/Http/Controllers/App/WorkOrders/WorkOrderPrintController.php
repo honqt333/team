@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Models\Department;
@@ -8,6 +10,7 @@ use App\Models\TenantTaxSetting;
 use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
+use App\Models\WorkOrderItemPart;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -60,7 +63,7 @@ class WorkOrderPrintController
         ]);
 
         // Filter out cancelled items
-        $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== WorkOrderItem::STATUS_CANCELLED);
+        $filteredItems = $workOrder->items->filter(fn ($item) => $item->status !== WorkOrderItem::STATUS_CANCELLED);
         $workOrder->setRelation('items', $filteredItems->values());
 
         $departmentId = request('department_id');
@@ -71,7 +74,8 @@ class WorkOrderPrintController
                 $itemDeptId = $item->service?->type === Service::TYPE_PACKAGE
                     ? 'packages'
                     : ($item->department_id ?? $item->service?->department_id ?? 0);
-                return (string)$itemDeptId === (string)$departmentId;
+
+                return (string) $itemDeptId === (string) $departmentId;
             });
             $workOrder->setRelation('items', $filteredItems->values());
 
@@ -81,6 +85,7 @@ class WorkOrderPrintController
                 $printedDepartment = ['name_ar' => 'خدمات غير مصنفة', 'name_en' => 'Uncategorized Services'];
             } else {
                 $dept = Department::find($departmentId);
+
                 if ($dept) {
                     $printedDepartment = ['name_ar' => $dept->name_ar, 'name_en' => $dept->name_en];
                 }
@@ -97,6 +102,7 @@ class WorkOrderPrintController
             $workOrder->setRelation('items', $filteredItems->values());
 
             $user = User::with('employee')->find($technicianId);
+
             if ($user) {
                 $printedTechnician = [
                     'name_ar' => $user->employee?->name_ar ?: $user->name,
@@ -109,6 +115,7 @@ class WorkOrderPrintController
             if ($item->service?->type === Service::TYPE_PACKAGE) {
                 return 'packages';
             }
+
             return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
@@ -144,18 +151,20 @@ class WorkOrderPrintController
         ]);
 
         // Filter out cancelled items
-        $filteredItems = $workOrder->items->filter(fn($item) => $item->status !== WorkOrderItem::STATUS_CANCELLED);
+        $filteredItems = $workOrder->items->filter(fn ($item) => $item->status !== WorkOrderItem::STATUS_CANCELLED);
         $workOrder->setRelation('items', $filteredItems->values());
 
         // Filter out cancelled / reversed parts (both item-level and order-level)
         $activeItemIds = $filteredItems->pluck('id')->all();
         $activeParts = $workOrder->parts->filter(function ($part) use ($activeItemIds) {
-            if (in_array($part->status, [\App\Models\WorkOrderItemPart::STATUS_CANCELLED, \App\Models\WorkOrderItemPart::STATUS_REVERSED])) {
+            if (in_array($part->status, [WorkOrderItemPart::STATUS_CANCELLED, WorkOrderItemPart::STATUS_REVERSED])) {
                 return false;
             }
-            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+
+            if ($part->work_order_item_id !== null && ! in_array($part->work_order_item_id, $activeItemIds)) {
                 return false;
             }
+
             return true;
         })->values();
 
@@ -166,7 +175,7 @@ class WorkOrderPrintController
         });
 
         $partsTotal = $activeParts->sum(function ($part) {
-            return ((float)$part->unit_price * (float)$part->qty) - (float)($part->discount ?? 0);
+            return ((float) $part->unit_price * (float) $part->qty) - (float) ($part->discount ?? 0);
         });
 
         $totalPaid = $workOrder->total_paid ?? 0;
@@ -177,6 +186,7 @@ class WorkOrderPrintController
             if ($item->service?->type === Service::TYPE_PACKAGE) {
                 return 'packages';
             }
+
             return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
@@ -225,17 +235,17 @@ class WorkOrderPrintController
         });
 
         $grandTotal = $servicesTotal + $partsTotal;
-        $badDebt    = $payments->where('type', 'bad_debt')->sum('amount');
-        $totalPaid  = $payments->sum('amount');
-        $balance    = $grandTotal - $totalPaid;
+        $badDebt = $payments->where('type', 'bad_debt')->sum('amount');
+        $totalPaid = $payments->sum('amount');
+        $balance = $grandTotal - $totalPaid;
 
         return Inertia::render('WorkOrders/Print/Payments', [
-            'workOrder'  => $workOrder,
-            'payments'   => $payments,
+            'workOrder' => $workOrder,
+            'payments' => $payments,
             'grandTotal' => $grandTotal,
-            'totalPaid'  => $totalPaid,
-            'badDebt'    => $badDebt,
-            'balance'    => $balance,
+            'totalPaid' => $totalPaid,
+            'badDebt' => $badDebt,
+            'balance' => $balance,
         ]);
     }
 }

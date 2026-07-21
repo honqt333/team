@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -26,24 +28,24 @@ class SubscriptionInvoicesController extends Controller
     public function index(Request $request): Response
     {
         $query = SubscriptionInvoice::with(['tenant', 'subscription.plan']);
-        
+
         // Filters
         if ($request->status) {
             $query->where('status', $request->status);
         }
-        
+
         if ($request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('invoice_number', 'like', "%{$search}%")
-                  ->orWhereHas('tenant', fn($q) => $q->where('trade_name', 'like', "%{$search}%"));
+                    ->orWhereHas('tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
             });
         }
-        
+
         $invoices = $query->orderBy('created_at', 'desc')
             ->paginate(20)
             ->withQueryString();
-        
+
         // Stats
         $stats = [
             'total' => SubscriptionInvoice::count(),
@@ -53,7 +55,7 @@ class SubscriptionInvoicesController extends Controller
                 ->where('due_date', '<', now())->count(),
             'total_revenue' => SubscriptionInvoice::where('status', 'paid')->sum('total'),
         ];
-        
+
         return Inertia::render('System/Invoices/Index', [
             'invoices' => $invoices,
             'stats' => $stats,
@@ -67,7 +69,7 @@ class SubscriptionInvoicesController extends Controller
     public function show(SubscriptionInvoice $invoice): Response
     {
         $invoice->load(['tenant', 'subscription.plan', 'installments']);
-        
+
         return Inertia::render('System/Invoices/Show', [
             'invoice' => $invoice,
             'pdfUrl' => $this->invoiceService->getPdfUrl($invoice),
@@ -80,7 +82,7 @@ class SubscriptionInvoicesController extends Controller
     public function download(SubscriptionInvoice $invoice)
     {
         $pdfPath = $this->invoiceService->getPdfPath($invoice);
-        
+
         return response()->download($pdfPath, "{$invoice->invoice_number}.pdf");
     }
 
@@ -90,15 +92,15 @@ class SubscriptionInvoicesController extends Controller
     public function send(SubscriptionInvoice $invoice)
     {
         $invoice->load(['tenant', 'subscription.plan']);
-        
+
         $email = $invoice->tenant->email;
-        
-        if (!$email) {
+
+        if (! $email) {
             return back()->with('error', 'لا يوجد بريد إلكتروني للمستأجر');
         }
-        
+
         Mail::to($email)->send(new SubscriptionInvoiceMail($invoice));
-        
+
         return back()->with('success', 'تم إرسال الفاتورة بنجاح');
     }
 
@@ -108,7 +110,7 @@ class SubscriptionInvoicesController extends Controller
     public function regeneratePdf(SubscriptionInvoice $invoice)
     {
         $this->invoiceService->generatePdf($invoice);
-        
+
         return back()->with('success', 'تم إعادة إنشاء ملف PDF');
     }
 
@@ -121,20 +123,20 @@ class SubscriptionInvoicesController extends Controller
             'reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
-        
+
         $this->invoiceService->markAsPaid(
             $invoice,
             'manual',
-            $validated['reference'] ?? 'MANUAL-' . time(),
+            $validated['reference'] ?? 'MANUAL-'.time(),
             ['notes' => $validated['notes'] ?? null, 'marked_by' => auth()->id()]
         );
-        
+
         // Activate subscription if pending
         if ($invoice->subscription && $invoice->subscription->status !== 'active') {
             $invoice->subscription->update(['status' => 'active']);
             $invoice->tenant->update(['status' => 'active']);
         }
-        
+
         return back()->with('success', 'تم تأكيد الدفع بنجاح');
     }
 
@@ -146,9 +148,9 @@ class SubscriptionInvoicesController extends Controller
         if ($invoice->status === 'paid') {
             return back()->with('error', 'لا يمكن إلغاء فاتورة مدفوعة');
         }
-        
+
         $invoice->update(['status' => 'cancelled']);
-        
+
         return back()->with('success', 'تم إلغاء الفاتورة');
     }
 }

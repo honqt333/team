@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Models\WorkOrder;
@@ -32,7 +34,7 @@ class WorkOrderMediaController
             $type = $request->input("photos.$index.type") ?? 'general';
             $caption = $request->input("photos.$index.caption");
 
-            $path = $file->store('work-orders/' . $workOrder->id . '/photos', 'public');
+            $path = $file->store('work-orders/'.$workOrder->id.'/photos', 'public');
 
             $workOrder->photos()->create([
                 'path' => $path,
@@ -76,7 +78,7 @@ class WorkOrderMediaController
         ]);
 
         foreach ($request->file('attachments') as $file) {
-            $path = $file->store('work-orders/' . $workOrder->id . '/attachments', 'public');
+            $path = $file->store('work-orders/'.$workOrder->id.'/attachments', 'public');
 
             $workOrder->attachments()->create([
                 'tenant_id' => $workOrder->tenant_id,

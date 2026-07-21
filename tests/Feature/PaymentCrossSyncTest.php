@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -33,49 +35,49 @@ class PaymentCrossSyncTest extends TestCase
         $customer = Customer::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
-            'name'      => 'Cust1',
-            'phone'     => '1234567890',
+            'name' => 'Cust1',
+            'phone' => '1234567890',
         ]);
         $vehicle = Vehicle::create([
-            'tenant_id'    => $tenant->id,
-            'center_id'    => $center->id,
-            'customer_id'  => $customer->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
             'plate_number' => 'ABC123',
-            'make'         => 'Toyota',
-            'model'        => 'Camry',
-            'year'         => 2024,
+            'make' => 'Toyota',
+            'model' => 'Camry',
+            'year' => 2024,
         ]);
 
         $wo = WorkOrder::create([
-            'tenant_id'             => $tenant->id,
-            'center_id'             => $center->id,
-            'customer_id'           => $customer->id,
-            'vehicle_id'            => $vehicle->id,
-            'code'                  => 'WO-TEST-001',
-            'status'                => 'completed',
-            'currency_code'         => 'SAR',
-            'tax_enabled_snapshot'  => true,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'code' => 'WO-TEST-001',
+            'status' => 'completed',
+            'currency_code' => 'SAR',
+            'tax_enabled_snapshot' => true,
             'pricing_mode_snapshot' => 'exclusive',
-            'tax_rate_snapshot'     => 15.00,
-            'total_incl_tax'        => $total,
+            'tax_rate_snapshot' => 15.00,
+            'total_incl_tax' => $total,
         ]);
 
         // Give the WO a real item so the recalculateTotals hook produces a
         // non-zero grand total (otherwise the invoice inherits 0).
         WorkOrderItem::create([
-            'work_order_id'     => $wo->id,
-            'tenant_id'         => $wo->tenant_id,
-            'center_id'         => $wo->center_id,
-            'title'             => 'Service',
-            'qty'               => 1,
-            'unit_price'        => $total / 1.15, // back out VAT so incl ≈ $total
-            'is_taxable'        => true,
+            'work_order_id' => $wo->id,
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'title' => 'Service',
+            'qty' => 1,
+            'unit_price' => $total / 1.15, // back out VAT so incl ≈ $total
+            'is_taxable' => true,
             'tax_rate_snapshot' => 15.00,
-            'status'            => WorkOrderItem::STATUS_COMPLETED,
+            'status' => WorkOrderItem::STATUS_COMPLETED,
         ]);
         $wo->refresh();
 
-        $svc = new InvoiceService(new TaxCalculator());
+        $svc = new InvoiceService(new TaxCalculator);
         $invoice = $svc->createFromWorkOrder($wo, null);
 
         return [$wo, $invoice];
@@ -86,9 +88,9 @@ class PaymentCrossSyncTest extends TestCase
     {
         [$wo, $invoice] = $this->makeWoWithInvoice(1000.00);
 
-        $svc = new PaymentService();
+        $svc = new PaymentService;
         $svc->recordPayment($invoice, [
-            'amount'         => 250.00,
+            'amount' => 250.00,
             'payment_method' => 'cash',
         ]);
 
@@ -109,14 +111,14 @@ class PaymentCrossSyncTest extends TestCase
         [$wo, $invoice] = $this->makeWoWithInvoice(1000.00);
 
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'invoice_id'     => $invoice->id,
-            'type'           => 'payment',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'invoice_id' => $invoice->id,
+            'type' => 'payment',
             'payment_method' => 'cash',
-            'amount'         => 400.00,
-            'payment_date'   => now(),
-            'received_by'    => auth()->id(),
+            'amount' => 400.00,
+            'payment_date' => now(),
+            'received_by' => auth()->id(),
         ]);
         $invoice->refresh()->updatePaymentStatus();
 
@@ -135,28 +137,28 @@ class PaymentCrossSyncTest extends TestCase
 
         // Pay 500 normally
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'invoice_id'     => $invoice->id,
-            'type'           => 'payment',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'invoice_id' => $invoice->id,
+            'type' => 'payment',
             'payment_method' => 'cash',
-            'amount'         => 500.00,
-            'payment_date'   => now(),
-            'received_by'    => auth()->id(),
+            'amount' => 500.00,
+            'payment_date' => now(),
+            'received_by' => auth()->id(),
         ]);
         $invoice->refresh()->updatePaymentStatus();
         $this->assertSame(500.00, (float) $invoice->total_paid);
 
         // Refund 100 — total_paid should drop to 400 on both sides.
         $wo->payments()->create([
-            'tenant_id'      => $wo->tenant_id,
-            'center_id'      => $wo->center_id,
-            'invoice_id'     => $invoice->id,
-            'type'           => 'refund',
+            'tenant_id' => $wo->tenant_id,
+            'center_id' => $wo->center_id,
+            'invoice_id' => $invoice->id,
+            'type' => 'refund',
             'payment_method' => 'cash',
-            'amount'         => 100.00,
-            'payment_date'   => now(),
-            'received_by'    => auth()->id(),
+            'amount' => 100.00,
+            'payment_date' => now(),
+            'received_by' => auth()->id(),
         ]);
         $invoice->refresh()->updatePaymentStatus();
 

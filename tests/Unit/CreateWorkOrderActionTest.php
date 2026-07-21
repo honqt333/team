@@ -1,14 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit;
 
 use App\Actions\WorkOrder\CreateWorkOrderAction;
-use App\Models\User;
-use App\Models\WorkOrder;
-use App\Models\Tenant;
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Tenant;
+use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\WorkOrder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -20,12 +22,12 @@ class CreateWorkOrderActionTest extends TestCase
     {
         // Fix: 'slug' is likely required for Center too if it's in fillable
         $tenant = Tenant::create(['name' => 'Test Tenant', 'slug' => 'test-tenant']);
-        
+
         $center = Center::create([
-            'tenant_id' => $tenant->id, 
-            'name' => 'Test Center', 
+            'tenant_id' => $tenant->id,
+            'name' => 'Test Center',
             'slug' => 'test-center',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         $user = User::create([
@@ -40,9 +42,9 @@ class CreateWorkOrderActionTest extends TestCase
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
             'name' => 'Test Customer',
-            'phone' => '1234567890'
+            'phone' => '1234567890',
         ]);
-        
+
         $vehicle = Vehicle::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
@@ -50,7 +52,7 @@ class CreateWorkOrderActionTest extends TestCase
             'plate_number' => 'ABC 1234',
             'make_other' => 'Toyota',
             'model_other' => 'Camry',
-            'year' => 2020
+            'year' => 2020,
         ]);
 
         $data = [
@@ -67,7 +69,7 @@ class CreateWorkOrderActionTest extends TestCase
             ],
         ];
 
-        $action = new CreateWorkOrderAction();
+        $action = new CreateWorkOrderAction;
         $workOrder = $action->execute($user, $data);
 
         $this->assertInstanceOf(WorkOrder::class, $workOrder);

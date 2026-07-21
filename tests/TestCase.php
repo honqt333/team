@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests;
 
 use App\Models\User;
@@ -15,7 +17,7 @@ abstract class TestCase extends BaseTestCase
     {
         // Reset cached permissions
         app(PermissionRegistrar::class)->forgetCachedPermissions();
-        
+
         // Set the permissions team context based on user's tenant
         if ($user->tenant_id) {
             app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);

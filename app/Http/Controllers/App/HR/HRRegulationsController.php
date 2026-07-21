@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
@@ -60,6 +62,7 @@ class HRRegulationsController extends Controller
     public function destroyRegulation(HRRegulation $regulation)
     {
         $regulation->delete();
+
         return back()->with('success', __('messages.deleted_successfully'));
     }
 }

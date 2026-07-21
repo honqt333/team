@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\User;
@@ -47,11 +49,11 @@ class WorkOrderPolicy
         }
 
         // Cannot edit closed/done/cancelled work orders
-        if (!$workOrder->canBeEdited()) {
+        if (! $workOrder->canBeEdited()) {
             // Exception: allow recording payments on completed work order if unpaid or deferred invoice
             $isPaymentRoute = request()->routeIs('work-orders.payments.*') || request()->routeIs('payments.*');
             $hasUnpaidOrDeferred = ($workOrder->balance > 0) || ($workOrder->invoice && $workOrder->invoice->due_date !== null);
-            
+
             if ($isPaymentRoute && $workOrder->status === WorkOrder::STATUS_DONE && $hasUnpaidOrDeferred) {
                 // Allow payment updates
             } else {
@@ -74,7 +76,7 @@ class WorkOrderPolicy
         }
 
         // Cannot delete closed/done/cancelled work orders
-        if (!$workOrder->canBeEdited()) {
+        if (! $workOrder->canBeEdited()) {
             return false;
         }
 

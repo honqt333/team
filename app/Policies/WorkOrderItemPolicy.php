@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\User;
@@ -15,6 +17,7 @@ class WorkOrderItemPolicy
         }
 
         $wo = $item->workOrder;
+
         if (! $wo) {
             return false;
         }
@@ -30,6 +33,7 @@ class WorkOrderItemPolicy
         }
 
         $wo = $item->workOrder;
+
         if (! $wo) {
             return false;
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Services\AI;
 
 use App\Models\Center;
@@ -8,6 +10,7 @@ use App\Models\User;
 use App\Models\WorkOrder;
 use App\Services\AI\WorkOrderSuggestionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Tests\TestCase;
 
 class WorkOrderSuggestionServiceTest extends TestCase
@@ -24,8 +27,8 @@ class WorkOrderSuggestionServiceTest extends TestCase
         $user = User::factory()->create(['tenant_id' => $tenant->id, 'current_center_id' => $center->id]);
         $wo = WorkOrder::factory()->create(['tenant_id' => $tenant->id, 'center_id' => $center->id]);
 
-        $request = \Illuminate\Http\Request::create('/', 'POST', ['complaint' => 'Brake noise']);
-        $request->setUserResolver(fn() => $user);
+        $request = Request::create('/', 'POST', ['complaint' => 'Brake noise']);
+        $request->setUserResolver(fn () => $user);
 
         $result = $service->suggest($wo, $request, $user, $tenant->id, $center->id);
 

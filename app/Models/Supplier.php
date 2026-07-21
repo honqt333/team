@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
@@ -7,11 +9,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
 {
-    use HasFactory, SoftDeletes, CenterScoped;
+    use CenterScoped, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'tenant_id',
@@ -54,7 +57,7 @@ class Supplier extends Model
                 $lastId = static::where('tenant_id', $supplier->tenant_id)
                     ->withTrashed()
                     ->max('id') ?? 0;
-                $supplier->code = 'SUP-' . str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
+                $supplier->code = 'SUP-'.str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -89,10 +92,10 @@ class Supplier extends Model
      * Schema: purchase_return_invoices.purchase_invoice_id → purchase_invoices.id
      *         purchase_invoices.supplier_id               → suppliers.id
      */
-    public function returnInvoices(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    public function returnInvoices(): HasManyThrough
     {
         return $this->hasManyThrough(
-            \App\Models\PurchaseReturnInvoice::class,
+            PurchaseReturnInvoice::class,
             PurchaseInvoice::class,
             'supplier_id',                  // FK on purchase_invoices table
             'purchase_invoice_id',          // FK on purchase_return_invoices table
@@ -111,12 +114,12 @@ class Supplier extends Model
         $invoicesBalance = 0.0;
         $totalCredits = 0.0;
 
-        foreach ($this->purchaseInvoices()->whereNotIn('status', [\App\Models\PurchaseInvoice::STATUS_DRAFT, \App\Models\PurchaseInvoice::STATUS_CANCELLED])->get() as $inv) {
+        foreach ($this->purchaseInvoices()->whereNotIn('status', [PurchaseInvoice::STATUS_DRAFT, PurchaseInvoice::STATUS_CANCELLED])->get() as $inv) {
             $invoicesBalance += (float) $inv->balance;
 
             // Real payments (cash/bank/transfer) the buyer has handed to the supplier.
             $payments = (float) $inv->payments()
-                ->where('type', \App\Models\Payment::TYPE_PAYMENT)
+                ->where('type', Payment::TYPE_PAYMENT)
                 ->sum('amount');
 
             $returnsTotal = (float) $inv->returnInvoices()->sum('total');
@@ -144,7 +147,7 @@ class Supplier extends Model
             // These offset any debit-note credit (the supplier paid us back in
             // cash, so the credit is partially or fully settled).
             $cashRefunds = (float) $inv->payments()
-                ->where('type', \App\Models\Payment::TYPE_REFUND)
+                ->where('type', Payment::TYPE_REFUND)
                 ->sum('amount');
 
             // Overpayment credit = (debit notes still outstanding) - (cash refunds).
@@ -161,6 +164,7 @@ class Supplier extends Model
         }
 
         $balance = round($invoicesBalance - $totalCredits, 2);
+
         return $balance == 0.0 ? 0.0 : $balance;
     }
 
@@ -177,7 +181,7 @@ class Supplier extends Model
     {
         return $query->where(function ($q) use ($centerId) {
             $q->where('center_id', $centerId)
-              ->orWhereNull('center_id');
+                ->orWhereNull('center_id');
         });
     }
 
@@ -194,9 +198,9 @@ class Supplier extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('name', 'like', "%{$search}%")
-              ->orWhere('code', 'like', "%{$search}%")
-              ->orWhere('contact_person', 'like', "%{$search}%")
-              ->orWhere('phone', 'like', "%{$search}%");
+                ->orWhere('code', 'like', "%{$search}%")
+                ->orWhere('contact_person', 'like', "%{$search}%")
+                ->orWhere('phone', 'like', "%{$search}%");
         });
     }
 }

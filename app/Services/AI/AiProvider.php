@@ -1,15 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\AI;
+
+use Generator;
 
 interface AiProvider
 {
     public function complete(CompletionRequest $req): CompletionResponse;
 
     /**
-     * @return \Generator<int, string>
+     * @return Generator<int, string>
      */
-    public function stream(CompletionRequest $req): \Generator;
+    public function stream(CompletionRequest $req): Generator;
 
     public function name(): string;
 

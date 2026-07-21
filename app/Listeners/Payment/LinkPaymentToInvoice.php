@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Listeners\Payment;
 
 use App\Events\Payment\PaymentRecorded;
@@ -21,6 +23,7 @@ class LinkPaymentToInvoice
         // 2. Payment doesn't already have an invoice_id
         if ($payment->work_order_id && ! $payment->invoice_id) {
             $invoice = $payment->workOrder?->invoice;
+
             if ($invoice) {
                 $payment->invoice_id = $invoice->id;
                 $payment->saveQuietly();

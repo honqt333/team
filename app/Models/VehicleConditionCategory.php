@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
@@ -7,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class VehicleConditionCategory extends Model
 {
@@ -33,6 +36,7 @@ class VehicleConditionCategory extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
     }
 
@@ -68,9 +72,10 @@ class VehicleConditionCategory extends Model
 
     public function scopeOrderedBySource($query)
     {
-        if (\Illuminate\Support\Facades\DB::getDriverName() === 'sqlite') {
+        if (DB::getDriverName() === 'sqlite') {
             return $query->orderByRaw("case source when 'center' then 1 when 'tenant' then 2 when 'system' then 3 else 4 end");
         }
+
         return $query->orderByRaw("FIELD(source, 'center', 'tenant', 'system')");
     }
 }

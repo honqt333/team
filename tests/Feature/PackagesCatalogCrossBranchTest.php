@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -55,11 +57,11 @@ class PackagesCatalogCrossBranchTest extends TestCase
     public function test_packages_catalog_scopes_local_packages_and_exposes_other_branches(): void
     {
         $tenant = Tenant::factory()->create();
-        
+
         // Branch A
         $centerA = Center::factory()->create(['tenant_id' => $tenant->id]);
         $userA = $this->createUserWithPermissions(['services.view'], $tenant, $centerA);
-        
+
         // Local service in branch A (child service)
         $serviceA = Service::factory()->create([
             'tenant_id' => $tenant->id,
@@ -81,7 +83,7 @@ class PackagesCatalogCrossBranchTest extends TestCase
 
         // Branch B
         $centerB = Center::factory()->create(['tenant_id' => $tenant->id]);
-        
+
         // Service in branch B
         $serviceB = Service::factory()->create([
             'tenant_id' => $tenant->id,
@@ -126,10 +128,10 @@ class PackagesCatalogCrossBranchTest extends TestCase
         $otherBranchesPackages = $response->viewData('page')['props']['otherBranchesPackages'];
         $this->assertCount(1, $otherBranchesPackages);
         $this->assertEquals($packageB->name_ar, $otherBranchesPackages[0]['name_ar']);
-        
+
         // Assert other tenant's package is isolated
         $this->assertEmpty(
-            collect($otherBranchesPackages)->filter(fn($p) => $p['name_ar'] === $packageC->name_ar)
+            collect($otherBranchesPackages)->filter(fn ($p) => $p['name_ar'] === $packageC->name_ar)
         );
 
         // Verify items inside packageB are loaded
@@ -140,11 +142,11 @@ class PackagesCatalogCrossBranchTest extends TestCase
     public function test_user_can_clone_package_from_other_branch_catalog_with_custom_pricing(): void
     {
         $tenant = Tenant::factory()->create();
-        
+
         // Branch A
         $centerA = Center::factory()->create(['tenant_id' => $tenant->id]);
         $userA = $this->createUserWithPermissions(['services.view', 'services.create'], $tenant, $centerA);
-        
+
         $serviceA = Service::factory()->create([
             'tenant_id' => $tenant->id,
             'center_id' => $centerA->id,
@@ -174,7 +176,7 @@ class PackagesCatalogCrossBranchTest extends TestCase
             'description_en' => $packageB->description_en,
             'type' => 'package',
             'items' => [
-                ['id' => $serviceA->id, 'quantity' => 1]
+                ['id' => $serviceA->id, 'quantity' => 1],
             ],
             // Branch A specific rates:
             'base_price' => 800.00,
@@ -186,7 +188,7 @@ class PackagesCatalogCrossBranchTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        
+
         // Assert a new package row was created for Center A
         $this->assertDatabaseHas('services', [
             'center_id' => $centerA->id,
@@ -221,7 +223,7 @@ class PackagesCatalogCrossBranchTest extends TestCase
             'description_en' => 'New Package Def desc',
             'type' => 'package',
             'items' => [
-                ['id' => $service->id, 'quantity' => 1]
+                ['id' => $service->id, 'quantity' => 1],
             ],
             'base_price' => 0,
             'min_price' => 0,

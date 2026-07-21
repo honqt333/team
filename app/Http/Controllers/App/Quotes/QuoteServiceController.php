@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\Quotes;
 
 use App\Http\Controllers\Controller;
@@ -22,7 +24,7 @@ class QuoteServiceController extends Controller
      */
     public function addService(Request $request, Quote $quote): RedirectResponse
     {
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot add services to a converted quote.');
         }
 
@@ -51,22 +53,23 @@ class QuoteServiceController extends Controller
         $unitPrice = (float) $validated['unit_price'];
         $discountType = $validated['discount_type'] ?? 'none';
         $discountValue = (float) ($validated['discount_value'] ?? 0);
-        
-        if ($service && !$service->allow_price_override) {
+
+        if ($service && ! $service->allow_price_override) {
             $unitPrice = (float) $service->base_price;
         }
-        
+
         $minPrice = $service ? (float) ($service->min_price ?? 0) : 0;
+
         if ($minPrice > 0) {
             $discountAmount = PricingHelper::computeDiscountAmount($unitPrice, $discountType, $discountValue);
             $finalPrice = max(0, $unitPrice - $discountAmount);
-            
+
             if ($finalPrice < $minPrice) {
                 return redirect()->back()->withErrors([
                     'unit_price' => __('pricing.final_price_below_minimum', [
                         'final' => number_format($finalPrice, 2),
                         'min' => number_format($minPrice, 2),
-                    ])
+                    ]),
                 ]);
             }
         }
@@ -84,7 +87,7 @@ class QuoteServiceController extends Controller
             'discount_value' => $validated['discount_value'] ?? 0,
         ]);
 
-        if (!empty($request->pending_parts)) {
+        if (! empty($request->pending_parts)) {
             foreach ($request->pending_parts as $partData) {
                 QuotePart::create([
                     'quote_id' => $quote->id,
@@ -116,7 +119,7 @@ class QuoteServiceController extends Controller
      */
     public function updateService(Request $request, Quote $quote, QuoteLine $line): RedirectResponse
     {
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot update services in a converted quote.');
         }
 
@@ -134,23 +137,24 @@ class QuoteServiceController extends Controller
         $unitPrice = (float) $validated['unit_price'];
         $discountType = $validated['discount_type'] ?? 'none';
         $discountValue = (float) ($validated['discount_value'] ?? 0);
-        
+
         if ($service) {
-            if (!$service->allow_price_override) {
+            if (! $service->allow_price_override) {
                 $unitPrice = (float) $service->base_price;
             }
-            
+
             $minPrice = (float) ($service->min_price ?? 0);
+
             if ($minPrice > 0) {
                 $discountAmount = PricingHelper::computeDiscountAmount($unitPrice, $discountType, $discountValue);
                 $finalPrice = max(0, $unitPrice - $discountAmount);
-                
+
                 if ($finalPrice < $minPrice) {
                     return redirect()->back()->withErrors([
                         'unit_price' => __('pricing.final_price_below_minimum', [
                             'final' => number_format($finalPrice, 2),
                             'min' => number_format($minPrice, 2),
-                        ])
+                        ]),
                     ]);
                 }
             }
@@ -176,7 +180,7 @@ class QuoteServiceController extends Controller
      */
     public function deleteService(Quote $quote, QuoteLine $line): RedirectResponse
     {
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot delete services from a converted quote.');
         }
 
@@ -198,7 +202,7 @@ class QuoteServiceController extends Controller
     {
         $this->authorize('update', $quote);
 
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot modify departments of a converted quote.');
         }
 
@@ -208,6 +212,7 @@ class QuoteServiceController extends Controller
 
         if ($validated['department_id'] === 'packages') {
             $quote->update(['show_packages_section' => true]);
+
             return redirect()->back();
         }
 
@@ -227,18 +232,18 @@ class QuoteServiceController extends Controller
     {
         $this->authorize('update', $quote);
 
-        if (!$quote->canBeEdited()) {
+        if (! $quote->canBeEdited()) {
             abort(403, 'Cannot modify departments of a converted quote.');
         }
 
         if ($department_id === 'packages') {
             $hasPackages = $quote->lines()
-                ->whereHas('service', fn($q) => $q->where('type', Service::TYPE_PACKAGE))
+                ->whereHas('service', fn ($q) => $q->where('type', Service::TYPE_PACKAGE))
                 ->exists();
 
             if ($hasPackages) {
                 return redirect()->back()->withErrors([
-                    'error' => __('quotes.cannot_remove_package_department_with_items')
+                    'error' => __('quotes.cannot_remove_package_department_with_items'),
                 ]);
             }
 
@@ -247,13 +252,13 @@ class QuoteServiceController extends Controller
             return redirect()->back();
         }
 
-        if (!is_numeric($department_id)) {
+        if (! is_numeric($department_id)) {
             abort(404);
         }
         $department = (int) $department_id;
 
         $hasServices = $quote->lines()
-            ->whereHas('service', fn($q) => $q->where('department_id', $department))
+            ->whereHas('service', fn ($q) => $q->where('department_id', $department))
             ->exists();
 
         if ($hasServices) {

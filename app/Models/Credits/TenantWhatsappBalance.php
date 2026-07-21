@@ -1,15 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Credits;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Concerns\TenantScoped;
 
 class TenantWhatsappBalance extends Model
 {
     use TenantScoped;
+
     protected $fillable = [
         'tenant_id',
         'balance',
@@ -29,12 +32,13 @@ class TenantWhatsappBalance extends Model
 
     public function useCredits(int $amount = 1): bool
     {
-        if (!$this->hasCredits($amount)) {
+        if (! $this->hasCredits($amount)) {
             return false;
         }
 
         $this->decrement('balance', $amount);
         $this->increment('total_used', $amount);
+
         return true;
     }
 

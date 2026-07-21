@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Developer\AuditSnapshot;
+use App\Models\User;
 use App\Services\Developer\AuditOrchestrator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -50,7 +52,7 @@ class DeveloperCenterTest extends TestCase
      */
     public function test_audit_orchestrator_runs_successfully_and_records_snapshots(): void
     {
-        $orchestrator = new AuditOrchestrator();
+        $orchestrator = new AuditOrchestrator;
         $snapshot = $orchestrator->runAudit();
 
         $this->assertInstanceOf(AuditSnapshot::class, $snapshot);

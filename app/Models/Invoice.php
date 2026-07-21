@@ -1,18 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
+use App\Enums\InvoiceType;
+use App\Enums\PaymentType;
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
+use App\Support\TenancyContext;
+use App\Traits\HasInvoiceRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends Model
 {
-    use HasFactory, SoftDeletes, CenterScoped, HasTaxSnapshot, \App\Traits\HasInvoiceRelations;
+    use CenterScoped, HasFactory, HasInvoiceRelations, HasTaxSnapshot, SoftDeletes;
 
     protected $appends = ['balance', 'is_paid', 'payment_status_label', 'bad_debt'];
 
@@ -30,17 +34,17 @@ class Invoice extends Model
         'subtype', // simplified, standard
         'status', // draft, valid, reported, cancelled
         'payment_status', // unpaid, partial, paid
-        
+
         // Snapshots
         'customer_name_snapshot',
         'customer_vat_snapshot',
         'customer_address_snapshot',
-        
+
         'tax_enabled_snapshot',
         'pricing_mode_snapshot',
         'tax_rate_snapshot',
         'currency_code',
-        
+
         // Totals
         'total_excl_tax',
         'total_tax',
@@ -48,7 +52,7 @@ class Invoice extends Model
         'total_taxable_amount',
         'total_paid',
         'tax_breakdown',
-        
+
         // ZATCA
         'zatca_qr_tlv',
         'zatca_uuid',
@@ -61,7 +65,7 @@ class Invoice extends Model
         'issue_date' => 'datetime',
         'supply_date' => 'date',
         'due_date' => 'date',
-        'type' => \App\Enums\InvoiceType::class,
+        'type' => InvoiceType::class,
         'tax_enabled_snapshot' => 'boolean',
         'tax_rate_snapshot' => 'decimal:2',
         'total_excl_tax' => 'decimal:2',
@@ -75,8 +79,6 @@ class Invoice extends Model
     // ─────────────────────────────────────────────────────────────
     // Relationships
     // ─────────────────────────────────────────────────────────────
-
-
 
     // ─────────────────────────────────────────────────────────────
     // Accessors
@@ -94,7 +96,7 @@ class Invoice extends Model
 
     public function getPaymentStatusLabelAttribute(): string
     {
-        return match($this->payment_status) {
+        return match ($this->payment_status) {
             'unpaid' => __('invoices.status.unpaid'),
             'partial' => __('invoices.status.partial'),
             'paid' => __('invoices.status.paid'),
@@ -109,8 +111,9 @@ class Invoice extends Model
     public function getBadDebtAttribute(): float
     {
         if ($this->relationLoaded('payments')) {
-            return (float) $this->payments->sum(fn($p) => ($p->type === 'bad_debt' || $p->type === \App\Enums\PaymentType::BAD_DEBT) ? $p->amount : 0);
+            return (float) $this->payments->sum(fn ($p) => ($p->type === 'bad_debt' || $p->type === PaymentType::BAD_DEBT) ? $p->amount : 0);
         }
+
         return (float) $this->payments()->where('type', 'bad_debt')->sum('amount');
     }
 
@@ -184,7 +187,7 @@ class Invoice extends Model
     {
         return $this->withoutGlobalScope('center_scoped')
             ->where($field ?? $this->getRouteKeyName(), $value)
-            ->where('tenant_id', \App\Support\TenancyContext::tenantId())
+            ->where('tenant_id', TenancyContext::tenantId())
             ->first();
     }
 }

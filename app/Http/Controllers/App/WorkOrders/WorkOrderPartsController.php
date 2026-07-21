@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemPart;
+use App\Services\Inventory\WorkOrderPartsService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -26,7 +29,7 @@ class WorkOrderPartsController
             'part_id' => 'nullable|exists:parts,id',
             'warehouse_id' => 'nullable|exists:warehouses,id',
             'part_number' => 'nullable|string|max:100',
-            'source' => 'required|in:' . implode(',', WorkOrderItemPart::SOURCES),
+            'source' => 'required|in:'.implode(',', WorkOrderItemPart::SOURCES),
             'unit_id' => 'nullable|exists:inventory_units,id',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
@@ -36,7 +39,7 @@ class WorkOrderPartsController
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $partsService = app(\App\Services\Inventory\WorkOrderPartsService::class);
+        $partsService = app(WorkOrderPartsService::class);
         $allowNegative = auth()->user()->can('inventory.override_negative_stock');
         $part = $partsService->addPart([
             'work_order_id' => $work_order->id,
@@ -49,6 +52,7 @@ class WorkOrderPartsController
         $work_order->logActivity('part_added', __('work_orders.activities.actions.part_added', ['name' => $validated['name']]));
 
         $message = __('messages.part_added');
+
         return $request->expectsJson()
             ? response()->json(['success' => $message, 'part' => $part])
             : redirect()->back()->with('success', $message);
@@ -65,7 +69,7 @@ class WorkOrderPartsController
             'name' => 'required|string|max:255',
             'part_id' => 'nullable|exists:parts,id',
             'part_number' => 'nullable|string|max:100',
-            'source' => 'required|in:' . implode(',', WorkOrderItemPart::SOURCES),
+            'source' => 'required|in:'.implode(',', WorkOrderItemPart::SOURCES),
             'unit_id' => 'nullable|exists:inventory_units,id',
             'qty' => 'required|numeric|min:0.01',
             'unit_price' => 'required|numeric|min:0',
@@ -80,6 +84,7 @@ class WorkOrderPartsController
         $work_order->logActivity('part_updated', __('work_orders.activities.actions.part_updated', ['name' => $validated['name']]));
 
         $message = __('messages.part_updated');
+
         return $request->expectsJson()
             ? response()->json(['success' => $message, 'part' => $part->fresh()])
             : redirect()->back()->with('success', $message);
@@ -98,6 +103,7 @@ class WorkOrderPartsController
         $work_order->logActivity('part_deleted', __('work_orders.activities.actions.part_deleted', ['name' => $name]));
 
         $message = __('messages.part_deleted');
+
         return request()->expectsJson()
             ? response()->json(['success' => $message])
             : redirect()->back()->with('success', $message);

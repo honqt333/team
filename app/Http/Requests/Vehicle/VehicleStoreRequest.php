@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Vehicle;
 
 use App\Http\Requests\Concerns\TenantAware;
@@ -35,7 +37,7 @@ class VehicleStoreRequest extends FormRequest
             'make_id' => ['nullable', 'integer', 'exists:vehicle_makes,id'],
             'model_id' => ['nullable', 'integer', 'exists:vehicle_models,id'],
             'color_id' => ['nullable', 'integer', 'exists:vehicle_colors,id'],
-            'year' => ['nullable', 'integer', 'min:1900', 'max:' . ((int) date('Y') + 1)],
+            'year' => ['nullable', 'integer', 'min:1900', 'max:'.((int) date('Y') + 1)],
             'current_odometer' => ['nullable', 'integer', 'min:0'],
         ];
     }

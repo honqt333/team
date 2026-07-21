@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\InventoryUnit;
+use App\Models\Department;
 use App\Models\HR\EmployeeType;
 use App\Models\HR\JobTitle;
+use App\Models\InventoryUnit;
 use App\Models\Tenant;
-use App\Models\Department;
 use Illuminate\Database\Seeder;
 
 class MetadataSeeder extends Seeder
@@ -76,21 +78,21 @@ class MetadataSeeder extends Seeder
         foreach ($tenants as $tenant) {
             // Find departments for this tenant
             $mechanicalDept = Department::where('tenant_id', $tenant->id)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('name_ar', 'like', '%ميكانيكا%')
-                      ->orWhere('name_en', 'like', '%Mechanical%');
+                        ->orWhere('name_en', 'like', '%Mechanical%');
                 })->first();
 
             $electricalDept = Department::where('tenant_id', $tenant->id)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('name_ar', 'like', '%كهرباء%')
-                      ->orWhere('name_en', 'like', '%Electrical%');
+                        ->orWhere('name_en', 'like', '%Electrical%');
                 })->first();
 
             $bodyDept = Department::where('tenant_id', $tenant->id)
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->where('name_ar', 'like', '%سمكرة%')
-                      ->orWhere('name_en', 'like', '%Body%');
+                        ->orWhere('name_en', 'like', '%Body%');
                 })->first();
 
             $jobTitles = [

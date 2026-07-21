@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Payment\Gateways;
 
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class TabbyGateway implements PaymentGatewayInterface
 {
     protected array $config;
+
     protected string $baseUrl;
 
     public function __construct()
@@ -24,7 +28,7 @@ class TabbyGateway implements PaymentGatewayInterface
 
     public function isConfigured(): bool
     {
-        return !empty($this->config['public_key']) && !empty($this->config['secret_key']);
+        return ! empty($this->config['public_key']) && ! empty($this->config['secret_key']);
     }
 
     /**
@@ -34,7 +38,7 @@ class TabbyGateway implements PaymentGatewayInterface
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['secret_key'],
+                'Authorization' => 'Bearer '.$this->config['secret_key'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/checkout", [
                 'payment' => [
@@ -78,6 +82,7 @@ class TabbyGateway implements PaymentGatewayInterface
 
             if ($response->successful()) {
                 $result = $response->json();
+
                 return [
                     'success' => true,
                     'gateway' => 'tabby',
@@ -89,12 +94,14 @@ class TabbyGateway implements PaymentGatewayInterface
             }
 
             Log::error('Tabby initiate failed', ['response' => $response->json()]);
+
             return [
                 'success' => false,
                 'message' => $response->json('error') ?? 'Failed to create Tabby session',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tabby initiate exception', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -109,8 +116,8 @@ class TabbyGateway implements PaymentGatewayInterface
     {
         try {
             $paymentId = $data['payment_id'] ?? $data['id'] ?? null;
-            
-            if (!$paymentId) {
+
+            if (! $paymentId) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -119,8 +126,8 @@ class TabbyGateway implements PaymentGatewayInterface
             }
 
             $payment = $this->getPayment($paymentId);
-            
-            if (!$payment) {
+
+            if (! $payment) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -129,7 +136,7 @@ class TabbyGateway implements PaymentGatewayInterface
             }
 
             $status = strtolower($payment['status'] ?? 'failed');
-            
+
             return [
                 'success' => in_array($status, ['authorized', 'closed']),
                 'payment_id' => $paymentId,
@@ -139,8 +146,9 @@ class TabbyGateway implements PaymentGatewayInterface
                 'payment_method' => 'tabby',
                 'raw_response' => $payment,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tabby verification failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'status' => 'error',
@@ -156,7 +164,7 @@ class TabbyGateway implements PaymentGatewayInterface
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['secret_key'],
+                'Authorization' => 'Bearer '.$this->config['secret_key'],
             ])->get("{$this->baseUrl}/payments/{$paymentId}");
 
             if ($response->successful()) {
@@ -164,8 +172,9 @@ class TabbyGateway implements PaymentGatewayInterface
             }
 
             return null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tabby getPayment exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -177,12 +186,13 @@ class TabbyGateway implements PaymentGatewayInterface
     {
         try {
             $payload = [];
+
             if ($amount !== null) {
                 $payload['amount'] = (string) $amount;
             }
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['secret_key'],
+                'Authorization' => 'Bearer '.$this->config['secret_key'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/payments/{$paymentId}/refunds", $payload);
 
@@ -198,8 +208,9 @@ class TabbyGateway implements PaymentGatewayInterface
                 'success' => false,
                 'message' => $response->json('error') ?? 'Refund failed',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tabby refund failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),

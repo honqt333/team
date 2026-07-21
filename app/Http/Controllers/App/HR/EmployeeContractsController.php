@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
@@ -40,7 +42,7 @@ class EmployeeContractsController extends Controller
         $this->authorize('update', $contract);
 
         $validated = $request->validate([
-            'contract_number' => 'required|string|unique:hr_employee_contracts,contract_number,' . $contract->id,
+            'contract_number' => 'required|string|unique:hr_employee_contracts,contract_number,'.$contract->id,
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'status' => 'required|in:draft,active,expired,cancelled',
@@ -61,6 +63,7 @@ class EmployeeContractsController extends Controller
         $this->authorize('delete', $contract);
 
         $contract->delete();
+
         return back()->with('success', __('common.deleted_success'));
     }
 }

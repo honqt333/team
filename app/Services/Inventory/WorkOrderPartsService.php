@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Inventory;
 
 use App\Models\InventoryBalance;
@@ -18,7 +20,7 @@ class WorkOrderPartsService
 
     /**
      * Add a part to a work order with auto-issue from inventory.
-     * 
+     *
      * @throws ValidationException if insufficient stock
      */
     public function addPart(array $data, bool $allowNegative = false): WorkOrderItemPart
@@ -191,7 +193,7 @@ class WorkOrderPartsService
             allowNegative: $allowNegative,
             referenceType: WorkOrderItemPart::class,
             referenceId: $partLine->id,
-            notes: "WO Part Issue"
+            notes: 'WO Part Issue'
         );
 
         // Update line with issue info
@@ -218,21 +220,22 @@ class WorkOrderPartsService
                 allowNegative: $allowNegative,
                 referenceType: WorkOrderItemPart::class,
                 referenceId: $partLine->id,
-                notes: "WO Part Qty Increase"
+                notes: 'WO Part Qty Increase'
             );
-            
+
             // Update cost snapshot to latest WAC
             $partLine->cost_snapshot = $move->unit_cost;
-            
+
         } elseif ($delta < 0) {
             // Returning some - create reversal for the delta
             $originalMove = $partLine->inventoryMove;
+
             if ($originalMove) {
                 $this->inventoryService->createPartialReversal(
                     originalMove: $originalMove,
                     qty: abs($delta),
                     userId: auth()->id(),
-                    notes: "WO Part Qty Decrease"
+                    notes: 'WO Part Qty Decrease'
                 );
             }
         }
@@ -243,12 +246,13 @@ class WorkOrderPartsService
      */
     public function reversePartIssue(WorkOrderItemPart $partLine, ?int $userId = null, ?string $notes = null): ?InventoryMove
     {
-        if (!$partLine->canBeReversed()) {
+        if (! $partLine->canBeReversed()) {
             return null;
         }
 
         $originalMove = $partLine->inventoryMove;
-        if (!$originalMove) {
+
+        if (! $originalMove) {
             return null;
         }
 

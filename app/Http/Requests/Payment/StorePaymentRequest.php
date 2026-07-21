@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Payment;
 
+use App\Enums\PaymentType;
 use App\Http\Requests\Concerns\TenantAware;
 use App\Models\Payment;
 use Illuminate\Foundation\Http\FormRequest;
@@ -20,7 +23,7 @@ class StorePaymentRequest extends FormRequest
     {
         return [
             'payment_method' => ['required', Rule::in(Payment::METHODS ?? ['cash', 'mada', 'visa', 'mastercard', 'transfer', 'apple_pay', 'stc_pay', 'tabby'])],
-            'type' => ['required', Rule::in(array_column(\App\Enums\PaymentType::cases(), 'value'))],
+            'type' => ['required', Rule::in(array_column(PaymentType::cases(), 'value'))],
             'amount' => ['required', 'numeric', 'min:0.01', 'max:9999999'],
             'payment_date' => ['required', 'date', 'before_or_equal:today'],
             'reference' => ['nullable', 'string', 'max:255'],

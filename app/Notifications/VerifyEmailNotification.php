@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Mail\TemplateMail;
 use App\Models\CommunicationTemplate;
 use App\Services\Email\SmtpConfigService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Carbon;
 
 class VerifyEmailNotification extends Notification
 {
@@ -27,6 +30,7 @@ class VerifyEmailNotification extends Notification
     public function via($notifiable): array
     {
         $this->sendVerificationEmail($notifiable);
+
         return [];
     }
 
@@ -75,22 +79,22 @@ class VerifyEmailNotification extends Notification
 
             try {
                 Mail::to($notifiable->email)->send(new TemplateMail($subject, $content));
-            } catch (\Exception $e) {
-                Log::error('Email verification failed: ' . $e->getMessage());
+            } catch (Exception $e) {
+                Log::error('Email verification failed: '.$e->getMessage());
             }
         } else {
             // Fallback: send simple email
             try {
                 Mail::to($notifiable->email)->send(new TemplateMail(
-                    'تفعيل حسابك - ' . config('app.name'),
+                    'تفعيل حسابك - '.config('app.name'),
                     '<div style="font-family: sans-serif; text-align: right; direction: rtl;">
-                        <h2>مرحباً ' . $notifiable->name . '!</h2>
+                        <h2>مرحباً '.$notifiable->name.'!</h2>
                         <p>يرجى الضغط على الرابط أدناه لتفعيل حسابك:</p>
-                        <p><a href="' . $verificationUrl . '" style="background-color: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px;">تفعيل الحساب</a></p>
+                        <p><a href="'.$verificationUrl.'" style="background-color: #4f46e5; color: white; padding: 12px 30px; text-decoration: none; border-radius: 8px;">تفعيل الحساب</a></p>
                     </div>'
                 ));
-            } catch (\Exception $e) {
-                Log::error('Email verification fallback failed: ' . $e->getMessage());
+            } catch (Exception $e) {
+                Log::error('Email verification fallback failed: '.$e->getMessage());
             }
         }
     }

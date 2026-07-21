@@ -1,13 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
+use App\Models\InventoryMove;
 use App\Models\InventoryUnit;
 use App\Models\Part;
+use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class PartsCrudTest extends TestCase
@@ -15,8 +22,11 @@ class PartsCrudTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Part $part;
+
     protected InventoryUnit $baseUnit;
+
     protected InventoryUnit $purchaseUnit;
 
     protected function setUp(): void
@@ -33,11 +43,11 @@ class PartsCrudTest extends TestCase
         $this->user->centers()->attach($center->id, ['tenant_id' => $tenant->id]);
 
         // Reset permission cache and create permission
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        \Spatie\Permission\Models\Permission::findOrCreate('inventory.moves.create', 'web');
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+        Permission::findOrCreate('inventory.moves.create', 'web');
 
         // Set the team id for permissions based on the user's tenant
-        app()[\Spatie\Permission\PermissionRegistrar::class]->setPermissionsTeamId($tenant->id);
+        app()[PermissionRegistrar::class]->setPermissionsTeamId($tenant->id);
 
         $this->user->givePermissionTo('inventory.moves.create');
         $this->user->refresh();
@@ -85,25 +95,25 @@ class PartsCrudTest extends TestCase
 
         $this->part->refresh();
         $this->assertEquals($this->purchaseUnit->id, $this->part->purchase_unit_id);
-        $this->assertEquals(24.5, (float)$this->part->purchase_conversion_factor);
+        $this->assertEquals(24.5, (float) $this->part->purchase_conversion_factor);
     }
 
     /** @test */
     public function it_updates_part_and_converts_stock_qty_on_direct_purchase_invoice()
     {
-        \Spatie\Permission\Models\Permission::findOrCreate('purchasing.invoices.create', 'web');
+        Permission::findOrCreate('purchasing.invoices.create', 'web');
         $this->user->givePermissionTo('purchasing.invoices.create');
         $this->user->refresh();
 
         $this->actingAs($this->user);
 
-        $supplier = \App\Models\Supplier::create([
+        $supplier = Supplier::create([
             'tenant_id' => $this->user->tenant_id,
             'name' => 'Test Supplier',
             'is_active' => true,
         ]);
 
-        $warehouse = \App\Models\Warehouse::create([
+        $warehouse = Warehouse::create([
             'center_id' => $this->user->current_center_id,
             'name' => 'Main Warehouse',
             'is_active' => true,
@@ -123,8 +133,8 @@ class PartsCrudTest extends TestCase
                     'tax_rate' => 15.0,
                     'purchase_unit_id' => $this->purchaseUnit->id,
                     'purchase_conversion_factor' => 24.0, // 24 pieces per Carton
-                ]
-            ]
+                ],
+            ],
         ]);
 
         $response->assertRedirect();
@@ -132,12 +142,11 @@ class PartsCrudTest extends TestCase
         // 1. Verify part's purchase settings were updated
         $this->part->refresh();
         $this->assertEquals($this->purchaseUnit->id, $this->part->purchase_unit_id);
-        $this->assertEquals(24.0, (float)$this->part->purchase_conversion_factor);
+        $this->assertEquals(24.0, (float) $this->part->purchase_conversion_factor);
 
         // 2. Verify stock inventory moves were posted with converted qty: 2 * 24 = 48
-        $move = \App\Models\InventoryMove::where('part_id', $this->part->id)->first();
+        $move = InventoryMove::where('part_id', $this->part->id)->first();
         $this->assertNotNull($move);
-        $this->assertEquals(48.0, (float)$move->qty);
+        $this->assertEquals(48.0, (float) $move->qty);
     }
 }
-

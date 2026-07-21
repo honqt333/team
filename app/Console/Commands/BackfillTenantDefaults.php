@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Tenant;
 use App\Services\TenantSetupService;
 use Illuminate\Console\Command;
+use Throwable;
 
 class BackfillTenantDefaults extends Command
 {
@@ -26,6 +29,7 @@ class BackfillTenantDefaults extends Command
         $onlyId = $this->option('tenant');
 
         $query = Tenant::query();
+
         if ($onlyId) {
             $query->where('id', (int) $onlyId);
         }
@@ -34,6 +38,7 @@ class BackfillTenantDefaults extends Command
 
         if ($tenants->isEmpty()) {
             $this->info('No tenants to process.');
+
             return self::SUCCESS;
         }
 
@@ -59,7 +64,7 @@ class BackfillTenantDefaults extends Command
                 $service->seedRolesForTenant($tenant->id);
                 $service->seedDefaultsForTenant($tenant->id);
                 $processed++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->error("    ✗ Failed: {$e->getMessage()}");
                 $errors++;
             }

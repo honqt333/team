@@ -1,26 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\HR\EmployeeType;
 use App\Models\HR\JobTitle;
 use App\Models\InventoryUnit;
 use App\Support\Permissions;
+use Spatie\Permission\Exceptions\PermissionDoesNotExist;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class TenantSetupService
 {
     /**
      * Seeds default roles and permissions for a specific tenant.
-     *
-     * @param int $tenantId
-     * @return void
      */
     public function seedRolesForTenant(int $tenantId): void
     {
         // Clear Spatie permissions cache to ensure newly migrated permissions are available
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         // Define default roles with their permissions
         $roles = $this->getDefaultRoles();
@@ -30,7 +31,7 @@ class TenantSetupService
                 [
                     'name' => $roleName,
                     'guard_name' => 'web',
-                    'tenant_id' => $tenantId
+                    'tenant_id' => $tenantId,
                 ],
                 [
                     'name' => $roleName,
@@ -43,7 +44,7 @@ class TenantSetupService
             );
 
             // Update existing roles if they exist to ensure new fields are populated
-            if (!$role->wasRecentlyCreated) {
+            if (! $role->wasRecentlyCreated) {
                 $role->update([
                     'label_ar' => $roleData['label_ar'],
                     'label_en' => $roleData['label_en'],
@@ -54,8 +55,8 @@ class TenantSetupService
             // Sync permissions
             try {
                 $role->syncPermissions($roleData['permissions']);
-            } catch (\Spatie\Permission\Exceptions\PermissionDoesNotExist $e) {
-                if (!app()->runningUnitTests()) {
+            } catch (PermissionDoesNotExist $e) {
+                if (! app()->runningUnitTests()) {
                     throw $e;
                 }
             }
@@ -70,9 +71,6 @@ class TenantSetupService
      * Note: Nationalities are global (not tenant-scoped) and live in
      * `Database\Seeders\NationalitiesSeeder`. They are seeded once on
      * `php artisan db:seed`, not per-tenant.
-     *
-     * @param int $tenantId
-     * @return void
      */
     public function seedDefaultsForTenant(int $tenantId): void
     {
@@ -88,16 +86,17 @@ class TenantSetupService
     protected function seedInventoryUnits(int $tenantId): void
     {
         $units = $this->getDefaultInventoryUnits();
+
         foreach ($units as $unit) {
             InventoryUnit::firstOrCreate(
                 [
                     'tenant_id' => $tenantId,
-                    'name_ar'   => $unit['name_ar'],
+                    'name_ar' => $unit['name_ar'],
                 ],
                 [
                     'tenant_id' => $tenantId,
-                    'name_ar'   => $unit['name_ar'],
-                    'name_en'   => $unit['name_en'],
+                    'name_ar' => $unit['name_ar'],
+                    'name_en' => $unit['name_en'],
                     'is_active' => true,
                 ]
             );
@@ -110,16 +109,17 @@ class TenantSetupService
     protected function seedEmployeeTypes(int $tenantId): void
     {
         $types = $this->getDefaultEmployeeTypes();
+
         foreach ($types as $type) {
             EmployeeType::firstOrCreate(
                 [
                     'tenant_id' => $tenantId,
-                    'name_ar'   => $type['name_ar'],
+                    'name_ar' => $type['name_ar'],
                 ],
                 [
                     'tenant_id' => $tenantId,
-                    'name_ar'   => $type['name_ar'],
-                    'name_en'   => $type['name_en'],
+                    'name_ar' => $type['name_ar'],
+                    'name_en' => $type['name_en'],
                     'is_active' => true,
                 ]
             );
@@ -135,18 +135,19 @@ class TenantSetupService
     protected function seedJobTitles(int $tenantId): void
     {
         $titles = $this->getDefaultJobTitles();
+
         foreach ($titles as $title) {
             JobTitle::firstOrCreate(
                 [
                     'tenant_id' => $tenantId,
-                    'name_ar'   => $title['name_ar'],
+                    'name_ar' => $title['name_ar'],
                 ],
                 [
-                    'tenant_id'        => $tenantId,
-                    'name_ar'          => $title['name_ar'],
-                    'name_en'          => $title['name_en'],
-                    'default_role_name'=> $title['default_role_name'] ?? null,
-                    'is_active'        => true,
+                    'tenant_id' => $tenantId,
+                    'name_ar' => $title['name_ar'],
+                    'name_en' => $title['name_en'],
+                    'default_role_name' => $title['default_role_name'] ?? null,
+                    'is_active' => true,
                 ]
             );
         }

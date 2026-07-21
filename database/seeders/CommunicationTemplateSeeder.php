@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\CommunicationTemplate;
@@ -27,7 +29,7 @@ class CommunicationTemplateSeeder extends Seeder
 </div>',
                 'variables' => ['{code}', '{app_name}'],
             ],
-            
+
             // Email Verification
             [
                 'code' => 'email_verification',
@@ -47,7 +49,7 @@ class CommunicationTemplateSeeder extends Seeder
 </div>',
                 'variables' => ['{name}', '{app_name}', '{verification_url}'],
             ],
-            
+
             // Trial Activation
             [
                 'code' => 'trial_activation',
@@ -68,7 +70,7 @@ class CommunicationTemplateSeeder extends Seeder
 </div>',
                 'variables' => ['{name}', '{app_name}', '{start_date}', '{end_date}', '{plan_name}'],
             ],
-            
+
             // Welcome User
             [
                 'code' => 'welcome_user',
@@ -87,7 +89,7 @@ class CommunicationTemplateSeeder extends Seeder
 </div>',
                 'variables' => ['{name}', '{app_name}', '{login_url}'],
             ],
-            
+
             // New Invoice
             [
                 'code' => 'new_invoice',
@@ -107,7 +109,7 @@ class CommunicationTemplateSeeder extends Seeder
 </div>',
                 'variables' => ['{name}', '{app_name}', '{invoice_number}', '{amount}', '{due_date}'],
             ],
-            
+
             // Payment Confirmation
             [
                 'code' => 'payment_confirmation',
@@ -128,7 +130,7 @@ class CommunicationTemplateSeeder extends Seeder
 </div>',
                 'variables' => ['{name}', '{app_name}', '{amount}', '{payment_method}', '{reference}', '{date}'],
             ],
-            
+
             // Subscription Expiry Warning
             [
                 'code' => 'subscription_expiry',
@@ -147,7 +149,7 @@ class CommunicationTemplateSeeder extends Seeder
 </div>',
                 'variables' => ['{name}', '{app_name}', '{expiry_date}', '{renew_url}'],
             ],
-            
+
             // Appointment Reminder
             [
                 'code' => 'appointment_reminder',
@@ -215,7 +217,7 @@ class CommunicationTemplateSeeder extends Seeder
     </p>
     
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; text-align: center;">
-        &copy; ' . date('Y') . ' {app_name}. جميع الحقوق محفوظة.
+        &copy; '.date('Y').' {app_name}. جميع الحقوق محفوظة.
     </div>
 </div>',
                 'variables' => ['{name}', '{app_name}', '{activation_url}'],

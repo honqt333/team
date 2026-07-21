@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
+use App\Models\Center;
 use App\Models\CenterSequence;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Tenant;
-use App\Models\Center;
-use App\Models\Customer;
+use App\Observers\InvoiceObserver;
 use App\Services\InvoiceService;
 use App\Services\Optimization\TaxCalculator;
-use App\Observers\InvoiceObserver;
+use Exception;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Illuminate\Support\Facades\Event;
 
 class InvoicingSecurityTest extends TestCase
 {
@@ -31,7 +33,7 @@ class InvoicingSecurityTest extends TestCase
         $tenant = Tenant::create(['name' => 'T1', 'slug' => 't1']);
         $center = Center::create(['tenant_id' => $tenant->id, 'name' => 'C1', 'slug' => 'c1']);
         $customer = Customer::create(['tenant_id' => $tenant->id, 'center_id' => $center->id, 'name' => 'Cust1', 'phone' => '1234567890']);
-        
+
         $invoice = Invoice::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
@@ -45,17 +47,17 @@ class InvoicingSecurityTest extends TestCase
         // 1. Try to Update
         try {
             $invoice->update(['total_tax' => 999]);
-            $this->fail("Should not allow update on valid invoice");
-        } catch (\Exception $e) {
-            $this->assertStringContainsString("Cannot edit invoice", $e->getMessage());
+            $this->fail('Should not allow update on valid invoice');
+        } catch (Exception $e) {
+            $this->assertStringContainsString('Cannot edit invoice', $e->getMessage());
         }
 
         // 2. Try to Delete
         try {
             $invoice->delete();
-            $this->fail("Should not allow delete on valid invoice");
-        } catch (\Exception $e) {
-            $this->assertStringContainsString("Cannot delete invoice", $e->getMessage());
+            $this->fail('Should not allow delete on valid invoice');
+        } catch (Exception $e) {
+            $this->assertStringContainsString('Cannot delete invoice', $e->getMessage());
         }
     }
 
@@ -64,13 +66,13 @@ class InvoicingSecurityTest extends TestCase
     {
         $tenant = Tenant::create(['name' => 'T1', 'slug' => 't1']);
         $center = Center::create(['tenant_id' => $tenant->id, 'name' => 'C1', 'slug' => 'c1']);
-        
+
         // Use service
-        $svc = new InvoiceService(new TaxCalculator());
-        
+        $svc = new InvoiceService(new TaxCalculator);
+
         $seq1 = CenterSequence::getNextValue($tenant->id, $center->id, 'invoice', 2025);
         $seq2 = CenterSequence::getNextValue($tenant->id, $center->id, 'invoice', 2025);
-        
+
         $this->assertEquals(1, $seq1);
         $this->assertEquals(2, $seq2);
     }

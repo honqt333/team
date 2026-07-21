@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Exports;
 
 use App\Models\WorkOrder;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class WorkOrdersExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize
+class WorkOrdersExport implements FromCollection, ShouldAutoSize, WithHeadings, WithStyles
 {
     public function collection()
     {
@@ -22,18 +24,19 @@ class WorkOrdersExport implements FromCollection, WithHeadings, WithStyles, Shou
             $search = request('search');
             $query->where(function ($q) use ($search) {
                 $q->where('code', 'like', "%{$search}%")
-                  ->orWhereHas('customer', function ($cq) use ($search) {
-                      $cq->where('name', 'like', "%{$search}%");
-                  })
-                  ->orWhereHas('vehicle', function ($vq) use ($search) {
-                      $vq->where('plate_number', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('customer', function ($cq) use ($search) {
+                        $cq->where('name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('vehicle', function ($vq) use ($search) {
+                        $vq->where('plate_number', 'like', "%{$search}%");
+                    });
             });
         }
 
         // Status filter
         if (request('status')) {
             $status = request('status');
+
             if ($status === 'open') {
                 $query->whereNotIn('status', ['paid', 'cancelled']);
             } elseif ($status === 'closed') {
@@ -52,6 +55,7 @@ class WorkOrdersExport implements FromCollection, WithHeadings, WithStyles, Shou
         if (request('date_from')) {
             $query->whereDate('created_at', '>=', request('date_from'));
         }
+
         if (request('date_to')) {
             $query->whereDate('created_at', '<=', request('date_to'));
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\TenantScoped;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CompanyTransaction extends Model
 {
-    use TenantScoped, SoftDeletes;
+    use SoftDeletes, TenantScoped;
 
     protected $fillable = [
         'tenant_id',
@@ -73,9 +75,11 @@ class CompanyTransaction extends Model
         if ($this->contact_type === 'customer' && $this->contact_id) {
             return Customer::withoutGlobalScopes()->find($this->contact_id);
         }
+
         if ($this->contact_type === 'supplier' && $this->contact_id) {
             return Supplier::withoutGlobalScopes()->find($this->contact_id);
         }
+
         return null;
     }
 }

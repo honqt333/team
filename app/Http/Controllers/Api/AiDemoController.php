@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
@@ -79,7 +81,7 @@ class AiDemoController extends Controller
     }
 
     /**
-     * @param  array<string, mixed>  $vehicle
+     * @param array<string, mixed> $vehicle
      */
     private function vehicleSummary(array $vehicle): string
     {

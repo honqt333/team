@@ -1,14 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Traits\HasInventoryMoveRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class InventoryMove extends Model
 {
-    use \App\Traits\HasInventoryMoveRelations, CenterScoped, HasFactory;
+    use CenterScoped, HasFactory, HasInventoryMoveRelations;
 
     public const TYPE_RECEIPT = 'receipt';
 
@@ -72,9 +75,11 @@ class InventoryMove extends Model
     public function getWorkOrderAttribute(): ?WorkOrder
     {
         $ref = $this->reference;
+
         if ($ref instanceof WorkOrderItemPart) {
             return $ref->workOrder;
         }
+
         if ($ref instanceof WorkOrder) {
             return $ref;
         }

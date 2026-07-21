@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -32,30 +34,31 @@ class WorkOrderCodeGenerationTest extends TestCase
         $customer = Customer::create([
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
-            'name'      => 'Cust1',
-            'phone'     => '1234567890',
+            'name' => 'Cust1',
+            'phone' => '1234567890',
         ]);
         $vehicle = Vehicle::create([
-            'tenant_id'    => $tenant->id,
-            'center_id'    => $center->id,
-            'customer_id'  => $customer->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
             'plate_number' => 'ABC123',
-            'make'         => 'Toyota',
-            'model'        => 'Camry',
-            'year'         => 2024,
+            'make' => 'Toyota',
+            'model' => 'Camry',
+            'year' => 2024,
         ]);
+
         return [$tenant, $center, $customer, $vehicle];
     }
 
     private function makeWo(string $code, int $tenantId, int $centerId, int $customerId, int $vehicleId): WorkOrder
     {
         return WorkOrder::create([
-            'tenant_id'     => $tenantId,
-            'center_id'     => $centerId,
-            'customer_id'   => $customerId,
-            'vehicle_id'    => $vehicleId,
-            'code'          => $code,
-            'status'        => 'open',
+            'tenant_id' => $tenantId,
+            'center_id' => $centerId,
+            'customer_id' => $customerId,
+            'vehicle_id' => $vehicleId,
+            'code' => $code,
+            'status' => 'open',
             'currency_code' => 'SAR',
         ]);
     }
@@ -90,7 +93,7 @@ class WorkOrderCodeGenerationTest extends TestCase
         [$tenant, $center, $customer, $vehicle] = $this->makeCenterAndCustomer();
         $this->makeWo('WO-TEST-001', $tenant->id, $center->id, $customer->id, $vehicle->id);
         $this->makeWo('WO-IMPORT-9', $tenant->id, $center->id, $customer->id, $vehicle->id);
-        $this->makeWo('WO-000001',   $tenant->id, $center->id, $customer->id, $vehicle->id);
+        $this->makeWo('WO-000001', $tenant->id, $center->id, $customer->id, $vehicle->id);
 
         $code = WorkOrder::generateCode($tenant->id, $center->id);
         $this->assertSame('WO-000002', $code);

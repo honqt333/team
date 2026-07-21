@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\Tenant;
@@ -15,8 +17,10 @@ class VehicleConditionSeeder extends Seeder
     public function run(): void
     {
         $tenant = Tenant::first();
-        if (!$tenant) {
+
+        if (! $tenant) {
             $this->command->warn('No tenant found in the database. Skipping VehicleConditionSeeder.');
+
             return;
         }
         $tenantId = $tenant->id;
@@ -34,7 +38,7 @@ class VehicleConditionSeeder extends Seeder
                     ['ar' => 'فلتر الهواء', 'en' => 'Air Filter'],
                     ['ar' => 'فلتر مكيف الهواء', 'en' => 'Cabin AC Filter'],
                     ['ar' => 'المبرد (الرديتر) والخراطيم', 'en' => 'Radiator & Hoses'],
-                ]
+                ],
             ],
             [
                 'category' => ['ar' => 'الإطارات والفرامل', 'en' => 'Tires & Brakes'],
@@ -45,7 +49,7 @@ class VehicleConditionSeeder extends Seeder
                     ['ar' => 'حالة هوبات الفرامل', 'en' => 'Brake Rotors Condition'],
                     ['ar' => 'عمق ونقشة الإطارات', 'en' => 'Tire Tread & Wear'],
                     ['ar' => 'الإطار الاحتياطي', 'en' => 'Spare Tire'],
-                ]
+                ],
             ],
             [
                 'category' => ['ar' => 'الأنوار والنظام الكهربائي', 'en' => 'Lights & Electrical'],
@@ -56,7 +60,7 @@ class VehicleConditionSeeder extends Seeder
                     ['ar' => 'شاشة العدادات ولمبات التحذير', 'en' => 'Instrument Cluster & Dashboard Lights'],
                     ['ar' => 'بوق السيارة (البوري)', 'en' => 'Horn Operation'],
                     ['ar' => 'مساحات الزجاج ورشاش الماء', 'en' => 'Windshield Wipers & Washer Jet'],
-                ]
+                ],
             ],
             [
                 'category' => ['ar' => 'أسفل السيارة ونظام التعليق', 'en' => 'Under the Vehicle & Suspension'],
@@ -66,7 +70,7 @@ class VehicleConditionSeeder extends Seeder
                     ['ar' => 'نظام العادم (الشكمان)', 'en' => 'Exhaust System'],
                     ['ar' => 'تهريبات السوائل (المحرك/القير/المبرد)', 'en' => 'Fluid Leaks (Engine/Transmission/Coolant)'],
                     ['ar' => 'العكوس وجلود العكوس', 'en' => 'CV Boots & Drive Shafts'],
-                ]
+                ],
             ],
             [
                 'category' => ['ar' => 'المقصورة الداخلية', 'en' => 'Interior & Cabin'],
@@ -75,7 +79,7 @@ class VehicleConditionSeeder extends Seeder
                     ['ar' => 'أحزمة الأمان', 'en' => 'Seat Belts'],
                     ['ar' => 'الفرامل اليدوية (الجلنط)', 'en' => 'Parking Brake'],
                     ['ar' => 'رافعات النوافذ الكهربائية', 'en' => 'Window Regulators'],
-                ]
+                ],
             ],
             [
                 'category' => ['ar' => 'الهيكل الخارجي', 'en' => 'Exterior & Body'],
@@ -83,11 +87,12 @@ class VehicleConditionSeeder extends Seeder
                     ['ar' => 'خدوش وصدمات الهيكل', 'en' => 'Body Scratches & Dents'],
                     ['ar' => 'الزجاج الأمامي والخلفي', 'en' => 'Windshield & Glass'],
                     ['ar' => 'المرايا الجانبية', 'en' => 'Side Mirrors'],
-                ]
+                ],
             ],
         ];
 
         $catOrder = 1;
+
         foreach ($checklist as $catGroup) {
             $category = VehicleConditionCategory::withoutGlobalScopes()->updateOrCreate(
                 [
@@ -105,6 +110,7 @@ class VehicleConditionSeeder extends Seeder
             );
 
             $itemOrder = 1;
+
             foreach ($catGroup['items'] as $itemData) {
                 VehicleConditionItem::withoutGlobalScopes()->updateOrCreate(
                     [

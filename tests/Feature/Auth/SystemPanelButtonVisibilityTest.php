@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
+use Database\Seeders\RolesSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -31,7 +35,7 @@ class SystemPanelButtonVisibilityTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RolesSeeder::class);
+        $this->seed(RolesSeeder::class);
     }
 
     public function test_main_admin_with_is_system_admin_flag_sees_system_button(): void
@@ -69,7 +73,7 @@ class SystemPanelButtonVisibilityTest extends TestCase
 
         // Assign the tenant-scope super_admin role
         app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
-        $role = \Spatie\Permission\Models\Role::firstOrCreate([
+        $role = Role::firstOrCreate([
             'tenant_id' => $tenant->id,
             'name' => 'super_admin',
             'guard_name' => 'web',

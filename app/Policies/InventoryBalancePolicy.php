@@ -1,10 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\InventoryBalance;
 use App\Models\User;
-
 use App\Support\Permissions;
+
 class InventoryBalancePolicy
 {
     public function viewAny(User $user): bool

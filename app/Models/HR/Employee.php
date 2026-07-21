@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\HR;
 
 use App\Models\Concerns\TenantScoped;
@@ -130,8 +132,10 @@ class Employee extends Model
     public function calculateTotalAllowances(): float
     {
         $total = 0;
+
         foreach ($this->allowances as $allowance) {
             $amount = $allowance->pivot->custom_amount ?? $allowance->amount;
+
             if ($allowance->type === 'percentage') {
                 $base = $this->getCalculationBase($allowance->calculation_base);
                 $total += ($base * $amount / 100);
@@ -147,8 +151,10 @@ class Employee extends Model
     public function calculateTotalDeductions(): float
     {
         $total = 0;
+
         foreach ($this->deductions as $deduction) {
             $amount = $deduction->pivot->custom_amount ?? $deduction->amount;
+
             if ($deduction->type === 'percentage') {
                 $base = $this->getCalculationBase($deduction->calculation_base);
                 $total += ($base * $amount / 100);

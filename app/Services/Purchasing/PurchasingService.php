@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Purchasing;
 
 use App\Models\GoodsReceivedNote;
@@ -11,6 +13,7 @@ use App\Models\PurchaseInvoiceLine;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Services\Inventory\InventoryService;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -71,6 +74,7 @@ class PurchasingService
         }
 
         $part = Part::find($data['part_id']);
+
         if ($part && ! empty($data['purchase_unit_id'])) {
             $part->update([
                 'purchase_unit_id' => $data['purchase_unit_id'],
@@ -243,6 +247,7 @@ class PurchasingService
                 // Convert purchase qty → stock qty using the part's conversion factor
                 // e.g. 1 carton (purchase unit) × 12 (factor) = 12 pieces (stock unit)
                 $conversionFactor = (float) ($part?->purchase_conversion_factor ?? 1);
+
                 if ($conversionFactor <= 0) {
                     $conversionFactor = 1;
                 }
@@ -287,7 +292,7 @@ class PurchasingService
             // Create invoice from GRN (Wrapped in try-catch to prevent blocking GRN posting)
             try {
                 $this->createInvoiceFromGrn($grn);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 Log::error("Failed to auto-create invoice for GRN {$grn->code}: ".$e->getMessage());
             }
 
@@ -423,9 +428,11 @@ class PurchasingService
 
             // 2. Add PO items and prepare GRN items array
             $grnItems = [];
+
             if (! empty($data['items'])) {
                 foreach ($data['items'] as $item) {
                     $part = Part::find($item['part_id']);
+
                     if ($part && ! empty($item['purchase_unit_id'])) {
                         $part->update([
                             'purchase_unit_id' => $item['purchase_unit_id'],
@@ -481,6 +488,7 @@ class PurchasingService
 
             // 6. Find the generated invoice
             $invoice = PurchaseInvoice::where('purchase_order_id', $po->id)->first();
+
             if ($invoice) {
                 $invoice->update([
                     'notes' => $data['notes'] ?? null,
@@ -490,6 +498,7 @@ class PurchasingService
             // 7. If payments were recorded in the direct purchase form, record them!
             if ($invoice && ! empty($data['payments'])) {
                 $totalPaid = 0;
+
                 foreach ($data['payments'] as $payment) {
                     $amount = (float) $payment['amount'];
                     $totalPaid += $amount;
@@ -549,7 +558,7 @@ class PurchasingService
             }
 
             if (! $invoice) {
-                throw new \Exception('Failed to generate purchase invoice from GRN.');
+                throw new Exception('Failed to generate purchase invoice from GRN.');
             }
 
             return $invoice->fresh(['supplier', 'purchaseOrder']);

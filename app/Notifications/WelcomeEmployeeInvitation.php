@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\CommunicationTemplate;
 use App\Services\Messaging\EmailService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
+use Log;
 
 class WelcomeEmployeeInvitation extends Notification
 {
@@ -20,7 +24,7 @@ class WelcomeEmployeeInvitation extends Notification
     {
         // Send email directly using EmailService
         $this->sendInvitationEmail($notifiable);
-        
+
         // Only save to database for notification history
         return ['database'];
     }
@@ -40,7 +44,7 @@ class WelcomeEmployeeInvitation extends Notification
         $template = CommunicationTemplate::getByCode('employee_invitation', 'email');
 
         // Default values
-        $subject = 'مرحباً بك في الفريق - تفعيل حسابك في ' . config('app.name');
+        $subject = 'مرحباً بك في الفريق - تفعيل حسابك في '.config('app.name');
         $content = $this->getDefaultContent($notifiable->name, $activationUrl);
 
         if ($template && $template->is_active) {
@@ -60,7 +64,7 @@ class WelcomeEmployeeInvitation extends Notification
 
         try {
             // Send via EmailService which uses Integration SMTP settings
-            $emailService = new EmailService();
+            $emailService = new EmailService;
             $emailService->send(
                 $notifiable->email,
                 $subject,
@@ -68,9 +72,9 @@ class WelcomeEmployeeInvitation extends Notification
                 true, // isHtml
                 $notifiable->tenant_id
             );
-            \Log::info("WelcomeEmployeeInvitation: Sent to {$notifiable->email}");
-        } catch (\Exception $e) {
-            \Log::error("WelcomeEmployeeInvitation failed: " . $e->getMessage());
+            Log::info("WelcomeEmployeeInvitation: Sent to {$notifiable->email}");
+        } catch (Exception $e) {
+            Log::error('WelcomeEmployeeInvitation failed: '.$e->getMessage());
         }
     }
 
@@ -98,8 +102,3 @@ class WelcomeEmployeeInvitation extends Notification
         ];
     }
 }
-
-
-
-
-

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Models\AdminUser;
@@ -30,6 +32,7 @@ class EnsureSystemAdmin
         if ($request->hasSession() && $request->session()->has('impersonating_from')) {
             $originalUserId = $request->session()->get('impersonating_from');
             $originalUser = User::find($originalUserId);
+
             if ($originalUser && ($originalUser->is_system_admin || $originalUser instanceof AdminUser)) {
                 Auth::login($originalUser);
                 $request->session()->forget('impersonating_from');

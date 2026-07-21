@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Developer\Scanners;
 
-use App\Services\Developer\Contracts\ScannerInterface;
 use App\Models\Developer\SlowQueryLog;
+use App\Services\Developer\Contracts\ScannerInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Throwable;
 
 class PerformanceScanner implements ScannerInterface
 {
@@ -55,7 +58,7 @@ class PerformanceScanner implements ScannerInterface
                     'description' => "Potential N+1 Query Loop detected: executed [{$query->occurrences}] times. Ensure Eager Loading is used.",
                 ];
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Log table might be empty or missing during initial migrations runs
         }
 
@@ -63,6 +66,7 @@ class PerformanceScanner implements ScannerInterface
         try {
             if (Schema::hasTable('failed_jobs')) {
                 $failedJobsCount = DB::table('failed_jobs')->count();
+
                 if ($failedJobsCount > 0) {
                     $findings[] = [
                         'severity' => 'high',
@@ -73,7 +77,7 @@ class PerformanceScanner implements ScannerInterface
                     ];
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             // Ignore if failed_jobs doesn't exist
         }
 

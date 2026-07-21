@@ -1,8 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Developer\Scanners;
 
 use App\Services\Developer\Contracts\ScannerInterface;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use Throwable;
 
 class TestScanner implements ScannerInterface
 {
@@ -23,12 +28,14 @@ class TestScanner implements ScannerInterface
         $featureTestsCount = 0;
 
         $testsPath = base_path('tests');
+
         if (is_dir($testsPath)) {
-            $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($testsPath));
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($testsPath));
+
             foreach ($iterator as $file) {
                 if ($file->isFile() && $file->getExtension() === 'php' && str_ends_with($file->getFilename(), 'Test.php')) {
                     $relativePath = str_replace(base_path(), '', $file->getPathname());
-                    
+
                     if (str_contains($relativePath, '/Unit/')) {
                         $unitTestsCount++;
                     } elseif (str_contains($relativePath, '/Feature/')) {
@@ -40,6 +47,7 @@ class TestScanner implements ScannerInterface
 
         // Check if the total test files count is low for an enterprise platform
         $totalTests = $unitTestsCount + $featureTestsCount;
+
         if ($totalTests < 15) {
             $findings[] = [
                 'severity' => 'high',
@@ -52,12 +60,15 @@ class TestScanner implements ScannerInterface
 
         // Read test results from phpunit output if run was recently executed
         $junitPath = base_path('storage/app/developer/junit.xml');
+
         if (file_exists($junitPath)) {
             try {
                 $xml = simplexml_load_file($junitPath);
+
                 if ($xml && isset($xml->testsuite)) {
                     $failures = (int) $xml->testsuite['failures'];
                     $errors = (int) $xml->testsuite['errors'];
+
                     if ($failures > 0 || $errors > 0) {
                         $findings[] = [
                             'severity' => 'critical',
@@ -68,7 +79,7 @@ class TestScanner implements ScannerInterface
                         ];
                     }
                 }
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 // Ignore XML parsing errors
             }
         }

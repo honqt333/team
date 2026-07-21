@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
@@ -15,10 +17,13 @@ use App\Models\Nationality;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\TenancyContext;
+use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Log;
 use Spatie\Permission\PermissionRegistrar;
+use Storage;
 
 class EmployeeController extends Controller
 {
@@ -120,7 +125,7 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-        \Log::info('Employee store initiated', $request->all());
+        Log::info('Employee store initiated', $request->all());
         $this->authorize('create', Employee::class);
 
         $validated = $request->validate([
@@ -143,7 +148,7 @@ class EmployeeController extends Controller
         // Check if user has permission to management if center_id is null
         if (empty($validated['center_id']) && ! auth()->user()->hasRole('super_admin')) {
             $validated['center_id'] = TenancyContext::centerId();
-            \Log::info('Auto-assigned center_id', ['center_id' => $validated['center_id']]);
+            Log::info('Auto-assigned center_id', ['center_id' => $validated['center_id']]);
         }
 
         try {
@@ -157,16 +162,17 @@ class EmployeeController extends Controller
 
             $employee->save();
 
-            \Log::info('Employee created', ['id' => $employee->id]);
+            Log::info('Employee created', ['id' => $employee->id]);
         } catch (QueryException $e) {
-            \Log::error('Database Error creating employee: '.$e->getMessage());
+            Log::error('Database Error creating employee: '.$e->getMessage());
+
             if ($e->errorInfo[1] == 1062) { // Duplicate entry
                 return back()->with('error', __('messages.duplicate_entry_error').' - '.__('hr.employees.employee_number_exists'));
             }
 
             return back()->with('error', __('messages.error_occurred'));
-        } catch (\Exception $e) {
-            \Log::error('Error creating employee: '.$e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Error creating employee: '.$e->getMessage());
 
             return back()->with('error', __('messages.error_occurred'));
         }
@@ -328,8 +334,8 @@ class EmployeeController extends Controller
         ]);
 
         // Delete old photo if exists
-        if ($employee->photo_path && \Storage::disk('public')->exists($employee->photo_path)) {
-            \Storage::disk('public')->delete($employee->photo_path);
+        if ($employee->photo_path && Storage::disk('public')->exists($employee->photo_path)) {
+            Storage::disk('public')->delete($employee->photo_path);
         }
 
         // Store new photo
@@ -363,6 +369,7 @@ class EmployeeController extends Controller
         }
 
         $department = Department::find($departmentId);
+
         if (! $department) {
             return;
         }
@@ -400,12 +407,13 @@ class EmployeeController extends Controller
             ->toArray();
 
         $rolesToSync = array_intersect($validated['roles'], $allowedRoles);
+
         if (! in_array('employee', $rolesToSync)) {
             $rolesToSync[] = 'employee';
         }
 
         $employee->user->syncRoles($rolesToSync);
-        \Log::info("Updated roles for employee {$employee->id}", ['roles' => $rolesToSync]);
+        Log::info("Updated roles for employee {$employee->id}", ['roles' => $rolesToSync]);
 
         return back()->with('success', __('hr.employees.roles_updated'));
     }

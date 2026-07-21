@@ -17,7 +17,7 @@ use Throwable;
 class WorkOrderAiInvalidResponseException extends RuntimeException
 {
     /**
-     * @param  array<string, mixed>  $context
+     * @param array<string, mixed> $context
      */
     public function __construct(
         string $message = 'AI returned an invalid response.',

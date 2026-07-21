@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
-use App\Models\Tenant;
 use App\Models\Center;
 use App\Models\Customer;
+use App\Models\Quote;
+use App\Models\Tenant;
 use App\Models\VehicleMake;
+use App\Models\VehicleMileageLog;
 use App\Models\VehicleModel;
 use App\Models\WorkOrder;
-use App\Models\Quote;
-use App\Models\VehicleMileageLog;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;

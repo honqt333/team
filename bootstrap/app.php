@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Middleware\ConvertArabicNumerals;
 use App\Http\Middleware\EnsureCenterContext;
 use App\Http\Middleware\EnsureSystemAdmin;
@@ -11,6 +13,8 @@ use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeam;
 use App\Http\Middleware\TrackAiUsage;
 use App\Logging\JsonFormatter;
+use App\Providers\EventServiceProvider;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -24,8 +28,8 @@ use Spatie\Permission\Middleware\RoleOrPermissionMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
-        \App\Providers\RouteServiceProvider::class,
-        \App\Providers\EventServiceProvider::class,
+        RouteServiceProvider::class,
+        EventServiceProvider::class,
     ])
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

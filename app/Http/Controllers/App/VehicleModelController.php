@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -24,7 +26,7 @@ class VehicleModelController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name_ar', 'like', "%{$search}%")
-                  ->orWhere('name_en', 'like', "%{$search}%");
+                    ->orWhere('name_en', 'like', "%{$search}%");
             });
         }
 
@@ -112,7 +114,7 @@ class VehicleModelController extends Controller
             abort(403, __('common.cannot_modify_system_data'));
         }
 
-        $model->update(['is_active' => !$model->is_active]);
+        $model->update(['is_active' => ! $model->is_active]);
 
         return redirect()->back();
     }

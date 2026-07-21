@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Models\Department;
@@ -86,7 +88,7 @@ class DepartmentController
         // Prevent deletion if department has services
         if ($department->services()->exists()) {
             return back()->withErrors([
-                'delete' => __('departments.cannot_delete_has_services')
+                'delete' => __('departments.cannot_delete_has_services'),
             ]);
         }
 
@@ -99,7 +101,7 @@ class DepartmentController
     {
         $this->authorize('update', $department);
 
-        $department->update(['is_active' => !$department->is_active]);
+        $department->update(['is_active' => ! $department->is_active]);
 
         return back();
     }

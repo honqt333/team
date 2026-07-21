@@ -1,7 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
+use App\Support\Permissions;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ReflectionClass;
 use Tests\TestCase;
 
 /**
@@ -30,22 +36,22 @@ class PolicyPermissionReferenceTest extends TestCase
             'No Permissions::* references found in Policies. Either the test is broken or the policies do not use the registry.'
         );
 
-        $reflection = new \ReflectionClass(\App\Support\Permissions::class);
+        $reflection = new ReflectionClass(Permissions::class);
         $defined = array_keys($reflection->getConstants());
 
         $undefined = array_diff($found, $defined);
         $this->assertEmpty(
             $undefined,
             'Policies reference these permission constants but they are not defined on App\Support\Permissions: '
-                . implode(', ', $undefined)
+                .implode(', ', $undefined)
         );
     }
 
     public function test_policies_do_not_use_hardcoded_permission_strings(): void
     {
         $policyDir = base_path('app/Policies');
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($policyDir)
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($policyDir)
         );
 
         $offenders = [];
@@ -60,9 +66,10 @@ class PolicyPermissionReferenceTest extends TestCase
                 continue;
             }
             $source = file_get_contents($file->getPathname());
+
             if (preg_match_all($pattern, $source, $matches)) {
                 foreach ($matches[2] as $perm) {
-                    $offenders[] = $file->getBasename() . ' -> "' . $perm . '"';
+                    $offenders[] = $file->getBasename().' -> "'.$perm.'"';
                 }
             }
         }
@@ -70,7 +77,7 @@ class PolicyPermissionReferenceTest extends TestCase
         $this->assertEmpty(
             $offenders,
             "These Policies use hard-coded permission strings instead of Permissions::* constants:\n  - "
-                . implode("\n  - ", $offenders)
+                .implode("\n  - ", $offenders)
         );
     }
 
@@ -81,11 +88,12 @@ class PolicyPermissionReferenceTest extends TestCase
         // relying on hard-coded strings (already caught by the
         // test above). Either way, it should be reviewed.
         $policyDir = base_path('app/Policies');
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($policyDir)
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($policyDir)
         );
 
         $missing = [];
+
         foreach ($iterator as $file) {
             if (! $file->isFile() || $file->getExtension() !== 'php') {
                 continue;
@@ -109,7 +117,7 @@ class PolicyPermissionReferenceTest extends TestCase
         $this->assertEmpty(
             $missing,
             'These Policies do not reference any permission. Either add Permissions::* checks or remove them from the policy layer: '
-                . implode(', ', $missing)
+                .implode(', ', $missing)
         );
     }
 
@@ -118,21 +126,24 @@ class PolicyPermissionReferenceTest extends TestCase
      */
     private function extractPermissionConstants(string $dir): array
     {
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir)
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($dir)
         );
         $found = [];
+
         foreach ($iterator as $file) {
             if (! $file->isFile() || $file->getExtension() !== 'php') {
                 continue;
             }
             $source = file_get_contents($file->getPathname());
+
             if (preg_match_all('/Permissions::([A-Z_]+)/', $source, $matches)) {
                 foreach ($matches[1] as $const) {
                     $found[] = $const;
                 }
             }
         }
+
         return array_values(array_unique($found));
     }
 }

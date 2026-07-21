@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\HR;
 
 use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,6 +62,7 @@ class Shift extends Model
     public function getNameAttribute()
     {
         $locale = app()->getLocale();
+
         return $locale === 'ar' ? $this->name_ar : ($this->name_en ?? $this->name_ar);
     }
 
@@ -67,14 +71,15 @@ class Shift extends Model
      */
     public function getWorkingHoursAttribute(): float
     {
-        $start = \Carbon\Carbon::parse($this->start_time);
-        $end = \Carbon\Carbon::parse($this->end_time);
-        
+        $start = Carbon::parse($this->start_time);
+        $end = Carbon::parse($this->end_time);
+
         if ($this->is_overnight && $end->lt($start)) {
             $end->addDay();
         }
-        
+
         $totalMinutes = $start->diffInMinutes($end) - $this->break_minutes;
+
         return round($totalMinutes / 60, 2);
     }
 }

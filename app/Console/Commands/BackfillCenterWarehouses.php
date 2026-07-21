@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Center;
 use App\Observers\CenterObserver;
 use Illuminate\Console\Command;
+use Throwable;
 
 class BackfillCenterWarehouses extends Command
 {
@@ -46,6 +49,7 @@ class BackfillCenterWarehouses extends Command
 
         if ($centers->isEmpty()) {
             $this->info('✓ All centers already have a default warehouse.');
+
             return self::SUCCESS;
         }
 
@@ -70,7 +74,7 @@ class BackfillCenterWarehouses extends Command
                 $warehouse = $observer->ensureDefaultWarehouse($center);
                 $this->line("  ✓ Created warehouse [{$warehouse->id}] \"{$warehouse->name}\" for center [{$center->id}] {$center->name}");
                 $created++;
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 $this->error("  ✗ Failed for center [{$center->id}] {$center->name}: {$e->getMessage()}");
                 $skipped++;
             }

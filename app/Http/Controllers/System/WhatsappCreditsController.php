@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\Credits\TenantWhatsappBalance;
 use App\Models\Credits\WhatsappPackage;
 use App\Models\Credits\WhatsappPurchase;
-use App\Models\Credits\TenantWhatsappBalance;
 use App\Models\Credits\WhatsappUsageLog;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,7 +18,7 @@ class WhatsappCreditsController extends Controller
     public function packages(): Response
     {
         $packages = WhatsappPackage::orderBy('sort_order')->get();
-        
+
         return Inertia::render('System/Credits/WhatsappPackages', [
             'packages' => $packages,
         ]);
@@ -59,20 +61,21 @@ class WhatsappCreditsController extends Controller
     public function destroyPackage(WhatsappPackage $package)
     {
         $package->delete();
+
         return back()->with('success', 'تم حذف الباقة بنجاح');
     }
 
     public function balances(Request $request): Response
     {
         $query = TenantWhatsappBalance::with('tenant');
-        
+
         if ($request->search) {
             $search = $request->search;
-            $query->whereHas('tenant', fn($q) => $q->where('trade_name', 'like', "%{$search}%"));
+            $query->whereHas('tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
         }
-        
+
         $balances = $query->orderByDesc('balance')->paginate(20)->withQueryString();
-        
+
         $stats = [
             'total_purchased' => TenantWhatsappBalance::sum('total_purchased'),
             'total_used' => TenantWhatsappBalance::sum('total_used'),
@@ -103,7 +106,7 @@ class WhatsappCreditsController extends Controller
             'credits' => $validated['credits'],
             'amount' => 0,
             'payment_gateway' => 'manual',
-            'payment_reference' => 'MANUAL-' . time(),
+            'payment_reference' => 'MANUAL-'.time(),
             'status' => 'paid',
             'payment_details' => ['reason' => $validated['reason'] ?? 'إضافة يدوية'],
         ]);
@@ -114,13 +117,13 @@ class WhatsappCreditsController extends Controller
     public function usage(Request $request): Response
     {
         $query = WhatsappUsageLog::with(['tenant', 'center']);
-        
+
         if ($request->status) {
             $query->where('status', $request->status);
         }
-        
+
         $logs = $query->latest()->paginate(50)->withQueryString();
-        
+
         $stats = [
             'total_sent' => WhatsappUsageLog::count(),
             'delivered' => WhatsappUsageLog::where('status', 'delivered')->count(),

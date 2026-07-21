@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Center;
@@ -9,7 +11,7 @@ use App\Models\Vehicle;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Vehicle>
+ * @extends Factory<Vehicle>
  */
 class VehicleFactory extends Factory
 {
@@ -39,7 +41,7 @@ class VehicleFactory extends Factory
      */
     public function forTenant(Tenant $tenant, Center $center): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'tenant_id' => $tenant->id,
             'center_id' => $center->id,
         ]);
@@ -50,7 +52,7 @@ class VehicleFactory extends Factory
      */
     public function forCustomer(Customer $customer): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'tenant_id' => $customer->tenant_id,
             'center_id' => $customer->center_id,
             'customer_id' => $customer->id,

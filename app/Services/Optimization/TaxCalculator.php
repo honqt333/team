@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Optimization;
 
 class TaxCalculator
@@ -8,10 +10,10 @@ class TaxCalculator
      * Calculate tax for a single line item.
      * Rounds tax_amount to 2 decimals per standard practice (Line Level).
      *
-     * @param float $unitPrice  Price per unit
-     * @param float $qty        Quantity
-     * @param float $discount   Total discount amount for the line
-     * @param float $taxRate    Tax rate percentage (e.g., 15 for 15%)
+     * @param float $unitPrice Price per unit
+     * @param float $qty Quantity
+     * @param float $discount Total discount amount for the line
+     * @param float $taxRate Tax rate percentage (e.g., 15 for 15%)
      * @param bool $isInclusive Whether the unitPrice includes tax
      * @return array Result with detailed breakdown
      */
@@ -37,7 +39,7 @@ class TaxCalculator
             $totalInclTax = $netTotal;
             $baseAmount = $totalInclTax / (1 + $rateDecimal);
             $taxAmount = $totalInclTax - $baseAmount;
-            $totalExclTax = $baseAmount; 
+            $totalExclTax = $baseAmount;
         } else {
             $totalExclTax = $netTotal;
             $taxAmount = $totalExclTax * $rateDecimal;
@@ -47,18 +49,18 @@ class TaxCalculator
 
         // Return HIGH PRECISION values for document-level aggregation
         // We do NOT round here anymore for the final calculation, purely for display preview if needed.
-        
+
         return [
             'unit_price' => $unitPrice,
             'qty' => $qty,
             'discount' => $discount,
             'tax_rate' => $taxRate,
-            
+
             // Raw high precision
             'raw_tax_amount' => $taxAmount,
             'raw_line_total_excl' => $totalExclTax,
             'raw_line_total_incl' => $totalInclTax,
-            
+
             // Initial display values (rounded), will be reconciled later
             'tax_amount' => round($taxAmount, 2),
             'line_total_excl_tax' => round($totalExclTax, 2),
@@ -82,9 +84,11 @@ class TaxCalculator
 
         // Step 1: Group by Category & Rate
         $grouped = [];
+
         foreach ($lines as $index => $line) {
-            $key = $line['tax_category_code'] . '_' . $line['tax_rate'];
-            if (!isset($grouped[$key])) {
+            $key = $line['tax_category_code'].'_'.$line['tax_rate'];
+
+            if (! isset($grouped[$key])) {
                 $grouped[$key] = [
                     'category' => $line['tax_category_code'],
                     'rate' => $line['tax_rate'],
@@ -93,7 +97,7 @@ class TaxCalculator
                 ];
             }
             $grouped[$key]['lines_indices'][] = $index;
-            // Use rounded line totals for base to ensure consistency? 
+            // Use rounded line totals for base to ensure consistency?
             // ZATCA: Tax is calculated on the sum of taxable amounts.
             // Usually we sum the rounded exclusive totals of lines.
             $grouped[$key]['sum_excl'] += $line['line_total_excl_tax'];
@@ -105,20 +109,21 @@ class TaxCalculator
 
         foreach ($grouped as $key => $group) {
             $rateDecimal = $group['rate'] / 100;
-            
+
             // Calculate detailed tax on the group sum
             $groupTaxFull = $group['sum_excl'] * $rateDecimal;
             $groupTaxRounded = round($groupTaxFull, 2);
-            
+
             // Calculate sum of line taxes currently
             $sumLineTaxes = 0;
+
             foreach ($group['lines_indices'] as $idx) {
                 $sumLineTaxes += $reconciledLines[$idx]['tax_amount'];
             }
-            
+
             // Find difference (The "Penny")
             $diff = $groupTaxRounded - $sumLineTaxes;
-            
+
             // Distribute difference to first line(s) of this group
             // Usually diff is 0.01, -0.01, etc.
             if (abs($diff) > 0.0001) {
@@ -140,12 +145,12 @@ class TaxCalculator
 
             $totalExclTax += $group['sum_excl'];
             $totalDocumentTax += $groupTaxRounded;
-            
+
             if (in_array($cat, ['S', 'Z'])) {
                 $totalTaxable += $group['sum_excl'];
             }
         }
-        
+
         $totalInclTax = $totalExclTax + $totalDocumentTax;
 
         return [

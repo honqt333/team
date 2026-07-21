@@ -1,18 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Models\Role;
+use App\Models\Tenant;
+use App\Models\User;
+use App\Services\TenantSetupService;
 use App\Support\Permissions;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 class RolesSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     * 
+     *
      * Creates default system roles with their permissions.
      * These roles serve as templates for tenant-specific roles.
      */
@@ -23,24 +28,25 @@ class RolesSeeder extends Seeder
 
         // Create all permissions (Global)
         $allPermissions = Permissions::all();
+
         foreach ($allPermissions as $permission) {
             Permission::firstOrCreate(
                 ['name' => $permission, 'guard_name' => 'web'],
                 ['name' => $permission, 'guard_name' => 'web']
             );
         }
-        $this->command->info("Created " . count($allPermissions) . " permissions.");
+        $this->command->info('Created '.count($allPermissions).' permissions.');
 
         // Get all tenants
-        $tenants = \App\Models\Tenant::all();
-        
+        $tenants = Tenant::all();
+
         if ($tenants->isEmpty()) {
-            $this->command->warn("No tenants found. Seeding roles for default tenant (ID 1) as fallback.");
+            $this->command->warn('No tenants found. Seeding roles for default tenant (ID 1) as fallback.');
             // Create a dummy tenant object/ID or just force ID 1 if that's the convention
-             $tenants = collect([(object)['id' => 1]]); 
+            $tenants = collect([(object) ['id' => 1]]);
         }
 
-        $tenantSetupService = new \App\Services\TenantSetupService();
+        $tenantSetupService = new TenantSetupService;
 
         foreach ($tenants as $tenant) {
             $tenantSetupService->seedRolesForTenant($tenant->id);
@@ -49,18 +55,18 @@ class RolesSeeder extends Seeder
 
         // Assign Super Admin to the FIRST user of EACH tenant
         foreach ($tenants as $tenant) {
-            $firstUser = \App\Models\User::where('tenant_id', $tenant->id)->orderBy('id')->first();
-            
+            $firstUser = User::where('tenant_id', $tenant->id)->orderBy('id')->first();
+
             if ($firstUser) {
-                $superAdminRole = \App\Models\Role::where('name', 'super_admin')
+                $superAdminRole = Role::where('name', 'super_admin')
                     ->where('tenant_id', $tenant->id)
                     ->first();
-                    
+
                 if ($superAdminRole) {
                     // Set the team id for the assignment context
-                    app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
-                    
-                    if (!$firstUser->hasRole('super_admin')) {
+                    app(PermissionRegistrar::class)->setPermissionsTeamId($tenant->id);
+
+                    if (! $firstUser->hasRole('super_admin')) {
                         $firstUser->assignRole($superAdminRole);
                         $this->command->info("User {$firstUser->id} assigned to Super Admin Role (Tenant {$tenant->id}).");
                     }

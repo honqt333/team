@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\InventoryMove;
-use App\Models\Part;
 use App\Models\Warehouse;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Http\Request;
@@ -24,7 +25,7 @@ class InventoryMoveController extends Controller
         $centerId = $user->current_center_id;
         $warehouse = Warehouse::forCenter($centerId)->default()->first();
 
-        if (!$warehouse) {
+        if (! $warehouse) {
             $warehouse = Warehouse::getOrCreateDefault($centerId);
         }
 
@@ -42,21 +43,20 @@ class InventoryMoveController extends Controller
             ])
             ->posted()
             ->when($request->input('search'), function ($q, $search) {
-                $q->whereHas('part', fn($pq) =>
-                    $pq->where('sku', 'like', "%{$search}%")
-                       ->orWhere('name_ar', 'like', "%{$search}%")
+                $q->whereHas('part', fn ($pq) => $pq->where('sku', 'like', "%{$search}%")
+                    ->orWhere('name_ar', 'like', "%{$search}%")
                 );
             })
-            ->when($request->input('type'), fn($q, $type) => $q->ofType($type))
-            ->when($request->input('part_id'), fn($q, $partId) => $q->forPart($partId))
-            ->when($request->input('date_from'), fn($q, $date) => $q->whereDate('posted_at', '>=', $date))
-            ->when($request->input('date_to'), fn($q, $date) => $q->whereDate('posted_at', '<=', $date));
+            ->when($request->input('type'), fn ($q, $type) => $q->ofType($type))
+            ->when($request->input('part_id'), fn ($q, $partId) => $q->forPart($partId))
+            ->when($request->input('date_from'), fn ($q, $date) => $q->whereDate('posted_at', '>=', $date))
+            ->when($request->input('date_to'), fn ($q, $date) => $q->whereDate('posted_at', '<=', $date));
 
         // Apply Sorting (sort is whitelisted above; order is forced to asc/desc)
         if ($sort === 'sku') {
             $query->join('parts', 'inventory_moves.part_id', '=', 'parts.id')
-                  ->orderBy('parts.sku', $order)
-                  ->select('inventory_moves.*');
+                ->orderBy('parts.sku', $order)
+                ->select('inventory_moves.*');
         } else {
             $query->orderBy("inventory_moves.{$sort}", $order);
         }
@@ -153,7 +153,7 @@ class InventoryMoveController extends Controller
             InventoryMove::TYPE_PURCHASE_RETURN,
         ];
 
-        if (!$inventoryMove->canBeReversed() || in_array($inventoryMove->move_type, $restrictedTypes)) {
+        if (! $inventoryMove->canBeReversed() || in_array($inventoryMove->move_type, $restrictedTypes)) {
             return back()->with('error', __('inventory.moves.cannot_reverse'));
         }
 

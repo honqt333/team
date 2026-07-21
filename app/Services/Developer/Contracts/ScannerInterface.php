@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services\Developer\Contracts;
+declare(strict_types=1);
 
-use App\Models\Developer\AuditSnapshot;
+namespace App\Services\Developer\Contracts;
 
 interface ScannerInterface
 {

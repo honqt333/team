@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\Center;
 use App\Models\User;
 use App\Support\Permissions;
-use Illuminate\Auth\Access\Response;
 
 class CenterPolicy
 {

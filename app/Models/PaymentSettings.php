@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -77,6 +79,7 @@ class PaymentSettings extends Model
     public function isGatewayEnabled(string $gateway): bool
     {
         $config = $this->getGatewayConfig($gateway);
+
         if (empty($config['enabled'])) {
             return false;
         }
@@ -95,21 +98,27 @@ class PaymentSettings extends Model
     public function getEnabledMethods(): array
     {
         $methods = [];
+
         if ($this->mada_enabled) {
             $methods[] = 'mada';
         }
+
         if ($this->visa_enabled) {
             $methods[] = 'visa';
         }
+
         if ($this->mastercard_enabled) {
             $methods[] = 'mastercard';
         }
+
         if ($this->applepay_enabled) {
             $methods[] = 'applepay';
         }
+
         if ($this->stcpay_enabled) {
             $methods[] = 'stcpay';
         }
+
         if ($this->bank_transfer_enabled) {
             $methods[] = 'bank_transfer';
         }

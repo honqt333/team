@@ -1,9 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions\WorkOrder;
 
-use App\Models\WorkOrder;
 use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\VehicleMileageLog;
+use App\Models\WorkOrder;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class CreateWorkOrderAction
@@ -48,27 +53,29 @@ class CreateWorkOrderAction
             }
 
             // Attach departments (syncWithoutDetaching prevents duplicates)
-            if (!empty($data['departments'])) {
+            if (! empty($data['departments'])) {
                 $departments = $data['departments'];
                 $showPackages = false;
+
                 if (($key = array_search('packages', $departments)) !== false) {
                     $showPackages = true;
                     unset($departments[$key]);
                     $departments = array_values($departments);
                 }
-                
+
                 if ($showPackages) {
                     $workOrder->update(['show_packages_section' => true]);
                 }
-                
+
                 $uniqueDepts = array_values(array_unique($departments));
-                if (!empty($uniqueDepts)) {
+
+                if (! empty($uniqueDepts)) {
                     $workOrder->departments()->syncWithoutDetaching($uniqueDepts);
                 }
             }
 
             // Create damage marks
-            if (!empty($data['damage_marks'])) {
+            if (! empty($data['damage_marks'])) {
                 foreach ($data['damage_marks'] as $mark) {
                     $workOrder->damageMarks()->create([
                         'x' => $mark['x'],
@@ -86,19 +93,21 @@ class CreateWorkOrderAction
 
             // Sync Odometer to Vehicle History
             if (isset($data['odometer']) && $data['odometer'] !== null) {
-                $vehicle = \App\Models\Vehicle::find($data['vehicle_id']);
+                $vehicle = Vehicle::find($data['vehicle_id']);
+
                 if ($vehicle) {
                     $shouldUpdate = true;
+
                     // If new odometer is lower, only update if explicitly allowed
                     if ($vehicle->odometer && $data['odometer'] < $vehicle->odometer) {
-                        if (!isset($data['allow_lower_odometer']) || !$data['allow_lower_odometer']) {
+                        if (! isset($data['allow_lower_odometer']) || ! $data['allow_lower_odometer']) {
                             $shouldUpdate = false;
                         }
                     }
 
                     if ($shouldUpdate) {
                         // Log history
-                        \App\Models\VehicleMileageLog::create([
+                        VehicleMileageLog::create([
                             'vehicle_id' => $vehicle->id,
                             'tenant_id' => $user->tenant_id,
                             'center_id' => $user->current_center_id,
@@ -121,6 +130,7 @@ class CreateWorkOrderAction
             $workOrder->logActivity('created', __('work_orders.activities.actions.created'));
 
             $workOrder->refresh();
+
             return $workOrder;
         });
     }
@@ -129,10 +139,10 @@ class CreateWorkOrderAction
     {
         foreach ($photos as $photoData) {
             $file = $photoData['file'] ?? null;
-            
-            if ($file instanceof \Illuminate\Http\UploadedFile) {
-                $path = $file->store('work-orders/' . $workOrder->id, 'public');
-                
+
+            if ($file instanceof UploadedFile) {
+                $path = $file->store('work-orders/'.$workOrder->id, 'public');
+
                 $workOrder->photos()->create([
                     'path' => $path,
                     'type' => $photoData['type'] ?? 'general',

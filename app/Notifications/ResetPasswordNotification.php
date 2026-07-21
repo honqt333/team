@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Notifications;
 
 use App\Models\CommunicationTemplate;
 use App\Services\Messaging\EmailService;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Log;
 
 class ResetPasswordNotification extends Notification
 {
@@ -29,7 +33,7 @@ class ResetPasswordNotification extends Notification
     {
         // Send email directly using EmailService
         $this->sendResetEmail($notifiable);
-        
+
         return [];
     }
 
@@ -47,7 +51,7 @@ class ResetPasswordNotification extends Notification
         $template = CommunicationTemplate::getByCode('password_reset', 'email');
 
         // Default values
-        $subject = 'إعادة تعيين كلمة المرور - ' . config('app.name');
+        $subject = 'إعادة تعيين كلمة المرور - '.config('app.name');
         $content = $this->getDefaultContent($notifiable->name, $url);
 
         if ($template && $template->is_active) {
@@ -67,7 +71,7 @@ class ResetPasswordNotification extends Notification
 
         try {
             // Send via EmailService which uses Integration SMTP settings
-            $emailService = new EmailService();
+            $emailService = new EmailService;
             $emailService->send(
                 $notifiable->email,
                 $subject,
@@ -75,9 +79,9 @@ class ResetPasswordNotification extends Notification
                 true, // isHtml
                 $notifiable->tenant_id ?? null
             );
-            \Log::info("ResetPasswordNotification: Sent to {$notifiable->email}");
-        } catch (\Exception $e) {
-            \Log::error("ResetPasswordNotification failed: " . $e->getMessage());
+            Log::info("ResetPasswordNotification: Sent to {$notifiable->email}");
+        } catch (Exception $e) {
+            Log::error('ResetPasswordNotification failed: '.$e->getMessage());
         }
     }
 
@@ -95,15 +99,15 @@ class ResetPasswordNotification extends Notification
             </div>
             
             <p style="color: #374151; font-size: 16px; line-height: 1.8;">
-                أهلاً <strong>' . htmlspecialchars($name) . '</strong>،
+                أهلاً <strong>'.htmlspecialchars($name).'</strong>،
             </p>
             <p style="color: #374151; font-size: 16px; line-height: 1.8;">
-                تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في <strong>' . config('app.name') . '</strong>.
+                تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك في <strong>'.config('app.name').'</strong>.
                 يرجى الضغط على الزر أدناه لإعادة تعيين كلمة المرور.
             </p>
             
             <div style="text-align: center; margin: 30px 0;">
-                <a href="' . $url . '" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px;">إعادة تعيين كلمة المرور</a>
+                <a href="'.$url.'" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: #ffffff; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px;">إعادة تعيين كلمة المرور</a>
             </div>
             
             <div style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 16px; margin: 20px 0; color: #92400e;">
@@ -115,7 +119,7 @@ class ResetPasswordNotification extends Notification
             </p>
             
             <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #9ca3af; text-align: center;">
-                &copy; ' . date('Y') . ' ' . config('app.name') . '. جميع الحقوق محفوظة.
+                &copy; '.date('Y').' '.config('app.name').'. جميع الحقوق محفوظة.
             </div>
         </div>';
     }

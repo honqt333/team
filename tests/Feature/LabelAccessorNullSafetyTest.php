@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
@@ -55,7 +57,7 @@ class LabelAccessorNullSafetyTest extends TestCase
         $center = Center::factory()->create(['tenant_id' => $tenant->id]);
         $customer = Customer::factory()->create(['tenant_id' => $tenant->id, 'center_id' => $center->id]);
 
-        $invoice = new Invoice();
+        $invoice = new Invoice;
         $invoice->tenant_id = $tenant->id;
         $invoice->center_id = $center->id;
         $invoice->customer_id = $customer->id;

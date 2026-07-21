@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Models\HR\Employee;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,6 +38,7 @@ class Department extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
     }
 
@@ -55,7 +59,7 @@ class Department extends Model
 
     public function employees(): HasMany
     {
-        return $this->hasMany(\App\Models\HR\Employee::class);
+        return $this->hasMany(Employee::class);
     }
 
     /**

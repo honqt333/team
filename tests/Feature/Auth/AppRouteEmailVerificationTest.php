@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
 use App\Models\Center;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 /**
@@ -95,12 +99,12 @@ class AppRouteEmailVerificationTest extends TestCase
         // Make sure the employee role exists in this tenant so the
         // Spatie middleware can resolve it. The role is normally
         // seeded by TenantSetupService when a real tenant is created.
-        $role = \Spatie\Permission\Models\Role::firstOrCreate([
+        $role = Role::firstOrCreate([
             'tenant_id' => $user->tenant_id,
             'name' => 'employee',
             'guard_name' => 'web',
         ]);
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
+        app(PermissionRegistrar::class)->setPermissionsTeamId($user->tenant_id);
         $user->assignRole($role);
 
         $response = $this->actingAs($user)->get('/app/my');

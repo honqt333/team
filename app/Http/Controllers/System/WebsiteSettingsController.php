@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class WebsiteSettingsController extends Controller
@@ -22,17 +24,17 @@ class WebsiteSettingsController extends Controller
                 'website_logo' => Setting::get('website.logo', ''),
                 'website_favicon' => Setting::get('website.favicon', ''),
                 'website_primary_color' => Setting::get('website.primary.color', '#4f46e5'),
-                
+
                 'website_contact_email' => Setting::get('website.contact.email', ''),
                 'website_contact_phone' => Setting::get('website.contact.phone', ''),
                 'website_whatsapp_number' => Setting::get('website.whatsapp.number', ''),
-                
+
                 'website_whatsapp_floating_enabled' => Setting::get('website.whatsapp.floating.enabled', '0'),
                 'website_whatsapp_floating_number' => Setting::get('website.whatsapp.floating.number', ''),
-                
+
                 'website_chatbot_enabled' => Setting::get('website.chatbot.enabled', '0'),
                 'website_chatbot_script' => Setting::get('website.chatbot.script', ''),
-                
+
                 'website_scripts_header' => Setting::get('website.scripts.header', ''),
                 'website_scripts_footer' => Setting::get('website.scripts.footer', ''),
 
@@ -58,11 +60,11 @@ class WebsiteSettingsController extends Controller
                 // Lists
                 'website_header_menu' => json_decode(Setting::get('website.header.menu', '[]'), true),
                 'website_footer_menu' => json_decode(Setting::get('website.footer.menu', '[]'), true),
-                
+
                 'website_footer_about_ar' => Setting::get('website.footer.about.ar', ''),
                 'website_footer_about_en' => Setting::get('website.footer.about.en', ''),
-                'website_copyright_text_ar' => Setting::get('website.copyright.text.ar', '© ' . date('Y') . ' Carag. جميع الحقوق محفوظة.'),
-                'website_copyright_text_en' => Setting::get('website.copyright.text.en', '© ' . date('Y') . ' Carag. All rights reserved.'),
+                'website_copyright_text_ar' => Setting::get('website.copyright.text.ar', '© '.date('Y').' Carag. جميع الحقوق محفوظة.'),
+                'website_copyright_text_en' => Setting::get('website.copyright.text.en', '© '.date('Y').' Carag. All rights reserved.'),
 
                 // Landing Page Content
                 'landing_hero_title_ar' => Setting::get('landing.hero.title.ar', 'مرحباً بك في عصر الإدارة الذكية للورش'),
@@ -80,12 +82,12 @@ class WebsiteSettingsController extends Controller
                 'landing_hero_typed_suffix_en' => Setting::get('landing.hero.typed.suffix.en', 'With Real Intelligence'),
                 'landing_hero_typed_phrases_ar' => Setting::get('landing.hero.typed.phrases.ar', 'مركزك الآن|أرباحك اليوم|فريقك معك|مستقبلك هنا'),
                 'landing_hero_typed_phrases_en' => Setting::get('landing.hero.typed.phrases.en', 'Your Workshop|Your Revenue|Your Team|Your Future'),
-                
+
                 'landing_features_title_ar' => Setting::get('landing.features.title.ar', 'لماذا نظام Carag هو خيارك الأفضل؟'),
                 'landing_features_title_en' => Setting::get('landing.features.title.en', 'Why Carag is Your Best Choice?'),
                 'landing_features_subtitle_ar' => Setting::get('landing.features.subtitle.ar', 'بنينا النظام خصيصاً ليناسب احتياجات مراكز الصيانة، لنوفر لك أدوات تقنية متطورة تزيد من كفاءة العمل.'),
                 'landing_features_subtitle_en' => Setting::get('landing.features.subtitle.en', 'We built the system specifically for workshop needs, providing advanced tech tools to boost efficiency.'),
-                
+
                 'landing_pricing_title_ar' => Setting::get('landing.pricing.title.ar', 'خطط وأسعار مرنة تناسب احتياجاتك'),
                 'landing_pricing_title_en' => Setting::get('landing.pricing.title.en', 'Flexible Pricing Plans'),
                 'landing_pricing_subtitle_ar' => Setting::get('landing.pricing.subtitle.ar', 'اختر الباقة التي تناسب حجم مركزك وابدأ مسار النجاح معنا'),
@@ -104,12 +106,12 @@ class WebsiteSettingsController extends Controller
                     ['title_ar' => 'فحص فني رقمي', 'title_en' => 'Digital Inspection', 'desc_ar' => 'نماذج فحص رقمية احترافية مدعومة بالصور وإرسالها للعميل للموافقة.', 'desc_en' => 'Professional digital inspection templates with photos, sent to clients for approval.'],
                     ['title_ar' => 'إدارة شاملة للمخزون', 'title_en' => 'Comprehensive Inventory', 'desc_ar' => 'تتبع قطع الغيار، فواتير المشتريات، وتنبيهات النواقص لحظة بلحظة.', 'desc_en' => 'Track spare parts, purchase invoices, and shortage alerts instantly.'],
                     ['title_ar' => 'فواتير إلكترونية معتمدة', 'title_en' => 'Certified E-Invoices', 'desc_ar' => 'متوافق تماماً مع متطلبات هيئة الزكاة والدخل، مع دعم ضريبة القيمة المضافة.', 'desc_en' => 'Fully compliant with ZATCA requirements, with VAT support.'],
-                    ['title_ar' => 'نقاط البيع السريعة', 'title_en' => 'Fast POS', 'desc_ar' => 'شاشة نقاط بيع سريعة لإصدار الفواتير الفورية بخطوات بسيطة.', 'desc_en' => 'Fast POS screen to issue instant invoices with simple steps.']
+                    ['title_ar' => 'نقاط البيع السريعة', 'title_en' => 'Fast POS', 'desc_ar' => 'شاشة نقاط بيع سريعة لإصدار الفواتير الفورية بخطوات بسيطة.', 'desc_en' => 'Fast POS screen to issue instant invoices with simple steps.'],
                 ],
                 'landing_faq_list' => json_decode(Setting::get('landing.faq.list', '[]'), true) ?: [
                     ['q_ar' => 'هل النظام معتمد من هيئة الزكاة والدخل؟', 'q_en' => 'Is the system ZATCA certified?', 'a_ar' => 'نعم، النظام معتمد بالكامل ويدعم الفوترة الإلكترونية المرحلة الأولى والثانية.', 'a_en' => 'Yes, the system is fully certified and supports e-invoicing phases 1 & 2.'],
                     ['q_ar' => 'هل يمكنني إدارة أكثر من فرع؟', 'q_en' => 'Can I manage multiple branches?', 'a_ar' => 'نعم، يدعم النظام إدارة فروع متعددة بصلاحيات منفصلة لكل فرع ومخزون مستقل.', 'a_en' => 'Yes, the system supports managing multiple branches with separate roles and inventory.'],
-                    ['q_ar' => 'ماذا يحدث إذا انقطع الإنترنت؟', 'q_en' => 'What if the internet disconnects?', 'a_ar' => 'النظام سحابي ويتطلب اتصال بالإنترنت، ولكننا نستخدم خوادم مستقرة تضمن استمرار العمل.', 'a_en' => 'The system is cloud-based and requires internet, but we use stable servers to ensure uptime.']
+                    ['q_ar' => 'ماذا يحدث إذا انقطع الإنترنت؟', 'q_en' => 'What if the internet disconnects?', 'a_ar' => 'النظام سحابي ويتطلب اتصال بالإنترنت، ولكننا نستخدم خوادم مستقرة تضمن استمرار العمل.', 'a_en' => 'The system is cloud-based and requires internet, but we use stable servers to ensure uptime.'],
                 ],
                 'landing_testimonials_list' => json_decode(Setting::get('landing.testimonials.list', '[]'), true) ?: [
                     ['name' => 'AutoCare', 'logo_url' => 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'],
@@ -121,7 +123,7 @@ class WebsiteSettingsController extends Controller
                     ['value' => '+500', 'label_ar' => 'ورشة وصناعية', 'label_en' => 'Workshops'],
                     ['value' => '+1M', 'label_ar' => 'فاتورة مصدرة', 'label_en' => 'Invoices Issued'],
                     ['value' => '+100K', 'label_ar' => 'عميل مسجل', 'label_en' => 'Registered Clients'],
-                    ['value' => '%99.9', 'label_ar' => 'استقرار النظام', 'label_en' => 'Uptime']
+                    ['value' => '%99.9', 'label_ar' => 'استقرار النظام', 'label_en' => 'Uptime'],
                 ],
                 'website_custom_pages' => json_decode(Setting::get('website.custom.pages', '[]'), true),
 
@@ -161,7 +163,7 @@ class WebsiteSettingsController extends Controller
                 }
                 $file = $request->file("settings.$key");
                 $path = $file->store('website', 'public');
-                $value = asset('storage/' . $path);
+                $value = asset('storage/'.$path);
             }
 
             // Handle Files inside Lists (Banners, etc.)
@@ -173,7 +175,7 @@ class WebsiteSettingsController extends Controller
                         ]);
                         $file = $request->file("settings.landing_banners_list.$index.image");
                         $path = $file->store('website/banners', 'public');
-                        $item['image'] = asset('storage/' . $path);
+                        $item['image'] = asset('storage/'.$path);
                     }
                 }
             }
@@ -192,12 +194,12 @@ class WebsiteSettingsController extends Controller
             // Converts website_title_ar -> website.title.ar
             // Converts landing_hero_cta_text_ar -> landing.hero.cta.text.ar
             $dbKey = str_replace('_', '.', $key);
-            
+
             // Special cases where we want to keep some parts together if needed?
             // Actually, in this system, dots are the universal separator.
-            
+
             $group = str_starts_with($dbKey, 'landing.') ? 'landing' : 'website';
-            
+
             Setting::set($dbKey, $value, $group);
         }
 
@@ -212,12 +214,12 @@ class WebsiteSettingsController extends Controller
     public function uploadImage(Request $request): JsonResponse
     {
         $request->validate([
-            'key'   => 'required|string|in:website_logo,website_favicon',
+            'key' => 'required|string|in:website_logo,website_favicon',
             'image' => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:4096',
         ]);
 
         $path = $request->file('image')->store('website', 'public');
-        $url  = asset('storage/' . $path);
+        $url = asset('storage/'.$path);
 
         // Persist immediately so it survives even if the main form is not saved
         Setting::set($request->key === 'website_logo' ? 'website.logo' : 'website.favicon', $url, 'website');

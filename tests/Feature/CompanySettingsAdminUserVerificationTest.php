@@ -1,15 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-use App\Models\Tenant;
-use App\Models\User;
 use App\Models\Center;
-use App\Models\Supplier;
-use App\Models\IncomeCategory;
 use App\Models\CompanyTransaction;
+use App\Models\Customer;
+use App\Models\IncomeCategory;
+use App\Models\InventoryUnit;
+use App\Models\PurchaseInvoice;
+use App\Models\Role;
+use App\Models\Supplier;
+use App\Models\Tenant;
+use App\Models\TenantAddress;
+use App\Models\User;
+use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class CompanySettingsAdminUserVerificationTest extends TestCase
@@ -17,18 +26,21 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
     use RefreshDatabase;
 
     protected User $user;
+
     protected Tenant $tenant;
+
     protected Center $center;
+
     protected IncomeCategory $expenseCategory;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\PermissionsSeeder::class);
+        $this->seed(PermissionsSeeder::class);
         $this->tenant = Tenant::factory()->create();
         $this->center = Center::factory()->create(['tenant_id' => $this->tenant->id]);
-        
+
         $this->user = User::factory()->create([
             'tenant_id' => $this->tenant->id,
             'current_center_id' => $this->center->id,
@@ -37,15 +49,15 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
 
         $this->user->centers()->attach($this->center->id, ['tenant_id' => $this->tenant->id]);
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
-        $superAdminRole = \App\Models\Role::firstOrCreate([
+        app(PermissionRegistrar::class)->setPermissionsTeamId($this->tenant->id);
+        $superAdminRole = Role::firstOrCreate([
             'tenant_id' => $this->tenant->id,
             'name' => 'super_admin',
             'guard_name' => 'web',
         ]);
         $this->user->assignRole($superAdminRole);
 
-        \App\Models\InventoryUnit::create([
+        InventoryUnit::create([
             'tenant_id' => $this->tenant->id,
             'name_ar' => 'حبة',
             'name_en' => 'Piece',
@@ -57,7 +69,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
             'name_ar' => 'مصروفات الصيانة',
             'name_en' => 'Maintenance Expenses',
             'transaction_type' => 'expense',
-            'is_active' => true
+            'is_active' => true,
         ]);
     }
 
@@ -98,7 +110,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
                     'vat_number' => '12345', // Invalid
                     'services_vat_rate' => 15,
                     'parts_vat_rate' => 15,
-                ]
+                ],
             ]);
 
         $response1->assertRedirect(route('settings.company'));
@@ -115,7 +127,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
                     'vat_number' => '112345678901234', // Doesn't start/end with 3
                     'services_vat_rate' => 15,
                     'parts_vat_rate' => 15,
-                ]
+                ],
             ]);
 
         $response2->assertRedirect(route('settings.company'));
@@ -132,7 +144,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
                     'vat_number' => '300000000000003', // Valid
                     'services_vat_rate' => 15,
                     'parts_vat_rate' => 15,
-                ]
+                ],
             ]);
 
         $response3->assertSessionHasNoErrors();
@@ -148,7 +160,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
             'tenant_id' => $this->tenant->id,
             'center_id' => $otherCenter->id,
             'name' => 'مورد إداري عام',
-            'code' => 'SUP-ADMIN-' . $this->tenant->id,
+            'code' => 'SUP-ADMIN-'.$this->tenant->id,
             'is_active' => true,
         ]);
 
@@ -174,15 +186,15 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
             ->post(route('settings.company.transactions.approve', $transaction->id));
 
         $response->assertRedirect();
-        
+
         // Assert that the general admin supplier was reused, and no duplicate was created
-        $this->assertEquals(1, Supplier::withoutGlobalScope('center_scoped')->where('code', 'SUP-ADMIN-' . $this->tenant->id)->count());
+        $this->assertEquals(1, Supplier::withoutGlobalScope('center_scoped')->where('code', 'SUP-ADMIN-'.$this->tenant->id)->count());
     }
 
     public function test_purchase_invoice_loads_tenant_address_and_maps_contact_on_print(): void
     {
         // 1. Create a detailed address for the tenant
-        \App\Models\TenantAddress::create([
+        TenantAddress::create([
             'tenant_id' => $this->tenant->id,
             'building_number' => '1234',
             'street' => 'King Fahd Road',
@@ -193,7 +205,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
         ]);
 
         // 2. Create a customer to act as the contact
-        $customer = \App\Models\Customer::factory()->create([
+        $customer = Customer::factory()->create([
             'tenant_id' => $this->tenant->id,
             'name' => 'محمد العميل المشترك',
             'phone' => '0555555555',
@@ -225,7 +237,7 @@ class CompanySettingsAdminUserVerificationTest extends TestCase
             dd(session('error'));
         }
 
-        $invoice = \App\Models\PurchaseInvoice::where('tenant_id', $this->tenant->id)
+        $invoice = PurchaseInvoice::where('tenant_id', $this->tenant->id)
             ->where('total', 230)
             ->firstOrFail();
 

@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\WorkOrder;
-use App\Models\Vehicle;
 use App\Models\Part;
 use App\Models\Payment;
+use App\Models\Vehicle;
+use App\Models\WorkOrder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -22,16 +24,16 @@ class DashboardController extends Controller
         $tenantId = auth()->user()?->tenant_id;
 
         // Date ranges
-        $today      = Carbon::today();
-        $thisMonth  = Carbon::now()->startOfMonth();
-        $lastMonth  = Carbon::now()->subMonth()->startOfMonth();
+        $today = Carbon::today();
+        $thisMonth = Carbon::now()->startOfMonth();
+        $lastMonth = Carbon::now()->subMonth()->startOfMonth();
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
         $last30Days = Carbon::now()->subDays(30);
-        $last7Days  = Carbon::now()->subDays(7);
+        $last7Days = Carbon::now()->subDays(7);
 
         // ─── Work Orders Stats ─────────────────────────────────────────────
         $workOrdersBase = WorkOrder::where('tenant_id', $tenantId)
-            ->when($centerId, fn($q) => $q->where('center_id', $centerId));
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId));
 
         $workOrdersThisMonth = (clone $workOrdersBase)
             ->whereDate('created_at', '>=', $thisMonth)->count();
@@ -57,7 +59,7 @@ class DashboardController extends Controller
 
         // ─── Revenue Stats ─────────────────────────────────────────────────
         $invoiceBase = Invoice::where('tenant_id', $tenantId)
-            ->when($centerId, fn($q) => $q->where('center_id', $centerId))
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
             ->where('type', 'invoice')
             ->whereNotIn('status', ['draft', 'cancelled']);
 
@@ -89,10 +91,11 @@ class DashboardController extends Controller
 
         // Build 30-day array
         $revenueChart = [];
+
         for ($i = 29; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             $revenueChart[] = [
-                'date'  => $date,
+                'date' => $date,
                 'label' => Carbon::parse($date)->format('d/m'),
                 'total' => isset($dailyRevenue[$date]) ? round($dailyRevenue[$date]['total'], 2) : 0,
             ];
@@ -100,7 +103,7 @@ class DashboardController extends Controller
 
         // ─── Customer Stats ────────────────────────────────────────────────
         $customersBase = Customer::where('tenant_id', $tenantId)
-            ->when($centerId, fn($q) => $q->where('center_id', $centerId));
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId));
 
         $customersThisMonth = (clone $customersBase)
             ->whereDate('created_at', '>=', $thisMonth)->count();
@@ -113,7 +116,7 @@ class DashboardController extends Controller
 
         // ─── Vehicles Stats ────────────────────────────────────────────────
         $totalVehicles = Vehicle::where('tenant_id', $tenantId)
-            ->when($centerId, fn($q) => $q->where('center_id', $centerId))
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
             ->count();
 
         // ─── Alerts ───────────────────────────────────────────────────────
@@ -134,8 +137,9 @@ class DashboardController extends Controller
         $lowStockCount = Part::where('parts.tenant_id', $tenantId)
             ->whereNotNull('parts.min_qty')
             ->where('parts.min_qty', '>', 0)
-            ->join('inventory_balances', function($join) use ($centerId) {
+            ->join('inventory_balances', function ($join) use ($centerId) {
                 $join->on('inventory_balances.part_id', '=', 'parts.id');
+
                 if ($centerId) {
                     $join->where('inventory_balances.center_id', $centerId);
                 }
@@ -159,7 +163,7 @@ class DashboardController extends Controller
 
         // ─── Payments Today ────────────────────────────────────────────────
         $paymentsToday = Payment::where('tenant_id', $tenantId)
-            ->when($centerId, fn($q) => $q->where('center_id', $centerId))
+            ->when($centerId, fn ($q) => $q->where('center_id', $centerId))
             ->whereDate('payment_date', $today)
             ->sum('amount');
 
@@ -177,10 +181,11 @@ class DashboardController extends Controller
             ->toArray();
 
         $weeklyChart = [];
+
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
             $weeklyChart[] = [
-                'date'  => $date,
+                'date' => $date,
                 'label' => Carbon::parse($date)->locale('ar')->isoFormat('ddd'),
                 'count' => isset($weeklyWorkOrders[$date]) ? $weeklyWorkOrders[$date]['count'] : 0,
             ];
@@ -189,39 +194,39 @@ class DashboardController extends Controller
         return Inertia::render('Dashboard', [
             'stats' => [
                 'workOrders' => [
-                    'thisMonth'    => $workOrdersThisMonth,
-                    'lastMonth'    => $workOrdersLastMonth,
-                    'active'       => $activeWorkOrders,
+                    'thisMonth' => $workOrdersThisMonth,
+                    'lastMonth' => $workOrdersLastMonth,
+                    'active' => $activeWorkOrders,
                     'completedToday' => $completedToday,
                 ],
                 'revenue' => [
-                    'thisMonth'     => round($revenueThisMonth, 2),
-                    'lastMonth'     => round($revenueLastMonth, 2),
-                    'outstanding'   => round(max($outstandingBalance, 0), 2),
+                    'thisMonth' => round($revenueThisMonth, 2),
+                    'lastMonth' => round($revenueLastMonth, 2),
+                    'outstanding' => round(max($outstandingBalance, 0), 2),
                     'paymentsToday' => round($paymentsToday, 2),
                 ],
                 'customers' => [
-                    'total'      => $totalCustomers,
-                    'thisMonth'  => $customersThisMonth,
-                    'lastMonth'  => $customersLastMonth,
+                    'total' => $totalCustomers,
+                    'thisMonth' => $customersThisMonth,
+                    'lastMonth' => $customersLastMonth,
                 ],
                 'vehicles' => [
                     'total' => $totalVehicles,
                 ],
             ],
             'charts' => [
-                'revenueDaily'      => $revenueChart,
+                'revenueDaily' => $revenueChart,
                 'workOrdersByStatus' => $workOrdersByStatus,
-                'weeklyWorkOrders'  => $weeklyChart,
+                'weeklyWorkOrders' => $weeklyChart,
             ],
             'alerts' => [
                 'overdueWorkOrders' => $overdueWorkOrders,
-                'overdueInvoices'   => $overdueInvoices,
-                'lowStock'          => $lowStockCount,
+                'overdueInvoices' => $overdueInvoices,
+                'lowStock' => $lowStockCount,
             ],
             'recentWorkOrders' => $recentWorkOrders,
-            'recentInvoices'   => $recentInvoices,
-            'currency'         => session('currency_code', 'SAR'),
+            'recentInvoices' => $recentInvoices,
+            'currency' => session('currency_code', 'SAR'),
         ]);
     }
 }

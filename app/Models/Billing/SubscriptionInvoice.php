@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Billing;
 
+use App\Models\Concerns\TenantScoped;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\Concerns\TenantScoped;
 
 class SubscriptionInvoice extends Model
 {
@@ -85,6 +87,7 @@ class SubscriptionInvoice extends Model
     {
         $year = date('Y');
         $count = self::whereYear('created_at', $year)->count() + 1;
-        return "INV-{$year}-" . str_pad($count, 6, '0', STR_PAD_LEFT);
+
+        return "INV-{$year}-".str_pad($count, 6, '0', STR_PAD_LEFT);
     }
 }

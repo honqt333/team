@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\Credits\SmsPackage;
 use App\Models\Credits\SmsPurchase;
-use App\Models\Credits\TenantSmsBalance;
 use App\Models\Credits\SmsUsageLog;
+use App\Models\Credits\TenantSmsBalance;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,7 +21,7 @@ class SmsCreditsController extends Controller
     public function packages(): Response
     {
         $packages = SmsPackage::orderBy('sort_order')->get();
-        
+
         return Inertia::render('System/Credits/SmsPackages', [
             'packages' => $packages,
         ]);
@@ -71,6 +73,7 @@ class SmsCreditsController extends Controller
     public function destroyPackage(SmsPackage $package)
     {
         $package->delete();
+
         return back()->with('success', 'تم حذف الباقة بنجاح');
     }
 
@@ -80,14 +83,14 @@ class SmsCreditsController extends Controller
     public function balances(Request $request): Response
     {
         $query = TenantSmsBalance::with('tenant');
-        
+
         if ($request->search) {
             $search = $request->search;
-            $query->whereHas('tenant', fn($q) => $q->where('trade_name', 'like', "%{$search}%"));
+            $query->whereHas('tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
         }
-        
+
         $balances = $query->orderByDesc('balance')->paginate(20)->withQueryString();
-        
+
         // Stats
         $stats = [
             'total_purchased' => TenantSmsBalance::sum('total_purchased'),
@@ -109,11 +112,11 @@ class SmsCreditsController extends Controller
     public function purchases(Request $request): Response
     {
         $query = SmsPurchase::with(['tenant', 'package']);
-        
+
         if ($request->status) {
             $query->where('status', $request->status);
         }
-        
+
         $purchases = $query->latest()->paginate(20)->withQueryString();
 
         return Inertia::render('System/Credits/SmsPurchases', [
@@ -142,7 +145,7 @@ class SmsCreditsController extends Controller
             'credits' => $validated['credits'],
             'amount' => 0,
             'payment_gateway' => 'manual',
-            'payment_reference' => 'MANUAL-' . time(),
+            'payment_reference' => 'MANUAL-'.time(),
             'status' => 'paid',
             'payment_details' => ['reason' => $validated['reason'] ?? 'إضافة يدوية'],
         ]);
@@ -156,17 +159,17 @@ class SmsCreditsController extends Controller
     public function usage(Request $request): Response
     {
         $query = SmsUsageLog::with(['tenant', 'center']);
-        
+
         if ($request->tenant_id) {
             $query->where('tenant_id', $request->tenant_id);
         }
-        
+
         if ($request->status) {
             $query->where('status', $request->status);
         }
-        
+
         $logs = $query->latest()->paginate(50)->withQueryString();
-        
+
         // Stats
         $stats = [
             'total_sent' => SmsUsageLog::count(),

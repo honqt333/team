@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Billing;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -89,6 +91,7 @@ class Plan extends Model
     public function getFeaturesArAttribute(): array
     {
         $raw = $this->getRawOriginal('features');
+
         if (is_array($raw)) {
             $features = $raw;
         } elseif (is_string($raw)) {
@@ -110,6 +113,7 @@ class Plan extends Model
     public function getFeaturesEnAttribute(): array
     {
         $raw = $this->getRawOriginal('features');
+
         if (is_array($raw)) {
             $features = $raw;
         } elseif (is_string($raw)) {

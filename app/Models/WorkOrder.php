@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
 use App\Models\Concerns\HasTaxSnapshot;
-use App\Traits\HasWorkOrderRelations;
+use App\Support\TenancyContext;
 use App\Traits\HasWorkOrderOperations;
+use App\Traits\HasWorkOrderRelations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,9 +16,9 @@ use Illuminate\Support\Facades\DB;
 
 class WorkOrder extends Model
 {
-    use HasFactory, SoftDeletes, CenterScoped, HasTaxSnapshot;
-    use HasWorkOrderRelations, HasWorkOrderOperations;
-    
+    use CenterScoped, HasFactory, HasTaxSnapshot, SoftDeletes;
+    use HasWorkOrderOperations, HasWorkOrderRelations;
+
     protected $appends = [];
 
     /**
@@ -31,9 +34,9 @@ class WorkOrder extends Model
             $workOrder->recalculateTotals();
 
             // Synchronize odometer and mileage columns to maintain compatibility
-            if ($workOrder->isDirty('odometer') && !$workOrder->isDirty('mileage')) {
+            if ($workOrder->isDirty('odometer') && ! $workOrder->isDirty('mileage')) {
                 $workOrder->mileage = $workOrder->odometer;
-            } elseif ($workOrder->isDirty('mileage') && !$workOrder->isDirty('odometer')) {
+            } elseif ($workOrder->isDirty('mileage') && ! $workOrder->isDirty('odometer')) {
                 $workOrder->odometer = $workOrder->mileage;
             } elseif ($workOrder->odometer !== $workOrder->mileage) {
                 $workOrder->mileage = $workOrder->odometer;
@@ -61,36 +64,44 @@ class WorkOrder extends Model
             $this->refreshTaxSnapshot();
         }
 
-        if (!$this->relationLoaded('items')) $this->load('items');
-        if (!$this->relationLoaded('parts')) $this->load('parts');
+        if (! $this->relationLoaded('items')) {
+            $this->load('items');
+        }
 
-        $activeItems = $this->items->reject(fn($item) => $item->status === WorkOrderItem::STATUS_CANCELLED);
+        if (! $this->relationLoaded('parts')) {
+            $this->load('parts');
+        }
 
-        $servicesPrice = $activeItems->sum(fn($l) => (float)$l->unit_price * (float)$l->qty);
+        $activeItems = $this->items->reject(fn ($item) => $item->status === WorkOrderItem::STATUS_CANCELLED);
+
+        $servicesPrice = $activeItems->sum(fn ($l) => (float) $l->unit_price * (float) $l->qty);
         $servicesDiscount = $activeItems->sum('discount_amount');
-        
+
         $activeItemIds = $activeItems->pluck('id')->all();
         $activeParts = $this->parts->filter(function ($part) use ($activeItemIds) {
             if (in_array($part->status, [WorkOrderItemPart::STATUS_CANCELLED, WorkOrderItemPart::STATUS_REVERSED])) {
                 return false;
             }
-            if ($part->work_order_item_id !== null && !in_array($part->work_order_item_id, $activeItemIds)) {
+
+            if ($part->work_order_item_id !== null && ! in_array($part->work_order_item_id, $activeItemIds)) {
                 return false;
             }
+
             return true;
         });
 
-        $partsPrice = $activeParts->sum(fn($p) => (float)$p->unit_price * (float)$p->qty);
+        $partsPrice = $activeParts->sum(fn ($p) => (float) $p->unit_price * (float) $p->qty);
         $partsDiscount = $activeParts->sum('discount');
 
         $netTotal = ($servicesPrice - $servicesDiscount) + ($partsPrice - $partsDiscount);
         $this->total_excl_tax = $netTotal;
 
-        if (!($this->tax_enabled_snapshot ?? false)) {
+        if (! ($this->tax_enabled_snapshot ?? false)) {
             $this->total_tax = 0;
             $this->total_incl_tax = $netTotal;
         } else {
             $taxRate = (float) ($this->tax_rate_snapshot ?: 15.00);
+
             if (($this->pricing_mode_snapshot ?? 'exclusive') === 'inclusive') {
                 $this->total_incl_tax = $netTotal;
                 $this->total_excl_tax = round($netTotal / (1 + ($taxRate / 100)), 2);
@@ -104,11 +115,17 @@ class WorkOrder extends Model
 
     // Status constants
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_OPEN = 'open';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_ON_HOLD = 'on_hold';
+
     public const STATUS_DONE = 'done';
+
     public const STATUS_READY_FOR_QC = 'ready_for_qc';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public const STATUSES = [
@@ -149,13 +166,14 @@ class WorkOrder extends Model
             foreach ($rows as $code) {
                 if (preg_match('/WO-(\d+)/', (string) $code, $matches)) {
                     $n = (int) $matches[1];
+
                     if ($n > $maxNumber) {
                         $maxNumber = $n;
                     }
                 }
             }
 
-            return 'WO-' . str_pad($maxNumber + 1, 6, '0', STR_PAD_LEFT);
+            return 'WO-'.str_pad($maxNumber + 1, 6, '0', STR_PAD_LEFT);
         });
     }
 
@@ -184,10 +202,10 @@ class WorkOrder extends Model
             })
             ->selectRaw('SUM((unit_price * qty) - discount) as net')
             ->value('net');
-        
+
         $netTotal = $servicesNet + $partsNet;
 
-        if (!($this->tax_enabled_snapshot ?? false)) {
+        if (! ($this->tax_enabled_snapshot ?? false)) {
             return (float) $netTotal;
         }
 
@@ -196,6 +214,7 @@ class WorkOrder extends Model
         }
 
         $taxRate = (float) ($this->tax_rate_snapshot ?: 15.00);
+
         return round($netTotal * (1 + ($taxRate / 100)), 2);
     }
 
@@ -290,7 +309,7 @@ class WorkOrder extends Model
     {
         return $this->withoutGlobalScope('center_scoped')
             ->where($field ?? $this->getRouteKeyName(), $value)
-            ->where('tenant_id', \App\Support\TenancyContext::tenantId())
+            ->where('tenant_id', TenancyContext::tenantId())
             ->first();
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
@@ -25,22 +27,22 @@ class InstallmentsController extends Controller
     public function index(Request $request): Response
     {
         $query = Installment::with(['invoice.tenant', 'invoice.subscription.plan']);
-        
+
         // Filters
         if ($request->status) {
             $query->where('status', $request->status);
         }
-        
+
         if ($request->search) {
             $search = $request->search;
-            $query->whereHas('invoice.tenant', fn($q) => $q->where('trade_name', 'like', "%{$search}%"));
+            $query->whereHas('invoice.tenant', fn ($q) => $q->where('trade_name', 'like', "%{$search}%"));
         }
-        
+
         // Order by due date (upcoming first)
         $installments = $query->orderBy('due_date', 'asc')
             ->paginate(20)
             ->withQueryString();
-        
+
         // Stats
         $stats = [
             'total' => Installment::count(),
@@ -49,7 +51,7 @@ class InstallmentsController extends Controller
             'paid' => Installment::where('status', 'paid')->count(),
             'pending_amount' => Installment::whereIn('status', ['pending', 'overdue'])->sum('amount'),
         ];
-        
+
         return Inertia::render('System/Installments/Index', [
             'installments' => $installments,
             'stats' => $stats,
@@ -63,9 +65,9 @@ class InstallmentsController extends Controller
     public function show(SubscriptionInvoice $invoice): Response
     {
         $invoice->load(['tenant', 'subscription.plan', 'installments']);
-        
+
         $summary = $this->installmentService->getInstallmentSummary($invoice);
-        
+
         return Inertia::render('System/Installments/Show', [
             'invoice' => $invoice,
             'summary' => $summary,
@@ -81,13 +83,13 @@ class InstallmentsController extends Controller
             'reference' => 'nullable|string|max:255',
             'gateway' => 'nullable|string|max:50',
         ]);
-        
+
         $this->installmentService->markInstallmentPaid(
             $installment,
             $validated['gateway'] ?? 'manual',
             $validated['reference']
         );
-        
+
         return back()->with('success', 'تم تأكيد دفع القسط بنجاح');
     }
 
@@ -97,7 +99,7 @@ class InstallmentsController extends Controller
     public function updateOverdue()
     {
         $count = $this->installmentService->updateOverdueInstallments();
-        
+
         return back()->with('success', "تم تحديث {$count} قسط متأخر");
     }
 }

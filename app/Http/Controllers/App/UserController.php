@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -13,8 +15,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
-
-
 class UserController extends Controller
 {
     /**
@@ -23,7 +23,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', User::class);
-        
+
         $tenantId = TenancyContext::tenantId();
 
         $users = User::where('tenant_id', $tenantId)
@@ -35,7 +35,7 @@ class UserController extends Controller
             ->when($request->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             })
             ->orderByDesc('created_at')
@@ -57,7 +57,7 @@ class UserController extends Controller
     public function store(StoreUserRequest $request)
     {
         $this->authorize('create', User::class);
-        
+
         $validated = $request->validated();
         $tenantId = TenancyContext::tenantId();
 
@@ -77,7 +77,7 @@ class UserController extends Controller
         $user->centers()->sync($centers);
 
         // Sync Role
-        if (!empty($validated['role_id'])) {
+        if (! empty($validated['role_id'])) {
             $user->syncRoles([$validated['role_id']]);
         }
 
@@ -90,15 +90,15 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, User $user)
     {
         $this->authorize('update', $user);
-        
+
         $validated = $request->validated();
-        
+
         $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
         ];
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $data['password'] = Hash::make($validated['password']);
         }
 
@@ -107,7 +107,7 @@ class UserController extends Controller
         }
 
         $user->update($data);
-        
+
         $tenantId = TenancyContext::tenantId();
         $centers = collect($validated['centers'])->mapWithKeys(function ($centerId) use ($tenantId) {
             return [$centerId => ['tenant_id' => $tenantId]];
@@ -116,27 +116,25 @@ class UserController extends Controller
         $user->centers()->sync($centers);
 
         // Ensure current_center_id is valid after sync
-        if ($user->current_center_id && !array_key_exists($user->current_center_id, $centers)) {
-            $newId = !empty($centers) ? array_key_first($centers) : null;
+        if ($user->current_center_id && ! array_key_exists($user->current_center_id, $centers)) {
+            $newId = ! empty($centers) ? array_key_first($centers) : null;
             $user->update(['current_center_id' => $newId]);
-        } elseif (!$user->current_center_id && !empty($centers)) {
+        } elseif (! $user->current_center_id && ! empty($centers)) {
             $user->update(['current_center_id' => array_key_first($centers)]);
         }
 
         // Sync Role
-        if (!empty($validated['role_id'])) {
+        if (! empty($validated['role_id'])) {
             $user->syncRoles([$validated['role_id']]);
-        } else {
-             // If you want to allow unassigning roles:
-             // $user->syncRoles([]);
         }
+        // If you want to allow unassigning roles:
+        // $user->syncRoles([]);
 
         // Note: Employee linking is automatic via EmployeeObserver
         // Manual linking from User side is not allowed
 
         return back()->with('success', __('messages.updated_successfully'));
     }
-
 
     /**
      * Toggle the active status of a user.
@@ -149,7 +147,7 @@ class UserController extends Controller
             return back()->with('error', __('messages.cannot_deactivate_self'));
         }
 
-        $user->is_active = !$user->is_active;
+        $user->is_active = ! $user->is_active;
         $user->save();
 
         return back()->with('success', __('messages.updated_successfully'));
@@ -161,7 +159,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $this->authorize('delete', $user);
-        
+
         $user->delete();
 
         return back()->with('success', __('messages.deleted_successfully'));

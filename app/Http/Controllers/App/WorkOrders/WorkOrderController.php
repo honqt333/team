@@ -1,13 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Actions\WorkOrder\CreateWorkOrderAction;
 use App\Actions\WorkOrder\UpdateWorkOrderAction;
+use App\Exports\WorkOrdersExport;
 use App\Http\Requests\WorkOrderStoreRequest;
 use App\Http\Requests\WorkOrderUpdateRequest;
 use App\Models\Customer;
 use App\Models\Department;
+use App\Models\HR\Employee;
 use App\Models\InventoryUnit;
 use App\Models\Part;
 use App\Models\Service;
@@ -22,11 +26,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class WorkOrderController
 {
@@ -34,7 +38,9 @@ class WorkOrderController
 
     // Status constants for consistency
     protected const OPEN_STATUSES = ['open', 'in_progress', 'draft', 'on_hold', 'ready_for_qc'];
+
     protected const CLOSED_STATUSES = ['done', 'cancelled'];
+
     protected const ACTIVE_STATUSES = ['open', 'in_progress', 'on_hold', 'ready_for_qc'];
 
     /**
@@ -42,13 +48,13 @@ class WorkOrderController
      */
     public function apiIndex(): JsonResponse
     {
-        $this->authorize("viewAny", WorkOrder::class);
+        $this->authorize('viewAny', WorkOrder::class);
 
-        $status = request("status");
-        $subFilter = request("subFilter") ?: request("sub_filter");
+        $status = request('status');
+        $subFilter = request('subFilter') ?: request('sub_filter');
 
         $workOrders = $this->buildWorkOrderQuery($status, $subFilter)
-            ->orderByDesc("created_at")
+            ->orderByDesc('created_at')
             ->paginate(15)
             ->withQueryString();
 
@@ -65,7 +71,7 @@ class WorkOrderController
     protected function buildWorkOrderQuery(?string $status = null, ?string $subFilter = null): Builder
     {
         $query = WorkOrder::query()
-            ->with(["customer", "vehicle.make", "invoice"])
+            ->with(['customer', 'vehicle.make', 'invoice'])
             ->withCount('items');
 
         if ($status === 'open') {
@@ -92,37 +98,37 @@ class WorkOrderController
                     ->hasOutstandingBalance()
                     ->whereHas('invoice');
             } elseif ($subFilter === 'bad_debts') {
-                $query->whereHas('payments', fn($p) => $p->where('type', 'bad_debt'));
+                $query->whereHas('payments', fn ($p) => $p->where('type', 'bad_debt'));
             } elseif ($subFilter === 'cancelled') {
                 $query->where('status', WorkOrder::STATUS_CANCELLED);
             } elseif ($subFilter === 'closed') {
                 $query->where('status', WorkOrder::STATUS_DONE)
-                    ->whereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')');
+                    ->whereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')');
             } else {
                 $query->where('status', WorkOrder::STATUS_DONE)
-                    ->whereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')');
+                    ->whereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')');
             }
         }
 
-        if (request("search")) {
-            $search = request("search");
+        if (request('search')) {
+            $search = request('search');
             $query->where(function ($q) use ($search) {
-                $q->where("id", "like", "%{$search}%")
-                  ->orWhereHas("customer", fn($c) => $c->where("name", "like", "%{$search}%"))
-                  ->orWhereHas("vehicle", fn($v) => $v->where("plate_number", "like", "%{$search}%"));
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', "%{$search}%"))
+                    ->orWhereHas('vehicle', fn ($v) => $v->where('plate_number', 'like', "%{$search}%"));
             });
         }
 
-        if (request("date_from")) {
-            $query->whereDate('created_at', '>=', request("date_from"));
+        if (request('date_from')) {
+            $query->whereDate('created_at', '>=', request('date_from'));
         }
 
-        if (request("date_to")) {
-            $query->whereDate('created_at', '<=', request("date_to"));
+        if (request('date_to')) {
+            $query->whereDate('created_at', '<=', request('date_to'));
         }
 
-        if (request("customer_type")) {
-            $query->whereHas('customer', fn($c) => $c->where('type', request("customer_type")));
+        if (request('customer_type')) {
+            $query->whereHas('customer', fn ($c) => $c->where('type', request('customer_type')));
         }
 
         return $query;
@@ -134,26 +140,27 @@ class WorkOrderController
     protected function getStatsForStatuses(string $tabType): array
     {
         $baseQuery = WorkOrder::query();
+
         if ($tabType === 'open') {
             $baseQuery->where(function ($q) {
                 $q->whereIn('status', self::OPEN_STATUSES)
-                  ->orWhere(function ($sub) {
-                      $sub->where('status', WorkOrder::STATUS_DONE)
-                          ->hasOutstandingBalance()
-                          ->whereDoesntHave('invoice');
-                  });
+                    ->orWhere(function ($sub) {
+                        $sub->where('status', WorkOrder::STATUS_DONE)
+                            ->hasOutstandingBalance()
+                            ->whereDoesntHave('invoice');
+                    });
             });
         } else {
             $baseQuery->whereIn('status', self::CLOSED_STATUSES)
                 ->where(function ($q) {
                     $q->where('status', '!=', WorkOrder::STATUS_DONE)
-                      ->orWhere(function ($sub) {
-                          $sub->where('status', WorkOrder::STATUS_DONE)
-                              ->where(function ($sub2) {
-                                  $sub2->whereHas('invoice')
-                                       ->orWhereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')');
-                              });
-                      });
+                        ->orWhere(function ($sub) {
+                            $sub->where('status', WorkOrder::STATUS_DONE)
+                                ->where(function ($sub2) {
+                                    $sub2->whereHas('invoice')
+                                        ->orWhereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')');
+                                });
+                        });
                 });
         }
 
@@ -174,7 +181,8 @@ class WorkOrderController
 
         $unstoredItems = 0.0;
         $unstoredParts = 0.0;
-        if (!empty($unstoredIds)) {
+
+        if (! empty($unstoredIds)) {
             $unstoredItems = (float) DB::table('work_order_items')
                 ->whereIn('work_order_id', $unstoredIds)
                 ->sum(DB::raw('(unit_price * qty) - discount_amount'));
@@ -194,7 +202,7 @@ class WorkOrderController
 
         return [
             'count' => $count,
-            'balance' => round($totalRevenue - $totalPaid, 2)
+            'balance' => round($totalRevenue - $totalPaid, 2),
         ];
     }
 
@@ -203,12 +211,12 @@ class WorkOrderController
      */
     public function index(): Response
     {
-        $this->authorize("viewAny", WorkOrder::class);
+        $this->authorize('viewAny', WorkOrder::class);
 
-        $status = request("status");
-        $subFilter = request("sub_filter");
+        $status = request('status');
+        $subFilter = request('sub_filter');
 
-        $customers = Customer::select("id", "name", "phone")->get();
+        $customers = Customer::select('id', 'name', 'phone')->get();
         $makes = VehicleMake::ordered()->get();
         $colors = VehicleColor::active()->ordered()->get();
         $departments = Department::active()->ordered()->get();
@@ -223,6 +231,7 @@ class WorkOrderController
         ];
 
         $filterCounts = [];
+
         if ($status === 'open') {
             $filterCounts = [
                 'open' => WorkOrder::whereIn('status', self::ACTIVE_STATUSES)->count(),
@@ -240,20 +249,20 @@ class WorkOrderController
         } elseif ($status === 'closed') {
             $filterCounts = [
                 'closed' => WorkOrder::where('status', WorkOrder::STATUS_DONE)
-                    ->whereRaw('NOT (' . WorkOrder::outstandingBalanceSql() . ')')
+                    ->whereRaw('NOT ('.WorkOrder::outstandingBalanceSql().')')
                     ->count(),
                 'credit_invoices' => WorkOrder::where('status', WorkOrder::STATUS_DONE)
                     ->hasOutstandingBalance()
                     ->whereHas('invoice')
                     ->count(),
-                'bad_debts' => WorkOrder::whereHas('payments', fn($p) => $p->where('type', 'bad_debt'))->count(),
+                'bad_debts' => WorkOrder::whereHas('payments', fn ($p) => $p->where('type', 'bad_debt'))->count(),
                 'cancelled' => WorkOrder::where('status', WorkOrder::STATUS_CANCELLED)->count(),
             ];
         }
 
         if ($status) {
             $workOrders = $this->buildWorkOrderQuery($status, $subFilter)
-                ->orderByDesc("created_at")
+                ->orderByDesc('created_at')
                 ->paginate(15)
                 ->withQueryString();
 
@@ -264,18 +273,18 @@ class WorkOrderController
             $workOrders = null;
         }
 
-        return Inertia::render("WorkOrders/Index", [
-            "workOrders" => $workOrders,
-            "counts" => $counts,
-            "filterCounts" => $filterCounts,
-            "statusFilter" => $status,
-            "subFilter" => $subFilter,
-            "customers" => $customers,
-            "makes" => $makes,
-            "colors" => $colors,
-            "modelsByMake" => $modelsByMake,
-            "departments" => $departments,
-            "filters" => request()->only(["search", "date_from", "date_to", "status", "sub_filter"]),
+        return Inertia::render('WorkOrders/Index', [
+            'workOrders' => $workOrders,
+            'counts' => $counts,
+            'filterCounts' => $filterCounts,
+            'statusFilter' => $status,
+            'subFilter' => $subFilter,
+            'customers' => $customers,
+            'makes' => $makes,
+            'colors' => $colors,
+            'modelsByMake' => $modelsByMake,
+            'departments' => $departments,
+            'filters' => request()->only(['search', 'date_from', 'date_to', 'status', 'sub_filter']),
         ]);
     }
 
@@ -286,10 +295,10 @@ class WorkOrderController
     {
         $this->authorize('viewAny', WorkOrder::class);
 
-        $filename = 'work_orders_' . date('Y-m-d_His') . '.xlsx';
+        $filename = 'work_orders_'.date('Y-m-d_His').'.xlsx';
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\WorkOrdersExport(),
+        return Excel::download(
+            new WorkOrdersExport,
             $filename
         );
     }
@@ -306,6 +315,7 @@ class WorkOrderController
         if ($request->expectsJson()) {
             $workOrder->refresh();
             $workOrder->load('items');
+
             return response()->json($workOrder, 201);
         }
 
@@ -313,9 +323,9 @@ class WorkOrderController
         NotificationService::notifyOwner(
             tenantId: $request->user()->tenant_id,
             type: 'work_order.created',
-            title: 'أمر عمل جديد #' . ($workOrder->code ?? $workOrder->id),
-            body: 'تم إنشاء أمر عمل جديد' . ($workOrder->customer ? ' للعميل ' . $workOrder->customer->name : ''),
-            actionUrl: '/app/work-orders/' . $workOrder->id,
+            title: 'أمر عمل جديد #'.($workOrder->code ?? $workOrder->id),
+            body: 'تم إنشاء أمر عمل جديد'.($workOrder->customer ? ' للعميل '.$workOrder->customer->name : ''),
+            actionUrl: '/app/work-orders/'.$workOrder->id,
             actorId: $request->user()->id,
         );
 
@@ -332,26 +342,26 @@ class WorkOrderController
         $workOrder->load([
             'customer',
             'vehicle.make',
-            'items' => fn($q) => $q->withoutGlobalScope('center_scoped')->with([
-                'service' => fn($q) => $q->withoutGlobalScope('center_scoped')->with(['department' => fn($q) => $q->withoutGlobalScope('center_scoped')]),
+            'items' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with([
+                'service' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with(['department' => fn ($q) => $q->withoutGlobalScope('center_scoped')]),
                 'technicians.employee.jobTitle',
-                'parts' => fn($q) => $q->withoutGlobalScope('center_scoped')->with(['part', 'warehouse']),
+                'parts' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with(['part', 'warehouse']),
                 'itemNotes.user.roles',
             ]),
             'generalNotes.user.roles',
-            'generalNotes.workOrderItem.service.department' => fn($q) => $q->withoutGlobalScope('center_scoped'),
+            'generalNotes.workOrderItem.service.department' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
             'damageMarks',
             'photos',
-            'departments' => fn($q) => $q->withoutGlobalScope('center_scoped'),
-            'payments' => fn($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
-            'parts' => fn($q) => $q->withoutGlobalScope('center_scoped')->with([
-                'part' => fn($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
-                'workOrderItem.service'
+            'departments' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
+            'payments' => fn ($q) => $q->with('receivedBy')->orderByDesc('payment_date'),
+            'parts' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with([
+                'part' => fn ($q) => $q->withSum('inventoryBalances', 'qty_on_hand'),
+                'workOrderItem.service',
             ]),
             'attachments.user',
             'activities.user',
-            'inspections' => fn($q) => $q->withoutGlobalScope('center_scoped')->with('performedBy'),
-            'invoice' => fn($q) => $q->withoutGlobalScope('center_scoped'),
+            'inspections' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with('performedBy'),
+            'invoice' => fn ($q) => $q->withoutGlobalScope('center_scoped'),
         ]);
 
         // TODO(refactor): Move tab-specific relations to partial-reload endpoints.
@@ -360,6 +370,7 @@ class WorkOrderController
             if ($item->service?->type === Service::TYPE_PACKAGE) {
                 return 'packages';
             }
+
             return $item->department_id ?? $item->service?->department_id ?? 0;
         });
 
@@ -388,7 +399,7 @@ class WorkOrderController
             ->ordered()
             ->get();
 
-        $technicians = \App\Models\HR\Employee::where('center_id', $workOrder->center_id)
+        $technicians = Employee::where('center_id', $workOrder->center_id)
             ->whereNotNull('user_id')
             ->active()
             ->with(['jobTitle', 'user'])
@@ -471,4 +482,3 @@ class WorkOrderController
         return redirect()->route('work-orders.index')->with('success', __('messages.work_order_deleted'));
     }
 }
-

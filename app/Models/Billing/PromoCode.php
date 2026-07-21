@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models\Billing;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -119,6 +121,7 @@ class PromoCode extends Model
     {
         $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $code = '';
+
         for ($i = 0; $i < $length; $i++) {
             $code .= $characters[random_int(0, strlen($characters) - 1)];
         }

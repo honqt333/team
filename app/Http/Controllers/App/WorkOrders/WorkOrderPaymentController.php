@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\WorkOrders;
 
 use App\Models\Payment;
@@ -19,8 +21,8 @@ class WorkOrderPaymentController
         $this->authorize('update', $workOrder);
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:' . implode(',', Payment::METHODS),
-            'type' => 'required|in:' . implode(',', Payment::TYPES),
+            'payment_method' => 'required|in:'.implode(',', Payment::METHODS),
+            'type' => 'required|in:'.implode(',', Payment::TYPES),
             'amount' => 'required|numeric|min:0.01',
             'payment_date' => 'required|date',
             'reference' => 'nullable|string|max:255',
@@ -34,16 +36,16 @@ class WorkOrderPaymentController
         $linkedInvoiceId = $workOrder->invoice?->id;
 
         $workOrder->payments()->create([
-            'tenant_id'      => $workOrder->tenant_id,
-            'center_id'      => $workOrder->center_id,
-            'invoice_id'     => $linkedInvoiceId,
-            'type'           => $validated['type'],
+            'tenant_id' => $workOrder->tenant_id,
+            'center_id' => $workOrder->center_id,
+            'invoice_id' => $linkedInvoiceId,
+            'type' => $validated['type'],
             'payment_method' => $validated['payment_method'],
-            'amount'         => $validated['amount'],
-            'payment_date'   => $validated['payment_date'],
-            'reference'      => $validated['reference'] ?? null,
-            'notes'          => $validated['notes'] ?? null,
-            'received_by'    => auth()->id(),
+            'amount' => $validated['amount'],
+            'payment_date' => $validated['payment_date'],
+            'reference' => $validated['reference'] ?? null,
+            'notes' => $validated['notes'] ?? null,
+            'received_by' => auth()->id(),
         ]);
 
         if ($linkedInvoiceId) {
@@ -67,8 +69,8 @@ class WorkOrderPaymentController
         }
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:' . implode(',', Payment::METHODS),
-            'type' => 'required|in:' . implode(',', Payment::TYPES),
+            'payment_method' => 'required|in:'.implode(',', Payment::METHODS),
+            'type' => 'required|in:'.implode(',', Payment::TYPES),
             'amount' => 'required|numeric|min:0.01',
             'payment_date' => 'required|date',
             'reference' => 'nullable|string|max:255',

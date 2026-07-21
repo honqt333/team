@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Models\Concerns\CenterScoped;
+use App\Support\TenancyContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -37,6 +40,7 @@ class VehicleModel extends Model
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
+
         return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
     }
 
@@ -95,19 +99,19 @@ class VehicleModel extends Model
      */
     public function scopeVisibleToContext($query)
     {
-        $tenantId = \App\Support\TenancyContext::tenantId();
-        $centerId = \App\Support\TenancyContext::centerId();
+        $tenantId = TenancyContext::tenantId();
+        $centerId = TenancyContext::centerId();
 
         return $query->where(function ($q) use ($tenantId, $centerId) {
             $q->where('source', 'system');
-            
+
             if ($tenantId) {
                 $q->orWhere(function ($sub) use ($tenantId) {
                     $sub->where('source', 'tenant')
                         ->where('tenant_id', $tenantId);
                 });
             }
-            
+
             if ($tenantId && $centerId) {
                 $q->orWhere(function ($sub) use ($tenantId, $centerId) {
                     $sub->where('source', 'center')

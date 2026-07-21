@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
+use App\Models\Department;
 use Illuminate\Foundation\Http\FormRequest;
 
 class QuoteRequest extends FormRequest
@@ -33,11 +36,12 @@ class QuoteRequest extends FormRequest
                     if ($value === 'packages') {
                         return;
                     }
-                    $exists = \App\Models\Department::where('id', $value)->exists();
-                    if (!$exists) {
+                    $exists = Department::where('id', $value)->exists();
+
+                    if (! $exists) {
                         $fail(__('validation.exists', ['attribute' => $attribute]));
                     }
-                }
+                },
             ],
             'lines' => ['nullable', 'array'],
             'lines.*.service_id' => ['nullable', 'exists:services,id'],

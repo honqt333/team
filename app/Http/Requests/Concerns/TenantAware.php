@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\Concerns;
 
 trait TenantAware
@@ -28,6 +30,7 @@ trait TenantAware
     protected function centerExistsRule(string $table, string $column = 'id'): string
     {
         $centerId = $this->centerId() ?? 0;
+
         return "exists:{$table},{$column},tenant_id,{$this->tenantId()},center_id,{$centerId}";
     }
 }

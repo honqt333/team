@@ -1,14 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Payment\Gateways;
 
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class TapGateway implements PaymentGatewayInterface
 {
     protected array $config;
+
     protected string $baseUrl;
 
     public function __construct()
@@ -24,7 +28,7 @@ class TapGateway implements PaymentGatewayInterface
 
     public function isConfigured(): bool
     {
-        return !empty($this->config['secret_key']);
+        return ! empty($this->config['secret_key']);
     }
 
     /**
@@ -34,7 +38,7 @@ class TapGateway implements PaymentGatewayInterface
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['secret_key'],
+                'Authorization' => 'Bearer '.$this->config['secret_key'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/charges", [
                 'amount' => $data['amount'],
@@ -68,6 +72,7 @@ class TapGateway implements PaymentGatewayInterface
 
             if ($response->successful()) {
                 $result = $response->json();
+
                 return [
                     'success' => true,
                     'gateway' => 'tap',
@@ -81,8 +86,9 @@ class TapGateway implements PaymentGatewayInterface
                 'success' => false,
                 'message' => $response->json('errors.0.description') ?? 'Failed to initiate payment',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tap initiate failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -97,8 +103,8 @@ class TapGateway implements PaymentGatewayInterface
     {
         try {
             $chargeId = $data['tap_id'] ?? $data['id'] ?? null;
-            
-            if (!$chargeId) {
+
+            if (! $chargeId) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -107,8 +113,8 @@ class TapGateway implements PaymentGatewayInterface
             }
 
             $payment = $this->getPayment($chargeId);
-            
-            if (!$payment) {
+
+            if (! $payment) {
                 return [
                     'success' => false,
                     'status' => 'failed',
@@ -117,7 +123,7 @@ class TapGateway implements PaymentGatewayInterface
             }
 
             $status = $payment['status'] ?? 'failed';
-            
+
             return [
                 'success' => $status === 'CAPTURED',
                 'payment_id' => $chargeId,
@@ -128,8 +134,9 @@ class TapGateway implements PaymentGatewayInterface
                 'payment_method' => $payment['source']['payment_method'] ?? null,
                 'raw_response' => $payment,
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tap verification failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'status' => 'error',
@@ -145,7 +152,7 @@ class TapGateway implements PaymentGatewayInterface
     {
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['secret_key'],
+                'Authorization' => 'Bearer '.$this->config['secret_key'],
             ])->get("{$this->baseUrl}/charges/{$paymentId}");
 
             if ($response->successful()) {
@@ -153,8 +160,9 @@ class TapGateway implements PaymentGatewayInterface
             }
 
             return null;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tap getPayment exception', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -166,12 +174,13 @@ class TapGateway implements PaymentGatewayInterface
     {
         try {
             $payload = ['charge_id' => $paymentId];
+
             if ($amount !== null) {
                 $payload['amount'] = $amount;
             }
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->config['secret_key'],
+                'Authorization' => 'Bearer '.$this->config['secret_key'],
                 'Content-Type' => 'application/json',
             ])->post("{$this->baseUrl}/refunds", $payload);
 
@@ -187,8 +196,9 @@ class TapGateway implements PaymentGatewayInterface
                 'success' => false,
                 'message' => $response->json('errors.0.description') ?? 'Refund failed',
             ];
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Tap refund failed', ['error' => $e->getMessage()]);
+
             return [
                 'success' => false,
                 'message' => $e->getMessage(),

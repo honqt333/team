@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Policies;
 
 use App\Models\User;
@@ -20,7 +22,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        if (!$user->hasPermissionTo(Permissions::USERS_VIEW)) {
+        if (! $user->hasPermissionTo(Permissions::USERS_VIEW)) {
             return false;
         }
 
@@ -41,7 +43,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        if (!$user->hasPermissionTo(Permissions::USERS_UPDATE)) {
+        if (! $user->hasPermissionTo(Permissions::USERS_UPDATE)) {
             return false;
         }
 
@@ -54,7 +56,7 @@ class UserPolicy
      */
     public function delete(User $user, User $model): bool
     {
-        if (!$user->hasPermissionTo(Permissions::USERS_DELETE)) {
+        if (! $user->hasPermissionTo(Permissions::USERS_DELETE)) {
             return false;
         }
 

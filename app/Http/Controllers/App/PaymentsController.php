@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Services\PaymentService;
+use Exception;
 use Illuminate\Http\Request;
 
 class PaymentsController extends Controller
@@ -22,15 +25,16 @@ class PaymentsController extends Controller
         $this->authorize('update', $invoice);
 
         $validated = $request->validate([
-            'type' => 'nullable|in:' . implode(',', \App\Models\Payment::TYPES),
-            'amount' => 'required|numeric|min:0.01|max:' . $invoice->balance,
-            'payment_method' => 'required_unless:type,bad_debt|nullable|in:' . implode(',', \App\Models\Payment::METHODS),
+            'type' => 'nullable|in:'.implode(',', Payment::TYPES),
+            'amount' => 'required|numeric|min:0.01|max:'.$invoice->balance,
+            'payment_method' => 'required_unless:type,bad_debt|nullable|in:'.implode(',', Payment::METHODS),
             'payment_date' => 'nullable|date',
             'reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
         ]);
 
         $validated['type'] = $validated['type'] ?? 'payment';
+
         if ($validated['type'] === 'bad_debt') {
             $validated['payment_method'] = $validated['payment_method'] ?? 'cash';
         }
@@ -40,7 +44,7 @@ class PaymentsController extends Controller
             $this->paymentService->recordPayment($invoice, $validated);
 
             return back()->with('success', __('payments.recorded'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }
@@ -56,7 +60,7 @@ class PaymentsController extends Controller
             $this->paymentService->deletePayment($payment);
 
             return back()->with('success', __('payments.deleted'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }
@@ -69,7 +73,7 @@ class PaymentsController extends Controller
         $this->authorize('update', $invoice);
 
         $validated = $request->validate([
-            'payment_method' => 'required|in:' . implode(',', \App\Models\Payment::METHODS),
+            'payment_method' => 'required|in:'.implode(',', Payment::METHODS),
             'reference' => 'nullable|string|max:100',
         ]);
 
@@ -81,7 +85,7 @@ class PaymentsController extends Controller
             );
 
             return back()->with('success', __('payments.recorded'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }
     }

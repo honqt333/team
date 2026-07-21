@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
@@ -7,6 +9,7 @@ use App\Services\TwoFactorService;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,9 +30,9 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $tenant = $user->tenant;
-        
+
         $isEnabled = $user->two_factor_confirmed_at !== null;
-        
+
         return Inertia::render('App/Profile/Index', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
@@ -37,8 +40,8 @@ class ProfileController extends Controller
             'isEnforced' => $tenant?->two_factor_enforcement === 'required',
             'currentMethod' => $user->two_factor_type,
             'smsEnabled' => $this->twoFactor->isSmsEnabled($user),
-            'recoveryCodes' => $isEnabled && $user->two_factor_recovery_codes 
-                ? json_decode(decrypt($user->two_factor_recovery_codes), true) 
+            'recoveryCodes' => $isEnabled && $user->two_factor_recovery_codes
+                ? json_decode(decrypt($user->two_factor_recovery_codes), true)
                 : null,
         ]);
     }
@@ -50,7 +53,7 @@ class ProfileController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $request->user()->id],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,'.$request->user()->id],
         ]);
 
         $request->user()->fill($request->only(['name', 'email']));
@@ -71,7 +74,7 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->can_update_photo) {
+        if (! $user->can_update_photo) {
             return back()->with('error', 'لا يمكن تعديل الصورة الشخصية للموظفين الذين لديهم صورة في ملف الموارد البشرية');
         }
 
@@ -82,7 +85,7 @@ class ProfileController extends Controller
         if ($request->hasFile('photo')) {
             // Delete old photo if exists
             if ($user->photo_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->photo_path);
+                Storage::disk('public')->delete($user->photo_path);
             }
 
             $path = $request->file('photo')->store('profile-photos', 'public');

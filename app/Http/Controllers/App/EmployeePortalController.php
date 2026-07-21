@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\HR\Attendance;
 use App\Models\HR\Employee;
 use App\Models\HR\Leave;
-use App\Models\HR\Attendance;
 use App\Models\HR\PayrollItem;
 use App\Support\TenancyContext;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Carbon\Carbon;
 
 class EmployeePortalController extends Controller
 {
@@ -20,11 +22,11 @@ class EmployeePortalController extends Controller
     protected function getEmployee()
     {
         $user = auth()->user();
-        
-        if (!$user->employee) {
+
+        if (! $user->employee) {
             abort(403, __('messages.no_employee_linked'));
         }
-        
+
         return $user->employee;
     }
 
@@ -34,15 +36,15 @@ class EmployeePortalController extends Controller
     public function dashboard()
     {
         $this->authorize('viewOwn', Employee::class);
-        
+
         $employee = $this->getEmployee();
         $employee->load(['jobTitle', 'department', 'center', 'defaultShift']);
-        
+
         // Current month stats
         $now = Carbon::now();
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
-        
+
         // Attendance summary
         $attendanceStats = Attendance::where('employee_id', $employee->id)
             ->whereBetween('date', [$startOfMonth, $endOfMonth])
@@ -54,25 +56,25 @@ class EmployeePortalController extends Controller
                 SUM(TIMESTAMPDIFF(MINUTE, check_in, check_out)) as total_minutes
             ')
             ->first();
-        
+
         // Leave balance (simplified - would need proper leave balance calculation)
         $usedLeaves = Leave::where('employee_id', $employee->id)
             ->whereYear('start_date', $now->year)
             ->where('status', 'approved')
             ->sum('days');
-        
+
         // Pending leave requests
         $pendingLeaves = Leave::where('employee_id', $employee->id)
             ->where('status', 'pending')
             ->count();
-        
+
         // Recent payslips
         $recentPayslips = PayrollItem::where('employee_id', $employee->id)
             ->with('payrollRun:id,name,period_start,period_end')
             ->orderByDesc('created_at')
             ->take(3)
             ->get();
-        
+
         return Inertia::render('EmployeePortal/Dashboard', [
             'employee' => $employee,
             'stats' => [
@@ -98,17 +100,17 @@ class EmployeePortalController extends Controller
     public function profile()
     {
         $this->authorize('viewOwn', Employee::class);
-        
+
         $employee = $this->getEmployee();
         $employee->load([
-            'jobTitle', 
-            'employeeType', 
-            'department', 
-            'nationality', 
+            'jobTitle',
+            'employeeType',
+            'department',
+            'nationality',
             'center',
             'defaultShift',
         ]);
-        
+
         return Inertia::render('EmployeePortal/Profile', [
             'employee' => $employee,
         ]);
@@ -120,20 +122,20 @@ class EmployeePortalController extends Controller
     public function attendance(Request $request)
     {
         $this->authorize('viewOwn', Employee::class);
-        
+
         $employee = $this->getEmployee();
-        
+
         // Default to current month
         $month = $request->get('month', Carbon::now()->format('Y-m'));
         $startDate = Carbon::parse($month)->startOfMonth();
         $endDate = Carbon::parse($month)->endOfMonth();
-        
+
         $attendance = Attendance::where('employee_id', $employee->id)
             ->whereBetween('date', [$startDate, $endDate])
             ->with('shift:id,name_ar,name_en,start_time,end_time')
             ->orderBy('date')
             ->get();
-        
+
         // Calculate monthly summary
         $summary = [
             'present' => $attendance->where('status', 'present')->count(),
@@ -144,10 +146,11 @@ class EmployeePortalController extends Controller
                 if ($a->check_in && $a->check_out) {
                     return Carbon::parse($a->check_out)->diffInMinutes(Carbon::parse($a->check_in)) / 60;
                 }
+
                 return 0;
             }), 1),
         ];
-        
+
         return Inertia::render('EmployeePortal/Attendance', [
             'attendance' => $attendance,
             'summary' => $summary,
@@ -162,14 +165,14 @@ class EmployeePortalController extends Controller
     public function leaves(Request $request)
     {
         $this->authorize('viewOwn', Employee::class);
-        
+
         $employee = $this->getEmployee();
-        
+
         $leaves = Leave::where('employee_id', $employee->id)
             ->with(['approvedBy:id,name'])
             ->orderByDesc('created_at')
             ->paginate(10);
-        
+
         // Leave balance by type (simplified)
         $usedByType = Leave::where('employee_id', $employee->id)
             ->whereYear('start_date', Carbon::now()->year)
@@ -177,7 +180,7 @@ class EmployeePortalController extends Controller
             ->selectRaw('type, SUM(days) as used_days')
             ->groupBy('type')
             ->pluck('used_days', 'type');
-        
+
         return Inertia::render('EmployeePortal/Leaves', [
             'leaves' => $leaves,
             'usedByType' => $usedByType,
@@ -191,21 +194,21 @@ class EmployeePortalController extends Controller
     public function requestLeave(Request $request)
     {
         $this->authorize('createOwn', Leave::class);
-        
+
         $employee = $this->getEmployee();
-        
+
         $validated = $request->validate([
             'type' => 'required|string|in:annual,sick,unpaid,emergency,maternity,paternity,other',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'nullable|string|max:500',
         ]);
-        
+
         // Calculate days
         $startDate = Carbon::parse($validated['start_date']);
         $endDate = Carbon::parse($validated['end_date']);
         $days = $startDate->diffInDays($endDate) + 1;
-        
+
         Leave::create([
             'tenant_id' => TenancyContext::tenantId(),
             'employee_id' => $employee->id,
@@ -217,7 +220,7 @@ class EmployeePortalController extends Controller
             'status' => 'pending',
             'requested_by' => auth()->id(),
         ]);
-        
+
         return back()->with('success', __('hr.leaves.request_submitted'));
     }
 
@@ -227,14 +230,14 @@ class EmployeePortalController extends Controller
     public function payslips(Request $request)
     {
         $this->authorize('viewOwn', Employee::class);
-        
+
         $employee = $this->getEmployee();
-        
+
         $payslips = PayrollItem::where('employee_id', $employee->id)
             ->with(['payrollRun:id,name,period_start,period_end,status'])
             ->orderByDesc('created_at')
             ->paginate(12);
-        
+
         return Inertia::render('EmployeePortal/Payslips', [
             'payslips' => $payslips,
             'employee' => $employee->only(['id', 'name_ar', 'name_en', 'base_salary']),
@@ -247,16 +250,16 @@ class EmployeePortalController extends Controller
     public function showPayslip(PayrollItem $payslip)
     {
         $this->authorize('viewOwn', Employee::class);
-        
+
         $employee = $this->getEmployee();
-        
+
         // Ensure this payslip belongs to the employee
         if ($payslip->employee_id !== $employee->id) {
             abort(403);
         }
-        
+
         $payslip->load(['payrollRun', 'employee.jobTitle', 'employee.department']);
-        
+
         return Inertia::render('EmployeePortal/PayslipShow', [
             'payslip' => $payslip,
         ]);

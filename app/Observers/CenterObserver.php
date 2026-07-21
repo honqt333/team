@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Observers;
 
 use App\Models\Center;
@@ -29,6 +31,7 @@ class CenterObserver
     {
         if ($center->wasChanged(['name', 'name_ar', 'name_en'])) {
             $default = $center->warehouses()->where('is_default', true)->first();
+
             if ($default) {
                 $default->update([
                     'name' => $this->resolveWarehouseName($center),
@@ -44,6 +47,7 @@ class CenterObserver
     public function ensureDefaultWarehouse(Center $center): Warehouse
     {
         $existing = $center->warehouses()->where('is_default', true)->first();
+
         if ($existing) {
             return $existing;
         }

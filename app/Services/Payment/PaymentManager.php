@@ -1,12 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services\Payment;
 
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
 use App\Services\Payment\Gateways\MoyasarGateway;
-use App\Services\Payment\Gateways\TapGateway;
 use App\Services\Payment\Gateways\TabbyGateway;
 use App\Services\Payment\Gateways\TamaraGateway;
+use App\Services\Payment\Gateways\TapGateway;
+use Exception;
 use InvalidArgumentException;
 
 class PaymentManager
@@ -23,7 +26,7 @@ class PaymentManager
     {
         $name = $name ?? config('payment.default');
 
-        if (!isset($this->gateways[$name])) {
+        if (! isset($this->gateways[$name])) {
             $this->gateways[$name] = $this->resolveGateway($name);
         }
 
@@ -36,10 +39,10 @@ class PaymentManager
     protected function resolveGateway(string $name): PaymentGatewayInterface
     {
         return match ($name) {
-            'moyasar' => new MoyasarGateway(),
-            'tap' => new TapGateway(),
-            'tabby' => new TabbyGateway(),
-            'tamara' => new TamaraGateway(),
+            'moyasar' => new MoyasarGateway,
+            'tap' => new TapGateway,
+            'tabby' => new TabbyGateway,
+            'tamara' => new TamaraGateway,
             default => throw new InvalidArgumentException("Payment gateway [{$name}] is not supported."),
         };
     }
@@ -50,17 +53,18 @@ class PaymentManager
     public function getAvailableGateways(): array
     {
         $available = [];
-        
+
         foreach (['moyasar', 'tap', 'tabby', 'tamara'] as $name) {
             try {
                 $gateway = $this->gateway($name);
+
                 if ($gateway->isConfigured()) {
                     $available[$name] = [
                         'name' => $name,
                         'configured' => true,
                     ];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // Gateway not available
             }
         }

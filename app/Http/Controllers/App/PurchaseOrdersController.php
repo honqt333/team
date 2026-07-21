@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
-use App\Models\Part;
+use App\Models\InventoryUnit;
 use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\Warehouse;
@@ -29,10 +31,10 @@ class PurchaseOrdersController extends Controller
             ->with(['supplier:id,name', 'warehouse:id,name'])
             ->when($request->input('search'), function ($q, $search) {
                 $q->where('code', 'like', "%{$search}%")
-                  ->orWhereHas('supplier', fn($sq) => $sq->where('name', 'like', "%{$search}%"));
+                    ->orWhereHas('supplier', fn ($sq) => $sq->where('name', 'like', "%{$search}%"));
             })
-            ->when($request->input('status'), fn($q, $status) => $q->ofStatus($status))
-            ->when($request->input('supplier_id'), fn($q, $id) => $q->where('supplier_id', $id))
+            ->when($request->input('status'), fn ($q, $status) => $q->ofStatus($status))
+            ->when($request->input('supplier_id'), fn ($q, $id) => $q->where('supplier_id', $id))
             ->orderBy('created_at', 'desc');
 
         $orders = $query->paginate(25)->withQueryString();
@@ -52,7 +54,7 @@ class PurchaseOrdersController extends Controller
             ],
             'defaultWarehouse' => Warehouse::forCenter($centerId)->default()->first(),
             'warehouses' => Warehouse::forCenter($centerId)->active()->get(['id', 'name']),
-            'units' => \App\Models\InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
+            'units' => InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
         ]);
     }
 
@@ -70,7 +72,7 @@ class PurchaseOrdersController extends Controller
             'suppliers' => $suppliers,
             'warehouses' => Warehouse::forCenter($user->current_center_id)->active()->get(['id', 'name']),
             'defaultWarehouse' => $warehouse,
-            'units' => \App\Models\InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
+            'units' => InventoryUnit::where('is_active', true)->get(['id', 'name_ar', 'name_en']),
         ]);
     }
 
@@ -104,7 +106,8 @@ class PurchaseOrdersController extends Controller
         // Append payment info to notes if present
         if ($request->has('payments') && count($request->input('payments')) > 0) {
             $paymentInfo = "\n\n--- Start Payment Details ---\n";
-            $paymentInfo .= "Payment Type: " . ucfirst($request->input('payment_type', 'unknown')) . "\n";
+            $paymentInfo .= 'Payment Type: '.ucfirst($request->input('payment_type', 'unknown'))."\n";
+
             foreach ($request->input('payments') as $payment) {
                 $paymentInfo .= sprintf(
                     "- Method: %s, Amount: %s, Date: %s, Notes: %s\n",
@@ -114,11 +117,11 @@ class PurchaseOrdersController extends Controller
                     $payment['notes'] ?? ''
                 );
             }
-            $paymentInfo .= "--- End Payment Details ---";
-            
-            $validated['notes'] = ($validated['notes'] ?? '') . $paymentInfo;
-        } else if ($request->input('payment_type') === 'deferred') {
-             $validated['notes'] = ($validated['notes'] ?? '') . "\n\n[Marked as Deferred/Credit]";
+            $paymentInfo .= '--- End Payment Details ---';
+
+            $validated['notes'] = ($validated['notes'] ?? '').$paymentInfo;
+        } elseif ($request->input('payment_type') === 'deferred') {
+            $validated['notes'] = ($validated['notes'] ?? '')."\n\n[Marked as Deferred/Credit]";
         }
 
         $order = $this->purchasingService->createPurchaseOrder($validated);
@@ -148,7 +151,7 @@ class PurchaseOrdersController extends Controller
     {
         $this->authorize('update', $purchaseOrder);
 
-        if (!$purchaseOrder->isDraft()) {
+        if (! $purchaseOrder->isDraft()) {
             return back()->with('error', __('purchasing.orders.cannot_modify_sent'));
         }
 

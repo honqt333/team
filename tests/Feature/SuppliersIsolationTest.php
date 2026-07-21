@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\User;
+use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -23,7 +26,7 @@ class SuppliersIsolationTest extends TestCase
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Seed all permissions from the registry so that TenantSetupService role generation succeeds
-        $this->seed(\Database\Seeders\PermissionsSeeder::class);
+        $this->seed(PermissionsSeeder::class);
     }
 
     protected function createUserWithPermissions(array $permissions, ?Tenant $tenant = null, ?Center $center = null): User
@@ -79,7 +82,7 @@ class SuppliersIsolationTest extends TestCase
         // List suppliers and verify it appears
         $listResponse = $this->actingAs($user)->get('/app/purchasing/suppliers');
         $listResponse->assertStatus(200);
-        
+
         // Assert supplier is in the returned Inertia props
         $pageSuppliers = $listResponse->original->getData()['page']['props']['suppliers']['data'];
         $this->assertCount(1, $pageSuppliers);
@@ -134,7 +137,7 @@ class SuppliersIsolationTest extends TestCase
 
         // Route Model Binding fails due to CenterScoped global scope
         $response->assertStatus(404);
-        
+
         $this->assertDatabaseHas('suppliers', [
             'id' => $supplierB->id,
             'name' => 'Supplier Center B', // Name should not be updated

@@ -1,14 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
-use App\Mail\TwoFactorCodeMail;
 use App\Models\User;
 use App\Services\TwoFactorService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,14 +27,14 @@ class TwoFactorAuthenticatedSessionController extends Controller
     public function challenge(): Response
     {
         $userId = session('2fa:user_id');
-        
-        if (!$userId) {
+
+        if (! $userId) {
             abort(404); // Should redirect to login usually but Inertia handles redirects better in middleware
         }
-        
+
         // Check if code already sent recently (throttle)
-        if (!Cache::has('2fa_login_' . $userId)) {
-             $this->sendCode($userId);
+        if (! Cache::has('2fa_login_'.$userId)) {
+            $this->sendCode($userId);
         }
 
         return Inertia::render('App/Security/TwoFactorChallenge');
@@ -47,12 +47,12 @@ class TwoFactorAuthenticatedSessionController extends Controller
     {
         $userId = session('2fa:user_id');
 
-        if (!$userId) {
+        if (! $userId) {
             return redirect()->route('login');
         }
 
         $this->sendCode($userId);
-        
+
         // Determine message based on user preference
         $user = User::find($userId);
         $method = ($user && $user->two_factor_type === 'sms' && $this->twoFactor->isSmsEnabled()) ? 'الرسائل النصية' : 'بريدك الإلكتروني';
@@ -66,6 +66,7 @@ class TwoFactorAuthenticatedSessionController extends Controller
     protected function sendCode($userId)
     {
         $user = User::find($userId);
+
         if ($user) {
             $this->twoFactor->sendCode($user);
         }
@@ -82,43 +83,43 @@ class TwoFactorAuthenticatedSessionController extends Controller
         ]);
 
         $userId = session('2fa:user_id');
-        
-        if (!$userId) {
+
+        if (! $userId) {
             return redirect()->route('login');
         }
 
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 
         // Verify OTP code
         if ($request->code) {
-            $cachedCode = Cache::get('2fa_login_' . $userId);
+            $cachedCode = Cache::get('2fa_login_'.$userId);
 
             // Check how to verify (SMS vs Email)
             $isSms = $user->two_factor_type === 'sms' && $this->twoFactor->isSmsEnabled();
 
             if ($isSms) {
                 // Verify via Authentica
-                if (!$this->twoFactor->verifySmsCode($user, $request->code)) {
-                     return back()->withErrors(['code' => 'رمز التحقق غير صحيح']);
+                if (! $this->twoFactor->verifySmsCode($user, $request->code)) {
+                    return back()->withErrors(['code' => 'رمز التحقق غير صحيح']);
                 }
             } else {
                 // Verify via Cache (Email)
-                if (!$cachedCode || $cachedCode !== $request->code) {
+                if (! $cachedCode || $cachedCode !== $request->code) {
                     return back()->withErrors(['code' => 'رمز التحقق غير صحيح أو منتهي الصلاحية']);
                 }
             }
-            
-            Cache::forget('2fa_login_' . $userId);
-        } 
+
+            Cache::forget('2fa_login_'.$userId);
+        }
         // Verify recovery code
         elseif ($request->recovery_code) {
             $recoveryCodes = json_decode(decrypt($user->two_factor_recovery_codes), true);
-            
-            if (!$this->twoFactor->verifyRecoveryCode($request->recovery_code, $recoveryCodes)) {
+
+            if (! $this->twoFactor->verifyRecoveryCode($request->recovery_code, $recoveryCodes)) {
                 return back()->withErrors(['recovery_code' => 'رمز الاسترداد غير صحيح']);
             }
 

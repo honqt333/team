@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
 use App\Models\Center;
+use App\Models\Part;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceLine;
@@ -11,7 +14,7 @@ use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\Warehouse;
-use App\Models\Part;
+use Database\Seeders\PermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\PermissionRegistrar;
@@ -26,7 +29,7 @@ class PurchaseDebitNoteTest extends TestCase
         parent::setUp();
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->seed(\Database\Seeders\PermissionsSeeder::class);
+        $this->seed(PermissionsSeeder::class);
     }
 
     /**
@@ -67,38 +70,38 @@ class PurchaseDebitNoteTest extends TestCase
     protected function makePaidInvoice(Supplier $supplier, Part $part, Warehouse $warehouse, Center $center, Tenant $tenant, float $total = 1000.0, ?string $code = null): PurchaseInvoice
     {
         $invoice = PurchaseInvoice::create([
-            'tenant_id'      => $tenant->id,
-            'center_id'      => $center->id,
-            'supplier_id'    => $supplier->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'supplier_id' => $supplier->id,
             'invoice_number' => 'INV-001',
-            'code'           => $code ?? PurchaseInvoice::generateCode($tenant->id),
-            'issue_date'     => now()->toDateString(),
-            'status'         => PurchaseInvoice::STATUS_PAID,
-            'subtotal'       => $total,
-            'tax_amount'     => 0,
-            'total'          => $total,
-            'balance'        => 0,
+            'code' => $code ?? PurchaseInvoice::generateCode($tenant->id),
+            'issue_date' => now()->toDateString(),
+            'status' => PurchaseInvoice::STATUS_PAID,
+            'subtotal' => $total,
+            'tax_amount' => 0,
+            'total' => $total,
+            'balance' => 0,
         ]);
         PurchaseInvoiceLine::create([
             'purchase_invoice_id' => $invoice->id,
-            'part_id'             => $part->id,
-            'qty'                 => 10,
-            'unit_cost'           => $total / 10,
-            'tax_rate'            => 0,
-            'tax_amount'          => 0,
-            'total'               => $total,
+            'part_id' => $part->id,
+            'qty' => 10,
+            'unit_cost' => $total / 10,
+            'tax_rate' => 0,
+            'tax_amount' => 0,
+            'total' => $total,
         ]);
 
         // Mark as paid
         Payment::create([
-            'tenant_id'           => $tenant->id,
-            'center_id'           => $center->id,
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
             'purchase_invoice_id' => $invoice->id,
-            'amount'              => $total,
-            'payment_date'        => now(),
-            'payment_method'      => 'cash',
-            'received_by'         => null,
-            'type'                => Payment::TYPE_PAYMENT,
+            'amount' => $total,
+            'payment_date' => now(),
+            'payment_method' => 'cash',
+            'received_by' => null,
+            'type' => Payment::TYPE_PAYMENT,
         ]);
 
         return $invoice;
@@ -127,16 +130,16 @@ class PurchaseDebitNoteTest extends TestCase
         // any Payment row at all. The bookkeeping note lives on the
         // PurchaseReturnInvoice itself.
         PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoice->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 1000,
-            'tax_amount'         => 0,
-            'total'              => 1000,
-            'create_debit_note'  => true,
-            'debit_note_date'    => now()->toDateString(),
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 1000,
+            'tax_amount' => 0,
+            'total' => 1000,
+            'create_debit_note' => true,
+            'debit_note_date' => now()->toDateString(),
         ]);
 
         // CRITICAL: the payments count for this invoice MUST stay at 1.
@@ -218,16 +221,16 @@ class PurchaseDebitNoteTest extends TestCase
         // does: $invoice->update(['balance' => max(0, $balance - $total)])
         // → max(0, 0 - 300) = 0 (still 0, because we overpaid).
         $return = PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoice->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 300,
-            'tax_amount'         => 0,
-            'total'              => 300,
-            'create_debit_note'  => true,
-            'debit_note_date'    => now()->toDateString(),
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 300,
+            'tax_amount' => 0,
+            'total' => 300,
+            'create_debit_note' => true,
+            'debit_note_date' => now()->toDateString(),
         ]);
         $invoice->update(['balance' => max(0, $invoice->balance - $return->total)]);
 
@@ -254,16 +257,16 @@ class PurchaseDebitNoteTest extends TestCase
         );
 
         $return = PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoice->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 300,
-            'tax_amount'         => 0,
-            'total'              => 300,
-            'create_debit_note'  => true,
-            'debit_note_date'    => now()->toDateString(),
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 300,
+            'tax_amount' => 0,
+            'total' => 300,
+            'create_debit_note' => true,
+            'debit_note_date' => now()->toDateString(),
         ]);
         $invoice->update(['balance' => max(0, $invoice->balance - $return->total)]);
 
@@ -273,13 +276,13 @@ class PurchaseDebitNoteTest extends TestCase
         // The supplier returned 100 in actual cash. Record it as a
         // TYPE_REFUND Payment (real cash movement).
         Payment::create([
-            'tenant_id'           => $invoice->tenant_id,
-            'center_id'           => $invoice->center_id,
+            'tenant_id' => $invoice->tenant_id,
+            'center_id' => $invoice->center_id,
             'purchase_invoice_id' => $invoice->id,
-            'amount'              => 100,
-            'payment_date'        => now(),
-            'payment_method'      => 'cash',
-            'type'                => Payment::TYPE_REFUND,
+            'amount' => 100,
+            'payment_date' => now(),
+            'payment_method' => 'cash',
+            'type' => Payment::TYPE_REFUND,
         ]);
 
         // Credit drops from 300 to 200.
@@ -298,26 +301,26 @@ class PurchaseDebitNoteTest extends TestCase
 
         // Unpaid invoice: 1000 total, no payments.
         $invoice = PurchaseInvoice::create([
-            'tenant_id'      => $ctx['tenant']->id,
-            'center_id'      => $ctx['center']->id,
-            'supplier_id'    => $supplier->id,
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'supplier_id' => $supplier->id,
             'invoice_number' => 'INV-002',
-            'code'           => PurchaseInvoice::generateCode($ctx['tenant']->id),
-            'issue_date'     => now()->toDateString(),
-            'status'         => PurchaseInvoice::STATUS_OPEN,
-            'subtotal'       => 1000,
-            'tax_amount'     => 0,
-            'total'          => 1000,
-            'balance'        => 1000,
+            'code' => PurchaseInvoice::generateCode($ctx['tenant']->id),
+            'issue_date' => now()->toDateString(),
+            'status' => PurchaseInvoice::STATUS_OPEN,
+            'subtotal' => 1000,
+            'tax_amount' => 0,
+            'total' => 1000,
+            'balance' => 1000,
         ]);
         PurchaseInvoiceLine::create([
             'purchase_invoice_id' => $invoice->id,
-            'part_id'             => $ctx['part']->id,
-            'qty'                 => 10,
-            'unit_cost'           => 100,
-            'tax_rate'            => 0,
-            'tax_amount'          => 0,
-            'total'               => 1000,
+            'part_id' => $ctx['part']->id,
+            'qty' => 10,
+            'unit_cost' => 100,
+            'tax_rate' => 0,
+            'tax_amount' => 0,
+            'total' => 1000,
         ]);
 
         $this->assertEquals(1000.0, (float) $supplier->fresh()->calculateBalance());
@@ -325,15 +328,15 @@ class PurchaseDebitNoteTest extends TestCase
         // Return 300 with NO debit note. The controller reduces the
         // invoice balance by 300.
         $return = PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoice->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 300,
-            'tax_amount'         => 0,
-            'total'              => 300,
-            'create_debit_note'  => false,
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 300,
+            'tax_amount' => 0,
+            'total' => 300,
+            'create_debit_note' => false,
         ]);
         $invoice->update(['balance' => max(0, $invoice->balance - $return->total)]);
 
@@ -359,16 +362,16 @@ class PurchaseDebitNoteTest extends TestCase
         // A return with debit-note flag set; invoice balance reduced
         // by the return total. NO payment rows are touched.
         $return = PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoice->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 1000,
-            'tax_amount'         => 0,
-            'total'              => 1000,
-            'create_debit_note'  => true,
-            'debit_note_date'    => now()->toDateString(),
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 1000,
+            'tax_amount' => 0,
+            'total' => 1000,
+            'create_debit_note' => true,
+            'debit_note_date' => now()->toDateString(),
         ]);
         $invoice->update(['balance' => max(0, $invoice->balance - $return->total)]);
 
@@ -401,27 +404,27 @@ class PurchaseDebitNoteTest extends TestCase
         );
 
         $return = PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoice->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 1000,
-            'tax_amount'         => 0,
-            'total'              => 1000,
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoice->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 1000,
+            'tax_amount' => 0,
+            'total' => 1000,
         ]);
 
         // The user actually returned 300 in real cash to the supplier.
         // recordReturnRefund creates a TYPE_REFUND Payment.
         Payment::create([
-            'tenant_id'           => $invoice->tenant_id,
-            'center_id'           => $invoice->center_id,
+            'tenant_id' => $invoice->tenant_id,
+            'center_id' => $invoice->center_id,
             'purchase_invoice_id' => $invoice->id,
-            'amount'              => 300,
-            'payment_date'        => now(),
-            'payment_method'      => 'cash',
-            'type'                => Payment::TYPE_REFUND,
-            'notes'               => 'Refund for return invoice: ' . $return->code,
+            'amount' => 300,
+            'payment_date' => now(),
+            'payment_method' => 'cash',
+            'type' => Payment::TYPE_REFUND,
+            'notes' => 'Refund for return invoice: '.$return->code,
         ]);
 
         // Now there should be exactly 2 payments: the original payment
@@ -446,25 +449,25 @@ class PurchaseDebitNoteTest extends TestCase
         );
 
         PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoiceA->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 400,
-            'tax_amount'         => 0,
-            'total'              => 400,
-            'create_debit_note'  => true,
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoiceA->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 400,
+            'tax_amount' => 0,
+            'total' => 400,
+            'create_debit_note' => true,
         ]);
         PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctx['tenant']->id,
-            'center_id'          => $ctx['center']->id,
-            'purchase_invoice_id'=> $invoiceB->id,
-            'code'               => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 600,
-            'tax_amount'         => 0,
-            'total'              => 600,
+            'tenant_id' => $ctx['tenant']->id,
+            'center_id' => $ctx['center']->id,
+            'purchase_invoice_id' => $invoiceB->id,
+            'code' => PurchaseReturnInvoice::generateCode($ctx['tenant']->id),
+            'return_date' => now()->toDateString(),
+            'subtotal' => 600,
+            'tax_amount' => 0,
+            'total' => 600,
         ]);
 
         $returnInvoices = $supplier->returnInvoices;
@@ -490,24 +493,24 @@ class PurchaseDebitNoteTest extends TestCase
         );
 
         PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctxA['tenant']->id,
-            'center_id'          => $ctxA['center']->id,
-            'purchase_invoice_id'=> $invoiceA->id,
-            'code'               => 'PRET-A-0001',
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 200,
-            'tax_amount'         => 0,
-            'total'              => 200,
+            'tenant_id' => $ctxA['tenant']->id,
+            'center_id' => $ctxA['center']->id,
+            'purchase_invoice_id' => $invoiceA->id,
+            'code' => 'PRET-A-0001',
+            'return_date' => now()->toDateString(),
+            'subtotal' => 200,
+            'tax_amount' => 0,
+            'total' => 200,
         ]);
         PurchaseReturnInvoice::create([
-            'tenant_id'          => $ctxB['tenant']->id,
-            'center_id'          => $ctxB['center']->id,
-            'purchase_invoice_id'=> $invoiceB->id,
-            'code'               => 'PRET-B-0001',
-            'return_date'        => now()->toDateString(),
-            'subtotal'           => 300,
-            'tax_amount'         => 0,
-            'total'              => 300,
+            'tenant_id' => $ctxB['tenant']->id,
+            'center_id' => $ctxB['center']->id,
+            'purchase_invoice_id' => $invoiceB->id,
+            'code' => 'PRET-B-0001',
+            'return_date' => now()->toDateString(),
+            'subtotal' => 300,
+            'tax_amount' => 0,
+            'total' => 300,
         ]);
 
         $this->assertCount(1, $ctxA['supplier']->refresh()->returnInvoices);

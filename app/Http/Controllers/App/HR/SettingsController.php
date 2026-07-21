@@ -1,20 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\App\HR;
 
 use App\Http\Controllers\Controller;
-use App\Models\Department;
 use App\Models\Center;
+use App\Models\Department;
 use App\Models\HR\Allowance;
 use App\Models\HR\AttendanceSettings;
 use App\Models\HR\BiometricDevice;
 use App\Models\HR\Deduction;
 use App\Models\HR\EmployeeType;
+use App\Models\HR\HRRegulation;
 use App\Models\HR\JobTitle;
+use App\Models\HR\Shift;
 use App\Support\TenancyContext;
 use Illuminate\Http\Request;
-use App\Models\HR\Shift;
-use App\Models\HR\HRRegulation;
 use Inertia\Inertia;
 
 class SettingsController extends Controller
@@ -107,6 +109,7 @@ class SettingsController extends Controller
     public function destroyEmployeeType(EmployeeType $employeeType)
     {
         $employeeType->delete();
+
         return back()->with('success', __('messages.deleted_successfully'));
     }
 
@@ -152,6 +155,7 @@ class SettingsController extends Controller
     public function destroyJobTitle(JobTitle $jobTitle)
     {
         $jobTitle->delete();
+
         return back()->with('success', __('messages.deleted_successfully'));
     }
 
@@ -162,7 +166,7 @@ class SettingsController extends Controller
     public function updateAttendanceSettings(Request $request)
     {
         $centerId = TenancyContext::centerId();
-        
+
         $validated = $request->validate([
             'grace_period_minutes' => 'required|integer|min:0|max:60',
             'late_deduction_per_minute' => 'required|numeric|min:0',
