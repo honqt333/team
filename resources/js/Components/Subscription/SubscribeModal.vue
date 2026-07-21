@@ -4,6 +4,7 @@ import { router } from '@inertiajs/vue3';
 import PaymentMethodSelector from './PaymentMethodSelector.vue';
 import PromoCodeInput from './PromoCodeInput.vue';
 import BankTransferReceiptUpload from './BankTransferReceiptUpload.vue';
+import MoyasarPaymentForm from './MoyasarPaymentForm.vue';
 
 const props = defineProps({
     open: { type: Boolean, default: false },
@@ -28,6 +29,8 @@ const loading = ref(false);
 const error = ref(null);
 const success = ref(null);
 const bankTransferResult = ref(null);
+const gatewayFormData = ref(null); // for client-side forms (Moyasar)
+const currentPaymentId = ref(null); // for post-redirect success page
 
 watch(
     () => props.open,
@@ -40,6 +43,9 @@ watch(
             pricing.value = null;
             error.value = null;
             success.value = null;
+            bankTransferResult.value = null;
+            gatewayFormData.value = null;
+            currentPaymentId.value = null;
             calculate();
         }
     }
@@ -114,25 +120,40 @@ async function subscribe() {
         // For online gateways: redirect to payment gateway form
         if (data.form_data) {
             const form = data.form_data;
+
+            // 1) Gateway returns a hosted payment URL (Tap, Tabby, Tamara)
             if (form.payment_url) {
-                // Redirect
                 window.location.href = form.payment_url;
-            } else if (form.form_html) {
-                // Inject and submit
+                return;
+            }
+
+            // 2) Gateway returns HTML form to inject and submit
+            if (form.form_html) {
                 const div = document.createElement('div');
                 div.innerHTML = form.form_html;
                 document.body.appendChild(div);
                 const formEl = div.querySelector('form');
                 if (formEl) formEl.submit();
-            } else {
-                success.value =
-                    data.message || (locale.value === 'ar' ? 'تم إرسال الطلب' : 'Submitted');
-                setTimeout(() => {
-                    emit('success', data);
-                    emit('close');
-                    router.reload();
-                }, 1500);
+                return;
             }
+
+            // 3) Gateway returns client-side form data (Moyasar)
+            //    Render the gateway's form inside the modal so the user
+            //    can complete payment without leaving the page.
+            if (form.gateway === 'moyasar' && form.publishable_key) {
+                gatewayFormData.value = form;
+                currentPaymentId.value = data.payment?.id || null;
+                return;
+            }
+
+            // 4) Fallback — at this point we have nothing to render.
+            //    This used to silently close the modal with "تم إرسال
+            //    الطلب" which was confusing. Show an explicit error so
+            //    the tenant knows the gateway didn't return usable data.
+            error.value =
+                locale.value === 'ar'
+                    ? 'لم نتمكن من تحضير نموذج الدفع. حاول مرة أخرى أو اختر وسيلة دفع أخرى.'
+                    : 'Could not prepare the payment form. Please try again or choose another payment method.';
         }
     } catch (e) {
         error.value = locale.value === 'ar' ? 'خطأ في إنشاء الاشتراك' : 'Subscription error';
@@ -144,6 +165,8 @@ async function subscribe() {
 function close() {
     if (loading.value) return;
     bankTransferResult.value = null;
+    gatewayFormData.value = null;
+    currentPaymentId.value = null;
     success.value = null;
     emit('close');
 }
@@ -158,6 +181,30 @@ function onReceiptUploaded() {
         emit('close');
         router.reload();
     }, 2500);
+}
+
+/**
+ * Handle a gateway client-side form completion event.
+ * For Moyasar, the form posts the card to Moyasar's servers and then
+ * redirects the browser to the callback_url we set in initiate(). The
+ * `on_completed` fires mainly for 3DS failures / cancellations, so we
+ * just close the modal here and let the redirect handle success.
+ */
+function onGatewayCompleted(payment) {
+    // The form's callback_url is the payment.callback route, so a successful
+    // 3DS + payment will redirect the browser to /app/settings/company/subscription/callback/{id}
+    // and render the SubscriptionSuccess page. Closing the modal here for
+    // cancelled/failed flows.
+    if (payment && payment.status === 'paid') {
+        // Browser will navigate away — nothing to do.
+        return;
+    }
+    // User cancelled or 3DS failed — close and let them try again.
+    gatewayFormData.value = null;
+}
+
+function cancelGatewayForm() {
+    gatewayFormData.value = null;
 }
 
 function onPromoApplied(data) {
@@ -257,6 +304,35 @@ const formatCurrency = (amount) => {
                         @success="onReceiptUploaded"
                         @close="emit('close')"
                     />
+                </div>
+
+                <!-- Gateway client-side form (Moyasar) -->
+                <div v-else-if="gatewayFormData" class="p-6">
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
+                            {{ locale === 'ar' ? 'أدخل بيانات البطاقة' : 'Enter card details' }}
+                        </h3>
+                        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            {{
+                                locale === 'ar'
+                                    ? 'سيتم تفعيل اشتراكك تلقائياً بعد إتمام الدفع'
+                                    : 'Your subscription will be activated automatically after payment'
+                            }}
+                        </p>
+                    </div>
+                    <MoyasarPaymentForm
+                        :form-data="gatewayFormData"
+                        @completed="onGatewayCompleted"
+                    />
+                    <div class="mt-4 text-center">
+                        <button
+                            type="button"
+                            class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                            @click="cancelGatewayForm"
+                        >
+                            {{ locale === 'ar' ? 'إلغاء والعودة' : 'Cancel and go back' }}
+                        </button>
+                    </div>
                 </div>
 
                 <div v-else-if="success" class="p-8 text-center">
