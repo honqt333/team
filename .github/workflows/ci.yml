@@ -37,7 +37,37 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Run Pint (lint check, no fixes)
-        run: php artisan pint --test
+        run: vendor/bin/pint --test --no-interaction
+
+  static-analysis:
+    name: Static Analysis (PHPStan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          tools: composer
+          coverage: none
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-php-8.3-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-php-8.3-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Run PHPStan (level 5, with baseline)
+        # The phpstan-baseline.neon file tracks pre-existing issues so we
+        # only fail on NEW problems introduced by this PR. Run
+        # `vendor/bin/phpstan analyse --generate-baseline` periodically
+        # to retire fixed issues from the baseline.
+        run: vendor/bin/phpstan analyse --memory-limit=512M --no-progress
 
   tenant-scope-check:
     name: Tenant Scope Check

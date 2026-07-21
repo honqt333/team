@@ -1,0 +1,4405 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\Customer and ''invoices'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Actions/Customer/MergeCustomerAction.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Actions/WorkOrder/CreateWorkOrderAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Actions/WorkOrder/UpdateWorkOrderAction.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed and null will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Actions/WorkOrder/UpdateWorkOrderAction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contact_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Exports/VehiclesExport.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Exports/VehiclesExport.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Exports/VehiclesExport.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Vehicle\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Exports/VehiclesExport.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$paid_amount\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Exports/WorkOrdersExport.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Exports/WorkOrdersExport.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plate_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Exports/WorkOrdersExport.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\WorkOrder\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Exports/WorkOrdersExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/WorkOrdersExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>plate_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/WorkOrdersExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/AiDemoController.php
+
+		-
+			message: '#^Property App\\Models\\HR\\Attendance\:\:\$check_in \(Carbon\\Carbon\|null\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 2
+			path: app/Http/Controllers/Api/HR/BiometricAttendanceController.php
+
+		-
+			message: '#^Property App\\Models\\HR\\Attendance\:\:\$check_out \(Carbon\\Carbon\|null\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 2
+			path: app/Http/Controllers/Api/HR/BiometricAttendanceController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Vehicle\:\:\$has_open_work_order\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/WorkOrderController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Vehicle\:\:\$open_work_order\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/WorkOrderController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>current_center_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/WorkOrderSuggestionController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/WorkOrderSuggestionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/BranchesController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:centers\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Http/Controllers/App/BranchesController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:subscriptions\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/BranchesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>limits" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/BranchesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$address_line\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$building_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$close_time\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$day_of_week\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$district\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_open\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$latitude\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$longitude\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$open_time\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$postal_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$street\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$taxSettings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:centers\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/CenterSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cr_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$iban\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$legal_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$legal_name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$logo_path\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$owner_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$taxSettings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trade_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trial_ends_at\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:centers\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:subscriptions\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Parameter \#3 \$tenant of method App\\Http\\Controllers\\App\\CompanyProfileController\:\:validateSection\(\) expects App\\Models\\Tenant, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>qr_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/CompanyProfileController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/CompanyTransactionController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/CompanyTransactionController.php
+
+		-
+			message: '#^Using nullsafe property access on non\-nullable type mixed\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/CompanyTransactionController.php
+
+		-
+			message: '#^Class App\\Exports\\CustomersExport does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Http/Controllers/App/CustomerImportExportController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\AdminUser\|App\\Models\\User\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/DashboardController.php
+
+		-
+			message: '#^Relation ''approvedBy'' is not found in App\\Models\\HR\\Leave model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/App/EmployeePortalController.php
+
+		-
+			message: '#^Relation ''shift'' is not found in App\\Models\\HR\\Attendance model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/App/EmployeePortalController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_ordered\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_pending\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_received\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/GoodsReceivedNotesController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HR\\Employee\:\:\$shift_end\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HR\\Employee\:\:\$shift_start\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$check_in\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$check_out\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$notes\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\HR\\Employee\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/App/HR/AttendanceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$roles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$shift_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:syncRoles\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/HR/EmployeeController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$permissions\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeePermissionsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$roles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeePermissionsController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:syncPermissions\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeePermissionsController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:syncRoles\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/EmployeePermissionsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>status" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/HR/HRController.php
+
+		-
+			message: '#^Strict comparison using \!\=\= between mixed~\(0\|0\.0\|''''\|''0''\|array\{\}\|false\|null\) and '''' will always evaluate to true\.$#'
+			identifier: notIdentical.alwaysTrue
+			count: 1
+			path: app/Http/Controllers/App/HR/OtherPaymentsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/HR/PayrollController.php
+
+		-
+			message: '#^Relation ''updatedBy'' is not found in App\\Models\\HR\\HRRegulation model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/App/HR/SettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/InventoryBalanceController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InventoryBalanceController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>qty_on_hand" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InventoryBalanceController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>wac_cost" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/InventoryBalanceController.php
+
+		-
+			message: '#^Dead catch \- Illuminate\\Database\\QueryException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
+			count: 2
+			path: app/Http/Controllers/App/InventorySettingsController.php
+
+		-
+			message: '#^Relation ''updatedBy'' is not found in App\\Models\\InventoryCategory model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/App/InventorySettingsController.php
+
+		-
+			message: '#^Relation ''updatedBy'' is not found in App\\Models\\InventoryUnit model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Http/Controllers/App/InventorySettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Relation ''purchaseInvoice'' is not found in App\\Models\\PurchaseReturnInvoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Http/Controllers/App/InvoicesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/PartsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/PartsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_on_hand\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/PartsController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Warehouse\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/App/PartsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/PartsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_en" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/PartsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>qty_on_hand" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/PartsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/PrintSettings/Signatures/DestroySignatureController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$print_settings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/DestroySignatureController.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/DestroySignatureController.php
+
+		-
+			message: '#^Offset ''signatures'' on \*NEVER\* on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/DestroySignatureController.php
+
+		-
+			message: '#^Property App\\Models\\Tenant\:\:\$print_settings \(string\|null\) does not accept array\<string, array\<string, array\<string, array\<int, array\>\|string\|null\>\>\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/DestroySignatureController.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 2
+			path: app/Http/Controllers/App/PrintSettings/Signatures/IndexSignaturesController.php
+
+		-
+			message: '#^Offset ''signatures'' on \*NEVER\* on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Http/Controllers/App/PrintSettings/Signatures/IndexSignaturesController.php
+
+		-
+			message: '#^Property App\\Models\\Tenant\:\:\$print_settings \(string\|null\) does not accept array\<string, array\<string, array\<string, array\<int, array\>\|string\|null\>\>\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/IndexSignaturesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/ReorderSignaturesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$print_settings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/ReorderSignaturesController.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/ReorderSignaturesController.php
+
+		-
+			message: '#^Offset ''signatures'' on \*NEVER\* on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/ReorderSignaturesController.php
+
+		-
+			message: '#^Property App\\Models\\Tenant\:\:\$print_settings \(string\|null\) does not accept array\<string, array\<string, array\<string, array\<int, array\>\|string\|null\>\>\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/ReorderSignaturesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/PrintSettings/Signatures/StoreSignatureController.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/StoreSignatureController.php
+
+		-
+			message: '#^Offset ''signatures'' on \*NEVER\* on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/StoreSignatureController.php
+
+		-
+			message: '#^Parameter \#1 \$tenant of method App\\Http\\Controllers\\App\\PrintSettings\\Signatures\\StoreSignatureController\:\:appendSignatureToPrintSettings\(\) expects App\\Models\\Tenant, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/StoreSignatureController.php
+
+		-
+			message: '#^Property App\\Models\\Tenant\:\:\$print_settings \(string\|null\) does not accept array\<string, array\<string, array\<string, array\<int, array\>\|string\|null\>\>\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/StoreSignatureController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/UpdateSignatureController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$print_settings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/UpdateSignatureController.php
+
+		-
+			message: '#^Empty array passed to foreach\.$#'
+			identifier: foreach.emptyArray
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/UpdateSignatureController.php
+
+		-
+			message: '#^Offset ''signatures'' on \*NEVER\* on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/UpdateSignatureController.php
+
+		-
+			message: '#^Property App\\Models\\Tenant\:\:\$print_settings \(string\|null\) does not accept array\<string, array\<string, array\<string, array\<int, array\>\|string\|null\>\>\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/App/PrintSettings/Signatures/UpdateSignatureController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$two_factor_enforcement\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/ProfileController.php
+
+		-
+			message: '#^Parameter \#1 \$item of method App\\Services\\Purchasing\\PurchasingService\:\:removePurchaseOrderItem\(\) expects App\\Models\\PurchaseOrderItem, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Controllers/App/PurchaseOrdersController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PurchaseReturnInvoice\:\:\$purchaseInvoice\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/PurchaseReturnsController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/PurchaseReturnsController.php
+
+		-
+			message: '#^Relation ''purchaseInvoice'' is not found in App\\Models\\PurchaseReturnInvoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Http/Controllers/App/PurchasingInvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>parts_inclusive" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/PurchasingInvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>parts_vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/PurchasingInvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/PurchasingInvoicesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vat_rate" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/PurchasingInvoicesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/Quotes/QuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$odometer\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/Quotes/QuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$service\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/Quotes/QuoteController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:ordered\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/Quotes/QuoteController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>base_price" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/Quotes/QuoteController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>department_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/Quotes/QuoteController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>min_price" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/Quotes/QuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$allow_price_override\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/Quotes/QuoteServiceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$base_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/Quotes/QuoteServiceController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>base_price" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/Quotes/QuoteServiceController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Role\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/RoleController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Service\:\:\$items\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/ServiceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/ServiceController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/ServiceController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Service\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/ServiceController.php
+
+		-
+			message: '#^Relation ''items'' is not found in App\\Models\\Service model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Http/Controllers/App/ServiceController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Supplier\:\:\$balance\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/SuppliersController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Supplier\:\:\$payments\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/SuppliersController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_terms\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/SystemSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/SystemSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quote_terms\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/SystemSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quote_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/SystemSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_order_terms\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/SystemSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_order_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/SystemSettingsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$two_factor_enforcement\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/TwoFactorController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Vehicle\:\:\$color_name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:ordered\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Class App\\Exports\\VehiclesExport does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_en" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Http/Controllers/App/VehicleController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$creator\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$difference\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$mileage\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$recorded_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$reference_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$reference_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$reference_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Pagination\\AbstractPaginator\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:through\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/VehicleMileageController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrderInspection\:\:\$items\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrderInspectionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$workOrder\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/WorkOrderPartsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$photo_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$service\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\HR\\Employee\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>department_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderItemController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderItemController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:itemNotes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderItemController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:technicians\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderItemController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPaymentController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:updatePaymentStatus\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPaymentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$service\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$technicians\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_order_item_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>department_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderPrintController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$color\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderStatusController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$x\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderStatusController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$y\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderStatusController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderStatusController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Anonymous function should return array\{id\: int, service_id\: int\<0, max\>\|null, service_name_ar\: mixed, service_name_en\: mixed, title\: string, warranty_expires_at\: string, warranty_value_snapshot\: int\|null, warranty_unit_snapshot\: string\|null, \.\.\.\} but returns array\{id\: int, service_id\: int\<0, max\>\|null, service_name_ar\: mixed, service_name_en\: mixed, title\: string, warranty_expires_at\: string, warranty_value_snapshot\: int\|null, warranty_unit_snapshot\: string\|null, \.\.\.\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\WorkOrderItem\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_ar" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name_en" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/App/WorkOrders/WorkOrderWarrantiesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Auth/AuthenticatedSessionController.php
+
+		-
+			message: '#^Call to an undefined method App\\Http\\Controllers\\HealthController\:\:sanitiseError\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Http/Controllers/HealthController.php
+
+		-
+			message: '#^Method App\\Http\\Controllers\\HealthController\:\:sanititiseError\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Http/Controllers/HealthController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$total_excl_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$total_incl_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$total_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$address_line\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$color\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cr_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$discount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$discount_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$iban\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_taxable\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$logo_dark_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$logo_invoice_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$logo_light_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$logo_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$make\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$model\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plate_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$print_settings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quote_terms\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quote_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$stamp_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_amount\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_incl_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_number\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Http/Controllers/Public/PublicQuoteController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/AnnouncementsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/AnnouncementsController.php
+
+		-
+			message: '#^Match arm comparison between \*NEVER\* and ''email'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/System/AnnouncementsController.php
+
+		-
+			message: '#^Match arm comparison between \*NEVER\* and ''sms'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/System/AnnouncementsController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between mixed and true will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/System/GeneralSettingsController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Billing\\Subscription\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/System/PaymentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/PaymentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/PaymentController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trade_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/PaymentController.php
+
+		-
+			message: '#^Parameter \#1 \$config of method App\\Http\\Controllers\\System\\PaymentSettingsController\:\:maskGatewayConfig\(\) expects array\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 5
+			path: app/Http/Controllers/System/PaymentSettingsController.php
+
+		-
+			message: '#^Parameter \#1 \$existing of method App\\Http\\Controllers\\System\\PaymentSettingsController\:\:mergeGatewayConfig\(\) expects array\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 5
+			path: app/Http/Controllers/System/PaymentSettingsController.php
+
+		-
+			message: '#^Property App\\Models\\PaymentSettings\:\:\$moyasar \(string\|null\) does not accept array\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/System/PaymentSettingsController.php
+
+		-
+			message: '#^Property App\\Models\\PaymentSettings\:\:\$paytabs \(string\|null\) does not accept array\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/System/PaymentSettingsController.php
+
+		-
+			message: '#^Property App\\Models\\PaymentSettings\:\:\$tabby \(string\|null\) does not accept array\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/System/PaymentSettingsController.php
+
+		-
+			message: '#^Property App\\Models\\PaymentSettings\:\:\$tamara \(string\|null\) does not accept array\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/System/PaymentSettingsController.php
+
+		-
+			message: '#^Property App\\Models\\PaymentSettings\:\:\$tap \(string\|null\) does not accept array\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Http/Controllers/System/PaymentSettingsController.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Http/Controllers/System/ProfileController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/SubscriptionInvoicesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/SubscriptionInvoicesController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/System/SubscriptionsController.php
+
+		-
+			message: '#^Cannot call method addDays\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/System/SubscriptionsController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''active'' and ''trialing'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Http/Controllers/System/SubscriptionsController.php
+
+		-
+			message: '#^Cannot call method addDays\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Http/Controllers/System/TenantsController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Middleware/EnsureTenantActive.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trial_ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureTenantActive.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:trashed\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureTenantActive.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$two_factor_enabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureTwoFactorEnabled.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$two_factor_enforcement\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/EnsureTwoFactorEnabled.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cr_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 6
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_terms\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$legal_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$logo_path\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$owner_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$print_settings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quote_terms\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quote_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$taxSettings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trade_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trial_ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_order_terms\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_order_title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:hasPaidSubscription\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:subscriptions\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Http/Middleware/HandleInertiaRequests.php
+
+		-
+			message: '#^Parameter \#1 \$value of static method Illuminate\\Support\\Str\:\:lower\(\) expects string, Illuminate\\Support\\Stringable given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Requests/Auth/LoginRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Customer/CustomerMergeRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Customer/CustomerStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Customer/CustomerUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Customer/CustomerUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Department/DepartmentStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Department/DepartmentUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/HR/AttendanceClockRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/HR/EmployeeStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/HR/EmployeeUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/HR/EmployeeUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/HR/LeaveStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Inventory/PartStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Inventory/StockAdjustmentRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Payment/RefundPaymentRequest.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Http/Requests/Payment/StorePaymentRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Payment/StorePaymentRequest.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Http/Requests/Payment/UpdatePaymentRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Payment/UpdatePaymentRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Purchase/PurchaseInvoiceStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Purchase/PurchaseOrderStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Purchase/PurchaseReturnStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Quote/QuoteStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Quote/QuoteUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Service/ServiceStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Service/ServiceUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Supplier/SupplierStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Supplier/SupplierUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Vehicle/VehicleStoreRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Vehicle/VehicleUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/Vehicle/VehicleUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/VehicleUpdateRequest.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tenant_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Requests/WorkOrder/AddItemRequest.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Http/Requests/WorkOrder/ChangeStatusRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$balance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Listeners/Payment/HandleAutoInvoiceOnDoneWorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Listeners/Payment/HandleAutoInvoiceOnDoneWorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Listeners/Payment/HandleAutoInvoiceOnDoneWorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Listeners/Payment/HandleAutoInvoiceOnDoneWorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Listeners/Payment/HandleAutoInvoiceOnDoneWorkOrder.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:payments\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Listeners/Payment/HandleAutoInvoiceOnDoneWorkOrder.php
+
+		-
+			message: '#^Parameter \#1 \$workOrder of method App\\Services\\InvoiceService\:\:createFromWorkOrder\(\) expects App\\Models\\WorkOrder, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Listeners/Payment/HandleAutoInvoiceOnDoneWorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Listeners/Payment/LinkPaymentToInvoice.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Models\\WorkOrder and ''logActivity'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Listeners/WorkOrder/LogActivityOnStatusChange.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''App\\\\Services\\\\NotificationService'' and ''notifyOwner'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Listeners/WorkOrder/NotifyOwnerOnCreation.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Mail/SubscriptionInvoiceMail.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Billing/Installment.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Models/Billing/Installment.php
+
+		-
+			message: '#^Cannot call method isFuture\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Billing/PromoCode.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Billing/PromoCode.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Billing/PromoCodeUsage.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Billing/Subscription.php
+
+		-
+			message: '#^Cannot call method isFuture\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: app/Models/Billing/Subscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Billing/SubscriptionInvoice.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/Billing/SubscriptionInvoice.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Billing/SubscriptionInvoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Billing/SubscriptionPayment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Center.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/CenterAddress.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/CenterAddress.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/CenterSequence.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/CenterSequence.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/CenterWorkingHour.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/CenterWorkingHour.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/CompanyTransaction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/SmsPurchase.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/SmsUsageLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/SmsUsageLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/TenantSmsBalance.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/TenantWhatsappBalance.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/WhatsappPurchase.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/WhatsappUsageLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Credits/WhatsappUsageLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Customer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Customer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Department.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Department.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/GoodsReceivedNote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/GoodsReceivedNote.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/GoodsReceivedNote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/GrnItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/GrnItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/Allowance.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/Attendance.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getShiftForDate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Models/HR/Attendance.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 1
+			path: app/Models/HR/Attendance.php
+
+		-
+			message: '#^Property App\\Models\\HR\\Attendance\:\:\$early_leave_minutes \(int\) does not accept float\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Models/HR/Attendance.php
+
+		-
+			message: '#^Property App\\Models\\HR\\Attendance\:\:\$overtime_minutes \(int\) does not accept float\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Models/HR/Attendance.php
+
+		-
+			message: '#^Variable \$shiftStart might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: app/Models/HR/Attendance.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/AttendanceSettings.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/AttendanceSettings.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/BiometricDevice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/Deduction.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/HR/Employee.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$calculation_base\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/HR/Employee.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$shift\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/HR/Employee.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/Employee.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/HR/Employee.php
+
+		-
+			message: '#^Method App\\Models\\HR\\Employee\:\:getShiftForDate\(\) should return App\\Models\\HR\\Shift\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/HR/Employee.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, \(float\|int\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/HR/Employee.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/EmployeeContract.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/EmployeeDocument.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/EmployeeShift.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/EmployeeType.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/HRRegulation.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/JobTitle.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/Leave.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/OtherPayment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/Payroll.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/PayrollItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$payment_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/PayrollItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$period_label\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/PayrollItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/PayrollItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/PayrollItem.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>period_label" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/HR/PayrollItem.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>status" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Models/HR/PayrollItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/PayrollRun.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/HR/Shift.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/IncomeCategory.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InspectionItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InspectionItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InspectionTemplate.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InspectionTemplate.php
+
+		-
+			message: '#^Property App\\Models\\Integration\\Integration\:\:\$config \(string\|null\) does not accept array\<string, mixed\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Models/Integration/Integration.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Integration/IntegrationLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Integration/TenantIntegration.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InternalNotification.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryBalance.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryBalance.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryCategory.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryMove.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryMove.php
+
+		-
+			message: '#^Method App\\Models\\InventoryMove\:\:getWorkOrderAttribute\(\) should return App\\Models\\WorkOrder\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/InventoryMove.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryTransfer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryTransferItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryTransferItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InventoryUnit.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InvoiceLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InvoiceLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/InvoiceTemplate.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/NotificationSendLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Part.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Payment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Prompt.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseInvoice.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/PurchaseInvoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseInvoiceLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseInvoiceLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseOrder.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/PurchaseOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseOrderItem.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:recalculateTotals\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Models/PurchaseOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseReturnInvoice.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/PurchaseReturnInvoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseReturnInvoiceLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/PurchaseReturnInvoiceLine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$total_excl_tax\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$total_incl_tax\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$total_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total_incl_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Quote.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QuoteLine\:\:\$is_taxable\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QuoteLine\:\:\$line_total_excl_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QuoteLine\:\:\$line_total_incl_tax\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QuoteLine\:\:\$tax_amount\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\QuoteLine\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$department_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Parameter \#3 \$discountValue of static method App\\Support\\PricingHelper\:\:computeLineTotal\(\) expects float\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/QuoteLine.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuotePart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuotePart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuotePart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuotePart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/QuotePart.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Service\:\:\$estimated_minutes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Service.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$balance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:payments\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:returnInvoices\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, \(float\|int\) given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Cannot call method isPast\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Models/SystemAnnouncement.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/TenantAddress.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/TenantAnnouncementRead.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/TenantTaxSetting.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/TenantZatcaSetting.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$photo_path\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/User.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Vehicle\:\:\$display_make\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Vehicle.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Vehicle\:\:\$display_model\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Vehicle.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Vehicle.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Vehicle.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Vehicle.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Models/Vehicle.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Models/Vehicle.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleColor.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleColor.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleConditionCategory.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleConditionCategory.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleConditionItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleConditionItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleMake.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleMake.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleMileageLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleMileageLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleModel.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/VehicleModel.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Warehouse\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Warehouse.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Warehouse.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Warehouse.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: app/Models/Warehouse.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$total_excl_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$total_incl_tax\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$total_tax\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$allow_lower_mileage\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$amount\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$odometer\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$suspended_status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_order_item_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/WorkOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderActivity.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderAttachment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderDamageMark.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderDamageMark.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderInspection.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderInspection.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$department_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$warranty_unit\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$warranty_value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItem.php
+
+		-
+			message: '#^Parameter \#3 \$discountValue of static method App\\Support\\PricingHelper\:\:computeLineTotal\(\) expects float\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Models/WorkOrderItem.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItemNote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItemNote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItemPart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrderItemPart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkOrderItemPart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderItemPart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderPhoto.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/WorkOrderPhoto.php
+
+		-
+			message: '#^Method App\\Observers\\CenterObserver\:\:ensureDefaultWarehouse\(\) should return App\\Models\\Warehouse but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Observers/CenterObserver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$default_role_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Observers/EmployeeObserver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Observers/EmployeeObserver.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Observers/EmployeeObserver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Policies/LeavePolicy.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HR\\Payroll\:\:\$employee_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/PayrollPolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/PayrollPolicy.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:canBeEdited\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Policies/QuoteLinePolicy.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isConverted\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Policies/QuoteLinePolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Policies/WorkOrderItemPolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Policies/WorkOrderItemPolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$due_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Policies/WorkOrderPolicy.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 2
+			path: app/Services/AI/ProviderRegistry.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Services/AI/Providers/AnthropicProvider.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Services/AI/Providers/OpenAiProvider.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/AI/WorkOrderSuggestionService.php
+
+		-
+			message: '#^Parameter \#2 \$catalog of method App\\Services\\AI\\MockSuggester\:\:suggestForComplaint\(\) expects Illuminate\\Support\\Collection\<int, array\{item_type\: string, item_id\: int, name_ar\: string, name_en\: string, description_ar\?\: string, description_en\?\: string\}\>, Illuminate\\Support\\Collection\<int, array\{item_type\: string, item_id\: int, name_ar\: string, name_en\: string, description_ar\: string, description_en\: string\}\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/AI/WorkOrderSuggestionService.php
+
+		-
+			message: '#^Property App\\Services\\AI\\CompletionResponse\:\:\$model \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: app/Services/AI/WorkOrderSuggestionService.php
+
+		-
+			message: '#^Property App\\Services\\AI\\CompletionResponse\:\:\$provider \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
+			count: 1
+			path: app/Services/AI/WorkOrderSuggestionService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Billing\\Subscription\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Billing/InstallmentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Billing/InstallmentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Billing/InstallmentService.php
+
+		-
+			message: '#^Method App\\Services\\Billing\\InstallmentService\:\:getNextDueInstallment\(\) should return App\\Models\\Billing\\Installment\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/Billing/InstallmentService.php
+
+		-
+			message: '#^Parameter \#1 \$invoice of method App\\Services\\Billing\\InstallmentService\:\:checkInvoiceCompletion\(\) expects App\\Models\\Billing\\SubscriptionInvoice, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Billing/InstallmentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/Billing/SubscriptionRenewalService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trade_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Billing/SubscriptionRenewalService.php
+
+		-
+			message: '#^Parameter \#1 \$value of function collect contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/Developer/AuditOrchestrator.php
+
+		-
+			message: '#^Argument of an invalid type Illuminate\\Routing\\RouteCollectionInterface supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: app/Services/Developer/Scanners/SecurityScanner.php
+
+		-
+			message: '#^Left side of && is always false\.$#'
+			identifier: booleanAnd.leftAlwaysFalse
+			count: 1
+			path: app/Services/Developer/Scanners/UiScanner.php
+
+		-
+			message: '#^Offset ''\(\?\:PrimaryButton…''\|''SelectInput''\|''TextInput'' on array\{''\(\?\:PrimaryButton\|SecondaryButton\|DangerButton\|BackButton\)''\: ''PrimaryButton'', TextInput\: ''TextInput'', SelectInput\: ''SelectInput''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Services/Developer/Scanners/UiScanner.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\HR\\AttendanceSettings\:\:\$absence_deduction_per_day\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/HR/AttendanceCalculationService.php
+
+		-
+			message: '#^Method App\\Services\\HR\\AttendanceCalculationService\:\:calculateEarlyLeaveMinutes\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/HR/AttendanceCalculationService.php
+
+		-
+			message: '#^Method App\\Services\\HR\\AttendanceCalculationService\:\:calculateLateMinutes\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/HR/AttendanceCalculationService.php
+
+		-
+			message: '#^Method App\\Services\\HR\\AttendanceCalculationService\:\:calculateOvertimeMinutes\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/HR/AttendanceCalculationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_requested\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_sent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$send_move_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>qty_on_hand" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>total_value" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>wac_cost" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Services/Inventory/InventoryService.php
+
+		-
+			message: '#^Parameter \#1 \$move of method App\\Services\\Inventory\\InventoryService\:\:reverseMove\(\) expects App\\Models\\InventoryMove, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Inventory/WorkOrderPartsService.php
+
+		-
+			message: '#^Parameter \$originalMove of method App\\Services\\Inventory\\InventoryService\:\:createPartialReversal\(\) expects App\\Models\\InventoryMove, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Inventory/WorkOrderPartsService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Billing\\Subscription\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Invoice/SubscriptionInvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Invoice/SubscriptionInvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Invoice/SubscriptionInvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$total_excl_tax\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$total_incl_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrder\:\:\$total_tax\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrderItem\:\:\$is_taxable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\WorkOrderItem\:\:\$tax_category_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$address_line\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$building_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$district\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$postal_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$taxSettings\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_order_item_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>tax_number" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:updatePaymentStatus\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/PaymentService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$center_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$due_date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_fully_received\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$purchaseOrderItem\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty_received\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$supplier_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_cost\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isDraft\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Parameter \#1 \$po of method App\\Services\\Purchasing\\PurchasingService\:\:updatePurchaseOrderStatus\(\) expects App\\Models\\PurchaseOrder, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>purchase_conversion_factor" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/Purchasing/PurchasingService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$currency_code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$pricing_mode_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$tax_enabled_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Quote\:\:\$tax_rate_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$base_price_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$discount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$discount_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$discount_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$discount_value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$final_unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$hide_on_print\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$include_in_package\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$min_price_snapshot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$part_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$qty\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quote_line_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$service\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$service_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$source\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$title\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isFromWarehouse\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/QuoteConversionService.php
+
+		-
+			message: '#^Expression "\\App\\Services\\Email\\SmtpConfigService\:\:class" on a separate line does not do anything\.$#'
+			identifier: expr.resultUnused
+			count: 1
+			path: app/Services/TwoFactorService.php

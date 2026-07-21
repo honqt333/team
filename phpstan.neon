@@ -1,0 +1,36 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app/
+
+    # Level 5: catches undefined methods, wrong argument types, missing
+    # return types, etc. Higher levels (6-9) find more bugs but require
+    # extensive baseline annotations. We start at 5 — the cost/benefit
+    # sweet spot for a Laravel project at our size.
+    level: 5
+
+    # Domain modelling: ignore generic Eloquent magic for now. We can
+    # tighten this later with @phpstan-ignore-line + actual generic
+    # annotations on the models. Without this, every ->where() call
+    # would generate a "too general" warning. The phpstan-baseline.neon
+    # handles the rest.
+    excludePaths:
+        - app/Console/Kernel.php (?)
+        - app/Exceptions/Handler.php (?)
+        - app/Http/Middleware/VerifyCsrfToken.php (?)
+        - app/Http/Middleware/EncryptCookies.php (?)
+        - app/Providers/*
+        - database/migrations/*
+        - database/seeders/*
+        - database/factories/*
+        - bootstrap/cache/*
+
+    # Bootstrap files for Larastan — it needs to know about the Laravel
+    # container and our aliases.
+    bootstrapFiles:
+        - bootstrap/app.php
+
+    treatPhpDocTypesAsCertain: false

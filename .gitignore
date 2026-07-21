@@ -22,3 +22,8 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local scratch files (created during ad-hoc debugging — never commit)
+scratch_test.php
+/scratch
+
