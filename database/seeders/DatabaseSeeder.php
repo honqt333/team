@@ -22,6 +22,9 @@ class DatabaseSeeder extends Seeder
         // 2. Create Initial System Admin (Production)
         $this->call(InitialSystemSeeder::class);
 
+        // 2b. Create default admin user for /system/* panel (admin guard)
+        $this->call(AdminUserSeeder::class);
+
         // 3. Create Technical Data (Cars, Colors, Services, Units, HR Metadata)
         $this->call(MetadataSeeder::class);
         $this->call(ServiceSeeder::class);
