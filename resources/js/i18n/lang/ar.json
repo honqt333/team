@@ -3515,7 +3515,8 @@
   },
   "pagination": {
     "previous": "&laquo; السابق",
-    "next": "التالي &raquo;"
+    "next": "التالي &raquo;",
+    "showing_range": "عرض :from - :to من :total"
   },
   "passwords": {
     "reset": "تم إعادة تعيين كلمة المرور الخاصة بك.",

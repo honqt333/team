@@ -3515,7 +3515,8 @@
   },
   "pagination": {
     "previous": "&laquo; Previous",
-    "next": "Next &raquo;"
+    "next": "Next &raquo;",
+    "showing_range": "Showing :from - :to of :total"
   },
   "passwords": {
     "reset": "Your password has been reset.",

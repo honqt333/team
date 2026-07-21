@@ -4,14 +4,18 @@
             <!-- Page Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">الاشتراكات</h1>
-                    <p class="text-gray-500 dark:text-gray-400">إدارة اشتراكات المستأجرين</p>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ $t('system.subscriptions.title') }}
+                    </h1>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        {{ $t('system.subscriptions.subtitle') }}
+                    </p>
                 </div>
                 <button
                     @click="openModal()"
                     class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
-                    + إنشاء اشتراك
+                    {{ $t('system.subscriptions.create') }}
                 </button>
             </div>
 
@@ -20,7 +24,9 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">الإجمالي</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.subscriptions.stats.total') }}
+                    </p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ stats.total }}
                     </p>
@@ -28,25 +34,33 @@
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">نشط</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.status.active') }}
+                    </p>
                     <p class="text-2xl font-bold text-emerald-600">{{ stats.active }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">تجريبي</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.status.trial') }}
+                    </p>
                     <p class="text-2xl font-bold text-amber-600">{{ stats.trial }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">ملغي</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.status.cancelled') }}
+                    </p>
                     <p class="text-2xl font-bold text-red-600">{{ stats.cancelled }}</p>
                 </div>
                 <div
                     class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">منتهي</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.status.expired') }}
+                    </p>
                     <p class="text-2xl font-bold text-gray-500">{{ stats.expired }}</p>
                 </div>
             </div>
@@ -60,7 +74,7 @@
                         <input
                             v-model="search"
                             type="text"
-                            placeholder="بحث بالاسم..."
+                            :placeholder="$t('system.subscriptions.search_placeholder')"
                             class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                             @keyup.enter="applyFilters"
                         />
@@ -70,7 +84,7 @@
                         :options="statusFilterOptions"
                         option-label="label"
                         option-value="value"
-                        placeholder="جميع الحالات"
+                        :placeholder="$t('system.tenants.all_statuses')"
                         compact
                     />
                     <SearchableSelect
@@ -78,7 +92,7 @@
                         :options="(plans || []).map((p) => ({ value: p.id, label: p.name_ar }))"
                         option-label="label"
                         option-value="value"
-                        placeholder="جميع الباقات"
+                        :placeholder="$t('system.plans.title')"
                         compact
                     />
                 </div>
@@ -95,27 +109,27 @@
                                 <th
                                     class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
                                 >
-                                    المستأجر
+                                    {{ $t('system.subscriptions.tenant_label') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
                                 >
-                                    الباقة
+                                    {{ $t('system.subscriptions.plan_label') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
                                 >
-                                    الدورة
+                                    {{ $t('system.subscriptions.billing_cycle') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
                                 >
-                                    الحالة
+                                    {{ $t('system.tenants.status') }}
                                 </th>
                                 <th
                                     class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
                                 >
-                                    ينتهي في
+                                    {{ $t('system.subscriptions.ends_at') }}
                                 </th>
                                 <th class="px-6 py-4 align-middle text-center"></th>
                             </tr>
@@ -144,7 +158,11 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-400 align-middle">
-                                    {{ sub.billing_cycle === 'yearly' ? 'سنوي' : 'شهري' }}
+                                    {{
+                                        sub.billing_cycle === 'yearly'
+                                            ? $t('system.subscriptions.yearly')
+                                            : $t('system.subscriptions.monthly')
+                                    }}
                                 </td>
                                 <td class="px-6 py-4 align-middle">
                                     <span
@@ -162,7 +180,7 @@
                                         :href="`/system/subscriptions/${sub.id}`"
                                         class="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
                                     >
-                                        عرض
+                                        {{ $t('system.actions.view') }}
                                     </Link>
                                 </td>
                             </tr>
@@ -185,7 +203,9 @@
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                         />
                     </svg>
-                    <p class="mt-4 text-gray-500 dark:text-gray-400">لا توجد اشتراكات</p>
+                    <p class="mt-4 text-gray-500 dark:text-gray-400">
+                        {{ $t('system.subscriptions.no_subscriptions') }}
+                    </p>
                 </div>
 
                 <!-- Pagination -->
