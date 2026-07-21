@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import PaymentMethodSelector from './PaymentMethodSelector.vue';
 import PromoCodeInput from './PromoCodeInput.vue';
 import BankTransferReceiptUpload from './BankTransferReceiptUpload.vue';
@@ -18,7 +19,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['close', 'success']);
 
-const locale = computed(() => document.documentElement.lang || 'ar');
+const { t, locale } = useI18n();
 
 const billingCycle = ref('monthly');
 const promoInput = ref('');
@@ -75,7 +76,7 @@ async function calculate() {
         });
         pricing.value = await response.json();
     } catch (e) {
-        error.value = locale.value === 'ar' ? 'خطأ في حساب السعر' : 'Pricing error';
+        error.value = t('subscription.pricing_error');
     } finally {
         loading.value = false;
     }
@@ -83,7 +84,7 @@ async function calculate() {
 
 async function subscribe() {
     if (!selectedGateway.value) {
-        error.value = locale.value === 'ar' ? 'اختر وسيلة الدفع' : 'Choose a payment method';
+        error.value = t('subscription.choose_payment_method');
         return;
     }
 
@@ -150,13 +151,10 @@ async function subscribe() {
             //    This used to silently close the modal with "تم إرسال
             //    الطلب" which was confusing. Show an explicit error so
             //    the tenant knows the gateway didn't return usable data.
-            error.value =
-                locale.value === 'ar'
-                    ? 'لم نتمكن من تحضير نموذج الدفع. حاول مرة أخرى أو اختر وسيلة دفع أخرى.'
-                    : 'Could not prepare the payment form. Please try again or choose another payment method.';
+            error.value = t('subscription.subscription_error');
         }
     } catch (e) {
-        error.value = locale.value === 'ar' ? 'خطأ في إنشاء الاشتراك' : 'Subscription error';
+        error.value = t('subscription.subscription_error');
     } finally {
         loading.value = false;
     }
@@ -172,10 +170,7 @@ function close() {
 }
 
 function onReceiptUploaded() {
-    success.value =
-        locale.value === 'ar'
-            ? 'تم رفع الإيصال بنجاح. سيتم تفعيل اشتراكك فور مراجعته من الإدارة.'
-            : 'Receipt uploaded successfully. Your subscription will be activated after review.';
+    success.value = t('subscription.receipt_uploaded');
     setTimeout(() => {
         emit('success');
         emit('close');
@@ -240,7 +235,7 @@ const formatCurrency = (amount) => {
                 >
                     <div>
                         <h2 class="text-lg font-bold text-slate-900 dark:text-white">
-                            {{ locale === 'ar' ? 'اشترك الآن' : 'Subscribe now' }}
+                            {{ t('subscription.subscribe_now', 'اشترك الآن') }}
                         </h2>
                         <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                             {{ planName }}
@@ -283,16 +278,18 @@ const formatCurrency = (amount) => {
                         </div>
                         <h3 class="text-base font-bold text-slate-900 dark:text-white">
                             {{
-                                locale === 'ar'
-                                    ? 'تم استلام طلبك — ارفع الإيصال لتفعيل الاشتراك'
-                                    : 'Order received — Upload receipt to activate'
+                                t(
+                                    'subscription.bank_transfer_title',
+                                    'تم استلام طلبك — ارفع الإيصال لتفعيل الاشتراك'
+                                )
                             }}
                         </h3>
                         <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                             {{
-                                locale === 'ar'
-                                    ? 'حوّل المبلغ على أحد الحسابات أعلاه، ثم ارفع الإيصال هنا'
-                                    : 'Transfer the amount to one of the bank accounts above, then upload the receipt here'
+                                t(
+                                    'subscription.bank_transfer_hint',
+                                    'حوّل المبلغ على أحد الحسابات أعلاه، ثم ارفع الإيصال هنا'
+                                )
                             }}
                         </p>
                     </div>
@@ -310,14 +307,10 @@ const formatCurrency = (amount) => {
                 <div v-else-if="gatewayFormData" class="p-6">
                     <div class="mb-4">
                         <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                            {{ locale === 'ar' ? 'أدخل بيانات البطاقة' : 'Enter card details' }}
+                            {{ t('subscription.enter_card_details') }}
                         </h3>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {{
-                                locale === 'ar'
-                                    ? 'سيتم تفعيل اشتراكك تلقائياً بعد إتمام الدفع'
-                                    : 'Your subscription will be activated automatically after payment'
-                            }}
+                            {{ t('subscription.auto_activate_notice') }}
                         </p>
                     </div>
                     <MoyasarPaymentForm
@@ -330,7 +323,7 @@ const formatCurrency = (amount) => {
                             class="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                             @click="cancelGatewayForm"
                         >
-                            {{ locale === 'ar' ? 'إلغاء والعودة' : 'Cancel and go back' }}
+                            {{ t('subscription.cancel_and_go_back') }}
                         </button>
                     </div>
                 </div>
@@ -359,7 +352,7 @@ const formatCurrency = (amount) => {
                         <label
                             class="mb-2 block text-sm font-semibold text-slate-900 dark:text-white"
                         >
-                            {{ locale === 'ar' ? 'فترة الاشتراك' : 'Billing cycle' }}
+                            {{ t('subscription.billing_cycle', 'فترة الاشتراك') }}
                         </label>
                         <div class="grid grid-cols-2 gap-2">
                             <button
@@ -373,7 +366,7 @@ const formatCurrency = (amount) => {
                                 ]"
                             >
                                 <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                                    {{ locale === 'ar' ? 'شهري' : 'Monthly' }}
+                                    {{ t('subscription.monthly', 'شهري') }}
                                 </p>
                                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ formatCurrency(plan?.price_monthly) }} SAR
@@ -394,13 +387,15 @@ const formatCurrency = (amount) => {
                                     class="absolute -top-2 right-3 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white"
                                 >
                                     {{
-                                        locale === 'ar'
-                                            ? `وفر ${plan.yearly_discount}%`
-                                            : `Save ${plan.yearly_discount}%`
+                                        t(
+                                            'subscription.save_n_percent',
+                                            `وفر ${plan.yearly_discount}%`,
+                                            { percent: plan.yearly_discount }
+                                        )
                                     }}
                                 </span>
                                 <p class="text-sm font-semibold text-slate-900 dark:text-white">
-                                    {{ locale === 'ar' ? 'سنوي' : 'Yearly' }}
+                                    {{ t('subscription.yearly', 'سنوي') }}
                                 </p>
                                 <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                     {{ formatCurrency(plan?.price_yearly) }} SAR
@@ -423,12 +418,12 @@ const formatCurrency = (amount) => {
                         class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50"
                     >
                         <p class="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
-                            {{ locale === 'ar' ? 'ملخص الطلب' : 'Order summary' }}
+                            {{ t('subscription.order_summary', 'ملخص الطلب') }}
                         </p>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span class="text-slate-600 dark:text-slate-400">
-                                    {{ locale === 'ar' ? 'السعر الأساسي' : 'Subtotal' }}
+                                    {{ t('subscription.subtotal', 'السعر الأساسي') }}
                                 </span>
                                 <span class="font-mono text-slate-900 dark:text-white">
                                     {{ formatCurrency(pricing.base_price) }} SAR
@@ -438,7 +433,7 @@ const formatCurrency = (amount) => {
                                 v-if="pricing.discount > 0"
                                 class="flex justify-between text-emerald-600 dark:text-emerald-400"
                             >
-                                <span>{{ locale === 'ar' ? 'الخصم' : 'Discount' }}</span>
+                                <span>{{ t('subscription.discount', 'الخصم') }}</span>
                                 <span class="font-mono">
                                     - {{ formatCurrency(pricing.discount) }} SAR
                                 </span>
@@ -449,9 +444,11 @@ const formatCurrency = (amount) => {
                             >
                                 <span>
                                     {{
-                                        locale === 'ar'
-                                            ? `ضريبة القيمة المضافة (${vatSettings.rate}%)`
-                                            : `VAT (${vatSettings.rate}%)`
+                                        t(
+                                            'subscription.vat_label',
+                                            `ضريبة القيمة المضافة (${vatSettings.rate}%)`,
+                                            { rate: vatSettings.rate }
+                                        )
                                     }}
                                 </span>
                                 <span class="font-mono">
@@ -462,7 +459,7 @@ const formatCurrency = (amount) => {
                                 class="flex justify-between border-t border-slate-200 pt-2 text-base font-bold dark:border-slate-700"
                             >
                                 <span class="text-slate-900 dark:text-white">
-                                    {{ locale === 'ar' ? 'الإجمالي' : 'Total' }}
+                                    {{ t('subscription.total', 'الإجمالي') }}
                                 </span>
                                 <span class="font-mono text-indigo-600 dark:text-indigo-400">
                                     {{ formatCurrency(pricing.total) }} SAR
@@ -485,7 +482,7 @@ const formatCurrency = (amount) => {
                         class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900/50"
                     >
                         <p class="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
-                            {{ locale === 'ar' ? 'الحسابات البنكية' : 'Bank accounts' }}
+                            {{ t('subscription.bank_accounts', 'الحسابات البنكية') }}
                         </p>
                         <div class="space-y-3">
                             <div
@@ -535,7 +532,7 @@ const formatCurrency = (amount) => {
                         :disabled="loading"
                         class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
-                        {{ locale === 'ar' ? 'إلغاء' : 'Cancel' }}
+                        {{ t('common.cancel', 'إلغاء') }}
                     </button>
                     <button
                         type="button"
@@ -563,7 +560,7 @@ const formatCurrency = (amount) => {
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             />
                         </svg>
-                        <span>{{ locale === 'ar' ? 'متابعة الدفع' : 'Continue to payment' }}</span>
+                        <span>{{ t('subscription.continue_to_payment', 'متابعة الدفع') }}</span>
                     </button>
                 </div>
             </div>

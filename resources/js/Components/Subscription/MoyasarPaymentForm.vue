@@ -24,7 +24,7 @@
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 ></path>
             </svg>
-            {{ locale === 'ar' ? 'جاري تحميل نموذج الدفع...' : 'Loading payment form...' }}
+            {{ t('subscription.moyasar_loading') }}
         </div>
 
         <!-- Error state -->
@@ -48,7 +48,7 @@
                 />
             </svg>
             <span>
-                {{ locale === 'ar' ? 'الدفع آمن ومشفر (PCI DSS)' : 'Secure PCI-DSS payment' }}
+                {{ t('common.secure_payment_note', 'الدفع آمن ومشفر (PCI DSS)') }}
             </span>
         </div>
     </div>
@@ -56,6 +56,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     formData: { type: Object, required: true },
@@ -63,7 +64,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['completed', 'error']);
 
-const locale = ref(document.documentElement.lang || 'ar');
+const { t, locale } = useI18n();
 const loading = ref(true);
 const error = ref(null);
 const moyasarScriptId = 'moyasar-script';
@@ -113,10 +114,7 @@ function loadMoyasar() {
     script.src = 'https://cdn.moyasar.com/mpf/1.14.0/moyasar.js';
     script.onload = () => initMoyasar();
     script.onerror = () => {
-        error.value =
-            locale.value === 'ar'
-                ? 'فشل تحميل نموذج الدفع. حاول مرة أخرى.'
-                : 'Failed to load payment form. Please try again.';
+        error.value = t('subscription.moyasar_load_failed');
         loading.value = false;
     };
     document.head.appendChild(script);
