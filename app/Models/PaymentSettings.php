@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 // @bypass-tenancy-scanner - Single-row global payment gateway config (cached, not tenant-owned)
 class PaymentSettings extends Model
@@ -132,5 +133,78 @@ class PaymentSettings extends Model
     public function getBankAccounts(): array
     {
         return $this->bank_accounts ?? [];
+    }
+
+    /**
+     * Get company display name based on locale.
+     */
+    public function getCompanyDisplayName(?string $locale = null): string
+    {
+        $locale = $locale ?? app()->getLocale();
+
+        if ($locale === 'en' && $this->company_legal_name_en) {
+            return $this->company_legal_name_en;
+        }
+
+        return $this->company_legal_name ?? config('app.name', 'Carag');
+    }
+
+    /**
+     * Get VAT rate for subscriptions.
+     */
+    public function getSubscriptionVatRate(): float
+    {
+        if (! $this->subscription_vat_enabled) {
+            return 0.0;
+        }
+
+        return (float) ($this->subscription_vat_rate ?? 15.00);
+    }
+
+    /**
+     * Calculate VAT amount for a base price.
+     * If inclusive: extract VAT from total. If exclusive: add VAT on top.
+     */
+    public function calculateVat(float $basePrice, bool $returnExclusive = false): array
+    {
+        $rate = $this->getSubscriptionVatRate() / 100;
+        $inclusive = $this->subscription_vat_inclusive ?? false;
+
+        if ($inclusive) {
+            $exclusive = $basePrice / (1 + $rate);
+            $vat = $basePrice - $exclusive;
+
+            return [
+                'exclusive' => round($exclusive, 2),
+                'vat' => round($vat, 2),
+                'total' => round($basePrice, 2),
+            ];
+        }
+
+        $vat = $basePrice * $rate;
+        $total = $basePrice + $vat;
+
+        return [
+            'exclusive' => round($basePrice, 2),
+            'vat' => round($vat, 2),
+            'total' => round($total, 2),
+        ];
+    }
+
+    /**
+     * Get company info for invoices/receipts.
+     */
+    public function getCompanyInfo(): array
+    {
+        return [
+            'legal_name' => $this->company_legal_name,
+            'legal_name_en' => $this->company_legal_name_en,
+            'vat_number' => $this->company_vat_number,
+            'cr_number' => $this->company_cr_number,
+            'phone' => $this->company_phone,
+            'email' => $this->company_email,
+            'website' => $this->company_website,
+            'logo_url' => $this->company_logo_path ? Storage::url($this->company_logo_path) : null,
+        ];
     }
 }

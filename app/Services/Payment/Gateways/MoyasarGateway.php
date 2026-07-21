@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Payment\Gateways;
 
+use App\Models\PaymentSettings;
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -17,7 +18,12 @@ class MoyasarGateway implements PaymentGatewayInterface
 
     public function __construct()
     {
-        $this->config = config('payment.gateways.moyasar');
+        // Prefer DB-stored PaymentSettings (admin-managed), fall back to env/config.
+        // This lets the admin enable Moyasar in /system/settings/payment
+        // without restarting the app or editing .env.
+        $dbConfig = PaymentSettings::first()?->moyasar ?? [];
+        $envConfig = config('payment.gateways.moyasar') ?? [];
+        $this->config = array_merge($envConfig, array_filter($dbConfig, fn ($v) => $v !== null && $v !== ''));
         $this->baseUrl = $this->config['base_url'] ?? 'https://api.moyasar.com/v1';
     }
 

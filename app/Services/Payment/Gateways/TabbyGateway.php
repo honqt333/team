@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Payment\Gateways;
 
+use App\Models\PaymentSettings;
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -17,7 +18,9 @@ class TabbyGateway implements PaymentGatewayInterface
 
     public function __construct()
     {
-        $this->config = config('payment.gateways.tabby', []);
+        $dbConfig = PaymentSettings::first()?->tabby ?? [];
+        $envConfig = config('payment.gateways.tabby', []) ?? [];
+        $this->config = array_merge($envConfig, array_filter($dbConfig, fn ($v) => $v !== null && $v !== ''));
         $this->baseUrl = $this->config['base_url'] ?? 'https://api.tabby.ai/api/v2';
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Payment\Gateways;
 
+use App\Models\PaymentSettings;
 use App\Services\Payment\Contracts\PaymentGatewayInterface;
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -17,7 +18,9 @@ class TapGateway implements PaymentGatewayInterface
 
     public function __construct()
     {
-        $this->config = config('payment.gateways.tap');
+        $dbConfig = PaymentSettings::first()?->tap ?? [];
+        $envConfig = config('payment.gateways.tap') ?? [];
+        $this->config = array_merge($envConfig, array_filter($dbConfig, fn ($v) => $v !== null && $v !== ''));
         $this->baseUrl = $this->config['base_url'] ?? 'https://api.tap.company/v2';
     }
 
