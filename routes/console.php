@@ -1,5 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Console\Commands\UpdateOverdueInstallments;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -15,6 +18,6 @@ Schedule::command('subscriptions:process-renewals')
     ->appendOutputTo(storage_path('logs/subscription-renewals.log'));
 
 // Update overdue installments - runs daily at midnight
-Schedule::command(\App\Console\Commands\UpdateOverdueInstallments::class)
+Schedule::command(UpdateOverdueInstallments::class)
     ->daily()
     ->withoutOverlapping();

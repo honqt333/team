@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 use App\Models\Setting;
 
 // Hero
@@ -18,20 +20,20 @@ Setting::set('landing.features.subtitle.en', 'We built the system specifically f
 $features = [
     [
         'title_ar' => 'فحص فني رقمي', 'title_en' => 'Digital Inspection',
-        'desc_ar' => 'نماذج فحص رقمية احترافية مدعومة بالصور وإرسالها للعميل للموافقة.', 'desc_en' => 'Professional digital inspection templates with photos, sent to clients for approval.'
+        'desc_ar' => 'نماذج فحص رقمية احترافية مدعومة بالصور وإرسالها للعميل للموافقة.', 'desc_en' => 'Professional digital inspection templates with photos, sent to clients for approval.',
     ],
     [
         'title_ar' => 'إدارة شاملة للمخزون', 'title_en' => 'Comprehensive Inventory',
-        'desc_ar' => 'تتبع قطع الغيار، فواتير المشتريات، وتنبيهات النواقص لحظة بلحظة.', 'desc_en' => 'Track spare parts, purchase invoices, and shortage alerts instantly.'
+        'desc_ar' => 'تتبع قطع الغيار، فواتير المشتريات، وتنبيهات النواقص لحظة بلحظة.', 'desc_en' => 'Track spare parts, purchase invoices, and shortage alerts instantly.',
     ],
     [
         'title_ar' => 'فواتير إلكترونية معتمدة', 'title_en' => 'Certified E-Invoices',
-        'desc_ar' => 'متوافق تماماً مع متطلبات هيئة الزكاة والدخل، مع دعم ضريبة القيمة المضافة.', 'desc_en' => 'Fully compliant with ZATCA requirements, with VAT support.'
+        'desc_ar' => 'متوافق تماماً مع متطلبات هيئة الزكاة والدخل، مع دعم ضريبة القيمة المضافة.', 'desc_en' => 'Fully compliant with ZATCA requirements, with VAT support.',
     ],
     [
         'title_ar' => 'نقاط البيع السريعة', 'title_en' => 'Fast POS',
-        'desc_ar' => 'شاشة نقاط بيع سريعة لإصدار الفواتير الفورية بخطوات بسيطة.', 'desc_en' => 'Fast POS screen to issue instant invoices with simple steps.'
-    ]
+        'desc_ar' => 'شاشة نقاط بيع سريعة لإصدار الفواتير الفورية بخطوات بسيطة.', 'desc_en' => 'Fast POS screen to issue instant invoices with simple steps.',
+    ],
 ];
 Setting::set('landing.features.list', json_encode($features, JSON_UNESCAPED_UNICODE), 'landing');
 

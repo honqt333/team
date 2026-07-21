@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\VehicleMake;
 use App\Models\VehicleModel;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -9,7 +12,7 @@ require __DIR__.'/../../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../../bootstrap/app.php';
 
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 $makes = [
@@ -31,7 +34,7 @@ $makes = [
             ['en' => 'Rush', 'ar' => 'راش'],
             ['en' => 'Supra', 'ar' => 'سوبرا'],
             ['en' => 'C-HR', 'ar' => 'سي اتش آر'],
-        ]
+        ],
     ],
     'Lexus' => [
         'name_ar' => 'لكزس',
@@ -45,7 +48,7 @@ $makes = [
             ['en' => 'GX', 'ar' => 'GX'],
             ['en' => 'NX', 'ar' => 'NX'],
             ['en' => 'UX', 'ar' => 'UX'],
-        ]
+        ],
     ],
     'Hyundai' => [
         'name_ar' => 'هيونداي',
@@ -63,7 +66,7 @@ $makes = [
             ['en' => 'H1', 'ar' => 'إتش 1'],
             ['en' => 'Grandeur', 'ar' => 'غراندور'],
             ['en' => 'Stararia', 'ar' => 'ستاريا'],
-        ]
+        ],
     ],
     'Kia' => [
         'name_ar' => 'كيا',
@@ -81,7 +84,7 @@ $makes = [
             ['en' => 'Pegas', 'ar' => 'بيجاس'],
             ['en' => 'Sonet', 'ar' => 'سونيت'],
             ['en' => 'Picanto', 'ar' => 'بيكانتو'],
-        ]
+        ],
     ],
     'Nissan' => [
         'name_ar' => 'نيسان',
@@ -97,7 +100,7 @@ $makes = [
             ['en' => 'Navara', 'ar' => 'نافارا'],
             ['en' => 'Kicks', 'ar' => 'كيكس'],
             ['en' => 'Urvan', 'ar' => 'أورفان'],
-        ]
+        ],
     ],
     'Honda' => [
         'name_ar' => 'هوندا',
@@ -110,7 +113,7 @@ $makes = [
             ['en' => 'Pilot', 'ar' => 'بايلوت'],
             ['en' => 'Odyssey', 'ar' => 'أوديسي'],
             ['en' => 'HR-V', 'ar' => 'إتش آر في'],
-        ]
+        ],
     ],
     'Mazda' => [
         'name_ar' => 'مازدا',
@@ -123,7 +126,7 @@ $makes = [
             ['en' => 'CX-30', 'ar' => 'سي إكس 30'],
             ['en' => 'CX-3', 'ar' => 'سي إكس 3'],
             ['en' => 'CX-60', 'ar' => 'سي إكس 60'],
-        ]
+        ],
     ],
     'Ford' => [
         'name_ar' => 'فورد',
@@ -138,7 +141,7 @@ $makes = [
             ['en' => 'Territory', 'ar' => 'تيريتوري'],
             ['en' => 'Ranger', 'ar' => 'رينجر'],
             ['en' => 'Crown Victoria', 'ar' => 'كراون فكتوريا'],
-        ]
+        ],
     ],
     'Chevrolet' => [
         'name_ar' => 'شيفروليه',
@@ -153,7 +156,7 @@ $makes = [
             ['en' => 'Cruze', 'ar' => 'كروز'],
             ['en' => 'Spark', 'ar' => 'سبارك'],
             ['en' => 'Traverse', 'ar' => 'ترافيرس'],
-        ]
+        ],
     ],
     'GMC' => [
         'name_ar' => 'جي إم سي',
@@ -164,7 +167,7 @@ $makes = [
             ['en' => 'Acadia', 'ar' => 'أكاديا'],
             ['en' => 'Terrain', 'ar' => 'تيرين'],
             ['en' => 'Savana', 'ar' => 'سافانا'],
-        ]
+        ],
     ],
     'Jeep' => [
         'name_ar' => 'جيب',
@@ -175,7 +178,7 @@ $makes = [
             ['en' => 'Cherokee', 'ar' => 'شيروكي'],
             ['en' => 'Compass', 'ar' => 'كومباس'],
             ['en' => 'Gladiator', 'ar' => 'غلاديتور'],
-        ]
+        ],
     ],
     'Dodge' => [
         'name_ar' => 'دودج',
@@ -185,7 +188,7 @@ $makes = [
             ['en' => 'Challenger', 'ar' => 'تشالنجر'],
             ['en' => 'Durango', 'ar' => 'دورانجو'],
             ['en' => 'Ram', 'ar' => 'رام'],
-        ]
+        ],
     ],
     'Chrysler' => [
         'name_ar' => 'كرايسلر',
@@ -193,7 +196,7 @@ $makes = [
         'models' => [
             ['en' => '300C', 'ar' => '300 سي'],
             ['en' => 'Pacifica', 'ar' => 'باسيفيكا'],
-        ]
+        ],
     ],
     'Cadillac' => [
         'name_ar' => 'كاديلاك',
@@ -203,7 +206,7 @@ $makes = [
             ['en' => 'CTS', 'ar' => 'سي تي إس'],
             ['en' => 'XT5', 'ar' => 'إكس تي 5'],
             ['en' => 'CT6', 'ar' => 'سي تي 6'],
-        ]
+        ],
     ],
     'Lincoln' => [
         'name_ar' => 'لينكون',
@@ -212,7 +215,7 @@ $makes = [
             ['en' => 'Navigator', 'ar' => 'نافيجاتور'],
             ['en' => 'Aviator', 'ar' => 'أفياتور'],
             ['en' => 'Continental', 'ar' => 'كونتيننتال'],
-        ]
+        ],
     ],
     'BMW' => [
         'name_ar' => 'بي إم دبليو',
@@ -225,7 +228,7 @@ $makes = [
             ['en' => 'X6', 'ar' => 'إكس 6'],
             ['en' => 'X7', 'ar' => 'إكس 7'],
             ['en' => 'i8', 'ar' => 'آي 8'],
-        ]
+        ],
     ],
     'Mercedes-Benz' => [
         'name_ar' => 'مرسيدس بنز',
@@ -239,7 +242,7 @@ $makes = [
             ['en' => 'GLE', 'ar' => 'جي إل إي'],
             ['en' => 'GLS', 'ar' => 'جي إل إس'],
             ['en' => 'A-Class', 'ar' => 'الفئة A'],
-        ]
+        ],
     ],
     'Audi' => [
         'name_ar' => 'أودي',
@@ -252,7 +255,7 @@ $makes = [
             ['en' => 'Q7', 'ar' => 'كيو 7'],
             ['en' => 'Q8', 'ar' => 'كيو 8'],
             ['en' => 'e-tron', 'ar' => 'إي ترون'],
-        ]
+        ],
     ],
     'Porsche' => [
         'name_ar' => 'بورش',
@@ -263,7 +266,7 @@ $makes = [
             ['en' => 'Macan', 'ar' => 'ماكان'],
             ['en' => '911', 'ar' => '911'],
             ['en' => 'Taycan', 'ar' => 'تايكان'],
-        ]
+        ],
     ],
     'Land Rover' => [
         'name_ar' => 'لاند روفر',
@@ -275,7 +278,7 @@ $makes = [
             ['en' => 'Range Rover Evoque', 'ar' => 'رينج روفر إيفوك'],
             ['en' => 'Defender', 'ar' => 'ديفندر'],
             ['en' => 'Discovery', 'ar' => 'ديسكفري'],
-        ]
+        ],
     ],
     'Jaguar' => [
         'name_ar' => 'جاكوار',
@@ -284,7 +287,7 @@ $makes = [
             ['en' => 'F-Pace', 'ar' => 'إف بيس'],
             ['en' => 'XF', 'ar' => 'إكس إف'],
             ['en' => 'XJ', 'ar' => 'إكس جي'],
-        ]
+        ],
     ],
     'Volkswagen' => [
         'name_ar' => 'فولكس فاجن',
@@ -296,7 +299,7 @@ $makes = [
             ['en' => 'Touareg', 'ar' => 'طوارق'],
             ['en' => 'Tiguan', 'ar' => 'تيجوان'],
             ['en' => 'Teramont', 'ar' => 'تيرامونت'],
-        ]
+        ],
     ],
     'Volvo' => [
         'name_ar' => 'فولفو',
@@ -305,7 +308,7 @@ $makes = [
             ['en' => 'XC90', 'ar' => 'إكس سي 90'],
             ['en' => 'XC60', 'ar' => 'إكس سي 60'],
             ['en' => 'S90', 'ar' => 'إس 90'],
-        ]
+        ],
     ],
     'Infiniti' => [
         'name_ar' => 'إنفينيتي',
@@ -314,7 +317,7 @@ $makes = [
             ['en' => 'QX80', 'ar' => 'كيو إكس 80'],
             ['en' => 'QX60', 'ar' => 'كيو إكس 60'],
             ['en' => 'Q50', 'ar' => 'كيو 50'],
-        ]
+        ],
     ],
     'Changan' => [
         'name_ar' => 'شانجان',
@@ -327,7 +330,7 @@ $makes = [
             ['en' => 'Alsvin', 'ar' => 'ألسفن'],
             ['en' => 'UNI-K', 'ar' => 'يوني كي'],
             ['en' => 'UNI-T', 'ar' => 'يوني تي'],
-        ]
+        ],
     ],
     'Geely' => [
         'name_ar' => 'جيلي',
@@ -339,7 +342,7 @@ $makes = [
             ['en' => 'Monjaro', 'ar' => 'مونجارو'],
             ['en' => 'Okavango', 'ar' => 'أوكافانجو'],
             ['en' => 'Geometry C', 'ar' => 'جيومتري سي'],
-        ]
+        ],
     ],
     'MG' => [
         'name_ar' => 'إم جي',
@@ -350,7 +353,7 @@ $makes = [
             ['en' => 'MG ZS', 'ar' => 'إم جي زد إس'],
             ['en' => 'MG HS', 'ar' => 'إم جي إتش إس'],
             ['en' => 'RX8', 'ar' => 'أر إكس 8'],
-        ]
+        ],
     ],
     'Haval' => [
         'name_ar' => 'هافال',
@@ -360,7 +363,7 @@ $makes = [
             ['en' => 'Jolion', 'ar' => 'جوليان'],
             ['en' => 'Dargo', 'ar' => 'دارغو'],
             ['en' => 'H9', 'ar' => 'إتش 9'],
-        ]
+        ],
     ],
     'BYD' => [
         'name_ar' => 'بي واي دي',
@@ -371,7 +374,7 @@ $makes = [
             ['en' => 'Qin Plus', 'ar' => 'تشين بلس'],
             ['en' => 'Tang', 'ar' => 'تانغ'],
             ['en' => 'Atto 3', 'ar' => 'أتو 3'],
-        ]
+        ],
     ],
     'Genesis' => [
         'name_ar' => 'جينيسيس',
@@ -382,7 +385,7 @@ $makes = [
             ['en' => 'G90', 'ar' => 'جي 90'],
             ['en' => 'GV80', 'ar' => 'جي في 80'],
             ['en' => 'GV70', 'ar' => 'جي في 70'],
-        ]
+        ],
     ],
     'Suzuki' => [
         'name_ar' => 'سوزوكي',
@@ -393,7 +396,7 @@ $makes = [
             ['en' => 'Dzire', 'ar' => 'ديزاير'],
             ['en' => 'Baleno', 'ar' => 'بالينو'],
             ['en' => 'Ertiga', 'ar' => 'أرتيجا'],
-        ]
+        ],
     ],
     'Mitsubishi' => [
         'name_ar' => 'ميتسوبيشي',
@@ -406,7 +409,7 @@ $makes = [
             ['en' => 'Eclipse Cross', 'ar' => 'إكليبس كروس'],
             ['en' => 'Mirage', 'ar' => 'ميراج'],
             ['en' => 'Montero Sport', 'ar' => 'مونتيرو سبورت'],
-        ]
+        ],
     ],
     'Isuzu' => [
         'name_ar' => 'ايسوزو',
@@ -414,7 +417,7 @@ $makes = [
         'models' => [
             ['en' => 'D-Max', 'ar' => 'دي ماكس'],
             ['en' => 'MU-X', 'ar' => 'ام يو اكس'],
-        ]
+        ],
     ],
     'Tesla' => [
         'name_ar' => 'تسلا',
@@ -424,7 +427,7 @@ $makes = [
             ['en' => 'Model Y', 'ar' => 'موديل واي'],
             ['en' => 'Model S', 'ar' => 'موديل إس'],
             ['en' => 'Model X', 'ar' => 'موديل إكس'],
-        ]
+        ],
     ],
     'Great Wall' => [
         'name_ar' => 'جريت وول',
@@ -432,7 +435,7 @@ $makes = [
         'models' => [
             ['en' => 'Poer', 'ar' => 'باور'],
             ['en' => 'Wingle', 'ar' => 'وينجل'],
-        ]
+        ],
     ],
     // ========================================
     // NEW BRANDS REQUESTED (22 Brands)
@@ -446,7 +449,7 @@ $makes = [
             ['en' => 'Megane', 'ar' => 'ميغان'],
             ['en' => 'Talisman', 'ar' => 'تالسمان'],
             ['en' => 'Symbol', 'ar' => 'سيمبول'],
-        ]
+        ],
     ],
     'Peugeot' => [
         'name_ar' => 'بيجو',
@@ -457,7 +460,7 @@ $makes = [
             ['en' => '508', 'ar' => '508'],
             ['en' => '2008', 'ar' => '2008'],
             ['en' => 'Partner', 'ar' => 'بارتنر'],
-        ]
+        ],
     ],
     'Subaru' => [
         'name_ar' => 'سوبارو',
@@ -467,7 +470,7 @@ $makes = [
             ['en' => 'Forester', 'ar' => 'فورستر'],
             ['en' => 'XV', 'ar' => 'إكس في'],
             ['en' => 'WRX', 'ar' => 'دبليو آر إكس'],
-        ]
+        ],
     ],
     'Fiat' => [
         'name_ar' => 'فيات',
@@ -476,7 +479,7 @@ $makes = [
             ['en' => '500', 'ar' => '500'],
             ['en' => '500X', 'ar' => '500 إكس'],
             ['en' => 'Fiorino', 'ar' => 'فيورينو'],
-        ]
+        ],
     ],
     'Chery' => [
         'name_ar' => 'شيري',
@@ -486,7 +489,7 @@ $makes = [
             ['en' => 'Tiggo 8 Pro', 'ar' => 'تيجو 8 برو'],
             ['en' => 'Tiggo 4 Pro', 'ar' => 'تيجو 4 برو'],
             ['en' => 'Arrizo 6 Pro', 'ar' => 'أريزو 6 برو'],
-        ]
+        ],
     ],
     'Jetour' => [
         'name_ar' => 'جيتور',
@@ -496,7 +499,7 @@ $makes = [
             ['en' => 'X90', 'ar' => 'إكس 90'],
             ['en' => 'Dashing', 'ar' => 'داشينج'],
             ['en' => 'T2', 'ar' => 'تي 2'],
-        ]
+        ],
     ],
     'JAC' => [
         'name_ar' => 'جاك',
@@ -505,7 +508,7 @@ $makes = [
             ['en' => 'J7', 'ar' => 'جي 7'],
             ['en' => 'S3', 'ar' => 'إس 3'],
             ['en' => 'T8', 'ar' => 'تي 8'],
-        ]
+        ],
     ],
     'GAC' => [
         'name_ar' => 'جي أي سي',
@@ -515,7 +518,7 @@ $makes = [
             ['en' => 'GS4', 'ar' => 'جي إس 4'],
             ['en' => 'GA6', 'ar' => 'جي أيه 6'],
             ['en' => 'EMPOW', 'ar' => 'إمباو'],
-        ]
+        ],
     ],
     'Hongqi' => [
         'name_ar' => 'هونشي',
@@ -525,7 +528,7 @@ $makes = [
             ['en' => 'H9', 'ar' => 'إتش 9'],
             ['en' => 'HS5', 'ar' => 'إتش إس 5'],
             ['en' => 'Oseado', 'ar' => 'أوسادو'],
-        ]
+        ],
     ],
     'Tank' => [
         'name_ar' => 'تانك',
@@ -533,7 +536,7 @@ $makes = [
         'models' => [
             ['en' => 'Tank 300', 'ar' => 'تانك 300'],
             ['en' => 'Tank 500', 'ar' => 'تانك 500'],
-        ]
+        ],
     ],
     'Exeed' => [
         'name_ar' => 'إكسيد',
@@ -542,7 +545,7 @@ $makes = [
             ['en' => 'TXL', 'ar' => 'تي إكس إل'],
             ['en' => 'VX', 'ar' => 'في إكس'],
             ['en' => 'RX', 'ar' => 'آر إكس'],
-        ]
+        ],
     ],
     'Bestune' => [
         'name_ar' => 'بيستون',
@@ -551,7 +554,7 @@ $makes = [
             ['en' => 'T77 Pro', 'ar' => 'تي 77 برو'],
             ['en' => 'T99', 'ar' => 'تي 99'],
             ['en' => 'B70', 'ar' => 'بي 70'],
-        ]
+        ],
     ],
     'Aston Martin' => [
         'name_ar' => 'أستون مارتن',
@@ -560,7 +563,7 @@ $makes = [
             ['en' => 'DBX', 'ar' => 'دي بي إكس'],
             ['en' => 'Vantage', 'ar' => 'فانتاج'],
             ['en' => 'DB11', 'ar' => 'دي بي 11'],
-        ]
+        ],
     ],
     'Ferrari' => [
         'name_ar' => 'فيراري',
@@ -570,7 +573,7 @@ $makes = [
             ['en' => 'Roma', 'ar' => 'روما'],
             ['en' => 'Portofino', 'ar' => 'بورتوفينو'],
             ['en' => 'F8', 'ar' => 'إف 8'],
-        ]
+        ],
     ],
     'Lamborghini' => [
         'name_ar' => 'لامبورغيني',
@@ -579,7 +582,7 @@ $makes = [
             ['en' => 'Urus', 'ar' => 'أوروس'],
             ['en' => 'Huracan', 'ar' => 'هوراكان'],
             ['en' => 'Aventador', 'ar' => 'أفنتادور'],
-        ]
+        ],
     ],
     'Bentley' => [
         'name_ar' => 'بنتلي',
@@ -588,7 +591,7 @@ $makes = [
             ['en' => 'Bentayga', 'ar' => 'بينتايجا'],
             ['en' => 'Continental GT', 'ar' => 'كونتيننتال جي تي'],
             ['en' => 'Flying Spur', 'ar' => 'فلاينج سبير'],
-        ]
+        ],
     ],
     'Rolls-Royce' => [
         'name_ar' => 'رولز رويس',
@@ -598,7 +601,7 @@ $makes = [
             ['en' => 'Ghost', 'ar' => 'غوست'],
             ['en' => 'Phantom', 'ar' => 'فانتوم'],
             ['en' => 'Wraith', 'ar' => 'ريث'],
-        ]
+        ],
     ],
     'Maserati' => [
         'name_ar' => 'مازيراتي',
@@ -607,7 +610,7 @@ $makes = [
             ['en' => 'Levante', 'ar' => 'ليفانتي'],
             ['en' => 'Ghibli', 'ar' => 'جيبلي'],
             ['en' => 'Quattroporte', 'ar' => 'كواتروبورتي'],
-        ]
+        ],
     ],
     'Skoda' => [
         'name_ar' => 'سكودا',
@@ -616,7 +619,7 @@ $makes = [
             ['en' => 'Octavia', 'ar' => 'أوكتافيا'],
             ['en' => 'Kodiaq', 'ar' => 'كودياك'],
             ['en' => 'Superb', 'ar' => 'سوبيرب'],
-        ]
+        ],
     ],
     'Foton' => [
         'name_ar' => 'فوتون',
@@ -624,7 +627,7 @@ $makes = [
         'models' => [
             ['en' => 'Tunland', 'ar' => 'تونلاند'],
             ['en' => 'View', 'ar' => 'فيو'],
-        ]
+        ],
     ],
     'DFSK' => [
         'name_ar' => 'دي اف اس كي',
@@ -632,7 +635,7 @@ $makes = [
         'models' => [
             ['en' => 'Glory 580', 'ar' => 'غلوري 580'],
             ['en' => 'EC35', 'ar' => 'إي سي 35'],
-        ]
+        ],
     ],
     'SsangYong' => [
         'name_ar' => 'سانج يونج',
@@ -641,28 +644,28 @@ $makes = [
             ['en' => 'Korando', 'ar' => 'كوراندو'],
             ['en' => 'Rexton', 'ar' => 'ريكتون'],
             ['en' => 'Tivoli', 'ar' => 'تيفولي'],
-        ]
+        ],
     ],
 ];
 
 // Ensure public/makes storage directory exists
-if (!Storage::disk('public')->exists('makes')) {
+if (! Storage::disk('public')->exists('makes')) {
     Storage::disk('public')->makeDirectory('makes');
 }
 
-echo "Starting seeding for " . count($makes) . " brands and their models...\n";
+echo 'Starting seeding for '.count($makes)." brands and their models...\n";
 
 foreach ($makes as $makeName => $makeData) {
     // 1. Check if logo already exists or download it
     $logoPath = null;
     $slug = $makeData['slug'];
     $potentialFile = "makes/{$slug}.png";
-    
+
     // Attempt download from the optimized github dataset
     $url = "https://raw.githubusercontent.com/filippofilip95/car-logos-dataset/master/logos/optimized/{$slug}.png";
-    
+
     echo "Processing {$makeName}... ";
-    
+
     try {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -672,43 +675,43 @@ foreach ($makes as $makeName => $makeData) {
         $content = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         if ($httpCode === 200 && $content) {
             // Save with unique name to prevent cache issues and match system pattern
             $hash = Str::random(40);
             $logoFilename = "makes/{$hash}.png";
             Storage::disk('public')->put($logoFilename, $content);
             $logoPath = $logoFilename;
-            echo "Logo Downloaded. ";
+            echo 'Logo Downloaded. ';
         } else {
             echo "Logo not found (HTTP {$httpCode}). ";
         }
-    } catch (\Exception $e) {
-        echo "Logo download error: " . $e->getMessage() . ". ";
+    } catch (Exception $e) {
+        echo 'Logo download error: '.$e->getMessage().'. ';
     }
-    
+
     // 2. Create or Update Make
     $make = VehicleMake::updateOrCreate([
         'name_en' => $makeName,
-        'source' => 'system'
+        'source' => 'system',
     ], [
         'name_ar' => $makeData['name_ar'],
         'is_active' => true,
         'tenant_id' => null,
         'center_id' => null,
     ]);
-    
+
     // Update logo if we downloaded one
     if ($logoPath) {
         $make->update(['logo_path' => $logoPath]);
     }
-    
+
     // 3. Create or Update Models
     foreach ($makeData['models'] as $modelData) {
         VehicleModel::updateOrCreate([
             'make_id' => $make->id,
             'name_en' => $modelData['en'],
-            'source' => 'system'
+            'source' => 'system',
         ], [
             'name_ar' => $modelData['ar'],
             'is_active' => true,
@@ -716,7 +719,7 @@ foreach ($makes as $makeName => $makeData) {
             'center_id' => null,
         ]);
     }
-    
+
     echo "Done.\n";
 }
 

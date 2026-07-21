@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\Api\AiDemoController;
 use App\Http\Controllers\Api\HR\BiometricAttendanceController;
 use App\Http\Controllers\Api\WorkOrderSuggestionController;

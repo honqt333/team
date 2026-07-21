@@ -1,37 +1,43 @@
 <?php
 
-use App\Models\Tenant;
+declare(strict_types=1);
+
 use App\Models\Center;
+use App\Models\Tenant;
 use App\Models\User;
-use Spatie\Permission\Models\Role;
+use App\Services\TenantSetupService;
+use App\Support\Permissions;
+use Illuminate\Contracts\Console\Kernel;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 require __DIR__.'/../../vendor/autoload.php';
 
 $app = require_once __DIR__.'/../../bootstrap/app.php';
 
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+$kernel = $app->make(Kernel::class);
 $kernel->bootstrap();
 
 // 1. Create/Retrieve Tenant
 $tenant = Tenant::firstOrCreate(
-    ['slug' => 'carag'], 
+    ['slug' => 'carag'],
     ['name' => 'Carag', 'status' => 'active']
 );
-$tenant->status = 'active'; 
+$tenant->status = 'active';
 $tenant->save();
 
 // 2. Create/Retrieve Center
 $center = Center::firstOrCreate(
-    ['slug' => 'main', 'tenant_id' => $tenant->id], 
+    ['slug' => 'main', 'tenant_id' => $tenant->id],
     ['tenant_id' => $tenant->id, 'name' => 'Main Center', 'is_active' => true]
 );
 
 // 3. Create/Retrieve Super Admin User
 $user = User::where('email', 'admin@admin.com')->first();
-if (!$user) {
-    $user = new User();
+
+if (! $user) {
+    $user = new User;
     $user->name = 'Super Admin';
     $user->email = 'admin@admin.com';
     $user->password = bcrypt('11223355');
@@ -50,12 +56,13 @@ if (!$user) {
 }
 
 // 4. Attach User to Center
-if (!$user->centers()->where('center_id', $center->id)->exists()) {
+if (! $user->centers()->where('center_id', $center->id)->exists()) {
     $user->centers()->attach($center, ['tenant_id' => $tenant->id]);
 }
 
 // Seed all permissions globally
-$allPermissions = \App\Support\Permissions::all();
+$allPermissions = Permissions::all();
+
 foreach ($allPermissions as $permission) {
     Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
 }
@@ -64,7 +71,7 @@ foreach ($allPermissions as $permission) {
 app(PermissionRegistrar::class)->forgetCachedPermissions();
 
 // Seed roles for this tenant
-$tenantSetupService = new \App\Services\TenantSetupService();
+$tenantSetupService = new TenantSetupService;
 $tenantSetupService->seedRolesForTenant($tenant->id);
 
 // Assign Super Admin Role to this user
@@ -75,7 +82,7 @@ $superAdminRole = Role::where('name', 'super_admin')
     ->first();
 
 if ($superAdminRole) {
-    if (!$user->hasRole('super_admin')) {
+    if (! $user->hasRole('super_admin')) {
         $user->assignRole($superAdminRole);
     }
 }
