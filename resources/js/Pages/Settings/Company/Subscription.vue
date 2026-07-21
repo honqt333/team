@@ -12,8 +12,11 @@ const props = defineProps({
     available_plans: { type: Array, default: () => [] },
     subscription_history: { type: Array, default: () => [] },
     recent_payments: { type: Array, default: () => [] },
+    pending_receipts: { type: Array, default: () => [] },
     enabled_gateways: { type: Array, default: () => [] },
     payment_settings: { type: Object, default: () => ({}) },
+    company_info: { type: Object, default: () => ({}) },
+    vat_settings: { type: Object, default: () => ({}) },
 });
 
 const locale = computed(() => document.documentElement.lang || 'ar');
@@ -189,6 +192,68 @@ const gatewayLabels = {
                 />
             </div>
 
+            <!-- Pending bank transfer receipts -->
+            <div
+                v-if="pending_receipts.length"
+                class="rounded-2xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-800/50 dark:bg-amber-900/10"
+            >
+                <h2 class="mb-1 text-base font-bold text-amber-900 dark:text-amber-200">
+                    {{ locale === 'ar' ? 'إيصالات قيد المراجعة' : 'Receipts under review' }}
+                </h2>
+                <p class="mb-5 text-xs text-amber-700/80 dark:text-amber-300/80">
+                    {{
+                        locale === 'ar'
+                            ? 'هذه الإيصالات تم رفعها وفي انتظار موافقة الإدارة'
+                            : 'These receipts have been uploaded and are awaiting admin approval'
+                    }}
+                </p>
+                <div class="space-y-2">
+                    <div
+                        v-for="r in pending_receipts"
+                        :key="r.id"
+                        class="flex items-center justify-between rounded-lg border border-amber-200 bg-white p-3 dark:border-amber-800/30 dark:bg-slate-800"
+                    >
+                        <div class="flex items-center gap-3 min-w-0 flex-1">
+                            <div
+                                class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300"
+                            >
+                                <svg
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-slate-900 dark:text-white">
+                                    {{
+                                        locale === 'ar'
+                                            ? r.subscription?.plan?.name_ar
+                                            : r.subscription?.plan?.name_en
+                                    }}
+                                </p>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">
+                                    {{ formatDate(r.transfer_date) }} ·
+                                    {{ formatCurrency(r.transfer_amount) }} SAR
+                                </p>
+                            </div>
+                        </div>
+                        <span
+                            class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
+                        >
+                            {{ locale === 'ar' ? 'قيد المراجعة' : 'Pending' }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Recent payments -->
             <div
                 v-if="recent_payments.length"
@@ -288,6 +353,8 @@ const gatewayLabels = {
             :payment-settings="payment_settings"
             :bank-accounts="payment_settings.bank_accounts || []"
             :bank-instructions="payment_settings.bank_transfer_instructions"
+            :company-info="company_info"
+            :vat-settings="vat_settings"
             @close="closeModal"
             @success="onSuccess"
         />

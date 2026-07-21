@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 import PaymentMethodSelector from './PaymentMethodSelector.vue';
 import PromoCodeInput from './PromoCodeInput.vue';
+import BankTransferReceiptUpload from './BankTransferReceiptUpload.vue';
 
 const props = defineProps({
     open: { type: Boolean, default: false },
@@ -11,6 +12,8 @@ const props = defineProps({
     paymentSettings: { type: Object, default: () => ({}) },
     bankAccounts: { type: Array, default: () => [] },
     bankInstructions: { type: String, default: null },
+    companyInfo: { type: Object, default: () => ({}) },
+    vatSettings: { type: Object, default: () => ({ enabled: true, rate: 15, inclusive: false }) },
 });
 const emit = defineEmits(['close', 'success']);
 
@@ -24,6 +27,7 @@ const pricing = ref(null);
 const loading = ref(false);
 const error = ref(null);
 const success = ref(null);
+const bankTransferResult = ref(null);
 
 watch(
     () => props.open,
@@ -103,12 +107,7 @@ async function subscribe() {
         }
 
         if (data.bank_transfer) {
-            success.value = data.message;
-            setTimeout(() => {
-                emit('success', data);
-                emit('close');
-                router.reload();
-            }, 2000);
+            bankTransferResult.value = data;
             return;
         }
 
@@ -144,7 +143,21 @@ async function subscribe() {
 
 function close() {
     if (loading.value) return;
+    bankTransferResult.value = null;
+    success.value = null;
     emit('close');
+}
+
+function onReceiptUploaded() {
+    success.value =
+        locale.value === 'ar'
+            ? 'تم رفع الإيصال بنجاح. سيتم تفعيل اشتراكك فور مراجعته من الإدارة.'
+            : 'Receipt uploaded successfully. Your subscription will be activated after review.';
+    setTimeout(() => {
+        emit('success');
+        emit('close');
+        router.reload();
+    }, 2500);
 }
 
 function onPromoApplied(data) {
@@ -202,7 +215,50 @@ const formatCurrency = (amount) => {
                     </button>
                 </div>
 
-                <div v-if="success" class="p-8 text-center">
+                <div v-if="bankTransferResult" class="space-y-4 p-6">
+                    <div class="text-center">
+                        <div
+                            class="mx-auto mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300"
+                        >
+                            <svg
+                                class="h-7 w-7"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                            {{
+                                locale === 'ar'
+                                    ? 'تم استلام طلبك — ارفع الإيصال لتفعيل الاشتراك'
+                                    : 'Order received — Upload receipt to activate'
+                            }}
+                        </h3>
+                        <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            {{
+                                locale === 'ar'
+                                    ? 'حوّل المبلغ على أحد الحسابات أعلاه، ثم ارفع الإيصال هنا'
+                                    : 'Transfer the amount to one of the bank accounts above, then upload the receipt here'
+                            }}
+                        </p>
+                    </div>
+
+                    <BankTransferReceiptUpload
+                        :subscription="bankTransferResult.subscription"
+                        :payment-settings="paymentSettings"
+                        @success="onReceiptUploaded"
+                        @close="emit('close')"
+                    />
+                </div>
+
+                <div v-else-if="success" class="p-8 text-center">
                     <div
                         class="mx-auto mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-300"
                     >
@@ -388,7 +444,7 @@ const formatCurrency = (amount) => {
 
                 <!-- Footer -->
                 <div
-                    v-if="!success"
+                    v-if="!success && !bankTransferResult"
                     class="sticky bottom-0 flex items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:border-slate-700 dark:bg-slate-900/50"
                 >
                     <button
