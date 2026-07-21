@@ -456,7 +456,7 @@
                                 {{ $t('inventory.moves.title') }}
                             </a>
                             <a
-                                v-if="can('inventory.transfers.view')"
+                                v-if="can('inventory.moves.view')"
                                 href="/app/inventory/transfers"
                                 :class="[
                                     'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
@@ -1710,7 +1710,7 @@
                                 {{ $t('inventory.moves.title') }}
                             </a>
                             <a
-                                v-if="can('inventory.transfers.view')"
+                                v-if="can('inventory.moves.view')"
                                 href="/app/inventory/transfers"
                                 @click="mobileMenuOpen = false"
                                 :class="[
