@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\App\BranchesController;
 use App\Http\Controllers\App\CenterSettingsController;
 use App\Http\Controllers\App\CompanyProfileController;
@@ -35,7 +37,11 @@ use App\Http\Controllers\App\InvoicesController;
 use App\Http\Controllers\App\NotificationController;
 use App\Http\Controllers\App\PartsController;
 use App\Http\Controllers\App\PaymentsController;
-use App\Http\Controllers\App\PrintSettingsSignatureController;
+use App\Http\Controllers\App\PrintSettings\Signatures\DestroySignatureController;
+use App\Http\Controllers\App\PrintSettings\Signatures\IndexSignaturesController;
+use App\Http\Controllers\App\PrintSettings\Signatures\ReorderSignaturesController;
+use App\Http\Controllers\App\PrintSettings\Signatures\StoreSignatureController;
+use App\Http\Controllers\App\PrintSettings\Signatures\UpdateSignatureController;
 use App\Http\Controllers\App\PurchaseInvoicesController;
 use App\Http\Controllers\App\PurchaseOrdersController;
 use App\Http\Controllers\App\PurchaseReturnsController;
@@ -330,13 +336,15 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
 
     // Print Settings — Signatures (tenant-scoped image uploads + lifecycle)
-    Route::post('/settings/print/signatures', [PrintSettingsSignatureController::class, 'store'])->middleware('throttle:uploads')->name('settings.print.signatures.store');
-    Route::delete('/settings/print/signatures/{signatureId}', [PrintSettingsSignatureController::class, 'destroy'])->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.destroy');
-    // Update (rename + show/hide) and reorder (drag-drop in the library).
-    // PATCH is correct REST for partial updates; POST is correct for
-    // "reorder this list" which is an action over the collection.
-    Route::patch('/settings/print/signatures/{signatureId}', [PrintSettingsSignatureController::class, 'update'])->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.update');
-    Route::post('/settings/print/signatures/reorder', [PrintSettingsSignatureController::class, 'reorder'])->name('settings.print.signatures.reorder');
+    // Each endpoint is a single-action controller under
+    // App\Http\Controllers\App\PrintSettings\Signatures. This keeps
+    // each class under ~150 lines and makes the route => handler
+    // mapping obvious without a 600+ line god controller.
+    Route::get('/settings/print/signatures', IndexSignaturesController::class)->name('settings.print.signatures.index');
+    Route::post('/settings/print/signatures', StoreSignatureController::class)->middleware('throttle:uploads')->name('settings.print.signatures.store');
+    Route::patch('/settings/print/signatures/{signatureId}', UpdateSignatureController::class)->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.update');
+    Route::delete('/settings/print/signatures/{signatureId}', DestroySignatureController::class)->where('signatureId', '[0-9a-f-]{36}')->name('settings.print.signatures.destroy');
+    Route::post('/settings/print/signatures/reorder', ReorderSignaturesController::class)->name('settings.print.signatures.reorder');
 
     // Users Settings
     Route::resource('settings/users', UserController::class)->names('settings.users');
