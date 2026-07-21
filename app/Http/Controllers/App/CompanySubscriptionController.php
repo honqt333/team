@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
 use App\Models\Billing\PromoCode;
 use App\Models\Billing\Subscription;
@@ -479,5 +480,91 @@ class CompanySubscriptionController extends Controller
         $subscription->tenant->update(['status' => 'active']);
 
         return back()->with('success', __('company_profile.subscription.resumed'));
+    }
+
+    /**
+     * Upload a bank transfer receipt for a subscription payment.
+     * Creates a BankTransferReceipt in 'pending' status for admin review.
+     */
+    public function uploadReceipt(Request $request, Subscription $subscription)
+    {
+        // Verify the subscription belongs to this tenant
+        if ($subscription->tenant_id !== auth()->user()->tenant_id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'transfer_amount' => 'required|numeric|min:0.01',
+            'transfer_reference' => 'required|string|max:255',
+            'transfer_date' => 'required|date',
+            'bank_name' => 'required|string|max:255',
+            'sender_account_name' => 'required|string|max:255',
+            'sender_account_number' => 'nullable|string|max:255',
+            'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            return DB::transaction(function () use ($request, $subscription, $validated) {
+                $file = $request->file('receipt');
+                $path = $file->store("bank-transfer-receipts/{$subscription->tenant_id}", 'public');
+
+                // Find the latest pending payment for this subscription, if any
+                $payment = $subscription->payments()
+                    ->whereIn('status', ['pending', 'pending_payment'])
+                    ->latest()
+                    ->first();
+
+                $receipt = BankTransferReceipt::create([
+                    'tenant_id' => $subscription->tenant_id,
+                    'subscription_id' => $subscription->id,
+                    'subscription_payment_id' => $payment?->id,
+                    'transfer_amount' => $validated['transfer_amount'],
+                    'transfer_reference' => $validated['transfer_reference'],
+                    'transfer_date' => $validated['transfer_date'],
+                    'bank_name' => $validated['bank_name'],
+                    'sender_account_name' => $validated['sender_account_name'],
+                    'sender_account_number' => $validated['sender_account_number'] ?? null,
+                    'receipt_path' => $path,
+                    'receipt_filename' => $file->getClientOriginalName(),
+                    'receipt_mime_type' => $file->getMimeType(),
+                    'receipt_size_bytes' => $file->getSize(),
+                    'status' => 'pending',
+                    'review_notes' => $validated['notes'] ?? null,
+                ]);
+
+                // Move the subscription to pending_payment while admin reviews
+                if ($subscription->status !== 'pending_payment') {
+                    $subscription->update(['status' => 'pending_payment']);
+                }
+
+                return back()->with('success', __('company_profile.subscription.receipt_uploaded'));
+            });
+        } catch (Throwable $e) {
+            Log::error('Bank transfer receipt upload failed', [
+                'subscription_id' => $subscription->id,
+                'tenant_id' => $subscription->tenant_id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withErrors(['receipt' => __('company_profile.subscription.receipt_upload_failed')]);
+        }
+    }
+
+    /**
+     * List the current tenant's bank transfer receipts.
+     */
+    public function myReceipts(Request $request)
+    {
+        $tenantId = auth()->user()->tenant_id;
+
+        $receipts = BankTransferReceipt::where('tenant_id', $tenantId)
+            ->with(['subscription.plan', 'payment'])
+            ->latest()
+            ->paginate(20);
+
+        return Inertia::render('Settings/Company/MyReceipts', [
+            'receipts' => $receipts,
+        ]);
     }
 }

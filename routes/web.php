@@ -90,6 +90,7 @@ use App\Http\Controllers\Public\PublicQuoteController;
 use App\Http\Controllers\System\AdminUsersController;
 use App\Http\Controllers\System\AnnouncementsController;
 use App\Http\Controllers\System\BackupController;
+use App\Http\Controllers\System\BankTransferReceiptsController;
 use App\Http\Controllers\System\CommunicationTemplatesController;
 use App\Http\Controllers\System\ContactMessageController;
 use App\Http\Controllers\System\DeveloperController;
@@ -333,6 +334,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/cancel/{subscription}', [CompanySubscriptionController::class, 'cancel'])->name('cancel');
         Route::post('/resume/{subscription}', [CompanySubscriptionController::class, 'resume'])->name('resume');
         Route::post('/auto-renew/{subscription}', [CompanySubscriptionController::class, 'toggleAutoRenew'])->name('auto-renew');
+        Route::post('/receipt/{subscription}', [CompanySubscriptionController::class, 'uploadReceipt'])->name('receipt.upload');
+        Route::get('/receipts', [CompanySubscriptionController::class, 'myReceipts'])->name('receipts');
     });
 
     // Branches Settings
@@ -742,6 +745,15 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update');
         // Impersonation is super_admin only — powerful debugging affordance.
         Route::post('/tenants/{tenant}/impersonate', [ImpersonationController::class, 'start'])->name('system.impersonate.start');
+
+        // Bank Transfer Receipts Review
+        Route::prefix('bank-transfer-receipts')->name('system.bank-receipts.')->group(function () {
+            Route::get('/', [BankTransferReceiptsController::class, 'index'])->name('index');
+            Route::get('/{receipt}', [BankTransferReceiptsController::class, 'show'])->name('show');
+            Route::get('/{receipt}/download', [BankTransferReceiptsController::class, 'download'])->name('download');
+            Route::post('/{receipt}/approve', [BankTransferReceiptsController::class, 'approve'])->name('approve');
+            Route::post('/{receipt}/reject', [BankTransferReceiptsController::class, 'reject'])->name('reject');
+        });
 
         // Tenant backups — super_admin only because they reveal
         // a tenant's full data set, and the file itself is held on
