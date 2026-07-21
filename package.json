@@ -9,7 +9,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "test:coverage": "vitest run --coverage",
-        "lint": "eslint . --ext .vue,.js,.ts",
+        "lint": "eslint resources/js",
         "format": "prettier --write .",
         "prepare": "husky"
     },

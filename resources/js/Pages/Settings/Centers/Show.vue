@@ -2,57 +2,127 @@
     <AppLayout>
         <div class="space-y-6">
             <!-- Back Button & Header Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+            >
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
                         <BackButton href="/app/settings/branches" />
-                        
+
                         <div class="w-px h-8 bg-gray-300 dark:bg-gray-600"></div>
-                        
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+
+                        <div
+                            class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-blue-500/30"
+                        >
+                            <svg
+                                class="w-6 h-6 text-white"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                />
                             </svg>
                         </div>
                         <div>
                             <!-- Commercial Name -->
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">{{ $page.props.tenant?.trade_name || $page.props.tenant?.name }}</p>
-                            
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+                                {{ $page.props.tenant?.trade_name || $page.props.tenant?.name }}
+                            </p>
+
                             <!-- Center Name -->
-                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-0.5">{{ props.center?.name }}</h1>
-                            
+                            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-0.5">
+                                {{ props.center?.name }}
+                            </h1>
+
                             <!-- Center Type -->
-                            <p class="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">{{ props.profile?.center_type || '#' }}</p>
+                            <p class="text-sm font-medium text-blue-600 dark:text-blue-400 mb-2">
+                                {{ props.profile?.center_type || '#' }}
+                            </p>
 
                             <!-- Manager Name -->
-                            <div v-if="props.profile?.manager_name" class="flex items-center gap-2 mb-3 text-sm text-gray-500 dark:text-gray-400">
-                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <div
+                                v-if="props.profile?.manager_name"
+                                class="flex items-center gap-2 mb-3 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                <svg
+                                    class="w-4 h-4 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    />
+                                </svg>
                                 <span>{{ props.profile.manager_name }}</span>
                             </div>
 
                             <!-- Contact Info -->
-                            <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                            <div
+                                class="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400"
+                            >
                                 <span v-if="props.contact?.phone" class="flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                    <svg
+                                        class="w-4 h-4 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                                        />
+                                    </svg>
                                     <span dir="ltr">{{ props.contact?.phone }}</span>
                                 </span>
                                 <span v-if="props.contact?.email" class="flex items-center gap-1.5">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                    <svg
+                                        class="w-4 h-4 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                        />
+                                    </svg>
                                     <span>{{ props.contact?.email }}</span>
                                 </span>
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Center Status -->
                     <div class="flex items-center gap-2">
                         <!-- Main Center Badge -->
-                        <span v-if="props.center?.is_main" class="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-sm font-medium">
-                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        <span
+                            v-if="props.center?.is_main"
+                            class="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-lg text-sm font-medium"
+                        >
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                                />
+                            </svg>
                             {{ $t('center_settings.main_center') }}
                         </span>
                         <!-- Center ID -->
-                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-mono">
+                        <span
+                            class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-mono"
+                        >
                             #{{ props.center?.id }}
                         </span>
                     </div>
@@ -60,7 +130,9 @@
             </div>
 
             <!-- Main Content Card -->
-            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
                 <!-- Tabs Navigation -->
                 <div class="border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
                     <nav class="flex px-6">
@@ -72,7 +144,7 @@
                                 activeTab === tab.id
                                     ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
-                                'whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors'
+                                'whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors',
                             ]"
                         >
                             {{ tab.label }}
@@ -86,20 +158,44 @@
                     <div v-if="activeTab === 'profile'" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ $t('center_settings.profile.name_ar') }} <span class="text-red-500">*</span>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.profile.name_ar') }}
+                                    <span class="text-red-500">*</span>
                                 </label>
-                                <input v-model="form.profile.name_ar" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <input
+                                    v-model="form.profile.name_ar"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {{ $t('center_settings.profile.name_en') }} <span class="text-red-500">*</span>
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.profile.name_en') }}
+                                    <span class="text-red-500">*</span>
                                 </label>
-                                <input v-model="form.profile.name_en" type="text" required class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
+                                <input
+                                    v-model="form.profile.name_en"
+                                    type="text"
+                                    required
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir="ltr"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.profile.manager_name') }}</label>
-                                <input v-model="form.profile.manager_name" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.profile.manager_name') }}
+                                </label>
+                                <input
+                                    v-model="form.profile.manager_name"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                             </div>
                             <div>
                                 <SearchableSelect
@@ -109,39 +205,77 @@
                                     option-value="value"
                                     :label="$t('center_settings.profile.center_type')"
                                     :placeholder="$t('common.select')"
-                                    :disabled="props.center?.is_main && !props.center?.canModifyMain"
+                                    :disabled="
+                                        props.center?.is_main && !props.center?.canModifyMain
+                                    "
                                 />
-                                <p v-if="props.center?.is_main && !props.center?.canModifyMain" class="mt-1 text-xs text-gray-400">({{ $t('common.read_only') }})</p>
+                                <p
+                                    v-if="props.center?.is_main && !props.center?.canModifyMain"
+                                    class="mt-1 text-xs text-gray-400"
+                                >
+                                    ({{ $t('common.read_only') }})
+                                </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.profile.license_number') }}</label>
-                                <input v-model="form.profile.license_number" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.profile.license_number') }}
+                                </label>
+                                <input
+                                    v-model="form.profile.license_number"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir="ltr"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
                                     {{ $t('center_settings.profile.vat_number') }}
-                                    <span class="text-xs text-gray-400 font-normal">({{ $t('common.read_only') }})</span>
+                                    <span class="text-xs text-gray-400 font-normal">
+                                        ({{ $t('common.read_only') }})
+                                    </span>
                                 </label>
                                 <div class="relative">
-                                    <input 
-                                        :value="props.profile.vat_number" 
+                                    <input
+                                        :value="props.profile.vat_number"
                                         disabled
-                                        type="text" 
-                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed" 
+                                        type="text"
+                                        class="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
                                         dir="ltr"
                                     />
-                                    <div class="absolute inset-y-0 rtl:right-auto rtl:left-0 ltr:right-0 flex items-center px-3 pointer-events-none">
-                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    <div
+                                        class="absolute inset-y-0 rtl:right-auto rtl:left-0 ltr:right-0 flex items-center px-3 pointer-events-none"
+                                    >
+                                        <svg
+                                            class="w-4 h-4 text-gray-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                            />
                                         </svg>
                                     </div>
                                 </div>
-                                <p class="mt-1 text-xs text-gray-400">{{ $t('center_settings.profile.vat_help') }}</p>
+                                <p class="mt-1 text-xs text-gray-400">
+                                    {{ $t('center_settings.profile.vat_help') }}
+                                </p>
                             </div>
                         </div>
 
                         <div class="flex justify-end pt-4">
-                            <button @click="saveSection('profile')" :disabled="saving" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <button
+                                @click="saveSection('profile')"
+                                :disabled="saving"
+                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                            >
                                 {{ saving ? $t('common.loading') : $t('common.save') }}
                             </button>
                         </div>
@@ -151,66 +285,165 @@
                     <div v-if="activeTab === 'contact'" class="space-y-6">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.contact.phone') }}</label>
-                                <input v-model="form.contact.phone" type="tel" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.contact.phone') }}
+                                </label>
+                                <input
+                                    v-model="form.contact.phone"
+                                    type="tel"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir="ltr"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.contact.email') }}</label>
-                                <input v-model="form.contact.email" type="email" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.contact.email') }}
+                                </label>
+                                <input
+                                    v-model="form.contact.email"
+                                    type="email"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir="ltr"
+                                />
                             </div>
                         </div>
 
                         <!-- Address Section -->
                         <div class="flex items-center justify-between pt-4">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ $t('center_settings.address.title') }}</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ $t('center_settings.address.title') }}
+                            </h3>
                             <button
                                 type="button"
                                 @click="fetchLocation"
                                 :disabled="isLocating"
                                 class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors disabled:opacity-50"
                             >
-                                <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': isLocating }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                <svg
+                                    class="w-3.5 h-3.5"
+                                    :class="{ 'animate-spin': isLocating }"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                    />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                    />
                                 </svg>
-                                {{ isLocating ? $t('common.loading') : $t('customers.form.locate_me') }}
+                                {{
+                                    isLocating
+                                        ? $t('common.loading')
+                                        : $t('customers.form.locate_me')
+                                }}
                             </button>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.address.street') }}</label>
-                                <input v-model="form.address.street" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.address.street') }}
+                                </label>
+                                <input
+                                    v-model="form.address.street"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                             </div>
                             <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.address.address_line') }}</label>
-                                <input v-model="form.address.address_line" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.address.address_line') }}
+                                </label>
+                                <input
+                                    v-model="form.address.address_line"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.address.city') }}</label>
-                                <input v-model="form.address.city" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.address.city') }}
+                                </label>
+                                <input
+                                    v-model="form.address.city"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.address.district') }}</label>
-                                <input v-model="form.address.district" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.address.district') }}
+                                </label>
+                                <input
+                                    v-model="form.address.district"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.address.building_number') }}</label>
-                                <input v-model="form.address.building_number" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.address.building_number') }}
+                                </label>
+                                <input
+                                    v-model="form.address.building_number"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir="ltr"
+                                />
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ $t('center_settings.address.postal_code') }}</label>
-                                <input v-model="form.address.postal_code" type="text" class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent" dir="ltr" />
+                                <label
+                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                    {{ $t('center_settings.address.postal_code') }}
+                                </label>
+                                <input
+                                    v-model="form.address.postal_code"
+                                    type="text"
+                                    class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    dir="ltr"
+                                />
                             </div>
                         </div>
 
                         <!-- Map Section -->
                         <div class="pt-4">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">{{ $t('company_profile.map.click_hint') }}</p>
-                            <div ref="mapContainer" class="w-full h-64 rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden"></div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                {{ $t('company_profile.map.click_hint') }}
+                            </p>
+                            <div
+                                ref="mapContainer"
+                                class="w-full h-64 rounded-xl border border-gray-200 dark:border-gray-600 overflow-hidden"
+                            ></div>
                         </div>
 
                         <div class="flex justify-end pt-4">
-                            <button @click="saveContactAndAddress()" :disabled="saving" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <button
+                                @click="saveContactAndAddress()"
+                                :disabled="saving"
+                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                            >
                                 {{ saving ? $t('common.loading') : $t('common.save') }}
                             </button>
                         </div>
@@ -219,23 +452,57 @@
                     <!-- Branding Tab -->
                     <div v-if="activeTab === 'branding'" class="space-y-6">
                         <!-- Logo Light Mode -->
-                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <div
+                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+                        >
                             <div class="flex items-start gap-4">
-                                <div class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
-                                    <img v-if="props.branding?.logo_light_url" :src="props.branding.logo_light_url" class="w-full h-full object-contain" />
-                                    <svg v-else class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                <div
+                                    class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"
+                                >
+                                    <img
+                                        v-if="props.branding?.logo_light_url"
+                                        :src="props.branding.logo_light_url"
+                                        class="w-full h-full object-contain"
+                                    />
+                                    <svg
+                                        v-else
+                                        class="w-8 h-8 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="1.5"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">{{ $t('center_settings.branding.logo_light') }}</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ $t('center_settings.branding.logo_light_hint') }}</p>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        {{ $t('center_settings.branding.logo_light') }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                        {{ $t('center_settings.branding.logo_light_hint') }}
+                                    </p>
                                     <div class="flex items-center gap-2">
-                                        <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors">
-                                            <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp" @change="(e) => handleLogoUpload(e, 'light')" />
+                                        <label
+                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
+                                        >
+                                            <input
+                                                type="file"
+                                                class="hidden"
+                                                accept="image/png,image/jpeg,image/webp"
+                                                @change="(e) => handleLogoUpload(e, 'light')"
+                                            />
                                             {{ $t('company_profile.logo.upload') }}
                                         </label>
-                                        <button v-if="props.branding?.logo_light_url" @click="handleLogoDelete('light')" class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors">
+                                        <button
+                                            v-if="props.branding?.logo_light_url"
+                                            @click="handleLogoDelete('light')"
+                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
+                                        >
                                             {{ $t('company_profile.logo.remove') }}
                                         </button>
                                     </div>
@@ -244,23 +511,57 @@
                         </div>
 
                         <!-- Logo Dark Mode -->
-                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <div
+                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+                        >
                             <div class="flex items-start gap-4">
-                                <div class="w-20 h-20 rounded-lg bg-gray-800 dark:bg-gray-900 border border-gray-600 flex items-center justify-center overflow-hidden">
-                                    <img v-if="props.branding?.logo_dark_url" :src="props.branding.logo_dark_url" class="w-full h-full object-contain" />
-                                    <svg v-else class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                <div
+                                    class="w-20 h-20 rounded-lg bg-gray-800 dark:bg-gray-900 border border-gray-600 flex items-center justify-center overflow-hidden"
+                                >
+                                    <img
+                                        v-if="props.branding?.logo_dark_url"
+                                        :src="props.branding.logo_dark_url"
+                                        class="w-full h-full object-contain"
+                                    />
+                                    <svg
+                                        v-else
+                                        class="w-8 h-8 text-gray-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="1.5"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        />
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">{{ $t('center_settings.branding.logo_dark') }}</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ $t('center_settings.branding.logo_dark_hint') }}</p>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        {{ $t('center_settings.branding.logo_dark') }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                        {{ $t('center_settings.branding.logo_dark_hint') }}
+                                    </p>
                                     <div class="flex items-center gap-2">
-                                        <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors">
-                                            <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp" @change="(e) => handleLogoUpload(e, 'dark')" />
+                                        <label
+                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
+                                        >
+                                            <input
+                                                type="file"
+                                                class="hidden"
+                                                accept="image/png,image/jpeg,image/webp"
+                                                @change="(e) => handleLogoUpload(e, 'dark')"
+                                            />
                                             {{ $t('company_profile.logo.upload') }}
                                         </label>
-                                        <button v-if="props.branding?.logo_dark_url" @click="handleLogoDelete('dark')" class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors">
+                                        <button
+                                            v-if="props.branding?.logo_dark_url"
+                                            @click="handleLogoDelete('dark')"
+                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
+                                        >
                                             {{ $t('company_profile.logo.remove') }}
                                         </button>
                                     </div>
@@ -269,23 +570,57 @@
                         </div>
 
                         <!-- Logo Invoice -->
-                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <div
+                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+                        >
                             <div class="flex items-start gap-4">
-                                <div class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
-                                    <img v-if="props.branding?.logo_invoice_url" :src="props.branding.logo_invoice_url" class="w-full h-full object-contain" />
-                                    <svg v-else class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                <div
+                                    class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"
+                                >
+                                    <img
+                                        v-if="props.branding?.logo_invoice_url"
+                                        :src="props.branding.logo_invoice_url"
+                                        class="w-full h-full object-contain"
+                                    />
+                                    <svg
+                                        v-else
+                                        class="w-8 h-8 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="1.5"
+                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                        />
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">{{ $t('center_settings.branding.logo_invoice') }}</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ $t('center_settings.branding.logo_invoice_hint') }}</p>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        {{ $t('center_settings.branding.logo_invoice') }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                        {{ $t('center_settings.branding.logo_invoice_hint') }}
+                                    </p>
                                     <div class="flex items-center gap-2">
-                                        <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors">
-                                            <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp" @change="(e) => handleLogoUpload(e, 'invoice')" />
+                                        <label
+                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
+                                        >
+                                            <input
+                                                type="file"
+                                                class="hidden"
+                                                accept="image/png,image/jpeg,image/webp"
+                                                @change="(e) => handleLogoUpload(e, 'invoice')"
+                                            />
                                             {{ $t('company_profile.logo.upload') }}
                                         </label>
-                                        <button v-if="props.branding?.logo_invoice_url" @click="handleLogoDelete('invoice')" class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors">
+                                        <button
+                                            v-if="props.branding?.logo_invoice_url"
+                                            @click="handleLogoDelete('invoice')"
+                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
+                                        >
                                             {{ $t('company_profile.logo.remove') }}
                                         </button>
                                     </div>
@@ -294,23 +629,57 @@
                         </div>
 
                         <!-- Stamp -->
-                        <div class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                        <div
+                            class="p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+                        >
                             <div class="flex items-start gap-4">
-                                <div class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden">
-                                    <img v-if="props.branding?.stamp_url" :src="props.branding.stamp_url" class="w-full h-full object-contain" />
-                                    <svg v-else class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                                <div
+                                    class="w-20 h-20 rounded-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center overflow-hidden"
+                                >
+                                    <img
+                                        v-if="props.branding?.stamp_url"
+                                        :src="props.branding.stamp_url"
+                                        class="w-full h-full object-contain"
+                                    />
+                                    <svg
+                                        v-else
+                                        class="w-8 h-8 text-gray-400"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="1.5"
+                                            d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                                        />
                                     </svg>
                                 </div>
                                 <div class="flex-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white">{{ $t('center_settings.branding.stamp') }}</h4>
-                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ $t('center_settings.branding.stamp_hint') }}</p>
+                                    <h4 class="font-medium text-gray-900 dark:text-white">
+                                        {{ $t('center_settings.branding.stamp') }}
+                                    </h4>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                                        {{ $t('center_settings.branding.stamp_hint') }}
+                                    </p>
                                     <div class="flex items-center gap-2">
-                                        <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors">
-                                            <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp" @change="handleStampUpload" />
+                                        <label
+                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
+                                        >
+                                            <input
+                                                type="file"
+                                                class="hidden"
+                                                accept="image/png,image/jpeg,image/webp"
+                                                @change="handleStampUpload"
+                                            />
                                             {{ $t('company_profile.logo.upload') }}
                                         </label>
-                                        <button v-if="props.branding?.stamp_url" @click="handleStampDelete" class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors">
+                                        <button
+                                            v-if="props.branding?.stamp_url"
+                                            @click="handleStampDelete"
+                                            class="px-4 py-2 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 text-sm font-medium rounded-lg transition-colors"
+                                        >
                                             {{ $t('company_profile.logo.remove') }}
                                         </button>
                                     </div>
@@ -321,29 +690,59 @@
 
                     <!-- Working Hours Tab -->
                     <div v-if="activeTab === 'working_hours'" class="space-y-6">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $t('center_settings.working_hours.hint') }}</p>
-                        
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('center_settings.working_hours.hint') }}
+                        </p>
+
                         <div class="space-y-3">
-                            <div v-for="(wh, index) in form.working_hours" :key="wh.day_of_week" class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                            <div
+                                v-for="(wh, index) in form.working_hours"
+                                :key="wh.day_of_week"
+                                class="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+                            >
                                 <div class="w-24 font-medium text-gray-900 dark:text-white">
                                     {{ getDayName(wh.day_of_week) }}
                                 </div>
                                 <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" v-model="wh.is_open" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                                    <input
+                                        type="checkbox"
+                                        v-model="wh.is_open"
+                                        class="sr-only peer"
+                                    />
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+                                    ></div>
                                 </label>
-                                <span class="text-sm text-gray-500 dark:text-gray-400 w-12">{{ wh.is_open ? $t('center_settings.working_hours.open') : $t('center_settings.working_hours.closed') }}</span>
-                                
+                                <span class="text-sm text-gray-500 dark:text-gray-400 w-12">
+                                    {{
+                                        wh.is_open
+                                            ? $t('center_settings.working_hours.open')
+                                            : $t('center_settings.working_hours.closed')
+                                    }}
+                                </span>
+
                                 <template v-if="wh.is_open">
-                                    <input v-model="wh.open_time" type="time" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm" />
+                                    <input
+                                        v-model="wh.open_time"
+                                        type="time"
+                                        class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
                                     <span class="text-gray-400">-</span>
-                                    <input v-model="wh.close_time" type="time" class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm" />
+                                    <input
+                                        v-model="wh.close_time"
+                                        type="time"
+                                        class="px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                    />
                                 </template>
                             </div>
                         </div>
 
                         <div class="flex justify-end pt-4">
-                            <button @click="saveWorkingHours()" :disabled="saving" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <button
+                                @click="saveWorkingHours()"
+                                :disabled="saving"
+                                class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+                            >
                                 {{ saving ? $t('common.loading') : $t('common.save') }}
                             </button>
                         </div>
@@ -351,32 +750,50 @@
 
                     <!-- Center Revenues & Expenses Tab -->
                     <div v-if="activeTab === 'revenue_expenses'" class="space-y-6">
-                        <div class="flex items-center justify-between border-b border-gray-150 dark:border-gray-700/50 pb-4">
+                        <div
+                            class="flex items-center justify-between border-b border-gray-150 dark:border-gray-700/50 pb-4"
+                        >
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $t('company_profile.tabs.revenue_expenses') }}</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">إدارة الإيرادات والمصروفات الخاصة بمركز الصيانة</p>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                    {{ $t('company_profile.tabs.revenue_expenses') }}
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    إدارة الإيرادات والمصروفات الخاصة بمركز الصيانة
+                                </p>
                             </div>
                             <button
                                 @click="openAddTransactionModal"
                                 class="px-4 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2"
                             >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                <svg
+                                    class="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M12 4v16m8-8H4"
+                                    />
                                 </svg>
                                 <span>{{ $t('company_profile.transactions.add') }}</span>
                             </button>
                         </div>
 
                         <!-- Filters -->
-                        <div class="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl w-fit">
+                        <div
+                            class="flex items-center gap-2 p-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl w-fit"
+                        >
                             <button
                                 type="button"
                                 @click="transactionFilter = 'all'"
                                 :class="[
                                     'px-4 py-1.5 text-xs font-bold rounded-lg transition-all',
-                                    transactionFilter === 'all' 
-                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' 
-                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                                    transactionFilter === 'all'
+                                        ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white',
                                 ]"
                             >
                                 الكل
@@ -386,9 +803,9 @@
                                 @click="transactionFilter = 'revenue'"
                                 :class="[
                                     'px-4 py-1.5 text-xs font-bold rounded-lg transition-all',
-                                    transactionFilter === 'revenue' 
-                                        ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm' 
-                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                                    transactionFilter === 'revenue'
+                                        ? 'bg-white dark:bg-gray-700 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white',
                                 ]"
                             >
                                 {{ $t('company_profile.transactions.form.type_revenue') }}
@@ -398,9 +815,9 @@
                                 @click="transactionFilter = 'expense'"
                                 :class="[
                                     'px-4 py-1.5 text-xs font-bold rounded-lg transition-all',
-                                    transactionFilter === 'expense' 
-                                        ? 'bg-white dark:bg-gray-700 text-rose-600 dark:text-rose-400 shadow-sm' 
-                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                                    transactionFilter === 'expense'
+                                        ? 'bg-white dark:bg-gray-700 text-rose-600 dark:text-rose-400 shadow-sm'
+                                        : 'text-gray-500 hover:text-gray-900 dark:hover:text-white',
                                 ]"
                             >
                                 {{ $t('company_profile.transactions.form.type_expense') }}
@@ -408,68 +825,171 @@
                         </div>
 
                         <!-- Transactions Table -->
-                        <div class="bg-white dark:bg-gray-850 rounded-2xl border border-gray-200 dark:border-gray-700/60 overflow-hidden shadow-sm">
+                        <div
+                            class="bg-white dark:bg-gray-850 rounded-2xl border border-gray-200 dark:border-gray-700/60 overflow-hidden shadow-sm"
+                        >
                             <div class="overflow-x-auto">
                                 <table class="w-full text-right border-collapse">
                                     <thead>
-                                        <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-700">
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">#</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.title') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.date') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.category') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.transactions.table.amount') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.transactions.table.vat') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.transactions.table.total') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.updated_by') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.transactions.table.approved_by') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">{{ $t('company_profile.transactions.table.actions') }}</th>
+                                        <tr
+                                            class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-700"
+                                        >
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                #
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{ $t('company_profile.transactions.table.title') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{ $t('company_profile.transactions.table.date') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{
+                                                    $t(
+                                                        'company_profile.transactions.table.category'
+                                                    )
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{
+                                                    $t('company_profile.transactions.table.amount')
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{ $t('company_profile.transactions.table.vat') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{ $t('company_profile.transactions.table.total') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{
+                                                    $t(
+                                                        'company_profile.transactions.table.updated_by'
+                                                    )
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{
+                                                    $t(
+                                                        'company_profile.transactions.table.approved_by'
+                                                    )
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center"
+                                            >
+                                                {{
+                                                    $t('company_profile.transactions.table.actions')
+                                                }}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-150 dark:divide-gray-770/50">
-                                        <tr v-for="(trans, index) in filteredTransactions" :key="trans.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
-                                            <td class="px-6 py-4 text-sm font-mono">{{ index + 1 }}</td>
-                                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">
+                                        <tr
+                                            v-for="(trans, index) in filteredTransactions"
+                                            :key="trans.id"
+                                            class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors"
+                                        >
+                                            <td class="px-6 py-4 text-sm font-mono">
+                                                {{ index + 1 }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white"
+                                            >
                                                 <div>
                                                     <span>{{ trans.title }}</span>
-                                                    <span 
-                                                        v-if="trans.contact" 
+                                                    <span
+                                                        v-if="trans.contact"
                                                         class="block text-[10px] text-gray-400 font-semibold mt-0.5"
                                                     >
                                                         👤 {{ trans.contact.name }}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">{{ trans.transaction_date }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
-                                                <span class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">
+                                                {{ trans.transaction_date }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300"
+                                            >
+                                                <span
+                                                    class="px-2.5 py-1 text-xs rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                                                >
                                                     {{ trans.income_category?.name }}
                                                 </span>
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300">{{ formatCurrency(trans.amount) }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">
-                                                <span v-if="trans.is_taxable" class="text-emerald-600 font-bold">{{ formatCurrency(trans.tax_amount) }}</span>
-                                                <span v-else class="text-gray-400 italic">غير خاضع</span>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300"
+                                            >
+                                                {{ formatCurrency(trans.amount) }}
                                             </td>
-                                            <td class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white">{{ formatCurrency(trans.total_amount) }}</td>
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">
+                                                <span
+                                                    v-if="trans.is_taxable"
+                                                    class="text-emerald-600 font-bold"
+                                                >
+                                                    {{ formatCurrency(trans.tax_amount) }}
+                                                </span>
+                                                <span v-else class="text-gray-400 italic">
+                                                    غير خاضع
+                                                </span>
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white"
+                                            >
+                                                {{ formatCurrency(trans.total_amount) }}
+                                            </td>
                                             <td class="px-6 py-4 text-xs text-gray-500">
                                                 <div class="flex items-center gap-1.5">
-                                                    <div class="w-5 h-5 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-[9px] uppercase">
-                                                        {{ trans.updated_by?.name?.substring(0,2) }}
+                                                    <div
+                                                        class="w-5 h-5 rounded-full bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-bold text-[9px] uppercase"
+                                                    >
+                                                        {{
+                                                            trans.updated_by?.name?.substring(0, 2)
+                                                        }}
                                                     </div>
                                                     <span>{{ trans.updated_by?.name }}</span>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 text-sm">
-                                                <span 
+                                                <span
                                                     v-if="trans.status === 'approved'"
                                                     class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"
                                                 >
-                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                                    <svg
+                                                        class="w-3.5 h-3.5"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2.5"
+                                                            d="M5 13l4 4L19 7"
+                                                        />
                                                     </svg>
                                                     {{ trans.approved_by?.name }}
                                                 </span>
-                                                <span 
+                                                <span
                                                     v-else
                                                     class="px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/10 text-amber-500 uppercase tracking-wider"
                                                 >
@@ -486,15 +1006,25 @@
                                                     >
                                                         اعتماد
                                                     </button>
-                                                    
+
                                                     <!-- Edit Button -->
                                                     <button
                                                         v-if="trans.status === 'draft'"
                                                         @click="openEditTransactionModal(trans)"
                                                         class="p-1 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors"
                                                     >
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                        <svg
+                                                            class="w-4 h-4"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                                            />
                                                         </svg>
                                                     </button>
 
@@ -504,20 +1034,36 @@
                                                         @click="deleteTransaction(trans)"
                                                         class="p-1 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                                                     >
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        <svg
+                                                            class="w-4 h-4"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                stroke-linecap="round"
+                                                                stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                            />
                                                         </svg>
                                                     </button>
-                                                    
+
                                                     <!-- Locked state when approved -->
-                                                    <span v-if="trans.status === 'approved'" class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 font-semibold">
+                                                    <span
+                                                        v-if="trans.status === 'approved'"
+                                                        class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 font-semibold"
+                                                    >
                                                         🔒 معتمدة
                                                     </span>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr v-if="filteredTransactions.length === 0">
-                                            <td colspan="10" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                            <td
+                                                colspan="10"
+                                                class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                                            >
                                                 لا توجد معاملات مالية مسجلة حالياً للمركز
                                             </td>
                                         </tr>
@@ -540,15 +1086,24 @@
 
                     <!-- Center Invoices Tab -->
                     <div v-if="activeTab === 'invoices'" class="space-y-6">
-                        <div class="flex items-center justify-between border-b border-gray-150 dark:border-gray-700/50 pb-4">
+                        <div
+                            class="flex items-center justify-between border-b border-gray-150 dark:border-gray-700/50 pb-4"
+                        >
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">فواتير المركز</h3>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">عرض وتحميل الفواتير الضريبية الصادرة من معاملات الإيرادات والمصروفات الخاصة بهذا المركز</p>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+                                    فواتير المركز
+                                </h3>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    عرض وتحميل الفواتير الضريبية الصادرة من معاملات الإيرادات
+                                    والمصروفات الخاصة بهذا المركز
+                                </p>
                             </div>
                         </div>
 
                         <!-- Sub Tab Toggle for Sales vs Purchases -->
-                        <div class="flex items-center gap-2 border-b border-gray-150 dark:border-gray-750">
+                        <div
+                            class="flex items-center gap-2 border-b border-gray-150 dark:border-gray-750"
+                        >
                             <button
                                 type="button"
                                 @click="subInvoiceTab = 'sales'"
@@ -556,11 +1111,13 @@
                                     'px-5 py-3 text-sm font-bold border-b-2 transition-all',
                                     subInvoiceTab === 'sales'
                                         ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                                        : 'border-transparent text-gray-400 hover:text-gray-600'
+                                        : 'border-transparent text-gray-400 hover:text-gray-600',
                                 ]"
                             >
                                 {{ $t('company_profile.invoices_tab.sales_title') }}
-                                <span class="ms-1.5 px-2 py-0.5 text-xs font-mono rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
+                                <span
+                                    class="ms-1.5 px-2 py-0.5 text-xs font-mono rounded-full bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
+                                >
                                     {{ props.center_invoices.sales?.length || 0 }}
                                 </span>
                             </button>
@@ -571,51 +1128,132 @@
                                     'px-5 py-3 text-sm font-bold border-b-2 transition-all',
                                     subInvoiceTab === 'purchases'
                                         ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                                        : 'border-transparent text-gray-400 hover:text-gray-600'
+                                        : 'border-transparent text-gray-400 hover:text-gray-600',
                                 ]"
                             >
                                 {{ $t('company_profile.invoices_tab.purchases_title') }}
-                                <span class="ms-1.5 px-2 py-0.5 text-xs font-mono rounded-full bg-rose-50 dark:bg-rose-955 text-rose-600 dark:text-rose-400">
+                                <span
+                                    class="ms-1.5 px-2 py-0.5 text-xs font-mono rounded-full bg-rose-50 dark:bg-rose-955 text-rose-600 dark:text-rose-400"
+                                >
                                     {{ props.center_invoices.purchases?.length || 0 }}
                                 </span>
                             </button>
                         </div>
 
                         <!-- Sub-tab contents -->
-                        <div class="bg-white dark:bg-gray-855 border border-gray-155 dark:border-gray-750 rounded-2xl overflow-hidden shadow-sm">
+                        <div
+                            class="bg-white dark:bg-gray-855 border border-gray-155 dark:border-gray-750 rounded-2xl overflow-hidden shadow-sm"
+                        >
                             <!-- 1. Sales Invoices -->
                             <div v-if="subInvoiceTab === 'sales'" class="overflow-x-auto">
                                 <table class="w-full text-right border-collapse">
                                     <thead>
-                                        <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-750">
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">#</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.number') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.party') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.date') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.amount') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.vat') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.total') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">{{ $t('company_profile.invoices_tab.table.actions') }}</th>
+                                        <tr
+                                            class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-150 dark:border-gray-750"
+                                        >
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                #
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{
+                                                    $t('company_profile.invoices_tab.table.number')
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.party') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.date') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{
+                                                    $t('company_profile.invoices_tab.table.amount')
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.vat') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.total') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center"
+                                            >
+                                                {{
+                                                    $t('company_profile.invoices_tab.table.actions')
+                                                }}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-150 dark:divide-gray-750/50">
-                                        <tr v-for="(inv, index) in props.center_invoices.sales" :key="inv.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
-                                            <td class="px-6 py-4 text-sm font-mono">{{ index + 1 }}</td>
-                                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white font-mono">{{ inv.invoice_number }}</td>
-                                            <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ inv.customer?.name || inv.customer_name_snapshot }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">{{ inv.supply_date ? inv.supply_date.substring(0, 10) : '' }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300">{{ formatCurrency(inv.total_excl_tax) }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold">{{ formatCurrency(inv.total_tax) }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white">{{ formatCurrency(inv.total_incl_tax) }}</td>
+                                        <tr
+                                            v-for="(inv, index) in props.center_invoices.sales"
+                                            :key="inv.id"
+                                            class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors"
+                                        >
+                                            <td class="px-6 py-4 text-sm font-mono">
+                                                {{ index + 1 }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white font-mono"
+                                            >
+                                                {{ inv.invoice_number }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300"
+                                            >
+                                                {{
+                                                    inv.customer?.name || inv.customer_name_snapshot
+                                                }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">
+                                                {{
+                                                    inv.supply_date
+                                                        ? inv.supply_date.substring(0, 10)
+                                                        : ''
+                                                }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300"
+                                            >
+                                                {{ formatCurrency(inv.total_excl_tax) }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold"
+                                            >
+                                                {{ formatCurrency(inv.total_tax) }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white"
+                                            >
+                                                {{ formatCurrency(inv.total_incl_tax) }}
+                                            </td>
                                             <td class="px-6 py-4 text-center">
                                                 <div class="flex items-center justify-center gap-3">
-                                                    <Link 
-                                                        :href="route('app.invoices.show', inv.id) + '?from=center'"
+                                                    <Link
+                                                        :href="
+                                                            route('app.invoices.show', inv.id) +
+                                                            '?from=center'
+                                                        "
                                                         class="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
                                                         👁️ عرض الفاتورة
                                                     </Link>
-                                                    <a 
+                                                    <a
                                                         :href="route('app.invoices.print', inv.id)"
                                                         target="_blank"
                                                         class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
@@ -626,7 +1264,10 @@
                                             </td>
                                         </tr>
                                         <tr v-if="props.center_invoices.sales.length === 0">
-                                            <td colspan="10" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                            <td
+                                                colspan="10"
+                                                class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                                            >
                                                 لا توجد فواتير مبيعات صادرة للمركز حالياً
                                             </td>
                                         </tr>
@@ -638,36 +1279,118 @@
                             <div v-if="subInvoiceTab === 'purchases'" class="overflow-x-auto">
                                 <table class="w-full text-right border-collapse">
                                     <thead>
-                                        <tr class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-155 dark:border-gray-750">
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">#</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.number') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.party') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase">{{ $t('company_profile.invoices_tab.table.date') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.amount') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.vat') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono">{{ $t('company_profile.invoices_tab.table.total') }}</th>
-                                            <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">{{ $t('company_profile.invoices_tab.table.actions') }}</th>
+                                        <tr
+                                            class="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-155 dark:border-gray-750"
+                                        >
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                #
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{
+                                                    $t('company_profile.invoices_tab.table.number')
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.party') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.date') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{
+                                                    $t('company_profile.invoices_tab.table.amount')
+                                                }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.vat') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase font-mono"
+                                            >
+                                                {{ $t('company_profile.invoices_tab.table.total') }}
+                                            </th>
+                                            <th
+                                                class="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center"
+                                            >
+                                                {{
+                                                    $t('company_profile.invoices_tab.table.actions')
+                                                }}
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-150 dark:divide-gray-750/50">
-                                        <tr v-for="(inv, index) in props.center_invoices.purchases" :key="inv.id" class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors">
-                                            <td class="px-6 py-4 text-sm font-mono">{{ index + 1 }}</td>
-                                            <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white font-mono">{{ inv.invoice_number || inv.code }}</td>
-                                            <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ inv.supplier?.name || '—' }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">{{ inv.issue_date ? inv.issue_date.substring(0, 10) : '' }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300">{{ formatCurrency(inv.subtotal) }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold">{{ formatCurrency(inv.tax_amount) }}</td>
-                                            <td class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white">{{ formatCurrency(inv.total) }}</td>
+                                        <tr
+                                            v-for="(inv, index) in props.center_invoices.purchases"
+                                            :key="inv.id"
+                                            class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors"
+                                        >
+                                            <td class="px-6 py-4 text-sm font-mono">
+                                                {{ index + 1 }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white font-mono"
+                                            >
+                                                {{ inv.invoice_number || inv.code }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300"
+                                            >
+                                                {{ inv.supplier?.name || '—' }}
+                                            </td>
+                                            <td class="px-6 py-4 text-sm font-mono text-gray-500">
+                                                {{
+                                                    inv.issue_date
+                                                        ? inv.issue_date.substring(0, 10)
+                                                        : ''
+                                                }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono font-bold text-gray-600 dark:text-gray-300"
+                                            >
+                                                {{ formatCurrency(inv.subtotal) }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono text-emerald-600 font-bold"
+                                            >
+                                                {{ formatCurrency(inv.tax_amount) }}
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-sm font-mono font-black text-gray-900 dark:text-white"
+                                            >
+                                                {{ formatCurrency(inv.total) }}
+                                            </td>
                                             <td class="px-6 py-4 text-center">
                                                 <div class="flex items-center justify-center gap-3">
-                                                    <Link 
-                                                        :href="route('app.invoices.purchases.show', inv.id) + '?from=center'"
+                                                    <Link
+                                                        :href="
+                                                            route(
+                                                                'app.invoices.purchases.show',
+                                                                inv.id
+                                                            ) + '?from=center'
+                                                        "
                                                         class="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
                                                         👁️ عرض الفاتورة
                                                     </Link>
-                                                    <a 
-                                                        :href="route('app.invoices.purchases.print', inv.id)"
+                                                    <a
+                                                        :href="
+                                                            route(
+                                                                'app.invoices.purchases.print',
+                                                                inv.id
+                                                            )
+                                                        "
                                                         target="_blank"
                                                         class="text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:underline transition-colors flex items-center gap-1"
                                                     >
@@ -677,7 +1400,10 @@
                                             </td>
                                         </tr>
                                         <tr v-if="props.center_invoices.purchases.length === 0">
-                                            <td colspan="10" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                            <td
+                                                colspan="10"
+                                                class="px-6 py-12 text-center text-gray-500 dark:text-gray-400"
+                                            >
                                                 لا توجد فواتير مشتريات صادرة للمركز حالياً
                                             </td>
                                         </tr>
@@ -734,20 +1460,20 @@ const props = defineProps({
     working_hours: Array,
     center_transactions: {
         type: Array,
-        default: () => []
+        default: () => [],
     },
     income_categories: {
         type: Array,
-        default: () => []
+        default: () => [],
     },
     center_invoices: {
         type: Object,
-        default: () => ({ sales: [], purchases: [] })
+        default: () => ({ sales: [], purchases: [] }),
     },
     vat: {
         type: Object,
-        default: () => ({ vat_enabled: false })
-    }
+        default: () => ({ vat_enabled: false }),
+    },
 });
 
 const activeTab = ref('profile');
@@ -793,12 +1519,13 @@ const form = ref({
         latitude: props.address?.latitude ?? null,
         longitude: props.address?.longitude ?? null,
     },
-    working_hours: props.working_hours?.map(wh => ({
-        day_of_week: wh.day_of_week,
-        is_open: wh.is_open,
-        open_time: wh.open_time?.slice(0, 5) ?? '08:00',
-        close_time: wh.close_time?.slice(0, 5) ?? '17:00',
-    })) ?? [],
+    working_hours:
+        props.working_hours?.map((wh) => ({
+            day_of_week: wh.day_of_week,
+            is_open: wh.is_open,
+            open_time: wh.open_time?.slice(0, 5) ?? '08:00',
+            close_time: wh.close_time?.slice(0, 5) ?? '17:00',
+        })) ?? [],
 });
 
 const centerTypeOptions = computed(() => [
@@ -816,84 +1543,100 @@ function getDayName(dayOfWeek) {
 
 function saveSection(section) {
     saving.value = true;
-    router.put(`/app/settings/centers/${props.center.id}`, {
-        section,
-        ...form.value[section],
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            success(t('common.saved_success'));
+    router.put(
+        `/app/settings/centers/${props.center.id}`,
+        {
+            section,
+            ...form.value[section],
         },
-        onError: (errors) => {
-            error(Object.values(errors).flat().join('\n'));
-        },
-        onFinish: () => {
-            saving.value = false;
-        },
-    });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                success(t('common.saved_success'));
+            },
+            onError: (errors) => {
+                error(Object.values(errors).flat().join('\n'));
+            },
+            onFinish: () => {
+                saving.value = false;
+            },
+        }
+    );
 }
 
 function saveContactAndAddress() {
     saving.value = true;
-    
+
     // Save contact first
-    router.put(`/app/settings/centers/${props.center.id}`, {
-        section: 'contact',
-        ...form.value.contact,
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            // Then save address
-            router.put(`/app/settings/centers/${props.center.id}`, {
-                section: 'address',
-                ...form.value.address,
-            }, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    success(t('common.saved_success'));
-                },
-                onError: (errors) => {
-                    error(Object.values(errors).flat().join('\n'));
-                },
-                onFinish: () => {
-                    saving.value = false;
-                },
-            });
+    router.put(
+        `/app/settings/centers/${props.center.id}`,
+        {
+            section: 'contact',
+            ...form.value.contact,
         },
-        onError: (errors) => {
-            error(Object.values(errors).flat().join('\n'));
-            saving.value = false;
-        },
-    });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Then save address
+                router.put(
+                    `/app/settings/centers/${props.center.id}`,
+                    {
+                        section: 'address',
+                        ...form.value.address,
+                    },
+                    {
+                        preserveScroll: true,
+                        onSuccess: () => {
+                            success(t('common.saved_success'));
+                        },
+                        onError: (errors) => {
+                            error(Object.values(errors).flat().join('\n'));
+                        },
+                        onFinish: () => {
+                            saving.value = false;
+                        },
+                    }
+                );
+            },
+            onError: (errors) => {
+                error(Object.values(errors).flat().join('\n'));
+                saving.value = false;
+            },
+        }
+    );
 }
 
 function saveWorkingHours() {
     saving.value = true;
-    router.put(`/app/settings/centers/${props.center.id}`, {
-        section: 'working_hours',
-        working_hours: form.value.working_hours,
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            success(t('common.saved_success'));
+    router.put(
+        `/app/settings/centers/${props.center.id}`,
+        {
+            section: 'working_hours',
+            working_hours: form.value.working_hours,
         },
-        onError: (errors) => {
-            error(Object.values(errors).flat().join('\n'));
-        },
-        onFinish: () => {
-            saving.value = false;
-        },
-    });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                success(t('common.saved_success'));
+            },
+            onError: (errors) => {
+                error(Object.values(errors).flat().join('\n'));
+            },
+            onFinish: () => {
+                saving.value = false;
+            },
+        }
+    );
 }
 
 function handleLogoUpload(event, type) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     const formData = new FormData();
     formData.append('logo', file);
     formData.append('type', type);
-    
+
     router.post(`/app/settings/centers/${props.center.id}/logo`, formData, {
         preserveScroll: true,
         onSuccess: () => {
@@ -921,10 +1664,10 @@ function handleLogoDelete(type) {
 function handleStampUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     const formData = new FormData();
     formData.append('stamp', file);
-    
+
     router.post(`/app/settings/centers/${props.center.id}/stamp`, formData, {
         preserveScroll: true,
         onSuccess: () => {
@@ -958,7 +1701,7 @@ function initMap() {
     map = L.map(mapContainer.value).setView([lat, lng], 13);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+        attribution: '© OpenStreetMap contributors',
     }).addTo(map);
 
     // Add marker if we have coordinates
@@ -973,7 +1716,7 @@ function initMap() {
 
 function handleMapClick(e) {
     const { lat, lng } = e.latlng;
-    
+
     form.value.address.latitude = lat;
     form.value.address.longitude = lng;
 
@@ -994,22 +1737,25 @@ async function reverseGeocode(lat, lng) {
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=ar`,
             {
                 headers: {
-                    'User-Agent': 'Carag-App/1.0'
-                }
+                    'User-Agent': 'Carag-App/1.0',
+                },
             }
         );
         const data = await response.json();
-        
+
         if (data && data.address) {
             const addr = data.address;
-            form.value.address.city = addr.city || addr.town || addr.village || form.value.address.city || '';
-            form.value.address.district = addr.suburb || addr.neighbourhood || form.value.address.district || '';
-            
+            form.value.address.city =
+                addr.city || addr.town || addr.village || form.value.address.city || '';
+            form.value.address.district =
+                addr.suburb || addr.neighbourhood || form.value.address.district || '';
+
             // Extraction helpers for numeric fields
             const toEnglishDigits = (str) => {
                 if (!str) return '';
-                return str.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
-                          .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+                return str
+                    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d))
+                    .replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
             };
 
             const cleanDisplayName = toEnglishDigits(data.display_name || '');
@@ -1023,7 +1769,7 @@ async function reverseGeocode(lat, lng) {
             }
             if (!bldNum) {
                 // Find first 4-digit sequence
-                const fourDigit = numbers.find(n => n.length === 4);
+                const fourDigit = numbers.find((n) => n.length === 4);
                 if (fourDigit) {
                     bldNum = fourDigit;
                 }
@@ -1038,7 +1784,7 @@ async function reverseGeocode(lat, lng) {
             }
             if (!postCode) {
                 // Find first 5-digit sequence
-                const fiveDigit = numbers.find(n => n.length === 5);
+                const fiveDigit = numbers.find((n) => n.length === 5);
                 if (fiveDigit) {
                     postCode = fiveDigit;
                 }
@@ -1046,7 +1792,8 @@ async function reverseGeocode(lat, lng) {
             form.value.address.postal_code = postCode || form.value.address.postal_code || '';
 
             // Map street name to street field
-            form.value.address.street = addr.road || addr.pedestrian || addr.street || form.value.address.street || '';
+            form.value.address.street =
+                addr.road || addr.pedestrian || addr.street || form.value.address.street || '';
         }
     } catch (err) {
         console.error('Geocoding error:', err);
@@ -1066,9 +1813,8 @@ const isLocating = ref(false);
 
 async function fetchLocation() {
     isLocating.value = true;
-    
+
     const useIpFallback = async () => {
-        console.log('[Centers/Show] Falling back to IP-based geolocation...');
         try {
             const response = await fetch('https://ipapi.co/json/');
             if (!response.ok) throw new Error('IP geolocation failed');
@@ -1076,11 +1822,10 @@ async function fetchLocation() {
             if (data && data.latitude && data.longitude) {
                 const lat = parseFloat(data.latitude);
                 const lng = parseFloat(data.longitude);
-                console.log('[Centers/Show] IP Geolocation success:', lat, lng);
-                
+
                 form.value.address.latitude = parseFloat(lat.toFixed(7));
                 form.value.address.longitude = parseFloat(lng.toFixed(7));
-                
+
                 if (map) {
                     if (marker) {
                         marker.setLatLng([lat, lng]);
@@ -1096,7 +1841,7 @@ async function fetchLocation() {
         } catch (err) {
             console.warn('[Centers/Show] IP Geolocation failed:', err.message);
         }
-        
+
         isLocating.value = false;
     };
 
@@ -1104,11 +1849,10 @@ async function fetchLocation() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                console.log('[Centers/Show] Browser Geolocation success:', latitude, longitude);
-                
+
                 form.value.address.latitude = parseFloat(latitude.toFixed(7));
                 form.value.address.longitude = parseFloat(longitude.toFixed(7));
-                
+
                 if (map) {
                     if (marker) {
                         marker.setLatLng([latitude, longitude]);
@@ -1149,7 +1893,7 @@ onMounted(() => {
     // Handle tab query param
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    if (tab && tabs.value.find(t => t.id === tab)) {
+    if (tab && tabs.value.find((t) => t.id === tab)) {
         activeTab.value = tab;
     }
 
@@ -1174,11 +1918,13 @@ const transactionFilter = ref('all');
 const subInvoiceTab = ref('sales');
 
 const formatCurrency = (value) => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'decimal',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(value) + ' SAR';
+    return (
+        new Intl.NumberFormat('en-US', {
+            style: 'decimal',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(value) + ' SAR'
+    );
 };
 
 const openAddTransactionModal = () => {
@@ -1207,7 +1953,7 @@ const deleteTransaction = async (transaction) => {
         message: 'هل أنت متأكد من رغبتك في حذف هذه المعاملة؟ لا يمكن استعادة البيانات بعد ذلك.',
         confirmText: 'حذف',
         cancelText: 'إلغاء',
-        type: 'danger'
+        type: 'danger',
     });
 
     if (confirmed) {
@@ -1217,7 +1963,7 @@ const deleteTransaction = async (transaction) => {
             },
             onError: (errors) => {
                 error(errors.message || 'حدث خطأ أثناء الحذف');
-            }
+            },
         });
     }
 };
@@ -1228,18 +1974,22 @@ const approveTransaction = async (transaction) => {
         message: t('company_profile.transactions.approve_confirm'),
         confirmText: 'اعتماد وإصدار الفاتورة',
         cancelText: 'إلغاء',
-        type: 'success'
+        type: 'success',
     });
 
     if (confirmed) {
-        router.post(`/app/settings/company/transactions/${transaction.id}/approve`, {}, {
-            onSuccess: () => {
-                success('تم اعتماد المعاملة بنجاح');
-            },
-            onError: (errors) => {
-                error(errors.message || 'حدث خطأ أثناء الاعتماد');
+        router.post(
+            `/app/settings/company/transactions/${transaction.id}/approve`,
+            {},
+            {
+                onSuccess: () => {
+                    success('تم اعتماد المعاملة بنجاح');
+                },
+                onError: (errors) => {
+                    error(errors.message || 'حدث خطأ أثناء الاعتماد');
+                },
             }
-        });
+        );
     }
 };
 
@@ -1247,6 +1997,6 @@ const filteredTransactions = computed(() => {
     if (transactionFilter.value === 'all') {
         return props.center_transactions;
     }
-    return props.center_transactions.filter(t => t.transaction_type === transactionFilter.value);
+    return props.center_transactions.filter((t) => t.transaction_type === transactionFilter.value);
 });
 </script>

@@ -3390,7 +3390,6 @@ async function fetchLocation() {
     isLocating.value = true;
 
     const useIpFallback = async () => {
-        console.log('[Company/Index] Falling back to IP-based geolocation...');
         try {
             const response = await fetch('https://ipapi.co/json/');
             if (!response.ok) throw new Error('IP geolocation failed');
@@ -3398,7 +3397,6 @@ async function fetchLocation() {
             if (data && data.latitude && data.longitude) {
                 const lat = parseFloat(data.latitude);
                 const lng = parseFloat(data.longitude);
-                console.log('[Company/Index] IP Geolocation success:', lat, lng);
 
                 form.value.address.latitude = parseFloat(lat.toFixed(7));
                 form.value.address.longitude = parseFloat(lng.toFixed(7));
@@ -3427,7 +3425,6 @@ async function fetchLocation() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                console.log('[Company/Index] Browser Geolocation success:', latitude, longitude);
 
                 form.value.address.latitude = parseFloat(latitude.toFixed(7));
                 form.value.address.longitude = parseFloat(longitude.toFixed(7));
