@@ -38,6 +38,7 @@
         >
             <!-- Desktop Sidebar -->
             <aside
+                v-if="!hideSidebar"
                 :class="[
                     'hidden md:flex md:w-64 md:shrink-0 md:flex-col bg-white dark:bg-gray-800 print:hidden',
                     isRtl
@@ -2125,6 +2126,10 @@ import SystemAnnouncementBanner from '@/Components/SystemAnnouncementBanner.vue'
 import NotificationBell from '@/Components/NotificationBell.vue';
 import { usePermission } from '@/Composables/usePermission';
 import { useToast } from '@/Composables/useToast';
+
+const props = defineProps({
+    hideSidebar: { type: Boolean, default: false },
+});
 
 const { locale } = useI18n();
 const page = usePage();

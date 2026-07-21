@@ -97,7 +97,7 @@ function refresh() {
 <template>
     <Head :title="$t('dashboard.title')" />
 
-    <AppLayout>
+    <AppLayout :hide-sidebar="true">
         <div class="flex flex-col">
             <PageHeader
                 :title="$t('dashboard.title')"
