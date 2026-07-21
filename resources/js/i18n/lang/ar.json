@@ -4,7 +4,22 @@
         "password": "كلمة المرور",
         "set_password": "تعيين كلمة المرور",
         "set_password_action": "تعيين كلمة المرور",
-        "set_password_hint": "قم بتعيين كلمة المرور الخاصة بك، :name"
+        "set_password_hint": "قم بتعيين كلمة المرور الخاصة بك، :name",
+        "2fa": {
+            "required": "المصادقة الثنائية إلزامية في هذا الحساب. يرجى تفعيلها للمتابعة."
+        },
+        "failed": "بيانات الاعتماد هذه غير متطابقة مع سجلاتنا.",
+        "otp_invalid": "رمز التحقق غير صحيح",
+        "otp_request_again": "يرجى إعادة طلب رمز التحقق",
+        "otp_send_failed": "فشل إرسال رمز التحقق",
+        "otp_sent": "تم إرسال رمز التحقق إلى هاتفك",
+        "otp_verified": "تم التحقق من رقم الهاتف بنجاح",
+        "phone_already_registered": "رقم الهاتف مسجل بالفعل",
+        "rate_limit_exceeded": "تجاوزت الحد المسموح. يرجى الانتظار :minutes دقيقة",
+        "resend_cooldown": "يرجى الانتظار :seconds ثانية قبل إعادة الإرسال",
+        "throttle": "محاولات تسجيل دخول كثيرة جداً. يرجى المحاولة مرة أخرى بعد :seconds ثانية.",
+        "verification_unavailable": "خدمة التحقق غير متاحة حالياً",
+        "verify_phone_first": "يرجى التحقق من رقم الهاتف أولاً"
     },
     "center_settings": {
         "address": {
@@ -307,7 +322,12 @@
         "view_all": "عرض الكل",
         "view_details": "عرض التفاصيل",
         "yes": "نعم",
-        "yes_close": "نعم، إغلاق"
+        "yes_close": "نعم، إغلاق",
+        "cannot_delete_processed_leave": "لا يمكن حذف طلب إجازة تم تجهيزه بالفعل.",
+        "deleted": "تم الحذف",
+        "deleted_successfully": "تم الحذف بنجاح",
+        "saved_successfully": "تم الحفظ بنجاح",
+        "updated": "تم التحديث"
     },
     "company_profile": {
         "address": {
@@ -336,7 +356,10 @@
             "password_confirm_mismatch": "كلمة المرور الجديدة غير متطابقة",
             "password_hint": "اترك حقول كلمة المرور فارغة إذا كنت لا تريد تغييرها",
             "password_min": "كلمة المرور يجب أن تكون 8 أحرف على الأقل",
-            "title": "المستخدم الرئيسي"
+            "title": "المستخدم الرئيسي",
+            "info": "معلومات المستخدم الرئيسي",
+            "name": "الاسم",
+            "password": "كلمة المرور"
         },
         "branches": {
             "active": "مفعّل",
@@ -530,6 +553,10 @@
             "qr_enabled": "تفعيل QR في الفاتورة",
             "qr_enabled_hint": "سيتم إضافة رمز QR لجميع الفواتير",
             "setup_integration": "إعداد التكامل (قريباً)"
+        },
+        "subscription_history": {
+            "placeholder": "سيتم عرض سجل الاشتراكات هنا بمجرد رفع المكوّن.",
+            "subtitle": "سجل الاشتراكات وتواريخ التجديد والمدفوعات الخاصة بالمؤسسة"
         }
     },
     "customers": {
@@ -980,7 +1007,9 @@
             "total_deductions": "إجمالي الخصومات",
             "user_already_linked": "هذا الموظف مرتبط بمستخدم بالفعل",
             "weekly_schedule": "الجدولة الأسبوعية",
-            "working_hours": "أوقات العمل"
+            "working_hours": "أوقات العمل",
+            "edit": "تعديل موظف",
+            "employee_number_exists": "الرقم الوظيفي مستخدم مسبقاً"
         },
         "financial": {
             "add_allowance": "إضافة بدل",
@@ -1053,12 +1082,7 @@
             "reject": "رفض",
             "request_leave": "طلب إجازة",
             "start_date": "تاريخ البداية",
-            "status": {
-                "approved": "مقبولة",
-                "cancelled": "ملغاة",
-                "pending": "معلقة",
-                "rejected": "مرفوضة"
-            },
+            "status": "الحالة",
             "statuses": {
                 "approved": "مقبولة",
                 "pending": "معلقة",
@@ -1074,7 +1098,8 @@
                 "paternity": "أبوة",
                 "sick": "مرضي",
                 "unpaid": "بدون راتب"
-            }
+            },
+            "request_submitted": "تم تقديم الطلب بنجاح"
         },
         "payroll": {
             "allowances": "البدلات",
@@ -1117,7 +1142,10 @@
             "total_allowances": "إجمالي البدلات",
             "total_deductions": "إجمالي الخصومات",
             "total_net": "صافي الإجمالي",
-            "total_salaries": "إجمالي الرواتب"
+            "total_salaries": "إجمالي الرواتب",
+            "cannot_delete_item": "لا يمكن حذف موظف من مسير معتمد",
+            "cannot_regenerate": "لا يمكن إعادة إنشاء مسير معتمد أو مدفوع",
+            "regenerated_successfully": "تم إعادة احتساب الرواتب بنجاح"
         },
         "settings": {
             "allowances": {
@@ -1205,7 +1233,10 @@
             }
         },
         "subtitle": "إدارة الموظفين والرواتب والحضور",
-        "title": "الموارد البشرية"
+        "title": "الموارد البشرية",
+        "shifts": {
+            "cannot_delete_in_use": "لا يمكن حذف وردية مستخدمة من قبل موظفين"
+        }
     },
     "inventory": {
         "hub": {
@@ -1269,7 +1300,8 @@
                 "reversal": "عكس حركة",
                 "transfer_in": "تحويل وارد",
                 "transfer_out": "تحويل صادر"
-            }
+            },
+            "part_issued": "تم إصدار القطعة"
         },
         "parts": {
             "activated": "تم تفعيل القطعة",
@@ -1617,7 +1649,12 @@
         "title": "الفواتير",
         "total": "الإجمالي",
         "total_paid": "المدفوع",
-        "work_order_not_completed": "أمر العمل غير مكتمل"
+        "work_order_not_completed": "أمر العمل غير مكتمل",
+        "types": {
+            "credit_note": "إشعار دائن",
+            "debit_note": "إشعار مدين",
+            "invoice": "فاتورة"
+        }
     },
     "landing": {
         "active_shops": "ورشة نشطة",
@@ -1651,7 +1688,66 @@
         "saved_success": "تم الحفظ بنجاح",
         "technician_assigned": "تم تعيين الفني بنجاح",
         "technician_not_belong_to_center": "هذا الفني لا ينتمي لهذا المركز",
-        "technician_removed": "تم إزالة الفني بنجاح"
+        "technician_removed": "تم إزالة الفني بنجاح",
+        "attachment_deleted": "تم حذف المرفق بنجاح",
+        "attachment_uploaded": "تم رفع المرفق",
+        "attachments_uploaded_successfully": "تم رفع المرفقات بنجاح",
+        "cannot_cancel_has_relations": "لا يمكن إلغاء كرت العمل - يرجى حذف جميع الخدمات، القطع، الفنيين، وإعادة أي مدفوعات أولاً",
+        "cannot_change_item_status": "لا يمكن تغيير حالة الخدمة - يوجد فنيين أو قطع غيار مرتبطة",
+        "cannot_complete_error": "لا يمكن إكمال كرت العمل",
+        "cannot_complete_items_pending": "لا يمكن إكمال كرت العمل - هناك خدمات غير مكتملة",
+        "cannot_deactivate_self": "لا يمكنك إلغاء تفعيل حسابك بنفسك",
+        "cannot_delete_has_users": "لا يمكن الحذف لوجود مستخدمين مرتبطين",
+        "cannot_delete_item_has_parts_or_technicians": "لا يمكن إلغاء الخدمة حتى يتم إزالة جميع قطع الغيار والفنيين!",
+        "cannot_delete_item_status_changed": "لا يمكن حذف الخدمة بعد تغيير حالتها من قيد الانتظار!",
+        "cannot_delete_item_work_order_has_payments": "لا يمكن حذف الخدمة لوجود دفعات مسجلة على كرت العمل! يمكنك تغيير حالتها إلى ملغاة بدلاً من ذلك.",
+        "cannot_delete_system_role": "لا يمكن حذف دور النظام",
+        "cannot_edit_system_role": "لا يمكن تعديل دور النظام",
+        "cannot_put_on_hold": "لا يمكن تعليق كرت العمل في هذه الحالة",
+        "cannot_remove_department_has_items": "لا يمكن إزالة القسم - يوجد خدمات مرتبطة به",
+        "cannot_resume": "كرت العمل ليس معلقاً",
+        "cannot_start_work": "لا يمكن بدء العمل",
+        "cannot_start_work_no_services": "لا يمكن بدء العمل لعدم وجود خدمات مضافة بعد",
+        "created_successfully": "تم الإنشاء بنجاح",
+        "customer_deleted": "تم حذف العميل",
+        "customer_has_related_data": "العميل مرتبط ببيانات أخرى",
+        "customer_merged": "تم دمج العميل",
+        "customer_updated": "تم تحديث العميل",
+        "deferred_invoice_required": "يجب إنشاء فاتورة آجلة وتحديد تاريخ الدفع لوجود مستحقات معلقة",
+        "deleted": "تم الحذف",
+        "deleted_successfully": "تم الحذف بنجاح",
+        "department_removed": "تم إزالة القسم بنجاح",
+        "duplicate_entry_error": "البيانات المدخلة مكررة وموجودة بالفعل",
+        "error_occurred": "حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى",
+        "no_employee_linked": "لا يوجد موظف مرتبط بهذا الحساب",
+        "note_added": "تمت إضافة الملاحظة بنجاح",
+        "note_deleted": "تم حذف الملاحظة بنجاح",
+        "part_added": "تمت إضافة قطعة الغيار بنجاح",
+        "part_deleted": "تم حذف قطعة الغيار بنجاح",
+        "part_updated": "تم تحديث قطعة الغيار بنجاح",
+        "photo_deleted": "تم حذف الصورة بنجاح",
+        "photos_uploaded_successfully": "تم رفع الصور بنجاح",
+        "saved": "تم الحفظ",
+        "saved_successfully": "تم الحفظ بنجاح",
+        "service_added": "تمت إضافة الخدمة بنجاح",
+        "service_deleted": "تم حذف الخدمة بنجاح",
+        "service_has_quote_lines": "لا يمكن حذف الخدمة - يوجد :count تقييم يستخدم هذه الخدمة",
+        "service_has_quote_lines_with_codes": "لا يمكن حذف الخدمة - مستخدمة في التقييمات: :codes",
+        "service_has_work_order_items": "لا يمكن حذف الخدمة - يوجد :count كرت عمل يستخدم هذه الخدمة",
+        "service_has_work_order_items_with_codes": "لا يمكن حذف الخدمة - مستخدمة في كروت العمل: :codes",
+        "service_updated": "تم تحديث الخدمة بنجاح",
+        "updated_successfully": "تم التحديث بنجاح",
+        "user_not_found": "المستخدم غير موجود",
+        "work_order_cancelled": "تم إلغاء كرت العمل",
+        "work_order_completed": "تم إكمال كرت العمل - خروج المركبة",
+        "work_order_completed_and_invoice_issued": "تم إكمال كرت العمل وإصدار الفاتورة",
+        "work_order_created": "تم إنشاء كرت العمل بنجاح",
+        "work_order_deleted": "تم حذف كرت العمل بنجاح",
+        "work_order_locked": "كرت العمل مقفل",
+        "work_order_on_hold": "تم تعليق كرت العمل",
+        "work_order_resumed": "تم استئناف كرت العمل",
+        "work_order_started": "تم بدء العمل",
+        "work_order_updated": "تم تحديث كرت العمل بنجاح"
     },
     "nav": {
         "brand": "Carag",
@@ -1748,7 +1844,9 @@
             "tabby": "تابي",
             "tamara": "تمارا",
             "transfer": "تحويل بنكي",
-            "visa": "فيزا"
+            "visa": "فيزا",
+            "card": "بطاقة",
+            "check": "شيك"
         },
         "no_payments": "لا توجد مدفوعات",
         "no_payments_desc": "لا توجد مدفوعات مسجلة لهذه الفاتورة حتى الآن.",
@@ -1769,7 +1867,14 @@
             "payment": "دفع",
             "refund": "استرجاع"
         },
-        "updated_successfully": "تم تحديث الدفعة بنجاح"
+        "updated_successfully": "تم تحديث الدفعة بنجاح",
+        "add": "إضافة دفعة",
+        "amount": "المبلغ",
+        "date": "تاريخ الدفع",
+        "method": "طريقة الدفع",
+        "notes": "ملاحظات",
+        "received_by": "المستلم",
+        "reference": "رقم المرجع"
     },
     "permissions": {
         "crm_customers_create": "إضافة عملاء جدد",
@@ -1842,7 +1947,21 @@
         "workcards_delete": "حذف كروت العمل (متقدم)",
         "workcards_lines_discount": "تعديل خصم البنود",
         "workcards_update": "تعديل كروت العمل (متقدم)",
-        "workcards_view": "عرض كروت العمل (متقدم)"
+        "workcards_view": "عرض كروت العمل (متقدم)",
+        "active": "نشط",
+        "count": "العدد",
+        "crm_customers_export": "تصدير العملاء",
+        "crm_customers_import": "استيراد العملاء",
+        "crm_customers_print": "طباعة العملاء",
+        "crm_vehicles_export": "تصدير المركبات",
+        "crm_vehicles_import": "استيراد المركبات",
+        "crm_vehicles_print": "طباعة المركبات",
+        "from_role": "من الدور",
+        "from_roles": "من الأدوار",
+        "inventory_parts_create": "إضافة قطعة غيار",
+        "inventory_parts_deactivate": "إلغاء تفعيل قطعة غيار",
+        "inventory_parts_update": "تعديل قطعة غيار",
+        "inventory_parts_view": "عرض قطع الغيار"
     },
     "permissions_modules": {
         "crm_customers": "إدارة العملاء",
@@ -2000,7 +2119,10 @@
         "drawing_required": "يرجى رسم التوقيع قبل الحفظ",
         "upload_required": "يرجى اختيار ملف للرفع",
         "selection_required": "يرجى اختيار توقيع من المكتبة",
-        "save_signature": "حفظ التوقيع"
+        "save_signature": "حفظ التوقيع",
+        "documents": "المستندات",
+        "library_manage_hint": "اسحب لإعادة الترتيب · انقر ✎ لتعديل · ⊘ للحذف · 👁 للإخفاء",
+        "drag_handle": "اسحب"
     },
     "profile": {
         "info": {
@@ -2046,14 +2168,16 @@
                 "posted": "مرحل"
             },
             "subtitle": "استلام البضاعة من الموردين",
-            "title": "سندات الاستلام"
+            "title": "سندات الاستلام",
+            "over_receiving_error": "الكمية المستلمة تتجاوز الكمية المطلوبة"
         },
         "invoices": {
             "auto_generated_from_grn": "تم إنشاؤها تلقائياً من سند استلام البضاعة: {code}",
             "code": "رقم الفاتورة",
             "date": "تاريخ الفاتورة",
             "supplier_ref": "مرجع المورد",
-            "title": "فواتير المشتريات"
+            "title": "فواتير المشتريات",
+            "created": "تم الإنشاء"
         },
         "items": {
             "add": "إضافة صنف",
@@ -2069,7 +2193,8 @@
             "receive_now": "استلام الآن",
             "select_part": "اختر قطعة الغيار",
             "total": "الإجمالي",
-            "vat": "الضريبة"
+            "vat": "الضريبة",
+            "unit_factor": "معامل التحويل"
         },
         "orders": {
             "actions": {
@@ -2190,9 +2315,14 @@
             "type_parts_desc": "توفير قطع الغيار ومواد المخزون",
             "type_services": "مقدم خدمات",
             "type_services_desc": "تقديم خدمات صيانة أو عمالة",
-            "updated": "تم تحديث المورد بنجاح"
+            "updated": "تم تحديث المورد بنجاح",
+            "deleted": "تم حذف المورد بنجاح"
         },
-        "title": "المتجر"
+        "title": "المتجر",
+        "returns": {
+            "created": "تم إنشاء مرتجع الشراء"
+        },
+        "tax_number": "الرقم الضريبي"
     },
     "quotes": {
         "actions": {
@@ -2460,7 +2590,8 @@
         },
         "title": "التقييمات",
         "total_count": "تقييم",
-        "view_open_quote": "عرض التقييم"
+        "view_open_quote": "عرض التقييم",
+        "cannot_remove_package_department_with_items": "لا يمكن حذف قسم الباقة لوجود عناصر مرتبطة"
     },
     "reports": {
         "cash_flow": "حركة الصندوق",
@@ -2742,12 +2873,143 @@
         "status": "الحالة",
         "system_name": "اسم النظام (Slug)",
         "title": "إدارة المستخدمين",
-        "toggle_status": "تغيير الحالة"
+        "toggle_status": "تغيير الحالة",
+        "permissions_all": "كل الصلاحيات",
+        "select_roles_desc": "وصف اختيار الأدوار"
     },
     "validation": {
         "before_card_entry_date": "لا يمكن أن يكون التاريخ قبل تاريخ دخول كرت الصيانة",
         "due_date_before_start": "تاريخ الاستحقاق لا يمكن أن يكون قبل تاريخ البداية",
-        "required": "هذا الحقل مطلوب"
+        "required": "هذا الحقل مطلوب",
+        "accepted": "يجب قبول :attribute.",
+        "active_url": ":attribute ليس عنوان URL صالحاً.",
+        "after": "يجب أن يكون :attribute تاريخاً بعد :date.",
+        "after_or_equal": "يجب أن يكون :attribute تاريخاً بعد أو يساوي :date.",
+        "alpha": "يجب أن يحتوي :attribute على حروف فقط.",
+        "alpha_dash": "يجب أن يحتوي :attribute على حروف وأرقام وشرطات فقط.",
+        "alpha_num": "يجب أن يحتوي :attribute على حروف وأرقام فقط.",
+        "array": "يجب أن يكون :attribute مصفوفة.",
+        "attributes": {
+            "company_name": "الاسم التجاري",
+            "contact_name": "اسم المسؤول",
+            "email": "البريد الإلكتروني",
+            "first_name": "الاسم الأول",
+            "last_name": "اسم الأخير",
+            "name": "الاسم",
+            "name_ar": "الاسم بالعربية",
+            "name_en": "الاسم بالإنجليزية",
+            "password": "كلمة المرور",
+            "password_confirmation": "تأكيد كلمة المرور",
+            "phone": "رقم الهاتف",
+            "promo_code": "الرمز الترويجي",
+            "signature": "التوقيع",
+            "terms": "الشروط والأحكام",
+            "whatsapp": "الواتساب"
+        },
+        "before": "يجب أن يكون :attribute تاريخاً قبل :date.",
+        "before_or_equal": "يجب أن يكون :attribute تاريخاً قبل أو يساوي :date.",
+        "between": {
+            "array": "يجب أن يحتوي :attribute على عدد عناصر بين :min و :max.",
+            "file": "يجب أن يكون حجم :attribute بين :min و :max كيلوبايت.",
+            "numeric": "يجب أن يكون :attribute بين :min و :max.",
+            "string": "يجب أن يكون طول :attribute بين :min و :max حرفاً."
+        },
+        "boolean": "يجب أن يكون :attribute صحيحاً أو خاطئاً.",
+        "confirmed": "تأكيد :attribute غير متطابق.",
+        "customer_required": "العميل مطلوب.",
+        "date": ":attribute ليس تاريخاً صالحاً.",
+        "date_equals": "يجب أن يكون :attribute تاريخاً مساوياً لـ :date.",
+        "date_format": ":attribute لا يطابق الصيغة :format.",
+        "different": "يجب أن يكون :attribute و :other مختلفين.",
+        "digits": "يجب أن يكون :attribute :digits أرقام.",
+        "digits_between": "يجب أن يكون :attribute بين :min و :max أرقام.",
+        "dimensions": ":attribute له أبعاد صورة غير صالحة.",
+        "distinct": ":attribute له قيمة مكررة.",
+        "email": "يجب أن يكون :attribute بريداً إلكترونياً صالحاً.",
+        "ends_with": "يجب أن ينتهي :attribute بأحد القيم التالية: :values.",
+        "exists": ":attribute المحدد غير صالح.",
+        "expected_end_date_after_entry": "تاريخ الانتهاء المتوقع يجب أن يكون بعد أو يساوي تاريخ الدخول.",
+        "file": "يجب أن يكون :attribute ملفاً.",
+        "filled": "يجب أن يحتوي :attribute على قيمة.",
+        "gt": {
+            "array": "يجب أن يحتوي :attribute على أكثر من :value عنصر.",
+            "file": "يجب أن يكون حجم :attribute أكبر من :value كيلوبايت.",
+            "numeric": "يجب أن يكون :attribute أكبر من :value.",
+            "string": "يجب أن يكون طول :attribute أكبر من :value حرفاً."
+        },
+        "gte": {
+            "array": "يجب أن يحتوي :attribute على :value عنصر أو أكثر.",
+            "file": "يجب أن يكون حجم :attribute أكبر من أو يساوي :value كيلوبايت.",
+            "numeric": "يجب أن يكون :attribute أكبر من أو يساوي :value.",
+            "string": "يجب أن يكون طول :attribute أكبر من أو يساوي :value حرفاً."
+        },
+        "image": "يجب أن يكون :attribute صورة.",
+        "in": ":attribute المحدد غير صالح.",
+        "in_array": ":attribute غير موجود في :other.",
+        "integer": "يجب أن يكون :attribute عدداً صحيحاً.",
+        "ip": "يجب أن يكون :attribute عنوان IP صالحاً.",
+        "ipv4": "يجب أن يكون :attribute عنوان IPv4 صالحاً.",
+        "ipv6": "يجب أن يكون :attribute عنوان IPv6 صالحاً.",
+        "json": "يجب أن يكون :attribute نصاً من نوع JSON صالحاً.",
+        "lt": {
+            "array": "يجب أن يحتوي :attribute على أقل من :value عنصر.",
+            "file": "يجب أن يكون حجم :attribute أقل من :value كيلوبايت.",
+            "numeric": "يجب أن يكون :attribute أقل من :value.",
+            "string": "يجب أن يكون طول :attribute أقل من :value حرفاً."
+        },
+        "lte": {
+            "array": "يجب ألا يحتوي :attribute على أكثر من :value عنصر.",
+            "file": "يجب أن يكون حجم :attribute أقل من أو يساوي :value كيلوبايت.",
+            "numeric": "يجب أن يكون :attribute أقل من أو يساوي :value.",
+            "string": "يجب أن يكون طول :attribute أقل من أو يساوي :value حرفاً."
+        },
+        "max": {
+            "array": "يجب ألا يحتوي :attribute على أكثر من :max عنصر.",
+            "file": "يجب ألا يكون حجم :attribute أكبر من :max كيلوبايت.",
+            "numeric": "يجب ألا يكون :attribute أكبر من :max.",
+            "string": "يجب ألا يزيد طول :attribute عن :max حرفاً."
+        },
+        "mimes": "يجب أن يكون :attribute ملفاً من نوع: :values.",
+        "mimetypes": "يجب أن يكون :attribute ملفاً من نوع: :values.",
+        "min": {
+            "array": "يجب أن يحتوي :attribute على الأقل على :min عنصر.",
+            "file": "يجب أن يكون حجم :attribute على الأقل :min كيلوبايت.",
+            "numeric": "يجب أن يكون :attribute على الأقل :min.",
+            "string": "يجب أن يكون طول :attribute على الأقل :min حرفاً."
+        },
+        "model_make_mismatch": "الموديل لا يتطابق مع الماركة",
+        "not_in": ":attribute المحدد غير صالح.",
+        "not_regex": "صيغة :attribute غير صالحة.",
+        "numeric": "يجب أن يكون :attribute رقماً.",
+        "password": "كلمة المرور غير صحيحة.",
+        "phone_regex_error": "يرجى إدخال رقم جوال سعودي صحيح (مثال: 05xxxxxxxx أو +966xxxxxxxxx).",
+        "present": "يجب أن يكون :attribute موجوداً.",
+        "regex": "صيغة :attribute غير صالحة.",
+        "required_if": ":attribute مطلوب عندما يكون :other هو :value.",
+        "required_unless": ":attribute مطلوب ما لم يكن :other ضمن :values.",
+        "required_with": ":attribute مطلوب عند وجود :values.",
+        "required_with_all": ":attribute مطلوب عند وجود :values.",
+        "required_without": ":attribute مطلوب عند عدم وجود :values.",
+        "required_without_all": ":attribute مطلوب عند عدم وجود أي من :values.",
+        "same": "يجب أن يتطابق :attribute مع :other.",
+        "size": {
+            "array": "يجب أن يحتوي :attribute على :size عنصر.",
+            "file": "يجب أن يكون حجم :attribute :size كيلوبايت.",
+            "numeric": "يجب أن يكون :attribute بحجم :size.",
+            "string": "يجب أن يكون طول :attribute :size حرفاً."
+        },
+        "starts_with": "يجب أن يبدأ :attribute بأحد القيم التالية: :values.",
+        "string": "يجب أن يكون :attribute نصاً.",
+        "tax_number_invalid": "يجب أن يتكون الرقم الضريبي للمملكة العربية السعودية من 15 خانة ويبدأ وينتهي بالرقم 3.",
+        "timezone": "يجب أن يكون :attribute منطقة زمنية صالحة.",
+        "unique": ":attribute مُستخدم من قبل.",
+        "uploaded": "فشل تحميل :attribute.",
+        "url": "صيغة :attribute غير صالحة.",
+        "uuid": "يجب أن يكون :attribute معرّف UUID صالحاً.",
+        "vehicle_customer_mismatch": "المركبة المختارة لا تنتمي للعميل المحدد.",
+        "vehicle_has_open_work_order": "توجد بالفعل كرت عمل مفتوح لهذه المركبة. يرجى إغلاقها أولاً.",
+        "vehicle_required": "المركبة مطلوبة.",
+        "vin_invalid": "يجب أن يتكون رقم الهيكل من حروف وأرقام إنجليزية فقط."
     },
     "vehicles": {
         "add": "إضافة مركبة",
@@ -2822,7 +3084,8 @@
             "plate_taken_desc": "المركبة التي تحمل رقم اللوحة هذا مسجلة مسبقاً بالنظام. يمكنك الضغط على بطاقة المركبة أدناه للانتقال لملفها مباشرة:",
             "plate_taken_title": "رقم اللوحة موجود مسبقاً!"
         },
-        "view_details": "عرض التفاصيل"
+        "view_details": "عرض التفاصيل",
+        "loading_all_printing": "جاري تحميل كل المطبوعات..."
     },
     "work_orders": {
         "actions": {
@@ -2852,7 +3115,9 @@
                 "status_changed": "تم تغيير حالة كرت العمل إلى :status",
                 "technician_assigned": "تم تعيين فني: :name للخدمة :service",
                 "technician_removed": "تم إزالة فني من الخدمة :service",
-                "updated": "تم تحديث بيانات كرت العمل"
+                "updated": "تم تحديث بيانات كرت العمل",
+                "item_status_updated": "تم تغيير حالة الخدمة \":title\" إلى :status",
+                "status_changed_on_hold": "تم تعليق كرت العمل"
             },
             "no_activities": "لا يوجد أنشطة مسجلة بعد",
             "title": "سجل الأنشطة"
@@ -2896,9 +3161,7 @@
         },
         "confirm_exit_title": "تسجيل خروج المركبة وإصدار الفاتورة",
         "cost_and_payment": "التكلفة والدفع",
-        "create": {
-            "title": "إنشاء كرت عمل"
-        },
+        "create": "إنشاء",
         "created_at": "تاريخ الإنشاء",
         "days_remaining": "متبقي {days} يوم",
         "details": "تفاصيل كرت العمل",
@@ -2907,9 +3170,7 @@
         "due_date_label": "تاريخ الدفع / الاستحقاق",
         "due_today": "اليوم موعد التسليم",
         "duration": "المدة",
-        "edit": {
-            "title": "تعديل أمر العمل"
-        },
+        "edit": "تعديل",
         "empty": "لا توجد كروت عمل حالياً",
         "empty_hint": "ابدأ بإنشاء أول كرت عمل باستخدام زر الإضافة.",
         "exit_date_label": "تاريخ خروج المركبة",
@@ -3013,7 +3274,8 @@
             "tab_service": "الخدمة",
             "tab_technicians": "الفنيون",
             "technician_share": "مساهمة الخدمة %",
-            "total_cost": "إجمالي التكلفة"
+            "total_cost": "إجمالي التكلفة",
+            "source": "المصدر"
         },
         "list": {
             "all_title": "جميع كروت العمل",
@@ -3171,7 +3433,8 @@
             "on_hold": "معلق",
             "open": "مفتوح",
             "pending": "قيد الانتظار",
-            "ready_for_qc": "جاهز للفحص (QC)"
+            "ready_for_qc": "جاهز للفحص (QC)",
+            "closed": "مغلق"
         },
         "systematic": {
             "category": "الفئة",
@@ -3203,6 +3466,33 @@
         "total": "الإجمالي",
         "total_count": "كرت عمل",
         "vat_header": "VAT ({rate}%)",
-        "work_order": "أمر العمل"
+        "work_order": "أمر العمل",
+        "item_status": {
+            "cancelled": "ملغي",
+            "completed": "مكتمل",
+            "in_progress": "جاري العمل",
+            "on_hold": "معلق",
+            "pending": "قيد الانتظار",
+            "ready_for_qc": "فحص الجودة"
+        },
+        "suggestions": {
+            "errors": {
+                "center_required": "معرّف المركز مطلوب لتشغيل الاقتراحات الذكية.",
+                "invalid_response": "أعاد الذكاء الاصطناعي استجابة غير صالحة.",
+                "tenant_required": "تتبّع استخدام الذكاء الاصطناعي يتطلب وجود مستأجر نشط.",
+                "unavailable": "خدمة الاقتراحات غير متاحة حالياً. حاول لاحقاً."
+            }
+        }
+    },
+    "pagination": {
+        "previous": "&laquo; السابق",
+        "next": "التالي &raquo;"
+    },
+    "passwords": {
+        "reset": "تم إعادة تعيين كلمة المرور الخاصة بك.",
+        "sent": "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.",
+        "throttled": "يرجى الانتظار قبل إعادة المحاولة.",
+        "token": "رمز إعادة تعيين كلمة المرور غير صالح.",
+        "user": "لم يتم العثور على مستخدم بهذا البريد الإلكتروني."
     }
 }

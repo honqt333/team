@@ -4,7 +4,22 @@
         "password": "Password",
         "set_password": "Set Password",
         "set_password_action": "Set Password",
-        "set_password_hint": "Set your password, :name"
+        "set_password_hint": "Set your password, :name",
+        "2fa": {
+            "required": "Two-factor authentication is required for this account. Please enable it to continue."
+        },
+        "failed": "These credentials do not match our records.",
+        "otp_invalid": "Invalid verification code",
+        "otp_request_again": "Please request a new verification code",
+        "otp_send_failed": "Failed to send verification code",
+        "otp_sent": "Verification code sent to your phone",
+        "otp_verified": "Phone number verified successfully",
+        "phone_already_registered": "This phone number is already registered",
+        "rate_limit_exceeded": "Too many attempts. Please wait :minutes minutes",
+        "resend_cooldown": "Please wait :seconds seconds before resending",
+        "throttle": "Too many login attempts. Please try again in :seconds seconds.",
+        "verification_unavailable": "Verification service is currently unavailable",
+        "verify_phone_first": "Please verify your phone number first"
     },
     "center_settings": {
         "address": {
@@ -307,7 +322,12 @@
         "view_all": "View All",
         "view_details": "View details",
         "yes": "Yes",
-        "yes_close": "Yes, Close"
+        "yes_close": "Yes, Close",
+        "cannot_delete_processed_leave": "Cannot delete a leave request that has already been processed.",
+        "deleted": "Deleted",
+        "deleted_successfully": "Deleted successfully",
+        "saved_successfully": "Saved successfully",
+        "updated": "Updated"
     },
     "company_profile": {
         "address": {
@@ -336,7 +356,10 @@
             "password_confirm_mismatch": "The new password does not match",
             "password_hint": "Leave the password fields blank if you do not want to change them",
             "password_min": "Password must be at least 8 characters",
-            "title": "Main user"
+            "title": "Main user",
+            "info": "Admin user information",
+            "name": "Name",
+            "password": "Password"
         },
         "branches": {
             "active": "Active",
@@ -530,6 +553,10 @@
             "qr_enabled": "Activate QR on the invoice",
             "qr_enabled_hint": "A QR code will be added to all invoices",
             "setup_integration": "Integration setup (coming soon)"
+        },
+        "subscription_history": {
+            "placeholder": "Subscription history will appear here once the component is lifted.",
+            "subtitle": "Subscription log with renewal dates and payments for the company."
         }
     },
     "customers": {
@@ -980,7 +1007,9 @@
             "total_deductions": "Total discounts",
             "user_already_linked": "This employee is already linked to a user",
             "weekly_schedule": "Weekly scheduling",
-            "working_hours": "Working hours"
+            "working_hours": "Working hours",
+            "edit": "Edit Employee",
+            "employee_number_exists": "Employee number already exists"
         },
         "financial": {
             "add_allowance": "Add allowance",
@@ -1053,12 +1082,7 @@
             "reject": "He refused",
             "request_leave": "Leave request",
             "start_date": "Start date",
-            "status": {
-                "approved": "Acceptable",
-                "cancelled": "Canceled",
-                "pending": "Hanging",
-                "rejected": "Rejected"
-            },
+            "status": "Status",
             "statuses": {
                 "approved": "Acceptable",
                 "pending": "Hanging",
@@ -1074,7 +1098,8 @@
                 "paternity": "Fatherhood",
                 "sick": "Satisfactory",
                 "unpaid": "Without salary"
-            }
+            },
+            "request_submitted": "Request Submitted"
         },
         "payroll": {
             "allowances": "Suits",
@@ -1117,7 +1142,10 @@
             "total_allowances": "Total Allowances",
             "total_deductions": "Total discounts",
             "total_net": "Net gross",
-            "total_salaries": "Total salaries"
+            "total_salaries": "Total salaries",
+            "cannot_delete_item": "Cannot delete item from approved payroll",
+            "cannot_regenerate": "Cannot regenerate approved or paid payroll",
+            "regenerated_successfully": "Payroll recalculated successfully"
         },
         "settings": {
             "allowances": {
@@ -1205,7 +1233,10 @@
             }
         },
         "subtitle": "Managing employees, payroll and attendance",
-        "title": "Human resources"
+        "title": "Human resources",
+        "shifts": {
+            "cannot_delete_in_use": "Cannot Delete In Use"
+        }
     },
     "inventory": {
         "hub": {
@@ -1269,7 +1300,8 @@
                 "reversal": "Reverse movement",
                 "transfer_in": "Incoming transfer",
                 "transfer_out": "Outgoing transfer"
-            }
+            },
+            "part_issued": "Part Issued"
         },
         "parts": {
             "activated": "The widget has been activated",
@@ -1617,7 +1649,12 @@
         "title": "Invoices",
         "total": "Total",
         "total_paid": "Paid",
-        "work_order_not_completed": "The work order is incomplete"
+        "work_order_not_completed": "The work order is incomplete",
+        "types": {
+            "credit_note": "Credit note",
+            "debit_note": "Debit note",
+            "invoice": "Invoice"
+        }
     },
     "landing": {
         "active_shops": "Active Shops",
@@ -1651,7 +1688,66 @@
         "saved_success": "Saved successfully",
         "technician_assigned": "Technician assigned successfully",
         "technician_not_belong_to_center": "This technician does not belong to this center",
-        "technician_removed": "Technician removed successfully"
+        "technician_removed": "Technician removed successfully",
+        "attachment_deleted": "Attachment deleted successfully",
+        "attachment_uploaded": "Attachment Uploaded",
+        "attachments_uploaded_successfully": "Attachments uploaded successfully",
+        "cannot_cancel_has_relations": "Cannot cancel work order - please delete all services, parts, technicians, and refund any payments first",
+        "cannot_change_item_status": "Cannot change item status - has technicians or parts",
+        "cannot_complete_error": "Cannot Complete Error",
+        "cannot_complete_items_pending": "Cannot complete work order - pending items exist",
+        "cannot_deactivate_self": "Cannot Deactivate Self",
+        "cannot_delete_has_users": "Cannot Delete Has Users",
+        "cannot_delete_item_has_parts_or_technicians": "Cannot delete service until all spare parts and technicians are removed!",
+        "cannot_delete_item_status_changed": "Cannot delete service after its status has changed from pending!",
+        "cannot_delete_item_work_order_has_payments": "Cannot delete service because there are payments registered on the work order! You can change its status to cancelled instead.",
+        "cannot_delete_system_role": "Cannot Delete System Role",
+        "cannot_edit_system_role": "Cannot Edit System Role",
+        "cannot_put_on_hold": "Cannot put work order on hold in this status",
+        "cannot_remove_department_has_items": "Cannot remove department - has linked items",
+        "cannot_resume": "Work order is not on hold",
+        "cannot_start_work": "Cannot Start Work",
+        "cannot_start_work_no_services": "Cannot start work because there are no services added yet",
+        "created_successfully": "Created Successfully",
+        "customer_deleted": "Customer Deleted",
+        "customer_has_related_data": "Customer Has Related Data",
+        "customer_merged": "Customer Merged",
+        "customer_updated": "Customer Updated",
+        "deferred_invoice_required": "A deferred invoice and due date are required because there is an outstanding balance",
+        "deleted": "Deleted",
+        "deleted_successfully": "Deleted Successfully",
+        "department_removed": "Department removed successfully",
+        "duplicate_entry_error": "Duplicate Entry Error",
+        "error_occurred": "Error Occurred",
+        "no_employee_linked": "No Employee Linked",
+        "note_added": "Note added successfully",
+        "note_deleted": "Note deleted successfully",
+        "part_added": "Part added successfully",
+        "part_deleted": "Part deleted successfully",
+        "part_updated": "Part updated successfully",
+        "photo_deleted": "Photo deleted successfully",
+        "photos_uploaded_successfully": "Photos uploaded successfully",
+        "saved": "Saved",
+        "saved_successfully": "Saved Successfully",
+        "service_added": "Service added successfully",
+        "service_deleted": "Service deleted successfully",
+        "service_has_quote_lines": "Cannot delete service - used in :count quotes",
+        "service_has_quote_lines_with_codes": "Cannot delete service - used in quotes: :codes",
+        "service_has_work_order_items": "Cannot delete service - used in :count work orders",
+        "service_has_work_order_items_with_codes": "Cannot delete service - used in work orders: :codes",
+        "service_updated": "Service updated successfully",
+        "updated_successfully": "Updated Successfully",
+        "user_not_found": "User Not Found",
+        "work_order_cancelled": "Work order cancelled",
+        "work_order_completed": "Work order completed - Vehicle exit",
+        "work_order_completed_and_invoice_issued": "Work Order Completed And Invoice Issued",
+        "work_order_created": "Work order created successfully",
+        "work_order_deleted": "Work order deleted successfully",
+        "work_order_locked": "Work Order Locked",
+        "work_order_on_hold": "Work order put on hold",
+        "work_order_resumed": "Work order resumed",
+        "work_order_started": "Work Order Started",
+        "work_order_updated": "Work order updated successfully"
     },
     "nav": {
         "brand": "Carag",
@@ -1748,7 +1844,9 @@
             "tabby": "Tabby",
             "tamara": "Tamara",
             "transfer": "Bank transfer",
-            "visa": "Visa"
+            "visa": "Visa",
+            "card": "Card",
+            "check": "Check"
         },
         "no_payments": "There are no payments",
         "no_payments_desc": "There are no recorded payments for this invoice yet.",
@@ -1769,7 +1867,14 @@
             "payment": "Pay",
             "refund": "Recovery"
         },
-        "updated_successfully": "The batch has been updated successfully"
+        "updated_successfully": "The batch has been updated successfully",
+        "add": "Add Payment",
+        "amount": "Amount",
+        "date": "Payment Date",
+        "method": "Payment Method",
+        "notes": "Notes",
+        "received_by": "Received By",
+        "reference": "Reference"
     },
     "permissions": {
         "crm_customers_create": "Add new clients",
@@ -1842,7 +1947,21 @@
         "workcards_delete": "Delete business cards (advanced)",
         "workcards_lines_discount": "Modify discount items",
         "workcards_update": "Editing business cards (advanced)",
-        "workcards_view": "View business cards (advanced)"
+        "workcards_view": "View business cards (advanced)",
+        "active": "Active",
+        "count": "Count",
+        "crm_customers_export": "Export Customers",
+        "crm_customers_import": "Import Customers",
+        "crm_customers_print": "Print Customers",
+        "crm_vehicles_export": "Export Vehicles",
+        "crm_vehicles_import": "Import Vehicles",
+        "crm_vehicles_print": "Print Vehicles",
+        "from_role": "From Role",
+        "from_roles": "From Roles",
+        "inventory_parts_create": "Create Part",
+        "inventory_parts_deactivate": "Deactivate Part",
+        "inventory_parts_update": "Update Part",
+        "inventory_parts_view": "View Parts"
     },
     "permissions_modules": {
         "crm_customers": "Customer management",
@@ -2000,7 +2119,10 @@
         "drawing_required": "Please draw the signature before saving",
         "upload_required": "Please choose a file to upload",
         "selection_required": "Please pick a signature from the library",
-        "save_signature": "Save Signature"
+        "save_signature": "Save Signature",
+        "documents": "Documents",
+        "library_manage_hint": "Drag to reorder · click ✎ to rename · ⊘ to delete · 👁 to hide",
+        "drag_handle": "Drag"
     },
     "profile": {
         "info": {
@@ -2046,14 +2168,16 @@
                 "posted": "Posted"
             },
             "subtitle": "Receiving goods from suppliers",
-            "title": "Receipt vouchers"
+            "title": "Receipt vouchers",
+            "over_receiving_error": "Over Receiving Error"
         },
         "invoices": {
             "auto_generated_from_grn": "Auto-generated from GRN: {code}",
             "code": "Invoice Number",
             "date": "Invoice Date",
             "supplier_ref": "Supplier Ref",
-            "title": "Purchase Invoices"
+            "title": "Purchase Invoices",
+            "created": "Created"
         },
         "items": {
             "add": "Add Item",
@@ -2069,7 +2193,8 @@
             "receive_now": "Receive Now",
             "select_part": "Select Item",
             "total": "Total",
-            "vat": "VAT"
+            "vat": "VAT",
+            "unit_factor": "Conversion Factor"
         },
         "orders": {
             "actions": {
@@ -2190,9 +2315,14 @@
             "type_parts_desc": "Provides spare parts and inventory materials",
             "type_services": "Service Provider",
             "type_services_desc": "Provides maintenance or labor services",
-            "updated": "Supplier updated successfully"
+            "updated": "Supplier updated successfully",
+            "deleted": "Supplier deleted successfully"
         },
-        "title": "Store"
+        "title": "Store",
+        "returns": {
+            "created": "Created"
+        },
+        "tax_number": "Tax Number"
     },
     "quotes": {
         "actions": {
@@ -2460,7 +2590,8 @@
         },
         "title": "Ratings",
         "total_count": "Evaluation",
-        "view_open_quote": "View rating"
+        "view_open_quote": "View rating",
+        "cannot_remove_package_department_with_items": "Cannot Remove Package Department With Items"
     },
     "reports": {
         "cash_flow": "Cash Flow",
@@ -2742,12 +2873,143 @@
         "status": "Status",
         "system_name": "System name (Slug)",
         "title": "User management",
-        "toggle_status": "Change status"
+        "toggle_status": "Change status",
+        "permissions_all": "Permissions All",
+        "select_roles_desc": "Select Roles Desc"
     },
     "validation": {
         "before_card_entry_date": "Date cannot be before the work order entry date",
         "due_date_before_start": "Due date cannot be before the start date",
-        "required": "This field is required"
+        "required": "This field is required",
+        "accepted": "The :attribute must be accepted.",
+        "active_url": "The :attribute is not a valid URL.",
+        "after": "The :attribute must be a date after :date.",
+        "after_or_equal": "The :attribute must be a date after or equal to :date.",
+        "alpha": "The :attribute may only contain letters.",
+        "alpha_dash": "The :attribute may only contain letters, numbers, dashes and underscores.",
+        "alpha_num": "The :attribute may only contain letters and numbers.",
+        "array": "The :attribute must be an array.",
+        "attributes": {
+            "company_name": "Company Name",
+            "contact_name": "Responsible Person's Name",
+            "email": "Email",
+            "first_name": "First Name",
+            "last_name": "Last Name",
+            "name": "Name",
+            "name_ar": "Name (Arabic)",
+            "name_en": "Name (English)",
+            "password": "Password",
+            "password_confirmation": "Password confirmation",
+            "phone": "Phone number",
+            "promo_code": "Promo Code",
+            "signature": "Signature",
+            "terms": "Terms & Conditions",
+            "whatsapp": "WhatsApp number"
+        },
+        "before": "The :attribute must be a date before :date.",
+        "before_or_equal": "The :attribute must be a date before or equal to :date.",
+        "between": {
+            "array": "The :attribute must have between :min and :max items.",
+            "file": "The :attribute must be between :min and :max kilobytes.",
+            "numeric": "The :attribute must be between :min and :max.",
+            "string": "The :attribute must be between :min and :max characters."
+        },
+        "boolean": "The :attribute field must be true or false.",
+        "confirmed": "The :attribute confirmation does not match.",
+        "customer_required": "Customer is required.",
+        "date": "The :attribute is not a valid date.",
+        "date_equals": "The :attribute must be a date equal to :date.",
+        "date_format": "The :attribute does not match the format :format.",
+        "different": "The :attribute and :other must be different.",
+        "digits": "The :attribute must be :digits digits.",
+        "digits_between": "The :attribute must be between :min and :max digits.",
+        "dimensions": "The :attribute has invalid image dimensions.",
+        "distinct": "The :attribute field has a duplicate value.",
+        "email": "The :attribute must be a valid email address.",
+        "ends_with": "The :attribute must end with one of the following: :values.",
+        "exists": "The selected :attribute is invalid.",
+        "expected_end_date_after_entry": "Expected end date must be after or equal to entry date.",
+        "file": "The :attribute must be a file.",
+        "filled": "The :attribute field must have a value.",
+        "gt": {
+            "array": "The :attribute must have more than :value items.",
+            "file": "The :attribute must be greater than :value kilobytes.",
+            "numeric": "The :attribute must be greater than :value.",
+            "string": "The :attribute must be greater than :value characters."
+        },
+        "gte": {
+            "array": "The :attribute must have :value items or more.",
+            "file": "The :attribute must be greater than or equal to :value kilobytes.",
+            "numeric": "The :attribute must be greater than or equal to :value.",
+            "string": "The :attribute must be greater than or equal to :value characters."
+        },
+        "image": "The :attribute must be an image.",
+        "in": "The selected :attribute is invalid.",
+        "in_array": "The :attribute field does not exist in :other.",
+        "integer": "The :attribute must be an integer.",
+        "ip": "The :attribute must be a valid IP address.",
+        "ipv4": "The :attribute must be a valid IPv4 address.",
+        "ipv6": "The :attribute must be a valid IPv6 address.",
+        "json": "The :attribute must be a valid JSON string.",
+        "lt": {
+            "array": "The :attribute must have less than :value items.",
+            "file": "The :attribute must be less than :value kilobytes.",
+            "numeric": "The :attribute must be less than :value.",
+            "string": "The :attribute must be less than :value characters."
+        },
+        "lte": {
+            "array": "The :attribute must not have more than :value items.",
+            "file": "The :attribute must be less than or equal to :value kilobytes.",
+            "numeric": "The :attribute must be less than or equal to :value.",
+            "string": "The :attribute must be less than or equal to :value characters."
+        },
+        "max": {
+            "array": "The :attribute may not have more than :max items.",
+            "file": "The :attribute may not be greater than :max kilobytes.",
+            "numeric": "The :attribute may not be greater than :max.",
+            "string": "The :attribute may not be greater than :max characters."
+        },
+        "mimes": "The :attribute must be a file of type: :values.",
+        "mimetypes": "The :attribute must be a file of type: :values.",
+        "min": {
+            "array": "The :attribute must have at least :min items.",
+            "file": "The :attribute must be at least :min kilobytes.",
+            "numeric": "The :attribute must be at least :min.",
+            "string": "The :attribute must be at least :min characters."
+        },
+        "model_make_mismatch": "Model Make Mismatch",
+        "not_in": "The selected :attribute is invalid.",
+        "not_regex": "The :attribute format is invalid.",
+        "numeric": "The :attribute must be a number.",
+        "password": "The password is incorrect.",
+        "phone_regex_error": "Please enter a valid Saudi phone number (e.g., 05xxxxxxxx or +966xxxxxxxxx).",
+        "present": "The :attribute field must be present.",
+        "regex": "The :attribute format is invalid.",
+        "required_if": "The :attribute field is required when :other is :value.",
+        "required_unless": "The :attribute field is required unless :other is in :values.",
+        "required_with": "The :attribute field is required when :values is present.",
+        "required_with_all": "The :attribute field is required when :values are present.",
+        "required_without": "The :attribute field is required when :values is not present.",
+        "required_without_all": "The :attribute field is required when none of :values are present.",
+        "same": "The :attribute and :other must match.",
+        "size": {
+            "array": "The :attribute must contain :size items.",
+            "file": "The :attribute must be :size kilobytes.",
+            "numeric": "The :attribute must be :size.",
+            "string": "The :attribute must be :size characters."
+        },
+        "starts_with": "The :attribute must start with one of the following: :values.",
+        "string": "The :attribute must be a string.",
+        "tax_number_invalid": "The VAT number for Saudi Arabia must be exactly 15 digits, starting and ending with 3.",
+        "timezone": "The :attribute must be a valid zone.",
+        "unique": "The :attribute has already been taken.",
+        "uploaded": "The :attribute failed to upload.",
+        "url": "The :attribute format is invalid.",
+        "uuid": "The :attribute must be a valid UUID.",
+        "vehicle_customer_mismatch": "The selected vehicle does not belong to the selected customer.",
+        "vehicle_has_open_work_order": "This vehicle already has an open work order. Please close it first.",
+        "vehicle_required": "Vehicle is required.",
+        "vin_invalid": "The chassis number must contain only English letters and numbers."
     },
     "vehicles": {
         "add": "Add vehicle",
@@ -2822,7 +3084,8 @@
             "plate_taken_desc": "The vehicle with this plate number is already registered. You can click on the card below to go directly to its profile:",
             "plate_taken_title": "Plate number already exists!"
         },
-        "view_details": "View Details"
+        "view_details": "View Details",
+        "loading_all_printing": "Loading All Printing"
     },
     "work_orders": {
         "actions": {
@@ -2852,7 +3115,9 @@
                 "status_changed": "Status changed to :status",
                 "technician_assigned": "Technician :name assigned to :service",
                 "technician_removed": "Technician removed from :service",
-                "updated": "Work order updated"
+                "updated": "Work order updated",
+                "item_status_updated": "Service \":title\" status changed to :status",
+                "status_changed_on_hold": "Status Changed On Hold"
             },
             "no_activities": "No activities recorded yet",
             "title": "Activity Log"
@@ -2896,9 +3161,7 @@
         },
         "confirm_exit_title": "Vehicle Exit & Issue Invoice",
         "cost_and_payment": "Cost and payment",
-        "create": {
-            "title": "Create a business card"
-        },
+        "create": "Create",
         "created_at": "Creation date",
         "days_remaining": "{days} days left",
         "details": "Business card details",
@@ -2907,9 +3170,7 @@
         "due_date_label": "Due Date / Payment Date",
         "due_today": "Today is the delivery date",
         "duration": "Duration",
-        "edit": {
-            "title": "Edit Work Order"
-        },
+        "edit": "Edit",
         "empty": "There are no job cards currently available",
         "empty_hint": "Start by creating your first business card using the add button.",
         "exit_date_label": "Vehicle Exit Date",
@@ -3013,7 +3274,8 @@
             "tab_service": "Service",
             "tab_technicians": "Technicians",
             "technician_share": "Service Share %",
-            "total_cost": "Total cost"
+            "total_cost": "Total cost",
+            "source": "Source"
         },
         "list": {
             "all_title": "All business cards",
@@ -3171,7 +3433,8 @@
             "on_hold": "On Hold",
             "open": "Open",
             "pending": "Pending",
-            "ready_for_qc": "Ready for QC"
+            "ready_for_qc": "Ready for QC",
+            "closed": "Closed"
         },
         "systematic": {
             "category": "Category",
@@ -3203,6 +3466,33 @@
         "total": "Total",
         "total_count": "Business card",
         "vat_header": "VAT ({rate}%)",
-        "work_order": "Work Order"
+        "work_order": "Work Order",
+        "item_status": {
+            "cancelled": "Cancelled",
+            "completed": "Completed",
+            "in_progress": "In Progress",
+            "on_hold": "On Hold",
+            "pending": "Pending",
+            "ready_for_qc": "Ready for QC"
+        },
+        "suggestions": {
+            "errors": {
+                "center_required": "A center identifier is required to run AI suggestions.",
+                "invalid_response": "AI returned an invalid response.",
+                "tenant_required": "AI usage tracking requires an active tenant.",
+                "unavailable": "The suggestion service is temporarily unavailable. Please try again later."
+            }
+        }
+    },
+    "pagination": {
+        "previous": "&laquo; Previous",
+        "next": "Next &raquo;"
+    },
+    "passwords": {
+        "reset": "Your password has been reset.",
+        "sent": "We have emailed your password reset link.",
+        "throttled": "Please wait before retrying.",
+        "token": "This password reset token is invalid.",
+        "user": "We can't find a user with that email address."
     }
 }
