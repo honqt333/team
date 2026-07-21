@@ -7,6 +7,7 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionPayment;
+use App\Models\PaymentSettings;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -28,22 +29,32 @@ class PaymentController extends Controller
     {
         $subscription->load(['tenant', 'plan']);
 
-        // Get available gateways
+        // Get available gateways (already filtered by admin-enabled flag)
         $gateways = $this->paymentManager->getAvailableGateways();
+
+        // Read default gateway from DB (admin-managed)
+        $paymentSettings = PaymentSettings::getSettings();
+        $defaultGateway = $paymentSettings->default_gateway ?? config('payment.default');
+
+        // Compute total with VAT so the gateway charges the same amount the
+        // tenant saw in the subscription page. Without this, gateway form
+        // amounts would mismatch the invoice total.
+        $vatCalc = $paymentSettings->calculateVat((float) $subscription->price);
+        $totalAmount = $vatCalc['total'];
 
         // Create pending payment record
         $payment = SubscriptionPayment::create([
             'tenant_id' => $subscription->tenant_id,
             'subscription_id' => $subscription->id,
-            'amount' => $subscription->price,
+            'amount' => $totalAmount,
             'currency' => 'SAR',
-            'gateway' => config('payment.default'),
+            'gateway' => $defaultGateway,
             'status' => 'pending',
         ]);
 
         // Get payment form data
         $formData = $this->paymentManager->initiate([
-            'amount' => $subscription->price,
+            'amount' => $totalAmount,
             'currency' => 'SAR',
             'description' => "اشتراك {$subscription->plan->name_ar} - {$subscription->tenant->trade_name}",
             'callback_url' => route('system.payment.callback', ['payment' => $payment->id]),
@@ -52,7 +63,7 @@ class PaymentController extends Controller
                 'subscription_id' => $subscription->id,
                 'tenant_id' => $subscription->tenant_id,
             ],
-        ]);
+        ], $defaultGateway);
 
         return Inertia::render('System/Payment/Checkout', [
             'subscription' => $subscription,

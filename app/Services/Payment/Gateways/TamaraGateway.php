@@ -18,9 +18,18 @@ class TamaraGateway implements PaymentGatewayInterface
 
     public function __construct()
     {
+        // CRITICAL: keep boolean false values (e.g. enabled=false) — array_filter
+        // without an explicit callback drops ALL falsy values including false.
         $dbConfig = PaymentSettings::first()?->tamara ?? [];
         $envConfig = config('payment.gateways.tamara', []) ?? [];
-        $this->config = array_merge($envConfig, array_filter($dbConfig, fn ($v) => $v !== null && $v !== ''));
+        $filtered = [];
+
+        foreach ($dbConfig as $k => $v) {
+            if ($v !== null && $v !== '') {
+                $filtered[$k] = $v;
+            }
+        }
+        $this->config = array_merge($envConfig, $filtered);
         $this->baseUrl = $this->config['base_url'] ?? 'https://api.tamara.co';
     }
 
@@ -31,7 +40,8 @@ class TamaraGateway implements PaymentGatewayInterface
 
     public function isConfigured(): bool
     {
-        return ! empty($this->config['api_token']);
+        return ($this->config['enabled'] ?? false)
+            && ! empty($this->config['api_token']);
     }
 
     /**

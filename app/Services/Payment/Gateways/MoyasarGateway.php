@@ -21,9 +21,18 @@ class MoyasarGateway implements PaymentGatewayInterface
         // Prefer DB-stored PaymentSettings (admin-managed), fall back to env/config.
         // This lets the admin enable Moyasar in /system/settings/payment
         // without restarting the app or editing .env.
+        // CRITICAL: keep boolean false values (e.g. enabled=false) — array_filter
+        // without an explicit callback drops ALL falsy values including false.
         $dbConfig = PaymentSettings::first()?->moyasar ?? [];
         $envConfig = config('payment.gateways.moyasar') ?? [];
-        $this->config = array_merge($envConfig, array_filter($dbConfig, fn ($v) => $v !== null && $v !== ''));
+        $filtered = [];
+
+        foreach ($dbConfig as $k => $v) {
+            if ($v !== null && $v !== '') {
+                $filtered[$k] = $v;
+            }
+        }
+        $this->config = array_merge($envConfig, $filtered);
         $this->baseUrl = $this->config['base_url'] ?? 'https://api.moyasar.com/v1';
     }
 
@@ -34,7 +43,13 @@ class MoyasarGateway implements PaymentGatewayInterface
 
     public function isConfigured(): bool
     {
-        return ! empty($this->config['publishable_key']) && ! empty($this->config['secret_key']);
+        // Admin must explicitly enable the gateway AND provide valid keys.
+        // Without this check, the gateway stays "configured" even when the
+        // admin toggled it off in /system/settings/payment, which leaks the
+        // gateway into the tenant's checkout list.
+        return ($this->config['enabled'] ?? false)
+            && ! empty($this->config['publishable_key'])
+            && ! empty($this->config['secret_key']);
     }
 
     /**
