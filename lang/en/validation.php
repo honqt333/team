@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'accepted' => 'The :attribute must be accepted.',
     'active_url' => 'The :attribute is not a valid URL.',
@@ -22,6 +24,7 @@ return [
         'password_confirmation' => 'Password confirmation',
         'phone' => 'Phone number',
         'promo_code' => 'Promo Code',
+        'signature' => 'Signature',
         'terms' => 'Terms & Conditions',
         'whatsapp' => 'WhatsApp number',
     ],

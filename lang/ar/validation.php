@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'accepted' => 'يجب قبول :attribute.',
     'active_url' => ':attribute ليس عنوان URL صالحاً.',
@@ -22,6 +24,7 @@ return [
         'password_confirmation' => 'تأكيد كلمة المرور',
         'phone' => 'رقم الهاتف',
         'promo_code' => 'الرمز الترويجي',
+        'signature' => 'التوقيع',
         'terms' => 'الشروط والأحكام',
         'whatsapp' => 'الواتساب',
     ],

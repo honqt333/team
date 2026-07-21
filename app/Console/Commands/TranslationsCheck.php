@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -65,11 +67,14 @@ class TranslationsCheck extends Command
 
         // 1) Collect defined keys per locale (PHP files)
         $definedKeys = []; // locale => ['file.key.sub' => true]
+
         foreach ($locales as $locale) {
             $definedKeys[$locale] = [];
-            foreach (glob($base . "/lang/{$locale}/*.php") as $file) {
+
+            foreach (glob($base."/lang/{$locale}/*.php") as $file) {
                 $name = basename($file, '.php');
                 $arr = include $file;
+
                 foreach ($this->flatten($arr) as $k => $_) {
                     $definedKeys[$locale]["{$name}.{$k}"] = true;
                 }
@@ -78,11 +83,14 @@ class TranslationsCheck extends Command
 
         // 1b) Collect defined keys per locale (Vue i18n JSON files)
         $vueDefined = []; // locale => ['key.sub' => true]
+
         foreach ($locales as $locale) {
             $vueDefined[$locale] = [];
-            $jsonPath = $base . "/resources/js/i18n/lang/{$locale}.json";
+            $jsonPath = $base."/resources/js/i18n/lang/{$locale}.json";
+
             if (file_exists($jsonPath)) {
                 $arr = json_decode(file_get_contents($jsonPath), true) ?: [];
+
                 foreach ($this->flatten($arr) as $k => $_) {
                     $vueDefined[$locale][$k] = true;
                 }
@@ -92,36 +100,65 @@ class TranslationsCheck extends Command
         // 2) Scan codebase for usage
         $usages = []; // 'file.key.sub' => [files...]
         $scanDirs = ['app', 'resources/views', 'resources/js', 'database', 'routes'];
+
         foreach ($scanDirs as $d) {
-            $full = $base . '/' . $d;
-            if (!is_dir($full)) continue;
+            $full = $base.'/'.$d;
+
+            if (! is_dir($full)) {
+                continue;
+            }
             $rii = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($full));
+
             foreach ($rii as $f) {
-                if ($f->isDir()) continue;
+                if ($f->isDir()) {
+                    continue;
+                }
                 $path = $f->getPathname();
+
                 foreach ($this->skipDirs as $s) {
-                    if (strpos($path, '/' . $s . '/') !== false) continue 2;
+                    if (strpos($path, '/'.$s.'/') !== false) {
+                        continue 2;
+                    }
                 }
                 $ext = $f->getExtension();
-                if (!in_array($ext, ['php', 'vue', 'js', 'ts'], true)) continue;
+
+                if (! in_array($ext, ['php', 'vue', 'js', 'ts'], true)) {
+                    continue;
+                }
                 $content = @file_get_contents($path);
-                if ($content === false) continue;
+
+                if ($content === false) {
+                    continue;
+                }
+
                 foreach ($this->patterns as $pat) {
                     if (preg_match_all($pat, $content, $m)) {
                         foreach ($m[1] as $key) {
                             // skip dynamic markers / non-keys
-                            if (strpos($key, '$') !== false) continue;
-                            if (preg_match('/\{[^}]+\}/', $key)) continue;
-                            if (strpos($key, ' ') !== false) continue;
+                            if (strpos($key, '$') !== false) {
+                                continue;
+                            }
+
+                            if (preg_match('/\{[^}]+\}/', $key)) {
+                                continue;
+                            }
+
+                            if (strpos($key, ' ') !== false) {
+                                continue;
+                            }
+
                             // Skip bilingual model attributes (e.g., title_ar, name_en) —
                             // these are database fields, not translation keys.
-                            if (preg_match('/_(ar|en)$/', $key)) continue;
-                            $usages[$key][] = str_replace($base . '/', '', $path);
+                            if (preg_match('/_(ar|en)$/', $key)) {
+                                continue;
+                            }
+                            $usages[$key][] = str_replace($base.'/', '', $path);
                         }
                     }
                 }
             }
         }
+
         foreach ($usages as $k => &$files) {
             $files = array_values(array_unique($files));
         }
@@ -129,10 +166,12 @@ class TranslationsCheck extends Command
 
         // 3) Find missing per locale
         $missing = []; // locale => [key => files]
+
         foreach ($locales as $locale) {
             $missing[$locale] = [];
+
             foreach ($usages as $key => $files) {
-                if (!isset($definedKeys[$locale][$key])) {
+                if (! isset($definedKeys[$locale][$key])) {
                     $missing[$locale][$key] = $files;
                 }
             }
@@ -141,18 +180,21 @@ class TranslationsCheck extends Command
 
         // 3b) Vue i18n cross-check: keys in EN missing in AR, and vice versa
         $vueMissing = []; // locale => [key => value]
+
         if ($withVue || $vueOnly) {
             foreach ($locales as $locale) {
                 $otherLocale = $locale === 'en' ? 'ar' : 'en';
                 $vueMissing[$locale] = [];
+
                 foreach ($vueDefined[$locale] as $key => $_) {
-                    if (!isset($vueDefined[$otherLocale][$key])) {
+                    if (! isset($vueDefined[$otherLocale][$key])) {
                         $vueMissing[$locale][$key] = "Only in {$locale} JSON";
                     }
                 }
                 ksort($vueMissing[$locale]);
             }
         }
+
         if ($vueOnly) {
             // Override: skip PHP file checks
             $missing = [];
@@ -164,20 +206,26 @@ class TranslationsCheck extends Command
             $this->line('');
             $this->line('// Paste this into the appropriate lang/{locale}/*.php file.');
             $this->line('// Each missing key has a placeholder value.');
+
             foreach ($locales as $locale) {
-                if (empty($missing[$locale])) continue;
+                if (empty($missing[$locale])) {
+                    continue;
+                }
                 $this->line('');
                 $this->line("// --- {$locale} ---");
+
                 foreach ($missing[$locale] as $key => $files) {
-                    $placeholder = '[TODO:' . $locale . '] ' . $key;
-                    $this->line("// used in: " . implode(', ', array_slice($files, 0, 3)) . (count($files) > 3 ? ', ...' : ''));
+                    $placeholder = '[TODO:'.$locale.'] '.$key;
+                    $this->line('// used in: '.implode(', ', array_slice($files, 0, 3)).(count($files) > 3 ? ', ...' : ''));
                     $this->line("'{$key}' => '{$placeholder}',");
                 }
             }
+
             return self::SUCCESS;
         }
 
         $totalMissing = 0;
+
         foreach ($missing as $loc => $keys) {
             $totalMissing += count($keys);
         }
@@ -186,41 +234,46 @@ class TranslationsCheck extends Command
             $payload = [
                 'total_missing' => $totalMissing,
                 'locales' => array_map(
-                    fn($keys) => array_map(
-                        fn($files) => ['files' => $files, 'count' => count($files)],
+                    fn ($keys) => array_map(
+                        fn ($files) => ['files' => $files, 'count' => count($files)],
                         $keys
                     ),
                     $missing
                 ),
             ];
+
             if ($withVue || $vueOnly) {
                 $payload['vue_missing'] = $vueMissing;
             }
             $this->line(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         } else {
-            $this->info("Translation check complete.");
-            $this->line("  Total usages found: " . count($usages));
-            $this->line("  Total missing keys: " . $totalMissing);
+            $this->info('Translation check complete.');
+            $this->line('  Total usages found: '.count($usages));
+            $this->line('  Total missing keys: '.$totalMissing);
             $this->line('');
 
             foreach ($missing as $loc => $keys) {
-                $this->line("--- Missing in '{$loc}' (" . count($keys) . " keys) ---");
+                $this->line("--- Missing in '{$loc}' (".count($keys).' keys) ---');
+
                 if (empty($keys)) {
-                    $this->line("  (none)");
+                    $this->line('  (none)');
                     $this->line('');
                     continue;
                 }
                 $byFile = [];
+
                 foreach ($keys as $key => $files) {
                     $prefix = explode('.', $key)[0];
                     $byFile[$prefix][$key] = $files;
                 }
                 ksort($byFile);
+
                 foreach ($byFile as $prefix => $items) {
-                    $this->line("  [{$prefix}] " . count($items) . " keys");
+                    $this->line("  [{$prefix}] ".count($items).' keys');
+
                     foreach ($items as $key => $files) {
                         $first = $files[0] ?? '';
-                        $this->line("    {$key}  ({$first}" . (count($files) > 1 ? ' +' . (count($files) - 1) : '') . ')');
+                        $this->line("    {$key}  ({$first}".(count($files) > 1 ? ' +'.(count($files) - 1) : '').')');
                     }
                 }
                 $this->line('');
@@ -229,7 +282,8 @@ class TranslationsCheck extends Command
             // Vue JSON cross-check
             if ($withVue || $vueOnly) {
                 foreach ($vueMissing as $loc => $items) {
-                    $this->line("--- Vue i18n keys missing in '{$loc}' JSON (defined in other locale) (" . count($items) . " keys) ---");
+                    $this->line("--- Vue i18n keys missing in '{$loc}' JSON (defined in other locale) (".count($items).' keys) ---');
+
                     foreach ($items as $key => $reason) {
                         $this->line("  {$key}");
                     }
@@ -244,14 +298,21 @@ class TranslationsCheck extends Command
     private function flatten($arr, string $prefix = ''): array
     {
         $r = [];
+
         foreach ($arr as $k => $v) {
-            $newKey = $prefix === '' ? $k : $prefix . '.' . $k;
+            // Force string key. Some lang files have numeric-keyed
+            // entries (e.g. status enums); array_merge would renumber
+            // them, which then breaks the `key.replace('.', '.')`
+            // substring search the rest of the command does.
+            $newKey = $prefix === '' ? (string) $k : $prefix.'.'.(string) $k;
+
             if (is_array($v)) {
                 $r = array_merge($r, $this->flatten($v, $newKey));
             } else {
                 $r[$newKey] = $v;
             }
         }
+
         return $r;
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     'add_signature' => 'Add Signature',
@@ -27,6 +29,8 @@ return [
 
     'library_empty' => 'No saved signatures yet. Draw a new one or upload a file from the "Upload" tab.',
     'library_select' => 'Pick a signature from your library to reuse it. New signatures are added here automatically.',
+    'library_manage_hint' => 'Drag to reorder · click ✎ to rename · ⊘ to delete · 👁 to hide',
+    'drag_handle' => 'Drag',
 
     'name_ar' => 'Name (Arabic)',
     'name_en' => 'Name (English)',
