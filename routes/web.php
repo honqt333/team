@@ -330,7 +330,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/calculate', [CompanySubscriptionController::class, 'calculatePrice'])->name('calculate');
         Route::post('/validate-promo', [CompanySubscriptionController::class, 'validatePromo'])->name('validate-promo');
         Route::post('/subscribe', [CompanySubscriptionController::class, 'subscribe'])->name('subscribe');
-        Route::post('/callback/{payment}', [CompanySubscriptionController::class, 'callback'])->name('callback');
+        // Moyasar (and most other gateways) redirect the browser to the
+        // callback URL with a GET request + ?id=...&status=... query params
+        // after the 3DS challenge. POST-only would block the entire success
+        // path. Accept both methods — the controller is idempotent.
+        Route::match(['get', 'post'], '/callback/{payment}', [CompanySubscriptionController::class, 'callback'])->name('callback');
         Route::post('/cancel/{subscription}', [CompanySubscriptionController::class, 'cancel'])->name('cancel');
         Route::post('/resume/{subscription}', [CompanySubscriptionController::class, 'resume'])->name('resume');
         Route::post('/auto-renew/{subscription}', [CompanySubscriptionController::class, 'toggleAutoRenew'])->name('auto-renew');
