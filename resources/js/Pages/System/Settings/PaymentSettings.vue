@@ -728,6 +728,9 @@ const form = useForm({
     mastercard_enabled: props.settings?.mastercard_enabled ?? true,
     applepay_enabled: props.settings?.applepay_enabled ?? true,
     stcpay_enabled: props.settings?.stcpay_enabled ?? false,
+    subscription_vat_enabled: props.settings?.subscription_vat_enabled ?? false,
+    subscription_vat_rate: props.settings?.subscription_vat_rate ?? 15,
+    subscription_vat_inclusive: props.settings?.subscription_vat_inclusive ?? false,
 });
 
 const addBankAccount = () => {

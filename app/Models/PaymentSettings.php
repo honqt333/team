@@ -28,6 +28,21 @@ class PaymentSettings extends Model
         'mastercard_enabled',
         'applepay_enabled',
         'stcpay_enabled',
+        'company_legal_name',
+        'company_legal_name_en',
+        'company_vat_number',
+        'company_cr_number',
+        'company_phone',
+        'company_email',
+        'company_website',
+        'company_logo_path',
+        'subscription_vat_enabled',
+        'subscription_vat_rate',
+        'subscription_vat_inclusive',
+        'bank_transfer_min_amount',
+        'bank_transfer_max_days',
+        'bank_transfer_require_receipt',
+        'bank_transfer_receipt_instructions',
     ];
 
     protected function casts(): array
@@ -43,8 +58,11 @@ class PaymentSettings extends Model
             'mada_enabled' => 'boolean',
             'visa_enabled' => 'boolean',
             'mastercard_enabled' => 'boolean',
-            'applepay_enabled' => 'boolean',
             'stcpay_enabled' => 'boolean',
+            'subscription_vat_enabled' => 'boolean',
+            'subscription_vat_inclusive' => 'boolean',
+            'subscription_vat_rate' => 'decimal:2',
+            'bank_transfer_require_receipt' => 'boolean',
         ];
     }
 

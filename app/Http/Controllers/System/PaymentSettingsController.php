@@ -92,6 +92,11 @@ class PaymentSettingsController extends Controller
             'mastercard_enabled' => 'boolean',
             'applepay_enabled' => 'boolean',
             'stcpay_enabled' => 'boolean',
+
+            // Subscription VAT
+            'subscription_vat_enabled' => 'boolean',
+            'subscription_vat_rate' => 'nullable|numeric|min:0|max:100',
+            'subscription_vat_inclusive' => 'boolean',
         ]);
 
         $settings = PaymentSettings::first() ?? new PaymentSettings;
@@ -113,6 +118,11 @@ class PaymentSettingsController extends Controller
         $settings->mastercard_enabled = $validated['mastercard_enabled'] ?? true;
         $settings->applepay_enabled = $validated['applepay_enabled'] ?? true;
         $settings->stcpay_enabled = $validated['stcpay_enabled'] ?? false;
+
+        // Subscription VAT (off by default — admin opts in)
+        $settings->subscription_vat_enabled = $validated['subscription_vat_enabled'] ?? false;
+        $settings->subscription_vat_rate = $validated['subscription_vat_rate'] ?? 15.00;
+        $settings->subscription_vat_inclusive = $validated['subscription_vat_inclusive'] ?? false;
 
         $settings->save();
 
