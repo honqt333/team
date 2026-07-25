@@ -3824,13 +3824,78 @@
       "subtitle": "Send notifications to all tenants or a specific group",
       "create": "+ Create Announcement",
       "all_statuses": "All",
-      "title_col": "Title",
-      "type": "Type",
-      "audience": "Target Audience",
-      "status": "Status",
-      "views": "Views",
-      "date": "Date",
-      "actions": "Actions"
+      "col": {
+        "title": "Title",
+        "type": "Type",
+        "audience": "Target Audience",
+        "views": "Views",
+        "date": "Date"
+      },
+      "type": {
+        "info": "Info",
+        "warning": "Warning",
+        "important": "Important",
+        "maintenance": "Maintenance"
+      },
+      "target": {
+        "all": "All",
+        "active": "Active",
+        "trial": "Trial",
+        "expired": "Expired",
+        "specific": "Specific"
+      },
+      "empty": "No announcements yet",
+      "confirm_delete_title": "Confirm Delete",
+      "confirm_delete_message": "Are you sure you want to delete \":title\"? This cannot be undone and all related delivery records will be removed.",
+      "confirm_delete_yes": "Yes, Delete"
+    },
+    "contact_messages": {
+      "title": "Visitor Messages",
+      "search_placeholder": "Search by name, email, or subject...",
+      "empty": "No messages yet",
+      "no_subject": "No subject",
+      "detail_title": "Message Details",
+      "body_label": "Message",
+      "send_email": "Send Email",
+      "call": "Phone Call",
+      "reply_email": "Reply by Email",
+      "call_action": "Call",
+      "delete_message": "Delete Message",
+      "sent_at": "Sent: :date",
+      "confirm_delete": "Are you sure you want to delete this message?",
+      "col": {
+        "status": "Status",
+        "sender": "Sender",
+        "subject": "Subject",
+        "date": "Date"
+      }
+    },
+    "invoices": {
+      "title": "Subscription Invoices",
+      "subtitle": "Manage and track tenant invoices",
+      "empty": "No invoices",
+      "search_placeholder": "Search by invoice number or tenant name...",
+      "all_statuses": "All Statuses",
+      "stats": {
+        "total": "Total Invoices",
+        "pending": "Pending",
+        "paid": "Paid",
+        "overdue": "Overdue",
+        "revenue": "Revenue"
+      },
+      "status": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "failed": "Failed",
+        "cancelled": "Cancelled",
+        "refunded": "Refunded"
+      },
+      "col": {
+        "invoice_number": "Invoice Number",
+        "tenant": "Tenant",
+        "amount": "Amount",
+        "due_at": "Due Date"
+      }
     },
     "common": {
       "loading": "Loading...",

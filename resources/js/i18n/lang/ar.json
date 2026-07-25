@@ -3824,13 +3824,78 @@
       "subtitle": "إرسال إشعارات لكل المستأجرين أو مجموعة محددة",
       "create": "+ إنشاء إعلان",
       "all_statuses": "الكل",
-      "title_col": "العنوان",
-      "type": "النوع",
-      "audience": "الفئة المستهدفة",
-      "status": "الحالة",
-      "views": "المشاهدات",
-      "date": "التاريخ",
-      "actions": "الإجراءات"
+      "col": {
+        "title": "العنوان",
+        "type": "النوع",
+        "audience": "الفئة المستهدفة",
+        "views": "المشاهدات",
+        "date": "التاريخ"
+      },
+      "type": {
+        "info": "معلومات",
+        "warning": "تحذير",
+        "important": "هام",
+        "maintenance": "صيانة"
+      },
+      "target": {
+        "all": "الكل",
+        "active": "النشطين",
+        "trial": "التجريبي",
+        "expired": "المنتهية",
+        "specific": "محدد"
+      },
+      "empty": "لا توجد إعلانات",
+      "confirm_delete_title": "تأكيد الحذف",
+      "confirm_delete_message": "هل أنت متأكد من حذف الإعلان \":title\"؟ لا يمكن التراجع عن هذا الإجراء وسيتم حذف جميع سجلات الإرسال المرتبطة بهذا الإعلان.",
+      "confirm_delete_yes": "نعم، حذف الإعلان"
+    },
+    "contact_messages": {
+      "title": "رسائل الزوار",
+      "search_placeholder": "بحث عن اسم، بريد إلكتروني، أو موضوع...",
+      "empty": "لا توجد رسائل حالياً",
+      "no_subject": "بدون موضوع",
+      "detail_title": "تفاصيل الرسالة",
+      "body_label": "الرسالة",
+      "send_email": "إرسال بريد",
+      "call": "اتصال هاتفي",
+      "reply_email": "رد بالبريد",
+      "call_action": "اتصال هاتفي",
+      "delete_message": "حذف الرسالة",
+      "sent_at": "تاريخ الإرسال: :date",
+      "confirm_delete": "هل أنت متأكد من حذف هذه الرسالة؟",
+      "col": {
+        "status": "الحالة",
+        "sender": "المرسل",
+        "subject": "الموضوع",
+        "date": "التاريخ"
+      }
+    },
+    "invoices": {
+      "title": "فواتير الاشتراكات",
+      "subtitle": "إدارة ومتابعة فواتير المستأجرين",
+      "empty": "لا توجد فواتير",
+      "search_placeholder": "بحث برقم الفاتورة أو اسم المستأجر...",
+      "all_statuses": "كل الحالات",
+      "stats": {
+        "total": "إجمالي الفواتير",
+        "pending": "معلقة",
+        "paid": "مدفوعة",
+        "overdue": "متأخرة",
+        "revenue": "الإيرادات"
+      },
+      "status": {
+        "pending": "معلقة",
+        "paid": "مدفوعة",
+        "failed": "فشلت",
+        "cancelled": "ملغية",
+        "refunded": "مستردة"
+      },
+      "col": {
+        "invoice_number": "رقم الفاتورة",
+        "tenant": "المستأجر",
+        "amount": "المبلغ",
+        "due_at": "الاستحقاق"
+      }
     },
     "common": {
       "loading": "جاري التحميل...",

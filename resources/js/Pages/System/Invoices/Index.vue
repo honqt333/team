@@ -5,65 +5,60 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        فواتير الاشتراكات
+                        {{ $t('system.invoices.title') }}
                     </h1>
-                    <p class="text-gray-500 dark:text-gray-400">إدارة ومتابعة فواتير المستأجرين</p>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {{ $t('system.invoices.subtitle') }}
+                    </p>
                 </div>
             </div>
 
             <!-- Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                    v-for="stat in statCards"
+                    :key="stat.key"
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 transition-shadow hover:shadow-sm"
                 >
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ stats.total }}
+                    <p class="text-2xl font-bold" :class="stat.valueColor">
+                        {{ stat.value }}
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">إجمالي الفواتير</p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-2xl font-bold text-amber-600">{{ stats.pending }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">معلقة</p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-2xl font-bold text-emerald-600">{{ stats.paid }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">مدفوعة</p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-2xl font-bold text-red-600">{{ stats.overdue }}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">متأخرة</p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-2xl font-bold text-indigo-600">
-                        {{ formatCurrency(stats.total_revenue) }}
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {{ stat.label }}
                     </p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">الإيرادات</p>
                 </div>
             </div>
 
             <!-- Filters -->
             <div class="flex flex-wrap gap-4 items-center">
-                <input
-                    type="text"
-                    v-model="search"
-                    placeholder="بحث برقم الفاتورة أو اسم المستأجر..."
-                    class="flex-1 min-w-[200px] rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
-                    @keyup.enter="applyFilters"
-                />
+                <div class="relative flex-1 min-w-[200px]">
+                    <svg
+                        class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                    </svg>
+                    <input
+                        v-model="search"
+                        type="text"
+                        :placeholder="$t('system.invoices.search_placeholder')"
+                        class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500"
+                        @keyup.enter="applyFilters"
+                    />
+                </div>
                 <SearchableSelect
                     v-model="status"
                     :options="statusOptions"
                     option-label="label"
                     option-value="value"
-                    placeholder="كل الحالات"
+                    :placeholder="$t('system.invoices.all_statuses')"
                     compact
                 />
             </div>
@@ -76,34 +71,34 @@
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
                             <th
-                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                                class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                             >
-                                رقم الفاتورة
+                                {{ $t('system.invoices.col.invoice_number') }}
                             </th>
                             <th
-                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                                class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                             >
-                                المستأجر
+                                {{ $t('system.invoices.col.tenant') }}
                             </th>
                             <th
-                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                                class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                             >
-                                المبلغ
+                                {{ $t('system.invoices.col.amount') }}
                             </th>
                             <th
-                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                                class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                             >
-                                الاستحقاق
+                                {{ $t('system.invoices.col.due_at') }}
                             </th>
                             <th
-                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                                class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                             >
-                                الحالة
+                                {{ $t('system.tenants.status') }}
                             </th>
                             <th
-                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                                class="px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                             >
-                                الإجراءات
+                                {{ $t('system.backups.col.actions') }}
                             </th>
                         </tr>
                     </thead>
@@ -111,7 +106,7 @@
                         <tr
                             v-for="invoice in invoices.data"
                             :key="invoice.id"
-                            class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                         >
                             <td class="px-4 py-3 align-middle">
                                 <span class="font-mono text-sm text-gray-900 dark:text-white">
@@ -120,7 +115,7 @@
                             </td>
                             <td class="px-4 py-3 align-middle">
                                 <span class="text-gray-900 dark:text-white">
-                                    {{ invoice.tenant?.trade_name || '-' }}
+                                    {{ invoice.tenant?.trade_name || $t('common.na') }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 align-middle">
@@ -139,25 +134,44 @@
                                     {{ formatDate(invoice.due_at) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 align-middle">
+                            <td class="px-4 py-3 align-middle text-center">
                                 <span
                                     :class="getStatusClass(invoice.status)"
-                                    class="px-2 py-1 rounded-full text-xs font-medium"
+                                    class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium"
                                 >
                                     {{ getStatusLabel(invoice.status) }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 align-middle">
-                                <div class="flex gap-2">
+                                <div class="flex items-center justify-center gap-2">
                                     <a
                                         :href="`/system/invoices/${invoice.id}`"
-                                        class="text-indigo-600 hover:text-indigo-800 text-sm"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                     >
-                                        عرض
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                            />
+                                        </svg>
+                                        {{ $t('system.actions.view') }}
                                     </a>
                                     <a
                                         :href="`/system/invoices/${invoice.id}/download`"
-                                        class="text-gray-600 hover:text-gray-800 text-sm"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                     >
                                         PDF
                                     </a>
@@ -167,9 +181,9 @@
                         <tr v-if="!invoices.data?.length">
                             <td
                                 colspan="6"
-                                class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 align-middle"
+                                class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
                             >
-                                لا توجد فواتير
+                                {{ $t('system.invoices.empty') }}
                             </td>
                         </tr>
                     </tbody>
@@ -198,14 +212,17 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
+const { t } = useI18n();
+
 const statusOptions = computed(() => [
-    { value: 'pending', label: 'معلقة' },
-    { value: 'paid', label: 'مدفوعة' },
-    { value: 'cancelled', label: 'ملغية' },
+    { value: 'pending', label: t('system.invoices.status.pending') },
+    { value: 'paid', label: t('system.invoices.status.paid') },
+    { value: 'cancelled', label: t('system.invoices.status.cancelled') },
 ]);
 
 const props = defineProps({
@@ -213,6 +230,39 @@ const props = defineProps({
     stats: Object,
     filters: Object,
 });
+
+const statCards = computed(() => [
+    {
+        key: 'total',
+        label: t('system.invoices.stats.total'),
+        value: props.stats?.total ?? 0,
+        valueColor: 'text-gray-900 dark:text-white',
+    },
+    {
+        key: 'pending',
+        label: t('system.invoices.stats.pending'),
+        value: props.stats?.pending ?? 0,
+        valueColor: 'text-amber-600 dark:text-amber-400',
+    },
+    {
+        key: 'paid',
+        label: t('system.invoices.stats.paid'),
+        value: props.stats?.paid ?? 0,
+        valueColor: 'text-emerald-600 dark:text-emerald-400',
+    },
+    {
+        key: 'overdue',
+        label: t('system.invoices.stats.overdue'),
+        value: props.stats?.overdue ?? 0,
+        valueColor: 'text-red-600 dark:text-red-400',
+    },
+    {
+        key: 'revenue',
+        label: t('system.invoices.stats.revenue'),
+        value: formatCurrency(props.stats?.total_revenue ?? 0),
+        valueColor: 'text-indigo-600 dark:text-indigo-400',
+    },
+]);
 
 const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
@@ -229,13 +279,14 @@ const applyFilters = () => {
 };
 
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
-        amount || 0
-    );
+    return new Intl.NumberFormat('ar-SA-u-nu-latn', {
+        style: 'currency',
+        currency: 'SAR',
+    }).format(amount || 0);
 };
 
 const formatDate = (date) => {
-    if (!date) return '-';
+    if (!date) return t('common.na');
     return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
@@ -250,17 +301,17 @@ const getStatusClass = (status) => {
         failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
         cancelled: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400',
     };
-    return classes[status] || 'bg-gray-100 text-gray-700';
+    return classes[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 };
 
 const getStatusLabel = (status) => {
     const labels = {
-        pending: 'معلقة',
-        paid: 'مدفوعة',
-        failed: 'فشلت',
-        cancelled: 'ملغية',
-        refunded: 'مستردة',
+        pending: t('system.invoices.status.pending'),
+        paid: t('system.invoices.status.paid'),
+        failed: t('system.invoices.status.failed'),
+        cancelled: t('system.invoices.status.cancelled'),
+        refunded: t('system.invoices.status.refunded'),
     };
-    return labels[status] || status;
+    return labels[status] || status || t('common.na');
 };
 </script>
