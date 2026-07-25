@@ -6,9 +6,11 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Mail\SubscriptionInvoiceMail;
+use App\Models\BankTransferReceipt;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Services\Invoice\SubscriptionInvoiceService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -142,6 +144,23 @@ class SubscriptionInvoicesController extends Controller
 
     /**
      * Cancel invoice.
+     *
+     * Cascades to:
+     *   - The parent subscription (mark as cancelled so it doesn't
+     *     show as the tenant's "current" subscription any more — they
+     *     would otherwise see a pending sub on the dashboard forever)
+     *   - Any payments on this invoice (mark as cancelled so the
+     *     payment history doesn't show a "pending" payment that was
+     *     really cancelled)
+     *   - Any pending bank transfer receipts linked to those payments
+     *     (mark as superseded so the admin queue doesn't hold them and
+     *     so a late approval can't re-activate a cancelled sub)
+     *
+     * Without these cascades, cancelling just the invoice left the
+     * tenant's subscription page in a stale "pending" state — the
+     * dashboard said "current subscription = pending, pending
+     * payment, receipt under review" even though the admin had
+     * clearly cancelled the whole thing.
      */
     public function cancel(SubscriptionInvoice $invoice)
     {
@@ -149,7 +168,58 @@ class SubscriptionInvoicesController extends Controller
             return back()->with('error', 'لا يمكن إلغاء فاتورة مدفوعة');
         }
 
-        $invoice->update(['status' => 'cancelled']);
+        DB::transaction(function () use ($invoice) {
+            $invoice->update(['status' => 'cancelled']);
+
+            // Cancel the parent subscription (if it has no other open
+            // invoices). If it has another open invoice, leave the
+            // subscription in pending_payment so the tenant can pay
+            // the other one.
+            $subscription = $invoice->subscription;
+
+            if ($subscription) {
+                $hasOtherOpenInvoice = $subscription->invoices()
+                    ->where('id', '!=', $invoice->id)
+                    ->whereIn('status', ['pending', 'pending_payment'])
+                    ->exists();
+
+                if (! $hasOtherOpenInvoice) {
+                    $subscription->update([
+                        'status' => 'cancelled',
+                        'cancelled_at' => now(),
+                    ]);
+
+                    // Cancel payments on this invoice
+                    $subscription->payments()
+                        ->where('subscription_invoice_id', $invoice->id)
+                        ->whereIn('status', ['pending', 'pending_payment'])
+                        ->update(['status' => 'cancelled']);
+
+                    // Supersede pending bank transfer receipts
+                    BankTransferReceipt::where('subscription_id', $subscription->id)
+                        ->where('status', 'pending')
+                        ->update([
+                            'status' => 'superseded',
+                            'reviewed_by' => auth('admin')->id(),
+                            'reviewed_at' => now(),
+                            'review_notes' => 'Invoice #'.$invoice->invoice_number.' cancelled by admin — receipt superseded.',
+                        ]);
+
+                    // Suspend the tenant only if they have no other
+                    // active subscription — preserves multi-tenant
+                    // edge cases where the user is still on another
+                    // plan.
+                    $hasOtherActive = $subscription->tenant->subscriptions()
+                        ->where('id', '!=', $subscription->id)
+                        ->whereIn('status', ['active', 'trial', 'trialing'])
+                        ->exists();
+
+                    if (! $hasOtherActive) {
+                        $subscription->tenant->update(['status' => 'suspended']);
+                    }
+                }
+            }
+        });
 
         return back()->with('success', 'تم إلغاء الفاتورة');
     }

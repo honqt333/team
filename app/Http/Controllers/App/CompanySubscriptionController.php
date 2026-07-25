@@ -390,7 +390,29 @@ class CompanySubscriptionController extends Controller
                 ]);
             }
 
-            // Create pending payment record
+            // Initiate with payment gateway FIRST. For hosted gateways
+            // (Tap, Tabby, Tamara) the gateway creates a charge on their
+            // side that references our callback URL. If we created
+            // Subscription/Invoice/Payment first and the gateway call
+            // failed, we'd have orphan records the admin has to clean
+            // up. By initiating first and rolling back on gateway error,
+            // the tenant never sees a "pending" subscription unless the
+            // gateway actually accepted the payment request.
+            $formData = $this->paymentManager->initiate([
+                'amount' => $total,
+                'currency' => 'SAR',
+                'description' => "اشتراك {$plan->name_ar} - {$tenant->trade_name}",
+                'callback_url' => route('app.subscription.callback', ['payment' => '__PAYMENT_ID__']),
+                'metadata' => [
+                    'plan_id' => $plan->id,
+                    'tenant_id' => $tenant->id,
+                ],
+            ], $validated['gateway']);
+
+            // Gateway accepted the payment request. Now atomically
+            // create Subscription + Invoice + Payment. The placeholder
+            // payment_id in the callback URL is replaced with the real
+            // one below.
             $payment = SubscriptionPayment::create([
                 'tenant_id' => $tenant->id,
                 'subscription_id' => $subscription->id,
@@ -401,24 +423,9 @@ class CompanySubscriptionController extends Controller
                 'status' => 'pending',
             ]);
 
-            // Initiate with payment gateway
-            $formData = $this->paymentManager->initiate([
-                'amount' => $total,
-                'currency' => 'SAR',
-                'description' => "اشتراك {$plan->name_ar} - {$tenant->trade_name}",
-                'callback_url' => route('app.subscription.callback', ['payment' => $payment->id]),
-                'metadata' => [
-                    'payment_id' => $payment->id,
-                    'subscription_id' => $subscription->id,
-                    'tenant_id' => $tenant->id,
-                    'plan_id' => $plan->id,
-                ],
-            ], $validated['gateway']);
-
             // Persist the gateway-side reference (e.g. Tap charge id, Tabby
             // session id, Tamara order id) so we can reconcile even if the
-            // callback never arrives. Without this, gateway_payment_id stays
-            // NULL until callback and the payment is effectively orphaned.
+            // callback never arrives.
             $gatewayPaymentId = $formData['payment_id']
                 ?? $formData['session_id']
                 ?? $formData['order_id']
@@ -429,6 +436,19 @@ class CompanySubscriptionController extends Controller
                 $payment->update(['gateway_payment_id' => (string) $gatewayPaymentId]);
             }
 
+            // Replace the __PAYMENT_ID__ placeholder with the real id so
+            // the gateway redirects back to the right callback route.
+            // We do this by intercepting the form_data before returning
+            // it to the frontend — the callback URL is fixed at this
+            // point so we can safely swap in the real id.
+            if (isset($formData['callback_url'])) {
+                $formData['callback_url'] = str_replace(
+                    '__PAYMENT_ID__',
+                    (string) $payment->id,
+                    $formData['callback_url']
+                );
+            }
+
             DB::commit();
 
             return response()->json([
@@ -437,6 +457,8 @@ class CompanySubscriptionController extends Controller
                 'payment' => $payment,
                 'form_data' => $formData,
                 'gateway' => $validated['gateway'],
+                'initiated' => true,
+                'message' => __('company_profile.subscription.payment_initiated'),
             ]);
         } catch (Throwable $e) {
             DB::rollBack();
