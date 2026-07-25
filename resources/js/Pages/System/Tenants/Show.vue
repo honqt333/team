@@ -44,6 +44,7 @@
 
 <script setup>
 import { reactive } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import TenantHeader from './ShowComponents/TenantHeader.vue';
@@ -51,6 +52,8 @@ import TenantAnalyticsCards from './ShowComponents/TenantAnalyticsCards.vue';
 import TenantQuickActions from './ShowComponents/TenantQuickActions.vue';
 import TenantInfoCards from './ShowComponents/TenantInfoCards.vue';
 import TenantModals from './ShowComponents/TenantModals.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -85,7 +88,7 @@ const updateSecurity = () => {
 const suspendTenant = (reason) => {
     router.post(
         `/system/tenants/${props.tenant.id}/suspend`,
-        { reason: reason || 'لم يحدد سبب' },
+        { reason: reason || t('system.tenants.show.modals.suspend_no_reason') },
         {
             onSuccess: () => {
                 modals.suspend = false;

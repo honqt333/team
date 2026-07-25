@@ -783,7 +783,32 @@
     "technician_performance": "Technician performance",
     "this_month": "This month",
     "title": "Dashboard",
-    "today": "Today",
+    "welcome": "Welcome, Admin",
+    "subtitle_short": "Comprehensive management for all tenants and settings",
+    "total_tenants": "Total Tenants",
+    "active": "Active",
+    "trial": "Trial",
+    "suspended": "Suspended",
+    "provider_balances": {
+      "title": "Provider Balances",
+      "subtitle": "SMS and WhatsApp balance levels",
+      "refresh": "Refresh Balances",
+      "sms_label": "SMS Messages",
+      "whatsapp_label": "WhatsApp",
+      "remaining_balance": "Remaining Balance",
+      "fetch_failed": "Failed to fetch balance",
+      "fetch_error": "Connection error",
+      "settings": "Settings",
+      "no_providers": "No active providers to display balances"
+    },
+    "recent_registrations": "Recent Registrations",
+    "last_7_days": "Last 7 days",
+    "no_recent_registrations": "No recent registrations",
+    "trial_ending_soon": "⏰ Trial Ending Soon",
+    "in_7_days": "Within 7 days",
+    "trial_ends": "Ends: :date",
+    "no_trial_ending_soon": "No trials ending soon",
+    "view": "View",
     "today_schedule": "Today's schedule",
     "top_customers": "Top customers",
     "top_services": "Top services",
@@ -3113,6 +3138,12 @@
     "loading_all_printing": "Loading All Printing"
   },
   "work_orders": {
+    "status": {
+      "open": "Open",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "invoiced": "Invoiced"
+    },
     "actions": {
       "cancel": "Cancel Card",
       "complete": "Close Card",
@@ -3590,6 +3621,7 @@
     "tenants": {
       "title": "Tenants",
       "subtitle": "Manage all tenants in the system",
+      "id": "ID",
       "name": "Name",
       "trade_name": "Trade Name",
       "legal_name": "Legal Name",
@@ -3645,6 +3677,7 @@
       "modals": {
         "suspend_title": "Suspend Account",
         "suspend_reason": "Suspension Reason",
+        "suspend_no_reason": "No reason specified",
         "extend_title": "Extend Trial Period",
         "extend_days": "Number of Days",
         "extend_hint": "May be negative (to shorten) down to -90 days.",
@@ -3696,7 +3729,20 @@
       },
       "featured": "Featured",
       "free_trial_days": "Free trial: :count days",
-      "no_subscriptions": "No subscriptions"
+      "no_subscriptions": "No subscriptions",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "all_statuses": "All Statuses",
+      "all_plans": "All Plans",
+      "create_modal": {
+        "tenant_label": "Tenant",
+        "billing_cycle_label": "Billing Cycle",
+        "subscription_price": "Subscription Price",
+        "currency": "SAR",
+        "selected_tenant": "Selected: :name",
+        "submit": "Create Subscription",
+        "submitting": "Creating..."
+      }
     },
     "plans": {
       "title": "Plans",

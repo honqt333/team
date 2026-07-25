@@ -7,52 +7,45 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ $t('system.backups.title') }}
                     </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         {{ $t('system.backups.subtitle') }}
                     </p>
                 </div>
             </div>
 
             <!-- Stats -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                    v-for="stat in statCards"
+                    :key="stat.key"
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 transition-shadow hover:shadow-sm"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.backups.stats.total') }}
-                    </p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ stats.total?.toLocaleString() }}
-                    </p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.backups.stats.completed') }}
-                    </p>
-                    <p class="text-2xl font-bold text-emerald-600">
-                        {{ stats.completed?.toLocaleString() }}
-                    </p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.backups.stats.failed') }}
-                    </p>
-                    <p class="text-2xl font-bold text-red-600">
-                        {{ stats.failed?.toLocaleString() }}
-                    </p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.backups.stats.total_size') }}
-                    </p>
-                    <p class="text-2xl font-bold text-indigo-600">
-                        {{ stats.total_size_mb?.toLocaleString() }} MB
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            {{ stat.label }}
+                        </p>
+                        <div
+                            :class="stat.iconBg"
+                            class="flex items-center justify-center w-9 h-9 rounded-lg"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                :class="stat.iconColor"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    :d="stat.iconPath"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-2xl font-bold" :class="stat.valueColor">
+                        {{ stat.value }}
                     </p>
                 </div>
             </div>
@@ -100,36 +93,38 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
-                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
+                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
                                     {{ $t('system.backups.col.name') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
+                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
                                     {{ $t('system.backups.col.tenant') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
+                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
                                     {{ $t('system.backups.col.type') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
+                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
                                     {{ $t('system.backups.col.status') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
+                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
                                     {{ $t('system.backups.col.size') }}
                                 </th>
                                 <th
-                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400"
+                                    class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
                                 >
                                     {{ $t('system.backups.col.created') }}
                                 </th>
-                                <th class="px-4 py-3 align-middle text-center">
+                                <th
+                                    class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                                >
                                     {{ $t('system.backups.col.actions') }}
                                 </th>
                             </tr>
@@ -138,7 +133,7 @@
                             <tr
                                 v-for="backup in backups.data"
                                 :key="backup.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                             >
                                 <td class="px-4 py-3 align-middle">
                                     <p class="font-medium text-gray-900 dark:text-white">
@@ -146,20 +141,24 @@
                                     </p>
                                     <p
                                         v-if="backup.error_message"
-                                        class="text-xs text-red-600 dark:text-red-400 mt-1"
+                                        class="mt-1 text-xs text-red-600 dark:text-red-400"
                                     >
                                         {{ backup.error_message }}
                                     </p>
                                 </td>
                                 <td
-                                    class="px-4 py-3 text-gray-600 dark:text-gray-400 text-sm align-middle"
+                                    class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 align-middle"
                                 >
-                                    {{ backup.tenant?.trade_name || backup.tenant?.name || '—' }}
+                                    {{
+                                        backup.tenant?.trade_name ||
+                                        backup.tenant?.name ||
+                                        $t('common.na')
+                                    }}
                                 </td>
                                 <td class="px-4 py-3 align-middle">
                                     <span
                                         :class="getTypeClass(backup.type)"
-                                        class="px-2 py-1 rounded-full text-xs"
+                                        class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium"
                                     >
                                         {{ getTypeLabel(backup.type) }}
                                     </span>
@@ -167,45 +166,87 @@
                                 <td class="px-4 py-3 align-middle">
                                     <span
                                         :class="getStatusClass(backup.status)"
-                                        class="px-2 py-1 rounded-full text-xs"
+                                        class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium"
                                     >
                                         {{ getStatusLabel(backup.status) }}
                                     </span>
                                 </td>
                                 <td
-                                    class="px-4 py-3 text-gray-600 dark:text-gray-400 text-sm align-middle"
+                                    class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 align-middle"
                                 >
                                     {{ humanSize(backup.size_bytes) }}
                                 </td>
                                 <td
-                                    class="px-4 py-3 text-gray-500 dark:text-gray-400 text-sm align-middle"
+                                    class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 align-middle"
                                 >
                                     {{ formatDate(backup.created_at) }}
                                 </td>
-                                <td class="px-4 py-3 text-end align-middle">
-                                    <div class="flex gap-2 justify-end">
+                                <td class="px-4 py-3 align-middle">
+                                    <div class="flex items-center justify-center gap-2">
                                         <a
                                             v-if="backup.status === 'completed'"
                                             :href="`/system/backups/${backup.id}/download`"
-                                            class="text-indigo-600 hover:text-indigo-700 text-sm"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                         >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                                />
+                                            </svg>
                                             {{ $t('system.actions.download') }}
                                         </a>
                                         <button
                                             @click="confirmDelete(backup)"
-                                            class="text-red-600 hover:text-red-800 text-sm"
+                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                         >
+                                            <svg
+                                                class="w-4 h-4"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                />
+                                            </svg>
                                             {{ $t('system.actions.delete') }}
                                         </button>
                                     </div>
                                 </td>
                             </tr>
                             <tr v-if="!backups.data?.length">
-                                <td
-                                    colspan="7"
-                                    class="px-4 py-12 text-center text-gray-500 dark:text-gray-400"
-                                >
-                                    {{ $t('system.backups.empty') }}
+                                <td colspan="7" class="px-4 py-16 text-center">
+                                    <div
+                                        class="flex flex-col items-center justify-center text-gray-500 dark:text-gray-400"
+                                    >
+                                        <svg
+                                            class="w-12 h-12 mb-3 text-gray-300 dark:text-gray-600"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="1.5"
+                                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                            />
+                                        </svg>
+                                        <p class="text-sm font-medium">
+                                            {{ $t('system.backups.empty') }}
+                                        </p>
+                                    </div>
                                 </td>
                             </tr>
                         </tbody>
@@ -277,20 +318,63 @@ const tenantFilterOptions = computed(() => [
     ...(props.tenants || []).map((t) => ({ value: t.id, label: t.trade_name || t.name })),
 ]);
 
-const statusFilterOptions = [
+const statusFilterOptions = computed(() => [
     { value: 'all', label: t('system.common.all') },
-    { value: 'pending', label: t('system.status.pending') },
-    { value: 'running', label: t('system.status.pending') },
+    { value: 'pending', label: t('system.backups.status.pending') },
+    { value: 'running', label: t('system.backups.status.running') },
     { value: 'completed', label: t('system.backups.status.completed') },
     { value: 'failed', label: t('system.backups.status.failed') },
-];
+]);
 
-const typeFilterOptions = [
+const typeFilterOptions = computed(() => [
     { value: 'all', label: t('system.common.all') },
     { value: 'manual', label: t('system.backups.type.manual') },
     { value: 'scheduled', label: t('system.backups.type.scheduled') },
     { value: 'pre_delete', label: t('system.backups.type.pre_delete') },
-];
+]);
+
+// Stat cards: extracted to a computed list so the template doesn't
+// repeat the same card 4× with only label/value/color swapped.
+const statCards = computed(() => [
+    {
+        key: 'total',
+        label: t('system.backups.stats.total'),
+        value: (props.stats?.total || 0).toLocaleString(),
+        valueColor: 'text-gray-900 dark:text-white',
+        iconBg: 'bg-gray-100 dark:bg-gray-700',
+        iconColor: 'text-gray-500 dark:text-gray-400',
+        iconPath:
+            'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4',
+    },
+    {
+        key: 'completed',
+        label: t('system.backups.stats.completed'),
+        value: (props.stats?.completed || 0).toLocaleString(),
+        valueColor: 'text-emerald-600 dark:text-emerald-400',
+        iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
+        iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+    },
+    {
+        key: 'failed',
+        label: t('system.backups.stats.failed'),
+        value: (props.stats?.failed || 0).toLocaleString(),
+        valueColor: 'text-red-600 dark:text-red-400',
+        iconBg: 'bg-red-100 dark:bg-red-900/30',
+        iconColor: 'text-red-600 dark:text-red-400',
+        iconPath: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    },
+    {
+        key: 'total_size',
+        label: t('system.backups.stats.total_size'),
+        value: `${(props.stats?.total_size_mb || 0).toLocaleString()} MB`,
+        valueColor: 'text-indigo-600 dark:text-indigo-400',
+        iconBg: 'bg-indigo-100 dark:bg-indigo-900/30',
+        iconColor: 'text-indigo-600 dark:text-indigo-400',
+        iconPath:
+            'M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z',
+    },
+]);
 
 // Auto-apply filters; debounce tenant/status changes
 let filterTimeout = null;
@@ -311,10 +395,11 @@ const applyFilters = () => {
     );
 };
 
-const formatDate = (date) => (date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : '—');
+const formatDate = (date) =>
+    date ? new Date(date).toLocaleString('ar-SA-u-nu-latn') : t('common.na');
 
 const humanSize = (bytes) => {
-    if (!bytes) return '—';
+    if (!bytes) return t('common.na');
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let i = 0;
     let size = Number(bytes);
@@ -327,10 +412,10 @@ const humanSize = (bytes) => {
 
 const getTypeClass = (type) =>
     ({
-        manual: 'bg-blue-100 text-blue-700',
-        scheduled: 'bg-amber-100 text-amber-700',
-        pre_delete: 'bg-red-100 text-red-700',
-    })[type] || 'bg-gray-100 text-gray-700';
+        manual: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+        scheduled: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+        pre_delete: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+    })[type] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 
 const getTypeLabel = (type) =>
     ({
@@ -341,15 +426,15 @@ const getTypeLabel = (type) =>
 
 const getStatusClass = (status) =>
     ({
-        pending: 'bg-amber-100 text-amber-700',
-        running: 'bg-blue-100 text-blue-700',
-        completed: 'bg-emerald-100 text-emerald-700',
-        failed: 'bg-red-100 text-red-700',
-    })[status] || 'bg-gray-100 text-gray-700';
+        pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+        running: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
+        completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+        failed: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+    })[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
 
 const getStatusLabel = (status) =>
     ({
-        pending: t('system.status.pending'),
+        pending: t('system.backups.status.pending'),
         running: t('system.backups.status.running'),
         completed: t('system.backups.status.completed'),
         failed: t('system.backups.status.failed'),

@@ -7,61 +7,60 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ $t('system.subscriptions.title') }}
                     </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         {{ $t('system.subscriptions.subtitle') }}
                     </p>
                 </div>
                 <button
                     @click="openModal()"
-                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors"
                 >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 4v16m8-8H4"
+                        />
+                    </svg>
                     {{ $t('system.subscriptions.create') }}
                 </button>
             </div>
 
             <!-- Stats Cards -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                    v-for="stat in statCards"
+                    :key="stat.key"
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 transition-shadow hover:shadow-sm"
                 >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.subscriptions.stats.total') }}
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            {{ stat.label }}
+                        </p>
+                        <div
+                            :class="stat.iconBg"
+                            class="flex items-center justify-center w-9 h-9 rounded-lg"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                :class="stat.iconColor"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    :d="stat.iconPath"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 text-2xl font-bold" :class="stat.valueColor">
+                        {{ stat.value }}
                     </p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ stats.total }}
-                    </p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.status.active') }}
-                    </p>
-                    <p class="text-2xl font-bold text-emerald-600">{{ stats.active }}</p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.status.trial') }}
-                    </p>
-                    <p class="text-2xl font-bold text-amber-600">{{ stats.trial }}</p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.status.cancelled') }}
-                    </p>
-                    <p class="text-2xl font-bold text-red-600">{{ stats.cancelled }}</p>
-                </div>
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
-                >
-                    <p class="text-sm text-gray-500 dark:text-gray-400">
-                        {{ $t('system.status.expired') }}
-                    </p>
-                    <p class="text-2xl font-bold text-gray-500">{{ stats.expired }}</p>
                 </div>
             </div>
 
@@ -71,28 +70,43 @@
             >
                 <div class="flex flex-wrap gap-4">
                     <div class="flex-1 min-w-[200px]">
-                        <input
-                            v-model="search"
-                            type="text"
-                            :placeholder="$t('system.subscriptions.search_placeholder')"
-                            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                            @keyup.enter="applyFilters"
-                        />
+                        <div class="relative">
+                            <svg
+                                class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                            <input
+                                v-model="search"
+                                type="text"
+                                :placeholder="$t('system.subscriptions.search_placeholder')"
+                                class="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                                @keyup.enter="applyFilters"
+                            />
+                        </div>
                     </div>
                     <SearchableSelect
                         v-model="statusFilter"
                         :options="statusFilterOptions"
                         option-label="label"
                         option-value="value"
-                        :placeholder="$t('system.tenants.all_statuses')"
+                        :placeholder="$t('system.subscriptions.all_statuses')"
                         compact
                     />
                     <SearchableSelect
                         v-model="planFilter"
-                        :options="(plans || []).map((p) => ({ value: p.id, label: p.name_ar }))"
+                        :options="planFilterOptions"
                         option-label="label"
                         option-value="value"
-                        :placeholder="$t('system.plans.title')"
+                        :placeholder="$t('system.subscriptions.all_plans')"
                         compact
                     />
                 </div>
@@ -107,43 +121,51 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
                                     {{ $t('system.subscriptions.tenant_label') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
                                     {{ $t('system.subscriptions.plan_label') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                                 >
                                     {{ $t('system.subscriptions.billing_cycle') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                                 >
                                     {{ $t('system.tenants.status') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
                                     {{ $t('system.subscriptions.ends_at') }}
                                 </th>
-                                <th class="px-6 py-4 align-middle text-center"></th>
+                                <th
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.backups.col.actions') }}
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr
                                 v-for="sub in subscriptions.data"
                                 :key="sub.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                             >
                                 <td class="px-6 py-4 align-middle">
                                     <div>
                                         <p class="font-medium text-gray-900 dark:text-white">
-                                            {{ sub.tenant?.trade_name || sub.tenant?.name }}
+                                            {{
+                                                sub.tenant?.trade_name ||
+                                                sub.tenant?.name ||
+                                                $t('common.na')
+                                            }}
                                         </p>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
                                             #{{ sub.tenant?.id }}
@@ -152,34 +174,57 @@
                                 </td>
                                 <td class="px-6 py-4 align-middle">
                                     <span
-                                        class="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded text-sm font-medium"
+                                        class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400"
                                     >
-                                        {{ sub.plan?.name_ar }}
+                                        {{ sub.plan?.name_ar || $t('common.na') }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400 align-middle">
+                                <td
+                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle text-center"
+                                >
                                     {{
                                         sub.billing_cycle === 'yearly'
                                             ? $t('system.subscriptions.yearly')
                                             : $t('system.subscriptions.monthly')
                                     }}
                                 </td>
-                                <td class="px-6 py-4 align-middle">
+                                <td class="px-6 py-4 align-middle text-center">
                                     <span
                                         :class="getStatusClass(sub.status)"
-                                        class="px-2 py-1 rounded-full text-xs font-medium"
+                                        class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium"
                                     >
                                         {{ getStatusLabel(sub.status) }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-gray-600 dark:text-gray-400 align-middle">
+                                <td
+                                    class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 align-middle"
+                                >
                                     {{ formatDate(sub.ends_at) }}
                                 </td>
-                                <td class="px-6 py-4 text-end align-middle">
+                                <td class="px-6 py-4 align-middle text-center">
                                     <Link
                                         :href="`/system/subscriptions/${sub.id}`"
-                                        class="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                     >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                            />
+                                        </svg>
                                         {{ $t('system.actions.view') }}
                                     </Link>
                                 </td>
@@ -189,9 +234,9 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-if="!subscriptions.data?.length" class="px-6 py-12 text-center">
+                <div v-if="!subscriptions.data?.length" class="px-6 py-16 text-center">
                     <svg
-                        class="w-12 h-12 mx-auto text-gray-400"
+                        class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -203,7 +248,7 @@
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                         />
                     </svg>
-                    <p class="mt-4 text-gray-500 dark:text-gray-400">
+                    <p class="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                         {{ $t('system.subscriptions.no_subscriptions') }}
                     </p>
                 </div>
@@ -250,11 +295,11 @@
                                 class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between"
                             >
                                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    إنشاء اشتراك جديد
+                                    {{ $t('system.subscriptions.create_title') }}
                                 </h3>
                                 <button
                                     @click="closeModal"
-                                    class="text-gray-400 hover:text-gray-500"
+                                    class="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
                                 >
                                     <svg
                                         class="w-5 h-5"
@@ -282,13 +327,15 @@
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
-                                        المستأجر
+                                        {{ $t('system.subscriptions.create_modal.tenant_label') }}
                                     </label>
                                     <div class="relative">
                                         <input
                                             v-model="tenantSearch"
                                             type="text"
-                                            placeholder="ابحث عن اسم المركز أو المالك..."
+                                            :placeholder="
+                                                $t('system.subscriptions.tenant_search_placeholder')
+                                            "
                                             class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                             @focus="showTenantDropdown = true"
                                         />
@@ -306,7 +353,11 @@
                                                     <p
                                                         class="font-medium text-gray-900 dark:text-white"
                                                     >
-                                                        {{ tenant.trade_name || tenant.name }}
+                                                        {{
+                                                            tenant.trade_name ||
+                                                            tenant.name ||
+                                                            $t('common.na')
+                                                        }}
                                                     </p>
                                                     <p
                                                         class="text-xs text-gray-500 dark:text-gray-400"
@@ -339,7 +390,7 @@
                                     </p>
                                     <p
                                         v-if="form.tenant_id"
-                                        class="mt-1 text-sm text-emerald-600 flex items-center gap-1"
+                                        class="mt-1 text-sm text-emerald-600 dark:text-emerald-400 flex items-center gap-1"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -354,7 +405,15 @@
                                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                                             />
                                         </svg>
-                                        تم اختيار: {{ getSelectedTenantName() }}
+                                        {{
+                                            $t(
+                                                'system.subscriptions.create_modal.selected_tenant',
+                                                {
+                                                    name:
+                                                        getSelectedTenantName() || $t('common.na'),
+                                                }
+                                            )
+                                        }}
                                     </p>
                                 </div>
 
@@ -363,15 +422,10 @@
                                     <div>
                                         <SearchableSelect
                                             v-model="form.plan_id"
-                                            :options="
-                                                (plans || []).map((p) => ({
-                                                    value: p.id,
-                                                    label: p.name_ar,
-                                                }))
-                                            "
+                                            :options="planOptions"
                                             option-label="label"
                                             option-value="value"
-                                            label="الباقة"
+                                            :label="$t('system.subscriptions.plan_label')"
                                             required
                                             :error="form.errors.plan_id"
                                         />
@@ -382,7 +436,11 @@
                                             :options="formBillingCycleOptions"
                                             option-label="label"
                                             option-value="value"
-                                            label="دورة الفوترة"
+                                            :label="
+                                                $t(
+                                                    'system.subscriptions.create_modal.billing_cycle_label'
+                                                )
+                                            "
                                             required
                                             :error="form.errors.billing_cycle"
                                         />
@@ -394,10 +452,12 @@
                                     v-if="selectedPlan"
                                     class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600 flex justify-between items-center"
                                 >
-                                    <span
-                                        class="text-gray-600 dark:bg-gray-700 text-gray-300 font-medium"
-                                    >
-                                        سعر الاشتراك
+                                    <span class="font-medium text-gray-700 dark:text-gray-300">
+                                        {{
+                                            $t(
+                                                'system.subscriptions.create_modal.subscription_price'
+                                            )
+                                        }}
                                     </span>
                                     <span class="text-xl font-bold text-gray-900 dark:text-white">
                                         {{
@@ -405,7 +465,7 @@
                                                 ? selectedPlan.price_yearly
                                                 : selectedPlan.price_monthly
                                         }}
-                                        ر.س
+                                        {{ $t('system.subscriptions.create_modal.currency') }}
                                     </span>
                                 </div>
 
@@ -414,13 +474,15 @@
                                     <label
                                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                     >
-                                        رمز ترويجي (اختياري)
+                                        {{ $t('system.subscriptions.promo_code_label') }}
                                     </label>
                                     <input
                                         v-model="form.promo_code"
                                         type="text"
                                         dir="ltr"
-                                        placeholder="CODE"
+                                        :placeholder="
+                                            $t('system.subscriptions.promo_code_placeholder')
+                                        "
                                         class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono uppercase"
                                     />
                                     <p
@@ -441,14 +503,18 @@
                                     type="button"
                                     class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                                 >
-                                    إلغاء
+                                    {{ $t('system.actions.cancel') }}
                                 </button>
                                 <button
                                     @click="submit"
                                     :disabled="form.processing || !form.tenant_id"
                                     class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium disabled:opacity-50"
                                 >
-                                    {{ form.processing ? 'جاري الإنشاء...' : 'إنشاء الاشتراك' }}
+                                    {{
+                                        form.processing
+                                            ? $t('system.subscriptions.create_modal.submitting')
+                                            : $t('system.subscriptions.create_modal.submit')
+                                    }}
                                 </button>
                             </div>
                         </div>
@@ -461,21 +527,33 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Link, router, useForm } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
+const { t } = useI18n();
+
 const statusFilterOptions = computed(() => [
-    { value: 'all', label: 'جميع الحالات' },
-    { value: 'active', label: 'نشط' },
-    { value: 'trial', label: 'تجريبي' },
-    { value: 'cancelled', label: 'ملغي' },
-    { value: 'expired', label: 'منتهي' },
+    { value: 'all', label: t('system.subscriptions.all_statuses') },
+    { value: 'active', label: t('system.status.active') },
+    { value: 'trial', label: t('system.status.trial') },
+    { value: 'cancelled', label: t('system.status.cancelled') },
+    { value: 'expired', label: t('system.status.expired') },
 ]);
 
+const planFilterOptions = computed(() => [
+    { value: '', label: t('system.subscriptions.all_plans') },
+    ...(props.plans || []).map((p) => ({ value: p.id, label: p.name_ar })),
+]);
+
+const planOptions = computed(() =>
+    (props.plans || []).map((p) => ({ value: p.id, label: p.name_ar }))
+);
+
 const formBillingCycleOptions = computed(() => [
-    { value: 'monthly', label: 'شهري' },
-    { value: 'yearly', label: 'سنوي' },
+    { value: 'monthly', label: t('system.subscriptions.monthly') },
+    { value: 'yearly', label: t('system.subscriptions.yearly') },
 ]);
 
 const props = defineProps({
@@ -485,6 +563,57 @@ const props = defineProps({
     stats: Object,
     eligibleTenants: Array,
 });
+
+// Stat cards: extracted to a computed list so the template doesn't
+// repeat the same card 5× with only label/value/color swapped.
+const statCards = computed(() => [
+    {
+        key: 'total',
+        label: t('system.subscriptions.stats.total'),
+        value: props.stats?.total ?? 0,
+        valueColor: 'text-gray-900 dark:text-white',
+        iconBg: 'bg-gray-100 dark:bg-gray-700',
+        iconColor: 'text-gray-500 dark:text-gray-400',
+        iconPath:
+            'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2',
+    },
+    {
+        key: 'active',
+        label: t('system.status.active'),
+        value: props.stats?.active ?? 0,
+        valueColor: 'text-emerald-600 dark:text-emerald-400',
+        iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
+        iconColor: 'text-emerald-600 dark:text-emerald-400',
+        iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+    },
+    {
+        key: 'trial',
+        label: t('system.status.trial'),
+        value: props.stats?.trial ?? 0,
+        valueColor: 'text-amber-600 dark:text-amber-400',
+        iconBg: 'bg-amber-100 dark:bg-amber-900/30',
+        iconColor: 'text-amber-600 dark:text-amber-400',
+        iconPath: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+    },
+    {
+        key: 'cancelled',
+        label: t('system.status.cancelled'),
+        value: props.stats?.cancelled ?? 0,
+        valueColor: 'text-red-600 dark:text-red-400',
+        iconBg: 'bg-red-100 dark:bg-red-900/30',
+        iconColor: 'text-red-600 dark:text-red-400',
+        iconPath: 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z',
+    },
+    {
+        key: 'expired',
+        label: t('system.status.expired'),
+        value: props.stats?.expired ?? 0,
+        valueColor: 'text-gray-500 dark:text-gray-400',
+        iconBg: 'bg-gray-100 dark:bg-gray-700',
+        iconColor: 'text-gray-500 dark:text-gray-400',
+        iconPath: 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+    },
+]);
 
 const search = ref(props.filters?.search || '');
 const statusFilter = ref(props.filters?.status || 'all');
@@ -559,7 +688,7 @@ const applyFilters = () => {
 };
 
 const formatDate = (date) => {
-    if (!date) return '-';
+    if (!date) return t('common.na');
     return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
@@ -577,14 +706,14 @@ const getStatusClass = (status) => {
 
 const getStatusLabel = (status) => {
     const labels = {
-        active: 'نشط',
-        trial: 'تجريبي',
-        trialing: 'تجريبي',
-        cancelled: 'ملغي',
-        expired: 'منتهي',
-        pending: 'قيد الانتظار',
+        active: t('system.status.active'),
+        trial: t('system.status.trial'),
+        trialing: t('system.status.trial'),
+        cancelled: t('system.status.cancelled'),
+        expired: t('system.status.expired'),
+        pending: t('system.status.pending'),
     };
-    return labels[status] || status;
+    return labels[status] || status || t('common.na');
 };
 </script>
 

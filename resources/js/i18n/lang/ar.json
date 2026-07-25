@@ -783,7 +783,32 @@
     "technician_performance": "أداء الفنيين",
     "this_month": "هذا الشهر",
     "title": "لوحة التحكم",
-    "today": "اليوم",
+    "welcome": "مرحباً أيها المُشرف",
+    "subtitle_short": "إدارة شاملة لجميع المستأجرين والإعدادات",
+    "total_tenants": "إجمالي المستأجرين",
+    "active": "نشط",
+    "trial": "تجريبي",
+    "suspended": "معلّق",
+    "provider_balances": {
+      "title": "أرصدة مزودي الخدمة",
+      "subtitle": "مستوى أرصدة SMS و WhatsApp",
+      "refresh": "تحديث الأرصدة",
+      "sms_label": "رسائل SMS",
+      "whatsapp_label": "واتساب",
+      "remaining_balance": "الرصيد المتبقي",
+      "fetch_failed": "فشل في جلب الرصيد",
+      "fetch_error": "خطأ في الاتصال",
+      "settings": "الإعدادات",
+      "no_providers": "لا توجد مزودي خدمة مُفعَّلون لعرض الأرصدة"
+    },
+    "recent_registrations": "التسجيلات الأخيرة",
+    "last_7_days": "آخر 7 أيام",
+    "no_recent_registrations": "لا توجد تسجيلات حديثة",
+    "trial_ending_soon": "⏰ التجربة تنتهي قريباً",
+    "in_7_days": "خلال 7 أيام",
+    "trial_ends": "تنتهي: :date",
+    "no_trial_ending_soon": "لا توجد فترات تجريبية منتهية قريباً",
+    "view": "عرض",
     "today_schedule": "مواعيد اليوم",
     "top_customers": "أفضل العملاء",
     "top_services": "الخدمات الأكثر طلباً",
@@ -3113,6 +3138,12 @@
     "loading_all_printing": "جاري تحميل كل المطبوعات..."
   },
   "work_orders": {
+    "status": {
+      "open": "مفتوح",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "invoiced": "مفوتر"
+    },
     "actions": {
       "cancel": "إلغاء الكرت",
       "complete": "إغلاق الكرت",
@@ -3590,6 +3621,7 @@
     "tenants": {
       "title": "المستأجرين",
       "subtitle": "إدارة جميع المستأجرين في النظام",
+      "id": "المعرّف",
       "name": "الاسم",
       "trade_name": "الاسم التجاري",
       "legal_name": "الاسم القانوني",
@@ -3645,6 +3677,7 @@
       "modals": {
         "suspend_title": "تعليق الحساب",
         "suspend_reason": "سبب التعليق",
+        "suspend_no_reason": "لم يحدد سبب",
         "extend_title": "تمديد الفترة التجريبية",
         "extend_days": "عدد الأيام",
         "extend_hint": "يمكن أن يكون الرقم سالباً (لتقليص المدة) حتى -90 يوم.",
@@ -3696,7 +3729,20 @@
       },
       "featured": "مميزة",
       "free_trial_days": "تجربة مجانية: :count يوم",
-      "no_subscriptions": "لا توجد اشتراكات"
+      "no_subscriptions": "لا توجد اشتراكات",
+      "monthly": "شهري",
+      "yearly": "سنوي",
+      "all_statuses": "جميع الحالات",
+      "all_plans": "جميع الباقات",
+      "create_modal": {
+        "tenant_label": "المستأجر",
+        "billing_cycle_label": "دورة الفوترة",
+        "subscription_price": "سعر الاشتراك",
+        "currency": "ر.س",
+        "selected_tenant": "تم اختيار: :name",
+        "submit": "إنشاء الاشتراك",
+        "submitting": "جاري الإنشاء..."
+      }
     },
     "plans": {
       "title": "الباقات",

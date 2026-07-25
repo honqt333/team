@@ -21,14 +21,16 @@
             </Link>
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ tenant.trade_name || tenant.name }}
+                    {{ tenant.trade_name || tenant.name || $t('common.na') }}
                 </h1>
-                <p class="text-gray-500 dark:text-gray-400">{{ tenant.legal_name }}</p>
+                <p v-if="tenant.legal_name" class="text-gray-500 dark:text-gray-400">
+                    {{ tenant.legal_name }}
+                </p>
             </div>
         </div>
         <span
             :class="getStatusClass(tenant.status)"
-            class="px-3 py-1.5 rounded-full text-sm font-medium"
+            class="inline-flex px-3 py-1.5 rounded-full text-sm font-medium"
         >
             {{ getStatusLabel(tenant.status) }}
         </span>
@@ -37,10 +39,13 @@
 
 <script setup>
 import { Link } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 
 defineProps({
     tenant: { type: Object, required: true },
 });
+
+const { t } = useI18n();
 
 const getStatusClass = (status) => {
     const classes = {
@@ -52,11 +57,10 @@ const getStatusClass = (status) => {
 };
 
 const getStatusLabel = (status) => {
-    const labels = {
-        active: 'نشط',
-        trial: 'تجريبي',
-        suspended: 'معلّق',
-    };
-    return labels[status] || status || 'غير محدد';
+    const known = ['active', 'trial', 'suspended'];
+    if (known.includes(status)) {
+        return t(`system.status.${status}`);
+    }
+    return status || t('common.na');
 };
 </script>

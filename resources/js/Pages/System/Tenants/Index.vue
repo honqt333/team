@@ -7,7 +7,7 @@
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
                         {{ $t('system.tenants.title') }}
                     </h1>
-                    <p class="text-gray-500 dark:text-gray-400">
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         {{ $t('system.tenants.subtitle') }}
                     </p>
                 </div>
@@ -20,13 +20,28 @@
                 <div class="flex flex-wrap gap-4">
                     <!-- Search -->
                     <div class="flex-1 min-w-[200px]">
-                        <input
-                            v-model="search"
-                            type="text"
-                            :placeholder="$t('system.tenants.search_placeholder')"
-                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500"
-                            @input="debouncedSearch"
-                        />
+                        <div class="relative">
+                            <svg
+                                class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                />
+                            </svg>
+                            <input
+                                v-model="search"
+                                type="text"
+                                :placeholder="$t('system.tenants.search_placeholder')"
+                                class="w-full px-4 py-2.5 pr-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors"
+                                @input="debouncedSearch"
+                            />
+                        </div>
                     </div>
 
                     <!-- Status Filter -->
@@ -50,84 +65,104 @@
                         <thead class="bg-gray-50 dark:bg-gray-700/50">
                             <tr>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                                 >
-                                    #
+                                    {{ $t('system.tenants.id') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
                                     {{ $t('system.tenants.trade_name') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
                                     {{ $t('system.tenants.phone') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                                 >
                                     {{ $t('system.tenants.centers') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                                 >
                                     {{ $t('system.tenants.users') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
                                 >
                                     {{ $t('system.tenants.status') }}
                                 </th>
                                 <th
-                                    class="px-6 py-4 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle"
                                 >
                                     {{ $t('system.tenants.registration_date') }}
                                 </th>
-                                <th class="px-6 py-4 align-middle text-center"></th>
+                                <th
+                                    class="px-6 py-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider align-middle text-center"
+                                >
+                                    {{ $t('system.backups.col.actions') }}
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                             <tr
                                 v-for="tenant in tenants.data"
                                 :key="tenant.id"
-                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30"
+                                class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
                             >
                                 <td
-                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle"
+                                    class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 align-middle text-center"
                                 >
                                     {{ tenant.id }}
                                 </td>
                                 <td class="px-6 py-4 align-middle">
                                     <div class="font-medium text-gray-900 dark:text-white">
-                                        {{ tenant.trade_name || tenant.name }}
+                                        {{ tenant.trade_name || tenant.name || $t('common.na') }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <div
+                                        v-if="tenant.legal_name"
+                                        class="text-sm text-gray-500 dark:text-gray-400"
+                                    >
                                         {{ tenant.legal_name }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 align-middle">
-                                    <div class="text-sm text-gray-900 dark:text-white" dir="ltr">
+                                    <div
+                                        v-if="tenant.phone"
+                                        class="text-sm text-gray-900 dark:text-white"
+                                        dir="ltr"
+                                    >
                                         {{ tenant.phone }}
                                     </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <div
+                                        v-if="tenant.email"
+                                        class="text-sm text-gray-500 dark:text-gray-400"
+                                    >
                                         {{ tenant.email }}
                                     </div>
+                                    <span
+                                        v-if="!tenant.phone && !tenant.email"
+                                        class="text-sm text-gray-400"
+                                    >
+                                        {{ $t('common.na') }}
+                                    </span>
                                 </td>
                                 <td
-                                    class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle"
+                                    class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle text-center"
                                 >
                                     {{ tenant.centers_count }}
                                 </td>
                                 <td
-                                    class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle"
+                                    class="px-6 py-4 text-sm text-gray-900 dark:text-white align-middle text-center"
                                 >
                                     {{ tenant.users_count }}
                                 </td>
-                                <td class="px-6 py-4 align-middle">
+                                <td class="px-6 py-4 align-middle text-center">
                                     <span
                                         :class="getStatusClass(tenant.status)"
-                                        class="px-2.5 py-1 rounded-full text-xs font-medium"
+                                        class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium"
                                     >
                                         {{ getStatusLabel(tenant.status) }}
                                     </span>
@@ -137,11 +172,30 @@
                                 >
                                     {{ formatDate(tenant.created_at) }}
                                 </td>
-                                <td class="px-6 py-4 text-end align-middle">
+                                <td class="px-6 py-4 align-middle text-center">
                                     <Link
                                         :href="`/system/tenants/${tenant.id}`"
-                                        class="text-indigo-600 hover:text-indigo-700 font-medium text-sm"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
                                     >
+                                        <svg
+                                            class="w-4 h-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                            />
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                            />
+                                        </svg>
                                         {{ $t('system.actions.view') }}
                                     </Link>
                                 </td>
@@ -151,9 +205,9 @@
                 </div>
 
                 <!-- Empty State -->
-                <div v-if="!tenants.data?.length" class="px-6 py-12 text-center">
+                <div v-if="!tenants.data?.length" class="px-6 py-16 text-center">
                     <svg
-                        class="w-12 h-12 mx-auto text-gray-400"
+                        class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-600"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -165,7 +219,7 @@
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                         />
                     </svg>
-                    <p class="mt-4 text-gray-500 dark:text-gray-400">
+                    <p class="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">
                         {{ $t('system.tenants.no_tenants') }}
                     </p>
                 </div>
@@ -253,7 +307,7 @@ const applyFilters = () => {
 };
 
 const formatDate = (date) => {
-    if (!date) return '-';
+    if (!date) return t('common.na');
     return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
@@ -272,6 +326,6 @@ const getStatusLabel = (status) => {
     if (known.includes(status)) {
         return t(`system.status.${status}`);
     }
-    return status || t('system.status.no');
+    return status || t('common.na');
 };
 </script>

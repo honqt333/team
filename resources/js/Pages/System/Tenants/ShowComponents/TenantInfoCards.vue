@@ -7,37 +7,47 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    معلومات الشركة
+                    {{ $t('system.tenants.show.company_info') }}
                 </h2>
                 <dl class="grid grid-cols-2 gap-4">
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">الاسم التجاري</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.trade_name') }}
+                        </dt>
                         <dd class="text-gray-900 dark:text-white font-medium">
-                            {{ tenant.trade_name || '-' }}
+                            {{ tenant.trade_name || $t('common.na') }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">الاسم القانوني</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.legal_name') }}
+                        </dt>
                         <dd class="text-gray-900 dark:text-white font-medium">
-                            {{ tenant.legal_name || '-' }}
+                            {{ tenant.legal_name || $t('common.na') }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">المالك</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.owner') }}
+                        </dt>
                         <dd class="text-gray-900 dark:text-white font-medium">
-                            {{ tenant.owner_name || '-' }}
+                            {{ tenant.owner_name || $t('common.na') }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">السجل التجاري</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.cr_number') }}
+                        </dt>
                         <dd class="text-gray-900 dark:text-white font-medium" dir="ltr">
-                            {{ tenant.cr_number || '-' }}
+                            {{ tenant.cr_number || $t('common.na') }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">الرقم الضريبي</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.vat_number') }}
+                        </dt>
                         <dd class="text-gray-900 dark:text-white font-medium" dir="ltr">
-                            {{ tenant.vat_number || '-' }}
+                            {{ tenant.vat_number || $t('common.na') }}
                         </dd>
                     </div>
                 </dl>
@@ -47,7 +57,9 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">آخر الكروت</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {{ $t('system.tenants.show.recent_work_orders') }}
+                </h2>
                 <div v-if="recentWorkOrders?.length" class="space-y-3">
                     <div
                         v-for="wo in recentWorkOrders"
@@ -57,23 +69,25 @@
                         <div>
                             <p class="font-medium text-gray-900 dark:text-white">#{{ wo.code }}</p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ wo.vehicle?.customer?.name || '-' }}
+                                {{ wo.vehicle?.customer?.name || $t('common.na') }}
                             </p>
                         </div>
                         <div class="text-end">
                             <span
                                 :class="getWorkOrderStatusClass(wo.status)"
-                                class="px-2 py-1 rounded-full text-xs"
+                                class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium"
                             >
                                 {{ getWorkOrderStatusLabel(wo.status) }}
                             </span>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                 {{ formatDate(wo.created_at) }}
                             </p>
                         </div>
                     </div>
                 </div>
-                <p v-else class="text-center py-4 text-gray-500 dark:text-gray-400">لا توجد كروت</p>
+                <p v-else class="py-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                    {{ $t('system.tenants.show.no_work_orders') }}
+                </p>
             </div>
 
             <!-- Centers -->
@@ -81,7 +95,11 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    المراكز ({{ tenant.centers?.length || 0 }})
+                    {{
+                        $t('system.tenants.show.centers_count', {
+                            count: tenant.centers?.length || 0,
+                        })
+                    }}
                 </h2>
                 <div class="space-y-3">
                     <div
@@ -94,24 +112,27 @@
                                 <p class="font-medium text-gray-900 dark:text-white">
                                     {{ center.name }}
                                 </p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                <p
+                                    v-if="center.phone || center.email"
+                                    class="text-sm text-gray-500 dark:text-gray-400"
+                                >
                                     {{ center.phone || center.email }}
                                 </p>
                             </div>
                             <span
                                 v-if="center.is_main"
-                                class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded-full text-xs"
+                                class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
                             >
-                                رئيسي
+                                {{ $t('system.tenants.show.main') }}
                             </span>
                         </div>
                     </div>
-                    <div
+                    <p
                         v-if="!tenant.centers?.length"
-                        class="text-center py-4 text-gray-500 dark:text-gray-400"
+                        class="py-4 text-center text-sm text-gray-500 dark:text-gray-400"
                     >
-                        لا توجد مراكز
-                    </div>
+                        {{ $t('system.tenants.show.no_centers') }}
+                    </p>
                 </div>
             </div>
         </div>
@@ -122,39 +143,51 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">الحالة</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {{ $t('system.tenants.show.status_card') }}
+                </h2>
                 <dl class="space-y-4">
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">الحالة الحالية</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.current_status') }}
+                        </dt>
                         <dd class="mt-1">
                             <span
                                 :class="getStatusClass(tenant.status)"
-                                class="px-2.5 py-1 rounded-full text-xs font-medium"
+                                class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium"
                             >
                                 {{ getStatusLabel(tenant.status) }}
                             </span>
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">تاريخ التسجيل</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.registration_date') }}
+                        </dt>
                         <dd class="text-gray-900 dark:text-white font-medium">
                             {{ formatDate(tenant.created_at) }}
                         </dd>
                     </div>
                     <div v-if="tenant.trial_ends_at">
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">انتهاء التجربة</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.trial_ends') }}
+                        </dt>
                         <dd class="text-gray-900 dark:text-white font-medium">
                             {{ formatDate(tenant.trial_ends_at) }}
                         </dd>
                     </div>
                     <div v-if="tenant.suspended_at">
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">تاريخ التعليق</dt>
-                        <dd class="text-red-600 dark:text-red-400 font-medium">
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.suspended_at') }}
+                        </dt>
+                        <dd class="font-medium text-red-600 dark:text-red-400">
                             {{ formatDate(tenant.suspended_at) }}
                         </dd>
                     </div>
                     <div v-if="tenant.suspension_reason">
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">سبب التعليق</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.suspension_reason') }}
+                        </dt>
                         <dd class="text-red-600 dark:text-red-400">
                             {{ tenant.suspension_reason }}
                         </dd>
@@ -167,22 +200,30 @@
                 v-if="tenant.subscriptions?.length"
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">الاشتراك</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {{ $t('system.tenants.show.subscription') }}
+                </h2>
                 <div v-for="sub in tenant.subscriptions" :key="sub.id" class="space-y-3">
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-700 dark:text-gray-300">الباقة</span>
+                        <span class="text-gray-700 dark:text-gray-300">
+                            {{ $t('system.tenants.show.plan') }}
+                        </span>
                         <span class="font-medium text-indigo-600 dark:text-indigo-400">
                             {{ sub.plan?.name_ar }}
                         </span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-700 dark:text-gray-300">الدورة</span>
+                        <span class="text-gray-700 dark:text-gray-300">
+                            {{ $t('system.tenants.show.billing_cycle') }}
+                        </span>
                         <span class="font-medium text-gray-900 dark:text-white">
-                            {{ sub.billing_cycle === 'yearly' ? 'سنوي' : 'شهري' }}
+                            {{ $t(`system.tenants.show.${sub.billing_cycle}`) }}
                         </span>
                     </div>
                     <div class="flex items-center justify-between">
-                        <span class="text-gray-700 dark:text-gray-300">ينتهي</span>
+                        <span class="text-gray-700 dark:text-gray-300">
+                            {{ $t('system.tenants.show.ends_at') }}
+                        </span>
                         <span class="font-medium text-gray-900 dark:text-white">
                             {{ formatDate(sub.ends_at) }}
                         </span>
@@ -194,18 +235,24 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
-                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">التواصل</h2>
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    {{ $t('system.tenants.show.contact') }}
+                </h2>
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">الهاتف</dt>
-                        <dd class="text-gray-900 dark:text-white font-medium" dir="ltr">
-                            {{ tenant.phone || '-' }}
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.phone') }}
+                        </dt>
+                        <dd class="font-medium text-gray-900 dark:text-white" dir="ltr">
+                            {{ tenant.phone || $t('common.na') }}
                         </dd>
                     </div>
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">البريد</dt>
-                        <dd class="text-gray-900 dark:text-white font-medium">
-                            {{ tenant.email || '-' }}
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.email') }}
+                        </dt>
+                        <dd class="font-medium text-gray-900 dark:text-white">
+                            {{ tenant.email || $t('common.na') }}
                         </dd>
                     </div>
                 </dl>
@@ -216,17 +263,29 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
             >
                 <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">الأمان</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        {{ $t('system.tenants.show.security') }}
+                    </h2>
                     <button
                         @click="$emit('security')"
-                        class="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        class="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300"
                     >
-                        تعديل
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                        </svg>
+                        {{ $t('system.actions.edit') }}
                     </button>
                 </div>
                 <dl class="space-y-3">
                     <div>
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">المصادقة الثنائية</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.two_factor') }}
+                        </dt>
                         <dd class="mt-1">
                             <span
                                 :class="
@@ -234,14 +293,22 @@
                                         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                                         : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
                                 "
-                                class="px-2 py-1 rounded-full text-xs font-medium"
+                                class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium"
                             >
-                                {{ tenant.two_factor_enabled ? 'مفعلة' : 'معطلة' }}
+                                {{
+                                    $t(
+                                        tenant.two_factor_enabled
+                                            ? 'system.tenants.show.two_factor_enabled'
+                                            : 'system.tenants.show.two_factor_disabled'
+                                    )
+                                }}
                             </span>
                         </dd>
                     </div>
                     <div v-if="tenant.two_factor_enabled">
-                        <dt class="text-sm text-gray-500 dark:text-gray-400">مستوى الإلزام</dt>
+                        <dt class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ $t('system.tenants.show.enforcement_level') }}
+                        </dt>
                         <dd class="mt-1 text-gray-900 dark:text-white font-medium">
                             {{ getEnforcementLabel(tenant.two_factor_enforcement) }}
                         </dd>
@@ -253,6 +320,8 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+
 defineProps({
     tenant: { type: Object, required: true },
     recentWorkOrders: { type: Array, default: () => [] },
@@ -260,8 +329,10 @@ defineProps({
 
 defineEmits(['security']);
 
+const { t } = useI18n();
+
 const formatDate = (date) => {
-    if (!date) return '-';
+    if (!date) return t('common.na');
     return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
 };
 
@@ -275,8 +346,11 @@ const getStatusClass = (status) => {
 };
 
 const getStatusLabel = (status) => {
-    const labels = { active: 'نشط', trial: 'تجريبي', suspended: 'معلّق' };
-    return labels[status] || status || 'غير محدد';
+    const known = ['active', 'trial', 'suspended'];
+    if (known.includes(status)) {
+        return t(`system.status.${status}`);
+    }
+    return status || t('common.na');
 };
 
 const getWorkOrderStatusClass = (status) => {
@@ -286,29 +360,21 @@ const getWorkOrderStatusClass = (status) => {
         completed: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
         invoiced: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
     };
-    return classes[status] || 'bg-gray-100 text-gray-700';
+    return classes[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400';
 };
 
 const getWorkOrderStatusLabel = (status) => {
     const labels = {
-        open: 'مفتوح',
-        in_progress: 'قيد العمل',
-        completed: 'مكتمل',
-        invoiced: 'مفوتر',
+        open: t('system.work_orders.status.open'),
+        in_progress: t('system.work_orders.status.in_progress'),
+        completed: t('system.work_orders.status.completed'),
+        invoiced: t('system.work_orders.status.invoiced'),
     };
-    return labels[status] || status;
+    return labels[status] || status || t('common.na');
 };
 
 const getEnforcementLabel = (value) => {
-    switch (value) {
-        case 'required':
-            return 'إلزامي';
-        case 'optional':
-            return 'اختياري';
-        case 'disabled':
-            return 'غير ملزم';
-        default:
-            return value;
-    }
+    const key = `system.tenants.show.modals.enforcement_${value}`;
+    return t(key) || value || t('common.na');
 };
 </script>
