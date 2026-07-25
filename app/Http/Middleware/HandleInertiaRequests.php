@@ -56,6 +56,12 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
+            'csrf_token' => csrf_token(), // Exposed for fetch() calls that
+            // can't use Inertia's automatic
+            // CSRF (e.g. multipart file
+            // uploads). Always fresh per
+            // request so the token doesn't
+            // get stale like the meta tag.
             'locale' => app()->getLocale(),
             'auth' => [
                 'user' => $user ? ($isTenantUser ? $user->load('roles:id,name,label_ar,label_en') : $user) : null,

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
     // The setup payload from subscribe() — contains plan, billing_cycle,
@@ -15,6 +15,15 @@ const emit = defineEmits(['success', 'close']);
 
 const locale = computed(() => document.documentElement.lang || 'ar');
 
+// Read the CSRF token from Inertia's shared page props (always fresh
+// per request) — the meta tag in the document can be stale if the
+// session rotated or the user opened the page a long time ago.
+const csrfToken = computed(
+    () =>
+        usePage().props.value?.csrf_token ||
+        document.querySelector('meta[name="csrf-token"]')?.content
+);
+
 const form = ref({
     receipt: null,
     transfer_amount: '',
@@ -22,6 +31,7 @@ const form = ref({
     transfer_reference: '',
     bank_name: '',
     account_name: '',
+    notes: '',
 });
 
 const fileInput = ref(null);
@@ -118,7 +128,7 @@ async function submit() {
         const response = await fetch('/app/settings/company/subscription/bank-transfer-receipt', {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                'X-CSRF-TOKEN': csrfToken.value || '',
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
