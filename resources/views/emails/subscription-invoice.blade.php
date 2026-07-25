@@ -17,7 +17,7 @@
     |---|---|
     | **رقم الفاتورة** | {{ $invoice->invoice_number }} |
     | **تاريخ الإصدار** | {{ $invoice->created_at->format('Y-m-d') }} |
-    | **تاريخ الاستحقاق** | {{ $invoice->due_date->format('Y-m-d') }} |
+    | **تاريخ الاستحقاق** | {{ $invoice->due_at?->format('Y-m-d') ?? '—' }} |
     | **المجموع** | **{{ number_format($invoice->total, 2) }} ر.س** |
     | **الحالة** | {{ $invoice->status === 'paid' ? '✅ مدفوعة' : '⏳ معلقة' }} |
 

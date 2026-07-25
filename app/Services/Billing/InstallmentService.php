@@ -79,11 +79,14 @@ class InstallmentService
             $amount = ($i === $installmentCount) ? $lastInstallmentAmount : $installmentAmount;
 
             Installment::create([
-                'subscription_invoice_id' => $invoice->id,
+                // The 2026_07_25_140000 migration recreated installments
+                // without the subscription_invoice_id FK (only subscription_id
+                // remains). We link through subscription instead of invoice.
+                'subscription_id' => $invoice->subscription_id,
                 'installment_number' => $i,
                 'amount' => $amount,
                 'due_date' => $dueDate,
-                'status' => $i === 1 ? 'pending' : 'pending', // First one due immediately
+                'status' => 'pending',
             ]);
         }
 

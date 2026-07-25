@@ -228,7 +228,7 @@
         </div>
         <div class="meta-row">
             <span class="meta-label">تاريخ الاستحقاق:</span>
-            <span class="meta-value">{{ $invoice->due_date->format('Y-m-d') }}</span>
+            <span class="meta-value">{{ $invoice->due_at?->format('Y-m-d') ?? '—' }}</span>
         </div>
         <div class="meta-row">
             <span class="meta-label">الحالة:</span>
