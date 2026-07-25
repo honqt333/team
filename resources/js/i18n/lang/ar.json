@@ -3792,17 +3792,52 @@
       "title": "الرموز الترويجية",
       "subtitle": "إدارة أكواد الخصم والعروض",
       "create": "+ إنشاء رمز",
-      "code": "الرمز",
-      "name": "الاسم",
-      "discount": "الخصم",
-      "usage": "الاستخدام",
-      "status": "الحالة",
-      "valid": "صالح",
-      "expired": "منتهي",
-      "inactive": "غير نشط",
+      "create_title": "إنشاء رمز ترويجي",
+      "edit_title": "تعديل الرمز",
+      "create_action": "إنشاء الرمز",
+      "save_changes": "حفظ التغييرات",
+      "create_first": "إنشاء أول رمز",
+      "empty": "لا توجد رموز ترويجية",
+      "confirm_delete": "حذف الرمز \":code\"؟",
       "unlimited": "∞",
-      "no_codes": "لا توجد رموز ترويجية",
-      "first_code": "إنشاء أول رمز"
+      "all_plans": "جميع الباقات",
+      "col": {
+        "code": "الرمز",
+        "name": "الاسم",
+        "discount": "الخصم",
+        "usage": "الاستخدام"
+      },
+      "status": {
+        "valid": "صالح",
+        "expired": "منتهي",
+        "inactive": "غير نشط"
+      },
+      "discount_type": {
+        "percentage": "نسبة مئوية (%)",
+        "fixed": "مبلغ ثابت (ر.س)",
+        "trial_days": "أيام تجربة إضافية"
+      },
+      "discount_value": {
+        "percentage": "نسبة الخصم (%)",
+        "fixed": "مبلغ الخصم (ر.س)",
+        "trial_days": "أيام التجربة الإضافية"
+      },
+      "form": {
+        "code": "الرمز",
+        "name": "اسم العرض",
+        "generate": "توليد رمز عشوائي",
+        "discount": "الخصم",
+        "discount_type": "نوع الخصم",
+        "limits": "الحدود",
+        "max_uses": "الحد الأقصى للاستخدام",
+        "max_uses_per_tenant": "الحد لكل مستأجر",
+        "starts_at": "يبدأ من",
+        "expires_at": "ينتهي في",
+        "restrictions": "القيود",
+        "plan": "الباقة",
+        "billing_cycle": "دورة الفوترة",
+        "first_subscription_only": "للاشتراك الأول فقط"
+      }
     },
     "settings": {
       "general_title": "الإعدادات العامة",
