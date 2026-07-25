@@ -97,6 +97,28 @@ async function submit() {
             locale.value === 'ar' ? 'يرجى إدخال تاريخ التحويل' : 'Please enter transfer date';
         return;
     }
+    // The server-side validation requires these three fields. Block
+    // submit early so the user sees the field-level error rather than
+    // a generic "Upload failed" toast from the server's 422 response.
+    if (!form.value.bank_name?.trim()) {
+        errors.value.bank_name =
+            locale.value === 'ar' ? 'يرجى إدخال اسم البنك' : 'Please enter the bank name';
+        return;
+    }
+    if (!form.value.account_name?.trim()) {
+        errors.value.account_name =
+            locale.value === 'ar'
+                ? 'يرجى إدخال اسم صاحب الحساب'
+                : 'Please enter the account holder name';
+        return;
+    }
+    if (!form.value.transfer_reference?.trim()) {
+        errors.value.transfer_reference =
+            locale.value === 'ar'
+                ? 'يرجى إدخال مرجع التحويل'
+                : 'Please enter the transfer reference';
+        return;
+    }
 
     processing.value = true;
     error.value = null;
@@ -107,10 +129,13 @@ async function submit() {
         data.append('receipt', form.value.receipt);
         data.append('transfer_amount', form.value.transfer_amount);
         data.append('transfer_date', form.value.transfer_date);
-        if (form.value.transfer_reference)
-            data.append('transfer_reference', form.value.transfer_reference);
-        if (form.value.bank_name) data.append('bank_name', form.value.bank_name);
-        if (form.value.account_name) data.append('account_name', form.value.account_name);
+        // Server validation requires these three as non-empty strings.
+        // Send them unconditionally so a blank field doesn't 422 the
+        // whole request. The Vue client already validates emptiness
+        // before submit, so this is just a safety net.
+        data.append('transfer_reference', form.value.transfer_reference || '');
+        data.append('bank_name', form.value.bank_name || '');
+        data.append('account_name', form.value.account_name || '');
 
         // Send the plan/cycle/promo from the setup payload so the
         // server can atomically create subscription + invoice + payment
@@ -302,17 +327,20 @@ async function submit() {
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'البنك' : 'Bank name' }}
+                    {{ locale === 'ar' ? 'البنك *' : 'Bank name *' }}
                 </label>
                 <input
                     v-model="form.bank_name"
                     type="text"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                 />
+                <p v-if="errors.bank_name" class="mt-1 text-xs text-rose-600">
+                    {{ errors.bank_name }}
+                </p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'مرجع التحويل' : 'Transfer reference' }}
+                    {{ locale === 'ar' ? 'مرجع التحويل *' : 'Transfer reference *' }}
                 </label>
                 <input
                     v-model="form.transfer_reference"
@@ -320,30 +348,22 @@ async function submit() {
                     :placeholder="locale === 'ar' ? 'رقم العملية...' : 'Transaction ID...'"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                 />
+                <p v-if="errors.transfer_reference" class="mt-1 text-xs text-rose-600">
+                    {{ errors.transfer_reference }}
+                </p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'اسم صاحب الحساب' : 'Account holder name' }}
+                    {{ locale === 'ar' ? 'اسم صاحب الحساب *' : 'Account holder name *' }}
                 </label>
                 <input
                     v-model="form.account_name"
                     type="text"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                 />
-            </div>
-            <div>
-                <!-- (account_number field removed; not in current schema) -->
-            </div>
-            <div>
-                <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'رقم الحساب (اختياري)' : 'Account number (optional)' }}
-                </label>
-                <input
-                    v-model="form.account_number"
-                    type="text"
-                    dir="ltr"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                />
+                <p v-if="errors.account_name" class="mt-1 text-xs text-rose-600">
+                    {{ errors.account_name }}
+                </p>
             </div>
         </div>
 

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
 import PaymentMethodSelector from './PaymentMethodSelector.vue';
 import PromoCodeInput from './PromoCodeInput.vue';
@@ -20,6 +20,15 @@ const props = defineProps({
 const emit = defineEmits(['close', 'success']);
 
 const { t, locale } = useI18n();
+
+// Read the CSRF token from Inertia's shared page props (always fresh
+// per request) — the meta tag in the document can be stale if the
+// session rotated or the user opened the page a long time ago.
+const csrfToken = computed(
+    () =>
+        usePage().props.value?.csrf_token ||
+        document.querySelector('meta[name="csrf-token"]')?.content
+);
 
 const billingCycle = ref('monthly');
 const promoInput = ref('');
@@ -64,7 +73,7 @@ async function calculate() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                'X-CSRF-TOKEN': csrfToken.value || '',
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
@@ -95,7 +104,7 @@ async function subscribe() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                'X-CSRF-TOKEN': csrfToken.value || '',
                 Accept: 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
             },
