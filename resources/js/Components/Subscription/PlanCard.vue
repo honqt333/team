@@ -4,6 +4,7 @@ import { computed } from 'vue';
 const props = defineProps({
     plan: { type: Object, required: true },
     isCurrent: { type: Boolean, default: false },
+    hasPendingSubscription: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['subscribe']);
@@ -19,6 +20,22 @@ const features = computed(() => {
     return props.plan.features_en || props.plan.features_ar || [];
 });
 
+// Button state has three flavors:
+// 1. Current plan (active subscription)        → "Your current plan", disabled
+// 2. Pending in-flight subscription            → "Pending request", disabled
+// 3. Available                                 → "Subscribe now"
+const isDisabled = computed(() => props.isCurrent || props.hasPendingSubscription);
+
+const buttonLabel = computed(() => {
+    if (props.isCurrent) {
+        return locale.value === 'ar' ? 'باقتك الحالية' : 'Your current plan';
+    }
+    if (props.hasPendingSubscription) {
+        return locale.value === 'ar' ? 'طلب قيد المراجعة' : 'Pending request';
+    }
+    return locale.value === 'ar' ? 'اشترك الآن' : 'Subscribe now';
+});
+
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(amount || 0);
 };
@@ -30,8 +47,12 @@ const formatCurrency = (amount) => {
             'relative flex flex-col justify-between rounded-2xl border bg-white p-6 transition-all dark:bg-slate-800',
             isCurrent
                 ? 'border-2 border-indigo-600 ring-2 ring-indigo-600/20 dark:border-indigo-400 dark:ring-indigo-400/20'
-                : 'border-slate-200 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:hover:border-slate-600',
-            plan.is_featured && !isCurrent ? 'ring-1 ring-amber-300 dark:ring-amber-500/30' : '',
+                : hasPendingSubscription
+                  ? 'border-2 border-amber-400/70 ring-1 ring-amber-300/50 dark:border-amber-500/50 dark:ring-amber-500/20'
+                  : 'border-slate-200 hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:hover:border-slate-600',
+            plan.is_featured && !isCurrent && !hasPendingSubscription
+                ? 'ring-1 ring-amber-300 dark:ring-amber-500/30'
+                : '',
         ]"
     >
         <!-- Current badge -->
@@ -40,6 +61,12 @@ const formatCurrency = (amount) => {
             class="absolute -top-3 start-6 rounded-full bg-indigo-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
         >
             {{ locale === 'ar' ? 'باقتك الحالية' : 'Current plan' }}
+        </span>
+        <span
+            v-else-if="hasPendingSubscription"
+            class="absolute -top-3 start-6 rounded-full bg-amber-500 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow"
+        >
+            {{ locale === 'ar' ? 'طلب قيد المراجعة' : 'Pending request' }}
         </span>
         <span
             v-else-if="plan.is_featured"
@@ -111,22 +138,24 @@ const formatCurrency = (amount) => {
         <button
             type="button"
             @click="emit('subscribe', plan)"
-            :disabled="isCurrent"
+            :disabled="isDisabled"
+            :title="
+                hasPendingSubscription && !isCurrent
+                    ? locale === 'ar'
+                        ? 'لديك اشتراك قيد المراجعة، انتظر الموافقة قبل طلب جديد'
+                        : 'You already have a pending request. Wait for admin approval.'
+                    : ''
+            "
             :class="[
                 'mt-6 w-full rounded-xl px-4 py-2.5 text-xs font-bold transition-all',
-                isCurrent
+                isDisabled
                     ? 'cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
                     : plan.is_featured
                       ? 'bg-amber-500 text-white hover:bg-amber-600'
                       : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50',
             ]"
         >
-            <span v-if="isCurrent">
-                {{ locale === 'ar' ? 'باقتك الحالية' : 'Your current plan' }}
-            </span>
-            <span v-else>
-                {{ locale === 'ar' ? 'اشترك الآن' : 'Subscribe now' }}
-            </span>
+            {{ buttonLabel }}
         </button>
     </div>
 </template>

@@ -6,6 +6,7 @@ namespace App\Services\Invoice;
 
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
+use App\Models\PaymentSettings;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,13 +23,15 @@ class SubscriptionInvoiceService
         $tenant = $subscription->tenant;
         $plan = $subscription->plan;
 
-        // Calculate amounts
-        $subtotal = $subscription->price;
-        $vatRate = 15.00; // Saudi VAT
-        $discountAmount = $discount;
-        $taxableAmount = $subtotal - $discountAmount;
-        $vatAmount = round($taxableAmount * ($vatRate / 100), 2);
-        $total = $taxableAmount + $vatAmount;
+        // Calculate amounts using admin-configurable VAT from PaymentSettings
+        // (falls back to 0 if no settings row exists yet).
+        $paymentSettings = PaymentSettings::first();
+        $discountAmount = (float) $discount;
+        $subtotal = (float) $subscription->price - $discountAmount;
+        $vatCalc = $paymentSettings?->calculateVat($subtotal)
+            ?? ['exclusive' => $subtotal, 'vat' => 0, 'total' => $subtotal];
+        $vatAmount = $vatCalc['vat'];
+        $total = $vatCalc['total'];
 
         // Create invoice
         $invoice = SubscriptionInvoice::create([
@@ -36,14 +39,15 @@ class SubscriptionInvoiceService
             'tenant_id' => $tenant->id,
             'invoice_number' => SubscriptionInvoice::generateNumber(),
             'subtotal' => $subtotal,
-            'vat_rate' => $vatRate,
-            'vat_amount' => $vatAmount,
+            // 2026_07_25_140000 migration collapsed vat_rate + vat_amount
+            // into a single `vat` column. Persist the amount; the rate is
+            // implicit in (vat / subtotal) and not stored separately.
+            'vat' => $vatAmount,
             'discount' => $discountAmount,
             'total' => $total,
             'status' => 'pending',
-            'due_date' => now()->addDays(7),
-            'is_installment' => false,
-            'installment_count' => 1,
+            'issued_at' => now(),
+            'due_at' => now()->addDays(7),
         ]);
 
         return $invoice;
@@ -55,15 +59,31 @@ class SubscriptionInvoiceService
     public function markAsPaid(
         SubscriptionInvoice $invoice,
         string $gateway,
-        string $reference,
+        ?string $reference = null,
         array $details = []
     ): SubscriptionInvoice {
+        // 2026_07_25_140000 migration dropped the payment_gateway /
+        // payment_reference / payment_details columns from
+        // subscription_invoices. The payment reference now lives on the
+        // SubscriptionPayment record (gateway_ref column). We append the
+        // admin-supplied reference to the invoice's free-form notes
+        // instead so it remains auditable.
+        $notes = $invoice->notes ? $invoice->notes."\n" : '';
+        $notes .= '[Marked paid] gateway='.$gateway;
+
+        if ($reference) {
+            $notes .= ', reference='.$reference;
+        }
+
+        if (! empty($details['notes'])) {
+            $notes .= ', '.$details['notes'];
+        }
+        $notes .= ' at '.now()->toIso8601String();
+
         $invoice->update([
             'status' => 'paid',
             'paid_at' => now(),
-            'payment_gateway' => $gateway,
-            'payment_reference' => $reference,
-            'payment_details' => $details,
+            'notes' => $notes,
         ]);
 
         return $invoice;

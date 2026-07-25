@@ -29,6 +29,7 @@ class Subscription extends Model
         'auto_renew',
         'promo_code',
         'discount_amount',
+        'price',
     ];
 
     protected function casts(): array

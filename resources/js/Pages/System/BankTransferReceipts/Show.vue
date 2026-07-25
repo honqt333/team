@@ -254,20 +254,12 @@ const isImage = computed(() => {
                                     {{ receipt.transfer_reference }}
                                 </span>
                             </div>
-                            <div v-if="receipt.sender_account_name" class="flex justify-between">
+                            <div v-if="receipt.account_name" class="flex justify-between">
                                 <span class="text-gray-600 dark:text-gray-300">
-                                    {{ locale === 'ar' ? 'اسم المرسل' : 'Sender' }}
+                                    {{ locale === 'ar' ? 'اسم صاحب الحساب' : 'Account holder' }}
                                 </span>
                                 <span class="text-gray-900 dark:text-white">
-                                    {{ receipt.sender_account_name }}
-                                </span>
-                            </div>
-                            <div v-if="receipt.sender_account_number" class="flex justify-between">
-                                <span class="text-gray-600 dark:text-gray-300">
-                                    {{ locale === 'ar' ? 'حساب المرسل' : 'Sender account' }}
-                                </span>
-                                <span class="font-mono text-gray-900 dark:text-white" dir="ltr">
-                                    {{ receipt.sender_account_number }}
+                                    {{ receipt.account_name }}
                                 </span>
                             </div>
                         </div>
@@ -302,7 +294,7 @@ const isImage = computed(() => {
                             {{ locale === 'ar' ? 'سجل المراجعة' : 'Review history' }}
                         </h2>
                         <p class="text-sm text-gray-700 dark:text-gray-300">
-                            <strong>{{ receipt.reviewer?.name || '—' }}</strong>
+                            <strong>{{ receipt.reviewer_name || '—' }}</strong>
                             <br />
                             <span class="text-xs text-gray-500">
                                 {{ formatDateTime(receipt.reviewed_at) }}

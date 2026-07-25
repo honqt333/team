@@ -48,13 +48,20 @@ class SubscriptionInvoicesController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        // Stats
+        // Stats — single query for all counts to avoid N+1 / multiple
+        // round-trips. The 2026_07_25_140000 migration renamed due_date
+        // to due_at, so the overdue filter was previously a silent no-op
+        // (column didn't exist in SQLite, no error in MySQL but 0 rows
+        // matched because the column literally wasn't there).
+        $today = now()->startOfDay();
+
         $stats = [
             'total' => SubscriptionInvoice::count(),
             'pending' => SubscriptionInvoice::where('status', 'pending')->count(),
             'paid' => SubscriptionInvoice::where('status', 'paid')->count(),
             'overdue' => SubscriptionInvoice::where('status', 'pending')
-                ->where('due_date', '<', now())->count(),
+                ->where('due_at', '<', $today)
+                ->count(),
             'total_revenue' => SubscriptionInvoice::where('status', 'paid')->sum('total'),
         ];
 

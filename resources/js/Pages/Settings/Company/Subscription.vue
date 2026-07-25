@@ -25,8 +25,18 @@ const subscribeModalOpen = ref(false);
 const selectedPlan = ref(null);
 
 const currentPlanId = computed(() => {
-    return props.current_subscription?.plan_id;
+    // Use the discriminator set by the controller. Real Subscription
+    // models from Eloquent return objects with no `kind` field at all,
+    // so we treat the absence of `kind === 'virtual_trial'` as "real
+    // subscription, has a plan_id" and `kind === 'virtual_trial'` as
+    // "no plan, the tenant is in trial".
+    if (props.current_subscription?.kind === 'virtual_trial') {
+        return null;
+    }
+    return props.current_subscription?.plan_id ?? null;
 });
+
+const isVirtualTrial = computed(() => props.current_subscription?.kind === 'virtual_trial');
 
 const hasPendingSubscription = computed(() => {
     return ['pending', 'pending_payment'].includes(props.current_subscription?.status);
@@ -131,25 +141,46 @@ const gatewayLabels = {
                             }}
                         </p>
                     </div>
-                    <a
-                        href="/app/settings/company"
-                        class="inline-flex items-center gap-1 self-start rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-                    >
-                        <svg
-                            class="h-3.5 w-3.5 rtl:rotate-180"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a
+                            href="/app/settings/company/subscription/receipts"
+                            class="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                         >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                            />
-                        </svg>
-                        {{ locale === 'ar' ? 'العودة للإعدادات' : 'Back to settings' }}
-                    </a>
+                            <svg
+                                class="h-3.5 w-3.5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            {{ locale === 'ar' ? 'إيصالاتي' : 'My receipts' }}
+                        </a>
+                        <a
+                            href="/app/settings/company"
+                            class="inline-flex items-center gap-1 self-start rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                        >
+                            <svg
+                                class="h-3.5 w-3.5 rtl:rotate-180"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                                />
+                            </svg>
+                            {{ locale === 'ar' ? 'العودة للإعدادات' : 'Back to settings' }}
+                        </a>
+                    </div>
                 </div>
             </div>
 

@@ -4,40 +4,56 @@
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">فواتير الاشتراكات</h1>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                        فواتير الاشتراكات
+                    </h1>
                     <p class="text-gray-500 dark:text-gray-400">إدارة ومتابعة فواتير المستأجرين</p>
                 </div>
             </div>
-            
+
             <!-- Stats -->
             <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.total }}</p>
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                >
+                    <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                        {{ stats.total }}
+                    </p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">إجمالي الفواتير</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                >
                     <p class="text-2xl font-bold text-amber-600">{{ stats.pending }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">معلقة</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                >
                     <p class="text-2xl font-bold text-emerald-600">{{ stats.paid }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">مدفوعة</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                >
                     <p class="text-2xl font-bold text-red-600">{{ stats.overdue }}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">متأخرة</p>
                 </div>
-                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                    <p class="text-2xl font-bold text-indigo-600">{{ formatCurrency(stats.total_revenue) }}</p>
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700"
+                >
+                    <p class="text-2xl font-bold text-indigo-600">
+                        {{ formatCurrency(stats.total_revenue) }}
+                    </p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">الإيرادات</p>
                 </div>
             </div>
-            
+
             <!-- Filters -->
             <div class="flex flex-wrap gap-4 items-center">
-                <input 
-                    type="text" 
-                    v-model="search" 
+                <input
+                    type="text"
+                    v-model="search"
                     placeholder="بحث برقم الفاتورة أو اسم المستأجر..."
                     class="flex-1 min-w-[200px] rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                     @keyup.enter="applyFilters"
@@ -51,68 +67,126 @@
                     compact
                 />
             </div>
-            
+
             <!-- Table -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+            >
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700/50">
                         <tr>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">رقم الفاتورة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">المستأجر</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">المبلغ</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الاستحقاق</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الحالة</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle">الإجراءات</th>
+                            <th
+                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                            >
+                                رقم الفاتورة
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                            >
+                                المستأجر
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                            >
+                                المبلغ
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                            >
+                                الاستحقاق
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                            >
+                                الحالة
+                            </th>
+                            <th
+                                class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 align-middle"
+                            >
+                                الإجراءات
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr v-for="invoice in invoices.data" :key="invoice.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <tr
+                            v-for="invoice in invoices.data"
+                            :key="invoice.id"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        >
                             <td class="px-4 py-3 align-middle">
-                                <span class="font-mono text-sm text-gray-900 dark:text-white">{{ invoice.invoice_number }}</span>
-                            </td>
-                            <td class="px-4 py-3 align-middle">
-                                <span class="text-gray-900 dark:text-white">{{ invoice.tenant?.trade_name || '-' }}</span>
-                            </td>
-                            <td class="px-4 py-3 align-middle">
-                                <span class="font-semibold text-gray-900 dark:text-white">{{ formatCurrency(invoice.total) }}</span>
-                            </td>
-                            <td class="px-4 py-3 align-middle">
-                                <span :class="isOverdue(invoice) ? 'text-red-600' : 'text-gray-500 dark:text-gray-400'">
-                                    {{ formatDate(invoice.due_date) }}
+                                <span class="font-mono text-sm text-gray-900 dark:text-white">
+                                    {{ invoice.invoice_number }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 align-middle">
-                                <span :class="getStatusClass(invoice.status)" class="px-2 py-1 rounded-full text-xs font-medium">
+                                <span class="text-gray-900 dark:text-white">
+                                    {{ invoice.tenant?.trade_name || '-' }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span class="font-semibold text-gray-900 dark:text-white">
+                                    {{ formatCurrency(invoice.total) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span
+                                    :class="
+                                        isOverdue(invoice)
+                                            ? 'text-red-600'
+                                            : 'text-gray-500 dark:text-gray-400'
+                                    "
+                                >
+                                    {{ formatDate(invoice.due_at) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 align-middle">
+                                <span
+                                    :class="getStatusClass(invoice.status)"
+                                    class="px-2 py-1 rounded-full text-xs font-medium"
+                                >
                                     {{ getStatusLabel(invoice.status) }}
                                 </span>
                             </td>
                             <td class="px-4 py-3 align-middle">
                                 <div class="flex gap-2">
-                                    <a :href="`/system/invoices/${invoice.id}`" class="text-indigo-600 hover:text-indigo-800 text-sm">عرض</a>
-                                    <a :href="`/system/invoices/${invoice.id}/download`" class="text-gray-600 hover:text-gray-800 text-sm">PDF</a>
+                                    <a
+                                        :href="`/system/invoices/${invoice.id}`"
+                                        class="text-indigo-600 hover:text-indigo-800 text-sm"
+                                    >
+                                        عرض
+                                    </a>
+                                    <a
+                                        :href="`/system/invoices/${invoice.id}/download`"
+                                        class="text-gray-600 hover:text-gray-800 text-sm"
+                                    >
+                                        PDF
+                                    </a>
                                 </div>
                             </td>
                         </tr>
                         <tr v-if="!invoices.data?.length">
-                            <td colspan="6" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 align-middle">
+                            <td
+                                colspan="6"
+                                class="px-4 py-8 text-center text-gray-500 dark:text-gray-400 align-middle"
+                            >
                                 لا توجد فواتير
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            
+
             <!-- Pagination -->
             <div v-if="invoices.last_page > 1" class="flex justify-center gap-2">
-                <Link 
-                    v-for="page in invoices.last_page" 
+                <Link
+                    v-for="page in invoices.last_page"
                     :key="page"
                     :href="`/system/invoices?page=${page}`"
                     :class="[
                         'px-3 py-1 rounded text-sm',
                         page === invoices.current_page
                             ? 'bg-indigo-600 text-white'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
                     ]"
                 >
                     {{ page }}
@@ -144,14 +218,20 @@ const search = ref(props.filters?.search || '');
 const status = ref(props.filters?.status || '');
 
 const applyFilters = () => {
-    router.get('/system/invoices', {
-        search: search.value || undefined,
-        status: status.value || undefined,
-    }, { preserveState: true });
+    router.get(
+        '/system/invoices',
+        {
+            search: search.value || undefined,
+            status: status.value || undefined,
+        },
+        { preserveState: true }
+    );
 };
 
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
+        amount || 0
+    );
 };
 
 const formatDate = (date) => {
@@ -160,7 +240,7 @@ const formatDate = (date) => {
 };
 
 const isOverdue = (invoice) => {
-    return invoice.status === 'pending' && new Date(invoice.due_date) < new Date();
+    return invoice.status === 'pending' && new Date(invoice.due_at) < new Date();
 };
 
 const getStatusClass = (status) => {

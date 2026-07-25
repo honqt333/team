@@ -43,6 +43,14 @@ class CompanySubscriptionController extends Controller
 
         // Filter gateways that are admin-enabled
         $enabledGateways = collect($availableGateways)->filter(function ($gateway) use ($paymentSettings) {
+            // bank_transfer is configured as a single boolean toggle on
+            // PaymentSettings, not as a per-key array like Moyasar/Tap.
+            // Treat it as its own case so it surfaces in the
+            // enabled_gateways list and the SubscribeModal renders it.
+            if ($gateway['name'] === 'bank_transfer') {
+                return (bool) $paymentSettings->bank_transfer_enabled;
+            }
+
             $config = match ($gateway['name']) {
                 'moyasar' => $paymentSettings->moyasar,
                 'tap' => $paymentSettings->tap,
@@ -67,7 +75,12 @@ class CompanySubscriptionController extends Controller
             $trialStarts = $tenant->created_at;
             $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
             $currentSubscription = [
+                // Discriminator: lets the frontend tell a real Subscription
+                // model apart from this virtual placeholder without relying
+                // on missing field conventions (e.g. plan_id == null).
+                'kind' => 'virtual_trial',
                 'id' => 'trial-virtual',
+                'plan_id' => null,
                 'status' => $trialEnds->isFuture() ? 'trial' : 'expired',
                 'billing_cycle' => 'yearly',
                 'starts_at' => $trialStarts->toIso8601String(),
@@ -92,9 +105,20 @@ class CompanySubscriptionController extends Controller
                 return $plan;
             });
 
-        // Subscription history
+        // Subscription history — past subscriptions only. The current
+        // subscription (whatever its status) is shown separately in
+        // SubscriptionCard so the history list should not include it
+        // again. We treat all non-final statuses as "current" (active,
+        // trial, trialing, pending, pending_payment) and only show
+        // cancelled / expired / refunded here.
+        $currentSubId = $currentSubscription && ! is_array($currentSubscription)
+            ? $currentSubscription->id
+            : null;
+
         $subscriptionHistory = $tenant->subscriptions()
             ->with(['plan', 'invoices.payments'])
+            ->when($currentSubId, fn ($q) => $q->where('id', '!=', $currentSubId))
+            ->whereIn('status', ['cancelled', 'expired', 'refunded'])
             ->orderByDesc('created_at')
             ->limit(20)
             ->get();
@@ -106,9 +130,15 @@ class CompanySubscriptionController extends Controller
             ->limit(10)
             ->get();
 
-        // Pending bank transfer receipts (awaiting admin review)
+        // Pending bank transfer receipts (awaiting admin review).
+        // Exclude receipts attached to the current in-flight subscription
+        // so we don't show the same receipt twice — once in the
+        // SubscriptionCard (status=pending_payment) and again here.
         $pendingReceipts = BankTransferReceipt::where('tenant_id', $tenant->id)
             ->where('status', 'pending')
+            ->when($currentSubId, function ($q) use ($currentSubId) {
+                $q->where('subscription_id', '!=', $currentSubId);
+            })
             ->with('subscription.plan')
             ->orderByDesc('created_at')
             ->get();
@@ -398,16 +428,63 @@ class CompanySubscriptionController extends Controller
             // up. By initiating first and rolling back on gateway error,
             // the tenant never sees a "pending" subscription unless the
             // gateway actually accepted the payment request.
-            $formData = $this->paymentManager->initiate([
-                'amount' => $total,
-                'currency' => 'SAR',
-                'description' => "اشتراك {$plan->name_ar} - {$tenant->trade_name}",
-                'callback_url' => route('app.subscription.callback', ['payment' => '__PAYMENT_ID__']),
-                'metadata' => [
-                    'plan_id' => $plan->id,
+            try {
+                $formData = $this->paymentManager->initiate([
+                    'amount' => $total,
+                    'currency' => 'SAR',
+                    'description' => "اشتراك {$plan->name_ar} - {$tenant->trade_name}",
+                    'callback_url' => route('app.subscription.callback', ['payment' => '__PAYMENT_ID__']),
+                    'metadata' => [
+                        'plan_id' => $plan->id,
+                        'tenant_id' => $tenant->id,
+                    ],
+                ], $validated['gateway']);
+            } catch (Throwable $e) {
+                // Gateway call threw — roll back the orphan subscription
+                // and invoice we just created so the tenant doesn't see
+                // a "pending" sub the admin has to clean up.
+                DB::rollBack();
+                Log::error('Payment gateway initiate threw', [
                     'tenant_id' => $tenant->id,
-                ],
-            ], $validated['gateway']);
+                    'plan_id' => $plan->id,
+                    'gateway' => $validated['gateway'],
+                    'error' => $e->getMessage(),
+                ]);
+
+                return response()->json([
+                    'error' => __('company_profile.subscription.gateway_unavailable', [
+                        'default' => 'بوابة الدفع غير متاحة حالياً، حاول مرة أخرى',
+                    ]),
+                ], 502);
+            }
+
+            // Some gateways (e.g. Tabby, Tamara) return a "soft" failure
+            // without throwing — they return form_data with status=rejected
+            // or no payment_id at all. Treat that as a failure too.
+            if (! is_array($formData) || empty($formData)) {
+                DB::rollBack();
+
+                return response()->json([
+                    'error' => __('company_profile.subscription.gateway_unavailable', [
+                        'default' => 'بوابة الدفع لم ترد، حاول مرة أخرى',
+                    ]),
+                ], 502);
+            }
+
+            $gatewayStatus = $formData['status'] ?? null;
+            $allowedGatewayStatuses = ['initiated', 'pending', 'created', 'open', null];
+
+            if ($gatewayStatus !== null && ! in_array($gatewayStatus, $allowedGatewayStatuses, true)) {
+                DB::rollBack();
+
+                return response()->json([
+                    'error' => $formData['rejection']
+                        ?? $formData['message']
+                        ?? __('company_profile.subscription.gateway_rejected', [
+                            'default' => 'تم رفض طلب الدفع من البوابة',
+                        ]),
+                ], 402);
+            }
 
             // Gateway accepted the payment request. Now atomically
             // create Subscription + Invoice + Payment. The placeholder
@@ -685,10 +762,23 @@ class CompanySubscriptionController extends Controller
             ->first();
 
         if ($existingPending) {
-            return response()->json([
-                'error' => __('company_profile.subscription.already_pending', [
+            // Same UX as subscribe(): distinguish between `pending`
+            // (payment in flight) and `pending_payment` (receipt
+            // awaiting admin approval).
+            $message = $existingPending->status === 'pending_payment'
+                ? __('company_profile.subscription.receipt_under_review', [
                     'plan' => $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en,
-                ]),
+                    'default' => 'إيصال تحويل بنكي لـ ":plan" قيد المراجعة من الإدارة. انتظر الموافقة أو ألغِ الطلب الحالي.',
+                ])
+                : __('company_profile.subscription.payment_in_progress', [
+                    'plan' => $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en,
+                    'default' => 'لديك طلب دفع جارٍ لـ ":plan" — أكمل الدفع أو ألغِه قبل رفع إيصال جديد.',
+                ]);
+
+            return response()->json([
+                'error' => $message,
+                'pending_status' => $existingPending->status,
+                'pending_subscription_id' => $existingPending->id,
             ], 409);
         }
 

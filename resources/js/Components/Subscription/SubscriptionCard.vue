@@ -24,9 +24,24 @@ const statusConfig = {
         class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     },
     pending: {
-        label_ar: 'معلق',
-        label_en: 'Pending',
+        label_ar: 'بانتظار الدفع',
+        label_en: 'Awaiting payment',
         class: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+    },
+    pending_payment: {
+        label_ar: 'قيد المراجعة',
+        label_en: 'Under review',
+        class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+    },
+    payment_required: {
+        label_ar: 'الدفع مطلوب',
+        label_en: 'Payment required',
+        class: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+    },
+    failed: {
+        label_ar: 'فشل الدفع',
+        label_en: 'Payment failed',
+        class: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
     },
     cancelled: {
         label_ar: 'ملغي',
@@ -37,6 +52,11 @@ const statusConfig = {
         label_ar: 'منتهي',
         label_en: 'Expired',
         class: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+    },
+    refunded: {
+        label_ar: 'مسترجع',
+        label_en: 'Refunded',
+        class: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
     },
 };
 
@@ -56,6 +76,23 @@ const daysLeft = computed(() => {
     const now = new Date();
     const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
     return diff > 0 ? diff : 0;
+});
+
+// Subscription price fallback: legacy subscriptions created before
+// the 'price' column was added in 2026_07_21 (and backfilled in
+// 2026_07_25_150000) may have price=0 even though the plan has a real
+// price. If the subscription's own price is 0 (or missing), look up
+// the plan's price_monthly/price_yearly. The plan is eager-loaded by
+// the controller, so no extra request is needed.
+const effectivePrice = computed(() => {
+    const sub = props.subscription;
+    if (!sub) return 0;
+    if (sub.price && Number(sub.price) > 0) return Number(sub.price);
+    const plan = sub.plan;
+    if (!plan) return 0;
+    return sub.billing_cycle === 'yearly'
+        ? Number(plan.price_yearly || 0)
+        : Number(plan.price_monthly || 0);
 });
 
 const formatDate = (dateStr) => {
@@ -118,7 +155,7 @@ const formatCurrency = (amount) => {
                     {{ locale === 'ar' ? 'سعر الاشتراك' : 'Price' }}
                 </p>
                 <p class="mt-1 text-3xl font-black text-slate-900 dark:text-white">
-                    {{ formatCurrency(subscription.price) }}
+                    {{ formatCurrency(effectivePrice) }}
                     <span class="text-base font-normal text-slate-500">SAR</span>
                 </p>
                 <p class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
