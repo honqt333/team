@@ -205,18 +205,12 @@ class SubscriptionInvoicesController extends Controller
                             'review_notes' => 'Invoice #'.$invoice->invoice_number.' cancelled by admin — receipt superseded.',
                         ]);
 
-                    // Suspend the tenant only if they have no other
-                    // active subscription — preserves multi-tenant
-                    // edge cases where the user is still on another
-                    // plan.
-                    $hasOtherActive = $subscription->tenant->subscriptions()
-                        ->where('id', '!=', $subscription->id)
-                        ->whereIn('status', ['active', 'trial', 'trialing'])
-                        ->exists();
-
-                    if (! $hasOtherActive) {
-                        $subscription->tenant->update(['status' => 'suspended']);
-                    }
+                    // NOTE: We deliberately do NOT change tenant.status
+                    // here. Cancelling an invoice is not the same as
+                    // suspending the tenant — they may have other
+                    // subscriptions, or the admin may have clicked
+                    // cancel by mistake. Tenant suspension is a
+                    // separate, explicit action in the tenant UI.
                 }
             }
         });

@@ -202,7 +202,12 @@ class SubscriptionsController extends Controller
                 'review_notes' => 'Subscription cancelled by admin — receipt superseded.',
             ]);
 
-        $subscription->tenant->update(['status' => 'suspended']);
+        // NOTE: We deliberately do NOT change tenant.status here.
+        // Cancelling a subscription shouldn't lock the tenant out of the
+        // app — they may have multiple workspaces/subscriptions, or the
+        // admin may have just clicked cancel by mistake and the tenant
+        // should still be able to re-subscribe. Tenant suspension is a
+        // separate, explicit action.
 
         return back()->with('success', 'تم إلغاء الاشتراك');
     }
@@ -224,6 +229,14 @@ class SubscriptionsController extends Controller
 
     /**
      * Extend subscription.
+     *
+     * Extending a cancelled subscription used to silently re-activate
+     * it (line removed: the controller was treating 'cancelled' as
+     * "should be re-activated when extended" which is wrong — a
+     * cancelled sub is intentionally off). Now we just bump the
+     * ends_at and leave the status as-is. If the admin wants to
+     * re-activate a cancelled sub, that's a separate explicit action
+     * (the activate() endpoint below).
      */
     public function extend(Request $request, Subscription $subscription)
     {
@@ -231,18 +244,14 @@ class SubscriptionsController extends Controller
             'days' => 'required|integer|min:1|max:365',
         ]);
 
-        $newStatus = $subscription->status;
-
-        if (in_array($subscription->status, ['expired', 'suspended', 'cancelled'])) {
-            $newStatus = ($subscription->plan && $subscription->plan->slug === 'trial') ? 'trialing' : 'active';
-        }
-
         $subscription->update([
             'ends_at' => $subscription->ends_at->addDays($validated['days']),
-            'status' => $newStatus,
+            // status intentionally not touched
         ]);
 
-        // Sync tenant status and dates
+        // Sync tenant status — if the sub is currently active/trialing
+        // the tenant is too; cancelled/expired doesn't touch the tenant.
+        $newStatus = $subscription->fresh()->status;
         $tenantStatus = ($newStatus === 'trialing') ? 'trial' : 'active';
         $tenantUpdate = ['status' => $tenantStatus];
 
