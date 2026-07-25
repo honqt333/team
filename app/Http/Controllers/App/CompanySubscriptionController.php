@@ -357,12 +357,12 @@ class CompanySubscriptionController extends Controller
                 'tenant_id' => $tenant->id,
                 'invoice_number' => 'SUB-'.str_pad((string) $subscription->id, 6, '0', STR_PAD_LEFT).'-'.now()->format('Ymd'),
                 'subtotal' => $subtotal,
-                'vat_rate' => $vatRate ?? 0,
-                'vat_amount' => $vatAmount,
+                'vat' => $vatAmount, // single combined VAT column in DB
                 'discount' => $discount,
                 'total' => $total,
                 'status' => 'pending',
-                'due_date' => now()->addDays(7),
+                'issued_at' => now(),
+                'due_at' => now()->addDays(7),
             ]);
 
             // Handle bank transfer (no gateway call)

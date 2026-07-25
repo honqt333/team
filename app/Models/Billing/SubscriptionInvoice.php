@@ -20,32 +20,26 @@ class SubscriptionInvoice extends Model
         'tenant_id',
         'invoice_number',
         'subtotal',
-        'vat_rate',
-        'vat_amount',
+        'vat',
         'discount',
         'total',
         'status',
-        'due_date',
+        'issued_at',
+        'due_at',
         'paid_at',
-        'payment_gateway',
-        'payment_reference',
-        'payment_details',
-        'is_installment',
-        'installment_count',
+        'notes',
     ];
 
     protected function casts(): array
     {
         return [
             'subtotal' => 'decimal:2',
-            'vat_rate' => 'decimal:2',
-            'vat_amount' => 'decimal:2',
+            'vat' => 'decimal:2',
             'discount' => 'decimal:2',
             'total' => 'decimal:2',
-            'due_date' => 'date',
+            'issued_at' => 'datetime',
+            'due_at' => 'datetime',
             'paid_at' => 'datetime',
-            'payment_details' => 'array',
-            'is_installment' => 'boolean',
         ];
     }
 
@@ -82,7 +76,7 @@ class SubscriptionInvoice extends Model
      */
     public function isOverdue(): bool
     {
-        return $this->status === 'pending' && $this->due_date->isPast();
+        return $this->status === 'pending' && $this->due_at?->isPast();
     }
 
     /**
