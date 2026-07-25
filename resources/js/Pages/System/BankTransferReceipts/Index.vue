@@ -51,6 +51,15 @@ function formatDate(dateStr) {
 function formatCurrency(amount) {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(amount || 0);
 }
+
+// Heuristic: receipt_path has no extension info, but the original
+// Laravel upload keeps the original filename's extension in the
+// storage path. Check if the extension is one of the image formats.
+function isImage(receipt) {
+    if (!receipt?.receipt_path) return false;
+    const path = receipt.receipt_path.toLowerCase();
+    return /\.(jpe?g|png|webp|gif|bmp)$/.test(path);
+}
 </script>
 
 <template>
@@ -223,15 +232,50 @@ function formatCurrency(amount) {
                             class="hover:bg-gray-50/50 dark:hover:bg-gray-800/30"
                         >
                             <td class="px-4 py-3">
-                                <p class="font-semibold text-gray-900 dark:text-white">
-                                    {{ r.tenant?.trade_name || r.tenant?.name || '—' }}
-                                </p>
-                                <p
-                                    v-if="r.transfer_reference"
-                                    class="mt-0.5 font-mono text-xs text-gray-500"
-                                >
-                                    {{ r.transfer_reference }}
-                                </p>
+                                <div class="flex items-center gap-3">
+                                    <!-- Thumbnail of the uploaded receipt -->
+                                    <div
+                                        v-if="r.receipt_path"
+                                        class="h-10 w-10 flex-shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
+                                    >
+                                        <img
+                                            v-if="isImage(r)"
+                                            :src="`/storage/${r.receipt_path}`"
+                                            :alt="`receipt-${r.id}`"
+                                            class="h-full w-full object-cover"
+                                            loading="lazy"
+                                        />
+                                        <div
+                                            v-else
+                                            class="flex h-full w-full items-center justify-center text-gray-400"
+                                        >
+                                            <svg
+                                                class="h-5 w-5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <p class="font-semibold text-gray-900 dark:text-white">
+                                            {{ r.tenant?.trade_name || r.tenant?.name || '—' }}
+                                        </p>
+                                        <p
+                                            v-if="r.transfer_reference"
+                                            class="mt-0.5 font-mono text-xs text-gray-500"
+                                        >
+                                            {{ r.transfer_reference }}
+                                        </p>
+                                    </div>
+                                </div>
                             </td>
                             <td class="px-4 py-3 text-gray-700 dark:text-gray-200">
                                 {{
