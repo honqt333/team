@@ -113,7 +113,18 @@ async function subscribe() {
             return;
         }
 
+        if (data.bank_transfer_setup) {
+            // The controller returned a setup payload (not a subscription
+            // yet) — the tenant still has to upload a receipt before any
+            // subscription is recorded. Pass the setup data to the upload
+            // component so it knows what plan/price/bank accounts to show.
+            bankTransferResult.value = data;
+            return;
+        }
+
         if (data.bank_transfer) {
+            // Backwards-compat: if the old field is present (shouldn't be
+            // with the new controller), still treat it as a setup payload.
             bankTransferResult.value = data;
             return;
         }
@@ -295,7 +306,7 @@ const formatCurrency = (amount) => {
                     </div>
 
                     <BankTransferReceiptUpload
-                        :subscription="bankTransferResult.subscription"
+                        :setup="bankTransferResult"
                         :payment-settings="paymentSettings"
                         :vat-settings="vatSettings"
                         @success="onReceiptUploaded"

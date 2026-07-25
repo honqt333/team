@@ -199,6 +199,7 @@ return [
     // Subscription management (self-service)
     'subscription' => [
         'bank_transfer_pending' => 'Your bank transfer subscription request has been received. Your subscription will be activated once the transfer is verified.',
+        'bank_transfer_setup_ready' => 'Transfer details are ready. Transfer the amount, then upload the receipt to activate your subscription.',
         'cancelled' => 'Your subscription has been cancelled',
         'create_failed' => 'Failed to create subscription. Please try again.',
         'expired' => 'This subscription has expired',

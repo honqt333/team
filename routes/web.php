@@ -338,6 +338,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/cancel/{subscription}', [CompanySubscriptionController::class, 'cancel'])->name('cancel');
         Route::post('/resume/{subscription}', [CompanySubscriptionController::class, 'resume'])->name('resume');
         Route::post('/auto-renew/{subscription}', [CompanySubscriptionController::class, 'toggleAutoRenew'])->name('auto-renew');
+        // Create new subscription + invoice + receipt from a bank
+        // transfer upload (atomic — no pre-existing subscription needed).
+        Route::post('/bank-transfer-receipt', [CompanySubscriptionController::class, 'uploadBankTransferReceipt'])->name('receipt.bank_transfer');
+        // Legacy: attach a receipt to an already-existing subscription.
+        // Kept for backwards-compat with any external links.
         Route::post('/receipt/{subscription}', [CompanySubscriptionController::class, 'uploadReceipt'])->name('receipt.upload');
         Route::get('/receipts', [CompanySubscriptionController::class, 'myReceipts'])->name('receipts');
     });

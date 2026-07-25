@@ -3,7 +3,10 @@ import { ref, computed, watch } from 'vue';
 import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
-    subscription: { type: Object, default: null },
+    // The setup payload from subscribe() — contains plan, billing_cycle,
+    // promo_code, price, VAT, and bank account list. No subscription
+    // exists yet — it's created atomically when the receipt is uploaded.
+    setup: { type: Object, required: true },
     paymentSettings: { type: Object, default: () => ({}) },
     vatSettings: { type: Object, default: () => ({ enabled: false, rate: 0, inclusive: false }) },
 });
@@ -18,8 +21,7 @@ const form = ref({
     transfer_date: new Date().toISOString().slice(0, 10),
     transfer_reference: '',
     bank_name: '',
-    sender_account_name: '',
-    sender_account_number: '',
+    account_name: '',
 });
 
 const fileInput = ref(null);
@@ -31,18 +33,10 @@ const maxFileSize = 5; // MB
 const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
 const defaultAmount = computed(() => {
-    if (!props.subscription?.price) return 0;
-    const price = parseFloat(props.subscription.price);
-    if (props.vatSettings?.enabled && props.vatSettings.rate > 0) {
-        const rate = props.vatSettings.rate / 100;
-        if (props.vatSettings.inclusive) {
-            // VAT is inside the price — display price as-is
-            return price.toFixed(2);
-        }
-        // Exclusive — add VAT on top
-        return (price * (1 + rate)).toFixed(2);
-    }
-    return price.toFixed(2);
+    if (!props.setup?.total) return 0;
+    // The controller pre-computes the total (subtotal + VAT) so we
+    // display exactly what the tenant needs to transfer.
+    return Number(props.setup.total).toFixed(2);
 });
 
 function pickFile() {
@@ -106,23 +100,30 @@ async function submit() {
         if (form.value.transfer_reference)
             data.append('transfer_reference', form.value.transfer_reference);
         if (form.value.bank_name) data.append('bank_name', form.value.bank_name);
-        if (form.value.sender_account_name)
-            data.append('sender_account_name', form.value.sender_account_name);
-        if (form.value.sender_account_number)
-            data.append('sender_account_number', form.value.sender_account_number);
+        if (form.value.account_name) data.append('account_name', form.value.account_name);
 
-        const response = await fetch(
-            `/app/settings/company/subscription/receipt/${props.subscription.id}`,
-            {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                    Accept: 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: data,
-            }
-        );
+        // Send the plan/cycle/promo from the setup payload so the
+        // server can atomically create subscription + invoice + payment
+        // + receipt in one transaction. No pre-existing subscription.
+        if (props.setup?.plan?.id) {
+            data.append('plan_id', props.setup.plan.id);
+        }
+        if (props.setup?.billing_cycle) {
+            data.append('billing_cycle', props.setup.billing_cycle);
+        }
+        if (props.setup?.promo_code) {
+            data.append('promo_code', props.setup.promo_code);
+        }
+
+        const response = await fetch('/app/settings/company/subscription/bank-transfer-receipt', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: data,
+        });
 
         const result = await response.json();
         if (response.ok) {
@@ -134,7 +135,7 @@ async function submit() {
                 );
             }
             error.value =
-                result.message || (locale.value === 'ar' ? 'فشل رفع الإيصال' : 'Upload failed');
+                result.error || (locale.value === 'ar' ? 'فشل رفع الإيصال' : 'Upload failed');
         }
     } catch (e) {
         error.value = locale.value === 'ar' ? 'حدث خطأ' : 'Error occurred';
@@ -312,20 +313,23 @@ async function submit() {
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'اسم المرسل' : 'Sender name' }}
+                    {{ locale === 'ar' ? 'اسم صاحب الحساب' : 'Account holder name' }}
                 </label>
                 <input
-                    v-model="form.sender_account_name"
+                    v-model="form.account_name"
                     type="text"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                 />
             </div>
             <div>
+                <!-- (account_number field removed; not in current schema) -->
+            </div>
+            <div>
                 <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'حساب المرسل' : 'Sender account' }}
+                    {{ locale === 'ar' ? 'رقم الحساب (اختياري)' : 'Account number (optional)' }}
                 </label>
                 <input
-                    v-model="form.sender_account_number"
+                    v-model="form.account_number"
                     type="text"
                     dir="ltr"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
