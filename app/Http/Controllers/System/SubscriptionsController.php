@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Tenant;
@@ -165,6 +166,15 @@ class SubscriptionsController extends Controller
 
     /**
      * Cancel subscription.
+     *
+     * Also cascades to:
+     *   - the open invoice (mark as cancelled so the tenant doesn't see
+     *     a stale "pending" invoice on their subscription page)
+     *   - any pending bank transfer receipts (mark as superseded so
+     *     they fall off the "under review" list and an admin who
+     *     accidentally approves one later won't activate a cancelled sub)
+     *   - the tenant status (suspended — they keep their data but
+     *     can't use the app until they re-subscribe)
      */
     public function cancel(Subscription $subscription)
     {
@@ -172,6 +182,25 @@ class SubscriptionsController extends Controller
             'status' => 'cancelled',
             'cancelled_at' => now(),
         ]);
+
+        // Close any open invoices on this subscription. Without this the
+        // tenant's subscription page would still show a "pending" invoice
+        // even after the admin cancels — confusing for both sides.
+        $subscription->invoices()
+            ->whereIn('status', ['pending', 'pending_payment'])
+            ->update(['status' => 'cancelled']);
+
+        // Mark any pending bank transfer receipts as superseded so the
+        // admin queue doesn't keep them and so any approval after the
+        // cancel doesn't accidentally re-activate this subscription.
+        BankTransferReceipt::where('subscription_id', $subscription->id)
+            ->where('status', 'pending')
+            ->update([
+                'status' => 'superseded',
+                'reviewed_by' => auth('admin')->id(),
+                'reviewed_at' => now(),
+                'review_notes' => 'Subscription cancelled by admin — receipt superseded.',
+            ]);
 
         $subscription->tenant->update(['status' => 'suspended']);
 
