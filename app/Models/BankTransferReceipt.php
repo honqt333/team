@@ -23,8 +23,7 @@ class BankTransferReceipt extends Model
         'transfer_reference',
         'transfer_date',
         'bank_name',
-        'sender_account_name',
-        'sender_account_number',
+        'account_name',
         'receipt_path',
         'receipt_filename',
         'receipt_mime_type',
@@ -33,6 +32,7 @@ class BankTransferReceipt extends Model
         'reviewed_by',
         'reviewed_at',
         'review_notes',
+        'notes',
     ];
 
     protected function casts(): array

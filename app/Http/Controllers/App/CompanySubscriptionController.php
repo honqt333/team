@@ -54,9 +54,10 @@ class CompanySubscriptionController extends Controller
             return $config && ($config['enabled'] ?? false);
         })->values()->all();
 
-        // Current subscription
+        // Current subscription — include pending/pending_payment so the
+        // tenant sees their in-flight subscription instead of an empty card.
         $currentSubscription = $tenant->subscriptions()
-            ->whereIn('status', ['active', 'trial', 'trialing', 'cancelled', 'expired'])
+            ->whereIn('status', ['active', 'trial', 'trialing', 'cancelled', 'expired', 'pending', 'pending_payment'])
             ->with('plan')
             ->orderByDesc('created_at')
             ->first();
@@ -105,11 +106,19 @@ class CompanySubscriptionController extends Controller
             ->limit(10)
             ->get();
 
+        // Pending bank transfer receipts (awaiting admin review)
+        $pendingReceipts = BankTransferReceipt::where('tenant_id', $tenant->id)
+            ->where('status', 'pending')
+            ->with('subscription.plan')
+            ->orderByDesc('created_at')
+            ->get();
+
         return Inertia::render('Settings/Company/Subscription', [
             'current_subscription' => $currentSubscription,
             'available_plans' => $plans,
             'subscription_history' => $subscriptionHistory,
             'recent_payments' => $recentPayments,
+            'pending_receipts' => $pendingReceipts,
             'enabled_gateways' => $enabledGateways,
             'payment_settings' => [
                 'default_gateway' => $paymentSettings->default_gateway,
@@ -263,6 +272,24 @@ class CompanySubscriptionController extends Controller
         $basePrice = $validated['billing_cycle'] === 'yearly'
             ? (float) $plan->price_yearly
             : (float) $plan->price_monthly;
+
+        // Guard: reject if the tenant already has an in-flight subscription.
+        // Without this, every click on "Subscribe now" creates a new pending
+        // subscription, payment, and (for bank transfer) receipt — so the
+        // history table fills with duplicate "pending" rows for the same
+        // tenant until they realize nothing's working.
+        $existingPending = $tenant->subscriptions()
+            ->whereIn('status', ['pending', 'pending_payment'])
+            ->latest()
+            ->first();
+
+        if ($existingPending) {
+            return response()->json([
+                'error' => __('company_profile.subscription.already_pending', [
+                    'plan' => $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en,
+                ]),
+            ], 409);
+        }
 
         // Apply promo
         $discount = 0;

@@ -28,7 +28,17 @@ const currentPlanId = computed(() => {
     return props.current_subscription?.plan_id;
 });
 
+const hasPendingSubscription = computed(() => {
+    return ['pending', 'pending_payment'].includes(props.current_subscription?.status);
+});
+
 function openSubscribe(plan) {
+    // Guard: refuse to open the modal if the tenant already has an in-flight
+    // subscription. Defense in depth — the controller also rejects, but this
+    // gives instant feedback in the UI.
+    if (hasPendingSubscription.value) {
+        return;
+    }
     selectedPlan.value = plan;
     subscribeModalOpen.value = true;
 }
@@ -167,6 +177,7 @@ const gatewayLabels = {
                         :key="plan.id"
                         :plan="plan"
                         :is-current="currentPlanId === plan.id"
+                        :has-pending-subscription="hasPendingSubscription"
                         @subscribe="openSubscribe"
                     />
                 </div>
