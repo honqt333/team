@@ -14,29 +14,31 @@ class Installment extends Model
     use HasFactory, TenantScoped;
 
     protected $fillable = [
-        'subscription_invoice_id',
+        'subscription_id',
         'tenant_id',
         'installment_number',
         'amount',
         'due_date',
         'status',
-        'paid_at',
-        'payment_gateway',
-        'payment_reference',
+        'paid_date',
+        'paid_amount',
+        'payment_method',
+        'notes',
     ];
 
     protected function casts(): array
     {
         return [
             'amount' => 'decimal:2',
+            'paid_amount' => 'decimal:2',
             'due_date' => 'date',
-            'paid_at' => 'datetime',
+            'paid_date' => 'date',
         ];
     }
 
-    public function invoice(): BelongsTo
+    public function subscription(): BelongsTo
     {
-        return $this->belongsTo(SubscriptionInvoice::class, 'subscription_invoice_id');
+        return $this->belongsTo(Subscription::class);
     }
 
     /**

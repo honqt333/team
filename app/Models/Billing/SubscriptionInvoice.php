@@ -60,7 +60,11 @@ class SubscriptionInvoice extends Model
 
     public function installments(): HasMany
     {
-        return $this->hasMany(Installment::class);
+        // The 2026_07_25_140000 migration recreated the installments table
+        // without the subscription_invoice_id FK (it pointed at
+        // _subscriptions_old). The remaining column is subscription_id
+        // (also no FK), so we link through that instead.
+        return $this->hasMany(Installment::class, 'subscription_id', 'subscription_id');
     }
 
     /**
