@@ -802,7 +802,6 @@
       "no_providers": "لا توجد مزودي خدمة مُفعَّلون لعرض الأرصدة"
     },
     "recent_registrations": "التسجيلات الأخيرة",
-    "last_7_days": "آخر 7 أيام",
     "no_recent_registrations": "لا توجد تسجيلات حديثة",
     "trial_ending_soon": "⏰ التجربة تنتهي قريباً",
     "in_7_days": "خلال 7 أيام",
@@ -3139,10 +3138,17 @@
   },
   "work_orders": {
     "status": {
-      "open": "مفتوح",
-      "in_progress": "قيد التنفيذ",
+      "cancelled": "ملغي",
       "completed": "مكتمل",
-      "invoiced": "مفوتر"
+      "done": "مكتمل",
+      "draft": "مسودة",
+      "general_note": "ملاحظة عامة",
+      "in_progress": "قيد التنفيذ",
+      "on_hold": "معلق",
+      "open": "مفتوح",
+      "pending": "قيد الانتظار",
+      "ready_for_qc": "جاهز للفحص (QC)",
+      "closed": "مغلق"
     },
     "actions": {
       "cancel": "إلغاء الكرت",
@@ -3479,19 +3485,6 @@
       }
     },
     "showing": "عرض",
-    "status": {
-      "cancelled": "ملغي",
-      "completed": "مكتمل",
-      "done": "مكتمل",
-      "draft": "مسودة",
-      "general_note": "ملاحظة عامة",
-      "in_progress": "قيد التنفيذ",
-      "on_hold": "معلق",
-      "open": "مفتوح",
-      "pending": "قيد الانتظار",
-      "ready_for_qc": "جاهز للفحص (QC)",
-      "closed": "مغلق"
-    },
     "systematic": {
       "category": "الفئة",
       "item": "العنصر",
@@ -3601,7 +3594,8 @@
       "filter": "تصفية",
       "export": "تصدير",
       "view": "عرض",
-      "view_all": "عرض الكل"
+      "view_all": "عرض الكل",
+      "download": "تحميل"
     },
     "status": {
       "active": "نشط",
@@ -3664,7 +3658,10 @@
         "two_factor": "المصادقة الثنائية",
         "two_factor_enabled": "مفعلة",
         "two_factor_disabled": "معطلة",
-        "enforcement_level": "مستوى الإلزام"
+        "enforcement_level": "مستوى الإلزام",
+        "modals": {
+          "suspend_no_reason": "لم يحدد سبب"
+        }
       },
       "actions": {
         "impersonate": "الدخول للوحة",
@@ -3742,7 +3739,8 @@
         "selected_tenant": "تم اختيار: :name",
         "submit": "إنشاء الاشتراك",
         "submitting": "جاري الإنشاء..."
-      }
+      },
+      "ends_at": "تاريخ الانتهاء"
     },
     "plans": {
       "title": "الباقات",
@@ -3807,7 +3805,18 @@
       "whatsapp_purchases_title": "مشتريات WhatsApp",
       "whatsapp_purchases_subtitle": "سجل شراء رصيد رسائل واتساب",
       "whatsapp_usage_title": "سجل استخدام WhatsApp",
-      "whatsapp_usage_subtitle": "تتبع جميع رسائل واتساب المرسلة"
+      "whatsapp_usage_subtitle": "تتبع جميع رسائل واتساب المرسلة",
+      "amount": "المبلغ",
+      "credits": "الأرصدة",
+      "credits_sold": "رصيد مبيع",
+      "custom": "مخصص",
+      "date": "التاريخ",
+      "gateway": "بوابة الدفع",
+      "no_purchases": "لا توجد مشتريات",
+      "package": "الباقة",
+      "reference": "المرجع",
+      "revenue": "الإيرادات",
+      "search_purchases": "البحث في المشتريات"
     },
     "announcements": {
       "title": "الإعلانات والإشعارات",
@@ -3886,6 +3895,43 @@
       "create_failed": "فشل إنشاء النسخة الاحتياطية",
       "delete_success": "تم حذف النسخة الاحتياطية",
       "tenants_button": "نسخة احتياطية"
+    },
+    "dashboard": {
+      "welcome": "مرحباً",
+      "subtitle_short": "إدارة شاملة",
+      "total_tenants": "إجمالي المستأجرين",
+      "active": "نشط",
+      "trial": "تجريبي",
+      "suspended": "معلّق",
+      "title": "لوحة التحكم",
+      "recent_registrations": "التسجيلات الأخيرة",
+      "last_7_days": "آخر 7 أيام",
+      "no_recent_registrations": "لا توجد تسجيلات حديثة",
+      "trial_ending_soon": "التجربة تنتهي قريباً",
+      "in_7_days": "خلال 7 أيام",
+      "trial_ends": "تنتهي: :date",
+      "no_trial_ending_soon": "لا توجد فترات تنتهي قريباً",
+      "view": "عرض",
+      "provider_balances": {
+        "title": "أرصدة مزودي الخدمة",
+        "subtitle": "مستوى أرصدة SMS و WhatsApp",
+        "refresh": "تحديث الأرصدة",
+        "sms_label": "رسائل SMS",
+        "whatsapp_label": "واتساب",
+        "remaining_balance": "الرصيد المتبقي",
+        "fetch_failed": "فشل في جلب الرصيد",
+        "fetch_error": "خطأ في الاتصال",
+        "settings": "الإعدادات",
+        "no_providers": "لا توجد مزودي خدمة"
+      }
+    },
+    "work_orders": {
+      "status": {
+        "open": "مفتوح",
+        "in_progress": "قيد التنفيذ",
+        "completed": "مكتمل",
+        "invoiced": "مفوتر"
+      }
     }
   },
   "subscription": {

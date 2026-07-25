@@ -802,7 +802,6 @@
       "no_providers": "No active providers to display balances"
     },
     "recent_registrations": "Recent Registrations",
-    "last_7_days": "Last 7 days",
     "no_recent_registrations": "No recent registrations",
     "trial_ending_soon": "⏰ Trial Ending Soon",
     "in_7_days": "Within 7 days",
@@ -3139,10 +3138,17 @@
   },
   "work_orders": {
     "status": {
-      "open": "Open",
-      "in_progress": "In Progress",
+      "cancelled": "Cancelled",
       "completed": "Completed",
-      "invoiced": "Invoiced"
+      "done": "Completed",
+      "draft": "Draft",
+      "general_note": "General Note",
+      "in_progress": "In Progress",
+      "on_hold": "On Hold",
+      "open": "Open",
+      "pending": "Pending",
+      "ready_for_qc": "Ready for QC",
+      "closed": "Closed"
     },
     "actions": {
       "cancel": "Cancel Card",
@@ -3479,19 +3485,6 @@
       }
     },
     "showing": "Show",
-    "status": {
-      "cancelled": "Cancelled",
-      "completed": "Completed",
-      "done": "Completed",
-      "draft": "Draft",
-      "general_note": "General Note",
-      "in_progress": "In Progress",
-      "on_hold": "On Hold",
-      "open": "Open",
-      "pending": "Pending",
-      "ready_for_qc": "Ready for QC",
-      "closed": "Closed"
-    },
     "systematic": {
       "category": "Category",
       "item": "Item",
@@ -3601,7 +3594,8 @@
       "filter": "Filter",
       "export": "Export",
       "view": "View",
-      "view_all": "View All"
+      "view_all": "View All",
+      "download": "Download"
     },
     "status": {
       "active": "Active",
@@ -3664,7 +3658,10 @@
         "two_factor": "Two-Factor Auth",
         "two_factor_enabled": "Enabled",
         "two_factor_disabled": "Disabled",
-        "enforcement_level": "Enforcement Level"
+        "enforcement_level": "Enforcement Level",
+        "modals": {
+          "suspend_no_reason": "No reason specified"
+        }
       },
       "actions": {
         "impersonate": "Login to Dashboard",
@@ -3742,7 +3739,8 @@
         "selected_tenant": "Selected: :name",
         "submit": "Create Subscription",
         "submitting": "Creating..."
-      }
+      },
+      "ends_at": "End Date"
     },
     "plans": {
       "title": "Plans",
@@ -3807,7 +3805,18 @@
       "whatsapp_purchases_title": "WhatsApp Purchases",
       "whatsapp_purchases_subtitle": "WhatsApp credit purchase history",
       "whatsapp_usage_title": "WhatsApp Usage Log",
-      "whatsapp_usage_subtitle": "Track all sent WhatsApp messages"
+      "whatsapp_usage_subtitle": "Track all sent WhatsApp messages",
+      "amount": "Amount",
+      "credits": "Credits",
+      "credits_sold": "Credits Sold",
+      "custom": "Custom",
+      "date": "Date",
+      "gateway": "Gateway",
+      "no_purchases": "No purchases",
+      "package": "Package",
+      "reference": "Reference",
+      "revenue": "Revenue",
+      "search_purchases": "Search purchases"
     },
     "announcements": {
       "title": "Announcements & Notifications",
@@ -3886,6 +3895,43 @@
       "create_failed": "Backup failed",
       "delete_success": "Backup deleted",
       "tenants_button": "Backup"
+    },
+    "dashboard": {
+      "welcome": "Welcome",
+      "subtitle_short": "Comprehensive management",
+      "total_tenants": "Total Tenants",
+      "active": "Active",
+      "trial": "Trial",
+      "suspended": "Suspended",
+      "title": "Dashboard",
+      "recent_registrations": "Recent Registrations",
+      "last_7_days": "Last 7 days",
+      "no_recent_registrations": "No recent registrations",
+      "trial_ending_soon": "Trial ending soon",
+      "in_7_days": "Within 7 days",
+      "trial_ends": "Ends: :date",
+      "no_trial_ending_soon": "No trials ending soon",
+      "view": "View",
+      "provider_balances": {
+        "title": "Provider Balances",
+        "subtitle": "SMS and WhatsApp balance levels",
+        "refresh": "Refresh Balances",
+        "sms_label": "SMS Messages",
+        "whatsapp_label": "WhatsApp",
+        "remaining_balance": "Remaining Balance",
+        "fetch_failed": "Failed to fetch balance",
+        "fetch_error": "Connection error",
+        "settings": "Settings",
+        "no_providers": "No active providers"
+      }
+    },
+    "work_orders": {
+      "status": {
+        "open": "Open",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "invoiced": "Invoiced"
+      }
     }
   },
   "subscription": {
