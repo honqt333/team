@@ -3556,7 +3556,8 @@
       "clients": "Client Management",
       "service_config": "Service Configurations",
       "communication": "Communication Hub",
-      "admin": "System Administration"
+      "admin": "System Administration",
+      "security": "Security"
     },
     "nav_items": {
       "dashboard": "Overview",

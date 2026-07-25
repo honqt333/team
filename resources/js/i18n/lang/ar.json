@@ -3556,7 +3556,8 @@
       "clients": "إدارة العملاء",
       "service_config": "إعدادات الخدمة",
       "communication": "بوابة التواصل",
-      "admin": "إدارة النظام"
+      "admin": "إدارة النظام",
+      "security": "الأمان"
     },
     "nav_items": {
       "dashboard": "الرئيسية",
