@@ -67,6 +67,29 @@ class PaymentSettings extends Model
     }
 
     /**
+     * The "booted" method of the model — register Eloquent events here.
+     *
+     * `saved` fires after every create/update, including when the admin saves
+     * a new payment gateway config in System/PaymentSettingsController. We
+     * clear the cache so the next read (e.g. from a tenant's
+     * CompanySubscriptionController) sees the fresh values immediately,
+     * rather than waiting up to an hour for the TTL to expire.
+     *
+     * We also handle the rare `deleted` case so a misconfigured test wipe
+     * doesn't leave a stale 3600-second cache pointing at a non-existent row.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (): void {
+            static::clearCache();
+        });
+
+        static::deleted(function (): void {
+            static::clearCache();
+        });
+    }
+
+    /**
      * Get settings (cached).
      */
     public static function getSettings(): self
