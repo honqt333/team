@@ -2795,6 +2795,10 @@
   },
   "settings": {
     "cards": {
+      "billing": {
+        "description": "Subscription, payment methods, receipts, and history",
+        "title": "Billing & Subscription"
+      },
       "branches": {
         "description": "Managing the company's branches and centers",
         "title": "Branches"
