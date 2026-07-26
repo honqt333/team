@@ -4022,37 +4022,6 @@
       "save": "Save Settings",
       "saved": "Settings updated successfully"
     },
-    "integrations": {
-      "title": "Integrations",
-      "subtitle": "Manage SMS and email providers",
-      "sms": "SMS",
-      "whatsapp": "WhatsApp",
-      "email": "Email",
-      "add_provider": "+ Add Provider",
-      "active": "Active",
-      "inactive": "Inactive",
-      "default": "⭐ Default",
-      "no_providers": "No providers added"
-    },
-    "integrations": {
-      "title": "Integrations",
-      "subtitle": "Manage SMS, WhatsApp, and Email providers",
-      "add_provider": "+ Add Provider",
-      "add_provider_title": "Add :type Provider",
-      "add_and_enable": "Add and Enable",
-      "no_providers": "No providers added yet",
-      "default": "Default",
-      "settings": "Settings",
-      "status": {
-        "enabled": "Enabled",
-        "disabled": "Disabled"
-      },
-      "sections": {
-        "sms": "SMS Messages",
-        "whatsapp": "WhatsApp",
-        "email": "Email"
-      }
-    },
     "website": {
       "title": "Website CMS",
       "header_title": "System Settings (Website CMS)",
@@ -4435,62 +4404,62 @@
           "yes_cancel": "Yes, cancel"
         }
       }
-    }
-  },
-  "billing": {
-    "page": {
-      "title": "Billing",
-      "subtitle": "Manage your subscription, payment methods, and receipts",
-      "back_to_company_settings": "Back to company settings",
-      "section_current": "Current subscription",
-      "section_plans": "Available plans",
-      "section_plans_subtitle": "Choose the plan that fits your center's needs",
-      "section_payment_methods": "Payment methods",
-      "section_pending_receipts": "Receipts awaiting review",
-      "section_pending_receipts_subtitle": "These bank transfer receipts have been uploaded and are awaiting admin approval",
-      "section_history": "Subscription history",
-      "section_history_subtitle": "All your past subscriptions",
-      "section_receipts": "All receipts",
-      "section_receipts_subtitle": "Bank transfer receipts uploaded for your subscriptions",
-      "section_recent_payments": "Recent payment attempts",
-      "section_recent_payments_subtitle": "Last 10 payment attempts for your subscription",
-      "pending_badge": "Pending",
-      "table": {
-        "date": "Date",
-        "gateway": "Gateway",
-        "amount": "Amount",
-        "status": "Status"
-      },
-      "payment_status": {
-        "paid": "Paid",
-        "pending": "Pending",
-        "failed": "Failed",
-        "refunded": "Refunded"
-      },
-      "payment_method_active": "Active",
-      "payment_method_none": "No payment methods are currently active. Please contact support.",
-      "vat_on_subscriptions": "VAT on subscriptions",
-      "vat_inclusive": "Inclusive (price includes VAT)",
-      "vat_exclusive": "Exclusive (VAT added on top)",
-      "receipts_table": {
-        "date": "Date",
-        "plan": "Plan",
-        "amount": "Amount",
-        "reference": "Reference",
-        "status": "Status",
-        "actions": "Receipt"
-      },
-      "receipts_status": {
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected"
-      },
-      "receipts_view": "View",
-      "currency": "SAR",
-      "em_dash": "—",
-      "locale_ar": "ar-SA",
-      "locale_en": "en-US",
-      "no_plan": "—"
+    },
+    "billing": {
+      "page": {
+        "title": "Billing",
+        "subtitle": "Manage your subscription, payment methods, and receipts",
+        "back_to_company_settings": "Back to company settings",
+        "section_current": "Current subscription",
+        "section_plans": "Available plans",
+        "section_plans_subtitle": "Choose the plan that fits your center's needs",
+        "section_payment_methods": "Payment methods",
+        "section_pending_receipts": "Receipts awaiting review",
+        "section_pending_receipts_subtitle": "These bank transfer receipts have been uploaded and are awaiting admin approval",
+        "section_history": "Subscription history",
+        "section_history_subtitle": "All your past subscriptions",
+        "section_receipts": "All receipts",
+        "section_receipts_subtitle": "Bank transfer receipts uploaded for your subscriptions",
+        "section_recent_payments": "Recent payment attempts",
+        "section_recent_payments_subtitle": "Last 10 payment attempts for your subscription",
+        "pending_badge": "Pending",
+        "table": {
+          "date": "Date",
+          "gateway": "Gateway",
+          "amount": "Amount",
+          "status": "Status"
+        },
+        "payment_status": {
+          "paid": "Paid",
+          "pending": "Pending",
+          "failed": "Failed",
+          "refunded": "Refunded"
+        },
+        "payment_method_active": "Active",
+        "payment_method_none": "No payment methods are currently active. Please contact support.",
+        "vat_on_subscriptions": "VAT on subscriptions",
+        "vat_inclusive": "Inclusive (price includes VAT)",
+        "vat_exclusive": "Exclusive (VAT added on top)",
+        "receipts_table": {
+          "date": "Date",
+          "plan": "Plan",
+          "amount": "Amount",
+          "reference": "Reference",
+          "status": "Status",
+          "actions": "Receipt"
+        },
+        "receipts_status": {
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected"
+        },
+        "receipts_view": "View",
+        "currency": "SAR",
+        "em_dash": "—",
+        "locale_ar": "ar-SA",
+        "locale_en": "en-US",
+        "no_plan": "—"
+      }
     }
   },
   "subscription": {

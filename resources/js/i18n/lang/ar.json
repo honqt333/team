@@ -4006,18 +4006,6 @@
     "integrations": {
       "title": "التكاملات",
       "subtitle": "إدارة مزودي الرسائل والبريد الإلكتروني",
-      "sms": "رسائل SMS",
-      "whatsapp": "واتساب",
-      "email": "البريد الإلكتروني",
-      "add_provider": "+ إضافة مزود",
-      "active": "مفعّل",
-      "inactive": "معطّل",
-      "default": "⭐ افتراضي",
-      "no_providers": "لم يتم إضافة مزودين"
-    },
-    "integrations": {
-      "title": "التكاملات",
-      "subtitle": "إدارة مزودي الرسائل والبريد الإلكتروني",
       "add_provider": "+ إضافة مزود",
       "add_provider_title": "إضافة مزود :type",
       "add_and_enable": "إضافة وتفعيل",
@@ -4416,62 +4404,62 @@
           "yes_cancel": "نعم، إلغاء"
         }
       }
-    }
-  },
-  "billing": {
-    "page": {
-      "title": "الفوترة",
-      "subtitle": "إدارة اشتراكك وطرق الدفع والإيصالات",
-      "back_to_company_settings": "العودة لإعدادات الشركة",
-      "section_current": "الاشتراك الحالي",
-      "section_plans": "الباقات المتاحة",
-      "section_plans_subtitle": "اختر الباقة المناسبة لاحتياجات مركزك",
-      "section_payment_methods": "طرق الدفع",
-      "section_pending_receipts": "إيصالات قيد المراجعة",
-      "section_pending_receipts_subtitle": "إيصالات التحويل البنكي التي تم رفعها وفي انتظار موافقة الإدارة",
-      "section_history": "سجل الاشتراكات",
-      "section_history_subtitle": "جميع اشتراكاتك السابقة",
-      "section_receipts": "كل الإيصالات",
-      "section_receipts_subtitle": "إيصالات التحويل البنكي المرفوعة لاشتراكاتك",
-      "section_recent_payments": "آخر محاولات الدفع",
-      "section_recent_payments_subtitle": "آخر 10 محاولات دفع لاشتراكك",
-      "pending_badge": "قيد المراجعة",
-      "table": {
-        "date": "التاريخ",
-        "gateway": "البوابة",
-        "amount": "المبلغ",
-        "status": "الحالة"
-      },
-      "payment_status": {
-        "paid": "مدفوع",
-        "pending": "معلق",
-        "failed": "فشل",
-        "refunded": "مسترجع"
-      },
-      "payment_method_active": "فعّال",
-      "payment_method_none": "لا توجد طرق دفع فعّالة حالياً. يرجى التواصل مع الدعم.",
-      "vat_on_subscriptions": "ضريبة الاشتراكات",
-      "vat_inclusive": "شامل (السعر يشمل الضريبة)",
-      "vat_exclusive": "غير شامل (تضاف الضريبة على السعر)",
-      "receipts_table": {
-        "date": "التاريخ",
-        "plan": "الباقة",
-        "amount": "المبلغ",
-        "reference": "المرجع",
-        "status": "الحالة",
-        "actions": "الإيصال"
-      },
-      "receipts_status": {
-        "pending": "قيد المراجعة",
-        "approved": "مقبول",
-        "rejected": "مرفوض"
-      },
-      "receipts_view": "عرض",
-      "currency": "ر.س",
-      "em_dash": "—",
-      "locale_ar": "ar-SA",
-      "locale_en": "en-US",
-      "no_plan": "—"
+    },
+    "billing": {
+      "page": {
+        "title": "الفوترة",
+        "subtitle": "إدارة اشتراكك وطرق الدفع والإيصالات",
+        "back_to_company_settings": "العودة لإعدادات الشركة",
+        "section_current": "الاشتراك الحالي",
+        "section_plans": "الباقات المتاحة",
+        "section_plans_subtitle": "اختر الباقة المناسبة لاحتياجات مركزك",
+        "section_payment_methods": "طرق الدفع",
+        "section_pending_receipts": "إيصالات قيد المراجعة",
+        "section_pending_receipts_subtitle": "إيصالات التحويل البنكي التي تم رفعها وفي انتظار موافقة الإدارة",
+        "section_history": "سجل الاشتراكات",
+        "section_history_subtitle": "جميع اشتراكاتك السابقة",
+        "section_receipts": "كل الإيصالات",
+        "section_receipts_subtitle": "إيصالات التحويل البنكي المرفوعة لاشتراكاتك",
+        "section_recent_payments": "آخر محاولات الدفع",
+        "section_recent_payments_subtitle": "آخر 10 محاولات دفع لاشتراكك",
+        "pending_badge": "قيد المراجعة",
+        "table": {
+          "date": "التاريخ",
+          "gateway": "البوابة",
+          "amount": "المبلغ",
+          "status": "الحالة"
+        },
+        "payment_status": {
+          "paid": "مدفوع",
+          "pending": "معلق",
+          "failed": "فشل",
+          "refunded": "مسترجع"
+        },
+        "payment_method_active": "فعّال",
+        "payment_method_none": "لا توجد طرق دفع فعّالة حالياً. يرجى التواصل مع الدعم.",
+        "vat_on_subscriptions": "ضريبة الاشتراكات",
+        "vat_inclusive": "شامل (السعر يشمل الضريبة)",
+        "vat_exclusive": "غير شامل (تضاف الضريبة على السعر)",
+        "receipts_table": {
+          "date": "التاريخ",
+          "plan": "الباقة",
+          "amount": "المبلغ",
+          "reference": "المرجع",
+          "status": "الحالة",
+          "actions": "الإيصال"
+        },
+        "receipts_status": {
+          "pending": "قيد المراجعة",
+          "approved": "مقبول",
+          "rejected": "مرفوض"
+        },
+        "receipts_view": "عرض",
+        "currency": "ر.س",
+        "em_dash": "—",
+        "locale_ar": "ar-SA",
+        "locale_en": "en-US",
+        "no_plan": "—"
+      }
     }
   },
   "subscription": {
