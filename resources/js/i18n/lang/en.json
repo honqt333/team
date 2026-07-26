@@ -3884,6 +3884,25 @@
         "first_subscription_only": "First subscription only"
       }
     },
+    "integrations": {
+      "title": "Integrations",
+      "subtitle": "Manage SMS, WhatsApp, and Email providers",
+      "add_provider": "+ Add Provider",
+      "add_provider_title": "Add :type Provider",
+      "add_and_enable": "Add and Enable",
+      "no_providers": "No providers added yet",
+      "default": "Default",
+      "settings": "Settings",
+      "status": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "sections": {
+        "sms": "SMS Messages",
+        "whatsapp": "WhatsApp",
+        "email": "Email"
+      }
+    },
     "settings": {
       "general_title": "General Settings",
       "payment_title": "Payment Settings",
@@ -3903,6 +3922,25 @@
       "inactive": "Inactive",
       "default": "⭐ Default",
       "no_providers": "No providers added"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "subtitle": "Manage SMS, WhatsApp, and Email providers",
+      "add_provider": "+ Add Provider",
+      "add_provider_title": "Add :type Provider",
+      "add_and_enable": "Add and Enable",
+      "no_providers": "No providers added yet",
+      "default": "Default",
+      "settings": "Settings",
+      "status": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "sections": {
+        "sms": "SMS Messages",
+        "whatsapp": "WhatsApp",
+        "email": "Email"
+      }
     },
     "credits": {
       "tabs": {

@@ -3904,6 +3904,25 @@
       "default": "⭐ افتراضي",
       "no_providers": "لم يتم إضافة مزودين"
     },
+    "integrations": {
+      "title": "التكاملات",
+      "subtitle": "إدارة مزودي الرسائل والبريد الإلكتروني",
+      "add_provider": "+ إضافة مزود",
+      "add_provider_title": "إضافة مزود :type",
+      "add_and_enable": "إضافة وتفعيل",
+      "no_providers": "لم يتم إضافة مزودين",
+      "default": "افتراضي",
+      "settings": "الإعدادات",
+      "status": {
+        "enabled": "مفعّل",
+        "disabled": "معطّل"
+      },
+      "sections": {
+        "sms": "رسائل SMS",
+        "whatsapp": "واتساب",
+        "email": "البريد الإلكتروني"
+      }
+    },
     "credits": {
       "tabs": {
         "packages": "الباقات",
