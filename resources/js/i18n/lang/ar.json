@@ -4454,6 +4454,16 @@
           "rejected": "مرفوض"
         },
         "receipts_view": "عرض",
+        "filter": {
+          "all": "الكل",
+          "pending": "قيد المراجعة",
+          "approved": "مقبول",
+          "rejected": "مرفوض",
+          "search_placeholder": "ابحث بالباقة أو رقم التحويل أو اسم البنك…",
+          "showing_n_of_m": "عرض {shown} من {total}",
+          "no_results": "لا توجد إيصالات تطابق عوامل التصفية.",
+          "clear_filters": "مسح عوامل التصفية"
+        },
         "currency": "ر.س",
         "em_dash": "—",
         "locale_ar": "ar-SA",

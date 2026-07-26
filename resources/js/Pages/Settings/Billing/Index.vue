@@ -19,6 +19,11 @@ const props = defineProps({
     recent_payments: { type: Array, default: () => [] },
     pending_receipts: { type: Array, default: () => [] },
     all_receipts: { type: Array, default: () => [] },
+    receipt_status_counts: { type: Object, default: () => ({}) },
+    receipt_filter: {
+        type: Object,
+        default: () => ({ status: 'all', search: '', per_page: 20 }),
+    },
     enabled_gateways: { type: Array, default: () => [] },
     payment_settings: { type: Object, default: () => ({}) },
     company_info: { type: Object, default: () => ({}) },
@@ -275,7 +280,13 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
             </section>
 
             <!-- 6. All receipts (inline — replaces /settings/company/subscription/receipts) -->
-            <section v-if="all_receipts.length">
+            <!-- Show the section whenever there is at least one receipt on
+                 file OR the user is actively filtering. The filter chips
+                 and search input are useful even with zero rows, since
+                 the empty state inside ReceiptsList tells the tenant
+                 "no receipts match your filters" — and the active
+                 filters can then be cleared with one click. -->
+            <section v-if="all_receipts.length || (receipt_status_counts.all || 0) > 0">
                 <div
                     class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800"
                 >
@@ -285,7 +296,11 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                     <p class="mb-5 text-xs text-slate-500 dark:text-slate-400">
                         {{ t('system.billing.page.section_receipts_subtitle') }}
                     </p>
-                    <ReceiptsList :receipts="all_receipts" />
+                    <ReceiptsList
+                        :receipts="all_receipts"
+                        :status-counts="receipt_status_counts"
+                        :filter="receipt_filter"
+                    />
                 </div>
             </section>
 

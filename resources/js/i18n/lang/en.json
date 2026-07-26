@@ -4454,6 +4454,16 @@
           "rejected": "Rejected"
         },
         "receipts_view": "View",
+        "filter": {
+          "all": "All",
+          "pending": "Pending",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "search_placeholder": "Search by plan, reference, or bank…",
+          "showing_n_of_m": "Showing {shown} of {total}",
+          "no_results": "No receipts match your filters.",
+          "clear_filters": "Clear filters"
+        },
         "currency": "SAR",
         "em_dash": "—",
         "locale_ar": "ar-SA",

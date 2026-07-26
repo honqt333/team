@@ -12,6 +12,7 @@ use App\Models\Billing\SubscriptionPayment;
 use App\Models\PaymentSettings;
 use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -49,6 +50,16 @@ class BillingController extends Controller
     {
         $tenant = $request->user()->tenant;
         $tenant->load(['taxSettings', 'address', 'zatcaSettings']);
+
+        // Validate the filter / search / pagination inputs that drive
+        // the receipts list (section #6 in the Vue page). Without
+        // validation an attacker could pass `status=garbage` and
+        // either match zero rows (silent) or trigger a SQL error.
+        $filter = $request->validate([
+            'receipt_status' => ['nullable', 'string', Rule::in(['all', 'pending', 'approved', 'rejected'])],
+            'receipt_search' => ['nullable', 'string', 'max:100'],
+            'receipt_per_page' => ['nullable', 'integer', 'min:5', 'max:100'],
+        ]);
 
         $paymentSettings = PaymentSettings::first() ?? new PaymentSettings;
         $availableGateways = $this->paymentManager->getAvailableGateways();
@@ -144,12 +155,53 @@ class BillingController extends Controller
             ->get();
 
         // All my receipts (the dedicated /settings/company/subscription/receipts
-        // page is now folded into the hub — we paginate the full list here
-        // and the Vue side renders the same MyReceipts table inline).
-        $allReceipts = BankTransferReceipt::where('tenant_id', $tenant->id)
-            ->with(['subscription.plan', 'payment'])
+        // page is now folded into the hub). The list is filterable by
+        // status (all / pending / approved / rejected) and searchable
+        // by plan name / transfer reference / bank name — query params
+        // are read from $filter (validated above). We also pass a
+        // per-status count so the Vue filter chips can show counts
+        // without a second round-trip.
+        $allReceiptsQuery = BankTransferReceipt::where('tenant_id', $tenant->id)
+            ->with(['subscription.plan', 'payment']);
+
+        // Filter: status chip (default 'all' = no filter)
+        if (! empty($filter['receipt_status']) && $filter['receipt_status'] !== 'all') {
+            $allReceiptsQuery->where('status', $filter['receipt_status']);
+        }
+
+        // Search: match plan name_ar/name_en, transfer reference, or
+        // bank name. The OR group is wrapped in a closure so the
+        // surrounding query builder doesn't have to worry about
+        // operator precedence when combined with the WHERE status.
+        if (! empty($filter['receipt_search'])) {
+            $needle = '%'.$filter['receipt_search'].'%';
+            $allReceiptsQuery->where(function ($q) use ($needle) {
+                $q->where('transfer_reference', 'like', $needle)
+                    ->orWhere('bank_name', 'like', $needle)
+                    ->orWhere('account_name', 'like', $needle)
+                    ->orWhereHas('subscription.plan', function ($plan) use ($needle) {
+                        $plan->where('name_ar', 'like', $needle)
+                            ->orWhere('name_en', 'like', $needle);
+                    });
+            });
+        }
+
+        // Per-status counts for the chip badges. We use the base
+        // query (no status filter applied) so the counts always
+        // reflect the full distribution regardless of which
+        // chip is active.
+        $statusCounts = (clone $allReceiptsQuery)
+            ->reorder()
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+        $statusCounts['all'] = array_sum($statusCounts);
+
+        $perPage = $filter['receipt_per_page'] ?? 20;
+        $allReceipts = $allReceiptsQuery
             ->orderByDesc('created_at')
-            ->limit(50)
+            ->limit($perPage)
             ->get();
 
         return Inertia::render('Settings/Billing/Index', [
@@ -159,6 +211,12 @@ class BillingController extends Controller
             'recent_payments' => $recentPayments,
             'pending_receipts' => $pendingReceipts,
             'all_receipts' => $allReceipts,
+            'receipt_status_counts' => $statusCounts,
+            'receipt_filter' => [
+                'status' => $filter['receipt_status'] ?? 'all',
+                'search' => $filter['receipt_search'] ?? '',
+                'per_page' => $perPage,
+            ],
             'enabled_gateways' => $enabledGateways,
             'payment_settings' => [
                 'default_gateway' => $paymentSettings->default_gateway,
