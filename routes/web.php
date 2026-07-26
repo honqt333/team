@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\BranchesController;
 use App\Http\Controllers\App\CenterSettingsController;
 use App\Http\Controllers\App\CompanyProfileController;
@@ -322,11 +323,14 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::post('/settings/company/transactions/{transaction}/approve', [CompanyTransactionController::class, 'approve'])->name('settings.company.transactions.approve');
 
     // ─────────────────────────────────────────────────────────────────────
-    // Company Subscription Management (tenant self-service)
+    // Billing Hub (tenant self-service) — unified subscription + payment page
+    // Replaces the old /settings/company/subscription page. All POST endpoints
+    // (subscribe / cancel / resume / receipt) are still mounted on
+    // /settings/billing/* so the Vue page does not have to mix route names.
     // Uses payment settings configured by system admin (system/settings/payment)
     // ─────────────────────────────────────────────────────────────────────
-    Route::prefix('settings/company/subscription')->name('app.subscription.')->group(function () {
-        Route::get('/', [CompanySubscriptionController::class, 'index'])->name('index');
+    Route::prefix('settings/billing')->name('app.billing.')->group(function () {
+        Route::get('/', [BillingController::class, 'index'])->name('index');
         Route::post('/calculate', [CompanySubscriptionController::class, 'calculatePrice'])->name('calculate');
         Route::post('/validate-promo', [CompanySubscriptionController::class, 'validatePromo'])->name('validate-promo');
         Route::post('/subscribe', [CompanySubscriptionController::class, 'subscribe'])->name('subscribe');
@@ -345,7 +349,28 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         // Legacy: attach a receipt to an already-existing subscription.
         // Kept for backwards-compat with any external links.
         Route::post('/receipt/{subscription}', [CompanySubscriptionController::class, 'uploadReceipt'])->name('receipt.upload');
-        Route::get('/receipts', [CompanySubscriptionController::class, 'myReceipts'])->name('receipts');
+    });
+
+    // Backwards-compat redirects — the old /settings/company/subscription/*
+    // URLs now point at the new billing hub. POST endpoints are still
+    // mounted on /settings/billing/* above; only the GET pages redirect.
+    Route::get('/settings/company/subscription', fn () => redirect()->route('app.billing.index'))->name('app.subscription.index');
+    Route::get('/settings/company/subscription/receipts', fn () => redirect()->route('app.billing.index'))->name('app.subscription.receipts');
+
+    // Old POST endpoints (still used by external links / API clients) —
+    // kept under the old prefix for backwards compat. The Vue hub
+    // uses /settings/billing/* for all live calls.
+    Route::prefix('settings/company/subscription')->name('app.subscription.compat.')->group(function () {
+        Route::post('/calculate', [CompanySubscriptionController::class, 'calculatePrice'])->name('calculate');
+        Route::post('/validate-promo', [CompanySubscriptionController::class, 'validatePromo'])->name('validate-promo');
+        Route::post('/subscribe', [CompanySubscriptionController::class, 'subscribe'])->name('subscribe');
+        Route::post('/cancel-pending', [CompanySubscriptionController::class, 'cancelPending'])->name('cancel-pending');
+        Route::match(['get', 'post'], '/callback/{payment}', [CompanySubscriptionController::class, 'callback'])->name('callback');
+        Route::post('/cancel/{subscription}', [CompanySubscriptionController::class, 'cancel'])->name('cancel');
+        Route::post('/resume/{subscription}', [CompanySubscriptionController::class, 'resume'])->name('resume');
+        Route::post('/auto-renew/{subscription}', [CompanySubscriptionController::class, 'toggleAutoRenew'])->name('auto-renew');
+        Route::post('/bank-transfer-receipt', [CompanySubscriptionController::class, 'uploadBankTransferReceipt'])->name('receipt.bank_transfer');
+        Route::post('/receipt/{subscription}', [CompanySubscriptionController::class, 'uploadReceipt'])->name('receipt.upload');
     });
 
     // Branches Settings

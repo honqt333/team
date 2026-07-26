@@ -73,7 +73,7 @@ function formatCurrency(amount) {
                         </p>
                     </div>
                     <Link
-                        href="/app/settings/company/subscription"
+                        href="/app/settings/billing"
                         class="inline-flex items-center gap-1 self-start rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
                         <svg

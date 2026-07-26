@@ -150,7 +150,7 @@ async function submit() {
             data.append('promo_code', props.setup.promo_code);
         }
 
-        const response = await fetch('/app/settings/company/subscription/bank-transfer-receipt', {
+        const response = await fetch('/app/settings/billing/bank-transfer-receipt', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': csrfToken.value || '',

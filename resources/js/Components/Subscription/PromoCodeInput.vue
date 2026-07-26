@@ -18,7 +18,7 @@ async function apply() {
     loading.value = true;
     error.value = null;
     try {
-        const response = await fetch('/app/settings/company/subscription/validate-promo', {
+        const response = await fetch('/app/settings/billing/validate-promo', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

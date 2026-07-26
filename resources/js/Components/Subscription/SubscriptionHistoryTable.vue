@@ -63,7 +63,7 @@ const formatCurrency = (amount) => {
 async function cancel(sub) {
     processing.value = sub.id;
     try {
-        await fetch(`/app/settings/company/subscription/cancel/${sub.id}`, {
+        await fetch(`/app/settings/billing/cancel/${sub.id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ async function cancel(sub) {
 async function resume(sub) {
     processing.value = sub.id;
     try {
-        await fetch(`/app/settings/company/subscription/resume/${sub.id}`, {
+        await fetch(`/app/settings/billing/resume/${sub.id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ async function resume(sub) {
 async function toggleAutoRenew(sub) {
     processing.value = sub.id;
     try {
-        await fetch(`/app/settings/company/subscription/auto-renew/${sub.id}`, {
+        await fetch(`/app/settings/billing/auto-renew/${sub.id}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

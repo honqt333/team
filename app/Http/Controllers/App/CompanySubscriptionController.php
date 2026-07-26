@@ -18,7 +18,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
-use Inertia\Response;
 use Throwable;
 
 class CompanySubscriptionController extends Controller
@@ -30,144 +29,17 @@ class CompanySubscriptionController extends Controller
 
     /**
      * Show the subscription management page.
-     * Re-uses CompanyProfileController data + adds payment settings.
+     *
+     * DEPRECATED — this index page has been replaced by BillingController
+     * which serves the unified /app/settings/billing hub. This method
+     * is kept only because the routes file still mounts a `GET /` on
+     * the legacy `/settings/company/subscription` prefix; we just
+     * redirect it to the new hub so any old bookmarks still land on
+     * the right place.
      */
-    public function index(Request $request): Response
+    public function index(Request $request)
     {
-        $tenant = auth()->user()->tenant;
-        $tenant->load(['taxSettings', 'address', 'zatcaSettings']);
-
-        // Load payment settings (which gateways are enabled)
-        $paymentSettings = PaymentSettings::first() ?? new PaymentSettings;
-        $availableGateways = $this->paymentManager->getAvailableGateways();
-
-        // Filter gateways that are admin-enabled
-        $enabledGateways = collect($availableGateways)->filter(function ($gateway) use ($paymentSettings) {
-            // bank_transfer is configured as a single boolean toggle on
-            // PaymentSettings, not as a per-key array like Moyasar/Tap.
-            // Treat it as its own case so it surfaces in the
-            // enabled_gateways list and the SubscribeModal renders it.
-            if ($gateway['name'] === 'bank_transfer') {
-                return (bool) $paymentSettings->bank_transfer_enabled;
-            }
-
-            $config = match ($gateway['name']) {
-                'moyasar' => $paymentSettings->moyasar,
-                'tap' => $paymentSettings->tap,
-                'tabby' => $paymentSettings->tabby,
-                'tamara' => $paymentSettings->tamara,
-                default => null,
-            };
-
-            return $config && ($config['enabled'] ?? false);
-        })->values()->all();
-
-        // Current subscription — include pending/pending_payment so the
-        // tenant sees their in-flight subscription instead of an empty card.
-        $currentSubscription = $tenant->subscriptions()
-            ->whereIn('status', ['active', 'trial', 'trialing', 'cancelled', 'expired', 'pending', 'pending_payment'])
-            ->with('plan')
-            ->orderByDesc('created_at')
-            ->first();
-
-        // Build virtual trial if no real subscription
-        if (! $currentSubscription && $tenant->created_at) {
-            $trialStarts = $tenant->created_at;
-            $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
-            $currentSubscription = [
-                // Discriminator: lets the frontend tell a real Subscription
-                // model apart from this virtual placeholder without relying
-                // on missing field conventions (e.g. plan_id == null).
-                'kind' => 'virtual_trial',
-                'id' => 'trial-virtual',
-                'plan_id' => null,
-                'status' => $trialEnds->isFuture() ? 'trial' : 'expired',
-                'billing_cycle' => 'yearly',
-                'starts_at' => $trialStarts->toIso8601String(),
-                'ends_at' => $trialEnds->toIso8601String(),
-                'price' => 0,
-                'auto_renew' => false,
-                'plan' => [
-                    'name_ar' => "فترة تجريبية {$trialEnds->diffInDays($trialStarts)} يوم",
-                    'name_en' => "{$trialEnds->diffInDays($trialStarts)} days Trial",
-                ],
-            ];
-        }
-
-        // Plans
-        $plans = Plan::where('is_active', true)
-            ->orderBy('price_monthly', 'asc')
-            ->get()
-            ->map(function ($plan) {
-                $plan->features_ar = $plan->features_ar ?? [];
-                $plan->features_en = $plan->features_en ?? [];
-
-                return $plan;
-            });
-
-        // Subscription history — past subscriptions only. The current
-        // subscription (whatever its status) is shown separately in
-        // SubscriptionCard so the history list should not include it
-        // again. We treat all non-final statuses as "current" (active,
-        // trial, trialing, pending, pending_payment) and only show
-        // cancelled / expired / refunded here.
-        $currentSubId = $currentSubscription && ! is_array($currentSubscription)
-            ? $currentSubscription->id
-            : null;
-
-        $subscriptionHistory = $tenant->subscriptions()
-            ->with(['plan', 'invoices.payments'])
-            ->when($currentSubId, fn ($q) => $q->where('id', '!=', $currentSubId))
-            ->whereIn('status', ['cancelled', 'expired', 'refunded'])
-            ->orderByDesc('created_at')
-            ->limit(20)
-            ->get();
-
-        // Recent payment attempts
-        $recentPayments = SubscriptionPayment::where('tenant_id', $tenant->id)
-            ->with('subscription.plan')
-            ->orderByDesc('created_at')
-            ->limit(10)
-            ->get();
-
-        // Pending bank transfer receipts (awaiting admin review).
-        // Exclude receipts attached to the current in-flight subscription
-        // so we don't show the same receipt twice — once in the
-        // SubscriptionCard (status=pending_payment) and again here.
-        $pendingReceipts = BankTransferReceipt::where('tenant_id', $tenant->id)
-            ->where('status', 'pending')
-            ->when($currentSubId, function ($q) use ($currentSubId) {
-                $q->where('subscription_id', '!=', $currentSubId);
-            })
-            ->with('subscription.plan')
-            ->orderByDesc('created_at')
-            ->get();
-
-        return Inertia::render('Settings/Company/Subscription', [
-            'current_subscription' => $currentSubscription,
-            'available_plans' => $plans,
-            'subscription_history' => $subscriptionHistory,
-            'recent_payments' => $recentPayments,
-            'pending_receipts' => $pendingReceipts,
-            'enabled_gateways' => $enabledGateways,
-            'payment_settings' => [
-                'default_gateway' => $paymentSettings->default_gateway,
-                'bank_transfer_enabled' => $paymentSettings->bank_transfer_enabled,
-                'bank_accounts' => $paymentSettings->bank_accounts ?? [],
-                'bank_transfer_instructions' => $paymentSettings->bank_transfer_instructions,
-                'mada_enabled' => $paymentSettings->mada_enabled,
-                'visa_enabled' => $paymentSettings->visa_enabled,
-                'mastercard_enabled' => $paymentSettings->mastercard_enabled,
-                'applepay_enabled' => $paymentSettings->applepay_enabled,
-                'stcpay_enabled' => $paymentSettings->stcpay_enabled,
-            ],
-            'company_info' => $paymentSettings->getCompanyInfo(),
-            'vat_settings' => [
-                'enabled' => (bool) $paymentSettings->subscription_vat_enabled,
-                'rate' => (float) $paymentSettings->getSubscriptionVatRate(),
-                'inclusive' => (bool) $paymentSettings->subscription_vat_inclusive,
-            ],
-        ]);
+        return redirect()->route('app.billing.index');
     }
 
     /**
@@ -953,18 +825,14 @@ class CompanySubscriptionController extends Controller
 
     /**
      * List the current tenant's bank transfer receipts.
+     *
+     * DEPRECATED — receipts are now shown inline in the Billing hub
+     * (`/app/settings/billing`). The legacy GET route is kept mounted
+     * so bookmarks/external links still resolve, but they just redirect
+     * to the new unified page.
      */
     public function myReceipts(Request $request)
     {
-        $tenantId = auth()->user()->tenant_id;
-
-        $receipts = BankTransferReceipt::where('tenant_id', $tenantId)
-            ->with(['subscription.plan', 'payment'])
-            ->latest()
-            ->paginate(20);
-
-        return Inertia::render('Settings/Company/MyReceipts', [
-            'receipts' => $receipts,
-        ]);
+        return redirect()->route('app.billing.index');
     }
 }

@@ -1013,56 +1013,41 @@
                     </div>
                     -->
 
-                    <!-- Payment Tab (read-only — configured by System admin) -->
+                    <!-- Payment Tab (DEPRECATED — moved to /app/settings/billing) -->
                     <div v-if="activeTab === 'payment'" class="space-y-6">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    {{ $t('company_profile.payment_tab.title') }}
-                                </h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    {{ $t('company_profile.payment_tab.subtitle') }}
-                                </p>
-                            </div>
-                            <a
-                                href="/app/settings/company/subscription"
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
-                            >
-                                <svg
-                                    class="w-3.5 h-3.5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M13 7l5 5m0 0l-5 5m5-5H6"
-                                    />
-                                </svg>
-                                {{ $t('company_profile.payment_tab.manage_subscription') }}
-                            </a>
-                        </div>
-
-                        <!-- Active payment methods -->
                         <div
-                            class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-200 dark:border-gray-700"
+                            class="p-6 bg-gradient-to-br from-indigo-50 to-violet-50 dark:from-indigo-900/20 dark:to-violet-900/20 rounded-2xl border border-indigo-200 dark:border-indigo-800/50"
                         >
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                                {{ $t('company_profile.payment_tab.active_methods') }}
-                            </h4>
-                            <div
-                                v-if="enabled_gateways.length"
-                                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
-                            >
+                            <div class="flex items-start gap-4">
                                 <div
-                                    v-for="gw in enabled_gateways"
-                                    :key="gw.name"
-                                    class="flex items-center gap-3 p-3 bg-white dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                                    class="w-12 h-12 rounded-xl flex items-center justify-center bg-indigo-600 text-white flex-shrink-0"
                                 >
-                                    <div
-                                        class="w-9 h-9 rounded-lg flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
+                                    <svg
+                                        class="w-6 h-6"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                        />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <h3
+                                        class="text-lg font-bold text-gray-900 dark:text-white mb-1"
+                                    >
+                                        {{ $t('company_profile.billing_moved.title') }}
+                                    </h3>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                                        {{ $t('company_profile.billing_moved.subtitle') }}
+                                    </p>
+                                    <a
+                                        href="/app/settings/billing"
+                                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold text-sm transition-colors"
                                     >
                                         <svg
                                             class="w-4 h-4"
@@ -1074,80 +1059,12 @@
                                                 stroke-linecap="round"
                                                 stroke-linejoin="round"
                                                 stroke-width="2"
-                                                d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                                d="M13 7l5 5m0 0l-5 5m5-5H6"
                                             />
                                         </svg>
-                                    </div>
-                                    <div class="min-w-0 flex-1">
-                                        <p
-                                            class="text-sm font-semibold text-gray-900 dark:text-white truncate"
-                                        >
-                                            {{ gw.label || gw.name }}
-                                        </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ $t('company_profile.payment_tab.active') }}
-                                        </p>
-                                    </div>
+                                        {{ $t('company_profile.billing_moved.cta') }}
+                                    </a>
                                 </div>
-                            </div>
-                            <p v-else class="text-sm text-gray-500 dark:text-gray-400 italic py-3">
-                                {{ $t('company_profile.payment_tab.no_active_methods') }}
-                            </p>
-                        </div>
-
-                        <!-- Subscription VAT settings (read-only display) -->
-                        <div
-                            v-if="payment_settings?.subscription_vat_enabled"
-                            class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-200 dark:border-gray-700"
-                        >
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                                {{ $t('company_profile.payment_tab.vat_on_subscriptions') }}
-                            </h4>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                <div>
-                                    <span class="text-gray-500 dark:text-gray-400">
-                                        {{ $t('company_profile.payment_tab.vat_rate') }}:
-                                    </span>
-                                    <span
-                                        class="ms-1 font-mono font-semibold text-gray-900 dark:text-white"
-                                    >
-                                        {{ payment_settings.subscription_vat_rate }}%
-                                    </span>
-                                </div>
-                                <div>
-                                    <span class="text-gray-500 dark:text-gray-400">
-                                        {{ $t('company_profile.payment_tab.vat_method') }}:
-                                    </span>
-                                    <span class="ms-1 font-semibold text-gray-900 dark:text-white">
-                                        {{
-                                            payment_settings.subscription_vat_inclusive
-                                                ? $t('company_profile.payment_tab.vat_inclusive')
-                                                : $t('company_profile.payment_tab.vat_exclusive')
-                                        }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Note: payment settings are managed at System level -->
-                        <div
-                            class="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-xl"
-                        >
-                            <svg
-                                class="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-                            <div class="text-sm text-amber-700 dark:text-amber-300">
-                                {{ $t('company_profile.payment_tab.admin_managed_note') }}
                             </div>
                         </div>
                     </div>
@@ -1326,20 +1243,8 @@
                         </div>
                     </div>
 
-                    <!-- Subscription & Subscription History Tabs -->
-                    <CompanySubscriptionTab
-                        v-if="activeTab === 'subscription' || activeTab === 'subscription_history'"
-                        :active-tab="activeTab"
-                        :current-subscription="props.current_subscription"
-                        :available-plans="props.available_plans"
-                        :subscriptions="props.subscriptions"
-                        :contact="props.contact"
-                        :locale="locale"
-                        :currency="props.profile?.currency || 'SAR'"
-                        :enabled-gateways="props.enabled_gateways"
-                        :payment-settings="props.payment_settings"
-                        :bank-accounts="props.bank_accounts"
-                    />
+                    <!-- Subscription & Subscription History Tabs — MOVED to /app/settings/billing.
+                         See the billing_moved card in the payment tab above. -->
 
                     <!-- Revenue & Expenses Tab -->
                     <div v-if="activeTab === 'revenue_expenses'" class="space-y-6">
@@ -2231,8 +2136,6 @@ const tabs = computed(() => [
     // numbering tab hidden by design decision
     { id: 'admin_user', label: t('company_profile.tabs.admin_user') },
     { id: 'payment', label: t('company_profile.tabs.payment') },
-    { id: 'subscription', label: t('company_profile.tabs.subscription') },
-    { id: 'subscription_history', label: t('company_profile.tabs.subscription_history') },
     { id: 'revenue_expenses', label: t('company_profile.tabs.revenue_expenses') },
     { id: 'invoices', label: t('company_profile.tabs.invoices') },
 ]);
@@ -2794,6 +2697,16 @@ onMounted(() => {
     // Handle tab query param
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
+
+    // Backwards-compat: legacy tabs (subscription, subscription_history)
+    // were moved to /app/settings/billing. If an external link still
+    // points at them, redirect to the new unified hub instead of
+    // silently rendering an empty section.
+    if (tab === 'subscription' || tab === 'subscription_history') {
+        window.location.href = '/app/settings/billing';
+        return;
+    }
+
     if (tab && tabs.value.find((t) => t.id === tab)) {
         activeTab.value = tab;
     }

@@ -438,6 +438,11 @@
       "vat_exclusive": "غير شامل (تضاف الضريبة على السعر)",
       "admin_managed_note": "إعدادات بوابات الدفع وضريبة القيمة المضافة يديرها مسؤول النظام. تواصل مع الدعم إذا كنت بحاجة إلى تفعيل طريقة دفع."
     },
+    "billing_moved": {
+      "title": "انتقلت الفوترة",
+      "subtitle": "الاشتراكات وطرق الدفع والإيصالات والفواتير أصبحت في صفحة موحدة واحدة.",
+      "cta": "الذهاب إلى الفوترة"
+    },
     "logo": {
       "alt": "شعار الشركة",
       "deleted": "تم حذف الشعار",
@@ -4413,6 +4418,57 @@
       }
     }
   },
+  "billing": {
+    "page": {
+      "title": "الفوترة",
+      "subtitle": "إدارة اشتراكك وطرق الدفع والإيصالات",
+      "back_to_company_settings": "العودة لإعدادات الشركة",
+      "section_current": "الاشتراك الحالي",
+      "section_plans": "الباقات المتاحة",
+      "section_plans_subtitle": "اختر الباقة المناسبة لاحتياجات مركزك",
+      "section_payment_methods": "طرق الدفع",
+      "section_pending_receipts": "إيصالات قيد المراجعة",
+      "section_pending_receipts_subtitle": "إيصالات التحويل البنكي التي تم رفعها وفي انتظار موافقة الإدارة",
+      "section_history": "سجل الاشتراكات",
+      "section_history_subtitle": "جميع اشتراكاتك السابقة",
+      "section_receipts": "كل الإيصالات",
+      "section_receipts_subtitle": "إيصالات التحويل البنكي المرفوعة لاشتراكاتك",
+      "section_recent_payments": "آخر محاولات الدفع",
+      "section_recent_payments_subtitle": "آخر 10 محاولات دفع لاشتراكك",
+      "pending_badge": "قيد المراجعة",
+      "table": {
+        "date": "التاريخ",
+        "gateway": "البوابة",
+        "amount": "المبلغ",
+        "status": "الحالة"
+      },
+      "payment_status": {
+        "paid": "مدفوع",
+        "pending": "معلق",
+        "failed": "فشل",
+        "refunded": "مسترجع"
+      },
+      "payment_method_active": "فعّال",
+      "payment_method_none": "لا توجد طرق دفع فعّالة حالياً. يرجى التواصل مع الدعم.",
+      "vat_on_subscriptions": "ضريبة الاشتراكات",
+      "vat_inclusive": "شامل (السعر يشمل الضريبة)",
+      "vat_exclusive": "غير شامل (تضاف الضريبة على السعر)",
+      "receipts_table": {
+        "date": "التاريخ",
+        "plan": "الباقة",
+        "amount": "المبلغ",
+        "reference": "المرجع",
+        "status": "الحالة",
+        "actions": "الإيصال"
+      },
+      "receipts_status": {
+        "pending": "قيد المراجعة",
+        "approved": "مقبول",
+        "rejected": "مرفوض"
+      },
+      "receipts_view": "عرض"
+    }
+  },
   "subscription": {
     "bank_transfer_pending": "تم استلام طلب اشتراكك عبر التحويل البنكي. سيتم تفعيل اشتراكك فور التحقق من التحويل.",
     "cancelled": "تم إلغاء اشتراكك بنجاح",
@@ -4439,6 +4495,7 @@
     "paid_at": "تاريخ الدفع",
     "payment_method": "طريقة الدفع",
     "plan": "الباقة",
+    "redirecting_in": "إعادة التوجيه خلال {seconds} ثانية…",
     "success_heading": "تم الدفع بنجاح!",
     "success_subtitle": "تم تفعيل اشتراكك. يمكنك الآن الاستمتاع بجميع مزايا الباقة.",
     "success_title": "تم الدفع بنجاح",

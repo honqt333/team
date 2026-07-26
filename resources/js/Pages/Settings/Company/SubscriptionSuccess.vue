@@ -6,12 +6,15 @@
             <div
                 class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center"
             >
-                <!-- Success icon -->
+                <!-- Success icon (animated ring, Stripe-style) -->
                 <div
-                    class="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30"
+                    class="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30 relative"
                 >
+                    <span
+                        class="absolute inset-0 rounded-full bg-emerald-400/20 animate-ping"
+                    ></span>
                     <svg
-                        class="h-10 w-10 text-emerald-600 dark:text-emerald-400"
+                        class="h-10 w-10 text-emerald-600 dark:text-emerald-400 relative"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -77,18 +80,42 @@
                     </div>
                 </div>
 
+                <!-- Auto-redirect notice (Stripe-style: visible countdown) -->
+                <div
+                    class="flex items-center justify-center gap-2 mb-4 text-sm text-gray-500 dark:text-gray-400"
+                >
+                    <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                    </svg>
+                    <span>
+                        {{ $t('subscription.redirecting_in', { seconds: countdown }) }}
+                    </span>
+                </div>
+
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
-                        :href="route('dashboard')"
+                        :href="route('app.billing.index')"
                         class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
                     >
-                        {{ $t('subscription.go_to_dashboard') }}
+                        {{ $t('subscription.view_subscription') }}
                     </Link>
                     <Link
-                        :href="route('app.subscription.index')"
+                        :href="route('dashboard')"
                         class="px-6 py-2.5 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg font-medium transition-colors"
                     >
-                        {{ $t('subscription.view_subscription') }}
+                        {{ $t('subscription.go_to_dashboard') }}
                     </Link>
                 </div>
             </div>
@@ -97,11 +124,32 @@
 </template>
 
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { onMounted, onUnmounted, ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 const props = defineProps({
     payment: { type: Object, default: null },
+});
+
+// Stripe-style auto-redirect: after 3 seconds, send the user to the
+// billing hub so they see their newly active subscription. They can
+// always click a button to go elsewhere.
+const countdown = ref(3);
+let timer = null;
+
+onMounted(() => {
+    timer = setInterval(() => {
+        countdown.value -= 1;
+        if (countdown.value <= 0) {
+            clearInterval(timer);
+            router.visit(route('app.billing.index'));
+        }
+    }, 1000);
+});
+
+onUnmounted(() => {
+    if (timer) clearInterval(timer);
 });
 
 function formatCurrency(value) {

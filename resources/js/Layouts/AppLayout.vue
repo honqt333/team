@@ -1142,7 +1142,7 @@
                                 لقد انتهت فترة اشتراكك! لمتابعة استخدام النظام وتفادي توقف العمليات،
                                 يرجى تجديد الاشتراك
                                 <a
-                                    href="/app/settings/company?tab=subscription"
+                                    href="/app/settings/billing"
                                     class="font-bold underline text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
                                 >
                                     بالضغط هنا
@@ -1153,7 +1153,7 @@
                                 Your subscription has expired! To continue using the system, please
                                 renew your subscription
                                 <a
-                                    href="/app/settings/company?tab=subscription"
+                                    href="/app/settings/billing"
                                     class="font-bold underline text-rose-600 dark:text-rose-400 hover:text-rose-700 transition-colors"
                                 >
                                     by clicking here
@@ -1171,7 +1171,7 @@
                                 </span>
                                 أيام على انتهاء اشتراكك. لتفادي انقطاع الخدمة، يرجى التجديد
                                 <a
-                                    href="/app/settings/company?tab=subscription"
+                                    href="/app/settings/billing"
                                     class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
                                 >
                                     اضغط هنا
@@ -1188,7 +1188,7 @@
                                 days left on your subscription. To prevent service interruption,
                                 please renew
                                 <a
-                                    href="/app/settings/company?tab=subscription"
+                                    href="/app/settings/billing"
                                     class="font-bold underline text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-350 transition-colors"
                                 >
                                     click here

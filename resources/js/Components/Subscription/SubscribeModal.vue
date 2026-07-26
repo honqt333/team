@@ -83,7 +83,7 @@ async function calculate() {
     if (!props.plan) return;
     loading.value = true;
     try {
-        const response = await fetch('/app/settings/company/subscription/calculate', {
+        const response = await fetch('/app/settings/billing/calculate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ async function subscribe() {
     loading.value = true;
     error.value = null;
     try {
-        const response = await fetch('/app/settings/company/subscription/subscribe', {
+        const response = await fetch('/app/settings/billing/subscribe', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -198,7 +198,7 @@ async function close() {
     if (loading.value) return;
     if (gatewayFormData.value || bankTransferResult.value) {
         try {
-            await fetch('/app/settings/company/subscription/cancel-pending', {
+            await fetch('/app/settings/billing/cancel-pending', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -236,7 +236,7 @@ function onReceiptUploaded() {
  */
 function onGatewayCompleted(payment) {
     // The form's callback_url is the payment.callback route, so a successful
-    // 3DS + payment will redirect the browser to /app/settings/company/subscription/callback/{id}
+    // 3DS + payment will redirect the browser to /app/settings/billing/callback/{id}
     // and render the SubscriptionSuccess page. Closing the modal here for
     // cancelled/failed flows.
     if (payment && payment.status === 'paid') {

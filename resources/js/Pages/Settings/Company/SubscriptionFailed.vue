@@ -39,9 +39,33 @@
                 </p>
                 <p v-else class="mb-6"></p>
 
+                <!-- Auto-redirect notice -->
+                <div
+                    class="flex items-center justify-center gap-2 mb-4 text-sm text-gray-500 dark:text-gray-400"
+                >
+                    <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                    </svg>
+                    <span>
+                        {{ $t('subscription.redirecting_in', { seconds: countdown }) }}
+                    </span>
+                </div>
+
                 <div class="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
-                        :href="route('app.subscription.index')"
+                        :href="route('app.billing.index')"
                         class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors"
                     >
                         {{ $t('subscription.try_again') }}
@@ -59,11 +83,32 @@
 </template>
 
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { onMounted, onUnmounted, ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
-defineProps({
+const props = defineProps({
     payment: { type: Object, default: null },
     reason: { type: String, default: null },
+});
+
+// Auto-redirect to billing hub (Stripe-style "you can also view this in
+// the dashboard" pattern) so the tenant ends up at the unified place
+// where they can retry with a different gateway or update their plan.
+const countdown = ref(5);
+let timer = null;
+
+onMounted(() => {
+    timer = setInterval(() => {
+        countdown.value -= 1;
+        if (countdown.value <= 0) {
+            clearInterval(timer);
+            router.visit(route('app.billing.index'));
+        }
+    }, 1000);
+});
+
+onUnmounted(() => {
+    if (timer) clearInterval(timer);
 });
 </script>
