@@ -360,12 +360,17 @@
       "title": "Main user",
       "info": "Admin user information",
       "name": "Name",
-      "password": "Password"
+      "password": "Password",
+      "owner_badge": "Owner",
+      "email_label": "Email address",
+      "update_email_button": "Update email"
     },
     "branches": {
       "active": "Active",
       "active_help": "Activate the branch to start working on it",
       "add": "Add branch",
+      "count_label": "{count} branch(es)",
+      "no_branches": "No branches yet",
       "branch_name": "Center Name",
       "center_type": "Center Type",
       "center_type_branch": "Sub Branch",

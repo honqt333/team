@@ -360,12 +360,17 @@
       "title": "المستخدم الرئيسي",
       "info": "معلومات المستخدم الرئيسي",
       "name": "الاسم",
-      "password": "كلمة المرور"
+      "password": "كلمة المرور",
+      "owner_badge": "المالك",
+      "email_label": "البريد الإلكتروني",
+      "update_email_button": "تحديث البريد"
     },
     "branches": {
       "active": "مفعّل",
       "active_help": "تفعيل الفرع لبدء العمل عليه",
       "add": "إضافة فرع",
+      "count_label": "{count} فرع",
+      "no_branches": "لا توجد فروع بعد",
       "branch_name": "اسم المركز",
       "center_type": "نوع المركز",
       "center_type_branch": "فرع فرعي",
