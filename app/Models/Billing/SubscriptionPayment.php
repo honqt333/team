@@ -88,6 +88,14 @@ class SubscriptionPayment extends Model
 
     /**
      * Mark as failed.
+     *
+     * Sets status='failed' on the payment AND cascades the same status
+     * to the parent subscription (allowed by the CHECK constraint
+     * since migration 2026_07_26_172322 which widened the enum to
+     * include 'failed'). The 'failed' status tells the admin /
+     * /system/subscriptions report that the payment was rejected by
+     * the gateway — distinct from 'cancelled' which the tenant
+     * initiates themselves.
      */
     public function markAsFailed(?string $reason = null, array $response = []): self
     {
