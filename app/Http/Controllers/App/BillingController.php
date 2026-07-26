@@ -122,17 +122,22 @@ class BillingController extends Controller
                 return $plan;
             });
 
-        // Subscription history — past subscriptions only. The current
-        // subscription is shown separately in the SubscriptionCard, so
-        // we exclude it from the history list.
+        // Subscription history — every subscription except the
+        // current one. The current (active, in-window) subscription
+        // is shown separately in the SubscriptionCard so it doesn't
+        // get duplicated in the table. Everything else — past active
+        // subscriptions that have since ended, in-flight pending /
+        // pending_payment attempts, trial periods, failed payment
+        // attempts, explicit cancels, admin-initiated refunds, and
+        // natural expirations — belongs in the history so the
+        // tenant has a complete chronological record of every
+        // subscription they've ever had.
         //
-        // We show every terminal-state subscription: cancelled, expired,
-        // refunded, AND failed. The 'failed' status is the gateway's
-        // "the payment didn't go through" marker; the tenant needs
-        // to see those so they understand why their plan didn't
-        // activate. In-flight statuses (active, trialing, pending,
-        // pending_payment) belong on the "current subscription" card
-        // and would be misleading on a history list.
+        // Note: the in-flight statuses (pending, pending_payment)
+        // ARE included here even though the "Current subscription"
+        // card may also show one. The card shows the most recent
+        // one; the table shows all earlier ones in case the tenant
+        // started a new attempt before an old one was cancelled.
         $currentSubId = $currentSubscription && ! is_array($currentSubscription)
             ? $currentSubscription->id
             : null;
@@ -140,9 +145,8 @@ class BillingController extends Controller
         $subscriptionHistory = $tenant->subscriptions()
             ->with(['plan', 'invoices.payments'])
             ->when($currentSubId, fn ($q) => $q->where('id', '!=', $currentSubId))
-            ->whereIn('status', ['cancelled', 'expired', 'refunded', 'failed'])
             ->orderByDesc('created_at')
-            ->limit(20)
+            ->limit(50)
             ->get();
 
         // Recent payment attempts
