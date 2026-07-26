@@ -321,7 +321,7 @@ class CompanySubscriptionController extends Controller
                     'amount' => $total,
                     'currency' => 'SAR',
                     'description' => "اشتراك {$plan->name_ar} - {$tenant->trade_name}",
-                    'callback_url' => route('app.subscription.callback', ['payment' => '__PAYMENT_ID__']),
+                    'callback_url' => route('app.billing.callback', ['payment' => '__PAYMENT_ID__']),
                     'metadata' => [
                         'plan_id' => $plan->id,
                         'tenant_id' => $tenant->id,
@@ -357,6 +357,26 @@ class CompanySubscriptionController extends Controller
                         'default' => 'بوابة الدفع لم ترد، حاول مرة أخرى',
                     ]),
                 ], 502);
+            }
+
+            // CRITICAL: Tap/Tabby/Tamara return {success: false, message: "..."}
+            // when their API rejects the request (e.g. 401 because the admin
+            // forgot to save the keys in /system/settings/payment). Without
+            // this check, the controller would silently create Subscription +
+            // Payment records in 'pending' state, then return a form with
+            // `success: false` to the frontend — the tenant would click
+            // "Pay" and get a blank Tap page. Detect this here and surface
+            // the real gateway error to the user.
+            if (isset($formData['success']) && $formData['success'] === false) {
+                DB::rollBack();
+
+                return response()->json([
+                    'error' => $formData['message']
+                        ?? $formData['rejection']
+                        ?? __('company_profile.subscription.gateway_rejected', [
+                            'default' => 'تم رفض طلب الدفع من البوابة',
+                        ]),
+                ], 402);
             }
 
             $gatewayStatus = $formData['status'] ?? null;
