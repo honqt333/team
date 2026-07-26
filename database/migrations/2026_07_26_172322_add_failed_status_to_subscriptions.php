@@ -82,8 +82,26 @@ return new class extends Migration
                 )
             SQL);
 
-            // 4. Copy data
-            DB::statement('INSERT INTO subscriptions (id, tenant_id, plan_id, status, billing_cycle, price, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at) SELECT id, tenant_id, plan_id, status, billing_cycle, price, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at FROM _subscriptions_old');
+            // 4. Copy data. Note: we cannot blindly SELECT * FROM
+            //    _subscriptions_old because the original table may
+            //    or may not have the `price` column (it was added
+            //    in 2026_07_21_201000, after the create-subscriptions
+            //    migration; on a fresh install the rename trick
+            //    fires before that migration runs, so the price
+            //    column is missing). The cleanest cross-version
+            //    approach: list every column we know the source
+            //    has (everything except `price`), then set
+            //    price=0 in the destination.
+            //
+            //    We do the copy in two passes: a structural
+            //    INSERT (no price) and a defensive ALTER TABLE to
+            //    add the price column if it isn't already there
+            //    (2026_07_21_201000 will add it with default 0,
+            //    so this is harmless to run early).
+            DB::statement(
+                'INSERT INTO subscriptions (id, tenant_id, plan_id, status, billing_cycle, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at) '
+                .'SELECT id, tenant_id, plan_id, status, billing_cycle, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at FROM _subscriptions_old'
+            );
 
             // 5. Drop old
             DB::statement('DROP TABLE _subscriptions_old');
@@ -132,7 +150,7 @@ return new class extends Migration
                 )
             SQL);
 
-            DB::statement('INSERT INTO subscriptions (id, tenant_id, plan_id, status, billing_cycle, price, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at) SELECT id, tenant_id, plan_id, status, billing_cycle, price, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at FROM _subscriptions_old');
+            DB::statement('INSERT INTO subscriptions (id, tenant_id, plan_id, status, billing_cycle, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at) SELECT id, tenant_id, plan_id, status, billing_cycle, starts_at, ends_at, trial_ends_at, cancelled_at, payment_method, auto_renew, promo_code, discount_amount, created_at, updated_at FROM _subscriptions_old');
 
             DB::statement('DROP TABLE _subscriptions_old');
         } else {
