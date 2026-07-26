@@ -97,6 +97,14 @@ class SubscriptionPayment extends Model
             'gateway_response' => $response,
         ]);
 
+        if ($this->subscription && in_array($this->subscription->status, ['pending', 'pending_payment'])) {
+            $this->subscription->update(['status' => 'failed']);
+        }
+
+        if ($this->invoice && $this->invoice->status === 'pending') {
+            $this->invoice->update(['status' => 'cancelled']);
+        }
+
         return $this;
     }
 

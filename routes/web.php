@@ -330,6 +330,7 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         Route::post('/calculate', [CompanySubscriptionController::class, 'calculatePrice'])->name('calculate');
         Route::post('/validate-promo', [CompanySubscriptionController::class, 'validatePromo'])->name('validate-promo');
         Route::post('/subscribe', [CompanySubscriptionController::class, 'subscribe'])->name('subscribe');
+        Route::post('/cancel-pending', [CompanySubscriptionController::class, 'cancelPending'])->name('cancel-pending');
         // Moyasar (and most other gateways) redirect the browser to the
         // callback URL with a GET request + ?id=...&status=... query params
         // after the 3DS challenge. POST-only would block the entire success

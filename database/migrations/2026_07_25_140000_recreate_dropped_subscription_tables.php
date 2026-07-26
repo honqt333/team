@@ -43,6 +43,8 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
+
         if (Schema::hasTable('_subscriptions_old')) {
             Schema::dropIfExists('_subscriptions_old');
         }
@@ -168,6 +170,8 @@ return new class extends Migration
                 $table->index(['subscription_id']);
             });
         }
+
+        Schema::enableForeignKeyConstraints();
     }
 
     public function down(): void

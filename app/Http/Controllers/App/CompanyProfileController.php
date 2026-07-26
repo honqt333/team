@@ -9,11 +9,13 @@ use App\Models\Billing\Plan;
 use App\Models\CompanyTransaction;
 use App\Models\IncomeCategory;
 use App\Models\Invoice;
+use App\Models\PaymentSettings;
 use App\Models\PurchaseInvoice;
 use App\Models\Tenant;
 use App\Models\TenantAddress;
 use App\Models\TenantTaxSetting;
 use App\Models\TenantZatcaSetting;
+use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -45,8 +47,8 @@ class CompanyProfileController extends Controller
                 'cr_number' => $tenant->cr_number,
                 'iban' => $tenant->iban,
                 'logo_url' => $tenant->logo_path ? Storage::url($tenant->logo_path) : asset('images/logo.png'),
-                'country' => 'SA', // Locked
-                'currency' => 'SAR', // Locked
+                'country' => $tenant->country ?? config('app.default_country', 'SA'),
+                'currency' => $tenant->currency ?? config('app.default_currency', 'SAR'),
             ],
             'contact' => [
                 'phone' => $tenant->phone,
@@ -89,18 +91,18 @@ class CompanyProfileController extends Controller
                 'email' => $adminUser->email,
             ],
             'branches' => $tenant->centers()->select('id', 'name', 'slug', 'is_active', 'created_at')->get(),
-            'company_transactions' => CompanyTransaction::with(['incomeCategory', 'approvedBy', 'updatedBy'])
+            'company_transactions' => fn () => CompanyTransaction::with(['incomeCategory', 'approvedBy', 'updatedBy'])
                 ->whereNull('center_id')
                 ->latest('transaction_date')
                 ->get(),
-            'income_categories' => IncomeCategory::active()
+            'income_categories' => fn () => IncomeCategory::active()
                 ->get()
                 ->map(fn ($cat) => [
                     'id' => $cat->id,
                     'name' => $cat->name,
                     'transaction_type' => $cat->transaction_type,
                 ]),
-            'company_invoices' => [
+            'company_invoices' => fn () => [
                 'sales' => Invoice::withoutGlobalScope('center_scoped')
                     ->whereNull('center_id')
                     ->whereIn('id', function ($query) {
@@ -122,9 +124,10 @@ class CompanyProfileController extends Controller
                 });
 
                 if (! $hasTrial && $tenant->created_at) {
+                    $defaultDays = (int) config('app.trial_days', 14);
                     $trialStarts = $tenant->created_at;
-                    $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays(14);
-                    $trialDays = (int) round($trialStarts->diffInDays($trialEnds) ?: 14);
+                    $trialEnds = $tenant->trial_ends_at ?: $trialStarts->copy()->addDays($defaultDays);
+                    $trialDays = (int) round($trialStarts->diffInDays($trialEnds) ?: $defaultDays);
                     $trialStatus = $trialEnds->isFuture() ? 'trial' : 'expired';
 
                     $virtualTrial = [
@@ -153,8 +156,10 @@ class CompanyProfileController extends Controller
             }),
             'current_subscription' => rescue(function () use ($tenant) {
                 $sub = $tenant->subscriptions()
-                    ->whereIn('status', ['active', 'trial', 'trialing'])
-                    ->with('plan')
+                    ->whereIn('status', ['active', 'trial', 'trialing', 'pending', 'pending_payment'])
+                    ->with(['plan', 'receipts'])
+                    ->orderByRaw("CASE WHEN status = 'pending_payment' THEN 1 WHEN status = 'pending' THEN 2 WHEN status = 'active' THEN 3 ELSE 4 END")
+                    ->latest()
                     ->first();
 
                 if (! $sub && ($tenant->status === 'trial' || $tenant->trial_ends_at)) {
@@ -186,9 +191,38 @@ class CompanyProfileController extends Controller
 
                 return $sub;
             }),
-            'available_plans' => Plan::where('is_active', true)
+            'available_plans' => fn () => Plan::where('is_active', true)
                 ->orderBy('price_monthly', 'asc')
                 ->get(),
+            'enabled_gateways' => rescue(function () {
+                $paymentSettings = PaymentSettings::first() ?? new PaymentSettings;
+                $manager = app(PaymentManager::class);
+                $available = $manager->getAvailableGateways();
+
+                return collect($available)->filter(function ($g) use ($paymentSettings) {
+                    if ($g['name'] === 'bank_transfer') {
+                        return (bool) ($paymentSettings->bank_transfer_enabled ?? false);
+                    }
+                    $config = match ($g['name']) {
+                        'moyasar' => $paymentSettings->moyasar,
+                        'tap' => $paymentSettings->tap,
+                        'paytabs' => $paymentSettings->paytabs,
+                        'tabby' => $paymentSettings->tabby,
+                        'tamara' => $paymentSettings->tamara,
+                        default => null,
+                    };
+
+                    return $config && ($config['enabled'] ?? false);
+                })->values()->all();
+            }, function () {
+                return [];
+            }),
+            'payment_settings' => rescue(function () {
+                return PaymentSettings::first() ?? new PaymentSettings;
+            }),
+            'bank_accounts' => rescue(function () {
+                return PaymentSettings::first()?->bank_accounts ?? [];
+            }),
         ]);
     }
 
@@ -276,6 +310,8 @@ class CompanyProfileController extends Controller
                     'vat_number' => $data['vat_number'] ?? null,
                     'cr_number' => $data['cr_number'] ?? null,
                     'iban' => $data['iban'] ?? null,
+                    'country' => $data['country'] ?? $tenant->country ?? 'SA',
+                    'currency' => $data['currency'] ?? $tenant->currency ?? 'SAR',
                 ]);
                 break;
 

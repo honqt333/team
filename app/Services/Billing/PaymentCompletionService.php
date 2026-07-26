@@ -72,13 +72,32 @@ class PaymentCompletionService
                     return false;
                 }
 
+                // Preserve remaining active days from previous subscription if active
+                $previousActive = Subscription::where('tenant_id', $subscription->tenant_id)
+                    ->where('id', '!=', $subscription->id)
+                    ->where('status', 'active')
+                    ->where('ends_at', '>', now())
+                    ->orderByDesc('ends_at')
+                    ->first();
+
+                $baseEndDate = ($previousActive && $previousActive->ends_at)
+                    ? $previousActive->ends_at
+                    : now();
+
+                $calculatedEndsAt = $subscription->billing_cycle === 'yearly'
+                    ? $baseEndDate->copy()->addYear()
+                    : $baseEndDate->copy()->addMonth();
+
+                // Expire any existing active/trial subscriptions atomically when new subscription is activated
+                Subscription::where('tenant_id', $subscription->tenant_id)
+                    ->where('id', '!=', $subscription->id)
+                    ->whereIn('status', ['active', 'trial', 'trialing'])
+                    ->update(['status' => 'expired']);
+
                 $subscription->update([
                     'status' => 'active',
-                    'starts_at' => $subscription->starts_at ?? now(),
-                    'ends_at' => $subscription->ends_at
-                        ?? ($subscription->billing_cycle === 'yearly'
-                            ? now()->addYear()
-                            : now()->addMonth()),
+                    'starts_at' => now(),
+                    'ends_at' => $calculatedEndsAt,
                 ]);
 
                 // 3. Mark the invoice paid (if linked)

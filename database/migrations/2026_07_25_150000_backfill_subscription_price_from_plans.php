@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Backfill subscriptions.price from the related plan.
@@ -28,14 +29,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("
-            UPDATE subscriptions
-            SET price = CASE
-                WHEN billing_cycle = 'yearly' THEN COALESCE((SELECT price_yearly FROM plans WHERE plans.id = subscriptions.plan_id), 0)
-                ELSE COALESCE((SELECT price_monthly FROM plans WHERE plans.id = subscriptions.plan_id), 0)
-            END
-            WHERE price = 0
-        ");
+        if (Schema::hasTable('subscriptions') && Schema::hasColumn('subscriptions', 'price')) {
+            DB::statement("
+                UPDATE subscriptions
+                SET price = CASE
+                    WHEN billing_cycle = 'yearly' THEN COALESCE((SELECT price_yearly FROM plans WHERE plans.id = subscriptions.plan_id), 0)
+                    ELSE COALESCE((SELECT price_monthly FROM plans WHERE plans.id = subscriptions.plan_id), 0)
+                END
+                WHERE price = 0
+            ");
+        }
     }
 
     public function down(): void

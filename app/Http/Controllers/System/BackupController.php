@@ -66,9 +66,12 @@ class BackupController extends Controller
             'name' => 'nullable|string|max:255',
         ]);
 
+        $adminUser = Auth::guard('admin')->user();
+        $adminId = $adminUser?->id;
+
         $name = $request->name ?: sprintf(
             'Manual backup by %s @ %s',
-            Auth::guard('admin')->user()?->name ?? 'system',
+            $adminUser?->name ?? Auth::user()?->name ?? 'system',
             now()->format('Y-m-d H:i')
         );
 
@@ -77,18 +80,20 @@ class BackupController extends Controller
                 $tenant,
                 $name,
                 TenantBackup::TYPE_MANUAL,
-                Auth::guard('admin')->id()
+                $adminId
             );
 
-            AdminActivityLog::create([
-                'admin_user_id' => Auth::guard('admin')->id(),
-                'action' => 'backup_create',
-                'model_type' => Tenant::class,
-                'model_id' => $tenant->id,
-                'changes' => ['backup_id' => $backup->id, 'backup_name' => $backup->name],
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
+            if ($adminId) {
+                AdminActivityLog::create([
+                    'admin_user_id' => $adminId,
+                    'action' => 'backup_create',
+                    'model_type' => Tenant::class,
+                    'model_id' => $tenant->id,
+                    'changes' => ['backup_id' => $backup->id, 'backup_name' => $backup->name],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                ]);
+            }
         } catch (Throwable $e) {
             return back()->with('error', 'فشل إنشاء النسخة الاحتياطية: '.$e->getMessage());
         }
@@ -101,15 +106,17 @@ class BackupController extends Controller
      */
     public function download(Request $request, TenantBackup $backup)
     {
-        AdminActivityLog::create([
-            'admin_user_id' => Auth::guard('admin')->id(),
-            'action' => 'backup_download',
-            'model_type' => Tenant::class,
-            'model_id' => $backup->tenant_id,
-            'changes' => ['backup_id' => $backup->id, 'backup_name' => $backup->name],
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        if ($adminId = Auth::guard('admin')->id()) {
+            AdminActivityLog::create([
+                'admin_user_id' => $adminId,
+                'action' => 'backup_download',
+                'model_type' => Tenant::class,
+                'model_id' => $backup->tenant_id,
+                'changes' => ['backup_id' => $backup->id, 'backup_name' => $backup->name],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
 
         return $this->backups->download($backup);
     }
@@ -124,15 +131,17 @@ class BackupController extends Controller
 
         $this->backups->delete($backup);
 
-        AdminActivityLog::create([
-            'admin_user_id' => Auth::guard('admin')->id(),
-            'action' => 'backup_delete',
-            'model_type' => Tenant::class,
-            'model_id' => $tenantId,
-            'changes' => ['backup_name' => $backupName],
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-        ]);
+        if ($adminId = Auth::guard('admin')->id()) {
+            AdminActivityLog::create([
+                'admin_user_id' => $adminId,
+                'action' => 'backup_delete',
+                'model_type' => Tenant::class,
+                'model_id' => $tenantId,
+                'changes' => ['backup_name' => $backupName],
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        }
 
         return back()->with('success', 'تم حذف النسخة الاحتياطية');
     }

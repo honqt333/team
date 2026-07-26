@@ -314,11 +314,25 @@ class CompanySubscriptionController extends Controller
             ->first();
 
         if ($existingPending) {
-            return response()->json([
-                'error' => __('company_profile.subscription.already_pending', [
-                    'plan' => $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en,
-                ]),
-            ], 409);
+            // If the pending request has an uploaded bank receipt, it's under admin review
+            $hasReceipt = $existingPending->receipts()->exists();
+
+            if (! $hasReceipt) {
+                // Online payment attempt or abandoned request: auto-cancel it so payment is never hung
+                $existingPending->update(['status' => 'cancelled']);
+                SubscriptionPayment::where('subscription_id', $existingPending->id)
+                    ->where('status', 'pending')
+                    ->update(['status' => 'failed', 'failure_reason' => 'إلغاء تلقائي لبدء محاولة سداد جديدة']);
+                SubscriptionInvoice::where('subscription_id', $existingPending->id)
+                    ->where('status', 'pending')
+                    ->update(['status' => 'cancelled']);
+            } else {
+                $planName = $existingPending->plan?->name_ar ?? $existingPending->plan?->name_en ?? 'المختارة';
+
+                return response()->json([
+                    'error' => __('company_profile.subscription.receipt_under_review', ['plan' => $planName]),
+                ], 409);
+            }
         }
 
         // Apply promo
@@ -353,20 +367,22 @@ class CompanySubscriptionController extends Controller
         $vatAmount = $vatCalc['vat'];
         $total = $vatCalc['total'];
 
-        // Calculate subscription dates
+        // Calculate subscription dates (preserving any remaining active days)
+        $previousActive = Subscription::where('tenant_id', $tenant->id)
+            ->where('status', 'active')
+            ->where('ends_at', '>', now())
+            ->orderByDesc('ends_at')
+            ->first();
+
         $startDate = now();
+        $baseEndDate = ($previousActive && $previousActive->ends_at) ? $previousActive->ends_at : $startDate;
         $endDate = $validated['billing_cycle'] === 'yearly'
-            ? $startDate->copy()->addYear()
-            : $startDate->copy()->addMonth();
+            ? $baseEndDate->copy()->addYear()
+            : $baseEndDate->copy()->addMonth();
 
         DB::beginTransaction();
 
         try {
-            // Cancel/expire existing active subscriptions
-            Subscription::where('tenant_id', $tenant->id)
-                ->whereIn('status', ['active', 'trial', 'trialing'])
-                ->update(['status' => 'expired']);
-
             // Create new subscription (pending until payment)
             $subscription = Subscription::create([
                 'tenant_id' => $tenant->id,
@@ -579,6 +595,36 @@ class CompanySubscriptionController extends Controller
         return Inertia::render('Settings/Company/SubscriptionFailed', [
             'payment' => $payment,
             'reason' => $result['message'] ?? null,
+        ]);
+    }
+
+    /**
+     * Cancel an in-flight pending subscription / payment (e.g. when tenant closes modal or abandons checkout).
+     */
+    public function cancelPending(Request $request)
+    {
+        $tenant = auth()->user()->tenant;
+
+        $pendingSub = Subscription::where('tenant_id', $tenant->id)
+            ->whereIn('status', ['pending', 'pending_payment'])
+            ->latest()
+            ->first();
+
+        if ($pendingSub) {
+            $pendingSub->update(['status' => 'cancelled']);
+
+            SubscriptionPayment::where('subscription_id', $pendingSub->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'failed', 'failure_reason' => 'ملغي من المستخدم']);
+
+            SubscriptionInvoice::where('subscription_id', $pendingSub->id)
+                ->where('status', 'pending')
+                ->update(['status' => 'cancelled']);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => __('company_profile.subscription.cancelled'),
         ]);
     }
 
@@ -815,10 +861,17 @@ class CompanySubscriptionController extends Controller
             return DB::transaction(function () use ($request, $tenant, $plan, $validated, $basePrice, $discount, $subtotal, $total) {
                 // 1. Subscription (status=pending_payment, awaiting admin
                 //    approval of the receipt)
+                $previousActive = Subscription::where('tenant_id', $tenant->id)
+                    ->where('status', 'active')
+                    ->where('ends_at', '>', now())
+                    ->orderByDesc('ends_at')
+                    ->first();
+
                 $startDate = now();
+                $baseEndDate = ($previousActive && $previousActive->ends_at) ? $previousActive->ends_at : $startDate;
                 $endDate = $validated['billing_cycle'] === 'yearly'
-                    ? $startDate->copy()->addYear()
-                    : $startDate->copy()->addMonth();
+                    ? $baseEndDate->copy()->addYear()
+                    : $baseEndDate->copy()->addMonth();
 
                 $subscription = Subscription::create([
                     'tenant_id' => $tenant->id,

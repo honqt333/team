@@ -198,6 +198,7 @@ return [
 
     // Subscription management (self-service)
     'subscription' => [
+        'already_pending' => 'You already have a pending subscription request for ":plan". Please complete the current payment or wait a moment.',
         'bank_transfer_pending' => 'Your bank transfer subscription request has been received. Your subscription will be activated once the transfer is verified.',
         'bank_transfer_setup_ready' => 'Transfer details are ready. Transfer the amount, then upload the receipt to activate your subscription.',
         'cancelled' => 'Your subscription has been cancelled',

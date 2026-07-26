@@ -49,7 +49,21 @@ watch(
             billingCycle.value = 'monthly';
             promoInput.value = '';
             validPromo.value = null;
-            selectedGateway.value = props.enabledGateways[0]?.name || 'bank_transfer';
+            const available = (props.enabledGateways || [])
+                .map((g) => (typeof g === 'string' ? g : g?.name || g?.key))
+                .filter(Boolean);
+            const pm = props.paymentSettings || {};
+            if (available.includes('moyasar') || pm.moyasar?.enabled) {
+                selectedGateway.value = 'moyasar';
+            } else if (available.includes('bank_transfer') || pm.bank_transfer_enabled) {
+                selectedGateway.value = 'bank_transfer';
+            } else if (available.includes('tap') || pm.tap?.enabled) {
+                selectedGateway.value = 'tap';
+            } else if (available.length > 0) {
+                selectedGateway.value = available[0];
+            } else {
+                selectedGateway.value = 'bank_transfer';
+            }
             pricing.value = null;
             error.value = null;
             success.value = null;
@@ -180,8 +194,23 @@ async function subscribe() {
     }
 }
 
-function close() {
+async function close() {
     if (loading.value) return;
+    if (gatewayFormData.value || bankTransferResult.value) {
+        try {
+            await fetch('/app/settings/company/subscription/cancel-pending', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken.value || '',
+                    Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+        } catch (e) {
+            // silent catch
+        }
+    }
     bankTransferResult.value = null;
     gatewayFormData.value = null;
     currentPaymentId.value = null;

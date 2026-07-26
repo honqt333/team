@@ -114,7 +114,7 @@ class DashboardController extends Controller
             $revenueChart[] = [
                 'date' => $date,
                 'label' => Carbon::parse($date)->format('d/m'),
-                'total' => isset($dailyRevenue[$date]) ? round($dailyRevenue[$date]['total'], 2) : 0,
+                'total' => isset($dailyRevenue[$date]) ? round((float) $dailyRevenue[$date]['total'], 2) : 0,
             ];
         }
 
@@ -131,7 +131,7 @@ class DashboardController extends Controller
             $monthlyRevenue[] = [
                 'month' => $start->format('Y-m'),
                 'label' => $start->locale(app()->getLocale())->isoFormat('MMM'),
-                'total' => round($total, 2),
+                'total' => round((float) $total, 2),
             ];
         }
 
@@ -189,7 +189,7 @@ class DashboardController extends Controller
             ->whereDate('expected_end_date', $today)
             ->orderBy('expected_end_date')
             ->take(10)
-            ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'expected_end_date', 'priority']);
+            ->get(['id', 'code', 'status', 'customer_id', 'vehicle_id', 'expected_end_date']);
 
         // ─── Today's New Work Orders ───────────────────────────────────────
         $todayNewWorkOrders = (clone $workOrdersBase)
@@ -250,7 +250,7 @@ class DashboardController extends Controller
             )
             ->groupBy('service_id')
             ->orderByDesc('times_used')
-            ->with('service:id,name')
+            ->with('service:id,name_ar,name_en')
             ->take(8)
             ->get()
             ->map(fn ($item) => [
@@ -338,10 +338,10 @@ class DashboardController extends Controller
                     'completedToday' => $completedToday,
                 ],
                 'revenue' => [
-                    'thisMonth' => round($revenueThisMonth, 2),
-                    'lastMonth' => round($revenueLastMonth, 2),
-                    'outstanding' => round(max($outstandingBalance, 0), 2),
-                    'paymentsToday' => round($paymentsToday, 2),
+                    'thisMonth' => round((float) $revenueThisMonth, 2),
+                    'lastMonth' => round((float) $revenueLastMonth, 2),
+                    'outstanding' => round((float) max((float) $outstandingBalance, 0), 2),
+                    'paymentsToday' => round((float) $paymentsToday, 2),
                     'avgInvoiceValue' => round((float) $avgInvoiceValue, 2),
                 ],
                 'customers' => [
