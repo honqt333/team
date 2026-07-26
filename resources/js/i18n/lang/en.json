@@ -3607,6 +3607,7 @@
       "integrations": "Integrations",
       "general_settings": "General Settings",
       "payment_settings": "Payment Settings",
+      "company_settings": "Company Settings",
       "developer_center": "Developer Center",
       "back_to_app": "Back to App",
       "backups": "Backups"
@@ -3695,6 +3696,73 @@
       "actions": {
         "save": "Save Settings",
         "saving": "Saving..."
+      }
+    },
+    "company_settings": {
+      "title": "Company Information",
+      "subtitle": "Information shown on tenant invoices and receipts (VAT invoices, etc.)",
+      "sections": {
+        "branding": {
+          "title": "Brand & Logo",
+          "subtitle": "Upload your company logo. It will appear on every invoice, receipt, and official document.",
+          "logo_label": "Company Logo",
+          "logo_hint": "Recommended: PNG with transparent background, square or horizontal (max 4MB).",
+          "upload": "Upload Logo",
+          "replace": "Replace",
+          "remove": "Remove",
+          "no_logo": "No logo uploaded yet",
+          "uploading": "Uploading...",
+          "upload_success": "Logo updated successfully",
+          "remove_confirm": "Remove the company logo? Invoices will fall back to the legal name.",
+          "remove_success": "Logo removed"
+        },
+        "legal": {
+          "title": "Legal & Tax Information",
+          "subtitle": "Required for VAT-compliant invoices in your jurisdiction.",
+          "legal_name_ar": "Legal Name (Arabic)",
+          "legal_name_en": "Legal Name (English)",
+          "vat_number": "VAT Number (15 digits)",
+          "cr_number": "Commercial Registration"
+        },
+        "contact": {
+          "title": "Contact Information",
+          "subtitle": "How tenants can reach you for invoice or payment questions.",
+          "phone": "Contact Phone",
+          "support_email": "Support Email",
+          "website": "Website"
+        },
+        "vat": {
+          "title": "Subscription VAT",
+          "subtitle": "Apply VAT to subscription amounts (shown in the invoice to the tenant)",
+          "enable": "Add VAT to subscriptions",
+          "rate": "VAT Rate (%)",
+          "method": "Calculation Method",
+          "exclusive": "Taxable (added on top of price)",
+          "inclusive": "VAT inclusive (price already includes VAT)",
+          "hint_enabled": "When enabled, VAT is calculated on every subscription invoice.",
+          "preview_net": "Net",
+          "preview_vat": "VAT",
+          "preview_total": "Total"
+        },
+        "preview": {
+          "title": "Invoice Preview",
+          "subtitle": "Live preview of how your data appears on a tenant invoice.",
+          "from_label": "Issued by"
+        }
+      },
+      "fields": {
+        "legal_name_ar": "Legal Name (Arabic)",
+        "legal_name_en": "Legal Name (English)",
+        "vat_number": "VAT Number (15 digits)",
+        "cr_number": "Commercial Registration",
+        "phone": "Contact Phone",
+        "support_email": "Support Email",
+        "website": "Website"
+      },
+      "actions": {
+        "save": "Save Company Information",
+        "saving": "Saving...",
+        "saved": "Company information saved"
       }
     },
     "actions": {

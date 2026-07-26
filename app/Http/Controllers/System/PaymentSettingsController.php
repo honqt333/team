@@ -7,7 +7,6 @@ namespace App\Http\Controllers\System;
 use App\Http\Controllers\Controller;
 use App\Models\PaymentSettings;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,22 +49,7 @@ class PaymentSettingsController extends Controller
             'applepay_enabled' => (bool) ($settings->applepay_enabled ?? true),
             'stcpay_enabled' => (bool) ($settings->stcpay_enabled ?? false),
 
-            // Company info (displayed on tenant invoices/PDFs)
-            'company_legal_name' => $settings->company_legal_name,
-            'company_legal_name_en' => $settings->company_legal_name_en,
-            'company_vat_number' => $settings->company_vat_number,
-            'company_cr_number' => $settings->company_cr_number,
-            'company_phone' => $settings->company_phone,
-            'company_email' => $settings->company_email,
-            'company_website' => $settings->company_website,
-            'company_logo_url' => $settings->company_logo_path
-                ? Storage::url($settings->company_logo_path)
-                : null,
-
-            // Subscription VAT
-            'subscription_vat_enabled' => (bool) ($settings->subscription_vat_enabled ?? false),
-            'subscription_vat_rate' => (float) ($settings->subscription_vat_rate ?? 15),
-            'subscription_vat_inclusive' => (bool) ($settings->subscription_vat_inclusive ?? false),
+            // Company info + Subscription VAT — moved to CompanySettingsController
         ];
 
         return Inertia::render('System/Settings/PaymentSettings', [
@@ -128,19 +112,7 @@ class PaymentSettingsController extends Controller
             'applepay_enabled' => 'boolean',
             'stcpay_enabled' => 'boolean',
 
-            // Company info
-            'company_legal_name' => 'nullable|string|max:255',
-            'company_legal_name_en' => 'nullable|string|max:255',
-            'company_vat_number' => 'nullable|string|max:15',
-            'company_cr_number' => 'nullable|string|max:50',
-            'company_phone' => 'nullable|string|max:50',
-            'company_email' => 'nullable|email|max:255',
-            'company_website' => 'nullable|url|max:255',
-
-            // Subscription VAT
-            'subscription_vat_enabled' => 'boolean',
-            'subscription_vat_rate' => 'nullable|numeric|min:0|max:100',
-            'subscription_vat_inclusive' => 'boolean',
+            // Company info + Subscription VAT — moved to CompanySettingsController
         ]);
 
         $settings = PaymentSettings::first() ?? new PaymentSettings;
@@ -168,19 +140,7 @@ class PaymentSettingsController extends Controller
         $settings->applepay_enabled = (bool) ($validated['applepay_enabled'] ?? true);
         $settings->stcpay_enabled = (bool) ($validated['stcpay_enabled'] ?? false);
 
-        // Company info
-        $settings->company_legal_name = $validated['company_legal_name'] ?? null;
-        $settings->company_legal_name_en = $validated['company_legal_name_en'] ?? null;
-        $settings->company_vat_number = $validated['company_vat_number'] ?? null;
-        $settings->company_cr_number = $validated['company_cr_number'] ?? null;
-        $settings->company_phone = $validated['company_phone'] ?? null;
-        $settings->company_email = $validated['company_email'] ?? null;
-        $settings->company_website = $validated['company_website'] ?? null;
-
-        // Subscription VAT
-        $settings->subscription_vat_enabled = (bool) ($validated['subscription_vat_enabled'] ?? false);
-        $settings->subscription_vat_rate = (float) ($validated['subscription_vat_rate'] ?? 15.00);
-        $settings->subscription_vat_inclusive = (bool) ($validated['subscription_vat_inclusive'] ?? false);
+        // Company info + Subscription VAT — moved to CompanySettingsController
 
         $settings->save();
 

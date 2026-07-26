@@ -93,6 +93,7 @@ use App\Http\Controllers\System\AnnouncementsController;
 use App\Http\Controllers\System\BackupController;
 use App\Http\Controllers\System\BankTransferReceiptsController;
 use App\Http\Controllers\System\CommunicationTemplatesController;
+use App\Http\Controllers\System\CompanySettingsController;
 use App\Http\Controllers\System\ContactMessageController;
 use App\Http\Controllers\System\DeveloperController;
 use App\Http\Controllers\System\GeneralSettingsController;
@@ -846,6 +847,12 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // Payment Settings
     Route::get('/settings/payment', [PaymentSettingsController::class, 'index'])->name('system.settings.payment');
     Route::put('/settings/payment', [PaymentSettingsController::class, 'update'])->name('system.settings.payment.update');
+
+    // Company Settings
+    Route::get('/settings/company', [CompanySettingsController::class, 'index'])->name('system.settings.company');
+    Route::put('/settings/company', [CompanySettingsController::class, 'update'])->name('system.settings.company.update');
+    Route::post('/settings/company/upload-logo', [CompanySettingsController::class, 'uploadLogo'])->name('system.settings.company.upload-logo');
+    Route::delete('/settings/company/logo', [CompanySettingsController::class, 'removeLogo'])->name('system.settings.company.remove-logo');
 
     // General Settings
     Route::get('/settings/general', [GeneralSettingsController::class, 'index'])->name('system.settings.general');
