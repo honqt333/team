@@ -4311,6 +4311,91 @@
         "completed": "مكتمل",
         "invoiced": "مفوتر"
       }
+    },
+    "company_subscription": {
+      "card": {
+        "current_label": "اشتراكك الحالي",
+        "ends": "ينتهي في",
+        "days_left": "{days} يوم متبقي",
+        "price": "سعر الاشتراك",
+        "billing_yearly": "سنوي",
+        "billing_monthly": "شهري",
+        "auto_renew_enabled": "التجديد التلقائي مفعّل",
+        "auto_renew_disabled": "التجديد التلقائي معطّل",
+        "no_subscription": "لا يوجد اشتراك نشط"
+      },
+      "status": {
+        "active": "نشط",
+        "trial": "تجريبي",
+        "trialing": "تجريبي",
+        "pending": "بانتظار الدفع",
+        "pending_payment": "قيد المراجعة",
+        "payment_required": "الدفع مطلوب",
+        "failed": "فشل الدفع",
+        "cancelled": "ملغي",
+        "expired": "منتهي",
+        "refunded": "مسترجع"
+      },
+      "page": {
+        "title": "إدارة الاشتراك",
+        "subtitle": "إدارة باقتك، طرق الدفع، وسجل الفواتير",
+        "my_receipts": "إيصالاتي",
+        "back_to_settings": "العودة للإعدادات",
+        "available_plans": "الباقات المتاحة",
+        "available_plans_subtitle": "اختر الباقة المناسبة لاحتياجات مركزك",
+        "history_title": "سجل الاشتراكات",
+        "history_subtitle": "جميع اشتراكاتك السابقة والحالية",
+        "pending_receipts_title": "إيصالات قيد المراجعة",
+        "pending_receipts_subtitle": "هذه الإيصالات تم رفعها وفي انتظار موافقة الإدارة",
+        "pending_status_badge": "قيد المراجعة",
+        "recent_payments_title": "آخر محاولات الدفع",
+        "recent_payments_subtitle": "سجل بآخر 10 محاولات دفع للاشتراك",
+        "table": {
+          "date": "التاريخ",
+          "gateway": "البوابة",
+          "amount": "المبلغ",
+          "status": "الحالة"
+        },
+        "payment_status": {
+          "paid": "مدفوع",
+          "pending": "معلق",
+          "failed": "فشل",
+          "refunded": "مسترجع"
+        }
+      },
+      "gateways": {
+        "moyasar": "مُيَسَّر",
+        "tap": "تاب",
+        "tabby": "تابي",
+        "tamara": "تمارا",
+        "bank_transfer": "تحويل بنكي"
+      },
+      "history": {
+        "empty": "لا يوجد سجل اشتراكات",
+        "table": {
+          "plan": "الباقة",
+          "cycle": "الفترة",
+          "from": "من",
+          "to": "إلى",
+          "amount": "المبلغ",
+          "status": "الحالة",
+          "actions": "إجراءات"
+        },
+        "cycle_yearly": "سنوي",
+        "cycle_monthly": "شهري",
+        "actions": {
+          "disable_auto_renew": "إيقاف التجديد التلقائي",
+          "enable_auto_renew": "تفعيل التجديد التلقائي",
+          "cancel_subscription": "إلغاء الاشتراك",
+          "resume_subscription": "استئناف الاشتراك"
+        },
+        "confirm_modal": {
+          "title": "تأكيد الإلغاء",
+          "body": "هل أنت متأكد من إلغاء هذا الاشتراك؟ ستفقد الوصول للميزات في نهاية الفترة الحالية.",
+          "go_back": "تراجع",
+          "yes_cancel": "نعم، إلغاء"
+        }
+      }
     }
   },
   "subscription": {

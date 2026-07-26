@@ -4330,6 +4330,91 @@
         "completed": "Completed",
         "invoiced": "Invoiced"
       }
+    },
+    "company_subscription": {
+      "card": {
+        "current_label": "Current subscription",
+        "ends": "Ends",
+        "days_left": "{days} days left",
+        "price": "Price",
+        "billing_yearly": "year",
+        "billing_monthly": "month",
+        "auto_renew_enabled": "Auto-renewal enabled",
+        "auto_renew_disabled": "Auto-renewal disabled",
+        "no_subscription": "No active subscription"
+      },
+      "status": {
+        "active": "Active",
+        "trial": "Trial",
+        "trialing": "Trial",
+        "pending": "Awaiting payment",
+        "pending_payment": "Under review",
+        "payment_required": "Payment required",
+        "failed": "Payment failed",
+        "cancelled": "Cancelled",
+        "expired": "Expired",
+        "refunded": "Refunded"
+      },
+      "page": {
+        "title": "Subscription Management",
+        "subtitle": "Manage your plan, payment methods, and invoice history",
+        "my_receipts": "My receipts",
+        "back_to_settings": "Back to settings",
+        "available_plans": "Available plans",
+        "available_plans_subtitle": "Choose the plan that fits your center's needs",
+        "history_title": "Subscription history",
+        "history_subtitle": "All your past and current subscriptions",
+        "pending_receipts_title": "Receipts under review",
+        "pending_receipts_subtitle": "These receipts have been uploaded and are awaiting admin approval",
+        "pending_status_badge": "Pending",
+        "recent_payments_title": "Recent payment attempts",
+        "recent_payments_subtitle": "Last 10 payment attempts for your subscription",
+        "table": {
+          "date": "Date",
+          "gateway": "Gateway",
+          "amount": "Amount",
+          "status": "Status"
+        },
+        "payment_status": {
+          "paid": "Paid",
+          "pending": "Pending",
+          "failed": "Failed",
+          "refunded": "Refunded"
+        }
+      },
+      "gateways": {
+        "moyasar": "Moyasar",
+        "tap": "Tap",
+        "tabby": "Tabby",
+        "tamara": "Tamara",
+        "bank_transfer": "Bank Transfer"
+      },
+      "history": {
+        "empty": "No subscription history",
+        "table": {
+          "plan": "Plan",
+          "cycle": "Cycle",
+          "from": "From",
+          "to": "To",
+          "amount": "Amount",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "cycle_yearly": "Yearly",
+        "cycle_monthly": "Monthly",
+        "actions": {
+          "disable_auto_renew": "Disable auto-renew",
+          "enable_auto_renew": "Enable auto-renew",
+          "cancel_subscription": "Cancel subscription",
+          "resume_subscription": "Resume subscription"
+        },
+        "confirm_modal": {
+          "title": "Confirm cancellation",
+          "body": "Are you sure you want to cancel this subscription? You will lose access to features at the end of the current period.",
+          "go_back": "Go back",
+          "yes_cancel": "Yes, cancel"
+        }
+      }
     }
   },
   "subscription": {

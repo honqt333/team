@@ -1,11 +1,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { Head, router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SubscriptionCard from '@/Components/Subscription/SubscriptionCard.vue';
 import PlanCard from '@/Components/Subscription/PlanCard.vue';
 import SubscribeModal from '@/Components/Subscription/SubscribeModal.vue';
 import SubscriptionHistoryTable from '@/Components/Subscription/SubscriptionHistoryTable.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     current_subscription: { type: Object, default: null },
@@ -74,27 +77,15 @@ onMounted(() => {
     }
 });
 
-const statusConfig = {
-    paid: {
-        label_ar: 'مدفوع',
-        label_en: 'Paid',
-        class: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
-    },
-    pending: {
-        label_ar: 'معلق',
-        label_en: 'Pending',
-        class: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
-    },
-    failed: {
-        label_ar: 'فشل',
-        label_en: 'Failed',
-        class: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
-    },
-    refunded: {
-        label_ar: 'مسترجع',
-        label_en: 'Refunded',
-        class: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
-    },
+const statusClass = (status) => {
+    return (
+        {
+            paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+            pending: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+            failed: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
+            refunded: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+        }[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300'
+    );
 };
 
 const formatDate = (dateStr) => {
@@ -110,17 +101,13 @@ const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(amount || 0);
 };
 
-const gatewayLabels = {
-    moyasar: { ar: 'مُيَسَّر', en: 'Moyasar' },
-    tap: { ar: 'تاب', en: 'Tap' },
-    tabby: { ar: 'تابي', en: 'Tabby' },
-    tamara: { ar: 'تمارا', en: 'Tamara' },
-    bank_transfer: { ar: 'تحويل بنكي', en: 'Bank Transfer' },
+const gatewayLabel = (gateway) => {
+    return t(`system.company_subscription.gateways.${gateway}`) || gateway;
 };
 </script>
 
 <template>
-    <Head :title="locale === 'ar' ? 'إدارة الاشتراك' : 'Subscription Management'" />
+    <Head :title="t('system.company_subscription.page.title')" />
 
     <AppLayout>
         <div class="space-y-6">
@@ -131,14 +118,10 @@ const gatewayLabels = {
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                         <h1 class="text-xl font-bold text-slate-900 dark:text-white">
-                            {{ locale === 'ar' ? 'إدارة الاشتراك' : 'Subscription Management' }}
+                            {{ t('system.company_subscription.page.title') }}
                         </h1>
                         <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {{
-                                locale === 'ar'
-                                    ? 'إدارة باقتك، طرق الدفع، وسجل الفواتير'
-                                    : 'Manage your plan, payment methods, and invoice history'
-                            }}
+                            {{ t('system.company_subscription.page.subtitle') }}
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
@@ -159,7 +142,7 @@ const gatewayLabels = {
                                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                 />
                             </svg>
-                            {{ locale === 'ar' ? 'إيصالاتي' : 'My receipts' }}
+                            {{ t('system.company_subscription.page.my_receipts') }}
                         </a>
                         <a
                             href="/app/settings/company"
@@ -178,7 +161,7 @@ const gatewayLabels = {
                                     d="M10 19l-7-7m0 0l7-7m-7 7h18"
                                 />
                             </svg>
-                            {{ locale === 'ar' ? 'العودة للإعدادات' : 'Back to settings' }}
+                            {{ t('system.company_subscription.page.back_to_settings') }}
                         </a>
                     </div>
                 </div>
@@ -192,14 +175,10 @@ const gatewayLabels = {
                 class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800"
             >
                 <h2 class="mb-1 text-base font-bold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'الباقات المتاحة' : 'Available plans' }}
+                    {{ t('system.company_subscription.page.available_plans') }}
                 </h2>
                 <p class="mb-5 text-xs text-slate-500 dark:text-slate-400">
-                    {{
-                        locale === 'ar'
-                            ? 'اختر الباقة المناسبة لاحتياجات مركزك'
-                            : "Choose the plan that fits your center's needs"
-                    }}
+                    {{ t('system.company_subscription.page.available_plans_subtitle') }}
                 </p>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -219,14 +198,10 @@ const gatewayLabels = {
                 class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800"
             >
                 <h2 class="mb-1 text-base font-bold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'سجل الاشتراكات' : 'Subscription history' }}
+                    {{ t('system.company_subscription.page.history_title') }}
                 </h2>
                 <p class="mb-5 text-xs text-slate-500 dark:text-slate-400">
-                    {{
-                        locale === 'ar'
-                            ? 'جميع اشتراكاتك السابقة والحالية'
-                            : 'All your past and current subscriptions'
-                    }}
+                    {{ t('system.company_subscription.page.history_subtitle') }}
                 </p>
                 <SubscriptionHistoryTable
                     :subscriptions="subscription_history"
@@ -240,14 +215,10 @@ const gatewayLabels = {
                 class="rounded-2xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-800/50 dark:bg-amber-900/10"
             >
                 <h2 class="mb-1 text-base font-bold text-amber-900 dark:text-amber-200">
-                    {{ locale === 'ar' ? 'إيصالات قيد المراجعة' : 'Receipts under review' }}
+                    {{ t('system.company_subscription.page.pending_receipts_title') }}
                 </h2>
                 <p class="mb-5 text-xs text-amber-700/80 dark:text-amber-300/80">
-                    {{
-                        locale === 'ar'
-                            ? 'هذه الإيصالات تم رفعها وفي انتظار موافقة الإدارة'
-                            : 'These receipts have been uploaded and are awaiting admin approval'
-                    }}
+                    {{ t('system.company_subscription.page.pending_receipts_subtitle') }}
                 </p>
                 <div class="space-y-2">
                     <div
@@ -290,7 +261,7 @@ const gatewayLabels = {
                         <span
                             class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300"
                         >
-                            {{ locale === 'ar' ? 'قيد المراجعة' : 'Pending' }}
+                            {{ t('system.company_subscription.page.pending_status_badge') }}
                         </span>
                     </div>
                 </div>
@@ -302,14 +273,10 @@ const gatewayLabels = {
                 class="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800"
             >
                 <h2 class="mb-1 text-base font-bold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'آخر محاولات الدفع' : 'Recent payment attempts' }}
+                    {{ t('system.company_subscription.page.recent_payments_title') }}
                 </h2>
                 <p class="mb-5 text-xs text-slate-500 dark:text-slate-400">
-                    {{
-                        locale === 'ar'
-                            ? 'سجل بآخر 10 محاولات دفع للاشتراك'
-                            : 'Last 10 payment attempts for your subscription'
-                    }}
+                    {{ t('system.company_subscription.page.recent_payments_subtitle') }}
                 </p>
 
                 <div
@@ -321,22 +288,22 @@ const gatewayLabels = {
                                 <th
                                     class="px-4 py-2.5 text-start text-xs font-bold uppercase tracking-wider text-slate-500"
                                 >
-                                    {{ locale === 'ar' ? 'التاريخ' : 'Date' }}
+                                    {{ t('system.company_subscription.page.table.date') }}
                                 </th>
                                 <th
                                     class="px-4 py-2.5 text-start text-xs font-bold uppercase tracking-wider text-slate-500"
                                 >
-                                    {{ locale === 'ar' ? 'البوابة' : 'Gateway' }}
+                                    {{ t('system.company_subscription.page.table.gateway') }}
                                 </th>
                                 <th
                                     class="px-4 py-2.5 text-start text-xs font-bold uppercase tracking-wider text-slate-500"
                                 >
-                                    {{ locale === 'ar' ? 'المبلغ' : 'Amount' }}
+                                    {{ t('system.company_subscription.page.table.amount') }}
                                 </th>
                                 <th
                                     class="px-4 py-2.5 text-start text-xs font-bold uppercase tracking-wider text-slate-500"
                                 >
-                                    {{ locale === 'ar' ? 'الحالة' : 'Status' }}
+                                    {{ t('system.company_subscription.page.table.status') }}
                                 </th>
                             </tr>
                         </thead>
@@ -352,11 +319,7 @@ const gatewayLabels = {
                                     {{ formatDate(payment.created_at) }}
                                 </td>
                                 <td class="px-4 py-2.5 text-slate-700 dark:text-slate-200">
-                                    {{
-                                        gatewayLabels[payment.gateway]?.[
-                                            locale === 'ar' ? 'ar' : 'en'
-                                        ] || payment.gateway
-                                    }}
+                                    {{ gatewayLabel(payment.gateway) }}
                                 </td>
                                 <td
                                     class="px-4 py-2.5 font-mono font-semibold text-slate-900 dark:text-white"
@@ -367,16 +330,17 @@ const gatewayLabels = {
                                     <span
                                         :class="[
                                             'inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs font-semibold',
-                                            statusConfig[payment.status]?.class,
+                                            statusClass(payment.status),
                                         ]"
                                     >
                                         <span
                                             class="h-1.5 w-1.5 rounded-full bg-current opacity-70"
                                         ></span>
                                         {{
-                                            locale === 'ar'
-                                                ? statusConfig[payment.status]?.label_ar
-                                                : statusConfig[payment.status]?.label_en
+                                            t(
+                                                `system.company_subscription.page.payment_status.${payment.status}`,
+                                                payment.status
+                                            )
                                         }}
                                     </span>
                                 </td>

@@ -1,5 +1,8 @@
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const props = defineProps({
     subscription: { type: Object, default: null },
@@ -9,58 +12,42 @@ const locale = computed(() => document.documentElement.lang || 'ar');
 
 const statusConfig = {
     active: {
-        label_ar: 'نشط',
-        label_en: 'Active',
         class: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
     },
     trialing: {
-        label_ar: 'تجريبي',
-        label_en: 'Trial',
         class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     },
     trial: {
-        label_ar: 'تجريبي',
-        label_en: 'Trial',
         class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     },
     pending: {
-        label_ar: 'بانتظار الدفع',
-        label_en: 'Awaiting payment',
         class: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
     },
     pending_payment: {
-        label_ar: 'قيد المراجعة',
-        label_en: 'Under review',
         class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     },
     payment_required: {
-        label_ar: 'الدفع مطلوب',
-        label_en: 'Payment required',
         class: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
     },
     failed: {
-        label_ar: 'فشل الدفع',
-        label_en: 'Payment failed',
         class: 'bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-300',
     },
     cancelled: {
-        label_ar: 'ملغي',
-        label_en: 'Cancelled',
         class: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
     },
     expired: {
-        label_ar: 'منتهي',
-        label_en: 'Expired',
         class: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     },
     refunded: {
-        label_ar: 'مسترجع',
-        label_en: 'Refunded',
         class: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
     },
 };
 
 const status = computed(() => statusConfig[props.subscription?.status] || statusConfig.pending);
+const statusLabel = computed(() => {
+    const key = `system.company_subscription.status.${props.subscription?.status || 'pending'}`;
+    return t(key);
+});
 
 const planName = computed(() => {
     if (!props.subscription) return '';
@@ -128,10 +115,10 @@ const formatCurrency = (amount) => {
                     <span
                         class="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
                     >
-                        {{ locale === 'ar' ? 'اشتراكك الحالي' : 'Current subscription' }}
+                        {{ t('system.company_subscription.card.current_label') }}
                     </span>
                     <span :class="['rounded-full px-2 py-0.5 text-[10px] font-bold', status.class]">
-                        {{ locale === 'ar' ? status.label_ar : status.label_en }}
+                        {{ statusLabel }}
                     </span>
                 </div>
                 <h3 class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">
@@ -139,11 +126,13 @@ const formatCurrency = (amount) => {
                 </h3>
                 <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     <span v-if="subscription.ends_at">
-                        {{ locale === 'ar' ? 'ينتهي في' : 'Ends' }}:
+                        {{ t('system.company_subscription.card.ends') }}:
                         <span class="font-mono">{{ formatDate(subscription.ends_at) }}</span>
                         <span v-if="daysLeft !== null" class="ms-2 text-xs">
                             ({{
-                                locale === 'ar' ? `${daysLeft} يوم متبقي` : `${daysLeft} days left`
+                                t('system.company_subscription.card.days_left', {
+                                    days: daysLeft,
+                                })
                             }})
                         </span>
                     </span>
@@ -152,7 +141,7 @@ const formatCurrency = (amount) => {
 
             <div class="text-start md:text-end">
                 <p class="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    {{ locale === 'ar' ? 'سعر الاشتراك' : 'Price' }}
+                    {{ t('system.company_subscription.card.price') }}
                 </p>
                 <p class="mt-1 text-3xl font-black text-slate-900 dark:text-white">
                     {{ formatCurrency(effectivePrice) }}
@@ -162,12 +151,8 @@ const formatCurrency = (amount) => {
                     /
                     {{
                         subscription.billing_cycle === 'yearly'
-                            ? locale === 'ar'
-                                ? 'سنوي'
-                                : 'year'
-                            : locale === 'ar'
-                              ? 'شهري'
-                              : 'month'
+                            ? t('system.company_subscription.card.billing_yearly')
+                            : t('system.company_subscription.card.billing_monthly')
                     }}
                 </p>
             </div>
@@ -195,12 +180,8 @@ const formatCurrency = (amount) => {
             <span>
                 {{
                     subscription.auto_renew
-                        ? locale === 'ar'
-                            ? 'التجديد التلقائي مفعّل'
-                            : 'Auto-renewal enabled'
-                        : locale === 'ar'
-                          ? 'التجديد التلقائي معطّل'
-                          : 'Auto-renewal disabled'
+                        ? t('system.company_subscription.card.auto_renew_enabled')
+                        : t('system.company_subscription.card.auto_renew_disabled')
                 }}
             </span>
         </div>

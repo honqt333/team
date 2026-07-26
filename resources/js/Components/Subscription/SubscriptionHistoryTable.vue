@@ -1,6 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { router } from '@inertiajs/vue3';
+
+const { t } = useI18n();
 
 const props = defineProps({
     subscriptions: { type: Array, default: () => [] },
@@ -16,35 +19,27 @@ const confirmCancel = ref(null);
 
 const statusConfig = {
     active: {
-        label_ar: 'نشط',
-        label_en: 'Active',
         class: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
     },
     trialing: {
-        label_ar: 'تجريبي',
-        label_en: 'Trial',
         class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     },
     trial: {
-        label_ar: 'تجريبي',
-        label_en: 'Trial',
         class: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
     },
     pending: {
-        label_ar: 'معلق',
-        label_en: 'Pending',
         class: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
     },
     cancelled: {
-        label_ar: 'ملغي',
-        label_en: 'Cancelled',
         class: 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',
     },
     expired: {
-        label_ar: 'منتهي',
-        label_en: 'Expired',
         class: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
     },
+};
+
+const statusLabel = (status) => {
+    return t(`system.company_subscription.status.${status}`);
 };
 
 const planName = (sub) => {
@@ -134,7 +129,7 @@ async function toggleAutoRenew(sub) {
             class="rounded-lg border border-dashed border-slate-200 p-8 text-center dark:border-slate-700"
         >
             <p class="text-sm text-slate-500 dark:text-slate-400">
-                {{ locale === 'ar' ? 'لا يوجد سجل اشتراكات' : 'No subscription history' }}
+                {{ t('system.company_subscription.history.empty') }}
             </p>
         </div>
 
@@ -148,37 +143,37 @@ async function toggleAutoRenew(sub) {
                         <th
                             class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                         >
-                            {{ locale === 'ar' ? 'الباقة' : 'Plan' }}
+                            {{ t('system.company_subscription.history.table.plan') }}
                         </th>
                         <th
                             class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                         >
-                            {{ locale === 'ar' ? 'الفترة' : 'Cycle' }}
+                            {{ t('system.company_subscription.history.table.cycle') }}
                         </th>
                         <th
                             class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                         >
-                            {{ locale === 'ar' ? 'من' : 'From' }}
+                            {{ t('system.company_subscription.history.table.from') }}
                         </th>
                         <th
                             class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                         >
-                            {{ locale === 'ar' ? 'إلى' : 'To' }}
+                            {{ t('system.company_subscription.history.table.to') }}
                         </th>
                         <th
                             class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                         >
-                            {{ locale === 'ar' ? 'المبلغ' : 'Amount' }}
+                            {{ t('system.company_subscription.history.table.amount') }}
                         </th>
                         <th
                             class="px-4 py-3 text-start text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                         >
-                            {{ locale === 'ar' ? 'الحالة' : 'Status' }}
+                            {{ t('system.company_subscription.history.table.status') }}
                         </th>
                         <th
                             class="px-4 py-3 text-end text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
                         >
-                            {{ locale === 'ar' ? 'إجراءات' : 'Actions' }}
+                            {{ t('system.company_subscription.history.table.actions') }}
                         </th>
                     </tr>
                 </thead>
@@ -202,12 +197,8 @@ async function toggleAutoRenew(sub) {
                         <td class="px-4 py-3 text-slate-600 dark:text-slate-300">
                             {{
                                 sub.billing_cycle === 'yearly'
-                                    ? locale === 'ar'
-                                        ? 'سنوي'
-                                        : 'Yearly'
-                                    : locale === 'ar'
-                                      ? 'شهري'
-                                      : 'Monthly'
+                                    ? t('system.company_subscription.history.cycle_yearly')
+                                    : t('system.company_subscription.history.cycle_monthly')
                             }}
                         </td>
                         <td class="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">
@@ -227,11 +218,7 @@ async function toggleAutoRenew(sub) {
                                 ]"
                             >
                                 <span class="h-1.5 w-1.5 rounded-full bg-current opacity-70"></span>
-                                {{
-                                    locale === 'ar'
-                                        ? statusConfig[sub.status]?.label_ar
-                                        : statusConfig[sub.status]?.label_en
-                                }}
+                                {{ statusLabel(sub.status) }}
                             </span>
                         </td>
                         <td class="px-4 py-3 text-end">
@@ -244,12 +231,12 @@ async function toggleAutoRenew(sub) {
                                     :disabled="processing === sub.id"
                                     :title="
                                         sub.auto_renew
-                                            ? locale === 'ar'
-                                                ? 'إيقاف التجديد التلقائي'
-                                                : 'Disable auto-renew'
-                                            : locale === 'ar'
-                                              ? 'تفعيل التجديد التلقائي'
-                                              : 'Enable auto-renew'
+                                            ? t(
+                                                  'system.company_subscription.history.actions.disable_auto_renew'
+                                              )
+                                            : t(
+                                                  'system.company_subscription.history.actions.enable_auto_renew'
+                                              )
                                     "
                                     :class="[
                                         'rounded p-1.5 transition-colors disabled:opacity-50',
@@ -284,7 +271,9 @@ async function toggleAutoRenew(sub) {
                                     :disabled="processing === sub.id"
                                     class="rounded p-1.5 text-rose-600 hover:bg-rose-50 disabled:opacity-50 dark:hover:bg-rose-900/30"
                                     :title="
-                                        locale === 'ar' ? 'إلغاء الاشتراك' : 'Cancel subscription'
+                                        t(
+                                            'system.company_subscription.history.actions.cancel_subscription'
+                                        )
                                     "
                                 >
                                     <svg
@@ -310,7 +299,9 @@ async function toggleAutoRenew(sub) {
                                     :disabled="processing === sub.id"
                                     class="rounded p-1.5 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50 dark:hover:bg-emerald-900/30"
                                     :title="
-                                        locale === 'ar' ? 'استئناف الاشتراك' : 'Resume subscription'
+                                        t(
+                                            'system.company_subscription.history.actions.resume_subscription'
+                                        )
                                     "
                                 >
                                     <svg
@@ -355,14 +346,10 @@ async function toggleAutoRenew(sub) {
                         </svg>
                     </div>
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">
-                        {{ locale === 'ar' ? 'تأكيد الإلغاء' : 'Confirm cancellation' }}
+                        {{ t('system.company_subscription.history.confirm_modal.title') }}
                     </h3>
                     <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                        {{
-                            locale === 'ar'
-                                ? 'هل أنت متأكد من إلغاء هذا الاشتراك؟ ستفقد الوصول للميزات في نهاية الفترة الحالية.'
-                                : 'Are you sure you want to cancel this subscription? You will lose access to features at the end of the current period.'
-                        }}
+                        {{ t('system.company_subscription.history.confirm_modal.body') }}
                     </p>
                     <div class="mt-6 flex justify-end gap-2">
                         <button
@@ -370,7 +357,7 @@ async function toggleAutoRenew(sub) {
                             @click="confirmCancel = null"
                             class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300"
                         >
-                            {{ locale === 'ar' ? 'تراجع' : 'Go back' }}
+                            {{ t('system.company_subscription.history.confirm_modal.go_back') }}
                         </button>
                         <button
                             type="button"
@@ -378,7 +365,7 @@ async function toggleAutoRenew(sub) {
                             :disabled="processing === confirmCancel.id"
                             class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
                         >
-                            {{ locale === 'ar' ? 'نعم، إلغاء' : 'Yes, cancel' }}
+                            {{ t('system.company_subscription.history.confirm_modal.yes_cancel') }}
                         </button>
                     </div>
                 </div>
