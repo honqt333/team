@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -35,10 +37,10 @@ return new class extends Migration
      * For maximum portability we use correlated subqueries — slower but
      * supported on every driver the project targets (mysql, sqlite).
      *
-     * @param  string  $target  target table name
-     * @param  string  $source  source table name (provides tenant/center)
-     * @param  string  $fkColumn  foreign-key column on target that points at source.id
-     * @param  array  $cols  ['target_col' => 'source_col', ...]
+     * @param string $target target table name
+     * @param string $source source table name (provides tenant/center)
+     * @param string $fkColumn foreign-key column on target that points at source.id
+     * @param array $cols ['target_col' => 'source_col', ...]
      */
     private function backfillFromParent(
         string $target,
@@ -266,16 +268,12 @@ return new class extends Migration
             $table->foreign('center_id')->references('id')->on('centers')->nullOnDelete();
         });
 
-        // 16. installments (subscription_invoice → tenant via subscription_invoices)
-        Schema::table('installments', function (Blueprint $table) {
-            $table->foreignId('tenant_id')->nullable()->after('subscription_invoice_id')->constrained()->nullOnDelete();
-            $table->index('tenant_id');
-        });
-        $this->backfillFromParent('installments', 'subscription_invoices', 'subscription_invoice_id', ['tenant_id' => 'tenant_id']);
-        Schema::table('installments', function (Blueprint $table) {
-            $table->dropForeign(['tenant_id']);
-            $table->foreign('tenant_id')->references('id')->on('tenants')->nullOnDelete();
-        });
+        // 16. installments — REMOVED (the Installments feature was deleted
+        // in the Phase 0 cleanup; the table is no longer created, so any
+        // ALTER TABLE on it would crash this migration on fresh installs.
+        // Keeping the original block as a no-op so the surrounding
+        // migration numbers stay stable and any dev running an old DB
+        // with the table still in place just sees the migration skip.)
 
         // 17. grn_items (goods_received_note → purchase_order → tenant)
         Schema::table('grn_items', function (Blueprint $table) {
@@ -316,7 +314,11 @@ return new class extends Migration
             'work_order_photos', 'purchase_return_invoice_lines', 'inventory_moves',
             'installments', 'grn_items', 'quote_lines',
         ];
+
         foreach ($tables as $t) {
+            if (! Schema::hasTable($t)) {
+                continue; // table dropped (e.g. installments removed in Phase 0)
+            }
             Schema::table($t, function (Blueprint $table) use ($t) {
                 foreach (['tenant_id', 'center_id'] as $col) {
                     if (Schema::hasColumn($t, $col)) {
@@ -332,6 +334,7 @@ return new class extends Migration
                 if (Schema::hasColumn($t, 'center_id')) {
                     $table->dropColumn('center_id');
                 }
+
                 if (Schema::hasColumn($t, 'tenant_id')) {
                     $table->dropColumn('tenant_id');
                 }

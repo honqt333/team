@@ -250,6 +250,13 @@ class BillingController extends Controller
                 'rate' => (float) $paymentSettings->getSubscriptionVatRate(),
                 'inclusive' => (bool) $paymentSettings->subscription_vat_inclusive,
             ],
+            // Phase 6: tenant's dunning preferences (opt-out + lang).
+            // Used by DunningPreferencesCard in the Billing page.
+            'tenant' => $tenant ? [
+                'id' => $tenant->id,
+                'dunning_opted_out' => (bool) $tenant->dunning_opted_out,
+                'dunning_language' => $tenant->dunning_language,
+            ] : null,
         ]);
     }
 }

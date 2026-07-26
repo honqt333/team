@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\App;
 
+use App\Events\Billing\ReceiptSubmitted;
 use App\Http\Controllers\Controller;
 use App\Models\BankTransferReceipt;
 use App\Models\Billing\Plan;
@@ -17,6 +18,7 @@ use App\Services\Payment\PaymentManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Throwable;
 
@@ -165,8 +167,6 @@ class CompanySubscriptionController extends Controller
             'billing_cycle' => 'required|in:monthly,yearly',
             'gateway' => 'required|in:moyasar,tap,tabby,tamara,bank_transfer,paytabs',
             'promo_code' => 'nullable|string',
-            'use_installments' => 'boolean',
-            'installment_count' => 'nullable|integer|in:2,3,4,6,12',
         ]);
 
         $tenant = auth()->user()->tenant;
@@ -294,6 +294,24 @@ class CompanySubscriptionController extends Controller
             if ($validated['gateway'] === 'bank_transfer') {
                 DB::rollBack();
 
+                // Pass any pre-existing unpaid invoices so the upload form
+                // can show an explicit "which invoice are you paying?"
+                // dropdown when the tenant has more than one open invoice.
+                // Empty array = single-invoice case, dropdown is hidden.
+                $pendingInvoices = $tenant->invoices()
+                    ->whereIn('status', ['pending', 'pending_payment', 'overdue'])
+                    ->orderBy('due_at')
+                    ->get(['id', 'invoice_number', 'total', 'due_at', 'status'])
+                    ->map(fn ($inv) => [
+                        'id' => $inv->id,
+                        'invoice_number' => $inv->invoice_number,
+                        'amount' => (float) $inv->total,
+                        'due_date' => $inv->due_at?->toDateString(),
+                        'status' => $inv->status,
+                    ])
+                    ->values()
+                    ->all();
+
                 return response()->json([
                     'bank_transfer_setup' => true,
                     'plan' => $plan,
@@ -304,6 +322,7 @@ class CompanySubscriptionController extends Controller
                     'total' => $total,
                     'bank_accounts' => $paymentSettings->bank_accounts ?? [],
                     'bank_instructions' => $paymentSettings->bank_transfer_instructions,
+                    'pending_invoices' => $pendingInvoices,
                     'message' => __('company_profile.subscription.bank_transfer_setup_ready'),
                 ]);
             }
@@ -636,6 +655,13 @@ class CompanySubscriptionController extends Controller
                     'notes' => $validated['notes'] ?? null,
                 ]);
 
+                // Fire the event AFTER the DB::transaction so listeners
+                // see the committed row. We use event() (synchronous) here
+                // because the notification is just an INSERT — no need
+                // for a queue worker on a small system. Switch to
+                // ReceiptSubmitted::dispatch() if you want it queued.
+                event(new ReceiptSubmitted($receipt));
+
                 // Move the subscription to pending_payment while admin reviews
                 if ($subscription->status !== 'pending_payment') {
                     $subscription->update(['status' => 'pending_payment']);
@@ -674,20 +700,46 @@ class CompanySubscriptionController extends Controller
      */
     public function uploadBankTransferReceipt(Request $request)
     {
+        $tenant = auth()->user()->tenant;
+
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
             'billing_cycle' => 'required|in:monthly,yearly',
             'promo_code' => 'nullable|string|max:50',
             'transfer_amount' => 'required|numeric|min:0.01',
-            'transfer_reference' => 'required|string|max:255',
-            'transfer_date' => 'required|date',
+            // The reference is unique per tenant for PENDING receipts.
+            // Once a receipt is approved/rejected, the tenant can re-use
+            // the same reference (e.g. correcting a typo) — only the
+            // active review queue matters for fraud detection.
+            'transfer_reference' => [
+                'required', 'string', 'max:255',
+                Rule::unique('bank_transfer_receipts', 'transfer_reference')
+                    ->where('tenant_id', $tenant->id)
+                    ->where('status', BankTransferReceipt::STATUS_PENDING),
+            ],
+            'transfer_date' => 'required|date|before_or_equal:today',
             'bank_name' => 'required|string|max:255',
             'account_name' => 'required|string|max:255',
             'receipt' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240', // 10MB
             'notes' => 'nullable|string|max:1000',
+            // Optional: link the receipt to a specific invoice instead of
+            // the implicit "latest pending payment" fallback. The invoice
+            // must belong to the same tenant to prevent cross-tenant
+            // receipt routing.
+            'subscription_invoice_id' => [
+                'nullable',
+                Rule::exists('subscription_invoices', 'id')
+                    ->where('tenant_id', $tenant->id),
+            ],
         ]);
 
-        $tenant = auth()->user()->tenant;
+        // Re-validate tenant after the (now tenant-scoped) rules — the
+        // $tenant above was loaded before the validator ran, which is
+        // fine for the unique check but we want to bail out cleanly if
+        // somehow the user has no tenant (defensive).
+        if (! $tenant) {
+            return response()->json(['error' => 'لا يوجد مستأجر مرتبط بحسابك'], 403);
+        }
         $plan = Plan::findOrFail($validated['plan_id']);
         $basePrice = $validated['billing_cycle'] === 'yearly'
             ? (float) $plan->price_yearly
@@ -821,6 +873,12 @@ class CompanySubscriptionController extends Controller
                     'notes' => $validated['notes'] ?? null,
                 ]);
 
+                // Fire the event AFTER the DB::transaction commits so the
+                // listener can read the row safely. Synchronous — the
+                // listener just writes one row per admin. Move to
+                // ReceiptSubmitted::dispatch() if you want queueing.
+                event(new ReceiptSubmitted($receipt));
+
                 return response()->json([
                     'success' => true,
                     'subscription' => $subscription->fresh()->load('plan'),
@@ -844,6 +902,37 @@ class CompanySubscriptionController extends Controller
     }
 
     /**
+     * Real-time check used by the upload form: does this tenant already
+     * have a PENDING receipt with this transfer reference? The form
+     * calls this on every keystroke (debounced) so the user sees the
+     * "duplicate reference" error before they hit Submit.
+     *
+     * Returns JSON: { exists: bool, receipt_id?: int }
+     */
+    public function checkTransferReference(Request $request)
+    {
+        $validated = $request->validate([
+            'ref' => 'required|string|max:255',
+        ]);
+
+        $tenant = auth()->user()->tenant;
+
+        if (! $tenant) {
+            return response()->json(['exists' => false]);
+        }
+
+        $existing = BankTransferReceipt::where('tenant_id', $tenant->id)
+            ->where('transfer_reference', $validated['ref'])
+            ->where('status', BankTransferReceipt::STATUS_PENDING)
+            ->first(['id', 'created_at']);
+
+        return response()->json([
+            'exists' => (bool) $existing,
+            'receipt_id' => $existing?->id,
+        ]);
+    }
+
+    /**
      * List the current tenant's bank transfer receipts.
      *
      * DEPRECATED — receipts are now shown inline in the Billing hub
@@ -854,5 +943,35 @@ class CompanySubscriptionController extends Controller
     public function myReceipts(Request $request)
     {
         return redirect()->route('app.billing.index');
+    }
+
+    /**
+     * Update the tenant's dunning preferences — opt-out flag and
+     * preferred language for collection reminders. Phase 6.
+     *
+     * This is the tenant's last line of control: even if the admin
+     * has dunning globally enabled, a tenant who toggles
+     * dunning_opted_out = true will not receive any reminders
+     * (DunningService::findCandidates() short-circuits on it).
+     */
+    public function updateDunningPreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'dunning_opted_out' => ['required', 'boolean'],
+            'dunning_language' => ['nullable', 'in:ar,en'],
+        ]);
+
+        $tenant = $request->user()->tenant;
+
+        if (! $tenant) {
+            return back()->withErrors(['dunning_opted_out' => __('No tenant context.')]);
+        }
+
+        $tenant->update([
+            'dunning_opted_out' => $validated['dunning_opted_out'],
+            'dunning_language' => $validated['dunning_language'] ?? null,
+        ]);
+
+        return back()->with('success', __('Dunning preferences updated.'));
     }
 }

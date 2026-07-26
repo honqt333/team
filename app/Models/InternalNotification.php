@@ -22,6 +22,7 @@ class InternalNotification extends Model
         'tenant_id',
         'user_id',
         'actor_id',
+        'admin_id',
         'type',
         'title',
         'body',
@@ -53,6 +54,11 @@ class InternalNotification extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(AdminUser::class, 'admin_id');
     }
 
     public function actor(): BelongsTo

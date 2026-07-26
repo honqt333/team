@@ -74,6 +74,24 @@
         >
             🗑️ حذف نهائي
         </button>
+
+        <!-- Open tenant billing dashboard in a new tab (super_admin only) -->
+        <a
+            v-if="tenant.id"
+            :href="`/app/settings/billing?tenant_id=${tenant.id}`"
+            target="_blank"
+            class="px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+        >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                />
+            </svg>
+            عرض الفواتير
+        </a>
     </div>
 </template>
 

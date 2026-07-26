@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Console\Commands\UpdateOverdueInstallments;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -17,10 +16,12 @@ Schedule::command('subscriptions:process-renewals')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/subscription-renewals.log'));
 
-// Update overdue installments - runs daily at midnight
-Schedule::command(UpdateOverdueInstallments::class)
-    ->daily()
-    ->withoutOverlapping();
+// Dunning reminders - runs daily at 7 AM, AFTER renewals so a
+// freshly-renewed invoice (status=paid) is excluded from the scan.
+Schedule::command('dunning:send-reminders')
+    ->dailyAt('07:00')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/dunning-reminders.log'));
 
 // Tenant backups - weekly on Sundays at 2 AM
 Schedule::command('tenants:backup --active-only')

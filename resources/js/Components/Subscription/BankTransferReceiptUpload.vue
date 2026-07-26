@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onUnmounted } from 'vue';
 import { router, usePage } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -9,6 +9,11 @@ const props = defineProps({
     setup: { type: Object, required: true },
     paymentSettings: { type: Object, default: () => ({}) },
     vatSettings: { type: Object, default: () => ({ enabled: false, rate: 0, inclusive: false }) },
+    // Optional: list of pending invoices for the tenant. When the tenant
+    // has more than one unpaid invoice, the upload form exposes a
+    // dropdown so they can explicitly link the receipt to the right one
+    // instead of relying on the controller's "latest pending" fallback.
+    pendingInvoices: { type: Array, default: () => [] },
 });
 
 const emit = defineEmits(['success', 'close']);
@@ -32,12 +37,60 @@ const form = ref({
     bank_name: '',
     account_name: '',
     notes: '',
+    // Optional: explicit invoice link. When null, the controller falls
+    // back to the tenant's most recent pending payment (preserves the
+    // old behaviour for the single-invoice happy path).
+    subscription_invoice_id: null,
 });
 
 const fileInput = ref(null);
 const errors = ref({});
 const error = ref(null);
 const processing = ref(false);
+
+// Real-time duplicate-reference check. The form polls the server with
+// the typed value (debounced 500ms) and shows a red border + helper
+// text the moment a match is found, before the user reaches Submit.
+const checkingRef = ref(false);
+const refCheckError = ref(null);
+const refDebounceTimer = ref(null);
+
+function scheduleRefCheck() {
+    if (refDebounceTimer.value) clearTimeout(refDebounceTimer.value);
+    const val = form.value.transfer_reference?.trim();
+    if (!val || val.length < 3) {
+        refCheckError.value = null;
+        return;
+    }
+    refDebounceTimer.value = setTimeout(async () => {
+        checkingRef.value = true;
+        try {
+            const res = await fetch(
+                `/app/settings/billing/bank-transfer-receipt/check-reference?ref=${encodeURIComponent(val)}`,
+                { headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } }
+            );
+            if (res.ok) {
+                const data = await res.json();
+                refCheckError.value = data.exists
+                    ? locale.value === 'ar'
+                        ? 'هذا المرجع مستخدم بالفعل في إيصال آخر'
+                        : 'This reference is already used in another pending receipt'
+                    : null;
+            }
+        } catch (_) {
+            // Network blip — silently skip. The server-side validation
+            // will still block the submit if needed.
+        } finally {
+            checkingRef.value = false;
+        }
+    }, 500);
+}
+
+watch(() => form.value.transfer_reference, scheduleRefCheck);
+
+onUnmounted(() => {
+    if (refDebounceTimer.value) clearTimeout(refDebounceTimer.value);
+});
 
 const maxFileSize = 5; // MB
 const acceptedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
@@ -48,6 +101,70 @@ const defaultAmount = computed(() => {
     // display exactly what the tenant needs to transfer.
     return Number(props.setup.total).toFixed(2);
 });
+
+// Auto-fill the amount on mount. We prefill with the controller's
+// computed total so the tenant doesn't have to type it. The field is
+// still editable (so a tenant who overpaid or underpaid intentionally
+// can record the actual figure) — we just give them a sensible default
+// instead of an empty field. `watch` runs once on mount, then on
+// any reactive change (so e.g. switching the invoice selector can
+// update the default to that invoice's amount).
+watch(
+    () => defaultAmount.value,
+    (val) => {
+        if (val && !form.value.transfer_amount) {
+            form.value.transfer_amount = val;
+        }
+    },
+    { immediate: true }
+);
+
+// Show the invoice selector only when there's actual ambiguity — one
+// pending invoice is the common case and a dropdown there just adds
+// noise. The default selection is the first (most recent) pending one.
+const showInvoiceSelector = computed(() => props.pendingInvoices.length > 0);
+
+// ─── Progress indicator helpers ──────────────────────────────────────
+// Each step has a "done" state derived from the form values; the UI
+// shows a green check on completion so the tenant knows what remains.
+// Step 1 is the receipt file; Step 2 is the amount (auto-filled, but
+// we count it as "done" once the user has viewed the page); Step 3
+// is the bank details (bank name + account name + reference).
+const step2Done = computed(() => {
+    const v = parseFloat(form.value.transfer_amount);
+    return !isNaN(v) && v > 0;
+});
+
+const step3Done = computed(() =>
+    Boolean(
+        form.value.bank_name?.trim() &&
+        form.value.account_name?.trim() &&
+        form.value.transfer_reference?.trim() &&
+        !refCheckError.value
+    )
+);
+
+function stepStateClass(step) {
+    if (
+        (step === 1 && form.value.receipt) ||
+        (step === 2 && step2Done.value) ||
+        (step === 3 && step3Done.value)
+    ) {
+        return 'bg-emerald-500 text-white';
+    }
+    return 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
+}
+
+function stepLabelClass(step) {
+    if (
+        (step === 1 && form.value.receipt) ||
+        (step === 2 && step2Done.value) ||
+        (step === 3 && step3Done.value)
+    ) {
+        return 'font-semibold text-emerald-700 dark:text-emerald-300';
+    }
+    return 'text-gray-500 dark:text-gray-400';
+}
 
 function pickFile() {
     fileInput.value?.click();
@@ -119,6 +236,11 @@ async function submit() {
                 : 'Please enter the transfer reference';
         return;
     }
+    // Block submit if the real-time duplicate check already found a
+    // matching reference — saves a round-trip to the server.
+    if (refCheckError.value) {
+        return;
+    }
 
     processing.value = true;
     error.value = null;
@@ -148,6 +270,13 @@ async function submit() {
         }
         if (props.setup?.promo_code) {
             data.append('promo_code', props.setup.promo_code);
+        }
+        // Optional explicit invoice link — server uses this to scope the
+        // receipt to a specific invoice instead of the implicit "latest
+        // pending" fallback. Sent only when the user actually picked one
+        // from the dropdown.
+        if (form.value.subscription_invoice_id) {
+            data.append('subscription_invoice_id', form.value.subscription_invoice_id);
         }
 
         const response = await fetch('/app/settings/billing/bank-transfer-receipt', {
@@ -202,6 +331,88 @@ async function submit() {
                         : 'Please upload your bank transfer receipt (image or PDF, up to 5 MB).'
                 }}
             </p>
+        </div>
+
+        <!-- Bank accounts panel — shows where the tenant needs to transfer
+             the money. The most important information is at the top
+             (bank name + account holder) so the tenant can locate the
+             right account in their banking app; IBAN / account number
+             follow for the actual transfer. -->
+        <div
+            v-if="setup.bank_accounts && setup.bank_accounts.length"
+            class="rounded-lg border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800/50 dark:bg-emerald-900/10"
+        >
+            <p class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                {{
+                    locale === 'ar' ? 'حوّل إلى أحد الحسابات' : 'Transfer to one of these accounts'
+                }}
+            </p>
+            <div class="mt-2 space-y-2">
+                <div
+                    v-for="(acc, idx) in setup.bank_accounts"
+                    :key="idx"
+                    class="rounded border border-emerald-200 bg-white p-3 text-xs dark:border-emerald-800/50 dark:bg-gray-900/30"
+                >
+                    <p class="font-semibold text-emerald-700 dark:text-emerald-300">
+                        {{ acc.bank_name || '—' }}
+                    </p>
+                    <p v-if="acc.account_name" class="text-gray-700 dark:text-gray-300">
+                        {{ acc.account_name }}
+                    </p>
+                    <p v-if="acc.iban" class="font-mono text-gray-600 dark:text-gray-400" dir="ltr">
+                        IBAN: {{ acc.iban }}
+                    </p>
+                    <p
+                        v-if="acc.account_number"
+                        class="font-mono text-gray-600 dark:text-gray-400"
+                        dir="ltr"
+                    >
+                        {{ locale === 'ar' ? 'رقم الحساب' : 'Account #' }}: {{ acc.account_number }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress indicator — 3 steps with visual feedback. Helps the
+             tenant see what they've completed and what remains. The
+             third step (Transfer details) is "complete" only when ALL
+             three required fields are filled. -->
+        <div class="flex items-center gap-2 text-xs">
+            <div class="flex flex-1 items-center gap-2">
+                <div
+                    :class="stepStateClass(1)"
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                >
+                    {{ form.receipt ? '✓' : '1' }}
+                </div>
+                <span :class="stepLabelClass(1)">
+                    {{ locale === 'ar' ? 'الإيصال' : 'Receipt' }}
+                </span>
+            </div>
+            <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
+            <div class="flex flex-1 items-center gap-2">
+                <div
+                    :class="stepStateClass(2)"
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                >
+                    {{ step2Done ? '✓' : '2' }}
+                </div>
+                <span :class="stepLabelClass(2)">
+                    {{ locale === 'ar' ? 'المبلغ' : 'Amount' }}
+                </span>
+            </div>
+            <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700"></div>
+            <div class="flex flex-1 items-center gap-2">
+                <div
+                    :class="stepStateClass(3)"
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold"
+                >
+                    {{ step3Done ? '✓' : '3' }}
+                </div>
+                <span :class="stepLabelClass(3)">
+                    {{ locale === 'ar' ? 'تفاصيل البنك' : 'Bank details' }}
+                </span>
+            </div>
         </div>
 
         <!-- File upload area -->
@@ -292,11 +503,69 @@ async function submit() {
             </p>
         </div>
 
+        <!-- Invoice selector (only when tenant has pending invoices to
+             disambiguate). Keeps the common single-invoice case clean
+             while giving multi-invoice tenants a clear "which one are
+             you paying?" choice. -->
+        <div v-if="showInvoiceSelector">
+            <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
+                {{ locale === 'ar' ? 'الفاتورة' : 'Invoice' }}
+            </label>
+            <select
+                v-model="form.subscription_invoice_id"
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+            >
+                <option :value="null">
+                    {{
+                        locale === 'ar'
+                            ? '— الأحدث تلقائياً —'
+                            : '— Most recent pending (default) —'
+                    }}
+                </option>
+                <option v-for="inv in pendingInvoices" :key="inv.id" :value="inv.id">
+                    {{ inv.invoice_number || `#${inv.id}` }} —
+                    {{ Number(inv.amount).toFixed(2) }} SAR ({{
+                        new Date(inv.due_date).toLocaleDateString(
+                            locale === 'ar' ? 'ar-SA' : 'en-US'
+                        )
+                    }})
+                </option>
+            </select>
+            <p class="mt-1 text-xs text-slate-500">
+                {{
+                    locale === 'ar'
+                        ? 'اختر الفاتورة التي دفعت عنها. الافتراضي: الأحدث.'
+                        : 'Pick the invoice you are paying for. Default: most recent pending.'
+                }}
+            </p>
+        </div>
+
         <!-- Transfer details -->
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-                <label class="mb-1.5 block text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ locale === 'ar' ? 'المبلغ المحول *' : 'Amount transferred *' }}
+                <label
+                    class="mb-1.5 flex items-center justify-between text-sm font-semibold text-slate-900 dark:text-white"
+                >
+                    <span>{{ locale === 'ar' ? 'المبلغ المحول *' : 'Amount transferred *' }}</span>
+                    <span
+                        v-if="defaultAmount"
+                        class="inline-flex items-center gap-1 text-[10px] font-medium text-indigo-600 dark:text-indigo-400"
+                        :title="
+                            locale === 'ar'
+                                ? 'المبلغ المتوقع حسب خطتك'
+                                : 'Expected amount from your plan'
+                        "
+                    >
+                        <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                        </svg>
+                        {{ locale === 'ar' ? 'مقترح' : 'Suggested' }}: {{ defaultAmount }} SAR
+                    </span>
                 </label>
                 <input
                     v-model="form.transfer_amount"
@@ -307,6 +576,13 @@ async function submit() {
                     dir="ltr"
                     class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                 />
+                <p class="mt-1 text-xs text-slate-500">
+                    {{
+                        locale === 'ar'
+                            ? 'المبلغ محسوب تلقائياً من خطتك. عدّله لو حوّلت مبلغاً مختلفاً.'
+                            : 'Auto-filled from your plan. Edit if you transferred a different amount.'
+                    }}
+                </p>
                 <p v-if="errors.transfer_amount" class="mt-1 text-xs text-rose-600">
                     {{ errors.transfer_amount }}
                 </p>
@@ -346,8 +622,23 @@ async function submit() {
                     v-model="form.transfer_reference"
                     type="text"
                     :placeholder="locale === 'ar' ? 'رقم العملية...' : 'Transaction ID...'"
-                    class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-mono dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                    :class="
+                        refCheckError
+                            ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500'
+                            : 'border-slate-300 dark:border-slate-600'
+                    "
+                    class="w-full rounded-lg border bg-white px-3 py-2 text-sm font-mono dark:bg-slate-700 dark:text-white"
+                    @input="scheduleRefCheck"
                 />
+                <p v-if="checkingRef" class="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {{ locale === 'ar' ? 'جاري التحقق من المرجع...' : 'Checking reference...' }}
+                </p>
+                <p
+                    v-else-if="refCheckError"
+                    class="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400"
+                >
+                    ⚠ {{ refCheckError }}
+                </p>
                 <p v-if="errors.transfer_reference" class="mt-1 text-xs text-rose-600">
                     {{ errors.transfer_reference }}
                 </p>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\System;
 
+use App\Events\Billing\ReceiptReviewed;
 use App\Http\Controllers\Controller;
 use App\Models\AdminUser;
 use App\Models\BankTransferReceipt;
@@ -45,11 +46,30 @@ class BankTransferReceiptsController extends Controller
 
         $receipts = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
+        // Augment every receipt with expected_amount + amount_diff so the
+        // Index.vue can render the mismatch badge without a second request.
+        // The receipt's payment relation is already eager-loaded above.
+        $receipts->getCollection()->transform(function ($r) {
+            $expected = $r->payment?->amount;
+            $r->expected_amount = $expected !== null ? (float) $expected : null;
+            $r->amount_diff = $r->expected_amount !== null
+                ? round((float) $r->transfer_amount - $r->expected_amount, 2)
+                : null;
+
+            return $r;
+        });
+
         $stats = [
             'pending' => BankTransferReceipt::where('status', 'pending')->count(),
             'approved' => BankTransferReceipt::where('status', 'approved')->count(),
             'rejected' => BankTransferReceipt::where('status', 'rejected')->count(),
             'total_amount_pending' => BankTransferReceipt::where('status', 'pending')->sum('transfer_amount'),
+            'mismatched_pending' => BankTransferReceipt::where('status', 'pending')
+                ->whereHas('payment')
+                ->get()
+                ->filter(fn ($r) => $r->payment
+                    && abs((float) $r->transfer_amount - (float) $r->payment->amount) > 0.01)
+                ->count(),
         ];
 
         return Inertia::render('System/BankTransferReceipts/Index', [
@@ -91,6 +111,16 @@ class BankTransferReceiptsController extends Controller
             $receipt->receipt_mime_type = null;
         }
 
+        // Amount comparison: how much was due vs. how much the tenant
+        // actually transferred. Null when there's no payment linked
+        // (e.g. legacy receipts that lost their payment FK) — the
+        // Vue page renders those as "no comparison available".
+        $expected = $receipt->payment?->amount;
+        $receipt->expected_amount = $expected !== null ? (float) $expected : null;
+        $receipt->amount_diff = $receipt->expected_amount !== null
+            ? round((float) $receipt->transfer_amount - $receipt->expected_amount, 2)
+            : null;
+
         // The reviewer relation is User (not AdminUser) — but the file
         // is uploaded by tenant staff. If the reviewer is a User we
         // expose name; if it's an AdminUser we add it. Most approvals
@@ -128,15 +158,96 @@ class BankTransferReceiptsController extends Controller
 
         $validated = $request->validate([
             'notes' => 'nullable|string|max:1000',
+            'force_approve' => 'sometimes|boolean',
+            // Optional override for partial approval. When set, the
+            // payment is marked as paid for THIS amount (which may be
+            // less than the invoice total). The remaining balance stays
+            // on the invoice and the tenant's wallet/credit balance is
+            // NOT auto-created here — the admin is responsible for
+            // issuing a credit note or carrying the balance forward.
+            // The receipt itself is still marked 'approved'.
+            'approved_amount' => 'nullable|numeric|min:0.01',
         ]);
 
-        DB::transaction(function () use ($receipt, $validated) {
+        // Amount mismatch check — protect against the admin rubber-stamping
+        // a receipt that doesn't match the invoice. The admin can override
+        // with force_approve, but the mismatch is then logged in review_notes
+        // for the audit trail.
+        $expected = $receipt->payment?->amount;
+        $actual = (float) $receipt->transfer_amount;
+        $diff = $expected !== null ? round($actual - (float) $expected, 2) : null;
+
+        if ($diff !== null && abs($diff) > 0.01 && ! ($validated['force_approve'] ?? false)) {
+            return back()->with('error', sprintf(
+                'المبلغ المُحوّل (%.2f) يختلف عن المطلوب (%.2f). فرق: %+.2f. للتأكيد على الرغم من الاختلاف، أعد الإرسال مع force_approve=true.',
+                $actual,
+                (float) $expected,
+                $diff
+            ));
+        }
+
+        // When the admin uses approved_amount, it must be > 0 and <= what
+        // the tenant actually transferred (we never invent money). If
+        // approved_amount equals the transfer amount, treat it as a
+        // full approval with no credit/shortfall.
+        $approvedAmount = isset($validated['approved_amount'])
+            ? (float) $validated['approved_amount']
+            : $actual;
+
+        if ($approvedAmount <= 0 || $approvedAmount > $actual + 0.01) {
+            return back()->with('error', sprintf(
+                'المبلغ المعتمد (%.2f) يجب أن يكون بين 0.01 و %.2f (المبلغ المُحوّل).',
+                $approvedAmount,
+                $actual
+            ));
+        }
+
+        // Initialise outside the transaction so the post-commit
+        // ReceiptReviewed event can pass the audit notes too.
+        $reviewNotes = $validated['notes'] ?? null;
+
+        DB::transaction(function () use ($receipt, $validated, $diff, $expected, $approvedAmount, $actual, &$reviewNotes) {
+            $isPartial = abs($approvedAmount - $actual) > 0.01;
+            $isShortVsExpected = $expected !== null && abs($approvedAmount - (float) $expected) > 0.01;
+
+            // When force-approving with a mismatch, append an audit line so
+            // we can investigate later who overrode what.
+            if ($diff !== null && abs($diff) > 0.01 && ($validated['force_approve'] ?? false)) {
+                $auditLine = sprintf(
+                    '[FORCE-APPROVED] amount mismatch — expected=%.2f, actual=%.2f, diff=%+.2f, by admin #%d at %s',
+                    (float) $expected,
+                    (float) $receipt->transfer_amount,
+                    $diff,
+                    auth()->id(),
+                    now()->toIso8601String()
+                );
+                $reviewNotes = $reviewNotes
+                    ? $reviewNotes."\n".$auditLine
+                    : $auditLine;
+            }
+
+            // When a partial approval was used, log the effective amount
+            // so finance can reconcile later.
+            if ($isPartial) {
+                $partialLine = sprintf(
+                    '[PARTIAL-APPROVAL] approved=%.2f, received=%.2f, shortfall=%.2f, by admin #%d at %s',
+                    $approvedAmount,
+                    $actual,
+                    round($actual - $approvedAmount, 2),
+                    auth()->id(),
+                    now()->toIso8601String()
+                );
+                $reviewNotes = $reviewNotes
+                    ? $reviewNotes."\n".$partialLine
+                    : $partialLine;
+            }
+
             // Mark receipt as approved
             $receipt->update([
                 'status' => 'approved',
                 'reviewed_by' => auth()->id(),
                 'reviewed_at' => now(),
-                'review_notes' => $validated['notes'] ?? null,
+                'review_notes' => $reviewNotes,
             ]);
 
             // Mark payment as paid (one source of truth — don't both
@@ -144,7 +255,7 @@ class BankTransferReceiptsController extends Controller
             // call would silently overwrite payment_method and gateway_ref
             // because markAsPaid doesn't know about them).
             if ($receipt->payment) {
-                $receipt->payment->update([
+                $paymentUpdates = [
                     'status' => 'paid',
                     'paid_at' => now(),
                     'payment_method' => 'bank_transfer',
@@ -153,10 +264,23 @@ class BankTransferReceiptsController extends Controller
                     'gateway_response' => [
                         'receipt_id' => $receipt->id,
                         'transfer_amount' => (float) $receipt->transfer_amount,
+                        'approved_amount' => $approvedAmount,
                         'transfer_date' => $receipt->transfer_date?->toDateString(),
                         'transfer_reference' => $receipt->transfer_reference,
+                        'expected_amount' => $expected !== null ? (float) $expected : null,
+                        'amount_diff' => $diff,
+                        'force_approved' => (bool) ($validated['force_approve'] ?? false),
+                        'partial_approval' => $isPartial,
                     ],
-                ]);
+                ];
+
+                // For a partial approval, the payment's recorded amount
+                // is the approved figure (not the full transfer). This
+                // makes reports line up with what was actually settled.
+                if ($isPartial) {
+                    $paymentUpdates['amount'] = $approvedAmount;
+                }
+                $receipt->payment->update($paymentUpdates);
             }
 
             // Activate subscription
@@ -164,12 +288,21 @@ class BankTransferReceiptsController extends Controller
                 $receipt->subscription->update(['status' => 'active']);
             }
 
-            // Mark invoice as paid
+            // Mark invoice as paid ONLY if the approved amount covers
+            // the full invoice total. For partial approvals, the invoice
+            // stays open with the remaining balance so the tenant gets
+            // a clear "what's left to pay" view.
             if ($receipt->payment?->invoice) {
-                $receipt->payment->invoice->update([
-                    'status' => 'paid',
-                    'paid_at' => now(),
-                ]);
+                if (! $isShortVsExpected) {
+                    $receipt->payment->invoice->update([
+                        'status' => 'paid',
+                        'paid_at' => now(),
+                    ]);
+                }
+                // For partial, the invoice stays pending — admin must
+                // decide whether to issue a credit or chase the rest.
+                // We surface a session message so the UI can show the
+                // remaining balance on the next page.
             }
 
             // Activate tenant
@@ -178,7 +311,21 @@ class BankTransferReceiptsController extends Controller
             }
         });
 
-        return back()->with('success', 'تم الموافقة على الإيصال وتفعيل الاشتراك');
+        $message = $approvedAmount < $actual - 0.01
+            ? sprintf('تمت الموافقة الجزئية بمبلغ %.2f. الفاتورة تبقى مفتوحة للمبلغ المتبقي.', $approvedAmount)
+            : 'تم الموافقة على الإيصال وتفعيل الاشتراك';
+
+        // Notify the tenant of the decision AFTER the transaction
+        // commits so the notification carries the canonical review
+        // state. The listener (NotifyTenantOfReceiptDecision) creates
+        // one row per user attached to the tenant.
+        event(new ReceiptReviewed(
+            $receipt->fresh(['tenant', 'payment']),
+            'approved',
+            $reviewNotes,
+        ));
+
+        return back()->with('success', $message);
     }
 
     /**
@@ -200,6 +347,14 @@ class BankTransferReceiptsController extends Controller
             'reviewed_at' => now(),
             'review_notes' => $validated['notes'],
         ]);
+
+        // Notify the tenant with the rejection reason so they know
+        // what to fix before resubmitting.
+        event(new ReceiptReviewed(
+            $receipt->fresh(['tenant']),
+            'rejected',
+            $validated['notes'],
+        ));
 
         return back()->with('success', 'تم رفض الإيصال');
     }

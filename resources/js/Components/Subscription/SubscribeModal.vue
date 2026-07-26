@@ -345,6 +345,7 @@ const formatCurrency = (amount) => {
 
                     <BankTransferReceiptUpload
                         :setup="bankTransferResult"
+                        :pending-invoices="bankTransferResult?.pending_invoices || []"
                         :payment-settings="paymentSettings"
                         :vat-settings="vatSettings"
                         @success="onReceiptUploaded"

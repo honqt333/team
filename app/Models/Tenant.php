@@ -50,6 +50,9 @@ class Tenant extends Model
         'invoice_terms',
         // Visual Print Settings
         'print_settings',
+        // Dunning (Phase 6) — collection automation preferences
+        'dunning_opted_out',
+        'dunning_language',
     ];
 
     protected $appends = [
@@ -64,6 +67,7 @@ class Tenant extends Model
             'two_factor_enabled' => 'boolean',
             'sms_2fa_enabled' => 'boolean',
             'print_settings' => 'array',
+            'dunning_opted_out' => 'boolean',
         ];
     }
 

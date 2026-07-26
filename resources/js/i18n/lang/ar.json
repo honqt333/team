@@ -3596,7 +3596,9 @@
       "tenants": "المستأجرين",
       "subscriptions": "الاشتراكات",
       "invoices": "الفواتير",
-      "installments": "الأقساط",
+      "bank_receipts": "إيصالات التحويل البنكي",
+      "dunning_settings": "إعدادات التذكير التلقائي",
+      "dunning_log": "سجل التذكير",
       "plans": "الباقات",
       "promo_codes": "الرموز الترويجية",
       "announcements": "الإعلانات",
@@ -3609,8 +3611,26 @@
       "payment_settings": "إعدادات الدفع",
       "company_settings": "معلومات الشركة",
       "developer_center": "مركز التطوير",
+      "analytics": "التحليلات",
+      "reports": "التقارير",
+      "notifications": "الإشعارات",
       "back_to_app": "العودة للتطبيق",
       "backups": "النسخ الاحتياطية"
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "mark_all_read": "تعليم الكل كمقروء",
+      "empty": "لا توجد إشعارات",
+      "view_all": "عرض الكل"
+    },
+    "dunning": {
+      "preferences_title": "إعدادات التذكير",
+      "preferences_subtitle": "اختر كيف نتواصل معك بخصوص الفواتير المتأخرة. الإعداد الافتراضي هو تذكير ودي عبر الإيميل بلغة حسابك.",
+      "opted_out_label": "أرغب في استلام تذكيرات التحصيل عبر الإيميل/SMS/WhatsApp",
+      "opted_out_helper": "ألغِ التحديد لإيقاف كل تذكيرات التحصيل. لا يزال بإمكانك مشاهدة حالة الفواتير وسدادها من صفحة الفوترة.",
+      "language_label": "لغة التذكير",
+      "language_helper": "أي لغة نستخدم عند إرسال التذكير؟",
+      "preferences_updated": "تم تحديث إعدادات التذكير"
     },
     "payment_settings": {
       "title": "إعدادات الدفع",
@@ -3944,15 +3964,6 @@
       "billing_cycle": "دورة الفوترة",
       "promo_code_label": "رمز ترويجي (اختياري)",
       "promo_code_placeholder": "مثال: WELCOME2026",
-      "use_installments": "تقسيط المبلغ السنوي",
-      "installment_count": "عدد الأقساط",
-      "installment_options": {
-        "2": "قسطان",
-        "3": "3 أقساط",
-        "4": "4 أقساط",
-        "6": "6 أقساط",
-        "12": "12 قسط"
-      },
       "featured": "مميزة",
       "free_trial_days": "تجربة مجانية: :count يوم",
       "no_subscriptions": "لا توجد اشتراكات",
@@ -4314,6 +4325,12 @@
     },
     "layout": {
       "mobile_menu": "القائمة"
+    },
+    "notifications": {
+      "title": "الإشعارات",
+      "mark_all_read": "تعليم الكل كمقروء",
+      "empty": "لا توجد إشعارات",
+      "view_all": "عرض الكل"
     },
     "backups": {
       "title": "النسخ الاحتياطية",

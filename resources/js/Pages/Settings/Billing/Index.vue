@@ -9,6 +9,7 @@ import SubscribeModal from '@/Components/Subscription/SubscribeModal.vue';
 import SubscriptionHistoryTable from '@/Components/Subscription/SubscriptionHistoryTable.vue';
 import PaymentMethodsList from '@/Pages/Settings/Billing/Components/PaymentMethodsList.vue';
 import ReceiptsList from '@/Pages/Settings/Billing/Components/ReceiptsList.vue';
+import DunningPreferencesCard from '@/Components/Subscription/DunningPreferencesCard.vue';
 
 const { t } = useI18n();
 
@@ -28,6 +29,7 @@ const props = defineProps({
     payment_settings: { type: Object, default: () => ({}) },
     company_info: { type: Object, default: () => ({}) },
     vat_settings: { type: Object, default: () => ({}) },
+    tenant: { type: Object, default: () => ({}) },
 });
 
 const locale = computed(() => document.documentElement.lang || 'ar');
@@ -302,6 +304,12 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                         :filter="receipt_filter"
                     />
                 </div>
+            </section>
+
+            <!-- 6b. Dunning preferences — opt out of collection
+                  reminders (Phase 6). -->
+            <section v-if="tenant && tenant.id">
+                <DunningPreferencesCard :tenant="tenant" />
             </section>
 
             <!-- 7. Recent payments -->

@@ -60,6 +60,37 @@ function isImage(receipt) {
     const path = receipt.receipt_path.toLowerCase();
     return /\.(jpe?g|png|webp|gif|bmp)$/.test(path);
 }
+
+// Returns the visual state for the amount-comparison badge shown next to
+// each receipt in the list. Three outcomes: match (green), short (amber),
+// over (orange), or unknown when the receipt has no payment to compare
+// against (legacy / orphaned data — kept visible so the admin can spot
+// them but rendered neutrally).
+function getAmountBadge(receipt) {
+    if (receipt.amount_diff === null || receipt.amount_diff === undefined) {
+        return { color: 'slate', label: locale.value === 'ar' ? 'لا مقارنة' : 'No comparison' };
+    }
+    const diff = Number(receipt.amount_diff);
+    if (Math.abs(diff) < 0.01) {
+        return {
+            color: 'emerald',
+            label: locale.value === 'ar' ? '✓ مطابق' : '✓ Match',
+        };
+    }
+    if (diff < 0) {
+        return {
+            color: 'amber',
+            label:
+                locale.value === 'ar'
+                    ? `⚠️ ناقص ${formatCurrency(-diff)}`
+                    : `⚠️ Short ${formatCurrency(-diff)}`,
+        };
+    }
+    return {
+        color: 'orange',
+        label: locale.value === 'ar' ? `+ ${formatCurrency(diff)}` : `+ ${formatCurrency(diff)}`,
+    };
+}
 </script>
 
 <template>
@@ -288,6 +319,18 @@ function isImage(receipt) {
                                 class="px-4 py-3 font-mono font-semibold text-gray-900 dark:text-white"
                             >
                                 {{ formatCurrency(r.transfer_amount) }} SAR
+                                <div
+                                    v-if="getAmountBadge(r).color !== 'slate'"
+                                    :class="`mt-1 inline-block rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                                        getAmountBadge(r).color === 'emerald'
+                                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                            : getAmountBadge(r).color === 'amber'
+                                              ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                              : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+                                    }`"
+                                >
+                                    {{ getAmountBadge(r).label }}
+                                </div>
                             </td>
                             <td
                                 class="px-4 py-3 font-mono text-xs text-gray-600 dark:text-gray-300"

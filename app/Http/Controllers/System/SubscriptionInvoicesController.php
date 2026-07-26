@@ -77,7 +77,7 @@ class SubscriptionInvoicesController extends Controller
      */
     public function show(SubscriptionInvoice $invoice): Response
     {
-        $invoice->load(['tenant', 'subscription.plan', 'installments']);
+        $invoice->load(['tenant', 'subscription.plan']);
 
         return Inertia::render('System/Invoices/Show', [
             'invoice' => $invoice,

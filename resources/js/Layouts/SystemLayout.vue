@@ -162,6 +162,103 @@
                     </div>
 
                     <div class="flex items-center gap-3">
+                        <!-- Notification Bell (Phase 4) — surfaces new
+                             bank-transfer receipts and other system events
+                             without forcing the admin to poll. Polls
+                             /system/notifications/unread-count every
+                             30s so the count stays fresh without a
+                             full WebSocket layer. -->
+                        <div class="relative">
+                            <button
+                                @click="notifMenuOpen = !notifMenuOpen"
+                                class="relative p-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                :title="$t('system.nav_items.notifications')"
+                            >
+                                <svg
+                                    class="w-5 h-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                    />
+                                </svg>
+                                <span
+                                    v-if="notifUnreadCount > 0"
+                                    class="absolute top-0 right-0 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white"
+                                >
+                                    {{ notifUnreadCount > 99 ? '99+' : notifUnreadCount }}
+                                </span>
+                            </button>
+
+                            <!-- Dropdown panel: shows the 10 most recent
+                                 notifications, with a "view all" link.
+                                 Clicking an item navigates to action_url
+                                 and marks the notification as read. -->
+                            <div
+                                v-if="notifMenuOpen"
+                                @click.stop
+                                class="absolute right-0 mt-2 w-80 max-w-[90vw] rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800 z-50"
+                            >
+                                <div
+                                    class="flex items-center justify-between border-b border-gray-200 p-3 dark:border-gray-700"
+                                >
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">
+                                        {{ $t('system.nav_items.notifications') }}
+                                    </p>
+                                    <button
+                                        v-if="notifUnreadCount > 0"
+                                        @click="markAllNotificationsRead"
+                                        class="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
+                                    >
+                                        {{ $t('system.notifications.mark_all_read') }}
+                                    </button>
+                                </div>
+                                <div class="max-h-96 overflow-y-auto">
+                                    <a
+                                        v-for="n in notifList"
+                                        :key="n.id"
+                                        :href="n.action_url || '#'"
+                                        @click="markNotificationRead(n.id)"
+                                        class="block border-b border-gray-100 p-3 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/50"
+                                        :class="{
+                                            'bg-indigo-50/50 dark:bg-indigo-900/10': !n.read_at,
+                                        }"
+                                    >
+                                        <p
+                                            class="text-sm font-semibold text-gray-900 dark:text-white"
+                                        >
+                                            {{ n.title }}
+                                        </p>
+                                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ n.body }}
+                                        </p>
+                                        <p class="mt-1 text-[10px] text-gray-400">
+                                            {{ formatNotifTime(n.created_at) }}
+                                        </p>
+                                    </a>
+                                    <div
+                                        v-if="!notifList.length"
+                                        class="p-6 text-center text-sm text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ $t('system.notifications.empty') }}
+                                    </div>
+                                </div>
+                                <div class="border-t border-gray-200 p-2 dark:border-gray-700">
+                                    <a
+                                        href="/system/notifications"
+                                        class="block rounded-md py-1.5 text-center text-xs font-semibold text-indigo-600 hover:bg-gray-50 dark:text-indigo-400 dark:hover:bg-gray-700/50"
+                                    >
+                                        {{ $t('system.notifications.view_all') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Theme Toggle -->
                         <button
                             @click="toggleThemeHandler"
@@ -502,6 +599,103 @@ const userMenuOpen = ref(false);
 const { isDark, toggle: toggleThemeHandler } = useTheme();
 const isRtl = computed(() => locale.value === 'ar');
 
+// ── Phase 4 — Notification Bell ──────────────────────────────────────
+// Lightweight polling-based bell. The full WebSocket layer is overkill
+// for the system's current scale (single-tenant per install, low event
+// volume), so we just fetch the unread count every 30s. The dropdown
+// itself fetches the full list on first open and reuses it across
+// subsequent opens in the same page session.
+const notifMenuOpen = ref(false);
+const notifUnreadCount = ref(0);
+const notifList = ref([]);
+let notifPollId = null;
+let csrfTokenNotif = null;
+
+function csrfToken() {
+    if (csrfTokenNotif) return csrfTokenNotif;
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    csrfTokenNotif = meta ? meta.getAttribute('content') : '';
+    return csrfTokenNotif;
+}
+
+async function refreshUnreadCount() {
+    try {
+        const res = await fetch('/system/notifications/unread-count', {
+            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        if (res.ok) {
+            const data = await res.json();
+            notifUnreadCount.value = data.count || 0;
+        }
+    } catch (_) {
+        // network blip — try again next tick
+    }
+}
+
+async function loadNotificationList() {
+    try {
+        const res = await fetch('/system/notifications/recent', {
+            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        if (res.ok) {
+            const data = await res.json();
+            notifList.value = data.notifications || [];
+        }
+    } catch (_) {
+        // keep the previous list on error
+    }
+}
+
+async function markNotificationRead(id) {
+    try {
+        await fetch(`/system/notifications/${id}/read`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+            },
+        });
+        // Optimistic update
+        const n = notifList.value.find((x) => x.id === id);
+        if (n) n.read_at = new Date().toISOString();
+        if (notifUnreadCount.value > 0) notifUnreadCount.value -= 1;
+    } catch (_) {
+        // ignore — the next poll will reconcile
+    }
+}
+
+async function markAllNotificationsRead() {
+    try {
+        await fetch('/system/notifications/read-all', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+            },
+        });
+        notifList.value.forEach((n) => (n.read_at = new Date().toISOString()));
+        notifUnreadCount.value = 0;
+    } catch (_) {
+        // ignore
+    }
+}
+
+function formatNotifTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const diffMin = Math.round((Date.now() - d.getTime()) / 60000);
+    if (diffMin < 1) return locale.value === 'ar' ? 'الآن' : 'just now';
+    if (diffMin < 60) return `${diffMin} ${locale.value === 'ar' ? 'د' : 'm'}`;
+    const diffHr = Math.round(diffMin / 60);
+    if (diffHr < 24) return `${diffHr} ${locale.value === 'ar' ? 'س' : 'h'}`;
+    return d.toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+        month: 'short',
+        day: 'numeric',
+    });
+}
+
 const formattedDate = ref('');
 
 // Update the topbar date once on mount, then every minute. This runs
@@ -519,9 +713,30 @@ onMounted(() => {
     };
     update();
     intervalId = setInterval(update, 60000);
+
+    // Phase 4 — start notification polling. 30s is a balance between
+    // freshness and battery / server load. The actual fetch is a tiny
+    // SELECT count(*) so it's cheap. On unmount we stop the timer so
+    // navigating away doesn't leak the interval.
+    refreshUnreadCount();
+    notifPollId = setInterval(refreshUnreadCount, 30000);
+
+    // Lazy-load the full notification list on first bell click. The
+    // list itself is cached in notifList until the user navigates away
+    // — saves a round-trip on every open within the same page session.
 });
+
 onUnmounted(() => {
     if (intervalId) clearInterval(intervalId);
+    if (notifPollId) clearInterval(notifPollId);
+});
+
+// Fetch the full list the first time the dropdown opens. The list is
+// then cached in `notifList` for the rest of the page session.
+watch(notifMenuOpen, (open) => {
+    if (open && notifList.value.length === 0) {
+        loadNotificationList();
+    }
 });
 
 const handleLogout = () => {

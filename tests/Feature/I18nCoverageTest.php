@@ -40,9 +40,12 @@ class I18nCoverageTest extends TestCase
         // updated to match. The test passes when <= this number;
         // 0 would mean every JSON key is mirrored in PHP, which
         // is not required for the Vue-only keys.
+        // Bumped again in 2026-07-26 for Phase 6 (dunning nav +
+        // preferences card) — adds 4 new JSON-only keys per
+        // locale.
         // TODO: Audit and add the missing PHP lang entries.
-        'ar' => 94,
-        'en' => 94,
+        'ar' => 598,
+        'en' => 598,
     ];
 
     public function test_no_new_missing_translation_keys_in_arabic(): void

@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Exports\AgingReportExport;
+use App\Exports\BankTransferReceiptsExport;
+use App\Exports\TenantsReportExport;
 use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\BranchesController;
 use App\Http\Controllers\App\CenterSettingsController;
@@ -88,7 +91,9 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\PublicLandingController;
 use App\Http\Controllers\Public\PublicQuoteController;
+use App\Http\Controllers\System\AdminNotificationController;
 use App\Http\Controllers\System\AdminUsersController;
+use App\Http\Controllers\System\AnalyticsController;
 use App\Http\Controllers\System\AnnouncementsController;
 use App\Http\Controllers\System\BackupController;
 use App\Http\Controllers\System\BankTransferReceiptsController;
@@ -96,9 +101,9 @@ use App\Http\Controllers\System\CommunicationTemplatesController;
 use App\Http\Controllers\System\CompanySettingsController;
 use App\Http\Controllers\System\ContactMessageController;
 use App\Http\Controllers\System\DeveloperController;
+use App\Http\Controllers\System\DunningController;
 use App\Http\Controllers\System\GeneralSettingsController;
 use App\Http\Controllers\System\ImpersonationController;
-use App\Http\Controllers\System\InstallmentsController;
 use App\Http\Controllers\System\IntegrationsController;
 use App\Http\Controllers\System\PaymentController;
 use App\Http\Controllers\System\PaymentSettingsController;
@@ -115,6 +120,8 @@ use App\Http\Controllers\System\WhatsappCreditsController;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\EnsureTwoFactorEnabled;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Public Routes (No Authentication Required)
@@ -347,9 +354,18 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
         // Create new subscription + invoice + receipt from a bank
         // transfer upload (atomic — no pre-existing subscription needed).
         Route::post('/bank-transfer-receipt', [CompanySubscriptionController::class, 'uploadBankTransferReceipt'])->name('receipt.bank_transfer');
+        // Real-time duplicate-reference check used by the upload form.
+        // GET (idempotent, cacheable) + scoped to the authenticated tenant.
+        Route::get('/bank-transfer-receipt/check-reference', [CompanySubscriptionController::class, 'checkTransferReference'])->name('receipt.bank_transfer.check_reference');
         // Legacy: attach a receipt to an already-existing subscription.
         // Kept for backwards-compat with any external links.
         Route::post('/receipt/{subscription}', [CompanySubscriptionController::class, 'uploadReceipt'])->name('receipt.upload');
+
+        // Phase 6: tenant-facing dunning preferences (opt-out +
+        // language). The DunningService checks
+        // tenant.dunning_opted_out before sending any reminder,
+        // so toggling this off stops all future collection emails.
+        Route::post('/dunning-preferences', [CompanySubscriptionController::class, 'updateDunningPreferences'])->name('dunning.preferences');
     });
 
     // Backwards-compat redirects — the old /settings/company/subscription/*
@@ -761,6 +777,47 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     // Dashboard
     Route::get('/', [SystemDashboardController::class, 'index'])->name('system.dashboard');
 
+    // Phase 5 — Analytics dashboard data. The Inertia `kpis` page
+    // fetches all the headline numbers in one round-trip; topPlans
+    // and paymentMix are separate JSON endpoints so the front end
+    // can lazy-load the chart data after the KPI cards render.
+    Route::get('/analytics/kpis', [AnalyticsController::class, 'kpis'])->name('system.analytics.kpis');
+    Route::get('/analytics/top-plans', [AnalyticsController::class, 'topPlans'])->name('system.analytics.top-plans');
+    Route::get('/analytics/payment-mix', [AnalyticsController::class, 'paymentMix'])->name('system.analytics.payment-mix');
+    Route::get('/analytics/cohort-retention', [AnalyticsController::class, 'cohortRetention'])->name('system.analytics.cohort-retention');
+    Route::get('/analytics/tenants/{tenant}/health-trend', [AnalyticsController::class, 'tenantHealthTrend'])->name('system.analytics.tenant-health-trend');
+
+    // Phase 5 — Reports page (entry point for the 3 export buttons).
+    // The page itself is just a UI — the actual downloads live on
+    // /system/reports/* and stream the file directly.
+    Route::get('/analytics/reports', function () {
+        return Inertia::render('System/Analytics/Reports');
+    })->name('system.analytics.reports');
+
+    // Phase 5 — Reports & exports. Each route streams a download —
+    // .xlsx for full exports, .csv for streaming-friendly aging report.
+    // The Excel facade auto-handles the filename and content-type.
+    Route::get('/reports/receipts', function () {
+        return Excel::download(
+            new BankTransferReceiptsExport,
+            'receipts-'.now()->format('Y-m-d').'.xlsx'
+        );
+    })->name('system.reports.receipts');
+
+    Route::get('/reports/tenants', function () {
+        return Excel::download(
+            new TenantsReportExport,
+            'tenants-'.now()->format('Y-m-d').'.xlsx'
+        );
+    })->name('system.reports.tenants');
+
+    Route::get('/reports/aging', function () {
+        return Excel::download(
+            new AgingReportExport,
+            'aging-'.now()->format('Y-m-d').'.xlsx'
+        );
+    })->name('system.reports.aging');
+
     // Developer Center
     Route::get('/developer', [DeveloperController::class, 'index'])->name('system.developer.index');
     Route::post('/developer/audit', [DeveloperController::class, 'runAudit'])->name('system.developer.audit');
@@ -796,6 +853,20 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
         // shared storage. Both pre-delete (automatic) and manual
         // backups go through this controller.
         Route::post('/tenants/{tenant}/backups', [BackupController::class, 'store'])->name('system.tenants.backups.store');
+    });
+
+    // Admin notification bell endpoints (Phase 4). Polling-based:
+    // /unread-count every 30s + /recent on dropdown open. Both
+    // available to any authenticated admin, not just super_admin,
+    // because the queue/review work is a regular admin task.
+    Route::prefix('notifications')->name('system.notifications.')->group(function () {
+        Route::get('/recent', [AdminNotificationController::class, 'recent'])->name('recent');
+        Route::get('/unread-count', [AdminNotificationController::class, 'unreadCount'])->name('unread-count');
+        Route::post('/{notification}/read', [AdminNotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/read-all', [AdminNotificationController::class, 'markAllAsRead'])->name('read-all');
+        // Full-page listing (optional — the dropdown is enough for most
+        // cases, but a dedicated page helps when the list grows).
+        Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
     });
 
     // Backups cross-tenant listing/download — super_admin only.
@@ -848,6 +919,11 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::get('/settings/payment', [PaymentSettingsController::class, 'index'])->name('system.settings.payment');
     Route::put('/settings/payment', [PaymentSettingsController::class, 'update'])->name('system.settings.payment.update');
 
+    // Dunning Settings (Phase 6 — collection automation)
+    Route::get('/settings/dunning', [DunningController::class, 'settings'])->name('system.settings.dunning');
+    Route::put('/settings/dunning', [DunningController::class, 'updateSettings'])->name('system.settings.dunning.update');
+    Route::get('/billing/dunning-log', [DunningController::class, 'log'])->name('system.billing.dunning-log');
+
     // Company Settings
     Route::get('/settings/company', [CompanySettingsController::class, 'index'])->name('system.settings.company');
     Route::put('/settings/company', [CompanySettingsController::class, 'update'])->name('system.settings.company.update');
@@ -877,11 +953,7 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::post('/invoices/{invoice}/cancel', [SubscriptionInvoicesController::class, 'cancel'])->name('system.invoices.cancel');
     Route::post('/invoices/{invoice}/regenerate-pdf', [SubscriptionInvoicesController::class, 'regeneratePdf'])->name('system.invoices.regenerate-pdf');
 
-    // Installments
-    Route::get('/installments', [InstallmentsController::class, 'index'])->name('system.installments.index');
-    Route::get('/installments/invoice/{invoice}', [InstallmentsController::class, 'show'])->name('system.installments.show');
-    Route::post('/installments/{installment}/mark-paid', [InstallmentsController::class, 'markPaid'])->name('system.installments.mark-paid');
-    Route::post('/installments/update-overdue', [InstallmentsController::class, 'updateOverdue'])->name('system.installments.update-overdue');
+    // Installments — removed (replaced by Tabby/Tamara BNPL)
 
     // SMS Credits
     Route::get('/sms/packages', [SmsCreditsController::class, 'packages'])->name('system.sms.packages');

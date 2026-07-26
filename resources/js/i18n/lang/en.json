@@ -3596,7 +3596,9 @@
       "tenants": "Tenants",
       "subscriptions": "Subscriptions",
       "invoices": "Invoices",
-      "installments": "Installments",
+      "bank_receipts": "Bank Transfer Receipts",
+      "dunning_settings": "Dunning Automation",
+      "dunning_log": "Dunning Log",
       "plans": "Plans",
       "promo_codes": "Promo Codes",
       "announcements": "Announcements",
@@ -3609,8 +3611,26 @@
       "payment_settings": "Payment Settings",
       "company_settings": "Company Settings",
       "developer_center": "Developer Center",
+      "analytics": "Analytics",
+      "reports": "Reports",
+      "notifications": "Notifications",
       "back_to_app": "Back to App",
       "backups": "Backups"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "mark_all_read": "Mark all as read",
+      "empty": "No notifications yet",
+      "view_all": "View all"
+    },
+    "dunning": {
+      "preferences_title": "Reminder preferences",
+      "preferences_subtitle": "Choose how we contact you about overdue invoices. We default to friendly email reminders in your account language.",
+      "opted_out_label": "I want to receive collection reminders by email/SMS/WhatsApp",
+      "opted_out_helper": "Uncheck this to opt out of all dunning reminders. You can still see your billing status and pay invoices from the Billing page.",
+      "language_label": "Reminder language",
+      "language_helper": "Which language should we use when we send you a reminder?",
+      "preferences_updated": "Reminder preferences updated"
     },
     "payment_settings": {
       "title": "Payment Settings",
@@ -3944,15 +3964,6 @@
       "billing_cycle": "Billing Cycle",
       "promo_code_label": "Promo Code (Optional)",
       "promo_code_placeholder": "e.g. WELCOME2026",
-      "use_installments": "Installment billing (yearly only)",
-      "installment_count": "Number of Installments",
-      "installment_options": {
-        "2": "2 installments",
-        "3": "3 installments",
-        "4": "4 installments",
-        "6": "6 installments",
-        "12": "12 installments"
-      },
       "featured": "Featured",
       "free_trial_days": "Free trial: :count days",
       "no_subscriptions": "No subscriptions",
@@ -4314,6 +4325,12 @@
     },
     "layout": {
       "mobile_menu": "Menu"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "mark_all_read": "Mark all as read",
+      "empty": "No notifications yet",
+      "view_all": "View all"
     },
     "backups": {
       "title": "Backups",

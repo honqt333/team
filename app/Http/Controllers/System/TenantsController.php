@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
+use App\Models\AdminActivityLog;
+use App\Models\BankTransferReceipt;
+use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Tenant;
@@ -64,7 +67,24 @@ class TenantsController extends Controller
      */
     public function show(Tenant $tenant): Response
     {
-        $tenant->load(['centers', 'users', 'subscriptions.plan']);
+        $tenant->load([
+            'centers',
+            'users',
+            // Subscriptions with their plan + invoices + payments so the
+            // Vue tabs can render the full financial timeline for each
+            // subscription without a follow-up request per row. Receipts
+            // are loaded separately on the tenant root (bankTransferReceipts
+            // prop) because the SubscriptionInvoice model no longer has a
+            // `receipts()` relation — receipts live on BankTransferReceipt
+            // and are scoped directly to the tenant.
+            'subscriptions' => fn ($q) => $q
+                ->orderByDesc('created_at')
+                ->with([
+                    'plan',
+                    'invoices' => fn ($q) => $q->orderByDesc('issued_at'),
+                    'invoices.payments' => fn ($q) => $q->orderByDesc('created_at'),
+                ]),
+        ]);
 
         // Get all center IDs for this tenant
         $centerIds = $tenant->centers->pluck('id');
@@ -96,11 +116,123 @@ class TenantsController extends Controller
             ->limit(5)
             ->get(['id', 'code', 'status', 'vehicle_id', 'center_id', 'created_at']);
 
+        // Bank transfer receipts — for the dedicated Receipts tab. Scoped
+        // to the tenant so the admin sees the full review history without
+        // re-querying on tab switch.
+        $bankTransferReceipts = BankTransferReceipt::where('tenant_id', $tenant->id)
+            ->with(['subscription.plan', 'payment', 'reviewer'])
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->get();
+
+        // Health Score — a 0-100 score that summarizes payment health,
+        // subscription liveness, and customer loyalty. Returns both the
+        // numeric score (drives the badge color) and a flag list (drives
+        // the "why" tooltip in the UI).
+        $healthScore = $this->computeHealthScore($tenant);
+
+        // Activity log (best-effort) — if the AdminActivityLog model
+        // exists, surface the last 25 entries. Wrap in try so a missing
+        // table doesn't break the page.
+        $activityLog = collect();
+
+        try {
+            $activityLog = AdminActivityLog::query()
+                ->where('tenant_id', $tenant->id)
+                ->orderByDesc('created_at')
+                ->limit(25)
+                ->get();
+        } catch (Throwable $e) {
+            // table not migrated yet — log and continue
+            Log::debug('AdminActivityLog not available for tenant timeline', [
+                'tenant_id' => $tenant->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return Inertia::render('System/Tenants/Show', [
             'tenant' => $tenant,
             'analytics' => $analytics,
             'recentWorkOrders' => $recentWorkOrders,
+            'bankTransferReceipts' => $bankTransferReceipts,
+            'healthScore' => $healthScore,
+            'activityLog' => $activityLog,
         ]);
+    }
+
+    /**
+     * Compute a 0-100 health score for a tenant.
+     *
+     * Signals (each subtracts from a base of 100):
+     *   -20  has at least one overdue invoice
+     *   -10  no active subscription
+     *   -10  current subscription expires within 30 days
+     *   -5   any rejected bank transfer receipt in last 90 days
+     *
+     * Signals (each adds):
+     *   +5   has 3+ approved receipts (loyal, established)
+     *   +5   subscription renewed at least once
+     *
+     * Score is clamped to [0, 100]. The `flags` list is used by the UI
+     * to render a "why this score" tooltip — every adjustment records
+     * the reason so the admin can act on it.
+     */
+    private function computeHealthScore(Tenant $tenant): array
+    {
+        $score = 100;
+        $flags = [];
+
+        $subscriptionInvoices = SubscriptionInvoice::where('tenant_id', $tenant->id);
+        $overdueExists = (clone $subscriptionInvoices)->where('status', 'overdue')->exists();
+
+        if ($overdueExists) {
+            $score -= 20;
+            $flags[] = ['type' => 'danger', 'key' => 'overdue_invoice'];
+        }
+
+        $activeSub = $tenant->subscriptions()
+            ->where('status', 'active')
+            ->orderByDesc('ends_at')
+            ->first();
+
+        if (! $activeSub) {
+            $score -= 10;
+            $flags[] = ['type' => 'warning', 'key' => 'no_active_subscription'];
+        } elseif ($activeSub->ends_at && $activeSub->ends_at->diffInDays(now(), false) >= -30) {
+            $score -= 10;
+            $flags[] = ['type' => 'warning', 'key' => 'expiring_within_30_days'];
+        }
+
+        $rejectedRecently = BankTransferReceipt::where('tenant_id', $tenant->id)
+            ->where('status', 'rejected')
+            ->where('created_at', '>=', now()->subDays(90))
+            ->exists();
+
+        if ($rejectedRecently) {
+            $score -= 5;
+            $flags[] = ['type' => 'warning', 'key' => 'rejected_receipt_recent'];
+        }
+
+        $approvedCount = BankTransferReceipt::where('tenant_id', $tenant->id)
+            ->where('status', 'approved')
+            ->count();
+
+        if ($approvedCount >= 3) {
+            $score += 5;
+            $flags[] = ['type' => 'positive', 'key' => 'loyal_customer'];
+        }
+
+        $renewedAtLeastOnce = $tenant->subscriptions()->count() > 1;
+
+        if ($renewedAtLeastOnce) {
+            $score += 5;
+            $flags[] = ['type' => 'positive', 'key' => 'has_renewed'];
+        }
+
+        return [
+            'score' => max(0, min(100, $score)),
+            'flags' => $flags,
+        ];
     }
 
     /**
