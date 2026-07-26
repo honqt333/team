@@ -3599,6 +3599,50 @@
       "view_all": "عرض الكل",
       "download": "تحميل"
     },
+    "admin_users": {
+      "title": "المستخدمين الإداريين",
+      "subtitle": "إدارة مسؤولي النظام وصلاحياتهم",
+      "create": "+ إضافة مستخدم",
+      "create_title": "إضافة مستخدم جديد",
+      "edit_title": "تعديل مستخدم",
+      "activity_log": "سجل النشاط",
+      "search_placeholder": "بحث بالاسم أو البريد...",
+      "all_roles": "كل الأدوار",
+      "empty": "لا يوجد مستخدمين",
+      "never_logged_in": "لم يسجل دخوله",
+      "confirm_delete": "هل تريد حذف \":name\"؟",
+      "status": {
+        "inactive": "معطّل"
+      },
+      "col": {
+        "user": "المستخدم",
+        "role": "الدور",
+        "last_login": "آخر دخول"
+      },
+      "roles": {
+        "super_admin": "مدير النظام",
+        "admin": "مسؤول",
+        "support": "دعم فني"
+      },
+      "permission_groups": {
+        "tenants": "المستأجرين",
+        "billing": "الفوترة",
+        "settings": "الإعدادات",
+        "credits": "الأرصدة"
+      },
+      "form": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الجوال",
+        "password": "كلمة المرور",
+        "password_keep": "(اتركها فارغة للإبقاء)",
+        "role": "الدور",
+        "permissions": "الصلاحيات",
+        "is_active": "حساب نشط",
+        "create_action": "إنشاء المستخدم",
+        "saving": "جاري الحفظ..."
+      }
+    },
     "status": {
       "active": "نشط",
       "trial": "تجريبي",

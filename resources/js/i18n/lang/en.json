@@ -3599,6 +3599,50 @@
       "view_all": "View All",
       "download": "Download"
     },
+    "admin_users": {
+      "title": "System Admin Users",
+      "subtitle": "Manage system admins and their permissions",
+      "create": "+ Add User",
+      "create_title": "Add New User",
+      "edit_title": "Edit User",
+      "activity_log": "Activity Log",
+      "search_placeholder": "Search by name or email...",
+      "all_roles": "All Roles",
+      "empty": "No admin users",
+      "never_logged_in": "Never logged in",
+      "confirm_delete": "Delete \":name\"?",
+      "status": {
+        "inactive": "Inactive"
+      },
+      "col": {
+        "user": "User",
+        "role": "Role",
+        "last_login": "Last Login"
+      },
+      "roles": {
+        "super_admin": "Super Admin",
+        "admin": "Admin",
+        "support": "Support"
+      },
+      "permission_groups": {
+        "tenants": "Tenants",
+        "billing": "Billing",
+        "settings": "Settings",
+        "credits": "Credits"
+      },
+      "form": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "password": "Password",
+        "password_keep": "(leave blank to keep)",
+        "role": "Role",
+        "permissions": "Permissions",
+        "is_active": "Active Account",
+        "create_action": "Create User",
+        "saving": "Saving..."
+      }
+    },
     "status": {
       "active": "Active",
       "trial": "Trial",
