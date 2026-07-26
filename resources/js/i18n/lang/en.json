@@ -3942,6 +3942,32 @@
         "email": "Email"
       }
     },
+    "website": {
+      "title": "Website CMS",
+      "header_title": "System Settings (Website CMS)",
+      "header_subtitle": "Centralized control of content, branding, and policies for the public website.",
+      "preview": "Preview Site",
+      "save": "Save Changes",
+      "saved": "Changes saved successfully",
+      "tabs": {
+        "general": "Visual Identity",
+        "menus": "Navigation Menus",
+        "banners": "Banners",
+        "landing": "Landing Page",
+        "features": "Competitive Features",
+        "pricing": "Pricing Plans",
+        "stats": "Performance Stats",
+        "testimonials": "Customer Testimonials",
+        "faq": "FAQ",
+        "contact": "Contact Form",
+        "pages": "Static Pages",
+        "maintenance": "Maintenance Mode",
+        "footer": "Footer",
+        "announcement": "Announcement Bar",
+        "integrations": "Integrations",
+        "seo_social": "SEO & Social"
+      }
+    },
     "credits": {
       "tabs": {
         "packages": "Packages",
