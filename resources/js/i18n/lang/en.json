@@ -424,6 +424,20 @@
         "vat": "VAT"
       }
     },
+    "payment_tab": {
+      "title": "Payment Methods",
+      "subtitle": "Active payment gateways you can use to pay your subscription",
+      "manage_subscription": "Manage subscription",
+      "active_methods": "Active payment methods",
+      "no_active_methods": "No payment methods are currently active. Please contact support.",
+      "active": "Active",
+      "vat_on_subscriptions": "VAT on subscriptions",
+      "vat_rate": "Rate",
+      "vat_method": "Method",
+      "vat_inclusive": "Inclusive (price includes VAT)",
+      "vat_exclusive": "Exclusive (VAT added on top)",
+      "admin_managed_note": "Payment gateways and VAT settings are configured by the system administrator. Contact support if you need a payment method enabled."
+    },
     "logo": {
       "alt": "Company logo",
       "deleted": "The logo has been deleted",
@@ -477,6 +491,7 @@
       "contact": "Contact and address",
       "invoices": "Invoices",
       "numbering": "Numbering",
+      "payment": "Payment",
       "profile": "Company profile",
       "revenue_expenses": "Income and expenses",
       "subscription": "Subscribe",
