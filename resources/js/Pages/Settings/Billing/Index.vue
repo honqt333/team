@@ -81,21 +81,30 @@ const statusClass = (status) => {
 };
 
 const formatDate = (dateStr) => {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
+    if (!dateStr) return t('system.billing.page.em_dash');
+    return new Date(dateStr).toLocaleDateString(
+        locale.value === 'ar'
+            ? t('system.billing.page.locale_ar')
+            : t('system.billing.page.locale_en'),
+        {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        }
+    );
 };
 
 const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(amount || 0);
+    return new Intl.NumberFormat(t('system.billing.page.locale_en'), {
+        maximumFractionDigits: 2,
+    }).format(amount || 0);
 };
 
 const gatewayLabel = (gateway) => {
     return t(`system.company_subscription.gateways.${gateway}`) || gateway;
 };
+
+const noPlanLabel = computed(() => t('system.billing.page.no_plan'));
 </script>
 
 <template>
@@ -226,13 +235,14 @@ const gatewayLabel = (gateway) => {
                                     <p class="text-sm font-semibold text-slate-900 dark:text-white">
                                         {{
                                             locale === 'ar'
-                                                ? r.subscription?.plan?.name_ar
-                                                : r.subscription?.plan?.name_en
+                                                ? r.subscription?.plan?.name_ar || noPlanLabel
+                                                : r.subscription?.plan?.name_en || noPlanLabel
                                         }}
                                     </p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400">
                                         {{ formatDate(r.transfer_date) }} ·
-                                        {{ formatCurrency(r.transfer_amount) }} SAR
+                                        {{ formatCurrency(r.transfer_amount) }}
+                                        {{ t('system.billing.page.currency') }}
                                     </p>
                                 </div>
                             </div>
@@ -335,7 +345,8 @@ const gatewayLabel = (gateway) => {
                                     <td
                                         class="px-4 py-2.5 font-mono font-semibold text-slate-900 dark:text-white"
                                     >
-                                        {{ formatCurrency(payment.amount) }} SAR
+                                        {{ formatCurrency(payment.amount) }}
+                                        {{ t('system.billing.page.currency') }}
                                     </td>
                                     <td class="px-4 py-2.5">
                                         <span

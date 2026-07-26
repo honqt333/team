@@ -4485,7 +4485,12 @@
         "approved": "Approved",
         "rejected": "Rejected"
       },
-      "receipts_view": "View"
+      "receipts_view": "View",
+      "currency": "SAR",
+      "em_dash": "—",
+      "locale_ar": "ar-SA",
+      "locale_en": "en-US",
+      "no_plan": "—"
     }
   },
   "subscription": {

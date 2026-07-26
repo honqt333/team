@@ -4466,7 +4466,12 @@
         "approved": "مقبول",
         "rejected": "مرفوض"
       },
-      "receipts_view": "عرض"
+      "receipts_view": "عرض",
+      "currency": "ر.س",
+      "em_dash": "—",
+      "locale_ar": "ar-SA",
+      "locale_en": "en-US",
+      "no_plan": "—"
     }
   },
   "subscription": {
