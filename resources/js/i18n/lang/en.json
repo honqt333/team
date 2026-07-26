@@ -234,6 +234,7 @@
     "no_attachments_desc": "No documents or attachments have been recorded for this invoice.",
     "no_contact": "No contact information",
     "no_data": "No data",
+    "only": "Only",
     "no_data_available": "No data available",
     "no_records": "No records found",
     "no_results": "No results found",
@@ -3792,17 +3793,52 @@
       "title": "Promo Codes",
       "subtitle": "Manage discount codes and offers",
       "create": "+ Create Code",
-      "code": "Code",
-      "name": "Name",
-      "discount": "Discount",
-      "usage": "Usage",
-      "status": "Status",
-      "valid": "Valid",
-      "expired": "Expired",
-      "inactive": "Inactive",
+      "create_title": "Create Promo Code",
+      "edit_title": "Edit Promo Code",
+      "create_action": "Create Code",
+      "save_changes": "Save Changes",
+      "create_first": "Create first code",
+      "empty": "No promo codes yet",
+      "confirm_delete": "Delete code \":code\"?",
       "unlimited": "∞",
-      "no_codes": "No promo codes",
-      "first_code": "Create first code"
+      "all_plans": "All plans",
+      "col": {
+        "code": "Code",
+        "name": "Name",
+        "discount": "Discount",
+        "usage": "Usage"
+      },
+      "status": {
+        "valid": "Valid",
+        "expired": "Expired",
+        "inactive": "Inactive"
+      },
+      "discount_type": {
+        "percentage": "Percentage (%)",
+        "fixed": "Fixed Amount (SAR)",
+        "trial_days": "Additional Trial Days"
+      },
+      "discount_value": {
+        "percentage": "Discount Percentage (%)",
+        "fixed": "Discount Amount (SAR)",
+        "trial_days": "Additional Trial Days"
+      },
+      "form": {
+        "code": "Code",
+        "name": "Offer Name",
+        "generate": "Generate Random Code",
+        "discount": "Discount",
+        "discount_type": "Discount Type",
+        "limits": "Limits",
+        "max_uses": "Maximum Uses",
+        "max_uses_per_tenant": "Limit per Tenant",
+        "starts_at": "Starts At",
+        "expires_at": "Expires At",
+        "restrictions": "Restrictions",
+        "plan": "Plan",
+        "billing_cycle": "Billing Cycle",
+        "first_subscription_only": "First subscription only"
+      }
     },
     "settings": {
       "general_title": "General Settings",
@@ -3937,6 +3973,7 @@
       "no_data": "No data",
       "search_placeholder": "Search...",
       "all": "All",
+      "only": "Only",
       "yes": "Yes",
       "no": "No"
     },
