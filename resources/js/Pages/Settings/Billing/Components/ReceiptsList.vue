@@ -30,7 +30,7 @@ const formatCurrency = (amount) => {
     }).format(amount || 0);
 };
 
-const noPlanLabel = computed(() => t('system.billing.page.no_plan'));
+const noPlanLabel = () => t('system.billing.page.no_plan');
 
 const statusConfig = {
     pending: {
@@ -94,8 +94,8 @@ const statusConfig = {
                     <td class="px-4 py-2.5 text-slate-700 dark:text-slate-200">
                         {{
                             locale === 'ar'
-                                ? r.subscription?.plan?.name_ar || noPlanLabel
-                                : r.subscription?.plan?.name_en || noPlanLabel
+                                ? r.subscription?.plan?.name_ar || noPlanLabel()
+                                : r.subscription?.plan?.name_en || noPlanLabel()
                         }}
                     </td>
                     <td class="px-4 py-2.5 font-mono font-semibold text-slate-900 dark:text-white">

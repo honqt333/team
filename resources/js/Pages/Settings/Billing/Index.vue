@@ -104,7 +104,7 @@ const gatewayLabel = (gateway) => {
     return t(`system.company_subscription.gateways.${gateway}`) || gateway;
 };
 
-const noPlanLabel = computed(() => t('system.billing.page.no_plan'));
+const noPlanLabel = () => t('system.billing.page.no_plan');
 </script>
 
 <template>
@@ -235,8 +235,8 @@ const noPlanLabel = computed(() => t('system.billing.page.no_plan'));
                                     <p class="text-sm font-semibold text-slate-900 dark:text-white">
                                         {{
                                             locale === 'ar'
-                                                ? r.subscription?.plan?.name_ar || noPlanLabel
-                                                : r.subscription?.plan?.name_en || noPlanLabel
+                                                ? r.subscription?.plan?.name_ar || noPlanLabel()
+                                                : r.subscription?.plan?.name_en || noPlanLabel()
                                         }}
                                     </p>
                                     <p class="text-xs text-slate-500 dark:text-slate-400">
