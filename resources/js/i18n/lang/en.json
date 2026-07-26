@@ -3968,6 +3968,67 @@
         "seo_social": "SEO & Social"
       }
     },
+    "developer": {
+      "title": "Developer Center",
+      "subtitle": "Codebase Health, Security Verification, and AI Architectural Audits",
+      "console_badge": "Developer Console Active",
+      "run_audit": "Run Fresh Audit",
+      "overall_score": "Overall Release Score",
+      "release_status": "Release Status: :status",
+      "release_required": "Required: Security (100%), Isolation (100%), Failed Tests (0)",
+      "gate_passed": "Gate status: Passed",
+      "gate_attention": "Gate status: Attention needed",
+      "gate_approved": "Approved",
+      "gate_rejected": "Rejected",
+      "gate_unknown": "Unknown",
+      "score_labels": {
+        "security": "Security",
+        "testing": "Testing",
+        "architecture": "Architecture",
+        "performance": "Performance",
+        "ui": "UI standards",
+        "documentation": "Documentation"
+      },
+      "tabs": {
+        "violations": "Violations Checklist",
+        "graph": "Dependency Graph",
+        "performance": "Slow & N+1 Queries",
+        "ai_advisor": "AI Architecture Advisor"
+      },
+      "violations_title": "Codebase Violations Checklist",
+      "showing_last": "Showing last snapshot results",
+      "no_violations": "No violations detected in your codebase. Outstanding job!",
+      "col": {
+        "severity": "Severity",
+        "category": "Category",
+        "file_path": "File Path",
+        "details": "Violation Details"
+      },
+      "graph_title": "Project Knowledge Graph Mapping",
+      "graph_subtitle": "Dependency tree tracking integrations between core modules",
+      "reload_map": "Reload Map",
+      "work_orders_module": "WorkOrders Module",
+      "graph_nodes": {
+        "inventory": "Inventory",
+        "vehicles": "Vehicles",
+        "customers": "Customers",
+        "invoices": "Invoices"
+      },
+      "performance_title": "Slow & N+1 Database Queries",
+      "no_slow_queries": "No slow queries captured in log tables. Execution time matches standards.",
+      "occurrences": "Occurrences: :n",
+      "ai_advisor_title": "AI Advisor Workspace",
+      "analyzing": "Analyzing...",
+      "generate_suggestions": "Generate New Suggestions",
+      "consulting_advisor": "Consulting Gemini Advisor...",
+      "no_suggestions": "No suggestions loaded. Click button above to execute AI workspace audit.",
+      "risk": "Risk: :level",
+      "impact_evidence": "Impact & Evidence",
+      "recommended_refactoring": "Recommended Refactoring",
+      "implementation_plan": "Implementation Plan",
+      "required_test": "Required Test: :test",
+      "rollback_plan": "Rollback Plan: :plan"
+    },
     "credits": {
       "tabs": {
         "packages": "Packages",

@@ -3949,6 +3949,67 @@
         "seo_social": "SEO وبيانات التواصل"
       }
     },
+    "developer": {
+      "title": "مركز التطوير",
+      "subtitle": "صحة الكود، التحقق الأمني، ومراجعات هندسة الذكاء الاصطناعي",
+      "console_badge": "وحدة تحكم المطور نشطة",
+      "run_audit": "تشغيل مراجعة جديدة",
+      "overall_score": "نتيجة الإصدار الإجمالية",
+      "release_status": "حالة الإصدار: :status",
+      "release_required": "المتطلبات: الأمان (100%)، العزل (100%)، الاختبارات الفاشلة (0)",
+      "gate_passed": "حالة البوابة: اجتياز",
+      "gate_attention": "حالة البوابة: يحتاج انتباه",
+      "gate_approved": "معتمد",
+      "gate_rejected": "مرفوض",
+      "gate_unknown": "غير معروف",
+      "score_labels": {
+        "security": "الأمان",
+        "testing": "الاختبارات",
+        "architecture": "الهندسة",
+        "performance": "الأداء",
+        "ui": "معايير الواجهة",
+        "documentation": "التوثيق"
+      },
+      "tabs": {
+        "violations": "قائمة الانتهاكات",
+        "graph": "خريطة الاعتماديات",
+        "performance": "الاستعلامات البطيئة",
+        "ai_advisor": "مستشار هندسة الذكاء الاصطناعي"
+      },
+      "violations_title": "قائمة انتهاكات الكود",
+      "showing_last": "عرض نتائج آخر لقطة",
+      "no_violations": "لم يتم اكتشاف انتهاكات في الكود. عمل ممتاز!",
+      "col": {
+        "severity": "الخطورة",
+        "category": "الفئة",
+        "file_path": "مسار الملف",
+        "details": "تفاصيل الانتهاك"
+      },
+      "graph_title": "تخطيط خريطة معرفة المشروع",
+      "graph_subtitle": "تتبع شجرة الاعتماديات بين الوحدات الأساسية",
+      "reload_map": "إعادة تحميل الخريطة",
+      "work_orders_module": "وحدة كروت العمل",
+      "graph_nodes": {
+        "inventory": "المخزون",
+        "vehicles": "المركبات",
+        "customers": "العملاء",
+        "invoices": "الفواتير"
+      },
+      "performance_title": "استعلامات بطيئة و N+1",
+      "no_slow_queries": "لم يتم تسجيل استعلامات بطيئة. وقت التنفيذ يطابق المعايير.",
+      "occurrences": "التكرارات: :n",
+      "ai_advisor_title": "مساحة عمل مستشار الذكاء الاصطناعي",
+      "analyzing": "جاري التحليل...",
+      "generate_suggestions": "توليد اقتراحات جديدة",
+      "consulting_advisor": "استشارة مستشار Gemini...",
+      "no_suggestions": "لا توجد اقتراحات محملة. انقر الزر أعلاه لتنفيذ مراجعة مساحة عمل الذكاء الاصطناعي.",
+      "risk": "المخاطر: :level",
+      "impact_evidence": "التأثير والأدلة",
+      "recommended_refactoring": "إعادة الهيكلة الموصى بها",
+      "implementation_plan": "خطة التنفيذ",
+      "required_test": "الاختبار المطلوب: :test",
+      "rollback_plan": "خطة التراجع: :plan"
+    },
     "credits": {
       "tabs": {
         "packages": "الباقات",
