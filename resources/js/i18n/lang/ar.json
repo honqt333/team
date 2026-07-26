@@ -3582,6 +3582,92 @@
       "back_to_app": "العودة للتطبيق",
       "backups": "النسخ الاحتياطية"
     },
+    "payment_settings": {
+      "title": "إعدادات الدفع",
+      "subtitle": "إدارة بوابات الدفع وطرق التحصيل",
+      "default_gateway": "البوابة الافتراضية",
+      "payment_methods": {
+        "title": "طرق الدفع المتاحة",
+        "mada": "مدى",
+        "visa": "Visa",
+        "mastercard": "Mastercard",
+        "apple_pay": "Apple Pay",
+        "stc_pay": "STC Pay"
+      },
+      "gateway": {
+        "moyasar": "Moyasar",
+        "tap": "Tap",
+        "paytabs": "PayTabs",
+        "tabby": "Tabby",
+        "tamara": "Tamara",
+        "bank_transfer": "تحويل بنكي فقط",
+        "enabled": "مفعّل",
+        "publishable_key": "مفتاح النشر (Publishable Key)",
+        "public_key": "المفتاح العام (Public Key)",
+        "secret_key": "المفتاح السري (Secret Key)",
+        "profile_id": "معرّف الملف الشخصي (Profile ID)",
+        "server_key": "مفتاح الخادم (Server Key)",
+        "client_key": "مفتاح العميل (Client Key)",
+        "merchant_code": "كود التاجر (Merchant Code)",
+        "api_token": "رمز الـ API",
+        "notification_token": "رمز الإشعارات",
+        "tabby_tagline": "4 دفعات بدون فوائد",
+        "tamara_tagline": "3 دفعات بدون فوائد"
+      },
+      "paytabs": {
+        "title": "PayTabs",
+        "subtitle": "بوابة دفع لمنطقة الشرق الأوسط وشمال أفريقيا تدعم البطاقات والبدائل"
+      },
+      "bnpl": {
+        "title": "منصات التقسيط (BNPL)",
+        "subtitle": "السماح للمستأجرين بتقسيط اشتراكاتهم عبر Tabby أو Tamara"
+      },
+      "company_info": {
+        "title": "معلومات الشركة",
+        "subtitle": "تظهر هذه المعلومات في الفواتير والإيصالات الصادرة للمستأجرين",
+        "legal_name_ar": "الاسم القانوني (عربي)",
+        "legal_name_en": "الاسم القانوني (إنجليزي)",
+        "vat_number": "الرقم الضريبي (15 رقم)",
+        "cr_number": "السجل التجاري",
+        "phone": "رقم التواصل",
+        "support_email": "البريد الإلكتروني للدعم",
+        "website": "الموقع الإلكتروني"
+      },
+      "vat": {
+        "title": "إعدادات ضريبة الاشتراكات",
+        "subtitle": "تطبيق الضريبة على مبالغ الاشتراكات (تظهر في الفاتورة للمستأجر)",
+        "enable": "إضافة ضريبة القيمة المضافة للاشتراكات",
+        "rate": "نسبة الضريبة (%)",
+        "method": "طريقة الاحتساب",
+        "exclusive": "خاضع للضريبة (تضاف على السعر)",
+        "inclusive": "شامل للضريبة (الضريبة ضمن السعر)"
+      },
+      "bank_transfer": {
+        "title": "التحويل البنكي",
+        "accounts_title": "الحسابات البنكية",
+        "add_account": "+ إضافة حساب",
+        "bank_name": "اسم البنك",
+        "account_name": "اسم صاحب الحساب",
+        "iban": "IBAN",
+        "account_number": "رقم الحساب",
+        "instructions_title": "تعليمات التحويل",
+        "instructions_placeholder": "مثال: يرجى ذكر رقم الاشتراك في وصف التحويل...",
+        "extras_title": "إعدادات التحويل البنكي الإضافية",
+        "extras_subtitle": "للتحكم في عملية تأكيد الدفع عبر التحويل البنكي",
+        "require_receipt": "طلب إيصال التحويل من المستأجر قبل التفعيل",
+        "max_days": "المدة المتاحة للدفع (بالأيام)",
+        "min_amount": "الحد الأدنى للمبلغ (اختياري)",
+        "receipt_instructions_title": "تعليمات إضافية لرفع الإيصال",
+        "receipt_instructions_placeholder": "مثال: يجب أن يظهر رقم الفاتورة في وصف التحويل..."
+      },
+      "placeholders": {
+        "secret_keep": "اتركه فارغاً للاحتفاظ بالقيمة الحالية"
+      },
+      "actions": {
+        "save": "حفظ الإعدادات",
+        "saving": "جاري الحفظ..."
+      }
+    },
     "actions": {
       "save": "حفظ",
       "saving": "جاري الحفظ...",

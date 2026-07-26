@@ -3,8 +3,12 @@
         <div class="max-w-4xl mx-auto py-6">
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">إعدادات الدفع</h1>
-                <p class="text-gray-500 dark:text-gray-400">إدارة بوابات الدفع وطرق التحصيل</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ t('system.payment_settings.title') }}
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">
+                    {{ t('system.payment_settings.subtitle') }}
+                </p>
             </div>
 
             <form @submit.prevent="submit" class="space-y-6">
@@ -13,7 +17,7 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        البوابة الافتراضية
+                        {{ t('system.payment_settings.default_gateway') }}
                     </h2>
                     <SearchableSelect
                         v-model="form.default_gateway"
@@ -28,48 +32,22 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                        طرق الدفع المتاحة
+                        {{ t('system.payment_settings.payment_methods.title') }}
                     </h2>
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
+                        <label
+                            v-for="method in paymentMethodToggles"
+                            :key="method.key"
+                            class="flex items-center gap-2 cursor-pointer"
+                        >
                             <input
                                 type="checkbox"
-                                v-model="form.mada_enabled"
+                                v-model="form[method.field]"
                                 class="rounded border-gray-300 text-indigo-600"
                             />
-                            <span class="text-gray-700 dark:text-gray-300">مدى</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.visa_enabled"
-                                class="rounded border-gray-300 text-indigo-600"
-                            />
-                            <span class="text-gray-700 dark:text-gray-300">Visa</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.mastercard_enabled"
-                                class="rounded border-gray-300 text-indigo-600"
-                            />
-                            <span class="text-gray-700 dark:text-gray-300">Mastercard</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.applepay_enabled"
-                                class="rounded border-gray-300 text-indigo-600"
-                            />
-                            <span class="text-gray-700 dark:text-gray-300">Apple Pay</span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                v-model="form.stcpay_enabled"
-                                class="rounded border-gray-300 text-indigo-600"
-                            />
-                            <span class="text-gray-700 dark:text-gray-300">STC Pay</span>
+                            <span class="text-gray-700 dark:text-gray-300">
+                                {{ t(method.labelKey) }}
+                            </span>
                         </label>
                     </div>
                 </div>
@@ -79,14 +57,18 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Moyasar</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ t('system.payment_settings.gateway.moyasar') }}
+                        </h2>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
                                 v-model="form.moyasar.enabled"
                                 class="rounded border-gray-300 text-indigo-600"
                             />
-                            <span class="text-sm text-gray-600 dark:text-gray-400">مفعّل</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ t('system.payment_settings.gateway.enabled') }}
+                            </span>
                         </label>
                     </div>
                     <div v-if="form.moyasar.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -94,7 +76,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Publishable Key
+                                {{ t('system.payment_settings.gateway.publishable_key') }}
                             </label>
                             <input
                                 type="text"
@@ -108,7 +90,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Secret Key
+                                {{ t('system.payment_settings.gateway.secret_key') }}
                             </label>
                             <input
                                 type="password"
@@ -118,7 +100,7 @@
                                 dir="ltr"
                             />
                             <p class="text-xs text-gray-500 mt-1">
-                                اتركه فارغاً للاحتفاظ بالقيمة الحالية
+                                {{ t('system.payment_settings.placeholders.secret_keep') }}
                             </p>
                         </div>
                     </div>
@@ -129,14 +111,18 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Tap</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ t('system.payment_settings.gateway.tap') }}
+                        </h2>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
                                 v-model="form.tap.enabled"
                                 class="rounded border-gray-300 text-indigo-600"
                             />
-                            <span class="text-sm text-gray-600 dark:text-gray-400">مفعّل</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ t('system.payment_settings.gateway.enabled') }}
+                            </span>
                         </label>
                     </div>
                     <div v-if="form.tap.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -144,7 +130,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Public Key
+                                {{ t('system.payment_settings.gateway.public_key') }}
                             </label>
                             <input
                                 type="text"
@@ -158,12 +144,88 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Secret Key
+                                {{ t('system.payment_settings.gateway.secret_key') }}
                             </label>
                             <input
                                 type="password"
                                 v-model="form.tap.secret_key"
                                 :placeholder="settings.tap?.secret_key_masked || 'sk_...'"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
+                                dir="ltr"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ t('system.payment_settings.placeholders.secret_keep') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PayTabs -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
+                >
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                {{ t('system.payment_settings.paytabs.title') }}
+                            </h2>
+                            <p class="text-xs text-gray-500">
+                                {{ t('system.payment_settings.paytabs.subtitle') }}
+                            </p>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                v-model="form.paytabs.enabled"
+                                class="rounded border-gray-300 text-indigo-600"
+                            />
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ t('system.payment_settings.gateway.enabled') }}
+                            </span>
+                        </label>
+                    </div>
+                    <div v-if="form.paytabs.enabled" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ t('system.payment_settings.gateway.profile_id') }}
+                            </label>
+                            <input
+                                type="text"
+                                v-model="form.paytabs.profile_id"
+                                placeholder="12345"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
+                                dir="ltr"
+                            />
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ t('system.payment_settings.gateway.server_key') }}
+                            </label>
+                            <input
+                                type="password"
+                                v-model="form.paytabs.server_key"
+                                :placeholder="settings.paytabs?.server_key_masked || 'srv_...'"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
+                                dir="ltr"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ t('system.payment_settings.placeholders.secret_keep') }}
+                            </p>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                            >
+                                {{ t('system.payment_settings.gateway.client_key') }}
+                            </label>
+                            <input
+                                type="text"
+                                v-model="form.paytabs.client_key"
+                                placeholder="client_..."
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                 dir="ltr"
                             />
@@ -177,7 +239,7 @@
                 >
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                            التحويل البنكي
+                            {{ t('system.payment_settings.bank_transfer.title') }}
                         </h2>
                         <label class="flex items-center gap-2 cursor-pointer">
                             <input
@@ -185,7 +247,9 @@
                                 v-model="form.bank_transfer_enabled"
                                 class="rounded border-gray-300 text-indigo-600"
                             />
-                            <span class="text-sm text-gray-600 dark:text-gray-400">مفعّل</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ t('system.payment_settings.gateway.enabled') }}
+                            </span>
                         </label>
                     </div>
 
@@ -196,14 +260,14 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    الحسابات البنكية
+                                    {{ t('system.payment_settings.bank_transfer.accounts_title') }}
                                 </label>
                                 <button
                                     type="button"
                                     @click="addBankAccount"
                                     class="text-sm text-indigo-600 hover:text-indigo-700"
                                 >
-                                    + إضافة حساب
+                                    {{ t('system.payment_settings.bank_transfer.add_account') }}
                                 </button>
                             </div>
 
@@ -216,19 +280,25 @@
                                     <input
                                         type="text"
                                         v-model="account.bank_name"
-                                        placeholder="اسم البنك"
+                                        :placeholder="
+                                            t('system.payment_settings.bank_transfer.bank_name')
+                                        "
                                         class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                     />
                                     <input
                                         type="text"
                                         v-model="account.account_name"
-                                        placeholder="اسم صاحب الحساب"
+                                        :placeholder="
+                                            t('system.payment_settings.bank_transfer.account_name')
+                                        "
                                         class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                     />
                                     <input
                                         type="text"
                                         v-model="account.iban"
-                                        placeholder="IBAN"
+                                        :placeholder="
+                                            t('system.payment_settings.bank_transfer.iban')
+                                        "
                                         class="rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                         dir="ltr"
                                     />
@@ -236,7 +306,11 @@
                                         <input
                                             type="text"
                                             v-model="account.account_number"
-                                            placeholder="رقم الحساب"
+                                            :placeholder="
+                                                t(
+                                                    'system.payment_settings.bank_transfer.account_number'
+                                                )
+                                            "
                                             class="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                             dir="ltr"
                                         />
@@ -244,6 +318,7 @@
                                             type="button"
                                             @click="removeBankAccount(index)"
                                             class="px-3 text-red-500 hover:text-red-700"
+                                            :title="t('system.actions.delete')"
                                         >
                                             <svg
                                                 class="w-5 h-5"
@@ -269,12 +344,16 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                تعليمات التحويل
+                                {{ t('system.payment_settings.bank_transfer.instructions_title') }}
                             </label>
                             <textarea
                                 v-model="form.bank_transfer_instructions"
                                 rows="3"
-                                placeholder="مثال: يرجى ذكر رقم الاشتراك في وصف التحويل..."
+                                :placeholder="
+                                    t(
+                                        'system.payment_settings.bank_transfer.instructions_placeholder'
+                                    )
+                                "
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                             ></textarea>
                         </div>
@@ -283,11 +362,11 @@
 
                 <!-- BNPL Section Header -->
                 <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                        منصات التقسيط (BNPL)
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                        {{ t('system.payment_settings.bnpl.title') }}
                     </h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        السماح للمستأجرين بتقسيط اشتراكاتهم عبر Tabby أو Tamara
+                        {{ t('system.payment_settings.bnpl.subtitle') }}
                     </p>
                 </div>
 
@@ -304,9 +383,11 @@
                             </div>
                             <div>
                                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    Tabby
+                                    {{ t('system.payment_settings.gateway.tabby') }}
                                 </h2>
-                                <p class="text-xs text-gray-500">4 دفعات بدون فوائد</p>
+                                <p class="text-xs text-gray-500">
+                                    {{ t('system.payment_settings.gateway.tabby_tagline') }}
+                                </p>
                             </div>
                         </div>
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -315,7 +396,9 @@
                                 v-model="form.tabby.enabled"
                                 class="rounded border-gray-300 text-indigo-600"
                             />
-                            <span class="text-sm text-gray-600 dark:text-gray-400">مفعّل</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ t('system.payment_settings.gateway.enabled') }}
+                            </span>
                         </label>
                     </div>
                     <div v-if="form.tabby.enabled" class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -323,7 +406,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Public Key
+                                {{ t('system.payment_settings.gateway.public_key') }}
                             </label>
                             <input
                                 type="text"
@@ -337,7 +420,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Secret Key
+                                {{ t('system.payment_settings.gateway.secret_key') }}
                             </label>
                             <input
                                 type="password"
@@ -346,12 +429,15 @@
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                 dir="ltr"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ t('system.payment_settings.placeholders.secret_keep') }}
+                            </p>
                         </div>
                         <div>
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Merchant Code
+                                {{ t('system.payment_settings.gateway.merchant_code') }}
                             </label>
                             <input
                                 type="text"
@@ -377,9 +463,11 @@
                             </div>
                             <div>
                                 <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                    Tamara
+                                    {{ t('system.payment_settings.gateway.tamara') }}
                                 </h2>
-                                <p class="text-xs text-gray-500">3 دفعات بدون فوائد</p>
+                                <p class="text-xs text-gray-500">
+                                    {{ t('system.payment_settings.gateway.tamara_tagline') }}
+                                </p>
                             </div>
                         </div>
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -388,7 +476,9 @@
                                 v-model="form.tamara.enabled"
                                 class="rounded border-gray-300 text-indigo-600"
                             />
-                            <span class="text-sm text-gray-600 dark:text-gray-400">مفعّل</span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ t('system.payment_settings.gateway.enabled') }}
+                            </span>
                         </label>
                     </div>
                     <div v-if="form.tamara.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -396,7 +486,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                API Token
+                                {{ t('system.payment_settings.gateway.api_token') }}
                             </label>
                             <input
                                 type="password"
@@ -405,12 +495,15 @@
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                 dir="ltr"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                {{ t('system.payment_settings.placeholders.secret_keep') }}
+                            </p>
                         </div>
                         <div>
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                Notification Token
+                                {{ t('system.payment_settings.gateway.notification_token') }}
                             </label>
                             <input
                                 type="password"
@@ -430,17 +523,17 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        معلومات الشركة
+                        {{ t('system.payment_settings.company_info.title') }}
                     </h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        تظهر هذه المعلومات في الفواتير والإيصالات الصادرة للمستأجرين
+                        {{ t('system.payment_settings.company_info.subtitle') }}
                     </p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                الاسم القانوني (عربي)
+                                {{ t('system.payment_settings.company_info.legal_name_ar') }}
                             </label>
                             <input
                                 type="text"
@@ -452,7 +545,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                الاسم القانوني (إنجليزي)
+                                {{ t('system.payment_settings.company_info.legal_name_en') }}
                             </label>
                             <input
                                 type="text"
@@ -465,7 +558,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                الرقم الضريبي (15 رقم)
+                                {{ t('system.payment_settings.company_info.vat_number') }}
                             </label>
                             <input
                                 type="text"
@@ -479,7 +572,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                السجل التجاري
+                                {{ t('system.payment_settings.company_info.cr_number') }}
                             </label>
                             <input
                                 type="text"
@@ -492,7 +585,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                رقم التواصل
+                                {{ t('system.payment_settings.company_info.phone') }}
                             </label>
                             <input
                                 type="text"
@@ -505,7 +598,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                البريد الإلكتروني للدعم
+                                {{ t('system.payment_settings.company_info.support_email') }}
                             </label>
                             <input
                                 type="email"
@@ -518,7 +611,7 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                الموقع الإلكتروني
+                                {{ t('system.payment_settings.company_info.website') }}
                             </label>
                             <input
                                 type="url"
@@ -535,10 +628,10 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        إعدادات ضريبة الاشتراكات
+                        {{ t('system.payment_settings.vat.title') }}
                     </h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        تطبيق الضريبة على مبالغ الاشتراكات (تظهر في الفاتورة للمستأجر)
+                        {{ t('system.payment_settings.vat.subtitle') }}
                     </p>
                     <div class="space-y-4">
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -548,7 +641,7 @@
                                 class="rounded border-gray-300 text-indigo-600"
                             />
                             <span class="text-gray-700 dark:text-gray-300 font-medium">
-                                إضافة ضريبة القيمة المضافة للاشتراكات
+                                {{ t('system.payment_settings.vat.enable') }}
                             </span>
                         </label>
                         <div
@@ -559,7 +652,7 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    نسبة الضريبة (%)
+                                    {{ t('system.payment_settings.vat.rate') }}
                                 </label>
                                 <input
                                     type="number"
@@ -575,14 +668,18 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    طريقة الاحتساب
+                                    {{ t('system.payment_settings.vat.method') }}
                                 </label>
                                 <select
                                     v-model="form.subscription_vat_inclusive"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                                 >
-                                    <option :value="false">خاضع للضريبة (تضاف على السعر)</option>
-                                    <option :value="true">شامل للضريبة (الضريبة ضمن السعر)</option>
+                                    <option :value="false">
+                                        {{ t('system.payment_settings.vat.exclusive') }}
+                                    </option>
+                                    <option :value="true">
+                                        {{ t('system.payment_settings.vat.inclusive') }}
+                                    </option>
                                 </select>
                             </div>
                         </div>
@@ -595,10 +692,10 @@
                     class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-200 dark:border-gray-700"
                 >
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
-                        إعدادات التحويل البنكي الإضافية
+                        {{ t('system.payment_settings.bank_transfer.extras_title') }}
                     </h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                        للتحكم في عملية تأكيد الدفع عبر التحويل البنكي
+                        {{ t('system.payment_settings.bank_transfer.extras_subtitle') }}
                     </p>
                     <div class="space-y-4">
                         <label class="flex items-center gap-2 cursor-pointer">
@@ -608,7 +705,7 @@
                                 class="rounded border-gray-300 text-indigo-600"
                             />
                             <span class="text-gray-700 dark:text-gray-300 font-medium">
-                                طلب إيصال التحويل من المستأجر قبل التفعيل
+                                {{ t('system.payment_settings.bank_transfer.require_receipt') }}
                             </span>
                         </label>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pl-7">
@@ -616,7 +713,7 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    المدة المتاحة للدفع (بالأيام)
+                                    {{ t('system.payment_settings.bank_transfer.max_days') }}
                                 </label>
                                 <input
                                     type="number"
@@ -631,7 +728,7 @@
                                 <label
                                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                                 >
-                                    الحد الأدنى للمبلغ (اختياري)
+                                    {{ t('system.payment_settings.bank_transfer.min_amount') }}
                                 </label>
                                 <input
                                     type="number"
@@ -647,12 +744,20 @@
                             <label
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                             >
-                                تعليمات إضافية لرفع الإيصال
+                                {{
+                                    t(
+                                        'system.payment_settings.bank_transfer.receipt_instructions_title'
+                                    )
+                                }}
                             </label>
                             <textarea
                                 v-model="form.bank_transfer_receipt_instructions"
                                 rows="3"
-                                placeholder="مثال: يجب أن يظهر رقم الفاتورة في وصف التحويل..."
+                                :placeholder="
+                                    t(
+                                        'system.payment_settings.bank_transfer.receipt_instructions_placeholder'
+                                    )
+                                "
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm"
                             ></textarea>
                         </div>
@@ -666,7 +771,11 @@
                         :disabled="form.processing"
                         class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
                     >
-                        {{ form.processing ? 'جاري الحفظ...' : 'حفظ الإعدادات' }}
+                        {{
+                            form.processing
+                                ? t('system.payment_settings.actions.saving')
+                                : t('system.payment_settings.actions.save')
+                        }}
                     </button>
                 </div>
             </form>
@@ -677,19 +786,32 @@
 <script setup>
 import { computed } from 'vue';
 import { useForm } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     settings: Object,
 });
 
 const gatewayOptions = computed(() => [
-    { value: 'moyasar', label: 'Moyasar' },
-    { value: 'tap', label: 'Tap' },
-    { value: 'paytabs', label: 'PayTabs' },
-    { value: 'bank_transfer', label: 'تحويل بنكي فقط' },
+    { value: 'moyasar', label: t('system.payment_settings.gateway.moyasar') },
+    { value: 'tap', label: t('system.payment_settings.gateway.tap') },
+    { value: 'paytabs', label: t('system.payment_settings.gateway.paytabs') },
+    { value: 'tabby', label: t('system.payment_settings.gateway.tabby') },
+    { value: 'tamara', label: t('system.payment_settings.gateway.tamara') },
+    { value: 'bank_transfer', label: t('system.payment_settings.gateway.bank_transfer') },
 ]);
+
+const paymentMethodToggles = [
+    { field: 'mada_enabled', labelKey: 'system.payment_settings.payment_methods.mada' },
+    { field: 'visa_enabled', labelKey: 'system.payment_settings.payment_methods.visa' },
+    { field: 'mastercard_enabled', labelKey: 'system.payment_settings.payment_methods.mastercard' },
+    { field: 'applepay_enabled', labelKey: 'system.payment_settings.payment_methods.apple_pay' },
+    { field: 'stcpay_enabled', labelKey: 'system.payment_settings.payment_methods.stc_pay' },
+];
 
 const form = useForm({
     default_gateway: props.settings?.default_gateway || 'moyasar',

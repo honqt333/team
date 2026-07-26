@@ -3582,6 +3582,92 @@
       "back_to_app": "Back to App",
       "backups": "Backups"
     },
+    "payment_settings": {
+      "title": "Payment Settings",
+      "subtitle": "Manage payment gateways and collection methods",
+      "default_gateway": "Default Gateway",
+      "payment_methods": {
+        "title": "Available Payment Methods",
+        "mada": "mada",
+        "visa": "Visa",
+        "mastercard": "Mastercard",
+        "apple_pay": "Apple Pay",
+        "stc_pay": "STC Pay"
+      },
+      "gateway": {
+        "moyasar": "Moyasar",
+        "tap": "Tap",
+        "paytabs": "PayTabs",
+        "tabby": "Tabby",
+        "tamara": "Tamara",
+        "bank_transfer": "Bank Transfer Only",
+        "enabled": "Enabled",
+        "publishable_key": "Publishable Key",
+        "public_key": "Public Key",
+        "secret_key": "Secret Key",
+        "profile_id": "Profile ID",
+        "server_key": "Server Key",
+        "client_key": "Client Key",
+        "merchant_code": "Merchant Code",
+        "api_token": "API Token",
+        "notification_token": "Notification Token",
+        "tabby_tagline": "4 installments, no interest",
+        "tamara_tagline": "3 installments, no interest"
+      },
+      "paytabs": {
+        "title": "PayTabs",
+        "subtitle": "MENA payment gateway with card + alternative methods"
+      },
+      "bnpl": {
+        "title": "Installment Platforms (BNPL)",
+        "subtitle": "Allow tenants to split their subscriptions via Tabby or Tamara"
+      },
+      "company_info": {
+        "title": "Company Information",
+        "subtitle": "This information appears on invoices and receipts issued to tenants",
+        "legal_name_ar": "Legal Name (Arabic)",
+        "legal_name_en": "Legal Name (English)",
+        "vat_number": "VAT Number (15 digits)",
+        "cr_number": "Commercial Registration",
+        "phone": "Contact Phone",
+        "support_email": "Support Email",
+        "website": "Website"
+      },
+      "vat": {
+        "title": "Subscription VAT Settings",
+        "subtitle": "Apply VAT to subscription amounts (shown in the invoice to the tenant)",
+        "enable": "Add VAT to subscriptions",
+        "rate": "VAT Rate (%)",
+        "method": "Calculation Method",
+        "exclusive": "Taxable (added on top of price)",
+        "inclusive": "VAT inclusive (price already includes VAT)"
+      },
+      "bank_transfer": {
+        "title": "Bank Transfer",
+        "accounts_title": "Bank Accounts",
+        "add_account": "+ Add account",
+        "bank_name": "Bank name",
+        "account_name": "Account holder name",
+        "iban": "IBAN",
+        "account_number": "Account number",
+        "instructions_title": "Transfer Instructions",
+        "instructions_placeholder": "Example: please mention the subscription number in the transfer description...",
+        "extras_title": "Additional Bank Transfer Settings",
+        "extras_subtitle": "Control how bank transfer payment confirmation works",
+        "require_receipt": "Require tenants to upload a transfer receipt before activation",
+        "max_days": "Payment window (in days)",
+        "min_amount": "Minimum amount (optional)",
+        "receipt_instructions_title": "Additional receipt upload instructions",
+        "receipt_instructions_placeholder": "Example: the invoice number must appear in the transfer description..."
+      },
+      "placeholders": {
+        "secret_keep": "Leave empty to keep the current value"
+      },
+      "actions": {
+        "save": "Save Settings",
+        "saving": "Saving..."
+      }
+    },
     "actions": {
       "save": "Save",
       "saving": "Saving...",
