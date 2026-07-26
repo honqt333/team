@@ -9,8 +9,8 @@ use App\Models\Billing\DunningConfig;
 use App\Models\Billing\DunningReminderLog;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Tenant;
+use App\Services\Messaging\SmsService;
 use App\Services\NotificationService;
-use App\Services\Sms\SmsService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -60,7 +60,14 @@ class DunningService
      */
     public function findCandidates(): array
     {
-        $today = Carbon::today();
+        // We compare against `now()` rather than `Carbon::today()` so
+        // the "days overdue" count reflects the exact elapsed time
+        // since the due date. Using today's midnight would under-
+        // count invoices whose due_at has a non-midnight time
+        // component (e.g. due_at = "yesterday 18:55" would read
+        // as 1 day old at "today 00:00", even though it's clearly
+        // past the customer-facing 1-day boundary).
+        $now = Carbon::now();
         $candidates = [];
 
         // Make sure the global default config row exists BEFORE
@@ -77,7 +84,7 @@ class DunningService
             ->with('tenant')
             ->where('status', 'pending')
             ->whereNotNull('due_at')
-            ->where('due_at', '<', $today)
+            ->where('due_at', '<', $now)
             ->get();
 
         foreach ($overdueInvoices as $invoice) {
@@ -98,7 +105,7 @@ class DunningService
                 continue;
             }
 
-            $daysOverdue = (int) abs($today->diffInDays(Carbon::parse($invoice->due_at)));
+            $daysOverdue = (int) abs($now->diffInDays(Carbon::parse($invoice->due_at)));
 
             $activeTiers = array_filter(
                 explode(',', $config->active_tiers),
