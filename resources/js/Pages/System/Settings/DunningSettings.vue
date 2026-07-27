@@ -42,6 +42,60 @@
                 </label>
             </div>
 
+            <!-- Phase 7.3 + 7.7: Quiet hours + Auto-suspend -->
+            <div
+                class="grid grid-cols-1 gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:grid-cols-2"
+            >
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 dark:text-white">
+                        {{ isAr ? 'ساعات الصمت' : 'Quiet hours' }}
+                    </label>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {{
+                            isAr
+                                ? 'لا تُرسل تذكيرات داخل هذا النطاق. اتركها فارغة لتعطيل الميزة.'
+                                : 'No reminders will be sent in this window. Leave blank to disable.'
+                        }}
+                    </p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <input
+                            v-model="form.quiet_hours_start"
+                            type="time"
+                            class="rounded-md border-gray-300 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                        <span class="text-sm text-gray-500">→</span>
+                        <input
+                            v-model="form.quiet_hours_end"
+                            type="time"
+                            class="rounded-md border-gray-300 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-900 dark:text-white">
+                        {{ isAr ? 'تعليق تلقائي بعد' : 'Auto-suspend after' }}
+                    </label>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        {{
+                            isAr
+                                ? 'أيام بعد آخر تذكير في المستوى 4 (نهائي) قبل تعليق الحساب تلقائياً. اتركها فارغة لتعطيل الميزة.'
+                                : 'Days after the last tier-4 (final) reminder before auto-suspending the tenant. Leave blank to disable.'
+                        }}
+                    </p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <input
+                            v-model.number="form.auto_suspend_after_days"
+                            type="number"
+                            min="1"
+                            max="90"
+                            class="w-24 rounded-md border-gray-300 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                        />
+                        <span class="text-sm text-gray-500">{{ isAr ? 'يوم' : 'days' }}</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tier table -->
             <div
                 class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
@@ -191,6 +245,9 @@ const form = ref({
     enabled: props.config.enabled,
     active_tiers_list: props.config.active_tiers.split(',').map((s) => s.trim()),
     channel_matrix: { ...props.config.channel_matrix },
+    quiet_hours_start: props.config.quiet_hours_start || '',
+    quiet_hours_end: props.config.quiet_hours_end || '',
+    auto_suspend_after_days: props.config.auto_suspend_after_days || '',
 });
 
 const processing = ref(false);
@@ -202,6 +259,9 @@ async function save() {
             enabled: form.value.enabled,
             active_tiers: form.value.active_tiers_list.join(','),
             channel_matrix: form.value.channel_matrix,
+            quiet_hours_start: form.value.quiet_hours_start || null,
+            quiet_hours_end: form.value.quiet_hours_end || null,
+            auto_suspend_after_days: form.value.auto_suspend_after_days || null,
         });
     } finally {
         processing.value = false;

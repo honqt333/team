@@ -23,6 +23,14 @@ Schedule::command('dunning:send-reminders')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/dunning-reminders.log'));
 
+// Auto-suspend tenants — runs at 7:30 AM, AFTER dunning:send-reminders
+// so the fresh tier_4 logs are visible. Grace window: 7 days after
+// the last tier_4 reminder (configurable in dunning_configs).
+Schedule::command('dunning:auto-suspend')
+    ->dailyAt('07:30')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/dunning-auto-suspend.log'));
+
 // Tenant backups - weekly on Sundays at 2 AM
 Schedule::command('tenants:backup --active-only')
     ->weekly()

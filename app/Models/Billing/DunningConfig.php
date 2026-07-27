@@ -28,6 +28,9 @@ class DunningConfig extends Model
         'active_tiers',
         'channel_matrix',
         'message_templates',
+        'quiet_hours_start',
+        'quiet_hours_end',
+        'auto_suspend_after_days',
     ];
 
     protected function casts(): array
@@ -39,7 +42,35 @@ class DunningConfig extends Model
             // array normalizes both into a PHP array.
             'channel_matrix' => 'array',
             'message_templates' => 'array',
+            // quiet_hours_* are stored as time strings. Carbon
+            // parses them on read so the dispatcher can compare
+            // against now() easily.
+            'quiet_hours_start' => 'datetime:H:i',
+            'quiet_hours_end' => 'datetime:H:i',
+            'auto_suspend_after_days' => 'integer',
         ];
+    }
+
+    /**
+     * Returns the configured auto-suspend delay (days), or null if
+     * the feature is disabled. Reads from the tenant's override
+     * config if available, else from the global default.
+     */
+    public static function resolveAutoSuspendDaysForTenant(int $tenantId): ?int
+    {
+        $row = static::query()
+            ->where('tenant_id', $tenantId)
+            ->value('auto_suspend_after_days');
+
+        if ($row !== null) {
+            return (int) $row;
+        }
+
+        $row = static::query()
+            ->whereNull('tenant_id')
+            ->value('auto_suspend_after_days');
+
+        return $row === null ? null : (int) $row;
     }
 
     public function tenant(): BelongsTo

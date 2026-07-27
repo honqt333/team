@@ -11,10 +11,13 @@ use App\Models\Billing\Plan;
 use App\Models\Billing\Subscription;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Tenant;
+use App\Services\Billing\DunningRetryService;
 use App\Services\Billing\DunningService;
+use App\Services\Billing\TenantSuspensionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use RuntimeException;
 use Tests\TestCase;
 
 /**
@@ -288,5 +291,263 @@ class DunningAutomationTest extends TestCase
         $this->assertStringContainsString($invoice->invoice_number, $message['body']);
         // 115.00 — formatted with 2 decimals
         $this->assertStringContainsString('115.00', $message['body']);
+    }
+
+    public function test_email_includes_invoice_pdf_attachment(): void
+    {
+        Mail::fake();
+
+        $tenant = $this->makeTenant([
+            'email' => 'attach@example.com',
+        ]);
+        $invoice = $this->makeInvoice($tenant, 5);
+
+        // Phase 7.1: when the dunning email goes out, the invoice
+        // PDF should be attached so the tenant has a copy in
+        // their inbox without having to log in.
+        $dunning = app(DunningService::class);
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+        $dunning->sendTier($invoice, 'tier_1', $config);
+
+        Mail::assertQueued(SubscriptionOverdueMail::class, function ($mail) {
+            $attachments = $mail->attachments();
+
+            return count($attachments) === 1;
+        });
+    }
+
+    public function test_quiet_hours_skip_send(): void
+    {
+        Mail::fake();
+
+        $tenant = $this->makeTenant();
+        $invoice = $this->makeInvoice($tenant, 5);
+
+        // Configure quiet hours that cover the entire current
+        // day (00:00 to 23:59). The dispatcher must skip.
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+        $config->update([
+            'quiet_hours_start' => '00:00',
+            'quiet_hours_end' => '23:59',
+        ]);
+        $config->refresh();
+
+        $dunning = app(DunningService::class);
+        $sent = $dunning->sendTier($invoice, 'tier_1', $config);
+
+        $this->assertSame(0, $sent, 'Send must be skipped inside quiet hours');
+        Mail::assertNothingQueued();
+    }
+
+    public function test_quiet_hours_disabled_when_null(): void
+    {
+        Mail::fake();
+
+        $tenant = $this->makeTenant();
+        $invoice = $this->makeInvoice($tenant, 5);
+
+        // Both quiet_hours_start and quiet_hours_end are null
+        // (the default). The dispatcher must NOT skip — even if
+        // the admin later sets a window, the default is
+        // "no restriction".
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+
+        $dunning = app(DunningService::class);
+        $sent = $dunning->sendTier($invoice, 'tier_1', $config);
+
+        $this->assertSame(1, $sent);
+        Mail::assertQueuedCount(1);
+    }
+
+    public function test_failure_records_retry_with_next_retry_at(): void
+    {
+        // Phase 7.4 — when a send fails, we record it as FAILED
+        // and set next_retry_at to +24h so the next cron run
+        // picks it up.
+        $tenant = $this->makeTenant([
+            'email' => 'broken@example.com',
+        ]);
+        $invoice = $this->makeInvoice($tenant, 5);
+
+        // Replace the email service with a stub that throws.
+        // We do this at the global Mail facade level.
+        Mail::shouldReceive('to')->andThrow(new RuntimeException('SMTP unavailable'));
+
+        $dunning = app(DunningService::class);
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+        $sent = $dunning->sendTier($invoice, 'tier_1', $config);
+
+        $this->assertSame(0, $sent, 'Failed sends must not increment the counter');
+
+        $log = DunningReminderLog::query()
+            ->where('subscription_invoice_id', $invoice->id)
+            ->where('tier_key', 'tier_1')
+            ->where('channel', 'email')
+            ->first();
+
+        $this->assertNotNull($log);
+        $this->assertSame('failed', $log->status);
+        $this->assertSame(0, $log->retry_count);
+        $this->assertNotNull($log->next_retry_at, 'next_retry_at must be set on first failure');
+        // Within ~24h window
+        $this->assertGreaterThan(now()->addHours(23), $log->next_retry_at);
+    }
+
+    public function test_retry_count_caps_at_max_retries(): void
+    {
+        // Phase 7.4 — after MAX_RETRIES (2) attempts, the next
+        // retry slot is null (no more retries). The dispatcher
+        // sees this and stops.
+        $retryService = app(DunningRetryService::class);
+
+        $this->assertNotNull($retryService->nextRetryAt(0), 'First retry should be scheduled');
+        $this->assertNotNull($retryService->nextRetryAt(1), 'Second retry should be scheduled');
+        $this->assertNull($retryService->nextRetryAt(2), 'Third+ retry should be null (give up)');
+        $this->assertSame(2, $retryService::MAX_RETRIES);
+    }
+
+    public function test_auto_suspend_skips_when_feature_disabled(): void
+    {
+        // Phase 7.7 — when auto_suspend_after_days is null in the
+        // global config, the command must do nothing.
+        $tenant = $this->makeTenant();
+        $invoice = $this->makeInvoice($tenant, 35);
+
+        // Seed a tier_4 log older than 7 days ago
+        DunningReminderLog::create([
+            'tenant_id' => $tenant->id,
+            'subscription_invoice_id' => $invoice->id,
+            'tier_key' => 'tier_4',
+            'channel' => 'email',
+            'status' => DunningReminderLog::STATUS_SENT,
+            'sent_at' => now()->subDays(10),
+        ]);
+
+        // global config: auto_suspend_after_days is null (default)
+        $service = app(TenantSuspensionService::class);
+        $summary = $service->runForAllTenants();
+
+        $this->assertSame(0, $summary['suspended']);
+        $this->assertSame(1, $summary['skipped_disabled']);
+        $tenant->refresh();
+        $this->assertNull($tenant->suspended_at);
+    }
+
+    public function test_auto_suspends_after_grace_window_with_unpaid_invoice(): void
+    {
+        // Phase 7.7 — happy path: tier_4 sent 8 days ago, invoice
+        // still pending → tenant gets auto-suspended.
+        $tenant = $this->makeTenant();
+        $invoice = $this->makeInvoice($tenant, 35, 'pending');
+
+        DunningReminderLog::create([
+            'tenant_id' => $tenant->id,
+            'subscription_invoice_id' => $invoice->id,
+            'tier_key' => 'tier_4',
+            'channel' => 'email',
+            'status' => DunningReminderLog::STATUS_SENT,
+            'sent_at' => now()->subDays(8),
+        ]);
+
+        // Set global config: suspend after 7 days
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+        $config->update(['auto_suspend_after_days' => 7]);
+        $config->refresh();
+
+        $service = app(TenantSuspensionService::class);
+        $summary = $service->runForAllTenants();
+
+        $this->assertSame(1, $summary['suspended']);
+        $this->assertSame(0, $summary['skipped_paid']);
+        $tenant->refresh();
+        $this->assertNotNull($tenant->suspended_at);
+        $this->assertNotNull($tenant->auto_suspended_at);
+        $this->assertSame(
+            TenantSuspensionService::REASON,
+            $tenant->suspension_reason
+        );
+    }
+
+    public function test_auto_suspend_skips_when_invoice_paid(): void
+    {
+        // Phase 7.7 — if the invoice was paid between tier_4
+        // and the grace window, the tenant is NOT suspended.
+        $tenant = $this->makeTenant();
+        $invoice = $this->makeInvoice($tenant, 35, 'paid');
+
+        DunningReminderLog::create([
+            'tenant_id' => $tenant->id,
+            'subscription_invoice_id' => $invoice->id,
+            'tier_key' => 'tier_4',
+            'channel' => 'email',
+            'status' => DunningReminderLog::STATUS_SENT,
+            'sent_at' => now()->subDays(8),
+        ]);
+
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+        $config->update(['auto_suspend_after_days' => 7]);
+
+        $service = app(TenantSuspensionService::class);
+        $summary = $service->runForAllTenants();
+
+        $this->assertSame(0, $summary['suspended']);
+        $this->assertSame(1, $summary['skipped_paid']);
+        $tenant->refresh();
+        $this->assertNull($tenant->suspended_at);
+    }
+
+    public function test_auto_suspend_idempotent(): void
+    {
+        // Phase 7.7 — running the command twice in a row must
+        // only suspend once. The second run sees auto_suspended_at
+        // and skips.
+        $tenant = $this->makeTenant();
+        $invoice = $this->makeInvoice($tenant, 35, 'pending');
+
+        DunningReminderLog::create([
+            'tenant_id' => $tenant->id,
+            'subscription_invoice_id' => $invoice->id,
+            'tier_key' => 'tier_4',
+            'channel' => 'email',
+            'status' => DunningReminderLog::STATUS_SENT,
+            'sent_at' => now()->subDays(8),
+        ]);
+
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+        $config->update(['auto_suspend_after_days' => 7]);
+
+        $service = app(TenantSuspensionService::class);
+        $summary1 = $service->runForAllTenants();
+        $summary2 = $service->runForAllTenants();
+
+        $this->assertSame(1, $summary1['suspended']);
+        $this->assertSame(0, $summary2['suspended'], 'Second run must be a no-op');
+    }
+
+    public function test_auto_suspend_respects_opt_out(): void
+    {
+        // Phase 7.7 — even if a tier_4 log is older than the grace
+        // window, an opted-out tenant is NEVER auto-suspended.
+        // Opt-out is the tenant's final say.
+        $tenant = $this->makeTenant(['dunning_opted_out' => true]);
+        $invoice = $this->makeInvoice($tenant, 35, 'pending');
+
+        DunningReminderLog::create([
+            'tenant_id' => $tenant->id,
+            'subscription_invoice_id' => $invoice->id,
+            'tier_key' => 'tier_4',
+            'channel' => 'email',
+            'status' => DunningReminderLog::STATUS_SENT,
+            'sent_at' => now()->subDays(8),
+        ]);
+
+        $config = DunningConfig::first() ?? DunningConfig::create([]);
+        $config->update(['auto_suspend_after_days' => 7]);
+
+        $service = app(TenantSuspensionService::class);
+        $service->runForAllTenants();
+
+        $tenant->refresh();
+        $this->assertNull($tenant->suspended_at, 'Opted-out tenants must not be auto-suspended');
     }
 }

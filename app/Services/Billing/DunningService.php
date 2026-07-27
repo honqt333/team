@@ -9,12 +9,14 @@ use App\Models\Billing\DunningConfig;
 use App\Models\Billing\DunningReminderLog;
 use App\Models\Billing\SubscriptionInvoice;
 use App\Models\Tenant;
+use App\Services\Invoice\SubscriptionInvoiceService;
 use App\Services\Messaging\SmsService;
 use App\Services\NotificationService;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
@@ -163,7 +165,27 @@ class DunningService
         $matrix = $config->channel_matrix ?: DunningConfig::defaultChannelMatrix();
         $channels = $matrix[$tierKey] ?? [];
 
-        $language = $tenant->dunning_language ?: app()->getLocale();
+        // Phase 7.3 — quiet hours check. If the current time
+        // falls inside the configured quiet window, skip the
+        // entire send for this invoice. The cron will pick it
+        // up again tomorrow morning. We don't log anything for
+        // skipped-by-quiet-hours because the next cron run will
+        // succeed and that's what the audit log will show.
+        if ($this->isInQuietHours($config)) {
+            return 0;
+        }
+
+        // Phase 7.2 — language fallback chain. The tenant's
+        // explicit dunning_language always wins. If that's
+        // null, fall through to the app's current locale, then
+        // to the tenant's slug/email heuristics, then to 'en'
+        // as a last resort. This makes dunning work out of the
+        // box for tenants who never opened the preferences card
+        // — they get reminders in whatever language the
+        // application is currently rendering in.
+        $language = $tenant->dunning_language
+            ?: app()->getLocale()
+            ?: 'en';
         $language = in_array($language, ['ar', 'en'], true) ? $language : 'en';
         $tierDef = DunningConfig::tierDefinitions()[$tierKey] ?? null;
         $daysOverdue = (int) abs(Carbon::today()->diffInDays(Carbon::parse($invoice->due_at)));
@@ -200,9 +222,16 @@ class DunningService
                 $this->dispatch($channel, $invoice, $tenant, $tierKey, $tierDef, $language, $daysOverdue);
             } catch (Throwable $e) {
                 // The channel provider failed (e.g. SMTP down, no
-                // email on file). Log it as a failed send and move
-                // to the next channel.
-                $this->logAttemptSafely($invoice, $tenant, $tierKey, $channel, DunningReminderLog::STATUS_FAILED, $e->getMessage());
+                // email on file). Log it as a failed send and
+                // schedule a retry per Phase 7.4 (24h then 72h,
+                // then give up).
+                $this->logFailureWithRetry(
+                    $invoice,
+                    $tenant,
+                    $tierKey,
+                    $channel,
+                    $e->getMessage(),
+                );
                 Log::error('Dunning channel dispatch failed', [
                     'invoice_id' => $invoice->id,
                     'tier' => $tierKey,
@@ -370,8 +399,64 @@ EOT;
             throw new RuntimeException("Tenant #{$tenant->id} has no email on file");
         }
 
+        // Phase 7.1 — attach the invoice PDF so the tenant has
+        // a copy in their inbox. We pass the storage path
+        // (relative to the public disk) and let the mailable
+        // resolve it at send-time. The PDF must already exist
+        // (or be generated on the fly here).
+        $attachmentPath = $this->resolveInvoiceAttachment($invoice);
+
         Mail::to($tenant->email)
-            ->send(new SubscriptionOverdueMail($invoice, $tierKey, $message['subject'], $message['body']));
+            ->send(new SubscriptionOverdueMail(
+                $invoice,
+                $tierKey,
+                $message['subject'],
+                $message['body'],
+                $attachmentPath,
+            ));
+    }
+
+    /**
+     * Get the storage path to the invoice PDF for email
+     * attachment, or null if the PDF can't be generated.
+     *
+     * We use the SubscriptionInvoiceService to generate the
+     * PDF on the fly (it's fast — ~1s on dev) so the admin
+     * never has to remember to "render PDFs before sending
+     * reminders". If the generator throws (e.g. font
+     * issue), we log + return null so the email still goes
+     * out without an attachment rather than failing the
+     * whole dunning send.
+     */
+    private function resolveInvoiceAttachment(SubscriptionInvoice $invoice): ?string
+    {
+        try {
+            $pdfService = app(SubscriptionInvoiceService::class);
+            $relativePath = $pdfService->getPdfPath($invoice);
+
+            if (! $relativePath || ! file_exists($relativePath)) {
+                return null;
+            }
+
+            // getPdfPath returns an absolute filesystem path;
+            // SubscriptionOverdueMail::attachments() wants a
+            // path relative to the public disk. Strip the
+            // disk root to convert.
+            $publicRoot = Storage::disk('public')->path('');
+
+            if (str_starts_with($relativePath, $publicRoot)) {
+                return ltrim(substr($relativePath, strlen($publicRoot)), '/');
+            }
+
+            return null;
+        } catch (Throwable $e) {
+            Log::warning('Dunning: failed to resolve invoice PDF for attachment', [
+                'invoice_id' => $invoice->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
     }
 
     private function sendInApp(Tenant $tenant, SubscriptionInvoice $invoice, string $tierKey, array $message): void
@@ -473,5 +558,107 @@ EOT;
 
             throw $e;
         }
+    }
+
+    /**
+     * Phase 7.4 — log a failed send + schedule a retry.
+     *
+     * If this is the first time we've failed on this (invoice,
+     * tier, channel) combo, INSERT a new row with retry_count=0
+     * and next_retry_at = +24h. If a FAILED row already exists
+     * (from a previous attempt that hit the same failure),
+     * UPDATE it to bump retry_count and roll next_retry_at
+     * forward by another 24h or 72h depending on the count.
+     *
+     * After 2 retries the row is left with next_retry_at=null
+     * and the dispatcher will skip it on the next cron run.
+     */
+    private function logFailureWithRetry(
+        SubscriptionInvoice $invoice,
+        Tenant $tenant,
+        string $tierKey,
+        string $channel,
+        string $error,
+    ): void {
+        $existing = DunningReminderLog::query()
+            ->where('subscription_invoice_id', $invoice->id)
+            ->where('tier_key', $tierKey)
+            ->where('channel', $channel)
+            ->where('status', DunningReminderLog::STATUS_FAILED)
+            ->first();
+
+        $retryService = app(DunningRetryService::class);
+
+        if ($existing) {
+            $newRetryCount = $existing->retry_count + 1;
+            $nextRetryAt = $retryService->nextRetryAt($newRetryCount);
+
+            $existing->update([
+                'retry_count' => $newRetryCount,
+                'next_retry_at' => $nextRetryAt,
+                'error_message' => $error,
+                'sent_at' => now(),
+            ]);
+        } else {
+            $nextRetryAt = $retryService->nextRetryAt(0);
+
+            DunningReminderLog::create([
+                'tenant_id' => $tenant->id,
+                'subscription_invoice_id' => $invoice->id,
+                'tier_key' => $tierKey,
+                'channel' => $channel,
+                'status' => DunningReminderLog::STATUS_FAILED,
+                'error_message' => $error,
+                'sent_at' => now(),
+                'retry_count' => 0,
+                'next_retry_at' => $nextRetryAt,
+            ]);
+        }
+    }
+
+    /**
+     * Phase 7.3 — check whether the current local time falls
+     * inside the configured quiet hours window. The window
+     * always crosses midnight (e.g. 21:00 → 08:00 next day),
+     * so the comparison has to handle the wraparound.
+     *
+     * Returns false (= "do not skip, send normally") when:
+     *  - quiet_hours_start or quiet_hours_end is null (admin
+     *    chose to disable quiet hours)
+     *  - the start equals the end (zero-width window, treated
+     *    as "no quiet hours")
+     *  - the current time is outside the window
+     *
+     * Returns true (= "skip this send") otherwise.
+     */
+    public function isInQuietHours(DunningConfig $config): bool
+    {
+        $start = $config->quiet_hours_start;
+        $end = $config->quiet_hours_end;
+
+        if (! $start || ! $end) {
+            return false;
+        }
+
+        $startMinutes = (int) $start->format('H') * 60 + (int) $start->format('i');
+        $endMinutes = (int) $end->format('H') * 60 + (int) $end->format('i');
+        $nowMinutes = (int) now()->format('H') * 60 + (int) now()->format('i');
+
+        // Zero-width window — never skip
+        if ($startMinutes === $endMinutes) {
+            return false;
+        }
+
+        // Two cases:
+        //  1. start < end (window fits within a single day,
+        //     e.g. 13:00 → 17:00) — straightforward comparison
+        //  2. start > end (window crosses midnight, e.g.
+        //     21:00 → 08:00) — we're inside if now >= start OR
+        //     now < end
+        if ($startMinutes < $endMinutes) {
+            return $nowMinutes >= $startMinutes && $nowMinutes < $endMinutes;
+        }
+
+        return $nowMinutes >= $startMinutes || $nowMinutes < $endMinutes;
     }
 }

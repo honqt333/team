@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use App\Services\Backup\TenantBackupService;
+use App\Services\Billing\TenantSuspensionService;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -384,5 +385,96 @@ class TenantsController extends Controller
         }
 
         return $size;
+    }
+
+    /**
+     * Phase 7.6 — admin override for the dunning opt-out.
+     * The opt-out is a tenant-controlled flag by default
+     * (the tenant can flip it from the billing preferences
+     * page). Admins need an escape hatch for: legal disputes
+     * where the tenant has asked in writing to be opted back
+     * in, account recovery flows, or compliance audits.
+     *
+     * We log the change so the audit trail captures "who
+     * flipped this and when" — important when an admin
+     * overrides a privacy-related preference.
+     */
+    public function updateDunningOptOut(Request $request, Tenant $tenant)
+    {
+        $validated = $request->validate([
+            'dunning_opted_out' => 'required|boolean',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        $tenant->update(['dunning_opted_out' => $validated['dunning_opted_out']]);
+
+        // Log via the central activity logger (falls back to
+        // Log facade if the helper isn't available). We record
+        // both the new value and the admin's reason so the
+        // audit trail is complete.
+        if (function_exists('activity')) {
+            activity()
+                ->performedOn($tenant)
+                ->causedBy($request->user())
+                ->withProperties([
+                    'dunning_opted_out' => $validated['dunning_opted_out'],
+                    'reason' => $validated['reason'] ?? null,
+                ])
+                ->log('dunning_opted_out_changed');
+        } else {
+            Log::info('admin.dunning_opted_out_changed', [
+                'tenant_id' => $tenant->id,
+                'admin_id' => $request->user()?->id,
+                'dunning_opted_out' => $validated['dunning_opted_out'],
+                'reason' => $validated['reason'] ?? null,
+            ]);
+        }
+
+        return back()->with('success', 'تم تحديث خيار التذكير للمستأجر');
+    }
+
+    /**
+     * Phase 7.7 — admin override for an auto-suspension. The
+     * dunning system can auto-suspend a tenant when tier_4
+     * reminders go unpaid past the grace window. Admins
+     * sometimes need to lift that suspension (e.g. the tenant
+     * promised payment in 24h, or it's a VIP, or the system
+     * mis-classified their case). This endpoint clears BOTH
+     * `suspended_at` and `auto_suspended_at` and the reason
+     * — the next dunning run treats them as a fresh cycle.
+     *
+     * We log the action so the audit trail records "admin X
+     * lifted auto-suspend for tenant Y at Z" — important when
+     * disputes come up later about why the system didn't
+     * auto-suspend them again on the next cycle.
+     */
+    public function liftAutoSuspend(Request $request, Tenant $tenant)
+    {
+        $wasAutoSuspended = $tenant->auto_suspended_at !== null
+            && $tenant->suspension_reason === TenantSuspensionService::REASON;
+
+        if (! $wasAutoSuspended) {
+            return back()->with('error', 'الحساب ليس معلّقاً تلقائياً — لا حاجة للإجراء');
+        }
+
+        $tenant->forceFill([
+            'suspended_at' => null,
+            'auto_suspended_at' => null,
+            'suspension_reason' => null,
+        ])->save();
+
+        if (function_exists('activity')) {
+            activity()
+                ->performedOn($tenant)
+                ->causedBy($request->user())
+                ->log('auto_suspension_lifted');
+        } else {
+            Log::info('admin.auto_suspension_lifted', [
+                'tenant_id' => $tenant->id,
+                'admin_id' => $request->user()?->id,
+            ]);
+        }
+
+        return back()->with('success', 'تم رفع التعليق التلقائي عن المستأجر');
     }
 }

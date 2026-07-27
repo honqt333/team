@@ -24,6 +24,7 @@ class Tenant extends Model
         'status',
         'trial_ends_at',
         'suspended_at',
+        'auto_suspended_at',
         'suspension_reason',
         // Company Profile
         'legal_name',
@@ -64,6 +65,7 @@ class Tenant extends Model
         return [
             'trial_ends_at' => 'datetime',
             'suspended_at' => 'datetime',
+            'auto_suspended_at' => 'datetime',
             'two_factor_enabled' => 'boolean',
             'sms_2fa_enabled' => 'boolean',
             'print_settings' => 'array',

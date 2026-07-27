@@ -24,6 +24,8 @@
                 @security="modals.security = true"
                 @backup="createBackup"
                 @delete="modals.delete = true"
+                @clear-dunning-opt-out="clearDunningOptOut"
+                @lift-auto-suspend="liftAutoSuspend"
             />
 
             <!-- Customer 360 Tabs — Overview / Subscription / Invoices /
@@ -141,5 +143,22 @@ const impersonateTenant = () => {
 
 const createBackup = () => {
     router.post(`/system/tenants/${props.tenant.id}/backups`, {});
+};
+
+// Phase 7.6: dunning opt-out override. We send the inverse of
+// whatever the tenant's current opt-out value is so this single
+// endpoint can both "clear" (opt back in) and "set" (opt out
+// again, if the admin wants to force it for compliance).
+const clearDunningOptOut = () => {
+    router.put(`/system/tenants/${props.tenant.id}/dunning-opt-out`, {
+        dunning_opted_out: !props.tenant.dunning_opted_out,
+    });
+};
+
+// Phase 7.7: lift an auto-suspension. The dunning system
+// applied this — admins need an explicit, audited way to undo
+// it without going through the manual activate flow.
+const liftAutoSuspend = () => {
+    router.post(`/system/tenants/${props.tenant.id}/lift-auto-suspend`);
 };
 </script>

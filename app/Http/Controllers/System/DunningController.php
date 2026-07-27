@@ -45,6 +45,9 @@ class DunningController extends Controller
                 'enabled' => $global->enabled,
                 'active_tiers' => $global->active_tiers,
                 'channel_matrix' => $global->channel_matrix ?: DunningConfig::defaultChannelMatrix(),
+                'quiet_hours_start' => $global->quiet_hours_start ? $global->quiet_hours_start->format('H:i') : null,
+                'quiet_hours_end' => $global->quiet_hours_end ? $global->quiet_hours_end->format('H:i') : null,
+                'auto_suspend_after_days' => $global->auto_suspend_after_days,
             ],
             'tier_definitions' => DunningConfig::tierDefinitions(),
             'default_channel_matrix' => DunningConfig::defaultChannelMatrix(),
@@ -67,6 +70,9 @@ class DunningController extends Controller
             'channel_matrix.tier_2' => ['array'],
             'channel_matrix.tier_3' => ['array'],
             'channel_matrix.tier_4' => ['array'],
+            'quiet_hours_start' => ['nullable', 'date_format:H:i'],
+            'quiet_hours_end' => ['nullable', 'date_format:H:i'],
+            'auto_suspend_after_days' => ['nullable', 'integer', 'min:1', 'max:90'],
         ]);
 
         $global = $this->dunning->ensureGlobalDefault();
@@ -74,6 +80,9 @@ class DunningController extends Controller
             'enabled' => $validated['enabled'],
             'active_tiers' => $validated['active_tiers'],
             'channel_matrix' => $validated['channel_matrix'],
+            'quiet_hours_start' => $validated['quiet_hours_start'] ?? null,
+            'quiet_hours_end' => $validated['quiet_hours_end'] ?? null,
+            'auto_suspend_after_days' => $validated['auto_suspend_after_days'] ?? null,
         ]);
 
         return redirect()
@@ -116,5 +125,79 @@ class DunningController extends Controller
             ],
             'tier_definitions' => DunningConfig::tierDefinitions(),
         ]);
+    }
+
+    /**
+     * Phase 7.5 — per-tenant dunning config page. The admin
+     * picks a tenant, sees the global dunning config as a
+     * baseline, and overrides what they need. Empty fields
+     * mean "fall back to the global default".
+     */
+    public function tenantConfig(Tenant $tenant): Response
+    {
+        $global = DunningConfig::first() ?? DunningConfig::create([]);
+        $override = DunningConfig::query()
+            ->where('tenant_id', $tenant->id)
+            ->first();
+
+        return Inertia::render('System/Settings/TenantDunning', [
+            'tenant' => $tenant->only(['id', 'name', 'email']),
+            'global_config' => [
+                'enabled' => $global->enabled,
+                'active_tiers' => $global->active_tiers,
+                'channel_matrix' => $global->channel_matrix ?: DunningConfig::defaultChannelMatrix(),
+                'quiet_hours_start' => $global->quiet_hours_start ? $global->quiet_hours_start->format('H:i') : null,
+                'quiet_hours_end' => $global->quiet_hours_end ? $global->quiet_hours_end->format('H:i') : null,
+            ],
+            'override' => $override ? [
+                'enabled' => $override->enabled,
+                'active_tiers' => $override->active_tiers,
+                'channel_matrix' => $override->channel_matrix ?: DunningConfig::defaultChannelMatrix(),
+                'quiet_hours_start' => $override->quiet_hours_start ? $override->quiet_hours_start->format('H:i') : null,
+                'quiet_hours_end' => $override->quiet_hours_end ? $override->quiet_hours_end->format('H:i') : null,
+            ] : null,
+        ]);
+    }
+
+    /**
+     * Phase 7.5 — save or create the override row for a tenant.
+     */
+    public function updateTenantConfig(Request $request, Tenant $tenant)
+    {
+        $validated = $request->validate([
+            'enabled' => ['required', 'boolean'],
+            'active_tiers' => ['required', 'string', 'max:100'],
+            'channel_matrix' => ['required', 'array'],
+            'channel_matrix.tier_1' => ['array'],
+            'channel_matrix.tier_2' => ['array'],
+            'channel_matrix.tier_3' => ['array'],
+            'channel_matrix.tier_4' => ['array'],
+            'quiet_hours_start' => ['nullable', 'date_format:H:i'],
+            'quiet_hours_end' => ['nullable', 'date_format:H:i'],
+        ]);
+
+        DunningConfig::updateOrCreate(
+            ['tenant_id' => $tenant->id],
+            [
+                'enabled' => $validated['enabled'],
+                'active_tiers' => $validated['active_tiers'],
+                'channel_matrix' => $validated['channel_matrix'],
+                'quiet_hours_start' => $validated['quiet_hours_start'] ?? null,
+                'quiet_hours_end' => $validated['quiet_hours_end'] ?? null,
+            ]
+        );
+
+        return back()->with('success', 'تم حفظ إعدادات التذكير للمستأجر بنجاح');
+    }
+
+    /**
+     * Phase 7.5 — drop the override row so the tenant falls
+     * back to the global config.
+     */
+    public function clearTenantConfig(Tenant $tenant)
+    {
+        DunningConfig::query()->where('tenant_id', $tenant->id)->delete();
+
+        return back()->with('success', 'تم حذف إعدادات التذكير الخاصة بالمستأجر');
     }
 }

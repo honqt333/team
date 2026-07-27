@@ -833,7 +833,26 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::middleware('super_admin')->group(function () {
         Route::post('/tenants/{tenant}/suspend', [TenantsController::class, 'suspend'])->name('system.tenants.suspend');
         Route::post('/tenants/{tenant}/activate', [TenantsController::class, 'activate'])->name('system.tenants.activate');
+        // Phase 7.6: admin override for the dunning opt-out.
+        // The opt-out is otherwise a tenant-only setting (the
+        // tenant can flip it from the billing preferences page).
+        // Admins need an escape hatch for: legal disputes where
+        // the tenant has asked in writing to be opted back in,
+        // an account recovery flow, or compliance audits.
+        Route::put('/tenants/{tenant}/dunning-opt-out', [TenantsController::class, 'updateDunningOptOut'])->name('system.tenants.dunning-opt-out');
+        // Phase 7.7: admin override to lift an auto-suspension
+        // applied by dunning:auto-suspend. Different from a
+        // manual un-suspend because the audit log distinguishes
+        // the two.
+        Route::post('/tenants/{tenant}/lift-auto-suspend', [TenantsController::class, 'liftAutoSuspend'])->name('system.tenants.lift-auto-suspend');
         Route::post('/tenants/{tenant}/extend-trial', [TenantsController::class, 'extendTrial'])->name('system.tenants.extend-trial');
+        // Phase 7.5: per-tenant dunning config (overrides the
+        // global config for this specific tenant). Useful for
+        // high-touch customers who want different timing or
+        // a different language for their reminders.
+        Route::get('/tenants/{tenant}/dunning', [DunningController::class, 'tenantConfig'])->name('system.tenants.dunning');
+        Route::put('/tenants/{tenant}/dunning', [DunningController::class, 'updateTenantConfig'])->name('system.tenants.dunning.update');
+        Route::delete('/tenants/{tenant}/dunning', [DunningController::class, 'clearTenantConfig'])->name('system.tenants.dunning.clear');
         Route::delete('/tenants/{tenant}', [TenantsController::class, 'destroy'])->name('system.tenants.destroy');
         Route::put('/tenants/{tenant}/security', [TenantSecurityController::class, 'update2FASettings'])->name('system.tenants.security.update');
         // Impersonation is super_admin only — powerful debugging affordance.

@@ -44,12 +44,16 @@ class DunningReminderLog extends Model
         'status',
         'error_message',
         'sent_at',
+        'retry_count',
+        'next_retry_at',
     ];
 
     protected function casts(): array
     {
         return [
             'sent_at' => 'datetime',
+            'next_retry_at' => 'datetime',
+            'retry_count' => 'integer',
         ];
     }
 
@@ -61,5 +65,16 @@ class DunningReminderLog extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(SubscriptionInvoice::class, 'subscription_invoice_id');
+    }
+
+    /**
+     * Phase 7.4: alias for the invoice relationship using the
+     * same name as the rest of the app (some callers use
+     * "subscriptionInvoice" for clarity). Keeps both naming
+     * conventions working.
+     */
+    public function subscriptionInvoice(): BelongsTo
+    {
+        return $this->invoice();
     }
 }
