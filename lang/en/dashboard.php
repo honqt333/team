@@ -79,8 +79,8 @@ return [
     'top_services' => 'Top services',
     'invoice_count' => ':n invoices',
 
-    // Technicians
-    'technician_performance' => 'Technician performance',
+    // Staff / Team
+    'technician_performance' => 'Staff performance',
     'assigned' => ':n assigned',
     'completed_short' => ':n done',
     'in_progress_short' => ':n in progress',

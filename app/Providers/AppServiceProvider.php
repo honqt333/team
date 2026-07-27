@@ -32,6 +32,7 @@ use App\Models\WorkOrderItem;
 use App\Observers\CenterObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\PaymentObserver;
+use App\Observers\WorkOrderItemObserver;
 use App\Observers\WorkOrderObserver;
 use App\Policies\CustomerPolicy;
 use App\Policies\DepartmentPolicy;
@@ -149,6 +150,7 @@ class AppServiceProvider extends ServiceProvider
         Employee::observe(EmployeeObserver::class);
         Center::observe(CenterObserver::class);
         WorkOrder::observe(WorkOrderObserver::class);
+        WorkOrderItem::observe(WorkOrderItemObserver::class);
         Payment::observe(PaymentObserver::class);
 
         // Super Admin Bypass

@@ -806,7 +806,7 @@
     "tab_financial": "Financial",
     "tab_operations": "Operations",
     "tab_overview": "Overview",
-    "technician_performance": "Technician performance",
+    "technician_performance": "Staff performance",
     "this_month": "This month",
     "title": "Dashboard",
     "welcome": "Welcome, Admin",
@@ -1752,7 +1752,7 @@
     "yearly": "Yearly"
   },
   "messages": {
-    "cannot_cancel_has_technicians_or_parts": "Cannot cancel work order because it has assigned technicians, spare parts, or payments.",
+    "cannot_cancel_has_technicians_or_parts": "Cannot cancel work order because it has assigned staff, spare parts, or payments.",
     "cannot_complete_excess_payments": "Cannot complete work order with excess payments.",
     "deleted_success": "Deleted successfully",
     "department_added": "Department added successfully",
@@ -1760,20 +1760,29 @@
     "inspection_saved": "Inspection saved successfully",
     "invalid_file_type": "Invalid file type: {file}",
     "item_status_updated": "Service status updated successfully",
+    "labor_started": "Timer started",
+    "labor_paused": "Timer paused",
+    "labor_resumed": "Timer resumed",
+    "labor_ended": "Timer ended",
+    "technician_not_assigned_to_item": "You are not assigned to this service",
+    "technician_already_running": "You already have a running timer",
+    "entry_not_running": "This timer is not running",
+    "entry_not_paused": "This timer is not paused",
+    "entry_already_completed": "This timer has already ended",
     "saved_success": "Saved successfully",
-    "technician_assigned": "Technician assigned successfully",
-    "technician_not_belong_to_center": "This technician does not belong to this center",
-    "technician_removed": "Technician removed successfully",
+    "technician_assigned": "Staff member assigned successfully",
+    "technician_not_belong_to_center": "This employee does not belong to this center",
+    "technician_removed": "Staff member removed successfully",
     "attachment_deleted": "Attachment deleted successfully",
     "attachment_uploaded": "Attachment Uploaded",
     "attachments_uploaded_successfully": "Attachments uploaded successfully",
-    "cannot_cancel_has_relations": "Cannot cancel work order - please delete all services, parts, technicians, and refund any payments first",
-    "cannot_change_item_status": "Cannot change item status - has technicians or parts",
+    "cannot_cancel_has_relations": "Cannot cancel work order - please delete all services, parts, assigned staff, and refund any payments first",
+    "cannot_change_item_status": "Cannot change item status - has assigned staff or parts",
     "cannot_complete_error": "Cannot Complete Error",
     "cannot_complete_items_pending": "Cannot complete work order - pending items exist",
     "cannot_deactivate_self": "Cannot Deactivate Self",
     "cannot_delete_has_users": "Cannot Delete Has Users",
-    "cannot_delete_item_has_parts_or_technicians": "Cannot delete service until all spare parts and technicians are removed!",
+    "cannot_delete_item_has_parts_or_technicians": "Cannot delete service until all spare parts and assigned staff are removed!",
     "cannot_delete_item_status_changed": "Cannot delete service after its status has changed from pending!",
     "cannot_delete_item_work_order_has_payments": "Cannot delete service because there are payments registered on the work order! You can change its status to cancelled instead.",
     "cannot_delete_system_role": "Cannot Delete System Role",
@@ -2906,7 +2915,7 @@
     "coming_soon": "Coming Soon",
     "features": {
       "finance": "Precise Financials",
-      "finance_desc": "Integrated accounting, VAT management, and financial tracking for your workshop.",
+      "finance_desc": "Integrated accounting, VAT management, and financial tracking for your service center.",
       "print": "Advanced Print System",
       "print_desc": "Complete printing control for invoices, quotes, vouchers, and all documents.",
       "speed": "High Performance",
@@ -2914,7 +2923,7 @@
     },
     "notify_me": "Notify Me",
     "placeholder": "Enter your email",
-    "subtitle": "The next generation of workshop management is almost here. Stay tuned for the all-new Khidmh Pro.",
+    "subtitle": "The next generation of car service center management is almost here. Stay tuned for the all-new Khidmh Pro.",
     "title": "Something Great is Coming"
   },
   "theme": {
@@ -3205,11 +3214,15 @@
         "signed_delivery": "Delivery signature recorded",
         "signed_reception": "Reception signature recorded",
         "status_changed": "Status changed to :status",
-        "technician_assigned": "Technician :name assigned to :service",
-        "technician_removed": "Technician removed from :service",
+        "technician_assigned": "Staff member :name assigned to :service",
+        "technician_removed": "Staff member removed from :service",
         "updated": "Work order updated",
         "item_status_updated": "Service \":title\" status changed to :status",
-        "status_changed_on_hold": "Status Changed On Hold"
+        "status_changed_on_hold": "Status Changed On Hold",
+        "labor_started": ":user started work on \":title\"",
+        "labor_paused": ":user paused work on \":title\"",
+        "labor_resumed": ":user resumed work on \":title\"",
+        "labor_ended": ":user ended work on \":title\""
       },
       "no_activities": "No activities recorded yet",
       "title": "Activity Log"
@@ -3330,9 +3343,9 @@
       "add_part": "Add a spare part",
       "add_service_first_to_write_notes": "Please add a service first to be able to write notes.",
       "amount": "Amount",
-      "assign_technician": "Appointment of technician",
+      "assign_technician": "Assign Staff",
       "assigned_at": "Appointment date",
-      "assigned_technicians": "Assigned Technicians",
+      "assigned_technicians": "Assigned Staff",
       "description": "Service description",
       "description_placeholder": "Enter service description...",
       "discount": "Discount",
@@ -3340,7 +3353,7 @@
       "include_in_package": "Included in the package price",
       "no_notes": "There are no notes",
       "no_parts": "There are no spare parts",
-      "no_technicians": "There are no designated technicians",
+      "no_technicians": "No assigned staff",
       "note_placeholder": "Write your comment here...",
       "part_name": "Part name",
       "part_price": "Part price",
@@ -3364,7 +3377,7 @@
       "tab_notes": "Notes",
       "tab_parts": "Spare parts",
       "tab_service": "Service",
-      "tab_technicians": "Technicians",
+      "tab_technicians": "Assigned Staff",
       "technician_share": "Service Share %",
       "total_cost": "Total cost",
       "source": "Source"
@@ -3373,7 +3386,7 @@
       "all_title": "All business cards",
       "closed_subtitle": "Archive of completed and cancelled work orders for historical records",
       "closed_title": "Closed maintenance cards",
-      "open_subtitle": "Follow active work orders and execution statuses in the workshop",
+      "open_subtitle": "Follow active work orders and execution statuses in the service center",
       "open_title": "Open maintenance cards"
     },
     "messages": {
@@ -3384,7 +3397,7 @@
       "confirm_status_change": "Are you sure you want to change the card status?",
       "hold_reason_prompt": "Please enter a reason for putting this card on hold."
     },
-    "no_technicians_assigned": "There are no technicians assigned to services in this work card",
+    "no_technicians_assigned": "There are no assigned staff for services in this work order",
     "of": "Who",
     "outstanding_balance_warning": "Warning: There is an outstanding balance that will be carried over to the issued invoice.",
     "overdue_days": "{days} day late",
@@ -3513,6 +3526,17 @@
         "signatures": "Digital Signatures",
         "technicians": "Technicians"
       }
+    },
+    "labor": {
+      "start": "Start",
+      "pause": "Pause",
+      "resume": "Resume",
+      "end": "End",
+      "running": "Running",
+      "paused": "Paused",
+      "idle": "Idle",
+      "total": "Total",
+      "other_tech": "Another technician is on this timer"
     },
     "showing": "Show",
     "systematic": {
@@ -4663,5 +4687,29 @@
   "subscription_history": {
     "placeholder": "Subscription history will appear here once the component is lifted.",
     "subtitle": "Subscription log with renewal dates and payments for the company."
+  },
+  "workshop": {
+    "board": {
+      "title": "Workshop Board",
+      "subtitle": "Live snapshot of active service items grouped by execution status",
+      "total_active": "{count} active items",
+      "empty_column": "No items in this column",
+      "open_work_order": "Open work order",
+      "no_technicians": "No technicians assigned",
+      "started_at": "Started at",
+      "not_started": "Not started yet",
+      "due_date": "Due",
+      "expected_delivery": "Expected delivery",
+      "overdue_badge": "Overdue",
+      "hold_reason_label": "Hold reason",
+      "labor_running": "On clock",
+      "labor_paused": "Paused",
+      "departments": {
+        "pending": "Pending start",
+        "in_progress": "In progress",
+        "on_hold": "On hold",
+        "ready_for_qc": "Ready for QC"
+      }
+    }
   }
 }

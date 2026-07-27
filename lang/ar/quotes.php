@@ -40,7 +40,7 @@ return [
         'customer_complaint_placeholder' => 'صف المشكلة التي يشتكي منها العميل...',
         'customer_name' => 'اسم العميل',
         'initial_assessment' => 'التقييم الأولي',
-        'initial_assessment_placeholder' => 'ملاحظات الفني بعد المعاينة الأولية...',
+        'initial_assessment_placeholder' => 'ملاحظات المعاينة الأولية...',
         'no_results' => 'لا توجد نتائج',
         'phone' => 'الهاتف',
         'search_placeholder' => 'ابحث بالاسم أو الهاتف...',

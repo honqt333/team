@@ -19,6 +19,7 @@ use App\Models\WorkOrderInspection;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderItemNote;
 use App\Models\WorkOrderItemPart;
+use App\Models\WorkOrderLaborEntry;
 use App\Models\WorkOrderPhoto;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -60,6 +61,11 @@ trait HasWorkOrderRelations
     public function items(): HasMany
     {
         return $this->hasMany(WorkOrderItem::class);
+    }
+
+    public function laborEntries(): HasMany
+    {
+        return $this->hasMany(WorkOrderLaborEntry::class);
     }
 
     public function damageMarks(): HasMany

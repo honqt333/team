@@ -447,6 +447,22 @@ class WorkOrderController
             'departments' => $departments,
             'services' => $services,
             'technicians' => $technicians,
+            'laborEntries' => $workOrder->laborEntries()
+                ->with('user:id,name')
+                ->get()
+                ->map(fn ($e) => [
+                    'id' => $e->id,
+                    'work_order_id' => $e->work_order_id,
+                    'work_order_item_id' => $e->work_order_item_id,
+                    'user_id' => $e->user_id,
+                    'user_name' => $e->user?->name,
+                    'status' => $e->status,
+                    'started_at' => $e->started_at?->toIso8601String(),
+                    'paused_at' => $e->paused_at?->toIso8601String(),
+                    'ended_at' => $e->ended_at?->toIso8601String(),
+                    'paused_duration_seconds' => (int) $e->paused_duration_seconds,
+                    'effective_duration_seconds' => $e->effectiveDurationSeconds(),
+                ]),
             'warehouses' => $warehouses,
             'inventoryParts' => $inventoryParts,
             'inventoryUnits' => $inventoryUnits,

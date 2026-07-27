@@ -148,6 +148,11 @@ class WorkOrderItem extends Model
         return $this->hasMany(WorkOrderItemNote::class);
     }
 
+    public function laborEntries(): HasMany
+    {
+        return $this->hasMany(WorkOrderLaborEntry::class);
+    }
+
     // ==================== Business Rules ====================
 
     public function canBeCancelled(): bool

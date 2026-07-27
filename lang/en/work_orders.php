@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'actions' => [
         'cancel' => 'Cancel',
@@ -19,6 +21,10 @@ return [
             'item_deleted' => 'Service deleted: :title',
             'item_status_updated' => 'Service ":title" status changed to :status',
             'item_updated' => 'Service title updated: :title',
+            'labor_started' => 'Technician :user started work on ":title"',
+            'labor_paused' => 'Technician :user paused work on ":title"',
+            'labor_resumed' => 'Technician :user resumed work on ":title"',
+            'labor_ended' => 'Technician :user ended work on ":title"',
             'part_added' => 'Part added: :name',
             'part_deleted' => 'Part deleted: :name',
             'part_updated' => 'Part updated: :name',
@@ -26,8 +32,8 @@ return [
             'photos_uploaded' => 'New photos uploaded',
             'status_changed' => 'Status changed to :status',
             'status_changed_on_hold' => 'Status Changed On Hold',
-            'technician_assigned' => 'Technician :name assigned to :service',
-            'technician_removed' => 'Technician removed from :service',
+            'technician_assigned' => 'Staff member :name assigned to :service',
+            'technician_removed' => 'Staff member removed from :service',
             'updated' => 'Work Order Updated',
         ],
         'no_activities' => 'No Activities',
@@ -130,9 +136,9 @@ return [
         'add_note' => 'Add Note',
         'add_part' => 'Add Part',
         'amount' => 'Amount',
-        'assign_technician' => 'Assign Technician',
+        'assign_technician' => 'Assign Staff',
         'assigned_at' => 'Assigned At',
-        'assigned_technicians' => 'Assigned Technicians',
+        'assigned_technicians' => 'Assigned Staff',
         'description' => 'Description',
         'description_placeholder' => 'Description Placeholder',
         'discount' => 'Discount',
@@ -140,7 +146,7 @@ return [
         'include_in_package' => 'Include In Package',
         'no_notes' => 'No Notes',
         'no_parts' => 'No Parts',
-        'no_technicians' => 'No Technicians',
+        'no_technicians' => 'No Assigned Staff',
         'note_placeholder' => 'Note Placeholder',
         'part_name' => 'Part Name',
         'part_price' => 'Part Price',
@@ -164,8 +170,8 @@ return [
         'tab_notes' => 'Tab Notes',
         'tab_parts' => 'Tab Parts',
         'tab_service' => 'Tab Service',
-        'tab_technicians' => 'Tab Technicians',
-        'technician_share' => 'Technician Share',
+        'tab_technicians' => 'Assigned Staff',
+        'technician_share' => 'Staff Share',
         'total_cost' => 'Total Cost',
     ],
     'item_status' => [
@@ -239,7 +245,7 @@ return [
         'scratch' => 'Scratch',
         'service' => 'Service',
         'status' => 'Status',
-        'technician' => 'Technician',
+        'technician' => 'Assigned Person',
         'terms_conditions' => 'Terms Conditions',
         'vehicle' => 'Vehicle',
         'vehicle_condition' => 'Vehicle Condition',
@@ -293,7 +299,7 @@ return [
             'photos' => 'Photos',
             'services' => 'Services',
             'signatures' => 'Signatures',
-            'technicians' => 'Technicians',
+            'technicians' => 'Assigned Staff',
         ],
     ],
     'status' => [
@@ -320,6 +326,17 @@ return [
         'save_inspection' => 'Save Inspection',
         'start_inspection' => 'Start Inspection',
         'title' => 'Title',
+    ],
+    'labor' => [
+        'end' => 'End',
+        'idle' => 'Idle',
+        'other_tech' => 'Another technician is on this timer',
+        'pause' => 'Pause',
+        'paused' => 'Paused',
+        'resume' => 'Resume',
+        'running' => 'Running',
+        'start' => 'Start',
+        'total' => 'Total',
     ],
     'tabs' => [
         'condition_report' => 'Condition Report',

@@ -36,7 +36,7 @@ return [
         'center_type_branch' => 'Center Type Branch',
         'center_type_main' => 'Center Type Main',
         'center_type_warehouse' => 'Center Type Warehouse',
-        'center_type_workshop' => 'Center Type Workshop',
+        'center_type_workshop' => 'Service Center',
         'coming_soon' => 'Coming Soon',
         'created_successfully' => 'Created Successfully',
         'email' => 'Email',

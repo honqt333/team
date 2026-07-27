@@ -210,6 +210,32 @@
                         {{ $t('nav.work_orders') }}
                     </Link>
 
+                    <Link
+                        v-if="can('crm.work_orders.view')"
+                        :href="route('app.workshop.index')"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/workshop')
+                                ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-5 h-5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h6v6H4V6zm0 10h6v4H4v-4zm10-10h6v4h-6V6zm0 8h6v6h-6v-6z"
+                            />
+                        </svg>
+                        {{ $t('workshop.board.title') }}
+                    </Link>
+
                     <a
                         v-if="can('quotes.view')"
                         href="/app/quotes"
@@ -1455,6 +1481,33 @@
                             />
                         </svg>
                         {{ $t('nav.work_orders') }}
+                    </Link>
+
+                    <Link
+                        v-if="can('crm.work_orders.view')"
+                        :href="route('app.workshop.index')"
+                        @click="mobileMenuOpen = false"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/workshop')
+                                ? 'bg-emerald-50 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-5 h-5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h6v6H4V6zm0 10h6v4H4v-4zm10-10h6v4h-6V6zm0 8h6v6h-6v-6z"
+                            />
+                        </svg>
+                        {{ $t('workshop.board.title') }}
                     </Link>
 
                     <a

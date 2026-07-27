@@ -76,6 +76,7 @@ use App\Http\Controllers\App\VehicleModelController;
 use App\Http\Controllers\App\WorkOrderInspectionController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderItemController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderLaborEntryController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderMediaController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderNotesController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderPartsController;
@@ -85,6 +86,7 @@ use App\Http\Controllers\App\WorkOrders\WorkOrderStatusController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderTechnicianController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderWarrantiesController;
 use App\Http\Controllers\App\WorkOrderSignatureController;
+use App\Http\Controllers\App\WorkshopBoardController;
 use App\Http\Controllers\Auth\PhoneVerificationController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\LocaleController;
@@ -209,6 +211,9 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
     // Work Orders - Hub and Index
     Route::get('/work-orders/export', [WorkOrderController::class, 'export'])->name('work-orders.export');
+
+    // Workshop board (Phase 1: read-only Kanban for active work order items)
+    Route::get('/workshop', [WorkshopBoardController::class, 'index'])->name('app.workshop.index');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
@@ -267,6 +272,12 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Work Order Item Technicians
     Route::post('/work-orders/{work_order}/items/{item}/technicians', [WorkOrderTechnicianController::class, 'assignTechnician'])->name('work-orders.items.technicians.store');
     Route::delete('/work-orders/{work_order}/items/{item}/technicians/{user}', [WorkOrderTechnicianController::class, 'removeTechnician'])->name('work-orders.items.technicians.destroy');
+
+    // Work Order Labor Entries (per-technician timer sessions)
+    Route::post('/work-orders/{work_order}/items/{item}/labor-entries/start', [WorkOrderLaborEntryController::class, 'start'])->name('work-orders.items.labor.start');
+    Route::post('/work-orders/{work_order}/labor-entries/{entry}/pause', [WorkOrderLaborEntryController::class, 'pause'])->name('work-orders.labor.pause');
+    Route::post('/work-orders/{work_order}/labor-entries/{entry}/resume', [WorkOrderLaborEntryController::class, 'resume'])->name('work-orders.labor.resume');
+    Route::post('/work-orders/{work_order}/labor-entries/{entry}/end', [WorkOrderLaborEntryController::class, 'end'])->name('work-orders.labor.end');
 
     // Work Order Item Parts
     Route::post('/work-orders/{work_order}/items/{item}/parts', [WorkOrderPartsController::class, 'addPart'])->name('work-orders.items.parts.store');

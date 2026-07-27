@@ -36,7 +36,7 @@ return [
         'center_type_branch' => 'فرع',
         'center_type_main' => 'المركز الرئيسي',
         'center_type_warehouse' => 'مستودع',
-        'center_type_workshop' => 'ورشة',
+        'center_type_workshop' => 'مركز خدمة',
         'coming_soon' => 'قريباً',
         'created_successfully' => 'تم إنشاء الفرع بنجاح',
         'email' => 'البريد الإلكتروني',

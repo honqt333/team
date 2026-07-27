@@ -806,7 +806,7 @@
     "tab_financial": "المالية",
     "tab_operations": "العمليات",
     "tab_overview": "نظرة عامة",
-    "technician_performance": "أداء الفنيين",
+    "technician_performance": "أداء فريق العمل",
     "this_month": "هذا الشهر",
     "title": "لوحة التحكم",
     "welcome": "مرحباً أيها المُشرف",
@@ -1732,7 +1732,7 @@
     }
   },
   "landing": {
-    "active_shops": "ورشة نشطة",
+    "active_shops": "مركز خدمة نشط",
     "elevate": "تطوير",
     "exclusive_tools": "أدواتنا الحصرية",
     "explore_features": "استكشف المميزات",
@@ -1752,7 +1752,7 @@
     "yearly": "سنوي"
   },
   "messages": {
-    "cannot_cancel_has_technicians_or_parts": "لا يمكن إلغاء كرت العمل لوجود فنيين مسندين أو قطع غيار أو دفعات مسجلة عليه.",
+    "cannot_cancel_has_technicians_or_parts": "لا يمكن إلغاء كرت العمل لوجود موظفين معينين أو قطع غيار أو دفعات مسجلة عليه.",
     "cannot_complete_excess_payments": "لا يمكن إغلاق كرت الصيانة بوجود مبالغ زائدة مدفوعة.",
     "deleted_success": "تم الحذف بنجاح",
     "department_added": "تم إضافة القسم بنجاح",
@@ -1760,20 +1760,29 @@
     "inspection_saved": "تم حفظ الفحص بنجاح",
     "invalid_file_type": "نوع الملف غير صالح: {file}",
     "item_status_updated": "تم تحديث حالة الخدمة بنجاح",
+    "labor_started": "تم بدء المؤقت",
+    "labor_paused": "تم إيقاف المؤقت مؤقتاً",
+    "labor_resumed": "تم استئناف المؤقت",
+    "labor_ended": "تم إنهاء المؤقت",
+    "technician_not_assigned_to_item": "لست معيناً على هذه الخدمة",
+    "technician_already_running": "لديك مؤقت نشط بالفعل",
+    "entry_not_running": "هذا المؤقت ليس نشطاً",
+    "entry_not_paused": "هذا المؤقت ليس في وضع الإيقاف المؤقت",
+    "entry_already_completed": "هذا المؤقت منتهي بالفعل",
     "saved_success": "تم الحفظ بنجاح",
-    "technician_assigned": "تم تعيين الفني بنجاح",
-    "technician_not_belong_to_center": "هذا الفني لا ينتمي لهذا المركز",
-    "technician_removed": "تم إزالة الفني بنجاح",
+    "technician_assigned": "تم تعيين الموظف بنجاح",
+    "technician_not_belong_to_center": "هذا الموظف لا ينتمي لهذا المركز",
+    "technician_removed": "تم إزالة الموظف بنجاح",
     "attachment_deleted": "تم حذف المرفق بنجاح",
     "attachment_uploaded": "تم رفع المرفق",
     "attachments_uploaded_successfully": "تم رفع المرفقات بنجاح",
-    "cannot_cancel_has_relations": "لا يمكن إلغاء كرت العمل - يرجى حذف جميع الخدمات، القطع، الفنيين، وإعادة أي مدفوعات أولاً",
-    "cannot_change_item_status": "لا يمكن تغيير حالة الخدمة - يوجد فنيين أو قطع غيار مرتبطة",
+    "cannot_cancel_has_relations": "لا يمكن إلغاء كرت العمل - يرجى حذف جميع الخدمات، القطع، الموظفين المعيّنين، وإعادة أي مدفوعات أولاً",
+    "cannot_change_item_status": "لا يمكن تغيير حالة الخدمة - يوجد موظفون معينون أو قطع غيار مرتبطة",
     "cannot_complete_error": "لا يمكن إكمال كرت العمل",
     "cannot_complete_items_pending": "لا يمكن إكمال كرت العمل - هناك خدمات غير مكتملة",
     "cannot_deactivate_self": "لا يمكنك إلغاء تفعيل حسابك بنفسك",
     "cannot_delete_has_users": "لا يمكن الحذف لوجود مستخدمين مرتبطين",
-    "cannot_delete_item_has_parts_or_technicians": "لا يمكن إلغاء الخدمة حتى يتم إزالة جميع قطع الغيار والفنيين!",
+    "cannot_delete_item_has_parts_or_technicians": "لا يمكن إلغاء الخدمة حتى يتم إزالة جميع قطع الغيار والموظفين المعيّنين!",
     "cannot_delete_item_status_changed": "لا يمكن حذف الخدمة بعد تغيير حالتها من قيد الانتظار!",
     "cannot_delete_item_work_order_has_payments": "لا يمكن حذف الخدمة لوجود دفعات مسجلة على كرت العمل! يمكنك تغيير حالتها إلى ملغاة بدلاً من ذلك.",
     "cannot_delete_system_role": "لا يمكن حذف دور النظام",
@@ -2914,7 +2923,7 @@
     },
     "notify_me": "أبلغني عند الانطلاق",
     "placeholder": "أدخل بريدك الإلكتروني",
-    "subtitle": "الجيل القادم من نظام إدارة مراكز صيانة السيارات قاب قوسين أو أدنى. انتظروا نظام خدمة برو الجديد كلياً.",
+    "subtitle": "الجيل القادم من نظام إدارة مراكز خدمات السيارات قاب قوسين أو أدنى. انتظروا نظام خدمة برو الجديد كلياً.",
     "title": "شيء رائع قادم قريباً"
   },
   "theme": {
@@ -3205,11 +3214,15 @@
         "signed_delivery": "تم توقيع التسليم",
         "signed_reception": "تم توقيع الاستلام",
         "status_changed": "تم تغيير حالة كرت العمل إلى :status",
-        "technician_assigned": "تم تعيين فني: :name للخدمة :service",
-        "technician_removed": "تم إزالة فني من الخدمة :service",
+        "technician_assigned": "تم تعيين الموظف: :name للخدمة :service",
+        "technician_removed": "تم إزالة الموظف من الخدمة :service",
         "updated": "تم تحديث بيانات كرت العمل",
         "item_status_updated": "تم تغيير حالة الخدمة \":title\" إلى :status",
-        "status_changed_on_hold": "تم تعليق كرت العمل"
+        "status_changed_on_hold": "تم تعليق كرت العمل",
+        "labor_started": "بدء الموظف :user العمل على \":title\"",
+        "labor_paused": "إيقاف الموظف :user العمل مؤقتاً على \":title\"",
+        "labor_resumed": "استئناف الموظف :user العمل على \":title\"",
+        "labor_ended": "إنهاء الموظف :user العمل على \":title\""
       },
       "no_activities": "لا يوجد أنشطة مسجلة بعد",
       "title": "سجل الأنشطة"
@@ -3330,9 +3343,9 @@
       "add_part": "إضافة قطعة غيار",
       "add_service_first_to_write_notes": "يرجى إضافة خدمة أولاً لتتمكن من كتابة مذكرات.",
       "amount": "المبلغ",
-      "assign_technician": "تعيين فني",
+      "assign_technician": "تعيين موظف",
       "assigned_at": "تاريخ التعيين",
-      "assigned_technicians": "الفنيون المختارون",
+      "assigned_technicians": "الموظفون المختارون",
       "description": "وصف الخدمة",
       "description_placeholder": "أدخل وصف الخدمة...",
       "discount": "الخصم",
@@ -3340,7 +3353,7 @@
       "include_in_package": "ضمن السعر في الباقة",
       "no_notes": "لا توجد ملاحظات",
       "no_parts": "لا توجد قطع غيار",
-      "no_technicians": "لا يوجد فنيون معينون",
+      "no_technicians": "لا يوجد موظفون معينون",
       "note_placeholder": "اكتب ملاحظتك هنا...",
       "part_name": "اسم القطعة",
       "part_price": "سعر القطعة",
@@ -3364,7 +3377,7 @@
       "tab_notes": "الملاحظات",
       "tab_parts": "قطع الغيار",
       "tab_service": "الخدمة",
-      "tab_technicians": "الفنيون",
+      "tab_technicians": "الموظفون المعيّنون",
       "technician_share": "مساهمة الخدمة %",
       "total_cost": "إجمالي التكلفة",
       "source": "المصدر"
@@ -3373,7 +3386,7 @@
       "all_title": "جميع كروت العمل",
       "closed_subtitle": "أرشيف كروت العمل المكتملة والملغاة للسجلات التاريخية",
       "closed_title": "كروت الصيانة المغلقة",
-      "open_subtitle": "متابعة كروت العمل النشطة وحالات التنفيذ في الورشة",
+      "open_subtitle": "متابعة كروت العمل النشطة وحالات التنفيذ في مركز الخدمة",
       "open_title": "كروت الصيانة المفتوحة"
     },
     "messages": {
@@ -3384,7 +3397,7 @@
       "confirm_status_change": "هل أنت متأكد من تغيير حالة الكرت؟",
       "hold_reason_prompt": "يرجى إدخال سبب تعليق الكرت."
     },
-    "no_technicians_assigned": "لا يوجد فنيين مسندين لخدمات في كرت العمل هذا",
+    "no_technicians_assigned": "لا يوجد موظفون معينون لخدمات في كرت العمل هذا",
     "of": "من",
     "outstanding_balance_warning": "تنبيه: يوجد مبلغ متبقي غير مسدد ",
     "overdue_days": "متأخر {days} يوم",
@@ -3447,8 +3460,8 @@
       "scratch": "خدش",
       "service": "الخدمة",
       "status": "الحالة",
-      "technician": "الفني",
-      "technician_signature": "توقيع الفني",
+      "technician": "المسؤول عن الخدمة",
+      "technician_signature": "توقيع الموظف المسؤول",
       "terms_conditions": "الشروط والأحكام",
       "total_paid": "إجمالي المدفوع",
       "vehicle": "المركبة",
@@ -3511,10 +3524,21 @@
         "photos": "الصور",
         "services": "الخدمات",
         "signatures": "التوقيعات الرقمية",
-        "technicians": "الفنيون"
+        "technicians": "الموظفون المعيّنون"
       }
     },
     "showing": "عرض",
+    "labor": {
+      "start": "بدء",
+      "pause": "إيقاف",
+      "resume": "استئناف",
+      "end": "إنهاء",
+      "running": "قيد التشغيل",
+      "paused": "موقوف",
+      "idle": "متوقف",
+      "total": "الإجمالي",
+      "other_tech": "موظف آخر يعمل على هذا المؤقت"
+    },
     "systematic": {
       "category": "الفئة",
       "item": "العنصر",
@@ -3538,7 +3562,7 @@
       "main_info": "معلومات كرت الصيانة",
       "payments": "المدفوعات",
       "photos": "صور المركبة",
-      "technicians": "الفنيين"
+      "technicians": "الموظفين"
     },
     "title": "أوامر العمل",
     "title_singular": "كرت عمل",
@@ -4663,5 +4687,29 @@
   "subscription_history": {
     "placeholder": "سيتم عرض سجل الاشتراكات هنا بمجرد رفع المكوّن.",
     "subtitle": "سجل الاشتراكات وتواريخ التجديد والمدفوعات الخاصة بالمؤسسة"
+  },
+  "workshop": {
+    "board": {
+      "title": "لوحة المركز",
+      "subtitle": "عرض مباشر لبنود الخدمات النشطة مجمّعة حسب حالة التنفيذ",
+      "total_active": "{count} بند نشط",
+      "empty_column": "لا توجد بنود في هذا العمود",
+      "open_work_order": "فتح أمر العمل",
+      "no_technicians": "لا يوجد موظفون معينون",
+      "started_at": "بدأ في",
+      "not_started": "لم يبدأ بعد",
+      "due_date": "موعد التسليم",
+      "expected_delivery": "تاريخ التسليم المتوقع",
+      "overdue_badge": "متأخر",
+      "hold_reason_label": "سبب التعليق",
+      "labor_running": "يعمل الآن",
+      "labor_paused": "موقوف مؤقتاً",
+      "departments": {
+        "pending": "بانتظار البدء",
+        "in_progress": "قيد التنفيذ",
+        "on_hold": "معلّق",
+        "ready_for_qc": "جاهز لفحص الجودة"
+      }
+    }
   }
 }

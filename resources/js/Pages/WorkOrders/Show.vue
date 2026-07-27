@@ -97,6 +97,7 @@
                             :items-by-department="itemsByDepartment"
                             :technicians="technicians"
                             :read-only="isReadOnly"
+                            :labor-entries="laborEntries"
                             @click-service="openServiceTechniciansModal"
                         />
                     </div>
@@ -691,6 +692,7 @@ const props = defineProps({
     departments: { type: Array, default: () => [] },
     services: { type: Array, default: () => [] },
     technicians: { type: Array, default: () => [] },
+    laborEntries: { type: Array, default: () => [] },
     warehouses: { type: Array, default: () => [] },
     inventoryParts: { type: Array, default: () => [] },
     inventoryUnits: { type: Array, default: () => [] },

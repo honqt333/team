@@ -79,8 +79,8 @@ return [
     'top_services' => 'الخدمات الأكثر طلباً',
     'invoice_count' => ':n فاتورة',
 
-    // Technicians
-    'technician_performance' => 'أداء الفنيين',
+    // Staff / Team
+    'technician_performance' => 'أداء فريق العمل',
     'assigned' => ':n مُسندة',
     'completed_short' => ':n منجزة',
     'in_progress_short' => ':n قيد العمل',

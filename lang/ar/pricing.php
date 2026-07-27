@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
     'allow_price_override' => 'السماح بتعديل السعر',
-    'allow_price_override_hint' => 'السماح للفني بتعديل السعر أثناء العمل',
+    'allow_price_override_hint' => 'السماح للموظف بتعديل السعر أثناء العمل',
     'base_price' => 'السعر الأساسي',
     'discount_type' => 'نوع الخصم',
     'discount_types' => [

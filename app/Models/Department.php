@@ -33,13 +33,20 @@ class Department extends Model
     protected $appends = ['name'];
 
     /**
-     * Get localized name based on current locale
+     * Get localized name based on current locale. Both name_ar and
+     * name_en can be NULL on legacy rows — fall back through the
+     * other locale, then to the plain `name` column, then to an
+     * empty string so the strict string return type never breaks.
      */
     public function getNameAttribute(): string
     {
         $locale = app()->getLocale();
 
-        return $locale === 'en' ? ($this->name_en ?: $this->name_ar) : ($this->name_ar ?: $this->name_en);
+        if ($locale === 'en') {
+            return (string) ($this->name_en ?: $this->name_ar ?: $this->name ?? '');
+        }
+
+        return (string) ($this->name_ar ?: $this->name_en ?: $this->name ?? '');
     }
 
     public function tenant(): BelongsTo
