@@ -133,7 +133,7 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                         </p>
                     </div>
                     <a
-                        href="/app/settings/company"
+                        href="/app/settings"
                         class="inline-flex items-center gap-1 self-start rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
                     >
                         <svg
@@ -149,7 +149,7 @@ const noPlanLabel = () => t('system.billing.page.no_plan');
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
                             />
                         </svg>
-                        {{ t('system.billing.page.back_to_company_settings') }}
+                        {{ t('system.billing.page.back_to_settings') }}
                     </a>
                 </div>
             </div>

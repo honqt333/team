@@ -4499,6 +4499,7 @@
         "title": "Billing",
         "subtitle": "Manage your subscription, payment methods, and receipts",
         "back_to_company_settings": "Back to company settings",
+        "back_to_settings": "Back to settings",
         "section_current": "Current subscription",
         "section_plans": "Available plans",
         "section_plans_subtitle": "Choose the plan that fits your center's needs",
