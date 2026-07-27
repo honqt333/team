@@ -80,6 +80,17 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
+        // Register the Amiri Arabic font with DomPDF so PDF
+        // generation can render Arabic text correctly. Without
+        // a font that has Arabic glyphs + shaping tables (GPOS /
+        // GSUB), DomPDF prints every character in left-to-right
+        // source order — the result is "ورب ةمدخ" instead of
+        // "خدمة برو". The font files ship in resources/fonts/
+        // (Amiri-Regular.ttf, Amiri-Bold.ttf) and are committed
+        // so the same fix works on macOS, Linux, and Windows
+        // without any system font installation.
+        $this->registerArabicFontForDomPDF();
+
         // Apply SMTP from the default email integration (DB-driven) before
         // any notification or email gets a chance to read mail.* config.
         // Both development and production read the same source of truth,
@@ -166,5 +177,68 @@ class AppServiceProvider extends ServiceProvider
 
             return null;
         });
+    }
+
+    /**
+     * Register the Amiri Arabic font with DomPDF so PDF
+     * generation can render Arabic text correctly. Without a
+     * font that has Arabic glyphs + shaping tables, DomPDF
+     * prints every character in left-to-right source order —
+     * the result is "ورب ةمدخ" instead of "خدمة برو".
+     *
+     * We commit the TTF files in resources/fonts/ (Amiri is
+     * SIL OFL licensed, redistributable) so the same fix
+     * works on macOS, Linux, and Windows without requiring
+     * any system font installation.
+     *
+     * Idempotent — DomPDF silently ignores re-registration
+     * of the same font family, so calling this on every
+     * boot is safe.
+     */
+    private function registerArabicFontForDomPDF(): void
+    {
+        $fontDir = base_path('resources/fonts');
+
+        if (! is_dir($fontDir)) {
+            return;
+        }
+
+        // Barryvdh's `dompdf.options` binding only reads
+        // `dompdf.options` config (not the top-level
+        // `dompdf.font_dir` / `dompdf.font_cache`), so we have to
+        // patch BOTH places. We also patch the top-level keys
+        // for any third-party code that reads them directly.
+        config([
+            'dompdf.font_dir' => array_values(array_unique(array_merge(
+                (array) config('dompdf.font_dir', []),
+                [$fontDir],
+            ))),
+            // The default config points at storage_path('fonts')
+            // which does not exist out of the box. resources/fonts/
+            // is already writable (we commit TTFs there) so it's
+            // the safer default.
+            'dompdf.font_cache' => $fontDir,
+
+            // Critical: dompdf.options must be a single string
+            // (DomPDF\Options takes `fontDir` and `fontCache` as
+            // scalars, not arrays). We pass the resources/fonts
+            // dir directly.
+            'dompdf.options' => array_merge(
+                (array) config('dompdf.options', []),
+                [
+                    'fontDir' => $fontDir,
+                    'fontCache' => $fontDir,
+                ],
+            ),
+        ]);
+
+        // Force the next wrapper call to read the updated
+        // dompdf.options. The service is `bind`, not singleton,
+        // so each `app('dompdf.wrapper')` resolves fresh, but
+        // the underlying `dompdf.options` is cached as a
+        // singleton on first resolve — so we forget it.
+        $this->app->forgetInstance('dompdf.options');
+        $this->app->forgetInstance('dompdf');
+        $this->app->forgetInstance('dompdf.wrapper');
     }
 }

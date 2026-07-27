@@ -1,168 +1,139 @@
 <template>
     <SystemLayout>
-        <div class="max-w-4xl mx-auto space-y-6">
-            <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <Link
-                        href="/system/invoices"
-                        class="text-indigo-600 hover:text-indigo-800 text-sm mb-2 block"
-                    >
-                        ← العودة للفواتير
-                    </Link>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                        {{ invoice.invoice_number }}
-                    </h1>
+        <Head
+            :title="isAr ? `فاتورة ${invoice.invoice_number}` : `Invoice ${invoice.invoice_number}`"
+        />
+
+        <div class="space-y-6">
+            <!-- Header card: back link + invoice number + status badge -->
+            <div
+                class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            >
+                <div class="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <Link
+                            href="/system/invoices"
+                            class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50 hover:text-gray-900 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/40 dark:hover:text-white"
+                        >
+                            <ChevronIcon class="h-4 w-4" />
+                        </Link>
+                        <div class="min-w-0">
+                            <p
+                                class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                            >
+                                {{ isAr ? 'فاتورة' : 'Invoice' }}
+                            </p>
+                            <h1 class="truncate text-xl font-bold text-gray-900 dark:text-white">
+                                {{ invoice.invoice_number }}
+                            </h1>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <StatusBadge :status="effectiveStatus" />
+                    </div>
                 </div>
-                <div class="flex gap-2">
+
+                <!-- Action bar -->
+                <div
+                    class="flex flex-wrap items-center gap-2 border-t border-gray-200 bg-gray-50/50 px-6 py-3 dark:border-gray-700 dark:bg-gray-900/20"
+                >
                     <a
                         :href="`/system/invoices/${invoice.id}/download`"
-                        class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700/40"
                     >
-                        تحميل PDF
+                        <DownloadIcon class="h-4 w-4" />
+                        {{ isAr ? 'تحميل PDF' : 'Download PDF' }}
                     </a>
+
                     <button
                         @click="sendInvoice"
                         :disabled="sending"
-                        class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50"
                     >
-                        {{ sending ? 'جاري الإرسال...' : 'إرسال بالإيميل' }}
+                        <MailIcon class="h-4 w-4" />
+                        {{
+                            sending
+                                ? isAr
+                                    ? 'جاري الإرسال...'
+                                    : 'Sending...'
+                                : isAr
+                                  ? 'إرسال بالإيميل'
+                                  : 'Send by email'
+                        }}
                     </button>
-                </div>
-            </div>
 
-            <!-- Invoice Card -->
-            <div
-                class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
-            >
-                <!-- Status Badge -->
-                <div class="flex justify-between items-start mb-6">
-                    <div>
-                        <span
-                            :class="getStatusClass(invoice.status)"
-                            class="px-3 py-1 rounded-full text-sm font-medium"
-                        >
-                            {{ getStatusLabel(invoice.status) }}
-                        </span>
-                    </div>
-                    <div class="text-left">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">تاريخ الإصدار</p>
-                        <p class="font-medium text-gray-900 dark:text-white">
-                            {{ formatDate(invoice.created_at) }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Tenant Info -->
-                <div
-                    class="grid grid-cols-2 gap-6 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700"
-                >
-                    <div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">المستأجر</p>
-                        <p class="font-semibold text-gray-900 dark:text-white">
-                            {{ invoice.tenant?.trade_name }}
-                        </p>
-                        <p class="text-sm text-gray-500">{{ invoice.tenant?.email }}</p>
-                    </div>
-                    <div class="text-left">
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">تاريخ الاستحقاق</p>
-                        <p
-                            class="font-semibold"
-                            :class="isOverdue ? 'text-red-600' : 'text-gray-900 dark:text-white'"
-                        >
-                            {{ formatDate(invoice.due_at) }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Items -->
-                <div class="mb-6">
-                    <h3 class="font-semibold text-gray-900 dark:text-white mb-3">
-                        تفاصيل الفاتورة
-                    </h3>
-                    <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                        <div class="flex justify-between mb-2">
-                            <span>باقة {{ invoice.subscription?.plan?.name_ar }}</span>
-                            <span class="font-medium">{{ formatCurrency(invoice.subtotal) }}</span>
-                        </div>
-                        <div class="flex justify-between text-sm text-gray-500">
-                            <span>
-                                {{
-                                    invoice.subscription?.billing_cycle === 'yearly'
-                                        ? 'سنوي'
-                                        : 'شهري'
-                                }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Totals -->
-                <div class="space-y-2 mb-6">
-                    <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                        <span>المجموع الفرعي</span>
-                        <span>{{ formatCurrency(invoice.subtotal) }}</span>
-                    </div>
-                    <div v-if="invoice.discount > 0" class="flex justify-between text-emerald-600">
-                        <span>الخصم</span>
-                        <span>- {{ formatCurrency(invoice.discount) }}</span>
-                    </div>
-                    <div class="flex justify-between text-gray-600 dark:text-gray-400">
-                        <span>ضريبة القيمة المضافة</span>
-                        <span>{{ formatCurrency(invoice.vat) }}</span>
-                    </div>
-                    <div
-                        class="flex justify-between text-xl font-bold text-gray-900 dark:text-white pt-2 border-t border-gray-200 dark:border-gray-700"
-                    >
-                        <span>الإجمالي</span>
-                        <span class="text-indigo-600">{{ formatCurrency(invoice.total) }}</span>
-                    </div>
-                </div>
-
-                <!-- Actions -->
-                <div
-                    v-if="invoice.status === 'pending'"
-                    class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700"
-                >
                     <button
+                        v-if="invoice.status === 'pending'"
                         @click="showMarkPaidModal = true"
-                        class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-transparent bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700"
                     >
-                        تأكيد الدفع يدوياً
+                        <CheckIcon class="h-4 w-4" />
+                        {{ isAr ? 'تأكيد الدفع' : 'Mark as paid' }}
                     </button>
-                    <button
-                        @click="cancelInvoice"
-                        class="px-4 py-2 border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg font-medium"
-                    >
-                        إلغاء الفاتورة
-                    </button>
-                </div>
 
-                <!-- Payment Info if Paid -->
-                <div
-                    v-if="invoice.status === 'paid'"
-                    class="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4 mt-4"
-                >
-                    <p class="text-emerald-700 dark:text-emerald-300 font-medium mb-2">
-                        ✓ تم الدفع
-                    </p>
-                    <div class="text-sm text-emerald-600 dark:text-emerald-400 space-y-1">
-                        <p>تاريخ الدفع: {{ formatDate(invoice.paid_at) }}</p>
-                        <p v-if="paymentMeta.gateway">البوابة: {{ paymentMeta.gateway }}</p>
-                        <p v-if="paymentMeta.reference">المرجع: {{ paymentMeta.reference }}</p>
-                    </div>
+                    <button
+                        v-if="invoice.status === 'pending'"
+                        @click="cancelInvoice"
+                        class="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-sm font-medium text-rose-600 transition hover:bg-rose-50 dark:border-rose-800 dark:bg-gray-800 dark:text-rose-400 dark:hover:bg-rose-900/20"
+                    >
+                        <XIcon class="h-4 w-4" />
+                        {{ isAr ? 'إلغاء الفاتورة' : 'Cancel invoice' }}
+                    </button>
                 </div>
             </div>
 
-            <!-- PDF Preview -->
+            <!-- Main grid: 2/3 main + 1/3 sidebar -->
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <!-- Main column -->
+                <div class="space-y-6 lg:col-span-2">
+                    <!-- Timeline -->
+                    <InvoiceTimeline :invoice="invoice" />
+
+                    <!-- Items table -->
+                    <InvoiceItemsTable
+                        :invoice="invoice"
+                        :subscription="invoice.subscription"
+                        :plan="invoice.subscription?.plan"
+                    />
+
+                    <!-- Totals -->
+                    <InvoiceTotalsCard :invoice="invoice" currency="SAR" />
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <InvoiceCustomerCard :tenant="invoice.tenant" />
+                    <InvoiceSubscriptionCard
+                        :subscription="invoice.subscription"
+                        :plan="invoice.subscription?.plan"
+                    />
+                </div>
+            </div>
+
+            <!-- PDF preview (full width, at the bottom for max focus) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700"
+                class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
             >
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-4">معاينة الفاتورة</h3>
-                <iframe
-                    :src="pdfUrl"
-                    class="w-full h-[600px] rounded-lg border border-gray-200 dark:border-gray-700"
-                ></iframe>
+                <div
+                    class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700"
+                >
+                    <h3
+                        class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400"
+                    >
+                        {{ isAr ? 'معاينة الـ PDF' : 'PDF Preview' }}
+                    </h3>
+                    <a
+                        :href="`/system/invoices/${invoice.id}/download`"
+                        target="_blank"
+                        class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400"
+                    >
+                        {{ isAr ? 'فتح في تبويب جديد' : 'Open in new tab' }} ↗
+                    </a>
+                </div>
+                <iframe v-if="pdfUrl" :src="pdfUrl" class="h-[700px] w-full border-0" />
+                <div v-else class="flex h-64 items-center justify-center text-sm text-gray-400">
+                    {{ isAr ? 'الـ PDF غير متاح' : 'PDF not available' }}
+                </div>
             </div>
         </div>
 
@@ -170,53 +141,65 @@
         <Transition name="modal">
             <div v-if="showMarkPaidModal" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="flex min-h-full items-center justify-center p-4">
-                    <div class="fixed inset-0 bg-black/50" @click="showMarkPaidModal = false"></div>
+                    <div class="fixed inset-0 bg-black/50" @click="showMarkPaidModal = false" />
                     <div
-                        class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-xl"
+                        class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
                     >
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                            تأكيد الدفع يدوياً
+                        <h3 class="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ isAr ? 'تأكيد الدفع يدوياً' : 'Confirm payment manually' }}
                         </h3>
                         <div class="space-y-4">
                             <div>
                                 <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                    class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    رقم المرجع
+                                    {{ isAr ? 'رقم المرجع' : 'Reference number' }}
                                 </label>
                                 <input
                                     type="text"
                                     v-model="markPaidForm.reference"
-                                    placeholder="رقم الحوالة أو الإيصال"
+                                    :placeholder="
+                                        isAr
+                                            ? 'رقم الحوالة أو الإيصال'
+                                            : 'Transfer or receipt number'
+                                    "
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
                             </div>
                             <div>
                                 <label
-                                    class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                    class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
                                 >
-                                    ملاحظات
+                                    {{ isAr ? 'ملاحظات' : 'Notes' }}
                                 </label>
                                 <textarea
                                     v-model="markPaidForm.notes"
                                     rows="2"
                                     class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                                ></textarea>
+                                />
                             </div>
                         </div>
-                        <div class="flex gap-3 mt-6">
+                        <div class="mt-6 flex gap-3">
                             <button
                                 @click="markAsPaid"
                                 :disabled="markingPaid"
-                                class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50"
+                                class="flex-1 rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                             >
-                                {{ markingPaid ? 'جاري التأكيد...' : 'تأكيد الدفع' }}
+                                {{
+                                    markingPaid
+                                        ? isAr
+                                            ? 'جاري التأكيد...'
+                                            : 'Confirming...'
+                                        : isAr
+                                          ? 'تأكيد الدفع'
+                                          : 'Confirm payment'
+                                }}
                             </button>
                             <button
                                 @click="showMarkPaidModal = false"
-                                class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium"
+                                class="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                             >
-                                إلغاء
+                                {{ isAr ? 'إلغاء' : 'Cancel' }}
                             </button>
                         </div>
                     </div>
@@ -227,13 +210,36 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { computed, h, ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import SystemLayout from '@/Layouts/SystemLayout.vue';
+import StatusBadge from '@/Components/Billing/StatusBadge.vue';
+import InvoiceTimeline from '@/Components/Billing/InvoiceTimeline.vue';
+import InvoiceItemsTable from '@/Components/Billing/InvoiceItemsTable.vue';
+import InvoiceTotalsCard from '@/Components/Billing/InvoiceTotalsCard.vue';
+import InvoiceCustomerCard from '@/Components/Billing/InvoiceCustomerCard.vue';
+import InvoiceSubscriptionCard from '@/Components/Billing/InvoiceSubscriptionCard.vue';
 
 const props = defineProps({
-    invoice: Object,
-    pdfUrl: String,
+    invoice: { type: Object, required: true },
+    pdfUrl: { type: String, default: null },
+});
+
+// Defensive locale read — same pattern as Analytics/Show.vue.
+const isAr = computed(() => (document?.documentElement?.lang || 'ar') === 'ar');
+
+// Compute the effective status — we still show 'overdue' for
+// pending invoices past their due date, so the admin gets a
+// visual signal even before dunning kicks in.
+const effectiveStatus = computed(() => {
+    if (
+        props.invoice.status === 'pending' &&
+        props.invoice.due_at &&
+        new Date(props.invoice.due_at) < new Date()
+    ) {
+        return 'overdue';
+    }
+    return props.invoice.status;
 });
 
 const sending = ref(false);
@@ -241,70 +247,69 @@ const showMarkPaidModal = ref(false);
 const markingPaid = ref(false);
 const markPaidForm = ref({ reference: '', notes: '' });
 
-const isOverdue = computed(() => {
-    return props.invoice.status === 'pending' && new Date(props.invoice.due_at) < new Date();
-});
-
-// The 2026_07_25_140000 migration dropped payment_gateway / payment_reference
-// columns. The service now writes them into `notes` as
-// "[Marked paid] gateway=..., reference=..., notes=... at <iso>". Parse it
-// back so the admin UI can still show the gateway/reference.
-const paymentMeta = computed(() => {
-    const notes = props.invoice.notes || '';
-    const gateway = notes.match(/gateway=([\w]+)/)?.[1] || null;
-    const reference = notes.match(/reference=([^,]+)/)?.[1]?.trim() || null;
-    return { gateway, reference };
-});
-
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('ar-SA-u-nu-latn', { style: 'currency', currency: 'SAR' }).format(
-        amount || 0
+// Inline icons (single helper). Each component returns a fresh
+// VNode so Vue can key them safely inside v-for if we ever need
+// to.
+const makeIcon = (path, opts = {}) =>
+    h(
+        'svg',
+        {
+            xmlns: 'http://www.w3.org/2000/svg',
+            fill: 'none',
+            viewBox: '0 0 24 24',
+            strokeWidth: opts.strokeWidth || 1.8,
+            stroke: 'currentColor',
+        },
+        [
+            h('path', {
+                strokeLinecap: 'round',
+                strokeLinejoin: 'round',
+                d: path,
+            }),
+        ]
     );
-};
 
-const formatDate = (date) => {
-    if (!date) return '-';
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
-};
+const ChevronIcon = () => makeIcon('M8.25 4.5l7.5 7.5-7.5 7.5', { strokeWidth: 2 });
+const DownloadIcon = () =>
+    makeIcon(
+        'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3'
+    );
+const MailIcon = () =>
+    makeIcon(
+        'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75'
+    );
+const CheckIcon = () =>
+    makeIcon('M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', { strokeWidth: 2 });
+const XIcon = () => makeIcon('M6 18L18 6M6 6l12 12', { strokeWidth: 2 });
 
-const getStatusClass = (status) => {
-    const classes = {
-        pending: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-        paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-        cancelled: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400',
-    };
-    return classes[status] || 'bg-gray-100 text-gray-700';
-};
-
-const getStatusLabel = (status) => {
-    const labels = { pending: 'معلقة', paid: 'مدفوعة', cancelled: 'ملغية' };
-    return labels[status] || status;
-};
-
-const sendInvoice = () => {
+function sendInvoice() {
     sending.value = true;
     router.post(
         `/system/invoices/${props.invoice.id}/send`,
         {},
-        {
-            onFinish: () => (sending.value = false),
-        }
+        { onFinish: () => (sending.value = false) }
     );
-};
+}
 
-const markAsPaid = () => {
+function markAsPaid() {
     markingPaid.value = true;
     router.post(`/system/invoices/${props.invoice.id}/mark-paid`, markPaidForm.value, {
         onSuccess: () => (showMarkPaidModal.value = false),
         onFinish: () => (markingPaid.value = false),
     });
-};
+}
 
-const cancelInvoice = () => {
-    if (confirm('هل أنت متأكد من إلغاء هذه الفاتورة؟')) {
+function cancelInvoice() {
+    if (
+        confirm(
+            isAr.value
+                ? 'هل أنت متأكد من إلغاء هذه الفاتورة؟'
+                : 'Are you sure you want to cancel this invoice?'
+        )
+    ) {
         router.post(`/system/invoices/${props.invoice.id}/cancel`);
     }
-};
+}
 </script>
 
 <style scoped>

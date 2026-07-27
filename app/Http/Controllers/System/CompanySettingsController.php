@@ -37,6 +37,9 @@ class CompanySettingsController extends Controller
             'company_logo_url' => $settings->company_logo_path
                 ? Storage::url($settings->company_logo_path)
                 : null,
+            'company_stamp_url' => $settings->company_stamp_path
+                ? Storage::url($settings->company_stamp_path)
+                : null,
 
             // Subscription VAT — applied to tenant subscription invoices
             'subscription_vat_enabled' => (bool) ($settings->subscription_vat_enabled ?? false),
@@ -131,6 +134,53 @@ class CompanySettingsController extends Controller
         }
 
         $settings->company_logo_path = null;
+        $settings->save();
+        PaymentSettings::clearCache();
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Upload company stamp (signature image, usually PNG with
+     * transparent background). Stored separately from the logo
+     * so admins can replace either without affecting the other.
+     */
+    public function uploadStamp(Request $request): JsonResponse
+    {
+        $request->validate([
+            'stamp' => 'required|image|mimes:png,jpg,jpeg,webp,svg|max:2048',
+        ]);
+
+        $settings = PaymentSettings::first() ?? new PaymentSettings;
+
+        // Remove old stamp file (best-effort)
+        if ($settings->company_stamp_path && Storage::disk('public')->exists($settings->company_stamp_path)) {
+            Storage::disk('public')->delete($settings->company_stamp_path);
+        }
+
+        $path = $request->file('stamp')->store('company/stamps', 'public');
+        $settings->company_stamp_path = $path;
+        $settings->save();
+        PaymentSettings::clearCache();
+
+        return response()->json([
+            'url' => Storage::url($path),
+            'path' => $path,
+        ]);
+    }
+
+    /**
+     * Remove company stamp.
+     */
+    public function removeStamp(): JsonResponse
+    {
+        $settings = PaymentSettings::first() ?? new PaymentSettings;
+
+        if ($settings->company_stamp_path && Storage::disk('public')->exists($settings->company_stamp_path)) {
+            Storage::disk('public')->delete($settings->company_stamp_path);
+        }
+
+        $settings->company_stamp_path = null;
         $settings->save();
         PaymentSettings::clearCache();
 

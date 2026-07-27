@@ -6,8 +6,29 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>فاتورة اشتراك - {{ $invoice->invoice_number }}</title>
     <style>
+        /* Register Amiri via @font-face so DomPDF picks it up
+           when CSS references the family name. The file is
+           committed at resources/fonts/ and registered as a
+           fontDir in AppServiceProvider. Without this, Arabic
+           text renders with letter-by-letter LTR order
+           ("ورب ةمدخ" instead of "خدمة برو") because the
+           default DejaVu Sans has no Arabic glyphs and no
+           shaping tables. */
+        @font-face {
+            font-family: 'Amiri';
+            font-weight: normal;
+            font-style: normal;
+            src: url('file://{{ base_path("resources/fonts/Amiri-Regular.ttf") }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Amiri';
+            font-weight: bold;
+            font-style: normal;
+            src: url('file://{{ base_path("resources/fonts/Amiri-Bold.ttf") }}') format('truetype');
+        }
+
         * {
-            font-family: 'DejaVu Sans', sans-serif;
+            font-family: 'Amiri', 'DejaVu Sans', sans-serif;
             box-sizing: border-box;
         }
 
@@ -205,13 +226,31 @@
 </head>
 
 <body>
-    <!-- Header -->
+    <!-- Header — pulls company info from PaymentSettings via
+         $company passed in from SubscriptionInvoiceService::buildCompanyInfo().
+         Shows logo if configured, falls back to plain text. -->
     <div class="header">
         <div class="header-left">
-            <div class="company-name">Khidma Pro</div>
+            @if (!empty($company['logo_url']))
+                <img src="{{ $company['logo_url'] }}" class="logo" alt="logo" />
+            @endif
+            <div class="company-name">{{ $company['name'] ?? 'Khidma Pro' }}</div>
             <div style="color: #666; font-size: 11px;">
-                منصة إدارة مراكز الصيانة<br>
-                المملكة العربية السعودية
+                @if ($company['cr_number'])
+                    السجل التجاري: {{ $company['cr_number'] }}<br>
+                @endif
+                @if ($company['vat_number'])
+                    الرقم الضريبي: {{ $company['vat_number'] }}<br>
+                @endif
+                @if ($company['phone'])
+                    {{ $company['phone'] }}<br>
+                @endif
+                @if ($company['email'])
+                    {{ $company['email'] }}<br>
+                @endif
+                @if ($company['website'])
+                    {{ $company['website'] }}
+                @endif
             </div>
         </div>
         <div class="header-right">
@@ -297,22 +336,22 @@
     <!-- Totals -->
     <div class="totals">
         <div class="totals-row">
-            <span class="totals-label">المجموع الفرعي</span>
+            <span class="totals-label">المجموع الفرعي&nbsp;&nbsp;&nbsp;</span>
             <span class="totals-value">{{ number_format($invoice->subtotal, 2) }} ر.س</span>
         </div>
         @if ($invoice->discount > 0)
             <div class="totals-row">
-                <span class="totals-label">الخصم</span>
+                <span class="totals-label">الخصم&nbsp;&nbsp;&nbsp;</span>
                 <span class="totals-value" style="color: #16a34a;">- {{ number_format($invoice->discount, 2) }}
                     ر.س</span>
             </div>
         @endif
         <div class="totals-row">
-            <span class="totals-label">ضريبة القيمة المضافة ({{ $invoice->vat_rate }}%)</span>
-            <span class="totals-value">{{ number_format($invoice->vat_amount, 2) }} ر.س</span>
+            <span class="totals-label">ضريبة القيمة المضافة ({{ $vat_rate }}%)&nbsp;&nbsp;&nbsp;</span>
+            <span class="totals-value">{{ number_format($invoice->vat, 2) }} ر.س</span>
         </div>
         <div class="totals-row total">
-            <span class="totals-label">الإجمالي</span>
+            <span class="totals-label">الإجمالي&nbsp;&nbsp;&nbsp;</span>
             <span class="totals-value">{{ number_format($invoice->total, 2) }} ر.س</span>
         </div>
     </div>
@@ -328,9 +367,19 @@
         </div>
     @endif
 
+    <!-- Footer + optional company stamp. The stamp floats to
+         the start (right in RTL) so it doesn't overlap the
+         centered footer text. -->
+    @if (!empty($company['stamp_url']))
+        <div style="position: fixed; bottom: 60px; right: 40px; opacity: 0.92;">
+            <img src="{{ $company['stamp_url'] }}" style="height: 110px; max-width: 180px; object-fit: contain;" alt="Stamp" />
+        </div>
+    @endif
+
     <!-- Footer -->
     <div class="footer">
-        <p>شكراً لاختياركم Khidma Pro</p>
+        <p>شكراً لاختياركم {{ $company['name'] ?? 'Khidma Pro' }}</p>
+        <p style="font-size: 9px; color: #aaa;">{{ $company['name_en'] ?? '' }}</p>
         <p>هذه فاتورة إلكترونية صادرة آلياً ولا تحتاج إلى توقيع</p>
     </div>
 </body>

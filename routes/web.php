@@ -929,6 +929,8 @@ Route::prefix('system')->middleware(['auth:web,admin', 'system.admin'])->group(f
     Route::put('/settings/company', [CompanySettingsController::class, 'update'])->name('system.settings.company.update');
     Route::post('/settings/company/upload-logo', [CompanySettingsController::class, 'uploadLogo'])->name('system.settings.company.upload-logo');
     Route::delete('/settings/company/logo', [CompanySettingsController::class, 'removeLogo'])->name('system.settings.company.remove-logo');
+    Route::post('/settings/company/upload-stamp', [CompanySettingsController::class, 'uploadStamp'])->name('system.settings.company.upload-stamp');
+    Route::delete('/settings/company/stamp', [CompanySettingsController::class, 'removeStamp'])->name('system.settings.company.remove-stamp');
 
     // General Settings
     Route::get('/settings/general', [GeneralSettingsController::class, 'index'])->name('system.settings.general');

@@ -36,6 +36,7 @@ class PaymentSettings extends Model
         'company_email',
         'company_website',
         'company_logo_path',
+        'company_stamp_path',
         'subscription_vat_enabled',
         'subscription_vat_rate',
         'subscription_vat_inclusive',
