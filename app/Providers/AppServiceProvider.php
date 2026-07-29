@@ -146,6 +146,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Payroll::class, PayrollPolicy::class);
         Gate::policy(WorkOrderItem::class, WorkOrderItemPolicy::class);
 
+        // Phase 4: appointments + service bays
+        Gate::policy(Appointment::class, AppointmentPolicy::class);
+        Gate::policy(ServiceBay::class, ServiceBayPolicy::class);
+
         // Observers
         Employee::observe(EmployeeObserver::class);
         Center::observe(CenterObserver::class);

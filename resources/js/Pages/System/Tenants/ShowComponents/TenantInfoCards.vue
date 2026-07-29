@@ -329,11 +329,12 @@ defineProps({
 
 defineEmits(['security']);
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const formatDate = (date) => {
     if (!date) return t('common.na');
-    return new Date(date).toLocaleDateString('ar-SA-u-nu-latn');
+    const loc = locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
+    return new Date(date).toLocaleDateString(loc);
 };
 
 const getStatusClass = (status) => {

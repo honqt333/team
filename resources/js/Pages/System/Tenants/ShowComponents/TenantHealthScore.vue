@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between gap-4 flex-wrap">
             <div>
                 <p class="text-xs font-bold uppercase tracking-wider opacity-80">
-                    {{ locale === 'ar' ? 'صحة المستأجر' : 'Tenant Health Score' }}
+                    {{ $t('system.tenants.health.title') }}
                 </p>
                 <p class="mt-1 text-3xl font-bold" :class="scoreColor">
                     {{ score }}
@@ -63,13 +63,14 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     score: { type: Number, required: true },
     flags: { type: Array, default: () => [] },
 });
 
-const locale = computed(() => document.documentElement.lang || 'ar');
+const { t } = useI18n();
 
 // Map score → color + label. 80+ green (healthy), 60-79 amber (watch),
 // <60 rose (at risk). Mirrors the visual ring fill so the score is
@@ -95,14 +96,9 @@ const cardClasses = computed(() => {
 });
 
 const scoreLabel = computed(() => {
-    if (locale.value === 'ar') {
-        if (props.score >= 80) return 'صحة جيدة';
-        if (props.score >= 60) return 'تحتاج مراقبة';
-        return 'تحتاج تدخل';
-    }
-    if (props.score >= 80) return 'Healthy';
-    if (props.score >= 60) return 'Needs watch';
-    return 'Needs intervention';
+    if (props.score >= 80) return t('system.tenants.health.healthy');
+    if (props.score >= 60) return t('system.tenants.health.needs_watch');
+    return t('system.tenants.health.needs_intervention');
 });
 
 const flagBadge = (type) => {
@@ -120,46 +116,12 @@ const flagIcon = (type) => {
 };
 
 const flagLabel = (key) => {
-    const isAr = locale.value === 'ar';
-    const map = {
-        overdue_invoice: { ar: 'فاتورة متأخرة', en: 'Overdue invoice' },
-        no_active_subscription: { ar: 'لا اشتراك نشط', en: 'No active subscription' },
-        expiring_within_30_days: { ar: 'ينتهي خلال 30 يوم', en: 'Expires < 30d' },
-        rejected_receipt_recent: { ar: 'إيصال مرفوض', en: 'Rejected receipt' },
-        loyal_customer: { ar: 'عميل وفي', en: 'Loyal' },
-        has_renewed: { ar: 'جدّد سابقاً', en: 'Renewed' },
-    };
-    return map[key]?.[isAr ? 'ar' : 'en'] ?? key;
+    const translationKey = `system.tenants.health.flags.${key}`;
+    return t(translationKey) !== translationKey ? t(translationKey) : key;
 };
 
 const flagTooltip = (key) => {
-    const isAr = locale.value === 'ar';
-    const map = {
-        overdue_invoice: {
-            ar: 'يوجد على الأقل فاتورة واحدة متأخرة',
-            en: 'Tenant has at least one overdue invoice',
-        },
-        no_active_subscription: {
-            ar: 'لا يوجد اشتراك نشط حالياً',
-            en: 'No active subscription at the moment',
-        },
-        expiring_within_30_days: {
-            ar: 'الاشتراك الحالي ينتهي خلال 30 يوم',
-            en: 'Current subscription expires within 30 days',
-        },
-        rejected_receipt_recent: {
-            ar: 'تم رفض إيصال تحويل خلال آخر 90 يوم',
-            en: 'A bank transfer receipt was rejected in the last 90 days',
-        },
-        loyal_customer: {
-            ar: 'تمت الموافقة على 3 إيصالات أو أكثر',
-            en: 'Three or more approved bank transfer receipts',
-        },
-        has_renewed: {
-            ar: 'جدّد الاشتراك مرة واحدة على الأقل',
-            en: 'Renewed at least once',
-        },
-    };
-    return map[key]?.[isAr ? 'ar' : 'en'] ?? key;
+    const translationKey = `system.tenants.health.tooltips.${key}`;
+    return t(translationKey) !== translationKey ? t(translationKey) : key;
 };
 </script>

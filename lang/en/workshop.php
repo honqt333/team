@@ -25,4 +25,16 @@ return [
             'ready_for_qc' => 'Ready for QC',
         ],
     ],
+    'today' => [
+        'check_in' => 'Check in',
+        'checked_in_badge' => 'At the center',
+        'empty' => 'No appointments scheduled for today',
+        'more_services' => '+{count} more',
+        'no_bay' => 'No bay',
+        'no_tech' => 'No technician',
+        'open_appointment' => 'Open appointment',
+        'see_all' => 'See all appointments',
+        'subtitle' => 'Bookings scheduled for today in this center',
+        'title' => 'Today\'s appointments',
+    ],
 ];

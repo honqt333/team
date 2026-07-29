@@ -53,6 +53,183 @@
                 </div>
             </div>
 
+            <!-- Today's Appointments — read-only snapshot of
+                 bookings scheduled for the current day. Separate
+                 from the Kanban columns (which are about work
+                 already in motion). -->
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden"
+            >
+                <div
+                    class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3"
+                >
+                    <div class="min-w-0">
+                        <h2
+                            class="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2"
+                        >
+                            <svg
+                                class="w-4 h-4 text-emerald-500"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                            </svg>
+                            {{ $t('workshop.today.title') }}
+                        </h2>
+                        <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
+                            {{ $t('workshop.today.subtitle') }}
+                        </p>
+                    </div>
+                    <a
+                        :href="appointmentsIndexUrl"
+                        class="text-xs font-bold text-emerald-700 dark:text-emerald-300 hover:underline"
+                    >
+                        {{ $t('workshop.today.see_all') }} →
+                    </a>
+                </div>
+
+                <div v-if="!todayAppointments.length" class="p-6 text-center text-sm text-gray-400">
+                    {{ $t('workshop.today.empty') }}
+                </div>
+
+                <ul v-else class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <li
+                        v-for="appt in todayAppointments"
+                        :key="appt.id"
+                        class="p-3 hover:bg-gray-50 dark:hover:bg-gray-900/30"
+                    >
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span
+                                        dir="ltr"
+                                        class="font-mono text-[11px] font-semibold text-gray-700 dark:text-gray-200"
+                                    >
+                                        {{ formatTime(appt.scheduled_at) }} →
+                                        {{ formatTime(appt.estimated_end_at) }}
+                                    </span>
+                                    <span
+                                        :class="apptStatusClass(appt.status)"
+                                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold"
+                                    >
+                                        {{ $t(`appointments.status.${appt.status}`) }}
+                                    </span>
+                                    <span
+                                        v-if="appt.status === 'checked_in'"
+                                        class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                                    >
+                                        <span
+                                            class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
+                                        ></span>
+                                        {{ $t('workshop.today.checked_in_badge') }}
+                                    </span>
+                                </div>
+
+                                <h3
+                                    class="mt-1 text-sm font-semibold text-gray-900 dark:text-gray-100"
+                                >
+                                    {{ appt.customer?.name || '—' }}
+                                    <span
+                                        v-if="appt.vehicle"
+                                        class="text-gray-500 dark:text-gray-400 font-mono text-xs"
+                                        dir="ltr"
+                                    >
+                                        {{ appt.vehicle.plate_number }}
+                                    </span>
+                                </h3>
+
+                                <p
+                                    class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-2 flex-wrap"
+                                >
+                                    <span v-if="appt.service_bay">
+                                        <svg
+                                            class="w-3 h-3 inline-block me-0.5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16"
+                                            />
+                                        </svg>
+                                        {{ appt.service_bay.name }}
+                                    </span>
+                                    <span v-else class="italic text-gray-400">
+                                        {{ $t('workshop.today.no_bay') }}
+                                    </span>
+                                    <span
+                                        v-if="appt.assigned_user"
+                                        class="inline-flex items-center gap-1"
+                                    >
+                                        <svg
+                                            class="w-3 h-3 inline-block"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                            />
+                                        </svg>
+                                        {{ appt.assigned_user.name }}
+                                    </span>
+                                </p>
+
+                                <p
+                                    v-if="appt.services_preview?.length"
+                                    class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5"
+                                >
+                                    {{ appt.services_preview.map((s) => s.name).join('، ') }}
+                                    <span
+                                        v-if="appt.services_extra_count > 0"
+                                        class="text-gray-400"
+                                    >
+                                        {{
+                                            $t('workshop.today.more_services', {
+                                                count: appt.services_extra_count,
+                                            })
+                                        }}
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                <button
+                                    v-if="
+                                        canManageAppointments &&
+                                        (appt.status === 'scheduled' || appt.status === 'confirmed')
+                                    "
+                                    type="button"
+                                    @click="checkInAppointment(appt)"
+                                    :disabled="checkingIn === appt.id"
+                                    class="px-2 py-1 rounded-md text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                                >
+                                    {{ $t('workshop.today.check_in') }}
+                                </button>
+                                <a
+                                    :href="`/app/appointments`"
+                                    class="px-2 py-1 rounded-md text-[11px] font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                    {{ $t('workshop.today.open_appointment') }}
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
             <!-- Kanban Board -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
                 <div
@@ -314,20 +491,28 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { useI18n } from 'vue-i18n';
+import axios from 'axios';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { useNumberFormat } from '@/Composables/useNumberFormat';
+import { usePermission } from '@/Composables/usePermission';
 
 const { t } = useI18n();
 const { toEnglish } = useNumberFormat();
+const { can } = usePermission();
 
 const props = defineProps({
     columns: { type: Object, required: true },
     statuses: { type: Array, required: true },
     counts: { type: Object, required: true },
+    todayAppointments: { type: Array, default: () => [] },
+    canManageAppointments: { type: Boolean, default: false },
 });
+
+const appointmentsIndexUrl = '/app/appointments';
+const checkingIn = ref(null);
 
 // Column definitions — single source of truth for the visual order,
 // labels and the dot/header color of each status column.
@@ -390,6 +575,68 @@ function formatDate(value) {
         }).format(d);
     } catch (e) {
         return value;
+    }
+}
+
+// Format an ISO timestamp as HH:MM. We use a 24-hour locale-aware
+// formatter so it lines up with the same controls used on the
+// appointments index.
+function formatTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    try {
+        return new Intl.DateTimeFormat(undefined, {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        }).format(d);
+    } catch (e) {
+        return iso;
+    }
+}
+
+// Tailwind class per appointment status — kept in sync with the
+// visual treatment on /app/appointments.
+function apptStatusClass(status) {
+    const map = {
+        scheduled: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
+        confirmed: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300',
+        checked_in: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+    };
+    return map[status] || 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300';
+}
+
+// Check the customer in via the same endpoint the appointments
+// page uses. We only refresh the board afterwards (preserves the
+// operator's scroll position / open modals) and re-fetch just the
+// workshop props so the today-appointments card + the labor
+// chips on the Kanban cards stay in sync.
+async function checkInAppointment(appt) {
+    // The server is the source of truth for what this user can
+    // do — `canManageAppointments` is computed by the controller
+    // from the user's actual permission grant. Don't try to
+    // recompute it on the client; trust the flag and bail if
+    // it's false. This is also what guarantees observers (who
+    // can VIEW the board but not check anyone in) never see
+    // the button in the first place.
+    if (!props.canManageAppointments) return;
+    if (checkingIn.value) return;
+    checkingIn.value = appt.id;
+    try {
+        await axios.post(`/app/appointments/${appt.id}/check-in`);
+        // Re-fetch the board without a full document reload.
+        // 'workOrder' partial isn't part of the board, but
+        // router.reload() with the same prop list the controller
+        // returned keeps the in-flight state on the rest of
+        // the page.
+        router.reload({ only: ['todayAppointments', 'columns', 'counts'] });
+    } catch (e) {
+        const code = e.response?.data?.code;
+        const msg = code ? e.response.data.error || code : e.message;
+        alert(msg);
+    } finally {
+        checkingIn.value = null;
     }
 }
 </script>

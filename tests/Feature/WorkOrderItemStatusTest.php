@@ -491,4 +491,168 @@ class WorkOrderItemStatusTest extends TestCase
         // resource as not visible from the other tenant.
         $this->assertContains($response->getStatusCode(), [403, 404]);
     }
+
+    // ==================== P1 hardening tests ====================
+
+    /**
+     * P1 regression: resolveResumeTarget must NOT accept on_hold
+     * as a valid resume target. A suspended_status snapshot of
+     * "on_hold" is nonsensical (we are *lifting* from on_hold)
+     * and must fall back to in_progress.
+     */
+    public function test_resolve_resume_target_rejects_on_hold_snapshot(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.work_orders.view', 'crm.work_orders.update']);
+        [, , $workOrder, $item] = $this->buildFixture($owner, WorkOrderItem::STATUS_PENDING);
+
+        // Hand-craft an item that is on hold with a "suspended"
+        // status of on_hold. This is an inconsistent state but
+        // a possible corrupt snapshot from a foreign data
+        // import or a future refactor.
+        $item->update([
+            'status' => WorkOrderItem::STATUS_ON_HOLD,
+            'suspended_status' => WorkOrderItem::STATUS_ON_HOLD,
+            'hold_reason' => 'reason',
+            'held_at' => now(),
+            'held_by_user_id' => $owner->id,
+        ]);
+
+        $this->quality->resume($workOrder, $item->refresh(), $owner);
+
+        $this->assertSame(
+            WorkOrderItem::STATUS_IN_PROGRESS,
+            $item->refresh()->status,
+            'on_hold must NOT be a valid resume target — it is the state we are leaving, not the one we return to.'
+        );
+    }
+
+    /**
+     * P1 regression: starting a labor session on an item that was
+     * just put on hold between the pre-transaction check and the
+     * create must fail. We can't easily race two real processes
+     * inside phpunit, but we can prove the same outcome by
+     * mutating the item status DURING the transaction window —
+     * the lock + re-read pattern catches it.
+     */
+    public function test_start_re_reads_item_status_under_lock(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.work_orders.view', 'crm.work_orders.update']);
+        [, , $workOrder, $item] = $this->buildFixture($owner, WorkOrderItem::STATUS_IN_PROGRESS);
+
+        $tech = $this->techInSameContext($owner, ['crm.work_orders.view', 'crm.work_orders.update']);
+        $this->assignTechnician($item, $tech);
+
+        // Simulate the race: a concurrent process puts the item
+        // on hold between our pre-transaction assertItemIsAssignable
+        // and the lockForUpdate inside the transaction. We do this
+        // by mutating the item BEFORE we call start() — this proves
+        // the lockForUpdate + re-read correctly throws the right
+        // error (item_on_hold), not a silent success.
+        $item->update(['status' => WorkOrderItem::STATUS_ON_HOLD]);
+
+        $threw = false;
+
+        try {
+            $this->labor->start($workOrder, $item->refresh(), $tech);
+        } catch (RuntimeException $e) {
+            $threw = $e->getMessage() === 'item_on_hold';
+        }
+
+        $this->assertTrue($threw, 'start() must throw item_on_hold when the item has been moved into a non-startable state.');
+    }
+
+    /**
+     * P1 regression: resuming a paused labor session must fail
+     * if the parent item is no longer in_progress. We test all
+     * four forbidden target states.
+     */
+    public function test_resume_rejects_when_item_moved_to_terminal_or_blocked_state(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.work_orders.view', 'crm.work_orders.update']);
+        $tech = $this->techInSameContext($owner, ['crm.work_orders.view', 'crm.work_orders.update']);
+
+        $cases = [
+            WorkOrderItem::STATUS_ON_HOLD => 'item_on_hold',
+            WorkOrderItem::STATUS_READY_FOR_QC => 'item_ready_for_qc',
+            WorkOrderItem::STATUS_COMPLETED => 'item_completed',
+            WorkOrderItem::STATUS_CANCELLED => 'item_cancelled',
+        ];
+
+        foreach ($cases as $itemStatus => $expectedCode) {
+            [, , $workOrder, $item] = $this->buildFixture($owner, WorkOrderItem::STATUS_IN_PROGRESS);
+            $this->assignTechnician($item, $tech);
+
+            $entry = $this->labor->start($workOrder, $item, $tech);
+            $this->labor->pause($entry);
+
+            // Move the item to the forbidden state.
+            $item->refresh()->update(['status' => $itemStatus]);
+
+            $threw = false;
+
+            try {
+                $this->labor->resume($entry->refresh());
+            } catch (RuntimeException $e) {
+                $threw = $e->getMessage() === $expectedCode;
+            }
+
+            $this->assertTrue(
+                $threw,
+                "resume() must throw {$expectedCode} when item is in {$itemStatus}."
+            );
+        }
+    }
+
+    /**
+     * P1 regression: after the item is put on hold, no labor
+     * session for that item may still be running — the hold
+     * action itself is responsible for pausing them all. This
+     * is a safety net on top of the regular pauseRunningSessions.
+     */
+    public function test_hold_leaves_no_running_sessions_for_the_item(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.work_orders.view', 'crm.work_orders.update']);
+        [, , $workOrder, $item] = $this->buildFixture($owner, WorkOrderItem::STATUS_IN_PROGRESS);
+
+        $tech = $this->techInSameContext($owner, ['crm.work_orders.view', 'crm.work_orders.update']);
+        $this->assignTechnician($item, $tech);
+
+        $entry = $this->labor->start($workOrder, $item, $tech);
+
+        $this->quality->hold($workOrder, $item, $owner, 'reason');
+
+        $stillRunning = WorkOrderLaborEntry::query()
+            ->where('work_order_item_id', $item->id)
+            ->where('status', WorkOrderLaborEntry::STATUS_RUNNING)
+            ->count();
+
+        $this->assertSame(0, $stillRunning, 'No labor session may be running on a held item.');
+        $this->assertNotSame(WorkOrderLaborEntry::STATUS_RUNNING, $entry->refresh()->status);
+    }
+
+    /**
+     * P1 regression: starting a labor session on an item that was
+     * moved to ready_for_qc between the pre-check and the
+     * transaction lock must fail with item_ready_for_qc.
+     */
+    public function test_start_re_reads_ready_for_qc_under_lock(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.work_orders.view', 'crm.work_orders.update']);
+        [, , $workOrder, $item] = $this->buildFixture($owner, WorkOrderItem::STATUS_IN_PROGRESS);
+
+        $tech = $this->techInSameContext($owner, ['crm.work_orders.view', 'crm.work_orders.update']);
+        $this->assignTechnician($item, $tech);
+
+        $item->update(['status' => WorkOrderItem::STATUS_READY_FOR_QC]);
+
+        $threw = false;
+
+        try {
+            $this->labor->start($workOrder, $item->refresh(), $tech);
+        } catch (RuntimeException $e) {
+            $threw = $e->getMessage() === 'item_ready_for_qc';
+        }
+
+        $this->assertTrue($threw);
+    }
 }

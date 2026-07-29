@@ -35,16 +35,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
 defineProps({
     analytics: { type: Object, required: true },
 });
 
+const { t } = useI18n();
+
 // Single source of truth for the cards grid. Adding a new metric
 // (e.g. active sessions) is now a one-line change.
-const cards = [
+const cards = computed(() => [
     {
         key: 'customers',
-        label: 'عميل',
+        label: t('system.tenants.analytics.customers'),
         iconBg: 'bg-blue-100 dark:bg-blue-900/30',
         iconColor: 'text-blue-600 dark:text-blue-400',
         iconPath:
@@ -52,7 +57,7 @@ const cards = [
     },
     {
         key: 'vehicles',
-        label: 'مركبة',
+        label: t('system.tenants.analytics.vehicles'),
         iconBg: 'bg-purple-100 dark:bg-purple-900/30',
         iconColor: 'text-purple-600 dark:text-purple-400',
         iconPath:
@@ -60,7 +65,7 @@ const cards = [
     },
     {
         key: 'work_orders',
-        label: 'كرت',
+        label: t('system.tenants.analytics.work_orders'),
         iconBg: 'bg-emerald-100 dark:bg-emerald-900/30',
         iconColor: 'text-emerald-600 dark:text-emerald-400',
         iconPath:
@@ -68,7 +73,7 @@ const cards = [
     },
     {
         key: 'invoices',
-        label: 'فاتورة',
+        label: t('system.tenants.analytics.invoices'),
         iconBg: 'bg-amber-100 dark:bg-amber-900/30',
         iconColor: 'text-amber-600 dark:text-amber-400',
         iconPath:
@@ -76,14 +81,14 @@ const cards = [
     },
     {
         key: 'users',
-        label: 'مستخدم',
+        label: t('system.tenants.analytics.users'),
         iconBg: 'bg-indigo-100 dark:bg-indigo-900/30',
         iconColor: 'text-indigo-600 dark:text-indigo-400',
         iconPath: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
     },
     {
         key: 'centers',
-        label: 'مركز',
+        label: t('system.tenants.analytics.centers'),
         iconBg: 'bg-rose-100 dark:bg-rose-900/30',
         iconColor: 'text-rose-600 dark:text-rose-400',
         iconPath:
@@ -91,11 +96,11 @@ const cards = [
     },
     {
         key: 'storage_mb',
-        label: 'MB التخزين',
+        label: t('system.tenants.analytics.storage_mb'),
         iconBg: 'bg-cyan-100 dark:bg-cyan-900/30',
         iconColor: 'text-cyan-600 dark:text-cyan-400',
         iconPath:
             'M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4',
     },
-];
+]);
 </script>

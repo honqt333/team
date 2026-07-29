@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\Appointment;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderItem;
 use App\Models\WorkOrderLaborEntry;
@@ -28,6 +29,14 @@ class WorkshopBoardController extends Controller
         WorkOrderItem::STATUS_ON_HOLD,
         WorkOrderItem::STATUS_READY_FOR_QC,
     ];
+
+    /**
+     * Max number of appointments the board shows in its
+     * "today" section. We cap the payload to keep the
+     * primary page render fast — the operator goes to
+     * /app/appointments for the full list.
+     */
+    public const TODAY_APPOINTMENTS_LIMIT = 8;
 
     /**
      * Display the workshop Kanban board.
@@ -188,6 +197,81 @@ class WorkshopBoardController extends Controller
                 'ready_for_qc' => count($columns[WorkOrderItem::STATUS_READY_FOR_QC]),
                 'total' => $items->count(),
             ],
+            'todayAppointments' => $this->loadTodayAppointments($tenantId, $centerId),
+            'canManageAppointments' => $user->can(Permissions::APPOINTMENTS_MANAGE),
         ]);
+    }
+
+    /**
+     * Today's appointments for the current center. The board
+     * surfaces a brief list as the operator's "what's coming in
+     * today" — separate from the Kanban columns, which are
+     * about work that's already in motion.
+     *
+     * Returned statuses: scheduled, confirmed, checked_in. We
+     * deliberately exclude cancelled / no_show / converted —
+     * those have no useful "today" meaning.
+     *
+     * The cap of 8 (TODAY_APPOINTMENTS_LIMIT) keeps the payload
+     * tiny. The Vue side always renders a "see all" link to
+     * /app/appointments for the complete view.
+     */
+    private function loadTodayAppointments(int $tenantId, int $centerId): array
+    {
+        $start = now()->startOfDay();
+        $end = now()->endOfDay();
+
+        $appointments = Appointment::query()
+            ->where('center_id', $centerId)
+            ->where('tenant_id', $tenantId)
+            ->whereBetween('scheduled_at', [$start, $end])
+            ->whereIn('status', [
+                Appointment::STATUS_SCHEDULED,
+                Appointment::STATUS_CONFIRMED,
+                Appointment::STATUS_CHECKED_IN,
+            ])
+            ->with([
+                'customer:id,tenant_id,center_id,name,phone',
+                'vehicle:id,tenant_id,center_id,plate_number,customer_id',
+                'serviceBay:id,tenant_id,center_id,name',
+                'assignedUser:id,name',
+                'services:id,name_ar,name_en',
+            ])
+            ->orderBy('scheduled_at')
+            ->limit(self::TODAY_APPOINTMENTS_LIMIT)
+            ->get();
+
+        return $appointments->map(fn (Appointment $a) => [
+            'id' => $a->id,
+            'status' => $a->status,
+            'scheduled_at' => $a->scheduled_at?->toIso8601String(),
+            'estimated_end_at' => $a->estimated_end_at?->toIso8601String(),
+            'customer' => $a->customer ? [
+                'id' => $a->customer->id,
+                'name' => $a->customer->name,
+            ] : null,
+            'vehicle' => $a->vehicle ? [
+                'id' => $a->vehicle->id,
+                'plate_number' => $a->vehicle->plate_number,
+            ] : null,
+            'service_bay' => $a->serviceBay ? [
+                'id' => $a->serviceBay->id,
+                'name' => $a->serviceBay->name,
+            ] : null,
+            'assigned_user' => $a->assignedUser ? [
+                'id' => $a->assignedUser->id,
+                'name' => $a->assignedUser->name,
+            ] : null,
+            // We render only the first 2 service names on the
+            // card and a "+N more" badge for the rest. Sending
+            // the full list would make the payload noisy. We
+            // route through the model's name accessor so the
+            // localized name (name_ar / name_en) is used.
+            'services_preview' => $a->services
+                ->take(2)
+                ->map(fn ($s) => ['id' => $s->id, 'name' => $s->name])
+                ->all(),
+            'services_extra_count' => max(0, $a->services->count() - 2),
+        ])->all();
     }
 }

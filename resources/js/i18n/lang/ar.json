@@ -1764,6 +1764,27 @@
     "item_resumed": "تم استئناف الخدمة",
     "item_quality_approved": "تم اعتماد الخدمة",
     "item_quality_rejected": "تم إعادة الخدمة للعمل",
+    "appointment_created": "تم إنشاء الموعد",
+    "appointment_updated": "تم تحديث الموعد",
+    "appointment_cancelled": "تم إلغاء الموعد",
+    "appointment_checked_in": "تم تسجيل وصول العميل",
+    "appointment_no_show": "تم تسجيل عدم الحضور",
+    "appointment_converted": "تم تحويل الموعد إلى أمر عمل",
+    "appointment_not_convertible": "لا يمكن تحويل هذا الموعد",
+    "bay_created": "تم إنشاء الباي",
+    "bay_updated": "تم تحديث الباي",
+    "bay_deleted": "تم حذف الباي",
+    "bay_has_active_appointments": "هذا الباي لديه مواعيد نشطة. قم بإلغاء تنشيطه بدلاً من حذفه.",
+    "bay_inactive": "هذا الباي غير نشط",
+    "start_in_past": "وقت البدء يجب أن يكون في المستقبل",
+    "end_before_start": "وقت الانتهاء يجب أن يكون بعد وقت البدء",
+    "center_closed": "الفرع مغلق في هذا اليوم",
+    "outside_working_hours": "الوقت خارج ساعات عمل الفرع",
+    "bay_conflict": "هذا الباي محجوز في ذلك الوقت",
+    "technician_conflict": "هذا الفني محجوز في ذلك الوقت",
+    "vehicle_conflict": "لهذه المركبة موعد آخر في نفس الوقت",
+    "user_not_in_center": "الفني غير معين على هذا الفرع",
+    "vehicle_not_owned_by_customer": "المركبة لا تخص العميل المحدد",
     "hold_reason_required": "سبب التعليق مطلوب",
     "rejection_notes_required": "يجب توضيح ما يحتاج لإعادة العمل",
     "item_already_on_hold": "هذه الخدمة معلّقة بالفعل",
@@ -3235,7 +3256,8 @@
         "item_held": "تعليق الخدمة \":title\" بواسطة :user — :reason",
         "item_resumed": "استئناف الخدمة \":title\" بواسطة :user",
         "item_quality_approved": "اعتماد الخدمة \":title\" بواسطة :user",
-        "item_quality_rejected": "إعادة الخدمة \":title\" للعمل بواسطة :user — :reason"
+        "item_quality_rejected": "إعادة الخدمة \":title\" للعمل بواسطة :user — :reason",
+        "appointment_converted": "تم إنشاء أمر عمل :code من موعد الساعة :time"
       },
       "no_activities": "لا يوجد أنشطة مسجلة بعد",
       "title": "سجل الأنشطة"
@@ -3975,6 +3997,54 @@
       "search_placeholder": "البحث بالاسم أو البريد أو الهاتف...",
       "all_statuses": "جميع الحالات",
       "no_tenants": "لا يوجد مستأجرين",
+      "analytics": {
+        "customers": "عميل",
+        "vehicles": "مركبة",
+        "work_orders": "كرت",
+        "invoices": "فاتورة",
+        "users": "مستخدم",
+        "centers": "مركز",
+        "storage_mb": "ميجابايت التخزين"
+      },
+      "health": {
+        "title": "صحة المستأجر",
+        "healthy": "صحة جيدة",
+        "needs_watch": "تحتاج مراقبة",
+        "needs_intervention": "تحتاج تدخل",
+        "flags": {
+          "overdue_invoice": "فاتورة متأخرة",
+          "no_active_subscription": "لا اشتراك نشط",
+          "expiring_within_30_days": "ينتهي خلال 30 يوم",
+          "rejected_receipt_recent": "إيصال مرفوض",
+          "loyal_customer": "عميل وفي",
+          "has_renewed": "جدّد سابقاً"
+        },
+        "tooltips": {
+          "overdue_invoice": "يوجد على الأقل فاتورة واحدة متأخرة",
+          "no_active_subscription": "لا يوجد اشتراك نشط حالياً",
+          "expiring_within_30_days": "الاشتراك الحالي ينتهي خلال 30 يوم",
+          "rejected_receipt_recent": "تم رفض إيصال تحويل خلال آخر 90 يوم",
+          "loyal_customer": "تمت الموافقة على 3 إيصالات أو أكثر",
+          "has_renewed": "جدّد الاشتراك مرة واحدة على الأقل"
+        }
+      },
+      "tabs": {
+        "overview": "نظرة عامة",
+        "subscriptions": "الاشتراكات",
+        "invoices": "الفواتير",
+        "payments": "المدفوعات",
+        "receipts": "الإيصالات",
+        "activity": "النشاط",
+        "basic_info": "معلومات أساسية",
+        "health_trend": "اتجاه صحة المستأجر (6 أشهر)",
+        "no_subscriptions": "لا توجد اشتراكات",
+        "no_invoices": "لا توجد فواتير",
+        "no_payments": "لا توجد مدفوعات",
+        "no_receipts": "لا توجد إيصالات تحويل بنكي",
+        "no_activity": "لا توجد سجلات نشاط",
+        "from": "من",
+        "to": "إلى"
+      },
       "show": {
         "analytics": "إحصائيات الاستخدام",
         "company_info": "معلومات الشركة",
@@ -4006,7 +4076,10 @@
         "two_factor_disabled": "معطلة",
         "enforcement_level": "مستوى الإلزام",
         "modals": {
-          "suspend_no_reason": "لم يحدد سبب"
+          "suspend_no_reason": "لم يحدد سبب",
+          "enforcement_disabled": "غير مفعّل",
+          "enforcement_optional": "اختياري",
+          "enforcement_required": "إلزامي للجميع"
         }
       },
       "actions": {
@@ -4743,6 +4816,168 @@
         "in_progress": "قيد التنفيذ",
         "on_hold": "معلّق",
         "ready_for_qc": "جاهز لفحص الجودة"
+      }
+    },
+    "today": {
+      "title": "مواعيد اليوم",
+      "subtitle": "المواعيد المجدولة لليوم في هذا الفرع",
+      "empty": "لا توجد مواعيد مجدولة لليوم",
+      "see_all": "عرض كل المواعيد",
+      "no_bay": "بدون باي",
+      "no_tech": "بدون فني",
+      "more_services": "+{count} أخرى",
+      "checked_in_badge": "حاضر في المركز",
+      "check_in": "تسجيل حضور",
+      "open_appointment": "فتح الموعد"
+    }
+  },
+  "appointments": {
+    "title": "المواعيد",
+    "subtitle": "حجز المواعيد، تسجيل الوصول، وتحويلها إلى أوامر عمل",
+    "new": "موعد جديد",
+    "total_count": "{count} موعد",
+    "filter_date": "التاريخ",
+    "filter_status": "الحالة",
+    "filter_bay": "الباي",
+    "filter_tech": "الفني",
+    "all": "الكل",
+    "clear_filters": "مسح الفلاتر",
+    "empty": "لا توجد مواعيد بهذه الفلاتر",
+    "customer": "معرّف العميل",
+    "vehicle": "معرّف المركبة",
+    "customer_placeholder": "معرّف العميل",
+    "vehicle_placeholder": "معرّف المركبة",
+    "bay": "الباي",
+    "tech": "الفني",
+    "no_bay": "بدون باي محدد",
+    "no_tech": "بدون فني محدد",
+    "scheduled_at": "وقت البدء",
+    "estimated_end_at": "وقت الانتهاء المتوقع",
+    "services": "الخدمات",
+    "notes": "ملاحظات",
+    "check_in": "تسجيل وصول",
+    "no_show": "لم يحضر",
+    "convert": "تحويل إلى أمر عمل",
+    "cancel": "إلغاء",
+    "cancel_title": "إلغاء الموعد",
+    "cancel_reason_placeholder": "سبب الإلغاء",
+    "confirm_no_show": "تأكيد تسجيل عدم الحضور؟",
+    "confirm_convert": "تحويل هذا الموعد إلى أمر عمل؟",
+    "status": {
+      "scheduled": "مجدول",
+      "confirmed": "مؤكد",
+      "checked_in": "وصل",
+      "no_show": "لم يحضر",
+      "cancelled": "ملغى",
+      "converted": "محوّل"
+    }
+  },
+  "service_bays": {
+    "title": "بايات الخدمة",
+    "subtitle": "إدارة بايات الورشة للمواعيد والجدولة",
+    "name": "الاسم",
+    "code": "الكود",
+    "type": "النوع",
+    "status": "الحالة",
+    "empty": "لا توجد بايات لهذا الفرع بعد",
+    "active": "نشط",
+    "add_bay": "إضافة باي",
+    "edit_bay": "تعديل باي",
+    "name_placeholder": "اسم الباي",
+    "code_placeholder": "كود (اختياري)",
+    "no_type": "بدون نوع محدد",
+    "has_active_appointments": "هذا الباي لديه مواعيد نشطة ولا يمكن حذفه. قم بإلغاء تنشيطه بدلاً من ذلك.",
+    "confirm_delete": "حذف هذا الباي؟",
+    "types": {
+      "maintenance": "صيانة",
+      "polish": "تلميع",
+      "tires": "إطارات",
+      "electrical": "كهرباء",
+      "wash": "غسيل",
+      "inspection": "فحص",
+      "general": "عام"
+    }
+  },
+  "tenant_site": {
+    "nav": {
+      "customer_portal": "بوابة العميل"
+    },
+    "hero": {
+      "badge": "خدمات سيارات موثوقة",
+      "whatsapp_cta": "واتساب",
+      "book_cta": "احجز موعد"
+    },
+    "services": {
+      "title": "خدماتنا",
+      "subtitle": "مجموعة مختارة من الخدمات المتاحة في مركزنا"
+    },
+    "centers": {
+      "title": "فروعنا",
+      "subtitle": "اختر الفرع الأقرب إليك",
+      "main_badge": "الرئيسي"
+    },
+    "why_us": {
+      "title": "لماذا تختارنا",
+      "subtitle": "جودة وسرعة وثقة في كل زيارة",
+      "cards": {
+        "quality": {
+          "title": "جودة معتمدة",
+          "body": "نلتزم بأعلى معايير الجودة في صيانة مركبتك باستخدام قطع غيار أصلية وأجهزة فحص حديثة."
+        },
+        "speed": {
+          "title": "سرعة الإنجاز",
+          "body": "فريق متخصص يضمن إنجاز خدمتك في الوقت المحدد مع متابعة دقيقة لكل خطوة."
+        },
+        "warranty": {
+          "title": "ضمان موثوق",
+          "body": "نقدم ضمانًا على خدماتنا وقطع الغيار المستبدلة لراحة بالك وثقة كاملة في كل صيانة."
+        }
+      }
+    },
+    "cta": {
+      "title": "تحتاج خدمة؟",
+      "body": "تواصل معنا عبر الاتصال أو واتساب، فريقنا في خدمتك.",
+      "call": "اتصل بنا",
+      "whatsapp": "واتساب",
+      "portal_coming_soon": "بوابة العميل قريباً"
+    },
+    "admin": {
+      "subtitle": "إدارة الموقع العام لمركزك — الهوية، التواصل، الخدمات وحالة النشر.",
+      "preview": "معاينة الموقع العام",
+      "save": "حفظ التغييرات",
+      "saved": "تم حفظ إعدادات الموقع بنجاح.",
+      "remove_image": "حذف الصورة",
+      "confirm_remove_image": "هل تريد فعلاً حذف هذه الصورة؟",
+      "sections": {
+        "identity": "الهوية",
+        "branding": "العلامة البصرية",
+        "contact": "معلومات التواصل",
+        "seo": "تحسين محركات البحث",
+        "publish": "النشر"
+      },
+      "fields": {
+        "site_name": "اسم الموقع",
+        "tagline": "شعار قصير (سطر واحد)",
+        "logo": "الشعار",
+        "cover": "صورة الغلاف",
+        "primary_color": "اللون الأساسي",
+        "secondary_color": "اللون الثانوي",
+        "theme_key": "الثيم",
+        "theme_key_help": "فقط ثيم \"الافتراضي\" متوفر في هذه المرحلة، وأي قيمة غير معروفة يتم إرجاعها إلى الافتراضي تلقائياً.",
+        "contact_phone": "رقم الجوال",
+        "contact_whatsapp": "رقم واتساب",
+        "contact_email": "البريد الإلكتروني",
+        "address": "العنوان",
+        "social_links": "روابط الشبكات الاجتماعية",
+        "seo_title": "عنوان SEO",
+        "seo_description": "وصف SEO",
+        "status": "حالة النشر",
+        "status_help": "فقط المواقع المنشورة تكون متاحة على الرابط العام."
+      },
+      "status": {
+        "draft": "مسودة",
+        "published": "منشور",
+        "unpublished": "غير منشور"
       }
     }
   }

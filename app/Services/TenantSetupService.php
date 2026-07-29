@@ -241,6 +241,8 @@ class TenantSetupService
                     Permissions::WORK_ORDERS_VIEW,
                     Permissions::WORK_ORDERS_CREATE,
                     Permissions::WORK_ORDERS_UPDATE,
+                    // Appointments
+                    Permissions::APPOINTMENTS_MANAGE,
                     // Quotes (all)
                     Permissions::QUOTES_VIEW,
                     Permissions::QUOTES_CREATE,
@@ -269,6 +271,8 @@ class TenantSetupService
                     Permissions::HR_PAYMENTS_CREATE,
                     Permissions::HR_PAYMENTS_UPDATE,
                     Permissions::HR_PAYMENTS_APPROVE,
+                    // Tenant public website (read-only for branch managers)
+                    Permissions::WEBSITE_VIEW,
                 ],
             ],
             'receptionist' => [
@@ -287,6 +291,9 @@ class TenantSetupService
                     // CRM - Work Orders (create only)
                     Permissions::WORK_ORDERS_VIEW,
                     Permissions::WORK_ORDERS_CREATE,
+                    // Appointments (the receptionist is the
+                    // primary user of the calendar)
+                    Permissions::APPOINTMENTS_MANAGE,
                     // Quotes (create/edit)
                     Permissions::QUOTES_VIEW,
                     Permissions::QUOTES_CREATE,

@@ -39,16 +39,21 @@ class CreateWorkOrderAction
                 'expected_end_date' => $data['expected_end_date'] ?? null,
             ]);
 
-            // Create items if they exist
+            // Create items if they exist. Phase 4 (appointments) also
+            // passes service_id and department_id when the items
+            // come from a converted appointment; those columns are
+            // nullable on the table so missing keys are fine.
             if (isset($data['items']) && is_array($data['items'])) {
                 foreach ($data['items'] as $itemData) {
-                    $workOrder->items()->create([
+                    $workOrder->items()->create(array_filter([
                         'tenant_id' => $user->tenant_id,
                         'center_id' => $user->current_center_id,
                         'title' => $itemData['title'],
                         'qty' => $itemData['qty'],
                         'unit_price' => $itemData['unit_price'],
-                    ]);
+                        'service_id' => $itemData['service_id'] ?? null,
+                        'department_id' => $itemData['department_id'] ?? null,
+                    ], fn ($v) => $v !== null));
                 }
             }
 

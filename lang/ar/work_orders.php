@@ -29,6 +29,7 @@ return [
             'item_resumed' => 'استئناف الخدمة ":title" بواسطة :user',
             'item_quality_approved' => 'اعتماد الخدمة ":title" بواسطة :user',
             'item_quality_rejected' => 'إعادة الخدمة ":title" للعمل بواسطة :user — :reason',
+            'appointment_converted' => 'تم إنشاء أمر عمل :code من موعد الساعة :time',
             'part_added' => 'تمت إضافة قطعة: :name',
             'part_deleted' => 'تم حذف قطعة: :name',
             'part_updated' => 'تم تحديث قطعة: :name',

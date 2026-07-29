@@ -42,9 +42,14 @@ class I18nCoverageTest extends TestCase
         // is not required for the Vue-only keys.
         // Bumped again in 2026-07-27 for stamp UI keys (8 new
         // JSON-only keys per locale for sections.stamp.*).
+        // Bumped in 2026-07-29 for Phase 6 (tenant public site) —
+        // adds ~37 new JSON-only keys per locale for the
+        // tenant_site.* + common.dark/light_mode namespace.
+        // All new tenant_site.* keys that are referenced from PHP
+        // are mirrored in lang/{ar,en}/tenant_site.php.
         // TODO: Audit and add the missing PHP lang entries.
-        'ar' => 603,
-        'en' => 603,
+        'ar' => 640,
+        'en' => 640,
     ];
 
     public function test_no_new_missing_translation_keys_in_arabic(): void

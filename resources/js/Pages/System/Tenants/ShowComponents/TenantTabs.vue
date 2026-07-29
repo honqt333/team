@@ -34,7 +34,7 @@
             <!-- Overview -->
             <div v-if="active === 'overview'" class="space-y-4">
                 <h3 class="text-sm font-bold uppercase tracking-wider text-gray-500">
-                    {{ locale === 'ar' ? 'معلومات أساسية' : 'Basic info' }}
+                    {{ $t('system.tenants.tabs.basic_info') }}
                 </h3>
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div
@@ -46,7 +46,7 @@
                             {{ key }}
                         </p>
                         <p class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
-                            {{ value || '—' }}
+                            {{ value || $t('common.na') }}
                         </p>
                     </div>
                 </div>
@@ -55,7 +55,7 @@
                     class="rounded-lg border border-gray-200 p-3 dark:border-gray-700"
                 >
                     <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500">
-                        {{ locale === 'ar' ? 'أحدث أوامر العمل' : 'Recent work orders' }}
+                        {{ $t('system.tenants.show.recent_work_orders') }}
                     </h4>
                     <ul class="mt-2 divide-y divide-gray-100 dark:divide-gray-700">
                         <li
@@ -70,7 +70,7 @@
                                 class="rounded-full px-2 py-0.5 text-xs font-bold"
                                 :class="statusBadge(wo.status)"
                             >
-                                {{ wo.status }}
+                                {{ getWorkOrderStatusLabel(wo.status) }}
                             </span>
                         </li>
                     </ul>
@@ -83,11 +83,7 @@
                 >
                     <div class="flex items-center justify-between">
                         <h4 class="text-xs font-bold uppercase tracking-wider text-gray-500">
-                            {{
-                                locale === 'ar'
-                                    ? 'اتجاه صحة المستأجر (6 أشهر)'
-                                    : 'Health score trend (6 months)'
-                            }}
+                            {{ $t('system.tenants.tabs.health_trend') }}
                         </h4>
                         <span
                             v-if="healthTrend.length"
@@ -138,7 +134,7 @@
                     v-if="!tenant.subscriptions || tenant.subscriptions.length === 0"
                     class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
                 >
-                    {{ locale === 'ar' ? 'لا يوجد اشتراكات' : 'No subscriptions yet' }}
+                    {{ $t('system.tenants.tabs.no_subscriptions') }}
                 </div>
                 <div
                     v-for="sub in tenant.subscriptions || []"
@@ -148,38 +144,28 @@
                     <div class="flex items-center justify-between gap-2 flex-wrap">
                         <div>
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ sub.plan?.name_ar || sub.plan?.name_en || '—' }}
+                                {{ sub.plan?.name_ar || sub.plan?.name_en || $t('common.na') }}
                             </p>
                             <p class="text-xs text-gray-500">
-                                {{
-                                    sub.billing_cycle === 'yearly'
-                                        ? locale === 'ar'
-                                            ? 'سنوي'
-                                            : 'Yearly'
-                                        : locale === 'ar'
-                                          ? 'شهري'
-                                          : 'Monthly'
-                                }}
+                                {{ $t(`system.tenants.show.${sub.billing_cycle}`) }}
                             </p>
                         </div>
                         <span
                             class="rounded-full px-2 py-0.5 text-xs font-bold"
                             :class="statusBadge(sub.status)"
                         >
-                            {{ sub.status }}
+                            {{ getStatusLabel(sub.status) }}
                         </span>
                     </div>
                     <div
                         class="mt-2 grid grid-cols-2 gap-2 text-xs text-gray-600 dark:text-gray-300"
                     >
                         <div>
-                            <span class="text-gray-500">
-                                {{ locale === 'ar' ? 'من' : 'From' }}:
-                            </span>
+                            <span class="text-gray-500">{{ $t('system.tenants.tabs.from') }}:</span>
                             {{ formatDate(sub.starts_at) }}
                         </div>
                         <div>
-                            <span class="text-gray-500">{{ locale === 'ar' ? 'إلى' : 'To' }}:</span>
+                            <span class="text-gray-500">{{ $t('system.tenants.tabs.to') }}:</span>
                             {{ formatDate(sub.ends_at) }}
                         </div>
                     </div>
@@ -204,7 +190,7 @@
                                 {{ formatDate(inv.issued_at) }}
                             </p>
                         </div>
-                        <div class="text-right">
+                        <div class="text-end">
                             <p class="font-mono text-sm font-bold text-gray-900 dark:text-white">
                                 {{ Number(inv.total).toFixed(2) }} SAR
                             </p>
@@ -212,7 +198,7 @@
                                 class="rounded-full px-2 py-0.5 text-xs font-bold"
                                 :class="statusBadge(inv.status)"
                             >
-                                {{ inv.status }}
+                                {{ getStatusLabel(inv.status) }}
                             </span>
                         </div>
                     </div>
@@ -221,7 +207,7 @@
                     v-if="!hasInvoices"
                     class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
                 >
-                    {{ locale === 'ar' ? 'لا توجد فواتير' : 'No invoices yet' }}
+                    {{ $t('system.tenants.tabs.no_invoices') }}
                 </div>
             </div>
 
@@ -247,7 +233,7 @@
                                 class="rounded-full px-2 py-0.5 text-xs font-bold"
                                 :class="statusBadge(pay.status)"
                             >
-                                {{ pay.status }}
+                                {{ getStatusLabel(pay.status) }}
                             </span>
                         </div>
                     </div>
@@ -256,7 +242,7 @@
                     v-if="!hasPayments"
                     class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
                 >
-                    {{ locale === 'ar' ? 'لا توجد مدفوعات' : 'No payments yet' }}
+                    {{ $t('system.tenants.tabs.no_payments') }}
                 </div>
             </div>
 
@@ -283,7 +269,7 @@
                             class="rounded-full px-2 py-0.5 text-xs font-bold"
                             :class="statusBadge(r.status)"
                         >
-                            {{ r.status }}
+                            {{ getStatusLabel(r.status) }}
                         </span>
                     </div>
                 </div>
@@ -291,7 +277,7 @@
                     v-if="!bankTransferReceipts || bankTransferReceipts.length === 0"
                     class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
                 >
-                    {{ locale === 'ar' ? 'لا توجد إيصالات' : 'No bank transfer receipts' }}
+                    {{ $t('system.tenants.tabs.no_receipts') }}
                 </div>
             </div>
 
@@ -303,7 +289,7 @@
                     class="rounded-lg border border-gray-200 p-3 dark:border-gray-700"
                 >
                     <p class="text-sm text-gray-900 dark:text-white">
-                        {{ log.description || log.action || '—' }}
+                        {{ log.description || log.action || $t('common.na') }}
                     </p>
                     <p class="mt-0.5 text-xs text-gray-500">
                         {{ formatDateTime(log.created_at) }}
@@ -313,7 +299,7 @@
                     v-if="!activityLog || activityLog.length === 0"
                     class="rounded-lg border border-dashed border-gray-300 p-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400"
                 >
-                    {{ locale === 'ar' ? 'لا توجد سجلات نشاط' : 'No activity yet' }}
+                    {{ $t('system.tenants.tabs.no_activity') }}
                 </div>
             </div>
         </div>
@@ -322,6 +308,7 @@
 
 <script setup>
 import { computed, ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -350,42 +337,43 @@ onMounted(async () => {
     }
 });
 
-const emit = defineEmits(['security']);
+defineEmits(['security']);
 
-const locale = computed(() => document.documentElement.lang || 'ar');
+const { t, locale } = useI18n();
 const active = ref('overview');
 
 // Tabs config — count-driven badges so the admin sees at a glance how
 // many subscriptions/invoices/etc. are on the tenant without clicking.
+// Internal key values remain completely unchanged.
 const tabs = computed(() => [
-    { key: 'overview', label: locale.value === 'ar' ? 'نظرة عامة' : 'Overview', icon: '👁' },
+    { key: 'overview', label: t('system.tenants.tabs.overview'), icon: '👁' },
     {
         key: 'subscriptions',
-        label: locale.value === 'ar' ? 'الاشتراكات' : 'Subscriptions',
+        label: t('system.tenants.tabs.subscriptions'),
         icon: '◐',
         badge: (props.tenant.subscriptions || []).length || null,
     },
     {
         key: 'invoices',
-        label: locale.value === 'ar' ? 'الفواتير' : 'Invoices',
+        label: t('system.tenants.tabs.invoices'),
         icon: '🧾',
         badge: invoiceCount.value || null,
     },
     {
         key: 'payments',
-        label: locale.value === 'ar' ? 'المدفوعات' : 'Payments',
+        label: t('system.tenants.tabs.payments'),
         icon: '$',
         badge: paymentCount.value || null,
     },
     {
         key: 'receipts',
-        label: locale.value === 'ar' ? 'الإيصالات' : 'Receipts',
+        label: t('system.tenants.tabs.receipts'),
         icon: '📎',
         badge: (props.bankTransferReceipts || []).length || null,
     },
     {
         key: 'activity',
-        label: locale.value === 'ar' ? 'النشاط' : 'Activity',
+        label: t('system.tenants.tabs.activity'),
         icon: '⏱',
         badge: (props.activityLog || []).length || null,
     },
@@ -413,17 +401,30 @@ const hasInvoices = computed(() => invoiceCount.value > 0);
 const hasPayments = computed(() => paymentCount.value > 0);
 
 const overviewFields = computed(() => ({
-    [locale.value === 'ar' ? 'الاسم' : 'Name']: props.tenant.trade_name || props.tenant.name || '—',
-    [locale.value === 'ar' ? 'الحالة' : 'Status']: props.tenant.status,
-    [locale.value === 'ar' ? 'البريد' : 'Email']: props.tenant.email,
-    [locale.value === 'ar' ? 'الهاتف' : 'Phone']: props.tenant.phone,
-    [locale.value === 'ar' ? 'البريد القانوني' : 'Legal name']: props.tenant.legal_name,
-    [locale.value === 'ar' ? 'السجل التجاري' : 'CR number']: props.tenant.cr_number,
+    [t('system.tenants.name')]: props.tenant.trade_name || props.tenant.name || t('common.na'),
+    [t('system.tenants.status')]: getStatusLabel(props.tenant.status),
+    [t('system.tenants.email')]: props.tenant.email || t('common.na'),
+    [t('system.tenants.phone')]: props.tenant.phone || t('common.na'),
+    [t('system.tenants.legal_name')]: props.tenant.legal_name || t('common.na'),
+    [t('system.tenants.show.cr_number')]: props.tenant.cr_number || t('common.na'),
 }));
 
+function getStatusLabel(status) {
+    if (!status) return t('common.na');
+    const key = `system.status.${status}`;
+    return t(key) !== key ? t(key) : status;
+}
+
+function getWorkOrderStatusLabel(status) {
+    if (!status) return t('common.na');
+    const key = `system.work_orders.status.${status}`;
+    return t(key) !== key ? t(key) : status;
+}
+
 function formatDate(dateStr) {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    if (!dateStr) return t('common.na');
+    const loc = locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
+    return new Date(dateStr).toLocaleDateString(loc, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
@@ -431,8 +432,9 @@ function formatDate(dateStr) {
 }
 
 function formatDateTime(dateStr) {
-    if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+    if (!dateStr) return t('common.na');
+    const loc = locale.value === 'ar' ? 'ar-SA-u-nu-latn' : 'en-US';
+    return new Date(dateStr).toLocaleString(loc, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',

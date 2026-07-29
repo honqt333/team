@@ -29,6 +29,7 @@ return [
             'item_resumed' => 'Service ":title" resumed by :user',
             'item_quality_approved' => 'Service ":title" approved by :user',
             'item_quality_rejected' => 'Service ":title" sent back for rework by :user — :reason',
+            'appointment_converted' => 'Work order :code created from appointment at :time',
             'part_added' => 'Part added: :name',
             'part_deleted' => 'Part deleted: :name',
             'part_updated' => 'Part updated: :name',

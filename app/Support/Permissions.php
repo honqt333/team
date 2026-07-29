@@ -75,6 +75,8 @@ class Permissions
     /** Work Order Inspections */
     public const WORK_ORDERS_INSPECT = 'crm.work_orders.inspect';
 
+    public const APPOINTMENTS_MANAGE = 'crm.appointments.manage';
+
     // ========================================
     // PURCHASING MODULE
     // ========================================
@@ -339,6 +341,11 @@ class Permissions
 
     public const CENTERS_MANAGE = 'settings.centers.manage';
 
+    /** Tenant public website (Phase 6 — site settings + publishing) */
+    public const WEBSITE_VIEW = 'settings.website.view';
+
+    public const WEBSITE_MANAGE = 'settings.website.manage';
+
     // ========================================
     // HELPER METHODS
     // ========================================
@@ -368,6 +375,8 @@ class Permissions
                 self::COMPANY_MANAGE,
                 self::CENTERS_VIEW,
                 self::CENTERS_MANAGE,
+                self::WEBSITE_VIEW,
+                self::WEBSITE_MANAGE,
             ],
             'crm_customers' => [
                 self::CUSTOMERS_VIEW,
@@ -398,6 +407,7 @@ class Permissions
                 self::WORK_ORDERS_PRINT,
                 self::WORK_ORDERS_EXPORT,
                 self::WORK_ORDERS_IMPORT,
+                self::APPOINTMENTS_MANAGE,
             ],
             'quotes' => [
                 self::QUOTES_VIEW,

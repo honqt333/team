@@ -75,10 +75,36 @@ class WorkOrderItemQualityService
         $now = Carbon::now();
 
         return DB::transaction(function () use ($workOrder, $item, $actor, $reason, $now) {
-            // Capture the pre-hold status so resume can restore it.
-            $previousStatus = $item->status;
+            // P1 hardening: lock the item row first and re-validate
+            // the precondition (not on hold, not terminal). A
+            // concurrent hold/resume/QC action on the same item
+            // would otherwise race past the pre-transaction
+            // checks above.
+            $freshItem = WorkOrderItem::query()
+                ->whereKey($item->id)
+                ->lockForUpdate()
+                ->first();
 
-            $item->update([
+            if (! $freshItem) {
+                throw new RuntimeException('item_not_in_work_order');
+            }
+
+            if ($freshItem->status === WorkOrderItem::STATUS_COMPLETED) {
+                throw new RuntimeException('item_completed');
+            }
+
+            if ($freshItem->status === WorkOrderItem::STATUS_CANCELLED) {
+                throw new RuntimeException('item_cancelled');
+            }
+
+            if ($freshItem->status === WorkOrderItem::STATUS_ON_HOLD) {
+                throw new RuntimeException('item_already_on_hold');
+            }
+
+            // Capture the pre-hold status so resume can restore it.
+            $previousStatus = $freshItem->status;
+
+            $freshItem->update([
                 'status' => WorkOrderItem::STATUS_ON_HOLD,
                 'suspended_status' => $previousStatus,
                 'hold_reason' => $reason,
@@ -91,20 +117,20 @@ class WorkOrderItemQualityService
             // session open (ended_at stays NULL) so the technician
             // can resume it manually after the item itself resumes.
             $this->pauseRunningSessionsForItem(
-                $item,
+                $freshItem,
                 __('work_orders.labor.paused_due_to_hold', ['reason' => $reason])
             );
 
             $workOrder->logActivity(
                 'item_held',
                 __('work_orders.activities.actions.item_held', [
-                    'title' => $item->title,
+                    'title' => $freshItem->title,
                     'reason' => $reason,
                     'user' => $actor->name,
                 ])
             );
 
-            return $item->refresh();
+            return $freshItem->refresh();
         });
     }
 
@@ -126,7 +152,26 @@ class WorkOrderItemQualityService
         $restored = $this->resolveResumeTarget($item->suspended_status);
 
         return DB::transaction(function () use ($workOrder, $item, $actor, $restored) {
-            $item->update([
+            // P1 hardening: lock the item row and re-validate that
+            // it is still on hold. Two concurrent resume calls
+            // would otherwise both pass the pre-transaction check
+            // and double-update the item.
+            $freshItem = WorkOrderItem::query()
+                ->whereKey($item->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $freshItem) {
+                throw new RuntimeException('item_not_in_work_order');
+            }
+
+            if ($freshItem->status !== WorkOrderItem::STATUS_ON_HOLD) {
+                throw new RuntimeException('item_not_on_hold');
+            }
+
+            $restored = $this->resolveResumeTarget($freshItem->suspended_status);
+
+            $freshItem->update([
                 'status' => $restored,
                 'suspended_status' => null,
                 'hold_reason' => null,
@@ -137,12 +182,12 @@ class WorkOrderItemQualityService
             $workOrder->logActivity(
                 'item_resumed',
                 __('work_orders.activities.actions.item_resumed', [
-                    'title' => $item->title,
+                    'title' => $freshItem->title,
                     'user' => $actor->name,
                 ])
             );
 
-            return $item->refresh();
+            return $freshItem->refresh();
         });
     }
 
@@ -164,23 +209,40 @@ class WorkOrderItemQualityService
         }
 
         return DB::transaction(function () use ($workOrder, $item, $actor, $notes) {
+            // P1 hardening: lock the item row and re-validate that
+            // it is still in ready_for_qc. A concurrent hold,
+            // resume, or second QC action would otherwise race
+            // past the pre-transaction guard.
+            $freshItem = WorkOrderItem::query()
+                ->whereKey($item->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $freshItem) {
+                throw new RuntimeException('item_not_in_work_order');
+            }
+
+            if ($freshItem->status !== WorkOrderItem::STATUS_READY_FOR_QC) {
+                throw new RuntimeException('item_not_ready_for_qc');
+            }
+
             $check = WorkOrderItemQualityCheck::create([
                 'tenant_id' => $workOrder->tenant_id,
                 'center_id' => $workOrder->center_id,
                 'work_order_id' => $workOrder->id,
-                'work_order_item_id' => $item->id,
+                'work_order_item_id' => $freshItem->id,
                 'checked_by_user_id' => $actor->id,
                 'decision' => WorkOrderItemQualityCheck::DECISION_APPROVED,
                 'notes' => $notes,
                 'checked_at' => Carbon::now(),
             ]);
 
-            $item->update(['status' => WorkOrderItem::STATUS_COMPLETED]);
+            $freshItem->update(['status' => WorkOrderItem::STATUS_COMPLETED]);
 
             $workOrder->logActivity(
                 'item_quality_approved',
                 __('work_orders.activities.actions.item_quality_approved', [
-                    'title' => $item->title,
+                    'title' => $freshItem->title,
                     'user' => $actor->name,
                 ])
             );
@@ -215,23 +277,40 @@ class WorkOrderItemQualityService
         }
 
         return DB::transaction(function () use ($workOrder, $item, $actor, $notes) {
+            // P1 hardening: lock the item row and re-validate that
+            // it is still in ready_for_qc. A concurrent hold,
+            // resume, or second QC action would otherwise race
+            // past the pre-transaction guard.
+            $freshItem = WorkOrderItem::query()
+                ->whereKey($item->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $freshItem) {
+                throw new RuntimeException('item_not_in_work_order');
+            }
+
+            if ($freshItem->status !== WorkOrderItem::STATUS_READY_FOR_QC) {
+                throw new RuntimeException('item_not_ready_for_qc');
+            }
+
             $check = WorkOrderItemQualityCheck::create([
                 'tenant_id' => $workOrder->tenant_id,
                 'center_id' => $workOrder->center_id,
                 'work_order_id' => $workOrder->id,
-                'work_order_item_id' => $item->id,
+                'work_order_item_id' => $freshItem->id,
                 'checked_by_user_id' => $actor->id,
                 'decision' => WorkOrderItemQualityCheck::DECISION_REJECTED,
                 'notes' => $notes,
                 'checked_at' => Carbon::now(),
             ]);
 
-            $item->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
+            $freshItem->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
 
             $workOrder->logActivity(
                 'item_quality_rejected',
                 __('work_orders.activities.actions.item_quality_rejected', [
-                    'title' => $item->title,
+                    'title' => $freshItem->title,
                     'reason' => $notes,
                     'user' => $actor->name,
                 ])
@@ -262,10 +341,13 @@ class WorkOrderItemQualityService
      */
     private function resolveResumeTarget(?string $previous): string
     {
+        // on_hold is intentionally NOT in the valid list. It's the
+        // state we're lifting FROM, never a target we'd lift TO.
+        // If a corrupted snapshot or a foreign value lands here we
+        // fall back to in_progress.
         $valid = [
             WorkOrderItem::STATUS_PENDING,
             WorkOrderItem::STATUS_IN_PROGRESS,
-            WorkOrderItem::STATUS_ON_HOLD,
             WorkOrderItem::STATUS_READY_FOR_QC,
         ];
 

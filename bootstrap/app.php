@@ -10,6 +10,7 @@ use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\RequestId;
+use App\Http\Middleware\ResolveTenantFromUrl;
 use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeam;
@@ -74,6 +75,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'center.context' => EnsureCenterContext::class,
             'system.admin' => EnsureSystemAdmin::class,
             'super_admin' => EnsureSuperAdmin::class,
+            // Resolves {tenant} slug into a Tenant/TenantWebsite pair
+            // for the public site route group. The middleware is
+            // strict — it 404s on missing or unpublished sites.
+            'public.tenant' => ResolveTenantFromUrl::class,
             // Spatie Permission middleware
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Exports\AgingReportExport;
 use App\Exports\BankTransferReceiptsExport;
 use App\Exports\TenantsReportExport;
+use App\Http\Controllers\App\AppointmentController;
 use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\BranchesController;
 use App\Http\Controllers\App\CenterSettingsController;
@@ -59,10 +60,12 @@ use App\Http\Controllers\App\Quotes\QuotePrintController;
 use App\Http\Controllers\App\Quotes\QuoteServiceController;
 use App\Http\Controllers\App\ReportsController;
 use App\Http\Controllers\App\RoleController;
+use App\Http\Controllers\App\ServiceBayController;
 use App\Http\Controllers\App\ServiceController;
 use App\Http\Controllers\App\SettingsController;
 use App\Http\Controllers\App\SuppliersController;
 use App\Http\Controllers\App\SystemSettingsController;
+use App\Http\Controllers\App\TenantWebsiteSettingsController;
 use App\Http\Controllers\App\TwoFactorAuthenticatedSessionController;
 use App\Http\Controllers\App\TwoFactorController;
 use App\Http\Controllers\App\UserController;
@@ -94,6 +97,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\PublicLandingController;
 use App\Http\Controllers\Public\PublicQuoteController;
+use App\Http\Controllers\Public\TenantSiteController;
 use App\Http\Controllers\System\AdminNotificationController;
 use App\Http\Controllers\System\AdminUsersController;
 use App\Http\Controllers\System\AnalyticsController;
@@ -139,6 +143,31 @@ Route::get('/', [PublicLandingController::class, 'preview'])->name('home');
 
 Route::get('/landing-preview', [PublicLandingController::class, 'preview'])->name('public.landing.preview');
 Route::post('/landing-preview/contact', [PublicLandingController::class, 'submitContact'])->middleware('throttle:public-landing')->name('public.landing.contact');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Tenant Public Sites (Phase 6)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Each tenant has a public website mounted under its slug:
+//     /{tenant-slug}        → public homepage
+//
+// The {tenant} parameter is the tenant SLUG (the unique key on
+// tenants table), not a tenant_id. ResolveTenantFromUrl turns
+// the slug into a Tenant + TenantWebsite pair, and 404s on
+// missing or unpublished sites. We do not use the standard
+// {tenant} route binding because that would resolve to a model
+// by id, which is wrong here.
+//
+// Reserved-slot exclusion: the where() regex pattern keeps this
+// catch-all from shadowing the platform's other top-level paths
+// (login, register, dashboard, app, system, etc.). The
+// negative-lookahead alternation matches anything EXCEPT the
+// reserved words. Add a new reserved word here whenever a new
+// top-level public route is introduced.
+Route::get('/{tenant}', [TenantSiteController::class, 'show'])
+    ->where('tenant', '^(?!(?:app|system|dashboard|login|logout|register|password|forgot-password|reset-password|verify-email|confirm-password|two-factor|2fa|locale|phone|lang|landing-preview|view|impersonate|impersonate-stop|up|storage|livewire|invitations)$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$')
+    ->middleware('public.tenant')
+    ->name('public.site.show');
 
 // Phone Verification (Registration)
 Route::post('/phone/send-otp', [PhoneVerificationController::class, 'sendOtp'])->middleware('throttle:phone-otp')->name('phone.send-otp');
@@ -215,6 +244,21 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
 
     // Workshop board (Phase 1: read-only Kanban for active work order items)
     Route::get('/workshop', [WorkshopBoardController::class, 'index'])->name('app.workshop.index');
+
+    // Phase 4: Service Bays (settings + admin)
+    Route::get('/settings/service-bays', [ServiceBayController::class, 'index'])->name('service-bays.index');
+    Route::post('/service-bays', [ServiceBayController::class, 'store'])->name('service-bays.store');
+    Route::put('/service-bays/{serviceBay}', [ServiceBayController::class, 'update'])->name('service-bays.update');
+    Route::delete('/service-bays/{serviceBay}', [ServiceBayController::class, 'destroy'])->name('service-bays.destroy');
+
+    // Phase 4: Appointments
+    Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+    Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+    Route::put('/appointments/{appointment}', [AppointmentController::class, 'update'])->name('appointments.update');
+    Route::post('/appointments/{appointment}/check-in', [AppointmentController::class, 'checkIn'])->name('appointments.check-in');
+    Route::post('/appointments/{appointment}/no-show', [AppointmentController::class, 'markNoShow'])->name('appointments.no-show');
+    Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
+    Route::post('/appointments/{appointment}/convert', [AppointmentController::class, 'convert'])->name('appointments.convert');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');
@@ -333,7 +377,25 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::get('/settings/integrations', [SettingsController::class, 'integrations'])->name('settings.integrations');
-    Route::get('/settings/website', [SettingsController::class, 'website'])->name('settings.website');
+    // /settings/website is a placeholder card on the settings
+    // hub. The real edit form lives at /settings/website/edit;
+    // we redirect so the hub card opens the actual form.
+    Route::get('/settings/website', fn () => redirect()->route('settings.website.edit'))->name('settings.website');
+
+    // Tenant website settings (Phase 6)
+    // The view is the existing Settings/Website.vue page; the
+    // controller backs the form. The delete-image endpoint
+    // lives at the same URL with a different verb to keep the
+    // UI surface area small.
+    Route::get('/settings/website/edit', [TenantWebsiteSettingsController::class, 'edit'])
+        ->middleware('permission:settings.website.view')
+        ->name('settings.website.edit');
+    Route::put('/settings/website/edit', [TenantWebsiteSettingsController::class, 'update'])
+        ->middleware('permission:settings.website.manage')
+        ->name('settings.website.update');
+    Route::delete('/settings/website/edit/image', [TenantWebsiteSettingsController::class, 'deleteImage'])
+        ->middleware('permission:settings.website.manage')
+        ->name('settings.website.image.delete');
 
     // Company Profile Settings
     Route::get('/settings/company', [CompanyProfileController::class, 'index'])->name('settings.company');

@@ -1764,6 +1764,27 @@
     "item_resumed": "Service resumed",
     "item_quality_approved": "Service approved",
     "item_quality_rejected": "Service sent back for rework",
+    "appointment_created": "Appointment created",
+    "appointment_updated": "Appointment updated",
+    "appointment_cancelled": "Appointment cancelled",
+    "appointment_checked_in": "Customer checked in",
+    "appointment_no_show": "Marked as no-show",
+    "appointment_converted": "Appointment converted to work order",
+    "appointment_not_convertible": "This appointment cannot be converted",
+    "bay_created": "Service bay created",
+    "bay_updated": "Service bay updated",
+    "bay_deleted": "Service bay deleted",
+    "bay_has_active_appointments": "This bay has active appointments. Deactivate it instead of deleting.",
+    "bay_inactive": "This bay is inactive",
+    "start_in_past": "Start time must be in the future",
+    "end_before_start": "End time must be after start time",
+    "center_closed": "The center is closed on this day",
+    "outside_working_hours": "Time falls outside center working hours",
+    "bay_conflict": "This bay is already booked for that time",
+    "technician_conflict": "This technician is already booked for that time",
+    "vehicle_conflict": "This vehicle already has an appointment in that window",
+    "user_not_in_center": "The technician is not assigned to this center",
+    "vehicle_not_owned_by_customer": "The vehicle does not belong to the selected customer",
     "hold_reason_required": "A reason is required to put this service on hold",
     "rejection_notes_required": "Tell the technician what needs to be reworked",
     "item_already_on_hold": "This service is already on hold",
@@ -3235,7 +3256,8 @@
         "item_held": "Service \":title\" put on hold by :user — :reason",
         "item_resumed": "Service \":title\" resumed by :user",
         "item_quality_approved": "Service \":title\" approved by :user",
-        "item_quality_rejected": "Service \":title\" sent back for rework by :user — :reason"
+        "item_quality_rejected": "Service \":title\" sent back for rework by :user — :reason",
+        "appointment_converted": "Work order :code created from appointment at :time"
       },
       "no_activities": "No activities recorded yet",
       "title": "Activity Log"
@@ -3975,6 +3997,54 @@
       "search_placeholder": "Search by name, email, or phone...",
       "all_statuses": "All Statuses",
       "no_tenants": "No tenants found",
+      "analytics": {
+        "customers": "Customers",
+        "vehicles": "Vehicles",
+        "work_orders": "Work Orders",
+        "invoices": "Invoices",
+        "users": "Users",
+        "centers": "Centers",
+        "storage_mb": "Storage (MB)"
+      },
+      "health": {
+        "title": "Tenant Health Score",
+        "healthy": "Healthy",
+        "needs_watch": "Needs Watch",
+        "needs_intervention": "Needs Intervention",
+        "flags": {
+          "overdue_invoice": "Overdue invoice",
+          "no_active_subscription": "No active subscription",
+          "expiring_within_30_days": "Expires < 30d",
+          "rejected_receipt_recent": "Rejected receipt",
+          "loyal_customer": "Loyal customer",
+          "has_renewed": "Renewed"
+        },
+        "tooltips": {
+          "overdue_invoice": "Tenant has at least one overdue invoice",
+          "no_active_subscription": "No active subscription at the moment",
+          "expiring_within_30_days": "Current subscription expires within 30 days",
+          "rejected_receipt_recent": "A bank transfer receipt was rejected in the last 90 days",
+          "loyal_customer": "Three or more approved bank transfer receipts",
+          "has_renewed": "Renewed subscription at least once"
+        }
+      },
+      "tabs": {
+        "overview": "Overview",
+        "subscriptions": "Subscriptions",
+        "invoices": "Invoices",
+        "payments": "Payments",
+        "receipts": "Receipts",
+        "activity": "Activity",
+        "basic_info": "Basic Info",
+        "health_trend": "Health Score Trend (6 Months)",
+        "no_subscriptions": "No subscriptions yet",
+        "no_invoices": "No invoices yet",
+        "no_payments": "No payments yet",
+        "no_receipts": "No bank transfer receipts",
+        "no_activity": "No activity yet",
+        "from": "From",
+        "to": "To"
+      },
       "show": {
         "analytics": "Usage Analytics",
         "company_info": "Company Info",
@@ -4006,7 +4076,10 @@
         "two_factor_disabled": "Disabled",
         "enforcement_level": "Enforcement Level",
         "modals": {
-          "suspend_no_reason": "No reason specified"
+          "suspend_no_reason": "No reason specified",
+          "enforcement_disabled": "Disabled",
+          "enforcement_optional": "Optional",
+          "enforcement_required": "Required for All"
         }
       },
       "actions": {
@@ -4743,6 +4816,168 @@
         "in_progress": "In progress",
         "on_hold": "On hold",
         "ready_for_qc": "Ready for QC"
+      }
+    },
+    "today": {
+      "title": "Today's appointments",
+      "subtitle": "Bookings scheduled for today in this center",
+      "empty": "No appointments scheduled for today",
+      "see_all": "See all appointments",
+      "no_bay": "No bay",
+      "no_tech": "No technician",
+      "more_services": "+{count} more",
+      "checked_in_badge": "At the center",
+      "check_in": "Check in",
+      "open_appointment": "Open appointment"
+    }
+  },
+  "appointments": {
+    "title": "Appointments",
+    "subtitle": "Schedule, check in and convert appointments to work orders",
+    "new": "New appointment",
+    "total_count": "{count} appointments",
+    "filter_date": "Date",
+    "filter_status": "Status",
+    "filter_bay": "Bay",
+    "filter_tech": "Technician",
+    "all": "All",
+    "clear_filters": "Clear filters",
+    "empty": "No appointments for the current filters",
+    "customer": "Customer ID",
+    "vehicle": "Vehicle ID",
+    "customer_placeholder": "Customer ID",
+    "vehicle_placeholder": "Vehicle ID",
+    "bay": "Bay",
+    "tech": "Technician",
+    "no_bay": "No specific bay",
+    "no_tech": "No specific technician",
+    "scheduled_at": "Start",
+    "estimated_end_at": "Estimated end",
+    "services": "Services",
+    "notes": "Notes",
+    "check_in": "Check in",
+    "no_show": "No show",
+    "convert": "Convert to work order",
+    "cancel": "Cancel",
+    "cancel_title": "Cancel appointment",
+    "cancel_reason_placeholder": "Reason for cancellation",
+    "confirm_no_show": "Mark this appointment as a no-show?",
+    "confirm_convert": "Convert this appointment to a work order?",
+    "status": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "checked_in": "Checked in",
+      "no_show": "No show",
+      "cancelled": "Cancelled",
+      "converted": "Converted"
+    }
+  },
+  "service_bays": {
+    "title": "Service Bays",
+    "subtitle": "Manage workshop bays for appointments and scheduling",
+    "name": "Name",
+    "code": "Code",
+    "type": "Type",
+    "status": "Status",
+    "empty": "No service bays yet for this center",
+    "active": "Active",
+    "add_bay": "Add bay",
+    "edit_bay": "Edit bay",
+    "name_placeholder": "Bay name",
+    "code_placeholder": "Code (optional)",
+    "no_type": "No specific type",
+    "has_active_appointments": "This bay has active appointments and cannot be deleted. Mark it inactive instead.",
+    "confirm_delete": "Delete this bay?",
+    "types": {
+      "maintenance": "Maintenance",
+      "polish": "Polish",
+      "tires": "Tires",
+      "electrical": "Electrical",
+      "wash": "Wash",
+      "inspection": "Inspection",
+      "general": "General"
+    }
+  },
+  "tenant_site": {
+    "nav": {
+      "customer_portal": "Customer Portal"
+    },
+    "hero": {
+      "badge": "Trusted auto service",
+      "whatsapp_cta": "WhatsApp",
+      "book_cta": "Book appointment"
+    },
+    "services": {
+      "title": "Our services",
+      "subtitle": "A selection of services available at our center"
+    },
+    "centers": {
+      "title": "Our branches",
+      "subtitle": "Choose the branch closest to you",
+      "main_badge": "Main"
+    },
+    "why_us": {
+      "title": "Why choose us",
+      "subtitle": "Quality, speed, and trust — in every visit",
+      "cards": {
+        "quality": {
+          "title": "Certified quality",
+          "body": "We uphold the highest quality standards in servicing your vehicle, using original parts and modern diagnostics."
+        },
+        "speed": {
+          "title": "Fast turnaround",
+          "body": "A specialized team ensures your service is completed on time with step-by-step tracking."
+        },
+        "warranty": {
+          "title": "Trusted warranty",
+          "body": "We back our services and replaced parts with a warranty for your complete peace of mind."
+        }
+      }
+    },
+    "cta": {
+      "title": "Need a service?",
+      "body": "Reach out to us by phone or WhatsApp — we're happy to help.",
+      "call": "Call us",
+      "whatsapp": "WhatsApp",
+      "portal_coming_soon": "Customer portal coming soon"
+    },
+    "admin": {
+      "subtitle": "Manage the public website of your center — branding, contact, services and publication status.",
+      "preview": "Preview public site",
+      "save": "Save changes",
+      "saved": "Website settings saved.",
+      "remove_image": "Remove image",
+      "confirm_remove_image": "Are you sure you want to remove this image?",
+      "sections": {
+        "identity": "Identity",
+        "branding": "Branding",
+        "contact": "Contact information",
+        "seo": "SEO & meta",
+        "publish": "Publication"
+      },
+      "fields": {
+        "site_name": "Site name",
+        "tagline": "Tagline (one short line)",
+        "logo": "Logo",
+        "cover": "Cover image",
+        "primary_color": "Primary color",
+        "secondary_color": "Secondary color",
+        "theme_key": "Theme",
+        "theme_key_help": "Only the Default theme is shipped in this phase. Unknown values are coerced to Default at read time.",
+        "contact_phone": "Phone",
+        "contact_whatsapp": "WhatsApp number",
+        "contact_email": "Email",
+        "address": "Address",
+        "social_links": "Social media links",
+        "seo_title": "SEO title",
+        "seo_description": "SEO description",
+        "status": "Publication status",
+        "status_help": "Only Published sites are reachable at the public URL."
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "unpublished": "Unpublished"
       }
     }
   }

@@ -79,6 +79,23 @@ class WorkOrderLaborService
             // exists and is the right serialization point.
             User::query()->whereKey($user->id)->lockForUpdate()->first();
 
+            // P1 hardening: also lock the work order item and
+            // re-read its status. The pre-transaction
+            // assertItemIsAssignable ran on a possibly stale
+            // snapshot — a concurrent hold / QC action could
+            // have moved the item into a non-startable state
+            // between then and now.
+            $freshItem = WorkOrderItem::query()
+                ->whereKey($item->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $freshItem) {
+                throw new RuntimeException('item_not_in_work_order');
+            }
+
+            $this->assertItemIsAssignable($freshItem);
+
             $existing = WorkOrderLaborEntry::query()
                 ->forUser($user->id)
                 ->running()
@@ -95,7 +112,7 @@ class WorkOrderLaborService
                 'tenant_id' => $workOrder->tenant_id,
                 'center_id' => $workOrder->center_id,
                 'work_order_id' => $workOrder->id,
-                'work_order_item_id' => $item->id,
+                'work_order_item_id' => $freshItem->id,
                 'user_id' => $user->id,
                 'started_at' => $now,
                 'resumed_at' => $now,
@@ -107,14 +124,14 @@ class WorkOrderLaborService
             // First start flips a pending item into in_progress. Items
             // already in_progress / on_hold / ready_for_qc are left
             // alone — the timer is independent of item status.
-            if ($item->status === WorkOrderItem::STATUS_PENDING) {
-                $item->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
+            if ($freshItem->status === WorkOrderItem::STATUS_PENDING) {
+                $freshItem->update(['status' => WorkOrderItem::STATUS_IN_PROGRESS]);
             }
 
             $workOrder->logActivity(
                 'labor_started',
                 __('work_orders.activities.actions.labor_started', [
-                    'title' => $item->title,
+                    'title' => $freshItem->title,
                     'user' => $user->name,
                 ])
             );
@@ -161,30 +178,63 @@ class WorkOrderLaborService
      */
     public function resume(WorkOrderLaborEntry $entry): WorkOrderLaborEntry
     {
-        if (! $entry->isPaused() || ! $entry->paused_at) {
-            throw new RuntimeException('entry_not_paused');
-        }
+        return DB::transaction(function () use ($entry) {
+            // P1 hardening: lock the item row and re-read its
+            // status. The user may have put the item on hold, or
+            // it may have moved to ready_for_qc / completed /
+            // cancelled between when the session was paused and
+            // when the technician asks to resume. None of those
+            // states is a valid resume target — fail fast.
+            $freshItem = WorkOrderItem::query()
+                ->whereKey($entry->work_order_item_id)
+                ->lockForUpdate()
+                ->first();
 
-        $now = Carbon::now();
-        $pausedFor = max(0, $now->getTimestamp() - $entry->paused_at->getTimestamp());
+            if (! $freshItem) {
+                throw new RuntimeException('item_not_in_work_order');
+            }
 
-        $entry->update([
-            'status' => WorkOrderLaborEntry::STATUS_RUNNING,
-            'resumed_at' => $now,
-            'paused_at' => null,
-            'pause_reason' => null,
-            'paused_duration_seconds' => $entry->paused_duration_seconds + $pausedFor,
-        ]);
+            if ($freshItem->status === WorkOrderItem::STATUS_ON_HOLD) {
+                throw new RuntimeException('item_on_hold');
+            }
 
-        $entry->workOrder->logActivity(
-            'labor_resumed',
-            __('work_orders.activities.actions.labor_resumed', [
-                'title' => $entry->workOrderItem->title,
-                'user' => $entry->user->name,
-            ])
-        );
+            if ($freshItem->status === WorkOrderItem::STATUS_READY_FOR_QC) {
+                throw new RuntimeException('item_ready_for_qc');
+            }
 
-        return $entry->refresh();
+            if ($freshItem->status === WorkOrderItem::STATUS_COMPLETED) {
+                throw new RuntimeException('item_completed');
+            }
+
+            if ($freshItem->status === WorkOrderItem::STATUS_CANCELLED) {
+                throw new RuntimeException('item_cancelled');
+            }
+
+            if (! $entry->isPaused() || ! $entry->paused_at) {
+                throw new RuntimeException('entry_not_paused');
+            }
+
+            $now = Carbon::now();
+            $pausedFor = max(0, $now->getTimestamp() - $entry->paused_at->getTimestamp());
+
+            $entry->update([
+                'status' => WorkOrderLaborEntry::STATUS_RUNNING,
+                'resumed_at' => $now,
+                'paused_at' => null,
+                'pause_reason' => null,
+                'paused_duration_seconds' => $entry->paused_duration_seconds + $pausedFor,
+            ]);
+
+            $entry->workOrder->logActivity(
+                'labor_resumed',
+                __('work_orders.activities.actions.labor_resumed', [
+                    'title' => $entry->workOrderItem->title,
+                    'user' => $entry->user->name,
+                ])
+            );
+
+            return $entry->refresh();
+        });
     }
 
     /**
