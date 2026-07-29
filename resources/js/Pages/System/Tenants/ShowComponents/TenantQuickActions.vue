@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-wrap gap-3">
+    <div class="flex flex-wrap gap-2.5 sm:gap-3">
         <!-- Impersonate (super_admin only — server enforces) -->
         <button
             @click="$emit('impersonate')"
@@ -13,7 +13,7 @@
                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
                 />
             </svg>
-            الدخول للوحة
+            {{ $t('system.tenants.actions.impersonate') }}
         </button>
 
         <!-- Suspend (super_admin only) -->
@@ -22,7 +22,7 @@
             @click="$emit('suspend')"
             class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
-            تعليق الحساب
+            {{ $t('system.tenants.actions.suspend') }}
         </button>
 
         <!-- Activate (super_admin only) -->
@@ -31,7 +31,7 @@
             @click="$emit('activate')"
             class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
-            تفعيل الحساب
+            {{ $t('system.tenants.actions.activate') }}
         </button>
 
         <!-- Phase 7.6: dunning opt-out override. We expose this
@@ -54,7 +54,7 @@
                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                     />
                 </svg>
-                تفعيل التذكير (معكوس)
+                {{ $t('system.tenants.actions.enable_dunning') }}
             </span>
         </button>
 
@@ -64,7 +64,7 @@
             @click="$emit('extend-trial')"
             class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
-            تمديد التجربة
+            {{ $t('system.tenants.actions.extend_trial') }}
         </button>
 
         <!-- Phase 7.7: lift auto-suspension. The dunning system
@@ -92,7 +92,7 @@
                         d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                     />
                 </svg>
-                رفع التعليق التلقائي
+                {{ $t('system.tenants.actions.lift_auto_suspend') }}
             </span>
         </button>
 
@@ -101,7 +101,7 @@
             @click="$emit('security')"
             class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors"
         >
-            إعدادات الأمان
+            {{ $t('system.tenants.actions.security_settings') }}
         </button>
 
         <!-- Backup (super_admin only) -->
@@ -117,7 +117,7 @@
                     d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
                 />
             </svg>
-            نسخة احتياطية الآن
+            {{ $t('system.tenants.actions.backup_now') }}
         </button>
 
         <!-- Delete (super_admin only) -->
@@ -125,7 +125,7 @@
             @click="$emit('delete')"
             class="px-4 py-2 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-sm font-medium transition-colors"
         >
-            🗑️ حذف نهائي
+            {{ $t('system.tenants.actions.delete_permanent') }}
         </button>
 
         <!-- Open tenant billing dashboard in a new tab (super_admin only) -->
@@ -143,12 +143,16 @@
                     d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
                 />
             </svg>
-            عرض الفواتير
+            {{ $t('system.tenants.actions.view_billing') }}
         </a>
     </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n';
+
+useI18n();
+
 defineProps({
     tenant: { type: Object, required: true },
 });

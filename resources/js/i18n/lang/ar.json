@@ -4015,7 +4015,11 @@
         "activate": "تفعيل الحساب",
         "extend_trial": "تمديد التجربة",
         "delete_permanent": "🗑️ حذف نهائي",
-        "security_settings": "إعدادات الأمان"
+        "security_settings": "إعدادات الأمان",
+        "enable_dunning": "تفعيل التذكير",
+        "lift_auto_suspend": "رفع التعليق التلقائي",
+        "backup_now": "نسخة احتياطية الآن",
+        "view_billing": "عرض الفواتير"
       },
       "modals": {
         "suspend_title": "تعليق الحساب",

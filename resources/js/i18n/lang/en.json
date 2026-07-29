@@ -4015,7 +4015,11 @@
         "activate": "Activate Account",
         "extend_trial": "Extend Trial",
         "delete_permanent": "🗑️ Permanent Delete",
-        "security_settings": "Security Settings"
+        "security_settings": "Security Settings",
+        "enable_dunning": "Enable Reminders",
+        "lift_auto_suspend": "Lift Auto Suspension",
+        "backup_now": "Backup Now",
+        "view_billing": "View Invoices"
       },
       "modals": {
         "suspend_title": "Suspend Account",
