@@ -55,6 +55,22 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(3)->by($request->input('phone') ?: $request->ip());
         });
 
+        // Phase 7 — Customer portal OTP rate limiters.
+        //
+        // These are coarse, IP-scoped limits. The fine-grained
+        // (tenant, phone) and per-IP limits live inside
+        // CustomerPortalOtpService via Laravel's RateLimiter
+        // facade. The route-level limits exist to fail fast
+        // at the framework layer before we even reach the
+        // service (saves a DB hit and prevents a flood from
+        // consuming the more nuanced buckets).
+        RateLimiter::for('customer-portal-otp', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+        RateLimiter::for('customer-portal-verify', function (Request $request) {
+            return Limit::perMinute(20)->by($request->ip());
+        });
+
         // Public Web Rate Limiters
         RateLimiter::for('public-landing', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());

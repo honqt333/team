@@ -78,6 +78,11 @@ class Appointment extends Model
         return $this->belongsTo(ServiceBay::class);
     }
 
+    public function center(): BelongsTo
+    {
+        return $this->belongsTo(Center::class);
+    }
+
     public function assignedUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_user_id');

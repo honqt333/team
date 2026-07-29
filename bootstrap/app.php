@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Http\Middleware\ConvertArabicNumerals;
 use App\Http\Middleware\EnsureCenterContext;
+use App\Http\Middleware\EnsureCustomerPortalSession;
 use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureSystemAdmin;
 use App\Http\Middleware\EnsureTenantActive;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\PortalLocale;
 use App\Http\Middleware\PreventBackHistory;
 use App\Http\Middleware\RequestId;
 use App\Http\Middleware\ResolveTenantFromUrl;
@@ -44,6 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             SetPermissionsTeam::class, // Must be FIRST - sets team before permissions are loaded
             SetLocale::class, // Must be before Inertia to pass correct locale to props
+            PortalLocale::class, // Must be before Inertia too — only acts on /portal/* paths; sets the portal locale so the Inertia payload is right
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
             ConvertArabicNumerals::class,
@@ -79,6 +82,19 @@ return Application::configure(basePath: dirname(__DIR__))
             // for the public site route group. The middleware is
             // strict — it 404s on missing or unpublished sites.
             'public.tenant' => ResolveTenantFromUrl::class,
+            // Phase 7 — ensures the customer portal session is
+            // alive, matches the route's tenant, and resolves
+            // the Customer onto the request. Behind this
+            // middleware the controller can read
+            // `portal_customer` from request attributes.
+            'customer.portal.session' => EnsureCustomerPortalSession::class,
+            // Phase 7 — sets Arabic as the portal default
+            // and reads the user's persistent language
+            // toggle from a dedicated cookie. Mounted
+            // before the Inertia middleware so the locale
+            // is in place by the time the Inertia props
+            // are built.
+            'customer.portal.locale' => PortalLocale::class,
             // Spatie Permission middleware
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,

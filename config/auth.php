@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\AdminUser;
+use App\Models\Customer;
 use App\Models\User;
 
 return [
@@ -50,6 +51,21 @@ return [
             'driver' => 'session',
             'provider' => 'admin_users',
         ],
+
+        // Customer portal (Phase 7). Separate session, separate
+        // guard, separate lifecycle. The session only carries
+        // a small payload — {customer_id, tenant_id, last_seen_at}
+        // — and the EnsureCustomerPortalSession middleware
+        // resolves the Customer row on each request. We do NOT
+        // use a full Eloquent provider because the portal has
+        // a single concern ("is this customer authenticated
+        // for this tenant?") and a provider would only obscure
+        // the explicit cross-tenant check the middleware
+        // already performs.
+        'customer_portal' => [
+            'driver' => 'session',
+            'provider' => 'customer_portal',
+        ],
     ],
 
     /*
@@ -78,6 +94,17 @@ return [
         'admin_users' => [
             'driver' => 'eloquent',
             'model' => AdminUser::class,
+        ],
+
+        // Provider for the customer portal guard. We register
+        // a minimal provider here so the Auth manager has
+        // something to resolve, but the actual customer lookup
+        // happens inside the EnsureCustomerPortalSession
+        // middleware. The provider's job is purely to satisfy
+        // the framework contract (it is never invoked).
+        'customer_portal' => [
+            'driver' => 'eloquent',
+            'model' => Customer::class,
         ],
     ],
 

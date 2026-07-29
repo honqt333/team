@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\CustomerPortalOtpChannel;
 use App\Models\AdminUser;
 use App\Models\Center;
 use App\Models\Customer;
@@ -55,6 +56,8 @@ use App\Policies\VehiclePolicy;
 use App\Policies\WorkOrderInspectionPolicy;
 use App\Policies\WorkOrderItemPolicy;
 use App\Policies\WorkOrderPolicy;
+use App\Services\CustomerPortal\CustomerPortalOtpService;
+use App\Services\CustomerPortal\LoggingCustomerPortalOtpChannel;
 use App\Services\Email\SmtpConfigService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
@@ -72,6 +75,27 @@ class AppServiceProvider extends ServiceProvider
         // Make SmtpConfigService a singleton so we look up the default email
         // integration once per request and reuse the resolved config.
         $this->app->singleton(SmtpConfigService::class);
+
+        // Phase 7 — Customer portal OTP channel binding.
+        //
+        // The default channel is the logging channel: it
+        // records each OTP send in the structured log
+        // (operator can grep "customer_portal.otp.sent") and
+        // returns success. Real deployments swap this for a
+        // gateway-backed implementation in
+        // config('customer_portal.channel') or by re-binding
+        // \App\Contracts\CustomerPortalOtpChannel.
+        //
+        // CustomerPortalOtpService is a singleton because it
+        // is constructed once per request and the channel
+        // binding is stable; the per-request work (rate
+        // limiting, hashing, lookups) lives inside the
+        // service's methods, not in its state.
+        $this->app->singleton(
+            CustomerPortalOtpChannel::class,
+            LoggingCustomerPortalOtpChannel::class
+        );
+        $this->app->singleton(CustomerPortalOtpService::class);
     }
 
     /**

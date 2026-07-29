@@ -52,8 +52,8 @@
 
                 <div class="flex items-center gap-2">
                     <a
-                        v-if="futurePortalEnabled"
-                        href="#customer-portal"
+                        v-if="portalUrl"
+                        :href="portalUrl"
                         class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,8 +187,8 @@
                     </a>
 
                     <a
-                        v-if="futurePortalEnabled"
-                        href="#customer-portal"
+                        v-if="portalUrl"
+                        :href="portalUrl"
                         class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
                         {{ t('tenant_site.hero.book_cta') }}
@@ -487,20 +487,21 @@
                         </a>
                     </div>
 
-                    <div
-                        v-if="futurePortalEnabled"
-                        class="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/30 text-sm"
+                    <a
+                        v-if="portalUrl"
+                        :href="portalUrl"
+                        class="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 border border-white/30 text-sm hover:bg-white/25"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                             />
                         </svg>
                         {{ t('tenant_site.cta.portal_coming_soon') }}
-                    </div>
+                    </a>
                 </div>
             </div>
         </section>
@@ -579,7 +580,15 @@ const seoDescription = computed(() => {
     return props.site.seo_description || props.site.tagline || '';
 });
 
-const futurePortalEnabled = computed(() => true); // Phase 6 spec: always show
+// Phase 7: customer portal is live. The CTA links to
+// /{tenant}/portal/login. The site prop carries
+// tenant_slug + has_portal from the controller.
+const portalUrl = computed(() => {
+    if (!props.site?.has_portal || !props.site?.tenant_slug) {
+        return null;
+    }
+    return `/${props.site.tenant_slug}/portal/login`;
+});
 
 const cssVars = computed(() => ({
     '--tenant-primary': props.site.primary_color || '#4f46e5',

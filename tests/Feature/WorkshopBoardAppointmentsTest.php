@@ -267,60 +267,49 @@ class WorkshopBoardAppointmentsTest extends TestCase
 
     public function test_appointments_ordered_by_scheduled_at_ascending(): void
     {
-        $owner = $this->createUserWithPermissions(['crm.work_orders.view']);
-        [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
+        // Freeze "now" at 08:00 today so the test is fully
+        // deterministic regardless of when the suite runs.
+        // Without this, anchor-the-clock arithmetic against
+        // a real wall clock fails around midnight: a 30-min
+        // lookahead can land on tomorrow, or endOfDay-45min
+        // can be in the past, and the scheduler's
+        // start_in_past guard rejects the booking. Carbon's
+        // test hook is reset in the finally block so the rest
+        // of the suite is unaffected.
+        Carbon::setTestNow(Carbon::parse('2026-07-29 08:00:00'));
 
-        // Anchor the three slots in the same calendar day no
-        // matter when the suite runs. The original
-        // implementation used now()->addHours(2) as the base +
-        // addHours(5) for the last slot, which crossed the day
-        // boundary around 19:00 and dropped one row out of the
-        // today section.
-        //
-        // Strategy: pick a base 30 minutes in the future, then
-        // place the three slots 15 minutes apart (so the full
-        // 30-minute spread + the 30-minute duration of the last
-        // slot fit in 60 minutes). If now+30min has crossed
-        // into tomorrow, fall back to 15 minutes before today's
-        // endOfDay. The clamp keeps every slot within the
-        // current calendar day, even at 23:55.
-        $now = Carbon::now();
-        $endOfDay = $now->copy()->endOfDay();
+        try {
+            $owner = $this->createUserWithPermissions(['crm.work_orders.view']);
+            [$customer, $vehicle, $bay, $tech] = $this->buildFixture($owner);
 
-        if ($now->copy()->addMinutes(30)->lt($endOfDay)) {
-            // Normal case: plenty of room today. Use now+30min
-            // as the base.
-            $base = $now->copy()->addMinutes(30)->setSecond(0);
-        } else {
-            // Late night: not enough room for a 30-minute
-            // lookahead. Place the base 45 minutes before
-            // endOfDay so the last slot's 30-minute duration
-            // still ends before midnight.
-            $base = $endOfDay->copy()->subMinutes(45);
+            // Three slots, two hours apart, comfortably within
+            // the test day. We pick 10:00, 11:00, 12:00 — far
+            // from the start of the frozen day and from
+            // endOfDay, so neither the scheduler's past-time
+            // guard nor any future-day windowing kicks in.
+            $early = Carbon::now()->setTime(10, 0);
+            $mid = Carbon::now()->setTime(11, 0);
+            $late = Carbon::now()->setTime(12, 0);
+
+            // Insert in non-chronological order on purpose.
+            $this->scheduler->create($mid, $mid->copy()->addMinutes(30), $customer, $vehicle, $bay, $tech, []);
+            $this->scheduler->create($late, $late->copy()->addMinutes(30), $customer, $vehicle, $bay, $tech, []);
+            $this->scheduler->create($early, $early->copy()->addMinutes(30), $customer, $vehicle, $bay, $tech, []);
+
+            $response = $this->actingAs($owner)->get('/app/workshop');
+
+            $response->assertInertia(
+                fn ($page) => $page
+                    ->has('todayAppointments', 3)
+                    ->where('todayAppointments.0.scheduled_at', $early->toIso8601String())
+                    ->where('todayAppointments.1.scheduled_at', $mid->toIso8601String())
+                    ->where('todayAppointments.2.scheduled_at', $late->toIso8601String())
+            );
+        } finally {
+            // Always release the test-now override so the rest
+            // of the suite sees real time.
+            Carbon::setTestNow();
         }
-
-        $early = $base->copy();
-        $mid = $base->copy()->addMinutes(15);
-        $late = $base->copy()->addMinutes(30);
-
-        // 15-minute duration per slot (shorter than the typical
-        // 30 used elsewhere in the suite) so back-to-back
-        // appointments do not conflict on the same bay. Three
-        // back-to-back 15-min slots fit in 45 minutes from the
-        // base, well within today's remaining hours.
-        $this->scheduler->create($mid, $mid->copy()->addMinutes(15), $customer, $vehicle, $bay, $tech, []);
-        $this->scheduler->create($late, $late->copy()->addMinutes(15), $customer, $vehicle, $bay, $tech, []);
-        $this->scheduler->create($early, $early->copy()->addMinutes(15), $customer, $vehicle, $bay, $tech, []);
-
-        $response = $this->actingAs($owner)->get('/app/workshop');
-
-        $response->assertInertia(
-            fn ($page) => $page
-                ->has('todayAppointments', 3)
-                ->where('todayAppointments.0.scheduled_at', $early->toIso8601String())
-                ->where('todayAppointments.1.scheduled_at', $mid->toIso8601String())
-                ->where('todayAppointments.2.scheduled_at', $late->toIso8601String())
-        );
     }
 
     public function test_user_without_work_orders_view_gets_403(): void

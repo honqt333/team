@@ -88,6 +88,7 @@ class TenantSiteController extends Controller
             'site' => [
                 'tenant_id' => $tenant->id,
                 'tenant_slug' => $tenant->slug,
+                'has_portal' => true,
                 'site_name' => $website->display_name,
                 'tagline' => $website->tagline,
                 'logo_url' => $website->logo_url,

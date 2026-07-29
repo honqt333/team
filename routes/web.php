@@ -95,6 +95,8 @@ use App\Http\Controllers\Auth\PhoneVerificationController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\CustomerPortalAuthController;
+use App\Http\Controllers\Public\CustomerPortalController;
 use App\Http\Controllers\Public\PublicLandingController;
 use App\Http\Controllers\Public\PublicQuoteController;
 use App\Http\Controllers\Public\TenantSiteController;
@@ -150,6 +152,7 @@ Route::post('/landing-preview/contact', [PublicLandingController::class, 'submit
 //
 // Each tenant has a public website mounted under its slug:
 //     /{tenant-slug}        → public homepage
+//     /{tenant-slug}/portal → customer portal
 //
 // The {tenant} parameter is the tenant SLUG (the unique key on
 // tenants table), not a tenant_id. ResolveTenantFromUrl turns
@@ -168,6 +171,54 @@ Route::get('/{tenant}', [TenantSiteController::class, 'show'])
     ->where('tenant', '^(?!(?:app|system|dashboard|login|logout|register|password|forgot-password|reset-password|verify-email|confirm-password|two-factor|2fa|locale|phone|lang|landing-preview|view|impersonate|impersonate-stop|up|storage|livewire|invitations)$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$')
     ->middleware('public.tenant')
     ->name('public.site.show');
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Customer Portal (Phase 7)
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Mounted at /{tenant}/portal/*. The {tenant} param has the same
+// reserved-word exclusion as the public site route above. Each
+// route lives in the `public.tenant` middleware group (to resolve
+// the tenant), and protected routes additionally run
+// `customer.portal.session` (to validate the OTP session).
+//
+// The portal session is a separate guard, separate cookie,
+// separate lifetime from the staff session. The middleware
+// chain ensures no staff cookies ever authenticate the portal
+// and vice versa.
+Route::prefix('/{tenant}/portal')
+    ->where(['tenant' => '^(?!(?:app|system|dashboard|login|logout|register|password|forgot-password|reset-password|verify-email|confirm-password|two-factor|2fa|locale|phone|lang|landing-preview|view|impersonate|impersonate-stop|up|storage|livewire|invitations)$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$'])
+    ->middleware('public.tenant')
+    ->name('public.portal.')
+    ->group(function () {
+        // Auth endpoints — public.tenant only; no portal
+        // session required (these are how you GET the
+        // session).
+        Route::get('/login', [CustomerPortalAuthController::class, 'showLogin'])
+            ->name('login');
+        Route::post('/login', [CustomerPortalAuthController::class, 'requestOtp'])
+            ->middleware('throttle:customer-portal-otp')
+            ->name('login.otp');
+        Route::get('/verify', [CustomerPortalAuthController::class, 'showVerify'])
+            ->name('verify');
+        Route::post('/verify', [CustomerPortalAuthController::class, 'verifyOtp'])
+            ->middleware('throttle:customer-portal-verify')
+            ->name('verify.otp');
+        Route::post('/logout', [CustomerPortalAuthController::class, 'logout'])
+            ->name('logout');
+        // Language toggle: persists the user's choice in a
+        // per-tenant cookie. The query-string `?lang=`
+        // shape on the redirect lets the very next render
+        // pick up the new locale without a round-trip.
+        Route::post('/locale', [CustomerPortalAuthController::class, 'setLocale'])
+            ->name('locale');
+
+        // Protected endpoints — must have a valid session.
+        Route::middleware('customer.portal.session')->group(function () {
+            Route::get('/dashboard', [CustomerPortalController::class, 'dashboard'])
+                ->name('dashboard');
+        });
+    });
 
 // Phone Verification (Registration)
 Route::post('/phone/send-otp', [PhoneVerificationController::class, 'sendOtp'])->middleware('throttle:phone-otp')->name('phone.send-otp');
