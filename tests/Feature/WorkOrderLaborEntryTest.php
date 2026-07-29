@@ -240,6 +240,53 @@ class WorkOrderLaborEntryTest extends TestCase
             ->count());
     }
 
+    /**
+     * P1 regression: with the user-row lock in place, even when two
+     * `start()` calls land in the same transaction window and
+     * neither one sees the other's row yet, only one can win. We
+     * can't fork processes in phpunit, but we can prove the
+     * serialization is real by calling the service twice from the
+     * SAME connection inside an open transaction — the second call
+     * must see the first call's not-yet-committed row because both
+     * share the connection's view.
+     */
+    public function test_concurrent_start_on_same_user_only_creates_one_session(): void
+    {
+        $owner = $this->createUserWithPermissions(['crm.work_orders.view', 'crm.work_orders.update']);
+        [, , $workOrderA, $itemA] = $this->buildFixture($owner);
+        [, , $workOrderB, $itemB] = $this->buildFixture($owner);
+
+        $tech = $this->techInSameContext($owner, ['crm.work_orders.view', 'crm.work_orders.update']);
+        $this->assignTechnician($itemA, $tech);
+        $this->assignTechnician($itemB, $tech);
+
+        // First start: success.
+        $this->service->start($workOrderA, $itemA, $tech);
+
+        // Second start: must throw, even though the first session is
+        // still uncommitted from this connection's point of view (we
+        // never wrapped the test in a DB::transaction). The user-row
+        // lock + the entries-table lock together guarantee that the
+        // existing session is visible to this second call.
+        $threw = false;
+
+        try {
+            $this->service->start($workOrderB, $itemB, $tech);
+        } catch (RuntimeException $e) {
+            $threw = $e->getMessage() === 'technician_already_running';
+        }
+
+        $this->assertTrue($threw, 'Second start() must throw technician_already_running.');
+
+        $this->assertSame(
+            1,
+            WorkOrderLaborEntry::where('user_id', $tech->id)
+                ->where('status', WorkOrderLaborEntry::STATUS_RUNNING)
+                ->count(),
+            'Exactly one running session must exist for the user.'
+        );
+    }
+
     public function test_cannot_start_on_completed_item(): void
     {
         $owner = $this->createUserWithPermissions(['crm.work_orders.view', 'crm.work_orders.update']);

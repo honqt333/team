@@ -71,9 +71,14 @@ class WorkOrderLaborService
         }
 
         return DB::transaction(function () use ($workOrder, $item, $user, $notes) {
-            // Lock the user row inside the tenant scope so a
-            // concurrent start from the same user can't slip past
-            // the "one running per tenant" rule.
+            // P1 hardening: lock the user row first. The previous
+            // implementation only locked the labor-entries table,
+            // which has no rows when the user has never started a
+            // session — so two concurrent requests would both see
+            // "no existing session" and both insert. The user row
+            // exists and is the right serialization point.
+            User::query()->whereKey($user->id)->lockForUpdate()->first();
+
             $existing = WorkOrderLaborEntry::query()
                 ->forUser($user->id)
                 ->running()
@@ -304,6 +309,17 @@ class WorkOrderLaborService
 
         if ($item->status === WorkOrderItem::STATUS_CANCELLED) {
             throw new RuntimeException('item_cancelled');
+        }
+
+        // Phase 3: a held item can be unblocked later via the
+        // resume action, but the technician may NOT start a fresh
+        // session against it. Likewise for an item already in QC.
+        if ($item->status === WorkOrderItem::STATUS_ON_HOLD) {
+            throw new RuntimeException('item_on_hold');
+        }
+
+        if ($item->status === WorkOrderItem::STATUS_READY_FOR_QC) {
+            throw new RuntimeException('item_ready_for_qc');
         }
     }
 }

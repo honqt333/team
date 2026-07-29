@@ -170,7 +170,14 @@ const state = computed(() => {
 });
 
 const isOwn = computed(() => !!myActive.value);
-const canStart = computed(() => !itemIsClosed.value && !myActive.value && !otherActive.value);
+// P1 revision: an assigned technician can start their own timer on
+// this item even when another technician is already on a session
+// here. The only things that block Start are:
+//   1. the item is completed/cancelled
+//   2. the current user already has their own open session
+// We do NOT block on otherActive.value — multiple technicians can
+// share a service item, each with their own session.
+const canStart = computed(() => !itemIsClosed.value && !myActive.value);
 
 // Total accumulated effective seconds across all entries for this item.
 const totalSeconds = computed(() => {

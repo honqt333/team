@@ -76,6 +76,7 @@ use App\Http\Controllers\App\VehicleModelController;
 use App\Http\Controllers\App\WorkOrderInspectionController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderItemController;
+use App\Http\Controllers\App\WorkOrders\WorkOrderItemStatusController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderLaborEntryController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderMediaController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderNotesController;
@@ -272,6 +273,12 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // Work Order Item Technicians
     Route::post('/work-orders/{work_order}/items/{item}/technicians', [WorkOrderTechnicianController::class, 'assignTechnician'])->name('work-orders.items.technicians.store');
     Route::delete('/work-orders/{work_order}/items/{item}/technicians/{user}', [WorkOrderTechnicianController::class, 'removeTechnician'])->name('work-orders.items.technicians.destroy');
+
+    // Work Order Item Status (Phase 3: per-item hold + QC)
+    Route::post('/work-orders/{work_order}/items/{item}/hold', [WorkOrderItemStatusController::class, 'hold'])->name('work-orders.items.hold');
+    Route::post('/work-orders/{work_order}/items/{item}/resume', [WorkOrderItemStatusController::class, 'resume'])->name('work-orders.items.resume');
+    Route::post('/work-orders/{work_order}/items/{item}/quality/approve', [WorkOrderItemStatusController::class, 'approveQuality'])->name('work-orders.items.quality.approve');
+    Route::post('/work-orders/{work_order}/items/{item}/quality/reject', [WorkOrderItemStatusController::class, 'rejectQuality'])->name('work-orders.items.quality.reject');
 
     // Work Order Labor Entries (per-technician timer sessions)
     Route::post('/work-orders/{work_order}/items/{item}/labor-entries/start', [WorkOrderLaborEntryController::class, 'start'])->name('work-orders.items.labor.start');

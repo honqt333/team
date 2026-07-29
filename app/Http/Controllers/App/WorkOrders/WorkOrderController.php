@@ -347,6 +347,8 @@ class WorkOrderController
                 'technicians.employee.jobTitle',
                 'parts' => fn ($q) => $q->withoutGlobalScope('center_scoped')->with(['part', 'warehouse']),
                 'itemNotes.user.roles',
+                'qualityChecks' => fn ($q) => $q->with('checkedBy:id,name')->latest('created_at')->limit(5),
+                'heldBy:id,name',
             ]),
             'generalNotes.user.roles',
             'generalNotes.workOrderItem.service.department' => fn ($q) => $q->withoutGlobalScope('center_scoped'),

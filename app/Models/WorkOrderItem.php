@@ -41,6 +41,7 @@ class WorkOrderItem extends Model
         'started_at', 'completed_at', 'duration_value', 'duration_unit', 'due_date', 'is_taxable',
         'tax_category_code', 'tax_rate_snapshot', 'tax_amount', 'line_total_excl_tax', 'line_total_incl_tax',
         'warranty_expires_at', 'warranty_value_snapshot', 'warranty_unit_snapshot', 'is_warranty',
+        'hold_reason', 'held_at', 'held_by_user_id',
     ];
 
     protected $appends = ['parts_total', 'grand_total'];
@@ -52,7 +53,7 @@ class WorkOrderItem extends Model
         'total' => 'decimal:2', 'price_locked' => 'boolean', 'started_at' => 'datetime', 'completed_at' => 'datetime',
         'due_date' => 'date', 'tax_rate_snapshot' => 'decimal:2', 'tax_amount' => 'decimal:2',
         'line_total_excl_tax' => 'decimal:2', 'line_total_incl_tax' => 'decimal:2', 'is_taxable' => 'boolean',
-        'is_warranty' => 'boolean', 'warranty_expires_at' => 'datetime',
+        'is_warranty' => 'boolean', 'warranty_expires_at' => 'datetime', 'held_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -151,6 +152,33 @@ class WorkOrderItem extends Model
     public function laborEntries(): HasMany
     {
         return $this->hasMany(WorkOrderLaborEntry::class);
+    }
+
+    public function qualityChecks(): HasMany
+    {
+        return $this->hasMany(WorkOrderItemQualityCheck::class);
+    }
+
+    public function latestQualityCheck()
+    {
+        return $this->hasOne(WorkOrderItemQualityCheck::class)->latestOfMany('created_at');
+    }
+
+    public function heldBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'held_by_user_id');
+    }
+
+    // ==================== Hold helpers ====================
+
+    public function isHeld(): bool
+    {
+        return $this->status === self::STATUS_ON_HOLD;
+    }
+
+    public function isReadyForQc(): bool
+    {
+        return $this->status === self::STATUS_READY_FOR_QC;
     }
 
     // ==================== Business Rules ====================

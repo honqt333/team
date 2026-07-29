@@ -1760,6 +1760,15 @@
     "inspection_saved": "Inspection saved successfully",
     "invalid_file_type": "Invalid file type: {file}",
     "item_status_updated": "Service status updated successfully",
+    "item_held": "Service put on hold",
+    "item_resumed": "Service resumed",
+    "item_quality_approved": "Service approved",
+    "item_quality_rejected": "Service sent back for rework",
+    "hold_reason_required": "A reason is required to put this service on hold",
+    "rejection_notes_required": "Tell the technician what needs to be reworked",
+    "item_already_on_hold": "This service is already on hold",
+    "item_not_on_hold": "This service is not on hold",
+    "item_not_ready_for_qc": "This service is not waiting for quality review",
     "labor_started": "Timer started",
     "labor_paused": "Timer paused",
     "labor_resumed": "Timer resumed",
@@ -3222,7 +3231,11 @@
         "labor_started": ":user started work on \":title\"",
         "labor_paused": ":user paused work on \":title\"",
         "labor_resumed": ":user resumed work on \":title\"",
-        "labor_ended": ":user ended work on \":title\""
+        "labor_ended": ":user ended work on \":title\"",
+        "item_held": "Service \":title\" put on hold by :user — :reason",
+        "item_resumed": "Service \":title\" resumed by :user",
+        "item_quality_approved": "Service \":title\" approved by :user",
+        "item_quality_rejected": "Service \":title\" sent back for rework by :user — :reason"
       },
       "no_activities": "No activities recorded yet",
       "title": "Activity Log"
@@ -3536,7 +3549,24 @@
       "paused": "Paused",
       "idle": "Idle",
       "total": "Total",
-      "other_tech": "Another technician is on this timer"
+      "other_tech": "Another technician is on this timer",
+      "paused_due_to_hold": "Paused because the item was put on hold: :reason"
+    },
+    "status_controls": {
+      "hold": "Hold",
+      "hold_title": "Put this service on hold",
+      "hold_hint": "Provide a reason. The item will switch to on hold and any running timers will pause.",
+      "hold_placeholder": "Reason for holding the service",
+      "resume": "Resume",
+      "approve_quality": "Approve QC",
+      "reject_quality": "Send back",
+      "reject_title": "Send this service back for rework",
+      "reject_hint": "Tell the technician what needs to be redone.",
+      "reject_placeholder": "What needs to be reworked?",
+      "held_by": "Held by",
+      "checked_by": "Checked by",
+      "last_approved": "Last QC: approved",
+      "last_rejected": "Last QC: rejected"
     },
     "showing": "Show",
     "systematic": {

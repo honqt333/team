@@ -337,6 +337,13 @@
                                 :labor-entries="entriesForItem(item.id)"
                                 :read-only="readOnly"
                             />
+
+                            <!-- Phase 3: per-item hold + quality controls -->
+                            <WorkOrderItemStatusControls
+                                :work-order="workOrder"
+                                :item="item"
+                                :read-only="readOnly"
+                            />
                         </div>
                     </div>
 
@@ -488,6 +495,7 @@ import axios from 'axios';
 import { useToast } from '@/Composables/useToast';
 import { useConfirm } from '@/Composables/useConfirm';
 import WorkOrderItemTimer from '@/Components/WorkOrders/WorkOrderItemTimer.vue';
+import WorkOrderItemStatusControls from '@/Components/WorkOrders/WorkOrderItemStatusControls.vue';
 
 const props = defineProps({
     workOrder: Object,

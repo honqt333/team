@@ -1760,6 +1760,15 @@
     "inspection_saved": "تم حفظ الفحص بنجاح",
     "invalid_file_type": "نوع الملف غير صالح: {file}",
     "item_status_updated": "تم تحديث حالة الخدمة بنجاح",
+    "item_held": "تم تعليق الخدمة",
+    "item_resumed": "تم استئناف الخدمة",
+    "item_quality_approved": "تم اعتماد الخدمة",
+    "item_quality_rejected": "تم إعادة الخدمة للعمل",
+    "hold_reason_required": "سبب التعليق مطلوب",
+    "rejection_notes_required": "يجب توضيح ما يحتاج لإعادة العمل",
+    "item_already_on_hold": "هذه الخدمة معلّقة بالفعل",
+    "item_not_on_hold": "هذه الخدمة ليست معلّقة",
+    "item_not_ready_for_qc": "هذه الخدمة ليست بانتظار فحص الجودة",
     "labor_started": "تم بدء المؤقت",
     "labor_paused": "تم إيقاف المؤقت مؤقتاً",
     "labor_resumed": "تم استئناف المؤقت",
@@ -3222,7 +3231,11 @@
         "labor_started": "بدء الموظف :user العمل على \":title\"",
         "labor_paused": "إيقاف الموظف :user العمل مؤقتاً على \":title\"",
         "labor_resumed": "استئناف الموظف :user العمل على \":title\"",
-        "labor_ended": "إنهاء الموظف :user العمل على \":title\""
+        "labor_ended": "إنهاء الموظف :user العمل على \":title\"",
+        "item_held": "تعليق الخدمة \":title\" بواسطة :user — :reason",
+        "item_resumed": "استئناف الخدمة \":title\" بواسطة :user",
+        "item_quality_approved": "اعتماد الخدمة \":title\" بواسطة :user",
+        "item_quality_rejected": "إعادة الخدمة \":title\" للعمل بواسطة :user — :reason"
       },
       "no_activities": "لا يوجد أنشطة مسجلة بعد",
       "title": "سجل الأنشطة"
@@ -3537,7 +3550,24 @@
       "paused": "موقوف",
       "idle": "متوقف",
       "total": "الإجمالي",
-      "other_tech": "موظف آخر يعمل على هذا المؤقت"
+      "other_tech": "موظف آخر يعمل على هذا المؤقت",
+      "paused_due_to_hold": "تم الإيقاف بسبب تعليق الخدمة: :reason"
+    },
+    "status_controls": {
+      "hold": "تعليق",
+      "hold_title": "تعليق هذه الخدمة",
+      "hold_hint": "اذكر سبب التعليق. ستتحول الخدمة إلى معلّقة وسيتم إيقاف أي مؤقت نشط.",
+      "hold_placeholder": "سبب تعليق الخدمة",
+      "resume": "استئناف",
+      "approve_quality": "اعتماد الجودة",
+      "reject_quality": "إعادة للعمل",
+      "reject_title": "إعادة هذه الخدمة لإعادة العمل",
+      "reject_hint": "اشرح للموظف ما يحتاج لإعادة التنفيذ.",
+      "reject_placeholder": "ما الذي يحتاج لإعادة العمل؟",
+      "held_by": "علّقها",
+      "checked_by": "راجعها",
+      "last_approved": "آخر فحص جودة: معتمد",
+      "last_rejected": "آخر فحص جودة: مرفوض"
     },
     "systematic": {
       "category": "الفئة",
