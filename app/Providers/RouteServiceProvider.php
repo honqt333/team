@@ -71,6 +71,90 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(20)->by($request->ip());
         });
 
+        // Phase 8 — Customer portal booking rate limiters.
+        //
+        // The availability endpoint is read-only and
+        // idempotent (the result is the same for a given
+        // (center, services, date) triple within a few
+        // minutes), so we can be a bit more generous.
+        // The store endpoint creates a row, so we cap
+        // it tighter.
+        //
+        // The key is a composite: tenant + customer + IP.
+        // The tenant id is on the resolved route param,
+        // not the body; the customer id comes from the
+        // session, not the body; the IP is from the
+        // request. A misbehaving client cannot use a
+        // shared IP to skip the per-customer cap.
+        RateLimiter::for('customer-portal-availability', function (Request $request) {
+            $tenant = $request->attributes->get('public_tenant');
+            $customer = $request->attributes->get('portal_customer');
+            $key = sprintf(
+                'avail:%s:%s:%s',
+                $tenant?->id ?? 'x',
+                $customer?->id ?? 'x',
+                $request->ip() ?? 'x'
+            );
+
+            return Limit::perMinute(30)->by($key);
+        });
+        RateLimiter::for('customer-portal-booking', function (Request $request) {
+            $tenant = $request->attributes->get('public_tenant');
+            $customer = $request->attributes->get('portal_customer');
+            $key = sprintf(
+                'book:%s:%s:%s',
+                $tenant?->id ?? 'x',
+                $customer?->id ?? 'x',
+                $request->ip() ?? 'x'
+            );
+
+            return Limit::perMinute(10)->by($key);
+        });
+
+        // Phase 9 — Self-service cancel + reschedule.
+        // Separate buckets per action so a customer
+        // who reschedules three times does not exhaust
+        // their cancel budget. The key is a composite
+        // (tenant, customer, IP) so a misbehaving client
+        // cannot burn through the budget by rotating
+        // IPs alone.
+        RateLimiter::for('customer-portal-cancel', function (Request $request) {
+            $tenant = $request->attributes->get('public_tenant');
+            $customer = $request->attributes->get('portal_customer');
+            $key = sprintf(
+                'cancel:%s:%s:%s',
+                $tenant?->id ?? 'x',
+                $customer?->id ?? 'x',
+                $request->ip() ?? 'x'
+            );
+
+            return Limit::perMinute(10)->by($key);
+        });
+        RateLimiter::for('customer-portal-reschedule-availability', function (Request $request) {
+            $tenant = $request->attributes->get('public_tenant');
+            $customer = $request->attributes->get('portal_customer');
+            $key = sprintf(
+                'resch-avail:%s:%s:%s',
+                $tenant?->id ?? 'x',
+                $customer?->id ?? 'x',
+                $request->ip() ?? 'x'
+            );
+
+            return Limit::perMinute(30)->by($key);
+        });
+        RateLimiter::for('customer-portal-reschedule', function (Request $request) {
+            $tenant = $request->attributes->get('public_tenant');
+            $customer = $request->attributes->get('portal_customer');
+            $key = sprintf(
+                'resch:%s:%s:%s',
+                $tenant?->id ?? 'x',
+                $customer?->id ?? 'x',
+                $request->ip() ?? 'x'
+            );
+
+            return Limit::perMinute(10)->by($key);
+        });
+
         // Public Web Rate Limiters
         RateLimiter::for('public-landing', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());

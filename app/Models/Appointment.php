@@ -44,6 +44,15 @@ class Appointment extends Model
 
     public const SOURCE_INTERNAL = 'internal';
 
+    /**
+     * Phase 8 — appointments booked by an authenticated
+     * customer from the public portal. Used by the portal
+     * audit log and by the workshop board (so the operator
+     * can see "this came from the website, not from the
+     * in-house POS").
+     */
+    public const SOURCE_CUSTOMER_PORTAL = 'customer_portal';
+
     protected $fillable = [
         'tenant_id', 'center_id',
         'customer_id', 'vehicle_id',

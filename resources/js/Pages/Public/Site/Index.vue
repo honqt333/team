@@ -187,8 +187,8 @@
                     </a>
 
                     <a
-                        v-if="portalUrl"
-                        :href="portalUrl"
+                        v-if="bookingUrl"
+                        :href="bookingUrl"
                         class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
                         {{ t('tenant_site.hero.book_cta') }}
@@ -580,14 +580,23 @@ const seoDescription = computed(() => {
     return props.site.seo_description || props.site.tagline || '';
 });
 
-// Phase 7: customer portal is live. The CTA links to
-// /{tenant}/portal/login. The site prop carries
-// tenant_slug + has_portal from the controller.
+// Phase 7 + 8: customer portal is live. The primary
+// "Book an appointment" CTA deep-links to the booking
+// flow. If the customer is signed in, the booking
+// page renders immediately; if not, the login page
+// captures `return_to` and bounces the customer back
+// to the booking form after a successful OTP verify.
 const portalUrl = computed(() => {
     if (!props.site?.has_portal || !props.site?.tenant_slug) {
         return null;
     }
     return `/${props.site.tenant_slug}/portal/login`;
+});
+const bookingUrl = computed(() => {
+    if (!props.site?.has_portal || !props.site?.tenant_slug) {
+        return null;
+    }
+    return `/${props.site.tenant_slug}/portal/login?return_to=/portal/appointments/new`;
 });
 
 const cssVars = computed(() => ({

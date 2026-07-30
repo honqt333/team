@@ -58,7 +58,10 @@ use App\Policies\WorkOrderItemPolicy;
 use App\Policies\WorkOrderPolicy;
 use App\Services\CustomerPortal\CustomerPortalOtpService;
 use App\Services\CustomerPortal\LoggingCustomerPortalOtpChannel;
+use App\Services\CustomerPortal\SystemSmsOtpChannel;
 use App\Services\Email\SmtpConfigService;
+use App\Services\Messaging\NullSmsService;
+use App\Services\Messaging\SmsService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Vite;
@@ -76,6 +79,26 @@ class AppServiceProvider extends ServiceProvider
         // integration once per request and reuse the resolved config.
         $this->app->singleton(SmtpConfigService::class);
 
+        // Phase 10 — SmsService binding.
+        //
+        // In testing we register a NullSmsService that
+        // returns success without calling any real
+        // provider. This lets every existing test in
+        // the suite (Phase 7/8/9) run untouched
+        // even though the controller paths now invoke
+        // the dispatcher. Tests that need to assert
+        // on the SmsService rebind it via
+        // `$this->app->instance(SmsService::class, ...)`.
+        $this->app->singleton(SmsService::class, function ($app) {
+            $env = (string) (env('APP_ENV') ?? getenv('APP_ENV') ?: '');
+
+            if ($env === 'testing') {
+                return new NullSmsService;
+            }
+
+            return new SmsService;
+        });
+
         // Phase 7 — Customer portal OTP channel binding.
         //
         // The default channel is the logging channel: it
@@ -86,14 +109,30 @@ class AppServiceProvider extends ServiceProvider
         // config('customer_portal.channel') or by re-binding
         // \App\Contracts\CustomerPortalOtpChannel.
         //
+        // Phase 10 — the binding now also takes the
+        // `CUSTOMER_PORTAL_OTP_CHANNEL` env var. In
+        // production (`APP_ENV !== testing`) the binding
+        // is the SystemSmsOtpChannel, which wraps the
+        // existing SmsService (Integration model in
+        // /system/integrations). In testing we keep the
+        // logging channel so unit tests do not need a
+        // real provider configured.
+        //
+        // The default for `local` is also SystemSmsOtpChannel
+        // (the developer can flip the env var back to
+        // `logging` if they don't have an SMS provider
+        // configured). The OTP service and the controllers
+        // do not know which implementation is active.
+        //
         // CustomerPortalOtpService is a singleton because it
         // is constructed once per request and the channel
         // binding is stable; the per-request work (rate
         // limiting, hashing, lookups) lives inside the
         // service's methods, not in its state.
+        $channel = $this->resolveOtpChannel();
         $this->app->singleton(
             CustomerPortalOtpChannel::class,
-            LoggingCustomerPortalOtpChannel::class
+            $channel
         );
         $this->app->singleton(CustomerPortalOtpService::class);
     }
@@ -225,6 +264,45 @@ class AppServiceProvider extends ServiceProvider
      * of the same font family, so calling this on every
      * boot is safe.
      */
+    /**
+     * Pick the OTP channel class for this environment.
+     *
+     * Precedence:
+     *   1. CUSTOMER_PORTAL_OTP_CHANNEL env var (if set,
+     *      operator can force a specific channel — useful
+     *      for staging).
+     *   2. APP_ENV === 'testing' → LoggingCustomerPortalOtpChannel
+     *      (so the existing Phase 7/8/9 test suite that
+     *      greps "customer_portal.otp.sent" still works).
+     *   3. Otherwise → SystemSmsOtpChannel (production-
+     *      grade, talks to the configured SMS provider
+     *      via SmsService + Integration table).
+     */
+    private function resolveOtpChannel(): string
+    {
+        $forced = env('CUSTOMER_PORTAL_OTP_CHANNEL');
+
+        if (is_string($forced) && $forced !== '') {
+            return match ($forced) {
+                'logging' => LoggingCustomerPortalOtpChannel::class,
+                'system' => SystemSmsOtpChannel::class,
+                default => LoggingCustomerPortalOtpChannel::class,
+            };
+        }
+
+        // APP_ENV is set by phpunit.xml to "testing"
+        // (force=true). We also check getenv() because
+        // some CI runners set it on the OS side and
+        // phpunit.xml is not used.
+        $env = (string) (env('APP_ENV') ?? getenv('APP_ENV') ?: '');
+
+        if ($env === 'testing') {
+            return LoggingCustomerPortalOtpChannel::class;
+        }
+
+        return SystemSmsOtpChannel::class;
+    }
+
     private function registerArabicFontForDomPDF(): void
     {
         $fontDir = base_path('resources/fonts');

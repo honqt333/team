@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Appointment;
+use App\Models\Center;
 use App\Models\CenterWorkingHour;
 use App\Models\Customer;
 use App\Models\Service;
@@ -41,6 +42,13 @@ class AppointmentSchedulingService
     /**
      * @param array<int> $serviceIds
      * @param array<string, mixed> $overrides
+     * @param int|null $centerIdOverride the center the
+     *                                   appointment is booked at. When null (the
+     *                                   staff-side default) the service falls back to
+     *                                   `$customer->center_id`. The portal passes the
+     *                                   user-selected branch here because the
+     *                                   portal-side customer row is not anchored to
+     *                                   a specific center.
      */
     public function create(
         Carbon $scheduledAt,
@@ -51,10 +59,34 @@ class AppointmentSchedulingService
         ?User $assignedUser,
         array $serviceIds,
         array $overrides = [],
+        ?int $centerIdOverride = null,
     ): Appointment {
-        $this->assertSameContext($customer, $vehicle, $bay, $assignedUser);
+        $centerId = $centerIdOverride ?? $customer->center_id;
+
+        // When the caller supplies a centerIdOverride
+        // (e.g. the customer-portal booking flow lets
+        // the customer pick a branch), we MUST verify
+        // the override actually belongs to the same
+        // tenant as the customer. A bug in the calling
+        // controller could otherwise route the
+        // appointment into another tenant's data and
+        // the rest of the create path would silently
+        // accept it.
+        if ($centerIdOverride !== null) {
+            $overrideOk = Center::query()
+                ->whereKey($centerId)
+                ->where('tenant_id', $customer->tenant_id)
+                ->where('is_active', true)
+                ->exists();
+
+            if (! $overrideOk) {
+                throw new RuntimeException('cross_tenant_or_center');
+            }
+        }
+
+        $this->assertSameContext($customer, $vehicle, $bay, $assignedUser, $centerId);
         $this->assertTimeWindow($scheduledAt, $estimatedEndAt, true);
-        $this->assertWorkingHours($customer->center_id, $scheduledAt, $estimatedEndAt);
+        $this->assertWorkingHours($centerId, $scheduledAt, $estimatedEndAt);
 
         // Internal create ALWAYS lands in `scheduled`. Every other
         // status (confirmed / checked_in / converted / cancelled)
@@ -66,7 +98,7 @@ class AppointmentSchedulingService
         }
 
         return DB::transaction(function () use (
-            $scheduledAt, $estimatedEndAt, $customer, $vehicle, $bay, $assignedUser, $serviceIds, $overrides
+            $scheduledAt, $estimatedEndAt, $customer, $vehicle, $bay, $assignedUser, $serviceIds, $overrides, $centerId
         ) {
             // Lock the bay, the user (if any), and the vehicle.
             // The vehicle lock is what serializes the
@@ -76,7 +108,7 @@ class AppointmentSchedulingService
             $this->lockConflictSources($bay, $assignedUser, $vehicle);
 
             $this->assertNoConflicts(
-                $customer->center_id,
+                $centerId,
                 $scheduledAt,
                 $estimatedEndAt,
                 $bay,
@@ -87,7 +119,7 @@ class AppointmentSchedulingService
 
             $appointment = Appointment::create(array_merge([
                 'tenant_id' => $customer->tenant_id,
-                'center_id' => $customer->center_id,
+                'center_id' => $centerId,
                 'customer_id' => $customer->id,
                 'vehicle_id' => $vehicle->id,
                 'service_bay_id' => $bay?->id,
@@ -120,6 +152,16 @@ class AppointmentSchedulingService
      * explicit "change vs keep vs clear" distinction because
      * `?ServiceBay $bay = null` is ambiguous in PHP — null can
      * mean "not passed" or "explicitly null".
+     *
+     * Phase 9 added `?int $newCenterId = null`. When supplied,
+     * the appointment's center_id is updated as part of the
+     * reschedule. The new center must:
+     *   1. belong to the same tenant as the customer
+     *   2. be active
+     *   3. have the appointment's services registered to it
+     *      (the caller is expected to have already checked this
+     *      in their own validation, but the working-hours
+     *      check below uses the new center id)
      */
     public function reschedule(
         Appointment $appointment,
@@ -129,14 +171,38 @@ class AppointmentSchedulingService
         ?ServiceBay $bay = null,
         bool $changeAssignee = false,
         ?User $assignedUser = null,
+        ?int $newCenterId = null,
     ): Appointment {
         // Reschedule is "editing a live appointment". Converted,
         // cancelled, and no_show appointments are immutable here.
         $allowedFrom = [Appointment::STATUS_SCHEDULED, Appointment::STATUS_CONFIRMED];
         $this->assertTransitionAllowed($appointment, $allowedFrom, 'reschedule');
 
+        // Resolve the effective center id for the
+        // duration of the reschedule. The working-hours
+        // check and the conflict check below must use the
+        // new center when one is supplied.
+        $effectiveCenterId = $newCenterId ?? $appointment->center_id;
+
+        if ($newCenterId !== null && $newCenterId !== $appointment->center_id) {
+            // Defense in depth: the new center must
+            // belong to the same tenant and be active.
+            // The caller is expected to have already
+            // verified this, but the reschedule service
+            // never trusts an id from the request.
+            $centerOk = Center::query()
+                ->whereKey($newCenterId)
+                ->where('tenant_id', $appointment->tenant_id)
+                ->where('is_active', true)
+                ->exists();
+
+            if (! $centerOk) {
+                throw new RuntimeException('cross_tenant_or_center');
+            }
+        }
+
         $this->assertTimeWindow($newStart, $newEnd, false);
-        $this->assertWorkingHours($appointment->center_id, $newStart, $newEnd);
+        $this->assertWorkingHours($effectiveCenterId, $newStart, $newEnd);
 
         // Resolve the FINAL bay and user we'll check + persist.
         // $changeBay=true  → use $bay (which may itself be null = cleared)
@@ -146,7 +212,10 @@ class AppointmentSchedulingService
 
         // Cross-context check on the final resources — defense in
         // depth in case the controller skipped validation.
-        if ($finalBay && $finalBay->center_id !== $appointment->center_id) {
+        // The new center may differ from the appointment's
+        // current one, so we check the final bay against the
+        // EFFECTIVE center id, not the original.
+        if ($finalBay && $finalBay->center_id !== $effectiveCenterId) {
             throw new RuntimeException('cross_tenant_or_center');
         }
 
@@ -154,33 +223,62 @@ class AppointmentSchedulingService
             throw new RuntimeException('cross_tenant_or_center');
         }
 
-        return DB::transaction(function () use ($appointment, $newStart, $newEnd, $finalBay, $finalUser) {
+        return DB::transaction(function () use ($appointment, $newStart, $newEnd, $finalBay, $finalUser, $effectiveCenterId, $newCenterId, $allowedFrom) {
+            // Re-read the appointment with a row-level
+            // lock. The caller (Phase 9 portal action
+            // service) already locked the row, but
+            // staff-side callers may not have. Locking
+            // again is cheap and makes the
+            // status transition check race-free: a
+            // concurrent cancel or check-in cannot
+            // slip past the allowlist between this
+            // method's pre-check and the update below.
+            //
+            // The re-read also picks up the latest
+            // row version, which matters for the
+            // conflict check below: it uses the
+            // latest id and tenant_id.
+            $fresh = Appointment::query()
+                ->whereKey($appointment->id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($fresh === null) {
+                throw new RuntimeException('appointment_not_found');
+            }
+            $this->assertTransitionAllowed($fresh, $allowedFrom, 'reschedule');
+
             // Lock the FINAL bay, the FINAL user, and the vehicle
             // — the row we lock must match the row we'll check.
-            $this->lockConflictSources($finalBay, $finalUser, $appointment->vehicle);
+            $this->lockConflictSources($finalBay, $finalUser, $fresh->vehicle);
 
             // Re-check conflicts with the FINAL resources inside
             // the locked transaction. This is what makes
             // "swap to a different bay" safe: the check uses the
             // same ids the update will persist.
             $this->assertNoConflicts(
-                $appointment->center_id,
+                $effectiveCenterId,
                 $newStart,
                 $newEnd,
                 $finalBay,
                 $finalUser,
-                $appointment->vehicle,
-                excludeAppointmentId: $appointment->id
+                $fresh->vehicle,
+                excludeAppointmentId: $fresh->id
             );
 
-            $appointment->update([
+            $update = [
                 'scheduled_at' => $newStart,
                 'estimated_end_at' => $newEnd,
                 'service_bay_id' => $finalBay?->id,
                 'assigned_user_id' => $finalUser?->id,
-            ]);
+            ];
 
-            return $appointment->refresh();
+            if ($newCenterId !== null) {
+                $update['center_id'] = $newCenterId;
+            }
+            $fresh->update($update);
+
+            return $fresh->refresh();
         });
     }
 
@@ -241,9 +339,9 @@ class AppointmentSchedulingService
         });
     }
 
-    public function cancel(Appointment $appointment, ?string $reason = null): Appointment
+    public function cancel(Appointment $appointment, ?string $reason = null, bool $isCustomerAction = false): Appointment
     {
-        return DB::transaction(function () use ($appointment, $reason) {
+        return DB::transaction(function () use ($appointment, $reason, $isCustomerAction) {
             $fresh = Appointment::query()
                 ->whereKey($appointment->id)
                 ->lockForUpdate()
@@ -255,11 +353,20 @@ class AppointmentSchedulingService
 
             // You can cancel something that is still alive. You
             // cannot un-convert or un-cancel by re-cancelling.
+            // The staff side accepts `checked_in` because an
+            // operator may need to walk a customer out after
+            // they physically arrived. The customer portal
+            // does NOT accept `checked_in`: once the
+            // customer is on premises, the operator owns the
+            // decision.
             $allowedFrom = [
                 Appointment::STATUS_SCHEDULED,
                 Appointment::STATUS_CONFIRMED,
-                Appointment::STATUS_CHECKED_IN,
             ];
+
+            if (! $isCustomerAction) {
+                $allowedFrom[] = Appointment::STATUS_CHECKED_IN;
+            }
             $this->assertTransitionAllowed($fresh, $allowedFrom, 'cancel');
 
             $fresh->update([
@@ -423,19 +530,36 @@ class AppointmentSchedulingService
         Vehicle $vehicle,
         ?ServiceBay $bay,
         ?User $assignedUser,
+        ?int $centerId = null,
     ): void {
         if ($vehicle->customer_id !== $customer->id) {
             throw new RuntimeException('vehicle_not_owned_by_customer');
         }
 
-        if ($vehicle->tenant_id !== $customer->tenant_id
-            || $vehicle->center_id !== $customer->center_id) {
+        if ($vehicle->tenant_id !== $customer->tenant_id) {
             throw new RuntimeException('cross_tenant_or_center');
         }
 
+        // A bay from a different center (in the same
+        // tenant) is still rejected on the staff side:
+        // a workshop can only book into bays in the
+        // center the operator is currently viewing.
+        // The customer portal supplies the booking's
+        // centerId via $centerIdOverride, so this check
+        // is keyed off the EFFECTIVE center (the
+        // appointment's), not the customer's home
+        // center. The vehicle itself, however, is
+        // tenant-scoped: a customer with a vehicle
+        // registered in any branch of the tenant can
+        // book in any other branch.
+        $effectiveCenterId = $centerId ?? $customer->center_id;
+
         if ($bay) {
-            if ($bay->tenant_id !== $customer->tenant_id
-                || $bay->center_id !== $customer->center_id) {
+            if ($bay->tenant_id !== $customer->tenant_id) {
+                throw new RuntimeException('cross_tenant_or_center');
+            }
+
+            if ($bay->center_id !== $effectiveCenterId) {
                 throw new RuntimeException('cross_tenant_or_center');
             }
 
@@ -452,7 +576,7 @@ class AppointmentSchedulingService
             // via the centers pivot. super_admin bypass is the
             // standard escape hatch.
             $isAssigned = $assignedUser->centers()
-                ->where('centers.id', $customer->center_id)
+                ->where('centers.id', $effectiveCenterId)
                 ->exists();
 
             if (! $isAssigned && ! $assignedUser->hasRole('super_admin')) {

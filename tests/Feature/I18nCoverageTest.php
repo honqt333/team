@@ -47,9 +47,14 @@ class I18nCoverageTest extends TestCase
         // tenant_site.* + common.dark/light_mode namespace.
         // All new tenant_site.* keys that are referenced from PHP
         // are mirrored in lang/{ar,en}/tenant_site.php.
+        // Bumped again in 2026-07-30 for Phase 10 (SMS OTP) —
+        // adds 1 new key per locale (customer_portal.otp.body).
+        // The body is rendered through the SMS channel, not the
+        // i18n JSON path, so a flat duplicate of the key is
+        // required in both lang/{en,ar}/customer_portal.php.
         // TODO: Audit and add the missing PHP lang entries.
-        'ar' => 640,
-        'en' => 640,
+        'ar' => 641,
+        'en' => 641,
     ];
 
     public function test_no_new_missing_translation_keys_in_arabic(): void

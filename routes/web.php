@@ -95,6 +95,8 @@ use App\Http\Controllers\Auth\PhoneVerificationController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Public\CustomerPortalAppointmentActionsController;
+use App\Http\Controllers\Public\CustomerPortalAppointmentController;
 use App\Http\Controllers\Public\CustomerPortalAuthController;
 use App\Http\Controllers\Public\CustomerPortalController;
 use App\Http\Controllers\Public\PublicLandingController;
@@ -217,6 +219,61 @@ Route::prefix('/{tenant}/portal')
         Route::middleware('customer.portal.session')->group(function () {
             Route::get('/dashboard', [CustomerPortalController::class, 'dashboard'])
                 ->name('dashboard');
+
+            // ─── Self-service booking (Phase 8) ───
+            // The booking endpoints run behind the
+            // portal session middleware, so the
+            // controller can trust portal_customer is
+            // set. Tenant + customer isolation live
+            // in the controller; the route itself
+            // only enforces auth + throttling.
+            //
+            // Route ordering matters. Laravel matches
+            // by registration order, NOT by specificity,
+            // so the catch-all `/appointments/{id}`
+            // would shadow `/appointments/new` and
+            // `/appointments/availability` if it came
+            // first. The literal routes come first.
+            Route::get('/appointments/new', [CustomerPortalAppointmentController::class, 'showNew'])
+                ->name('appointments.new');
+            Route::get('/appointments/availability', [CustomerPortalAppointmentController::class, 'availability'])
+                ->middleware('throttle:customer-portal-availability')
+                ->name('appointments.availability');
+            Route::post('/appointments', [CustomerPortalAppointmentController::class, 'store'])
+                ->middleware('throttle:customer-portal-booking')
+                ->name('appointments.store');
+            // The catch-all confirmation route uses a
+            // different path shape from the literal
+            // routes above so Laravel can never
+            // confuse a number like "1" with one of
+            // the literal segments.
+            Route::get('/appointment/{id}', [CustomerPortalAppointmentController::class, 'showConfirmation'])
+                ->where(['id' => '\d+'])
+                ->name('appointments.show');
+
+            // ─── Self-service cancel + reschedule (Phase 9) ───
+            // The cancel + reschedule endpoints are
+            // kept on a separate controller from the
+            // booking flow so each phase's audit log
+            // + tests stay focused. The actions live
+            // under the same `customer.portal.session`
+            // middleware so the controllers can trust
+            // `portal_customer` and `public_tenant`.
+            Route::get('/appointment/{id}/edit', [CustomerPortalAppointmentActionsController::class, 'showReschedule'])
+                ->where(['id' => '\d+'])
+                ->name('appointments.edit');
+            Route::post('/appointment/{id}/cancel', [CustomerPortalAppointmentActionsController::class, 'cancel'])
+                ->middleware('throttle:customer-portal-cancel')
+                ->where(['id' => '\d+'])
+                ->name('appointments.cancel');
+            Route::get('/appointment/{id}/reschedule-availability', [CustomerPortalAppointmentActionsController::class, 'rescheduleAvailability'])
+                ->middleware('throttle:customer-portal-reschedule-availability')
+                ->where(['id' => '\d+'])
+                ->name('appointments.rescheduleAvailability');
+            Route::post('/appointment/{id}/reschedule', [CustomerPortalAppointmentActionsController::class, 'reschedule'])
+                ->middleware('throttle:customer-portal-reschedule')
+                ->where(['id' => '\d+'])
+                ->name('appointments.reschedule');
         });
     });
 

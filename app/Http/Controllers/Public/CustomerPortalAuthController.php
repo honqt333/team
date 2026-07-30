@@ -45,10 +45,30 @@ class CustomerPortalAuthController extends Controller
 
     public function showLogin(Request $request): Response
     {
+        // We accept a `return_to` query param so deep
+        // links (e.g. "Book an appointment" CTA from
+        // the public site) can drop the customer on the
+        // login page and then resume the original
+        // destination after a successful OTP verify.
+        // The value is stored in the session because
+        // the POST /login → GET /verify → POST /verify
+        // round-trip does not preserve a custom query
+        // string cleanly, and the redirect after verify
+        // is server-driven.
+        $returnTo = $this->sanitizeReturnTo(
+            $request->query('return_to'),
+            $this->resolveTenantSlug($request)
+        );
+
+        if ($returnTo !== null) {
+            $request->session()->put('cp_return_to', $returnTo);
+        }
+
         return Inertia::render('Public/Portal/Login', [
             'tenant' => $this->tenantContext($request),
             'locale' => $this->localeContext($request),
             'phone' => old('phone', ''),
+            'return_to' => $returnTo,
         ]);
     }
 
@@ -148,7 +168,22 @@ class CustomerPortalAuthController extends Controller
         // immediately.
         $request->attributes->set('portal_customer', $result->customer);
 
-        return redirect()->to('/'.$tenant->slug.'/portal/dashboard');
+        // Resume the original destination if the user
+        // came from a deep link (e.g. "Book an
+        // appointment" CTA). The session-stored value was
+        // validated at the login step; we re-sanitize here
+        // because session data is user-controlled in
+        // pathological cases.
+        $returnTo = $this->sanitizeReturnTo(
+            $request->session()->pull('cp_return_to'),
+            $tenant->slug
+        );
+
+        return redirect()->to(
+            $returnTo !== null
+                ? '/'.$tenant->slug.$returnTo
+                : '/'.$tenant->slug.'/portal/dashboard'
+        );
     }
 
     public function logout(Request $request): RedirectResponse
@@ -210,9 +245,18 @@ class CustomerPortalAuthController extends Controller
         // before the cookie round-trips.
         $tenant = $request->attributes->get('public_tenant');
         $tenantSlug = $tenant instanceof Tenant ? $tenant->slug : '';
-        $returnTo = $request->input('return_to');
 
-        $url = '/'.ltrim($returnTo ?: ($tenantSlug.'/portal/login'), '/');
+        // Honor a return_to deep link if it survives
+        // sanitization. Without this, a customer who
+        // clicks the language toggle while on a deep
+        // link (e.g. from the booking CTA) would be
+        // bumped back to the login screen.
+        $returnTo = $this->sanitizeReturnTo(
+            $request->input('return_to'),
+            $tenantSlug
+        );
+
+        $url = '/'.ltrim($returnTo !== null ? $returnTo : ($tenantSlug.'/portal/login'), '/');
         $url .= (str_contains($url, '?') ? '&' : '?').'lang='.$validated['lang'];
 
         return redirect()->to($url)->withCookie($cookie);
@@ -227,6 +271,64 @@ class CustomerPortalAuthController extends Controller
         }
 
         return $tenant;
+    }
+
+    /**
+     * Strip + validate a `return_to` value. Allowed
+     * shapes are paths RELATIVE to the tenant's portal:
+     *
+     *   /portal/dashboard
+     *   /portal/appointments/new
+     *   /portal/appointments/123
+     *
+     * Reject anything that:
+     *   - is not a string,
+     *   - does not start with `/portal/`,
+     *   - contains `..` or a scheme (open-redirect
+     *     protection),
+     *   - contains a newline (header-injection guard).
+     *
+     * The function returns the canonical path (with a
+     * leading `/`) or null if the input is unsafe.
+     */
+    private function sanitizeReturnTo(mixed $value, ?string $tenantSlug): ?string
+    {
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        if (strlen($value) > 255) {
+            return null;
+        }
+
+        if (preg_match('/[\r\n\0]/', $value)) {
+            return null;
+        }
+
+        // Must be an absolute path under /portal/.
+        if (! str_starts_with($value, '/portal/')) {
+            return null;
+        }
+
+        // Reject any attempt to climb out of /portal/.
+        if (str_contains($value, '..')) {
+            return null;
+        }
+
+        // Reject schemes (defense-in-depth; the leading
+        // slash already rules out most cases).
+        if (preg_match('#^[a-z][a-z0-9+.\-]*://#i', $value) === 1) {
+            return null;
+        }
+
+        return $value;
+    }
+
+    private function resolveTenantSlug(Request $request): ?string
+    {
+        $tenant = $request->attributes->get('public_tenant');
+
+        return $tenant instanceof Tenant ? $tenant->slug : null;
     }
 
     private function tenantContext(Request $request): array

@@ -21,6 +21,32 @@ class SmsService
     }
 
     /**
+     * Phase 10 — set the integration after construction.
+     * The container resolves the default integration at
+     * boot time. Tests that mock the SmsService do not
+     * need this entry point; this is for code paths
+     * that want to swap providers at runtime (e.g. a
+     * multi-provider dispatch where one provider
+     * has a temporary outage).
+     */
+    public function setIntegration(?Integration $integration): void
+    {
+        $this->integration = $integration;
+    }
+
+    /**
+     * True if a usable integration is configured.
+     * The SmsService is "swappable" — tests can bind
+     * a fake, a Null, or a real instance. The check
+     * here is only for the production code path that
+     * picks a default at boot.
+     */
+    public function isReady(): bool
+    {
+        return $this->integration !== null && (bool) $this->integration->is_active;
+    }
+
+    /**
      * Send an SMS message.
      */
     public function send(string $to, string $message, ?int $tenantId = null): array

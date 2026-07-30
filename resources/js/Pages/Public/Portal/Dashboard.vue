@@ -32,6 +32,22 @@
 
                 <div class="flex items-center gap-2">
                     <a
+                        v-if="canBook"
+                        :href="bookUrl"
+                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-white"
+                        :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                            />
+                        </svg>
+                        <span>{{ t('customer_portal.dashboard.book_cta') }}</span>
+                    </a>
+                    <a
                         :href="`/${tenant.slug}`"
                         class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
                     >
@@ -232,6 +248,14 @@ const initial = computed(() => {
     const n = props.customer?.name || '';
     return n.trim().charAt(0).toUpperCase() || '?';
 });
+
+// Booking is only offered to customers with at least
+// one vehicle — the booking form rejects requests
+// without a vehicle and there's no self-service way
+// to add one in the portal. Hiding the CTA on empty
+// states keeps the UI honest.
+const canBook = computed(() => (props.vehicles?.length ?? 0) > 0);
+const bookUrl = computed(() => `/${props.tenant.slug}/portal/appointments/new`);
 
 const csrf = computed(() => {
     if (typeof document === 'undefined') {
