@@ -262,6 +262,32 @@
                         {{ $t('appointments.title') }}
                     </Link>
 
+                    <Link
+                        v-if="can('crm.appointments.manage')"
+                        :href="route('communications.appointment-messages.index')"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/communications/appointment-messages')
+                                ? 'bg-sky-50 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-5 h-5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.39-1.03L3 20l1.39-3.94A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
+                        </svg>
+                        {{ $t('communications.appointment_messages.title') }}
+                    </Link>
+
                     <a
                         v-if="can('quotes.view')"
                         href="/app/quotes"
@@ -1561,6 +1587,32 @@
                             />
                         </svg>
                         {{ $t('appointments.title') }}
+                    </Link>
+
+                    <Link
+                        v-if="can('crm.appointments.manage')"
+                        :href="route('communications.appointment-messages.index')"
+                        :class="[
+                            'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive('/app/communications/appointment-messages')
+                                ? 'bg-sky-50 dark:bg-sky-900/50 text-sky-700 dark:text-sky-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700',
+                        ]"
+                    >
+                        <svg
+                            class="w-5 h-5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.39-1.03L3 20l1.39-3.94A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                            />
+                        </svg>
+                        {{ $t('communications.appointment_messages.title') }}
                     </Link>
 
                     <a

@@ -9,9 +9,9 @@ use App\Contracts\SmsSendResult;
 use App\Models\CustomerPortalOtp;
 use App\Services\Messaging\SmsService;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Support\Facades\Log;
 use ReflectionClass;
+use Throwable;
 
 /**
  * Production OTP delivery channel.
@@ -131,7 +131,7 @@ class SystemSmsOtpChannel implements CustomerPortalOtpChannel
 
         try {
             $result = $this->sms->send($phone, $body, $otp->tenant_id);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             $this->invalidateOtp($otp, 'send_threw');
             // SECURITY: log the otp id, the tenant id,
             // the customer id, and a short reason class.

@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Contracts\CustomerPortalOtpChannel;
 use App\Models\AdminUser;
+use App\Models\AppointmentMessageDelivery;
 use App\Models\Center;
 use App\Models\Customer;
 use App\Models\Department;
@@ -35,6 +36,7 @@ use App\Observers\EmployeeObserver;
 use App\Observers\PaymentObserver;
 use App\Observers\WorkOrderItemObserver;
 use App\Observers\WorkOrderObserver;
+use App\Policies\AppointmentMessageDeliveryPolicy;
 use App\Policies\CustomerPolicy;
 use App\Policies\DepartmentPolicy;
 use App\Policies\EmployeeContractPolicy;
@@ -212,6 +214,14 @@ class AppServiceProvider extends ServiceProvider
         // Phase 4: appointments + service bays
         Gate::policy(Appointment::class, AppointmentPolicy::class);
         Gate::policy(ServiceBay::class, ServiceBayPolicy::class);
+
+        // Phase 11: appointment message delivery log
+        // (the Phase 10 deliveries table, surfaced
+        // to the staff UI for retry).
+        Gate::policy(
+            AppointmentMessageDelivery::class,
+            AppointmentMessageDeliveryPolicy::class
+        );
 
         // Observers
         Employee::observe(EmployeeObserver::class);

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Appointment extends Model
 {
@@ -100,6 +101,31 @@ class Appointment extends Model
     public function workOrder(): BelongsTo
     {
         return $this->belongsTo(WorkOrder::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(AppointmentActivity::class)->orderByDesc('created_at');
+    }
+
+    /**
+     * Log an activity for this appointment.
+     *
+     * Mirrors the work-order convention. The
+     * caller is responsible for the privacy
+     * contract on the description + changes
+     * arguments: NEVER the customer's phone, the
+     * SMS body, or any provider error text.
+     */
+    public function logActivity(string $action, ?string $description = null, ?array $changes = null): void
+    {
+        $this->activities()->create([
+            'tenant_id' => $this->tenant_id,
+            'user_id' => auth()->id(),
+            'action' => $action,
+            'description' => $description,
+            'changes' => $changes,
+        ]);
     }
 
     /**

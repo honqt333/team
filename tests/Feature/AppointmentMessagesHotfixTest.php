@@ -34,6 +34,7 @@ use Mockery;
 use RuntimeException;
 use Tests\TestCase;
 use Throwable;
+use TypeError;
 
 /**
  * Phase 10 hot-fix — P0/P1 regressions.
@@ -1172,5 +1173,54 @@ class AppointmentMessagesHotfixTest extends TestCase
         $this->assertSame(AppointmentMessageDelivery::STATUS_SENT, $stale->status, 'the row stays at whatever another worker set it to');
 
         Queue::assertNothingPushed();
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // P3 round 3 — SystemSmsOtpChannel catches Throwable
+    // ──────────────────────────────────────────────────────────
+
+    /**
+     * P3 hardening: a misbehaving provider may
+     * throw an `Error` (e.g. a TypeError from a
+     * broken SDK) rather than an `Exception`.
+     * `catch (Exception)` would let that throw
+     * escape and leave the OTP in a verifiable
+     * state. We now catch `Throwable` so any
+     * throwable failure invalidates the row.
+     */
+    public function test_system_sms_otp_channel_invalidates_on_throwable_not_just_exception(): void
+    {
+        $spy = Mockery::mock(SmsService::class);
+        $spy->shouldReceive('isReady')->andReturn(true);
+        // A TypeError is an Error, not an Exception.
+        // The old `catch (Exception)` would miss
+        // this and the throw would propagate,
+        // leaving the OTP consumable.
+        $spy->shouldReceive('send')
+            ->andThrow(new TypeError('broken sdk: bad arg +966509999990'));
+
+        $this->app->instance(SmsService::class, $spy);
+
+        $this->app->forgetInstance(CustomerPortalOtpChannel::class);
+        $this->app->bind(
+            CustomerPortalOtpChannel::class,
+            SystemSmsOtpChannel::class
+        );
+
+        $tenant = $this->publishedTenant();
+        $customer = $this->customerIn($tenant, '+966509999990');
+        $otp = $this->makeOtp($tenant, $customer, '+966509999990');
+
+        $channel = $this->app->make(CustomerPortalOtpChannel::class);
+        $result = $channel->send($otp, '+966509999990', '123456');
+
+        $this->assertFalse($result->success, 'Throwable must be treated as a hard failure');
+        $this->assertSame('sms_send_failed', $result->errorCode);
+
+        $otp->refresh();
+        $this->assertNotNull(
+            $otp->consumed_at,
+            'Throwable from the provider layer must invalidate the OTP — the verify path filters consumed_at IS NULL'
+        );
     }
 }

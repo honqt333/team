@@ -6,6 +6,7 @@ use App\Exports\AgingReportExport;
 use App\Exports\BankTransferReceiptsExport;
 use App\Exports\TenantsReportExport;
 use App\Http\Controllers\App\AppointmentController;
+use App\Http\Controllers\App\AppointmentMessageDeliveryController;
 use App\Http\Controllers\App\BillingController;
 use App\Http\Controllers\App\BranchesController;
 use App\Http\Controllers\App\CenterSettingsController;
@@ -367,6 +368,18 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::post('/appointments/{appointment}/no-show', [AppointmentController::class, 'markNoShow'])->name('appointments.no-show');
     Route::post('/appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::post('/appointments/{appointment}/convert', [AppointmentController::class, 'convert'])->name('appointments.convert');
+
+    // Phase 11: Appointment message delivery log
+    // (failed / skipped SMS about an appointment).
+    // The retry endpoint is throttled so a
+    // double-click or a runaway script cannot
+    // hammer the queue.
+    Route::get('/communications/appointment-messages', [AppointmentMessageDeliveryController::class, 'index'])
+        ->name('communications.appointment-messages.index');
+    Route::post('/communications/appointment-messages/{delivery}/retry', [AppointmentMessageDeliveryController::class, 'retry'])
+        ->where(['delivery' => '\d+'])
+        ->middleware('throttle:customer-portal-booking')
+        ->name('communications.appointment-messages.retry');
     Route::get('/work-orders', [WorkOrderController::class, 'index'])->name('work-orders.index');
     Route::post('/work-orders', [WorkOrderController::class, 'store'])->name('work-orders.store');
     Route::get('/work-orders/{workOrder}', [WorkOrderController::class, 'show'])->name('work-orders.show');

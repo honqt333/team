@@ -311,10 +311,24 @@ class AppointmentMessageDispatcher
      *   3. The queue itself could not accept the
      *      job (driver down, serialization error).
      *      The throw happens BEFORE the job's
-     *      handle() runs. The row is still
-     *      `queued`; the recovery command will
-     *      re-fire it on its next tick. We log the
-     *      class name and move on.
+     *      handle() runs. We mark the row `failed`
+     *      with `error_code = 'dispatch_failed'`
+     *      via a conditional UPDATE that only
+     *      matches rows still in `queued`. The
+     *      recovery command (`appointments:recover-stuck`)
+     *      only unsticks `sending` rows, so a
+     *      `queued` row with a broken dispatch is
+     *      stranded otherwise. Marking it `failed`
+     *      with a stable code gives operators a
+     *      signal (the dashboard can filter on
+     *      `error_code = 'dispatch_failed'`) and
+     *      ends the recovery ambiguity. The
+     *      conditional predicate
+     *      `status = 'queued'` ensures we do NOT
+     *      overwrite a row that the job, in some
+     *      interleaving, has already taken to
+     *      `sending` / `failed` / `sent` /
+     *      `skipped`.
      *
      * In none of the three cases does the
      * caller's response change. The customer sees
@@ -326,6 +340,8 @@ class AppointmentMessageDispatcher
         try {
             SendAppointmentMessage::dispatch($deliveryId);
         } catch (Throwable $e) {
+            $reasonClass = (new ReflectionClass($e))->getShortName();
+
             // SECURITY: log the delivery id and the
             // exception class only. The SmsService's
             // exception message can include the
@@ -333,8 +349,40 @@ class AppointmentMessageDispatcher
             // the phone). We do NOT echo it.
             Log::warning('appointment_message.dispatch_failed', [
                 'delivery_id' => $deliveryId,
-                'reason_class' => (new ReflectionClass($e))->getShortName(),
+                'reason_class' => $reasonClass,
             ]);
+
+            // Conditional UPDATE: only flip rows
+            // that are STILL `queued`. If the
+            // job (in another interleaving) has
+            // already taken the row to `sending`
+            // or terminal, we leave the row
+            // alone — its own state machine is
+            // the source of truth.
+            //
+            // The error code is a fixed sentinel,
+            // not derived from the exception class
+            // (the operator wants one bucket for
+            // "dispatch failed", not a long list
+            // of class names). The exception class
+            // is in the application log only.
+            //
+            // error_message is NULL on purpose:
+            // even the truncated exception
+            // message can leak the phone in some
+            // queue-driver failure envelopes. The
+            // row never carries the message body
+            // or the phone.
+            AppointmentMessageDelivery::query()
+                ->where('id', $deliveryId)
+                ->where('status', AppointmentMessageDelivery::STATUS_QUEUED)
+                ->update([
+                    'status' => AppointmentMessageDelivery::STATUS_FAILED,
+                    'failed_at' => Carbon::now(),
+                    'error_code' => 'dispatch_failed',
+                    'error_message' => null,
+                    'attempts' => DB::raw('attempts + 1'),
+                ]);
         }
     }
 }

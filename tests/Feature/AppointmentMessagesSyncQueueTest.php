@@ -14,10 +14,15 @@ use App\Models\ServiceBay;
 use App\Models\Tenant;
 use App\Models\TenantWebsite;
 use App\Models\Vehicle;
+use App\Services\Messaging\AppointmentMessageDispatcher;
 use App\Services\Messaging\SmsService;
 use App\Support\CustomerPortalSession;
 use Carbon\Carbon;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Mockery;
 use RuntimeException;
 use Tests\TestCase;
@@ -153,6 +158,27 @@ class AppointmentMessagesSyncQueueTest extends TestCase
             'tenant_id' => $tenant->id,
             'created_at' => Carbon::now()->toIso8601String(),
             'last_seen_at' => Carbon::now()->toIso8601String(),
+        ]);
+    }
+
+    private function makeAppointment(
+        Tenant $tenant,
+        Center $center,
+        Customer $customer,
+        Vehicle $vehicle,
+        Carbon $scheduledAt,
+        string $status = Appointment::STATUS_SCHEDULED,
+    ): Appointment {
+        return Appointment::create([
+            'tenant_id' => $tenant->id,
+            'center_id' => $center->id,
+            'customer_id' => $customer->id,
+            'vehicle_id' => $vehicle->id,
+            'service_bay_id' => null,
+            'scheduled_at' => $scheduledAt,
+            'estimated_end_at' => $scheduledAt->copy()->addMinutes(30),
+            'status' => $status,
+            'source' => Appointment::SOURCE_CUSTOMER_PORTAL,
         ]);
     }
 
@@ -344,5 +370,203 @@ class AppointmentMessagesSyncQueueTest extends TestCase
             ->first();
         $this->assertNotNull($delivery);
         $this->assertSame(AppointmentMessageDelivery::STATUS_FAILED, $delivery->status);
+    }
+
+    // ──────────────────────────────────────────────────────────
+    // P3 round 3 — dispatch throws BEFORE the job runs
+    // ──────────────────────────────────────────────────────────
+
+    /**
+     * Forcibly fail the queue's `dispatch()` so
+     * the job's `handle()` never runs. The
+     * dispatcher's `safeDispatch()` must
+     * transition the row to `failed` with
+     * `error_code = 'dispatch_failed'` so the
+     * operator gets a stable code to filter on,
+     * and so the row is not stranded in
+     * `queued` (the recovery command only unsticks
+     * `sending` rows, not `queued` ones).
+     *
+     * How we force the failure: the SendAppointmentMessage
+     * `dispatch()` static method ultimately calls
+     * `app(Bus::class)->dispatch($pending)`. The
+     * `Bus` facade resolves to a singleton; we
+     * swap that singleton for a Mockery mock
+     * whose `dispatch()` throws. The
+     * `PendingDispatch::__destruct()` triggers
+     * the throw inside the dispatcher's
+     * `safeDispatch()`.
+     */
+    public function test_dispatch_failure_before_job_marks_row_failed_with_dispatch_failed_code(): void
+    {
+        // We need the bus to throw before the
+        // job runs. Replace the resolved Bus
+        // instance with a Mockery double whose
+        // `dispatch()` throws. This catches
+        // the throw inside PendingDispatch's
+        // destructor, before any handle() runs.
+        $bus = Mockery::mock(Dispatcher::class);
+        $bus->shouldReceive('dispatch')
+            ->andThrow(new RuntimeException(
+                'queue down: phone +966501234567 not deliverable'
+            ));
+        $this->app->instance(Dispatcher::class, $bus);
+
+        // Capture every log call so we can assert
+        // no PII leaked into the application log.
+        $captured = [];
+        Log::listen(function (MessageLogged $event) use (&$captured) {
+            $captured[] = [
+                'level' => $event->level,
+                'message' => $event->message,
+                'context' => $event->context,
+            ];
+        });
+
+        $tenant = $this->publishedTenant();
+        $center = $this->openCenter($tenant);
+        $customer = $this->customerIn($tenant);
+        $vehicle = $this->vehicleFor($customer, $tenant);
+        $bay = $this->bayIn($center);
+        $service = $this->serviceIn($tenant, $center);
+
+        $this->loginAs($customer, $tenant);
+
+        $response = $this->post('/'.$tenant->slug.'/portal/appointments', [
+            'center_id' => $center->id,
+            'vehicle_id' => $vehicle->id,
+            'service_ids' => [$service->id],
+            'scheduled_at' => Carbon::now()->addHours(3)->setTime(10, 0)->toIso8601String(),
+        ]);
+
+        // 1. The HTTP response is a successful
+        // redirect — the customer did NOT see
+        // a 500 even though the dispatch failed.
+        $response->assertStatus(302);
+        $response->assertRedirectContains('/portal/appointment/');
+
+        // 2. The appointment itself was created.
+        $appt = Appointment::query()
+            ->where('customer_id', $customer->id)
+            ->where('center_id', $center->id)
+            ->first();
+        $this->assertNotNull($appt);
+        $this->assertSame(Appointment::STATUS_SCHEDULED, $appt->status);
+
+        // 3. The delivery row is `failed` with
+        // `error_code = 'dispatch_failed'`.
+        $delivery = AppointmentMessageDelivery::query()
+            ->where('appointment_id', $appt->id)
+            ->where('message_type', AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION)
+            ->first();
+        $this->assertNotNull($delivery);
+        $this->assertSame(AppointmentMessageDelivery::STATUS_FAILED, $delivery->status);
+        $this->assertSame('dispatch_failed', $delivery->error_code);
+        $this->assertNotNull($delivery->failed_at);
+
+        // 4. error_message is null, the phone and
+        // the exception message are NOT in the
+        // row.
+        $this->assertNull($delivery->error_message);
+        $this->assertStringNotContainsString('+966501234567', (string) $delivery->error_code);
+        $this->assertStringNotContainsString('+966501234567', (string) $delivery->error_message);
+
+        // 5. The log contains the dispatch_failed
+        // warning with the delivery id and the
+        // exception class name only — never the
+        // phone, never the exception message, never
+        // the SMS body.
+        $rawPhone = '+966501234567';
+        $rawBody = 'queue down: phone +966501234567 not deliverable';
+        $sawDispatchFailedLog = false;
+
+        foreach ($captured as $entry) {
+            if ($entry['message'] !== 'appointment_message.dispatch_failed') {
+                continue;
+            }
+            $sawDispatchFailedLog = true;
+            $this->assertArrayHasKey('delivery_id', $entry['context']);
+            $this->assertArrayHasKey('reason_class', $entry['context']);
+
+            foreach ($entry['context'] as $v) {
+                if (! is_string($v) && ! is_numeric($v)) {
+                    continue;
+                }
+                $str = (string) $v;
+                $this->assertStringNotContainsString($rawPhone, $str, "phone leaked: {$str}");
+                $this->assertStringNotContainsString($rawBody, $str, "exception body leaked: {$str}");
+            }
+        }
+        $this->assertTrue($sawDispatchFailedLog, 'expected an appointment_message.dispatch_failed log line');
+    }
+
+    /**
+     * The conditional `WHERE status = queued` in
+     * `safeDispatch()` must NOT overwrite a row
+     * that the job (or another interleaving) has
+     * already taken to a terminal state. We model
+     * that race by manually flipping the row to
+     * `failed` between the dispatcher's INSERT
+     * and the safeDispatch() catch.
+     *
+     * Strategy: queue the dispatch through a
+     * closure we control. The closure flips the
+     * row to `failed` mid-flight, then we let
+     * safeDispatch's catch run.
+     */
+    public function test_dispatch_failure_does_not_overwrite_already_failed_row(): void
+    {
+        $tenant = $this->publishedTenant();
+        $center = $this->openCenter($tenant);
+        $customer = $this->customerIn($tenant);
+        $vehicle = $this->vehicleFor($customer, $tenant);
+
+        $start = Carbon::now()->copy()->addHours(3);
+        $appt = $this->makeAppointment($tenant, $center, $customer, $vehicle, $start);
+
+        $delivery = AppointmentMessageDelivery::create([
+            'tenant_id' => $tenant->id,
+            'appointment_id' => $appt->id,
+            'customer_id' => $customer->id,
+            'message_type' => AppointmentMessageDelivery::TYPE_BOOKING_CONFIRMATION,
+            'scheduled_at_snapshot' => $start,
+            'idempotency_key' => str_repeat('q', 32),
+            'phone_hash' => hash('sha256', '+966501234567'),
+            'status' => AppointmentMessageDelivery::STATUS_QUEUED,
+            'attempts' => 0,
+            'queued_at' => Carbon::now(),
+        ]);
+
+        // Replace the bus with one that throws,
+        // but first flip the row to a different
+        // (terminal) state — `sent`. The
+        // conditional UPDATE in safeDispatch
+        // must see status != queued and skip
+        // the row entirely.
+        $bus = Mockery::mock(Dispatcher::class);
+        $bus->shouldReceive('dispatch')
+            ->andReturnUsing(function () use ($delivery) {
+                // Simulate a race: another
+                // interleaving (here, a job that
+                // somehow already ran) flipped
+                // the row to `sent` before
+                // safeDispatch catches the
+                // dispatch failure.
+                $delivery->update(['status' => AppointmentMessageDelivery::STATUS_SENT]);
+
+                throw new RuntimeException('queue down');
+            });
+        $this->app->instance(Dispatcher::class, $bus);
+
+        $dispatcher = $this->app->make(AppointmentMessageDispatcher::class);
+        $dispatcher->confirmation($appt, $customer);
+
+        $delivery->refresh();
+        // The row stays `sent` — the
+        // dispatcher's safeDispatch catch
+        // did NOT overwrite it with
+        // `failed / dispatch_failed`.
+        $this->assertSame(AppointmentMessageDelivery::STATUS_SENT, $delivery->status, 'safeDispatch must not overwrite a row that another interleaving already took to a terminal state');
+        $this->assertNotSame('dispatch_failed', $delivery->error_code);
     }
 }
