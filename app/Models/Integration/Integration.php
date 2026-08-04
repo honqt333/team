@@ -213,6 +213,19 @@ class Integration extends Model
             ],
             'authentica' => [
                 ['key' => 'api_key', 'label' => 'API Key', 'type' => 'password', 'required' => true],
+                // P2 — Authentica template id. Optional;
+                // the channel defaults to 1 when unset.
+                // Must be a positive integer when
+                // configured; the IntegrationsController
+                // validates this on save.
+                [
+                    'key' => 'template_id',
+                    'label' => 'Authentica OTP Template ID',
+                    'label_ar' => 'معرّف قالب أوثينتيكا لرمز التحقق',
+                    'type' => 'number',
+                    'required' => false,
+                    'min' => 1,
+                ],
             ],
             'whatsapp_cloud' => [
                 ['key' => 'access_token', 'label' => 'Access Token', 'type' => 'password', 'required' => true],

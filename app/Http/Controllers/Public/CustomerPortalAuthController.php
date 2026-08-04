@@ -69,6 +69,19 @@ class CustomerPortalAuthController extends Controller
             'locale' => $this->localeContext($request),
             'phone' => old('phone', ''),
             'return_to' => $returnTo,
+            // The flash status (e.g. the "we sent you a
+            // code" banner from the verify page on a
+            // back-navigation, or a future rate-limit
+            // / cooldowned message) is read out of the
+            // session and exposed as a top-level prop.
+            // The Vue page reads it as `status`, not
+            // `page.props.flash.status`, because Inertia
+            // does not auto-merge Laravel's session
+            // flash into props. The prop is only set
+            // when the session has a status; absent
+            // that, the page renders without the
+            // banner.
+            'status' => $request->session()->get('status'),
         ]);
     }
 
@@ -80,7 +93,6 @@ class CustomerPortalAuthController extends Controller
 
         $tenant = $this->resolveTenant($request);
         $phone = PhoneNumber::normalize($validated['phone']);
-        $generic = back()->with('status', __('customer_portal.auth.code_sent'));
 
         try {
             $this->otp->requestOtp(
@@ -90,18 +102,37 @@ class CustomerPortalAuthController extends Controller
                 userAgent: $request->userAgent(),
             );
         } catch (OtpRateLimitedException $e) {
+            // Rate limit. Keep the user on the login
+            // page with the error so they can read the
+            // cooldown. We do NOT redirect to /verify
+            // here — the customer is being told to wait,
+            // not told "we sent you a code".
             return back()
                 ->withErrors(['phone' => $e->getMessage()])
                 ->withInput();
         }
 
-        // Always return the SAME generic message, regardless
-        // of whether the phone was known. We do this by
-        // returning before any branch, with the phone in the
-        // session so the verify page can pre-fill it.
+        // Always return the SAME generic message,
+        // regardless of whether the phone was known —
+        // this is the anti-enumeration guarantee. The
+        // phone is stored in the session so the verify
+        // page can pre-fill it without the customer
+        // having to re-type.
+        //
+        // The redirect target is the verify page, NOT
+        // the login page. Before this fix the controller
+        // used `back()->with('status', ...)` which
+        // bounced the customer back to /portal/login —
+        // the OTP landed in their SMS but the verify
+        // form was never shown. The redirect must be
+        // explicit and tenant-scoped (the route name
+        // lives under the {tenant} prefix, so we pass
+        // the slug).
         $request->session()->put('cp_pending_phone', $phone ?? $validated['phone']);
 
-        return $generic;
+        return redirect()
+            ->route('public.portal.verify', ['tenant' => $tenant->slug])
+            ->with('status', __('customer_portal.auth.code_sent'));
     }
 
     public function showVerify(Request $request): Response
@@ -110,6 +141,14 @@ class CustomerPortalAuthController extends Controller
             'tenant' => $this->tenantContext($request),
             'locale' => $this->localeContext($request),
             'phone' => $request->session()->get('cp_pending_phone', ''),
+            // The "we sent you a code if your number is
+            // registered" flash from the login POST is
+            // read out of the session and exposed as a
+            // top-level prop. Inertia does not
+            // auto-merge Laravel's session flash into
+            // props, so the Vue page reads `status`,
+            // not `page.props.flash.status`.
+            'status' => $request->session()->get('status'),
         ]);
     }
 

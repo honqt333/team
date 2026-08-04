@@ -16,6 +16,7 @@ use App\Models\Vehicle;
 use App\Support\CustomerPortalSession;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -54,6 +55,13 @@ class CustomerPortalActionsHttpTest extends TestCase
         Carbon::setTestNow(Carbon::parse('2026-08-10 09:00:00'));
 
         parent::setUp();
+
+        // Wipe the rate-limiter buckets so the
+        // cancel / reschedule throttle tests do
+        // not pollute the next one. The phpunit
+        // env uses an array cache, but buckets
+        // survive within the same process.
+        Cache::flush();
     }
 
     protected function tearDown(): void

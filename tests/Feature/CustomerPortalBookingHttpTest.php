@@ -17,6 +17,7 @@ use App\Services\AppointmentSchedulingService;
 use App\Support\CustomerPortalSession;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use RuntimeException;
 use Tests\TestCase;
@@ -67,6 +68,15 @@ class CustomerPortalBookingHttpTest extends TestCase
         Carbon::setTestNow(Carbon::parse('2026-08-10 09:00:00'));
 
         parent::setUp();
+
+        // Wipe the rate-limiter buckets so a test
+        // that exercises the throttle does not
+        // pollute the next one. The phpunit env
+        // uses the array cache driver, but a
+        // prior test's buckets survive until
+        // the process exits — `Cache::flush()`
+        // makes each test own a fresh cache.
+        Cache::flush();
     }
 
     protected function tearDown(): void

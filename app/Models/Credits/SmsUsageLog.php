@@ -62,6 +62,15 @@ class SmsUsageLog extends Model
             'delivered' => 'تم التسليم',
             'failed' => 'فشل',
             'pending' => 'قيد الإرسال',
+            // Phase 13 — a reserved credit is a credit
+            // that was atomically deducted for a
+            // /send-otp call whose result has not
+            // landed yet. The lifecycle is:
+            //   reserved → sent  (success)
+            //   reserved → failed (refunded)
+            // The operator sees 'محجوز' in the
+            // billing report.
+            'reserved' => 'محجوز',
             default => $this->status,
         };
     }

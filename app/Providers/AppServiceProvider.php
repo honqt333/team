@@ -15,6 +15,7 @@ use App\Models\HR\Employee;
 use App\Models\HR\EmployeeContract;
 use App\Models\HR\Leave;
 use App\Models\HR\Payroll;
+use App\Models\Integration\Integration;
 use App\Models\Payment;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseReturnInvoice;
@@ -58,17 +59,20 @@ use App\Policies\VehiclePolicy;
 use App\Policies\WorkOrderInspectionPolicy;
 use App\Policies\WorkOrderItemPolicy;
 use App\Policies\WorkOrderPolicy;
+use App\Services\CustomerPortal\AuthenticaCustomerPortalOtpChannel;
 use App\Services\CustomerPortal\CustomerPortalOtpService;
 use App\Services\CustomerPortal\LoggingCustomerPortalOtpChannel;
 use App\Services\CustomerPortal\SystemSmsOtpChannel;
 use App\Services\Email\SmtpConfigService;
 use App\Services\Messaging\NullSmsService;
 use App\Services\Messaging\SmsService;
+use Closure;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\PermissionRegistrar;
+use Throwable;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -280,23 +284,59 @@ class AppServiceProvider extends ServiceProvider
      * Precedence:
      *   1. CUSTOMER_PORTAL_OTP_CHANNEL env var (if set,
      *      operator can force a specific channel — useful
-     *      for staging).
+     *      for staging). Accepts 'logging', 'system', or
+     *      'authentica'.
      *   2. APP_ENV === 'testing' → LoggingCustomerPortalOtpChannel
      *      (so the existing Phase 7/8/9 test suite that
      *      greps "customer_portal.otp.sent" still works).
-     *   3. Otherwise → SystemSmsOtpChannel (production-
+     *   3. Otherwise, if the active default SMS integration
+     *      is `authentica` (and is configured), bind
+     *      AuthenticaCustomerPortalOtpChannel. Authentica v2
+     *      has NO general "send free-form SMS" endpoint, so
+     *      it cannot be used by SmsService; the OTP-only
+     *      channel talks directly to /send-otp with our
+     *      own pre-generated 6-digit code.
+     *   4. Otherwise → SystemSmsOtpChannel (production-
      *      grade, talks to the configured SMS provider
      *      via SmsService + Integration table).
+     *
+     * Returns a Closure (not a class string) so the
+     * actual class is decided at resolve time, after
+     * the framework is fully booted. The previous
+     * implementation returned a class name, but with
+     * the Authentica branch we have to query the DB
+     * to read the default integration, and the DB
+     * connection is not yet available during the
+     * `register()` phase. The Closure defers that
+     * lookup until the first `app(CustomerPortalOtpChannel::class)`
+     * call.
      */
-    private function resolveOtpChannel(): string
+    private function resolveOtpChannel(): Closure
     {
         $forced = env('CUSTOMER_PORTAL_OTP_CHANNEL');
 
         if (is_string($forced) && $forced !== '') {
             return match ($forced) {
-                'logging' => LoggingCustomerPortalOtpChannel::class,
-                'system' => SystemSmsOtpChannel::class,
-                default => LoggingCustomerPortalOtpChannel::class,
+                'logging' => fn () => app(LoggingCustomerPortalOtpChannel::class),
+                'system' => fn () => app(SystemSmsOtpChannel::class),
+                'authentica' => function () {
+                    // The operator explicitly asked for
+                    // Authentica. If the default SMS
+                    // integration is authentica AND
+                    // configured, use the Authentica
+                    // channel. Otherwise fall back to
+                    // the system channel — a generic
+                    // "send via configured provider"
+                    // path that respects whatever SMS
+                    // provider the tenant has wired
+                    // up. Falling back to the logging
+                    // channel would silently swallow
+                    // every OTP send.
+                    $channel = $this->resolveAuthenticaOtpChannel();
+
+                    return $channel ?? app(SystemSmsOtpChannel::class);
+                },
+                default => fn () => app(LoggingCustomerPortalOtpChannel::class),
             };
         }
 
@@ -307,10 +347,55 @@ class AppServiceProvider extends ServiceProvider
         $env = (string) (env('APP_ENV') ?? getenv('APP_ENV') ?: '');
 
         if ($env === 'testing') {
-            return LoggingCustomerPortalOtpChannel::class;
+            return fn () => app(LoggingCustomerPortalOtpChannel::class);
         }
 
-        return SystemSmsOtpChannel::class;
+        // Lazy resolve. The Authentica lookup runs
+        // at the moment the first
+        // CustomerPortalOtpChannel is requested, by
+        // which point the DB connection is ready.
+        return function () {
+            $channel = $this->resolveAuthenticaOtpChannel();
+
+            if ($channel !== null) {
+                return $channel;
+            }
+
+            return app(SystemSmsOtpChannel::class);
+        };
+    }
+
+    /**
+     * Build the AuthenticaCustomerPortalOtpChannel
+     * from the default SMS integration, or null if the
+     * default integration is not Authentica (or not
+     * configured). The lookup is read at provider-
+     * resolve time; a freshly-edited default integration
+     * takes effect on the next container resolution.
+     */
+    private function resolveAuthenticaOtpChannel(): ?AuthenticaCustomerPortalOtpChannel
+    {
+        // The integration lookup may fail if the DB
+        // is not yet migrated, or if the integrations
+        // table is not part of the current schema.
+        // In that case we fall back to the system
+        // channel — never the Authentica one, which
+        // requires a configured integration.
+        try {
+            $integration = Integration::getDefault('sms');
+        } catch (Throwable $e) {
+            return null;
+        }
+
+        if ($integration === null || $integration->provider !== 'authentica') {
+            return null;
+        }
+
+        if (! $integration->isConfigured()) {
+            return null;
+        }
+
+        return new AuthenticaCustomerPortalOtpChannel($integration);
     }
 
     private function registerArabicFontForDomPDF(): void

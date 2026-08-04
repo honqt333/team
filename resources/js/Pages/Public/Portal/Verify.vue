@@ -87,6 +87,23 @@
             <div
                 class="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800"
             >
+                <!-- Generic "we sent you a code" flash
+                     from the login → verify handoff. Same
+                     banner shape as Login.vue so the
+                     customer gets a consistent cue. The
+                     status prop is consumed server-side
+                     on this GET, so a back-button
+                     navigation does not resurrect a stale
+                     "we sent you a code" message after
+                     the user has already verified. -->
+                <p
+                    v-if="statusBanner"
+                    class="mb-4 text-sm text-emerald-600 dark:text-emerald-400 text-center"
+                    data-testid="portal-verify-status"
+                >
+                    {{ statusBanner }}
+                </p>
+
                 <form @submit.prevent="submit" class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium mb-1.5">
@@ -147,6 +164,18 @@ const props = defineProps({
     tenant: { type: Object, required: true },
     locale: { type: Object, default: () => ({ current: 'ar', is_rtl: true }) },
     phone: { type: String, default: '' },
+    // Server-supplied flash status. The login → verify
+    // handoff sets `session('status')` to the generic
+    // "if your number is registered, we sent you a
+    // code" message; the controller reads it back out
+    // of the session and exposes it as a top-level
+    // prop. Inertia does not auto-merge Laravel's
+    // session flash into props, so the page reads
+    // `status`, not `page.props.flash.status`. The
+    // server-side flash is consumed on this GET, so a
+    // back-button navigation does not re-show a stale
+    // banner after the user has already verified.
+    status: { type: String, default: '' },
 });
 
 const { t: tRaw } = useI18n();
@@ -158,6 +187,11 @@ const t = (k) => {
 };
 
 const isDark = ref(true);
+
+// The banner value is the prop directly; we re-read
+// on every render so the banner appears / disappears
+// correctly across the handoff.
+const statusBanner = computed(() => props.status || '');
 
 const form = useForm({
     phone: props.phone || '',

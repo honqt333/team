@@ -503,7 +503,14 @@ class CustomerPortalOtpService
         $candidates = Customer::query()
             ->where('tenant_id', $tenant->id)
             ->whereNotNull('phone')
-            ->get(['id', 'phone', 'whatsapp']);
+            // The successful verification result is
+            // later used to mint the portal session.
+            // Keep tenant_id on this intentionally
+            // narrow projection; omitting it leaves
+            // the session tenant_id null, and the
+            // next dashboard request correctly
+            // rejects that incomplete session.
+            ->get(['id', 'tenant_id', 'phone', 'whatsapp']);
 
         foreach ($candidates as $candidate) {
             foreach (['phone', 'whatsapp'] as $field) {

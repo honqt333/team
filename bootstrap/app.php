@@ -17,6 +17,7 @@ use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SetPermissionsTeam;
 use App\Http\Middleware\TrackAiUsage;
+use App\Http\Middleware\UsePortalSessionCookie;
 use App\Logging\JsonFormatter;
 use App\Providers\EventServiceProvider;
 use App\Providers\RouteServiceProvider;
@@ -25,6 +26,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Spatie\Permission\Middleware\PermissionMiddleware;
@@ -43,6 +45,61 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // P1 — Customer portal session cookie isolation.
+        //
+        // The portal (/portal/*) and the admin app
+        // (/app/*, /system/*) used to share the same
+        // Laravel session cookie. The portal's own
+        // session payload is namespaced under
+        // CustomerPortalSession::key(), but the COOKIE
+        // carrying it is the same one the admin app
+        // uses. With both audiences active in the
+        // same browser, a session->regenerate() in one
+        // tab (e.g. on OTP verify) overwrites the
+        // cookie the other tab is reading from,
+        // bouncing the second tab's user back to
+        // /login on their next request.
+        //
+        // The fix is to give the portal its own cookie
+        // name (carag_customer_portal_session) for the
+        // duration of a portal request. The middleware
+        // runs at the START of the web group, BEFORE
+        // StartSession, so it can rewrite
+        // `session.cookie` in-process for that request
+        // and StartSession then builds the session
+        // store with the new name. Admin / system
+        // requests are unchanged.
+        //
+        // Companion fix (NOT done here): the
+        // verify endpoint also required
+        // CustomerPortalOtpService::findCustomer() to
+        // include `tenant_id` in the customer
+        // projection. Without it, the session payload
+        // minted on verify had tenant_id=null, and
+        // EnsureCustomerPortalSession rejected the
+        // next dashboard request (the cast of null to
+        // int yields 0, which never matches the route
+        // tenant). The cookie fix alone would not
+        // have made the customer-portal dashboard
+        // reachable. Both layers were required; this
+        // middleware covers the wire-level layer.
+        //
+        // We register it with `prepend:` (NOT
+        // `append:`) so it sits at the very start of
+        // the web group. The default web group order
+        // is: EncryptCookies → AddQueuedCookiesToResponse
+        // → StartSession → ShareErrorsFromSession →
+        // VerifyCsrfToken → SubstituteBindings. Our
+        // middleware must run before StartSession
+        // (which is the only middleware that reads
+        // `session.cookie` at request time and builds
+        // the Store with it). The `prependToPriorityList`
+        // call below is a belt-and-braces guard for
+        // the priority-sorted code path.
+        $middleware->web(prepend: [
+            UsePortalSessionCookie::class,
+        ]);
+
         $middleware->web(append: [
             SetPermissionsTeam::class, // Must be FIRST - sets team before permissions are loaded
             SetLocale::class, // Must be before Inertia to pass correct locale to props
@@ -107,6 +164,48 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->prependToPriorityList(
             before: SubstituteBindings::class,
             prepend: TrackAiUsage::class,
+        );
+
+        // P1 — customer portal session cookie isolation.
+        //
+        // The portal (/portal/*) and the admin app
+        // (/app/*, /system/*) used to share the same
+        // Laravel session cookie. The portal's own
+        // session payload is namespaced under
+        // CustomerPortalSession::key(), but the COOKIE
+        // carrying it is the same one the admin app
+        // uses. With both audiences active in the
+        // same browser, a session->regenerate() in one
+        // tab (e.g. on OTP verify) overwrites the
+        // cookie the other tab is reading from,
+        // bouncing the second tab's user back to
+        // /login on their next request.
+        //
+        // The fix is to give the portal its own cookie
+        // name (carag_customer_portal_session) for the
+        // duration of a portal request. The middleware
+        // runs BEFORE StartSession in the priority
+        // list, rewrites `session.cookie` in-process
+        // for that request, and StartSession then
+        // builds the session store with the new name.
+        // Admin / system requests are unchanged.
+        //
+        // Why prependToPriorityList and not the
+        // middleware group: StartSession reads the
+        // cookie name in getSession() (line 159 of
+        // StartSession.php) and builds the Store with
+        // the config value at construction time. By
+        // the time the priority-sorted list runs, the
+        // Store has already been built. So the rewrite
+        // MUST happen before StartSession executes.
+        // A route-level middleware on /portal/* would
+        // also be too late because route resolution
+        // for the group happens after the global
+        // web middleware stack has already started
+        // running.
+        $middleware->prependToPriorityList(
+            before: StartSession::class,
+            prepend: UsePortalSessionCookie::class,
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {

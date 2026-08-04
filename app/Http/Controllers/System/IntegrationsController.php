@@ -54,7 +54,16 @@ class IntegrationsController extends Controller
             ->get();
 
         return Inertia::render('System/Integrations/Show', [
-            'integration' => $integration,
+            // SECURITY: mask sensitive values before
+            // sending the integration row to the
+            // browser. The api_key is type=password
+            // in the form, but the raw value would
+            // still be readable via the page source
+            // / Inertia payload. The mask is a
+            // non-empty placeholder so the form can
+            // detect "still set" and skip an
+            // overwrite if the user does not retype.
+            'integration' => $this->redactIntegration($integration),
             'configFields' => $configFields,
             'logs' => $recentLogs,
             'purposes' => Integration::getPurposes(),
@@ -109,7 +118,22 @@ class IntegrationsController extends Controller
         foreach ($configFields as $field) {
             $type = ($field['type'] ?? 'text') === 'number' ? 'numeric' : 'string';
             $isRequired = ($field['required'] ?? false) ? 'required' : 'nullable';
-            $rules["config.{$field['key']}"] = "$isRequired|$type";
+
+            $fieldRules = [$isRequired, $type];
+
+            // P2 — Authentica template_id and any
+            // other `number` field can declare a
+            // positive-integer constraint via the
+            // `min` metadata key. We honour it on
+            // save. The minimum is always inclusive
+            // (the default Authentica v2 template id
+            // is 1, and we never want a non-positive
+            // value reaching the channel payload).
+            if (($field['type'] ?? null) === 'number' && isset($field['min'])) {
+                $fieldRules[] = 'min:'.(int) $field['min'];
+            }
+
+            $rules["config.{$field['key']}"] = implode('|', $fieldRules);
         }
 
         $validated = $request->validate($rules);
@@ -315,5 +339,66 @@ class IntegrationsController extends Controller
         $result = $service->getBalance();
 
         return response()->json($result);
+    }
+
+    /**
+     * P2 — strip sensitive values from an
+     * Integration row before sending it to the
+     * browser.
+     *
+     * The `api_key` for Authentica, Twilio, Msegat,
+     * 360dialog, WhatsApp Cloud, mailgun, and
+     * sendgrid lives in the JSON `config` column.
+     * The form renders these fields as
+     * type="password", but the raw value would
+     * still appear in the Inertia payload and be
+     * readable from the browser dev tools.
+     *
+     * The redaction replaces the value with a
+     * non-empty placeholder. The form's
+     * "preserve existing if blank" logic detects
+     * a non-blank placeholder and keeps the
+     * existing DB value; the operator can still
+     * type a new value to replace it.
+     *
+     * We mask every field declared as
+     * `type: 'password'` in `getConfigFields()` for
+     * the integration's provider. The list is
+     * resolved server-side so we never have to
+     * hardcode a key name here.
+     */
+    private function redactIntegration(Integration $integration): Integration
+    {
+        $configFields = Integration::getConfigFields($integration->provider);
+
+        // Build the list of sensitive keys from the
+        // declared field metadata. We do NOT
+        // blind-mask every key in $integration->config
+        // — that would hide legitimate non-sensitive
+        // values (template_id, sender_id, etc.).
+        $sensitiveKeys = [];
+
+        foreach ($configFields as $field) {
+            if (($field['type'] ?? null) === 'password') {
+                $sensitiveKeys[] = $field['key'];
+            }
+        }
+
+        $config = $integration->config ?? [];
+
+        foreach ($sensitiveKeys as $key) {
+            if (! empty($config[$key])) {
+                // Non-empty placeholder so the form
+                // sees the field as "set" and skips
+                // overwriting it. The actual value
+                // never leaves the server.
+                $config[$key] = '••••••••';
+            }
+        }
+
+        $integration->config = $config;
+        $integration->syncOriginal();
+
+        return $integration;
     }
 }

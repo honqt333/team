@@ -7,6 +7,7 @@ namespace Tests\Feature;
 use App\Contracts\CustomerPortalOtpChannel;
 use App\Contracts\SmsSendResult;
 use App\Http\Middleware\PortalLocale;
+use App\Http\Middleware\UsePortalSessionCookie;
 use App\Models\Appointment;
 use App\Models\Center;
 use App\Models\Customer;
@@ -19,6 +20,7 @@ use App\Models\WorkOrder;
 use App\Support\CustomerPortalSession;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -44,6 +46,15 @@ class CustomerPortalHttpTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Wipe the rate-limiter buckets so a test
+        // that exercises the per-phone / per-IP
+        // throttle does not pollute the next one.
+        // The phpunit env uses the array cache
+        // driver, but the buckets survive within
+        // the same process — Cache::flush() makes
+        // each test own a fresh cache.
+        Cache::flush();
 
         // Reset the captured-code buffer and bind a fake
         // channel that records the last-sent code. We use
@@ -118,13 +129,27 @@ class CustomerPortalHttpTest extends TestCase
     public function test_request_otp_returns_generic_message_for_known_phone(): void
     {
         $tenant = $this->publishedTenant();
-        $this->customerIn($tenant);
+        $customer = $this->customerIn($tenant);
 
+        // The login → verify handoff: a successful
+        // requestOtp MUST redirect the user to
+        // /{tenant}/portal/verify, not back to the
+        // login form. Before this fix, the controller
+        // used `back()->with('status', ...)` which
+        // bounced the user back to /portal/login;
+        // the OTP landed in the customer's SMS but
+        // the verify form was never shown. The fix
+        // is an explicit redirect to the verify
+        // route name.
         $this->post('/'.$tenant->slug.'/portal/login', ['phone' => '0501234567'])
-            ->assertRedirect();
+            ->assertRedirect('/'.$tenant->slug.'/portal/verify');
 
         $this->assertSame(6, strlen(self::$capturedCodeStatic));
         $this->assertMatchesRegularExpression('/^\d{6}$/', self::$capturedCodeStatic);
+
+        // The phone MUST be persisted in the session
+        // so the verify page can pre-fill it.
+        $this->assertSame('+966501234567', session('cp_pending_phone'));
     }
 
     public function test_request_otp_returns_same_generic_message_for_unknown_phone(): void
@@ -133,14 +158,29 @@ class CustomerPortalHttpTest extends TestCase
         // No customer in this tenant.
 
         $response = $this->post('/'.$tenant->slug.'/portal/login', ['phone' => '0509999999']);
-        $response->assertRedirect();
 
-        // No code was actually sent (no row, no channel call).
+        // Anti-enumeration: the unknown-phone path
+        // MUST land on the SAME /verify URL with the
+        // SAME flash status. A different redirect
+        // target would let an attacker enumerate
+        // which phones are registered by watching
+        // the Location header. The status flash
+        // must be the same string so the rendered
+        // page is identical.
+        $response->assertRedirect('/'.$tenant->slug.'/portal/verify');
+
+        // No code was actually sent (no row, no
+        // channel call). The fake channel's
+        // capturedCode is still empty.
         $this->assertSame('', self::$capturedCodeStatic);
 
-        // But the user-facing flash is the SAME message as
-        // the success case. We compare on the "status" key
-        // that the login page reads.
+        // The phone is still stashed in the session
+        // so the verify page can pre-fill it.
+        $this->assertSame('+966509999999', session('cp_pending_phone'));
+
+        // The user-facing flash is the SAME message
+        // as the success case. We compare on the
+        // "status" key that the verify page reads.
         $this->assertSame(
             $this->extractStatus($this->post('/'.$tenant->slug.'/portal/login', ['phone' => '0509999999'])),
             $this->extractStatus($response)
@@ -169,6 +209,209 @@ class CustomerPortalHttpTest extends TestCase
     }
 
     // ─────────────────────────────────────────────────────────────────
+    // P1 — login → verify handoff
+    //
+    // Before the fix, the controller used
+    // `back()->with('status', ...)` after a successful
+    // requestOtp, which bounced the user back to the
+    // login form. The OTP landed in the SMS inbox but
+    // the verify form was never shown. These tests pin
+    // the new flow:
+    //
+    //   1. requestOtp redirects to /{tenant}/portal/verify
+    //      with the same flash status the verify page reads.
+    //   2. cp_pending_phone survives the round-trip.
+    //   3. GET /verify renders the Inertia component
+    //      Public/Portal/Verify with the expected phone.
+    //   4. The verify page receives the flash status as
+    //      a prop, so the Inertia response carries the
+    //      same generic "we sent you a code" message
+    //      that the login page used to show.
+    //   5. Rate limit still bounces the user BACK to
+    //      the login page with the error, NOT to
+    //      /verify (the customer is being told to wait,
+    //      not told "we sent you a code").
+    // ─────────────────────────────────────────────────────────────────
+
+    public function test_request_otp_redirects_to_verify_with_status_flash(): void
+    {
+        $tenant = $this->publishedTenant();
+        $this->customerIn($tenant);
+
+        // Redirect target and flash payload — both
+        // required for the verify page to render the
+        // "we sent you a code" banner.
+        $response = $this->post(
+            '/'.$tenant->slug.'/portal/login',
+            ['phone' => '0501234567']
+        );
+
+        $response->assertRedirect('/'.$tenant->slug.'/portal/verify');
+        $response->assertSessionHas('status', __('customer_portal.auth.code_sent'));
+    }
+
+    public function test_request_otp_stores_normalized_phone_in_session(): void
+    {
+        $tenant = $this->publishedTenant();
+        $this->customerIn($tenant);
+
+        // Customer types a local format (05...).
+        // The service normalizes to E.164 (+966...)
+        // before the lookup; the session must hold
+        // the normalized form so the verify page
+        // pre-fills the E.164 phone consistently.
+        $this->post('/'.$tenant->slug.'/portal/login', ['phone' => '0501234567'])
+            ->assertRedirect('/'.$tenant->slug.'/portal/verify');
+
+        $this->assertSame('+966501234567', session('cp_pending_phone'));
+    }
+
+    public function test_request_otp_for_unknown_phone_still_redirects_to_verify(): void
+    {
+        // The anti-enumeration contract: the
+        // unknown-phone path MUST redirect to the
+        // same URL with the same flash status. A
+        // different redirect would leak which
+        // phones are registered.
+        $tenant = $this->publishedTenant();
+
+        $this->post('/'.$tenant->slug.'/portal/login', ['phone' => '0509999999'])
+            ->assertRedirect('/'.$tenant->slug.'/portal/verify')
+            ->assertSessionHas('status', __('customer_portal.auth.code_sent'));
+
+        // And the phone is still stashed, even
+        // though no OTP was sent.
+        $this->assertSame('+966509999999', session('cp_pending_phone'));
+    }
+
+    public function test_show_verify_renders_inertia_component_with_pending_phone(): void
+    {
+        $tenant = $this->publishedTenant();
+
+        // Seed the session as if requestOtp just
+        // bounced here. The verify page reads
+        // cp_pending_phone from the session.
+        session()->put('cp_pending_phone', '+966501234567');
+
+        $this->get('/'.$tenant->slug.'/portal/verify')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Verify')
+                ->where('tenant.slug', $tenant->slug)
+                ->where('phone', '+966501234567')
+            );
+    }
+
+    public function test_show_verify_without_pending_phone_renders_empty_phone(): void
+    {
+        // Direct deep link to /verify with no
+        // session: the page still renders, just
+        // without a pre-filled phone. The customer
+        // is expected to go back to /login.
+        $tenant = $this->publishedTenant();
+
+        $this->get('/'.$tenant->slug.'/portal/verify')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Verify')
+                ->where('phone', '')
+            );
+    }
+
+    public function test_show_verify_surfaces_flash_status_to_inertia(): void
+    {
+        // The login → verify handoff sets
+        // `session('status')` to the generic "we
+        // sent you a code" message. The controller
+        // reads it out of the session and exposes
+        // it as a top-level prop (not via
+        // `page.props.flash` — Inertia does not
+        // auto-merge Laravel's session flash into
+        // props). The Verify page reads the `status`
+        // prop and renders the banner.
+        //
+        // We seed the flash with a known marker
+        // string instead of using `__()` because
+        // the test environment's locale flips
+        // between ar / en depending on the
+        // bootstrap, and we want the assertion to
+        // be locale-independent.
+        $marker = 'WE-SENT-YOU-A-CODE-MARKER';
+        $tenant = $this->publishedTenant();
+        session()->put('cp_pending_phone', '+966501234567');
+        session()->flash('status', $marker);
+
+        $this->get('/'.$tenant->slug.'/portal/verify')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Verify')
+                ->where('status', $marker)
+                ->where('phone', '+966501234567')
+            );
+    }
+
+    public function test_request_otp_rate_limit_does_not_redirect_to_verify(): void
+    {
+        // Rate limit (OtpRateLimitedException): the
+        // controller must keep the user on the
+        // LOGIN page with the error. The customer
+        // is being told to wait, not told "we sent
+        // you a code". cp_pending_phone must NOT
+        // be set on a rate-limited request — the
+        // session state should match the no-OTP-
+        // was-sent reality.
+        $tenant = $this->publishedTenant();
+        $this->customerIn($tenant);
+
+        // Drive the per-phone bucket to its cap.
+        // RATE_LIMIT_PER_PHONE = 5 in 15 min; we
+        // burn through the cooldown by spacing
+        // each call with a Carbon jump.
+        $base = Carbon::now();
+
+        for ($i = 0; $i < 5; $i++) {
+            Carbon::setTestNow($base->copy()->addSeconds(61 * ($i + 1)));
+            $this->post('/'.$tenant->slug.'/portal/login', ['phone' => '0501234567']);
+        }
+
+        Carbon::setTestNow($base->copy()->addSeconds(61 * 6));
+
+        // The 6th call (still inside the 15-min
+        // window) hits the per-phone cap. The
+        // controller MUST bounce back to login
+        // with the rate-limit error.
+        //
+        // We seed a referer so `back()` resolves
+        // to the login page (the natural source of
+        // the form), not the test default of
+        // `http://localhost`. The Inertia error
+        // bag also surfaces the rate-limit
+        // message under `errors.phone`, which is
+        // how the Login page renders it.
+        $response = $this->withHeaders([
+            'referer' => '/'.$tenant->slug.'/portal/login',
+        ])->post(
+            '/'.$tenant->slug.'/portal/login',
+            ['phone' => '0501234567']
+        );
+
+        $response->assertSessionHasErrors('phone');
+        $location = $response->headers->get('Location') ?? '';
+        $this->assertStringContainsString(
+            '/portal/login',
+            $location,
+            'rate-limited request must bounce back to /portal/login, not to /verify'
+        );
+        $this->assertStringNotContainsString(
+            '/portal/verify',
+            $location,
+            'rate-limited request must NOT redirect to /verify'
+        );
+
+        Carbon::setTestNow();
+    }
+
+    // ─────────────────────────────────────────────────────────────────
     // POST /{tenant}/portal/verify
     // ─────────────────────────────────────────────────────────────────
 
@@ -184,15 +427,34 @@ class CustomerPortalHttpTest extends TestCase
         // "verify with a good code lands the user on the
         // dashboard URL" sanity check.
         $tenant = $this->publishedTenant();
-        $this->customerIn($tenant);
+        $customer = $this->customerIn($tenant);
 
         $this->post('/'.$tenant->slug.'/portal/login', ['phone' => '0501234567']);
         $code = self::$capturedCodeStatic;
 
-        $this->post('/'.$tenant->slug.'/portal/verify', [
+        $verifyResponse = $this->post('/'.$tenant->slug.'/portal/verify', [
             'phone' => '0501234567',
             'code' => $code,
-        ])->assertRedirect('/'.$tenant->slug.'/portal/dashboard');
+        ]);
+        $verifyResponse->assertRedirect('/'.$tenant->slug.'/portal/dashboard');
+
+        // The redirect alone is not sufficient proof
+        // of a successful portal login: the following
+        // request must receive the session that verify()
+        // regenerated and populated.
+        $portalCookie = $verifyResponse->getCookie(
+            UsePortalSessionCookie::COOKIE_NAME
+        );
+        $this->assertNotNull($portalCookie);
+        $this->withUnencryptedCookie(
+            UsePortalSessionCookie::COOKIE_NAME,
+            $portalCookie->getValue()
+        )->get('/'.$tenant->slug.'/portal/dashboard')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Public/Portal/Dashboard')
+                ->where('customer.id', $customer->id)
+            );
     }
 
     public function test_verify_with_wrong_code_returns_generic_error(): void

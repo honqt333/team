@@ -122,10 +122,39 @@ class SmsService
 
     /**
      * Send via configured provider.
+     *
+     * P1 — Authentica is intentionally NOT a supported
+     * provider here. The Authentica v2 API
+     * (https://docs.authentica.sa/api/v2) exposes only
+     * /send-otp, /verify-otp, /verify-by-face,
+     * /verify-by-voice, and /balance. There is no
+     * general "send free-form SMS" endpoint in the
+     * public OpenAPI spec. Booking confirmations,
+     * reschedule notices, and 24h/2h reminders carry
+     * multi-sentence Arabic/English messages that
+     * cannot be expressed through the /send-otp
+     * template pipeline. Routing them through
+     * Authentica would silently drop the body and
+     * claim success, which is worse than failing.
+     *
+     * The customer-portal OTP path uses
+     * App\Services\CustomerPortal\AuthenticaCustomerPortalOtpChannel
+     * instead — that class talks directly to
+     * /send-otp with our own 6-digit code and only
+     * with a 6-digit code, so the template fits.
      */
     protected function sendViaProvider(string $to, string $message): array
     {
         $config = $this->integration->config ?? [];
+
+        if ($this->integration->provider === 'authentica') {
+            throw new Exception(
+                'Authentica لا يدعم إرسال رسائل SMS نصية عامة '
+                .'(لا يوجد endpoint رسمي لـ free-form SMS في Authentica v2). '
+                .'استخدم مزوّداً آخر (Unifonic / Twilio / Msegat) للرسائل النصية، '
+                .'وقناة Authentica مخصصة لـ OTP بوابة العميل فقط.'
+            );
+        }
 
         return match ($this->integration->provider) {
             'unifonic' => $this->sendViaUnifonic($config, $to, $message),

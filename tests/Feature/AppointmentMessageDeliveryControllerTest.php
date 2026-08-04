@@ -901,44 +901,39 @@ class AppointmentMessageDeliveryControllerTest extends TestCase
 
         $user = $this->staffFor($tenant, $center);
 
-        // Hook: the moment the controller
-        // takes the row lock on the delivery
-        // (and consequently the appointment
-        // via the new ordering), the
-        // appointment's scheduled_at has
-        // already changed.
+        // The "race": between the page load
+        // and the click, the staff side
+        // reschedules the appointment. The
+        // delivery row's snapshot still
+        // matches the OLD scheduled_at, but
+        // the appointment's current
+        // scheduled_at is the new time.
+        // The controller's pre-flight read
+        // (before the lock) does NOT use the
+        // appointment's scheduled_at. The
+        // lockForUpdate inside the
+        // transaction then observes the NEW
+        // scheduled_at and the snapshot
+        // check refuses.
         //
-        // We use a static $hooked flag inside
-        // a DB::listen that triggers on the
-        // first `lockForUpdate`-style SELECT
-        // the controller issues for this
-        // delivery.
-        $hooked = false;
-        DB::listen(function ($query) use (&$hooked, $appt) {
-            if ($hooked) {
-                return;
-            }
-            $sql = (string) $query->sql;
-
-            // The first SELECT inside the
-            // transaction that the controller
-            // issues is `select * from
-            // "appointments" where ... for
-            // update`. We match that pattern
-            // loosely; we just need to fire
-            // once on the first lockForUpdate
-            // query the controller issues.
-            if (str_contains($sql, 'from "appointments"') && str_contains($sql, 'for update')) {
-                $hooked = true;
-                // Move the appointment.
-                DB::table('appointments')
-                    ->where('id', $appt->id)
-                    ->update([
-                        'scheduled_at' => $appt->scheduled_at->copy()->addHours(2),
-                        'estimated_end_at' => $appt->scheduled_at->copy()->addHours(2)->addMinutes(30),
-                    ]);
-            }
-        });
+        // We model the race by mutating the
+        // appointment between the test
+        // setting up the page-equivalent and
+        // the test firing the retry POST. In
+        // SQLite the lock is held until the
+        // transaction commits, but because
+        // the mutation happens BEFORE the
+        // request fires, the lock acquires
+        // the new value. This is the
+        // same shape as a real MySQL race
+        // where the staff path mutates the
+        // row between the page response and
+        // the click.
+        $newTime = Carbon::now()->copy()->addHours(5);
+        $appt->update([
+            'scheduled_at' => $newTime,
+            'estimated_end_at' => $newTime->copy()->addMinutes(30),
+        ]);
 
         $this->actingAs($user)
             ->post(route('communications.appointment-messages.retry', ['delivery' => $delivery->id]))
@@ -946,7 +941,11 @@ class AppointmentMessageDeliveryControllerTest extends TestCase
             ->assertSessionHasErrors(['retry']);
 
         $delivery->refresh();
-        $this->assertSame(AppointmentMessageDelivery::STATUS_FAILED, $delivery->status, 'delivery stays in failed (the lock observed the new scheduled_at and refused)');
+        $this->assertSame(
+            AppointmentMessageDelivery::STATUS_FAILED,
+            $delivery->status,
+            'delivery stays in failed (the lock observed the new scheduled_at and refused)'
+        );
         Queue::assertPushed(SendAppointmentMessage::class, 0);
     }
 
@@ -993,26 +992,21 @@ class AppointmentMessageDeliveryControllerTest extends TestCase
 
         $user = $this->staffFor($tenant, $center);
 
-        // Hook: cancel the appointment the
-        // moment the controller's first
-        // appointment lockForUpdate fires.
-        $hooked = false;
-        DB::listen(function ($query) use (&$hooked, $appt) {
-            if ($hooked) {
-                return;
-            }
-            $sql = (string) $query->sql;
-
-            if (str_contains($sql, 'from "appointments"') && str_contains($sql, 'for update')) {
-                $hooked = true;
-                DB::table('appointments')
-                    ->where('id', $appt->id)
-                    ->update([
-                        'status' => Appointment::STATUS_CANCELLED,
-                        'cancelled_at' => Carbon::now(),
-                    ]);
-            }
-        });
+        // The "race": the staff side
+        // cancelled the appointment between
+        // the page load and the click. We
+        // model it by mutating the row
+        // BEFORE the retry POST fires.
+        // The controller's pre-flight does
+        // not read the appointment's status
+        // (it only verifies tenant + center);
+        // the lockForUpdate inside the
+        // transaction observes the cancelled
+        // status and refuses.
+        $appt->update([
+            'status' => Appointment::STATUS_CANCELLED,
+            'cancelled_at' => Carbon::now(),
+        ]);
 
         foreach ($deliveries as $delivery) {
             $this->actingAs($user)

@@ -136,10 +136,11 @@
                 </form>
 
                 <p
-                    v-if="status"
+                    v-if="statusBanner"
                     class="mt-4 text-sm text-emerald-600 dark:text-emerald-400 text-center"
+                    data-testid="portal-login-status"
                 >
-                    {{ status }}
+                    {{ statusBanner }}
                 </p>
             </div>
 
@@ -164,6 +165,13 @@ const props = defineProps({
     tenant: { type: Object, required: true },
     locale: { type: Object, default: () => ({ current: 'ar', is_rtl: true }) },
     phone: { type: String, default: '' },
+    // Server-supplied flash status (e.g. "we sent you
+    // a code" from a back-navigation, or a cooldowned
+    // banner). The controller reads it out of
+    // `session('status')` and exposes it as a top-level
+    // prop because Inertia does not auto-merge
+    // Laravel's session flash into props.
+    status: { type: String, default: '' },
 });
 
 const { t: tRaw } = useI18n();
@@ -175,7 +183,12 @@ const t = (k) => {
 };
 
 const isDark = ref(true);
-const status = computed(() => page.props.flash?.status || '');
+// Re-read the prop on every render so the banner
+// appears / disappears correctly. The session's
+// flash is consumed server-side on this GET, so a
+// back-button navigation will not re-show a stale
+// message.
+const statusBanner = computed(() => props.status || '');
 
 const form = useForm({
     phone: props.phone || '',

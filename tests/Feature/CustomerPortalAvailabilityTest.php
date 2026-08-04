@@ -16,6 +16,7 @@ use App\Models\Vehicle;
 use App\Services\CustomerPortal\CustomerPortalAvailabilityService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -53,6 +54,15 @@ class CustomerPortalAvailabilityTest extends TestCase
         // lookahead / window math is deterministic across
         // CI runs and across clock skew.
         Carbon::setTestNow(Carbon::parse('2026-08-10 09:00:00'));
+
+        // Wipe the rate-limiter buckets so a test
+        // that exercises the throttle does not
+        // pollute the next one. The phpunit env
+        // uses the array cache driver, but the
+        // buckets survive within the same
+        // process — `Cache::flush()` makes each
+        // test own a fresh cache.
+        Cache::flush();
     }
 
     protected function tearDown(): void
