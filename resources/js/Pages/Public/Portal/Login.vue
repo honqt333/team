@@ -3,241 +3,167 @@
         <title>{{ t('customer_portal.login.title') }} — {{ tenant.site_name }}</title>
     </Head>
 
-    <div
-        :dir="isRtl ? 'rtl' : 'ltr'"
-        :data-theme="isDark ? 'dark' : 'light'"
-        :style="cssVars"
-        class="min-h-screen flex items-center justify-center px-4 py-10 bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+    <AuthShell
+        :tenant="tenant"
+        :locale="locale"
+        :title="t('customer_portal.login.title')"
+        :subtitle="t('customer_portal.login.subtitle')"
+        :eyebrow="t('customer_portal.login.portal_eyebrow')"
+        :hero-title="t('customer_portal.login.hero_title')"
+        :hero-text="t('customer_portal.login.reassure')"
+        :benefits="benefits"
+        :back-label="t('customer_portal.login.back_to_site')"
+        :footer-text="t('customer_portal.login.secure_note')"
+        :language-base-path="`/${tenant.slug}/portal/login`"
     >
-        <div class="w-full max-w-md">
-            <!-- Language toggle. Top-right, never blocks
-                 the form. The form action is a regular
-                 POST so the cookie sticks across visits. -->
-            <div class="flex justify-end mb-3">
-                <div
-                    class="inline-flex rounded-full border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 backdrop-blur p-0.5 text-xs font-semibold"
-                >
-                    <a
-                        v-for="opt in languageOptions"
-                        :key="opt.value"
-                        :href="opt.href"
-                        class="px-3 py-1 rounded-full transition"
-                        :class="
-                            locale.current === opt.value
-                                ? 'text-white'
-                                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                        "
-                        :style="
-                            locale.current === opt.value
-                                ? { backgroundColor: 'var(--tenant-primary, #4f46e5)' }
-                                : {}
-                        "
-                    >
-                        {{ opt.label }}
-                    </a>
-                </div>
-            </div>
+        <template #icon>
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm7 10a7 7 0 0 0-14 0"
+                />
+            </svg>
+        </template>
 
-            <div class="text-center mb-8">
-                <!-- Real brand mark when the tenant has a
-                     logo; otherwise a small monogram tile
-                     that still uses the tenant's color. The
-                     customer can tell at a glance whose
-                     portal this is. -->
+        <form @submit.prevent="submit" class="space-y-5">
+            <div>
+                <label for="phone" class="mb-2 block text-sm font-bold text-slate-800">
+                    {{ t('customer_portal.login.phone_label') }}
+                </label>
                 <div
-                    class="mx-auto mb-4 flex items-center justify-center overflow-hidden"
-                    :class="
-                        tenant.has_logo
-                            ? 'h-16 w-16 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700'
-                            : 'h-14 w-14 rounded-2xl'
-                    "
-                    :style="
-                        tenant.has_logo
-                            ? {}
-                            : {
-                                  backgroundColor:
-                                      'color-mix(in srgb, var(--tenant-primary, #4f46e5) 12%, transparent)',
-                                  color: 'var(--tenant-primary, #4f46e5)',
-                              }
-                    "
+                    class="flex h-14 overflow-hidden rounded-2xl border bg-white transition focus-within:border-transparent focus-within:ring-4"
+                    :class="form.errors.phone ? 'border-rose-400' : 'border-slate-200'"
+                    :style="{ '--tw-ring-color': 'var(--portal-primary-soft)' }"
                 >
-                    <img
-                        v-if="tenant.has_logo"
-                        :src="tenant.logo_url"
-                        :alt="tenant.site_name"
-                        class="h-12 w-12 object-contain"
-                    />
-                    <svg
-                        v-else
-                        class="w-7 h-7"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
+                    <div
+                        class="flex items-center gap-2 border-e border-slate-200 bg-slate-50 px-3.5 text-sm font-extrabold text-slate-700"
+                        dir="ltr"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                    </svg>
-                </div>
-                <h1 class="text-2xl font-bold">{{ tenant.site_name }}</h1>
-                <p v-if="tenant.tagline" class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {{ tenant.tagline }}
-                </p>
-                <p v-else class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    {{ t('customer_portal.login.subtitle') }}
-                </p>
-            </div>
-
-            <div
-                class="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800"
-            >
-                <form @submit.prevent="submit" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium mb-1.5">
-                            {{ t('customer_portal.login.phone_label') }}
-                        </label>
-                        <input
-                            v-model="form.phone"
-                            type="tel"
-                            inputmode="tel"
-                            autocomplete="tel"
-                            :placeholder="t('customer_portal.login.phone_placeholder')"
-                            dir="ltr"
-                            class="w-full rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-base"
-                            :class="{ 'border-rose-500': errors.phone }"
-                            @input="onPhoneInput"
-                        />
-                        <!-- Hint: tells the customer what to
-                             expect. Calm, not alarming. -->
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
-                            {{ t('customer_portal.login.phone_hint') }}
-                        </p>
-                        <p v-if="errors.phone" class="text-rose-500 text-sm mt-1">
-                            {{ errors.phone }}
-                        </p>
+                        <span
+                            class="flex h-5 w-7 items-center justify-center rounded bg-[#087a3d] text-[9px] text-white"
+                        >
+                            SA
+                        </span>
+                        <span>+966</span>
                     </div>
-
-                    <!-- Primary action: tenant brand color,
-                         not a fixed purple. Falls back to a
-                         neutral indigo only if the tenant
-                         has not picked a color yet. -->
-                    <button
-                        type="submit"
-                        :disabled="form.processing || !form.phone"
-                        class="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-white font-semibold disabled:opacity-60 transition"
-                        :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
-                    >
-                        <span v-if="form.processing">…</span>
-                        {{ t('customer_portal.login.submit') }}
-                    </button>
-                </form>
-
-                <p
-                    v-if="statusBanner"
-                    class="mt-4 text-sm text-emerald-600 dark:text-emerald-400 text-center"
-                    data-testid="portal-login-status"
-                >
-                    {{ statusBanner }}
+                    <input
+                        id="phone"
+                        v-model="form.phone"
+                        type="tel"
+                        inputmode="numeric"
+                        autocomplete="tel"
+                        dir="ltr"
+                        :placeholder="t('customer_portal.login.local_phone_placeholder')"
+                        class="min-w-0 flex-1 border-0 bg-white px-4 text-lg font-semibold tracking-wide text-slate-950 outline-none ring-0 placeholder:text-slate-300 focus:ring-0"
+                        @input="onPhoneInput"
+                    />
+                </div>
+                <p v-if="form.errors.phone" class="mt-2 text-sm font-medium text-rose-600">
+                    {{ form.errors.phone }}
+                </p>
+                <p v-else class="mt-2 text-xs leading-6 text-slate-500">
+                    {{ t('customer_portal.login.phone_hint') }}
                 </p>
             </div>
 
-            <div class="mt-6 text-center">
-                <a
-                    :href="`/${tenant.slug}`"
-                    class="text-sm text-slate-500 dark:text-slate-400 hover:underline"
+            <button
+                type="submit"
+                :disabled="form.processing || !form.phone"
+                class="flex h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-50"
+                :style="{
+                    backgroundColor: 'var(--portal-primary)',
+                    boxShadow: '0 16px 35px -18px var(--portal-primary)',
+                }"
+            >
+                <svg
+                    v-if="form.processing"
+                    class="h-4 w-4 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
                 >
-                    {{ t('customer_portal.login.back_to_site') }}
-                </a>
-            </div>
-        </div>
-    </div>
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"
+                        stroke="currentColor"
+                        stroke-width="3"
+                        stroke-dasharray="42 18"
+                    />
+                </svg>
+                <span>{{ t('customer_portal.login.submit') }}</span>
+                <svg
+                    v-if="!form.processing"
+                    class="h-4 w-4 rtl:rotate-180"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                        d="m9 18 6-6-6-6"
+                    />
+                </svg>
+            </button>
+        </form>
+
+        <p
+            v-if="status"
+            class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-sm font-medium text-emerald-800"
+            data-testid="portal-login-status"
+        >
+            {{ status }}
+        </p>
+    </AuthShell>
 </template>
 
 <script setup>
-import { Head, useForm, usePage } from '@inertiajs/vue3';
-import { computed, ref, onMounted } from 'vue';
+import { Head, useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import AuthShell from '@/Components/CustomerPortal/AuthShell.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
     locale: { type: Object, default: () => ({ current: 'ar', is_rtl: true }) },
     phone: { type: String, default: '' },
-    // Server-supplied flash status (e.g. "we sent you
-    // a code" from a back-navigation, or a cooldowned
-    // banner). The controller reads it out of
-    // `session('status')` and exposes it as a top-level
-    // prop because Inertia does not auto-merge
-    // Laravel's session flash into props.
     status: { type: String, default: '' },
 });
 
-const { t: tRaw } = useI18n();
-const page = usePage();
-const isRtl = computed(() => props.locale?.is_rtl ?? (page.props.locale || 'ar') === 'ar');
-const t = (k) => {
-    const v = tRaw(k);
-    return v === k ? k.split('.').pop() : v;
-};
+const { t } = useI18n();
 
-const isDark = ref(true);
-// Re-read the prop on every render so the banner
-// appears / disappears correctly. The session's
-// flash is consumed server-side on this GET, so a
-// back-button navigation will not re-show a stale
-// message.
-const statusBanner = computed(() => props.status || '');
+function localPhoneValue(phone) {
+    const digits = String(phone || '').replace(/\D/g, '');
+    if (digits.startsWith('966')) return digits.slice(3);
+    return digits;
+}
 
-const form = useForm({
-    phone: props.phone || '',
-});
+const form = useForm({ phone: localPhoneValue(props.phone) });
 
-const errors = form.errors;
+const benefits = computed(() => [
+    t('customer_portal.login.benefit_appointments'),
+    t('customer_portal.login.benefit_tracking'),
+    t('customer_portal.login.benefit_security'),
+]);
 
-// CSS variables. We inline the tenant's primary + secondary
-// colors as CSS custom properties on the root container. The
-// buttons throughout the page use `var(--tenant-primary, ...)`
-// so a single source of truth is in scope.
-const cssVars = computed(() => ({
-    '--tenant-primary': props.tenant?.primary_color || '#4f46e5',
-    '--tenant-secondary': props.tenant?.secondary_color || '#0ea5e9',
-}));
+function onPhoneInput(event) {
+    const cleaned = event.target.value.replace(/\D/g, '').slice(0, 10);
+    form.phone = cleaned;
+}
 
-// The toggle is a pair of <a> tags that GET the page with
-// `?lang=` set. The server reads the query, sets the cookie,
-// and redirects to the same URL with the new locale in
-// effect. We use plain links (not buttons) so the form's
-// CSRF token is irrelevant — a GET to the page is harmless.
-const languageOptions = computed(() => {
-    const base = `/${props.tenant.slug}/portal/login`;
-    return [
-        { value: 'ar', label: 'العربية', href: `${base}?lang=ar` },
-        { value: 'en', label: 'English', href: `${base}?lang=en` },
-    ];
-});
-
-function onPhoneInput(e) {
-    const cleaned = e.target.value.replace(/[^\d+]/g, '');
-    if (cleaned !== e.target.value) {
-        form.phone = cleaned;
-    }
+function normalizedPhone() {
+    const raw = String(form.phone || '').trim();
+    if (/^05\d{8}$/.test(raw)) return `+966${raw.slice(1)}`;
+    if (/^5\d{8}$/.test(raw)) return `+966${raw}`;
+    return raw;
 }
 
 function submit() {
-    form.post(route('public.portal.login.otp', { tenant: props.tenant.slug }));
+    form.transform((data) => ({ ...data, phone: normalizedPhone() })).post(
+        route('public.portal.login.otp', { tenant: props.tenant.slug })
+    );
 }
-
-onMounted(() => {
-    if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('cp-dark');
-        if (stored !== null) {
-            isDark.value = stored === '1';
-        } else if (window.matchMedia) {
-            isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        document.documentElement.classList.toggle('dark', isDark.value);
-    }
-});
 </script>

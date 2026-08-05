@@ -4500,12 +4500,6 @@
     "layout": {
       "mobile_menu": "القائمة"
     },
-    "notifications": {
-      "title": "الإشعارات",
-      "mark_all_read": "تعليم الكل كمقروء",
-      "empty": "لا توجد إشعارات",
-      "view_all": "عرض الكل"
-    },
     "backups": {
       "title": "النسخ الاحتياطية",
       "subtitle": "إدارة نسخ المستأجرين الاحتياطية",
@@ -4998,7 +4992,17 @@
       "phone_placeholder": "+966 5x xxx xxxx",
       "phone_hint": "سنرسل رمز تحقق من 6 أرقام إلى جوالك.",
       "submit": "إرسال الرمز",
-      "back_to_site": "العودة إلى الموقع العام"
+      "back_to_site": "العودة إلى الموقع العام",
+      "reassure": "سجّل دخولك مرة واحدة فقط برقم جوالك، وستجد مركباتك ومواعيدك في انتظارك.",
+      "flag_sa": "السعودية",
+      "country_code": "+966",
+      "portal_eyebrow": "بوابتك الخاصة",
+      "hero_title": "كل ما يخص مركبتك في مكان واحد",
+      "benefit_appointments": "احجز موعدك وعدّله بسهولة",
+      "benefit_tracking": "تابع حالة الخدمة لحظة بلحظة",
+      "benefit_security": "دخول آمن برمز تحقق لمرة واحدة",
+      "secure_note": "دخول آمن ومخصص لعملاء المركز",
+      "local_phone_placeholder": "5X XXX XXXX"
     },
     "verify": {
       "title": "أدخل رمز التحقق",
@@ -5008,11 +5012,16 @@
       "code_placeholder": "••••••",
       "submit": "تحقق",
       "change_number": "استخدام رقم آخر",
-      "expiry_notice": "الرمز ينتهي خلال 10 دقائق."
+      "expiry_notice": "الرمز ينتهي خلال 10 دقائق.",
+      "resend": "إعادة إرسال الرمز",
+      "resend_in": "إعادة الإرسال خلال {seconds} ثانية",
+      "resend_now": "إعادة إرسال الرمز الآن",
+      "sent_prefix": "أرسلنا رمزاً مكوناً من 6 أرقام إلى",
+      "change_link": "تغيير الرقم"
     },
     "dashboard": {
       "title": "حسابي",
-      "greeting": "مرحباً، :name",
+      "greeting": "مرحباً، {name}",
       "back_to_site": "الموقع العام",
       "logout": "تسجيل الخروج",
       "vehicles": "مركباتي",
@@ -5027,7 +5036,32 @@
       "status_scheduled": "مجدول",
       "status_confirmed": "مؤكد",
       "status_checked_in": "تم الدخول",
-      "book_cta": "احجز موعداً"
+      "book_cta": "احجز موعداً",
+      "greeting_subtitle": "إليك آخر مستجدات مركباتك ومواعيدك.",
+      "primary_kicker_appointment": "الموعد القادم",
+      "primary_title_appointment": "موعدك قادم",
+      "primary_title_appointment_today": "موعدك اليوم",
+      "primary_title_appointment_tomorrow": "موعدك غداً",
+      "primary_subtitle_appointment": "نراك في الفرع. يمكنك تعديل الموعد حتى قبلها بساعتين.",
+      "primary_kicker_workorder": "أمر العمل النشط",
+      "primary_title_workorder": "مركبتك قيد الخدمة",
+      "primary_subtitle_workorder": "العمل جارٍ على مركبتك. ستصلك رسالة عند الجاهزية.",
+      "primary_kicker_empty": "ابدأ معنا",
+      "primary_title_empty": "احجز موعد صيانة سيارتك",
+      "primary_subtitle_empty": "كل ما تحتاجه هو لفتة بسيطة. اختر مركبتك والوقت المناسب.",
+      "cta_view": "عرض الموعد",
+      "cta_edit": "تعديل الموعد",
+      "cta_book": "احجز موعداً",
+      "cta_reschedule": "إعادة الجدولة",
+      "section_vehicles": "مركباتي",
+      "section_vehicles_short": "المركبات",
+      "section_recent": "آخر نشاط",
+      "progress_label": "تقدّم العمل",
+      "progress_caption": "حالة أمر العمل: {status}",
+      "work_order_code": "أمر عمل #{code}",
+      "expected_on": "متوقع {date}",
+      "view_all": "عرض الكل",
+      "no_appointments_secondary": "لا توجد مواعيد قادمة بعد."
     },
     "actions": {
       "cancel_button": "إلغاء الموعد",
@@ -5056,13 +5090,18 @@
         "slot_out_of_window": "هذا الوقت خارج نافذة الحجز. يرجى اختيار وقت آخر.",
         "slot_no_longer_available": "هذا الوقت لم يعد متاحاً. يرجى اختيار وقت آخر.",
         "cancel_failed": "لم نتمكن من إلغاء هذا الموعد. حاول مرة أخرى أو تواصل مع الفرع."
-      }
+      },
+      "reschedule_step_1": "الفرع",
+      "reschedule_step_2": "التاريخ والوقت",
+      "reschedule_step_3": "مراجعة",
+      "reschedule_summary_title": "ملخص الموعد الجديد",
+      "current_label": "الموعد الحالي"
     },
     "booking": {
       "title": "احجز موعداً",
       "subtitle": "اختر الفرع والمركبة والخدمات التي تحتاجها، والوقت المناسب لك.",
       "back_to_dashboard": "العودة إلى حسابي",
-      "step": "الخطوة :current من :total",
+      "step": "الخطوة {current} من {total}",
       "step_center": "الفرع",
       "step_vehicle": "المركبة",
       "step_services": "الخدمات",
@@ -5084,7 +5123,7 @@
       "review_services": "الخدمات",
       "review_date": "التاريخ والوقت",
       "review_duration": "المدة المتوقعة",
-      "duration_minutes": ":count دقيقة",
+      "duration_minutes": "{count} دقيقة",
       "submit": "تأكيد الحجز",
       "submitting": "جاري الحجز…",
       "confirmed_flash": "تم حجز موعدك بنجاح.",
@@ -5104,7 +5143,29 @@
         "vehicle_not_owned": "هذه المركبة غير مرتبطة بحسابك.",
         "slot_out_of_window": "هذا الوقت خارج نافذة الحجز. يرجى اختيار وقت آخر.",
         "slot_no_longer_available": "هذا الوقت لم يعد متاحاً. يرجى اختيار وقت آخر."
-      }
+      },
+      "step_1": "المركبة والخدمات",
+      "step_2": "الفرع والوقت",
+      "step_3": "مراجعة وتأكيد",
+      "btn_back": "السابق",
+      "btn_next": "التالي",
+      "btn_confirm": "تأكيد الحجز",
+      "select_branch": "اختر الفرع",
+      "sticky_summary_label": "ملخص الحجز",
+      "sticky_branch": "الفرع",
+      "sticky_vehicle": "المركبة",
+      "sticky_services": "الخدمات",
+      "sticky_when": "الموعد",
+      "sticky_total_duration": "المدة الإجمالية",
+      "no_branch_picked": "لم تختر فرعاً",
+      "no_vehicle_picked": "لم تختر مركبة",
+      "no_services_picked": "لم تختر خدمات",
+      "no_time_picked": "لم تختر وقتاً",
+      "pick_branch_first": "اختر فرعاً أولاً",
+      "pick_vehicle_first": "اختر مركبة أولاً",
+      "pick_services_first": "اختر خدمة واحدة على الأقل",
+      "pick_time_first": "اختر وقتاً للمتابعة",
+      "review_intro": "تأكد من تفاصيل حجزك قبل المتابعة."
     },
     "sms": {
       "booking_confirmation": "تم تأكيد موعدك في :site_name (:branch_name) بتاريخ :date الساعة :time. المرجع: :ref.",
@@ -5116,6 +5177,30 @@
         "body": "رمز التحقق الخاص بك في :site_name هو: :code. ينتهي خلال 10 دقائق."
       },
       "site_name_fallback": "مركز الخدمة"
+    },
+    "nav": {
+      "home": "الرئيسية",
+      "bookings": "حجز موعد",
+      "vehicles": "مركباتي",
+      "account": "حسابي",
+      "bottom_label": "التنقل الرئيسي"
+    },
+    "work_order_statuses": {
+      "draft": "مسودة",
+      "open": "مفتوح",
+      "in_progress": "قيد التنفيذ",
+      "ready_for_qc": "بانتظار الفحص",
+      "on_hold": "متوقف مؤقتاً",
+      "done": "جاهز للتسليم",
+      "cancelled": "ملغى"
+    },
+    "appointment_statuses": {
+      "scheduled": "مجدول",
+      "confirmed": "مؤكد",
+      "checked_in": "وصلت للمركز",
+      "no_show": "لم تحضر",
+      "converted": "تم تحويله لأمر عمل",
+      "cancelled": "ملغى"
     }
   },
   "communications": {

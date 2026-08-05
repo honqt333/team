@@ -590,7 +590,11 @@ const portalUrl = computed(() => {
     if (!props.site?.has_portal || !props.site?.tenant_slug) {
         return null;
     }
-    return `/${props.site.tenant_slug}/portal/login`;
+    // Enter through the protected dashboard. A live
+    // portal session continues directly to the account;
+    // the session middleware redirects visitors without
+    // one to the normal OTP login page.
+    return `/${props.site.tenant_slug}/portal/dashboard`;
 });
 const bookingUrl = computed(() => {
     if (!props.site?.has_portal || !props.site?.tenant_slug) {

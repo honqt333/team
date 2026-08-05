@@ -46,7 +46,16 @@ createInertiaApp({
     resolve: (name) =>
         resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
-        // ...
+        // Public pages can choose a locale independently from the authenticated
+        // application. Sync vue-i18n before the first render so the portal never
+        // shows an Arabic direction/toggle with English copy (or the reverse).
+        const requestedLocale = props.initialPage?.props?.locale;
+        const localeCode =
+            typeof requestedLocale === 'object' ? requestedLocale?.current : requestedLocale;
+
+        if (['ar', 'en'].includes(localeCode)) {
+            i18n.global.locale.value = localeCode;
+        }
 
         return (
             createApp({ render: () => h(App, props) })

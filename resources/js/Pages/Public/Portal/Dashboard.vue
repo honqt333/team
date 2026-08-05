@@ -1,253 +1,240 @@
 <template>
-    <Head>
-        <title>{{ t('customer_portal.dashboard.title') }} — {{ tenant.site_name }}</title>
-    </Head>
-
-    <div
-        :dir="isRtl ? 'rtl' : 'ltr'"
-        :data-theme="isDark ? 'dark' : 'light'"
-        :style="cssVars"
-        class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+    <CustomerPortalLayout
+        :tenant="tenant"
+        :locale="locale"
+        :title="t('customer_portal.dashboard.title')"
+        :subtitle="t('customer_portal.dashboard.greeting_subtitle')"
+        show-logout
+        show-back-to-site
+        show-bottom-nav
+        :current-route="'public.portal.dashboard'"
     >
-        <header
-            class="sticky top-0 z-40 backdrop-blur bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800"
-        >
-            <div
-                class="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4"
-            >
-                <div class="flex items-center gap-3 min-w-0">
-                    <div
-                        class="h-9 w-9 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0"
-                        :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
-                    >
-                        {{ initial }}
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="font-bold text-base truncate">{{ tenant.site_name }}</h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                            {{ t('customer_portal.dashboard.greeting', { name: customer.name }) }}
-                        </p>
-                    </div>
-                </div>
+        <!--
+            Dashboard.vue — customer portal home.
 
-                <div class="flex items-center gap-2">
-                    <a
-                        v-if="canBook"
-                        :href="bookUrl"
-                        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold text-white"
-                        :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            The first thing the customer sees is the
+            PRIMARY CARD. It carries the single most
+            important interaction the customer can take
+            right now:
+              - upcoming appointment, or
+              - active work order, or
+              - empty state with a "book now" CTA.
+
+            Below the primary card: the customer's
+            vehicles (small chips, not a flood of cards),
+            and a compact recent-activity list.
+        -->
+
+        <!--
+            Greeting line. Sits at the top of the page,
+            not inside the primary card, because the
+            greeting is the page header. The card
+            carries the action, not the welcome.
+        -->
+        <p class="text-base sm:text-lg text-slate-700 dark:text-slate-200 mb-4">
+            {{ t('customer_portal.dashboard.greeting', { name: customer.name }) }}
+        </p>
+
+        <!--
+            Primary card. The component picks one of three
+            shapes:
+              1. Upcoming appointment (highest priority)
+              2. Active work order (fallback if no
+                 upcoming appointment)
+              3. Empty state (no appointment, no work
+                 order)
+        -->
+        <PrimaryCard
+            v-if="primaryCard.kind === 'appointment'"
+            kind="appointment"
+            :kicker="t('customer_portal.dashboard.primary_kicker_appointment')"
+            :title="primaryCard.title"
+            :subtitle="t('customer_portal.dashboard.primary_subtitle_appointment')"
+            :when-label="t('customer_portal.dashboard.cta_view')"
+            :when-value="primaryCard.when"
+            :branch-label="t('customer_portal.booking.review_branch')"
+            :branch-value="primaryCard.branch"
+            :cta-primary="{
+                label: t('customer_portal.dashboard.cta_view'),
+                href: primaryCard.viewHref,
+            }"
+            :cta-secondary="
+                canManageAppointment
+                    ? {
+                          label: t('customer_portal.dashboard.cta_edit'),
+                          href: primaryCard.editHref,
+                      }
+                    : null
+            "
+        />
+
+        <PrimaryCard
+            v-else-if="primaryCard.kind === 'work_order'"
+            kind="work_order"
+            :kicker="t('customer_portal.dashboard.primary_kicker_workorder')"
+            :title="t('customer_portal.dashboard.primary_title_workorder')"
+            :subtitle="t('customer_portal.dashboard.primary_subtitle_workorder')"
+            :progress-label="t('customer_portal.dashboard.progress_label')"
+            :progress-caption="
+                t('customer_portal.dashboard.progress_caption', { status: primaryCard.statusLabel })
+            "
+            :progress-value="primaryCard.progress"
+            :cta-primary="
+                canBook
+                    ? {
+                          label: t('customer_portal.dashboard.cta_book'),
+                          href: bookUrl,
+                      }
+                    : null
+            "
+        />
+
+        <PrimaryCard
+            v-else
+            kind="empty"
+            :kicker="t('customer_portal.dashboard.primary_kicker_empty')"
+            :title="t('customer_portal.dashboard.primary_title_empty')"
+            :subtitle="t('customer_portal.dashboard.primary_subtitle_empty')"
+            :cta-primary="
+                canBook
+                    ? {
+                          label: t('customer_portal.dashboard.cta_book'),
+                          href: bookUrl,
+                      }
+                    : null
+            "
+        />
+
+        <!--
+            Vehicles. The user spec asks for a small
+            chips/cards list — NOT the previous big
+            grid that ate the whole page. We render
+            a horizontal scroller on mobile and a small
+            grid on larger screens. Empty state is calm.
+        -->
+        <section class="mt-8">
+            <div class="flex items-baseline justify-between mb-3">
+                <h2 class="text-base sm:text-lg font-bold">
+                    {{ t('customer_portal.dashboard.section_vehicles') }}
+                </h2>
+                <span class="text-xs text-slate-500 dark:text-slate-400">
+                    {{ vehicles.length }}
+                </span>
+            </div>
+            <div
+                v-if="vehicles.length === 0"
+                class="bg-white dark:bg-slate-900 rounded-2xl p-5 text-center text-sm text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800"
+            >
+                {{ t('customer_portal.dashboard.no_vehicles') }}
+            </div>
+            <div
+                v-else
+                class="flex gap-3 overflow-x-auto sm:grid sm:grid-cols-2 sm:overflow-visible -mx-4 px-4 sm:mx-0 sm:px-0"
+            >
+                <article
+                    v-for="v in vehicles"
+                    :key="v.id"
+                    class="flex-shrink-0 w-44 sm:w-auto bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800"
+                >
+                    <div class="flex items-center gap-2 mb-1">
+                        <svg
+                            class="w-4 h-4 text-slate-400 dark:text-slate-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
                             <path
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 stroke-width="2"
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                d="M3 13l1.06-3.18a2 2 0 011.9-1.32h12.08a2 2 0 011.9 1.32L21 13M5 17v2a1 1 0 001 1h2a1 1 0 001-1v-2m6 0v2a1 1 0 001 1h2a1 1 0 001-1v-2M5 17h14a2 2 0 002-2v-2H3v2a2 2 0 002 2z"
                             />
                         </svg>
-                        <span>{{ t('customer_portal.dashboard.book_cta') }}</span>
-                    </a>
-                    <a
-                        :href="`/${tenant.slug}`"
-                        class="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                    >
-                        {{ t('customer_portal.dashboard.back_to_site') }}
-                    </a>
-                    <form :action="`/${tenant.slug}/portal/logout`" method="post" class="inline">
-                        <input type="hidden" name="_token" :value="csrf" />
-                        <button
-                            type="submit"
-                            class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                        >
-                            <svg
-                                class="w-4 h-4"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    stroke-width="2"
-                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                                />
-                            </svg>
-                            <span class="hidden sm:inline">
-                                {{ t('customer_portal.dashboard.logout') }}
-                            </span>
-                        </button>
-                    </form>
-                </div>
+                        <span class="font-bold text-sm" dir="ltr">
+                            {{ v.plate_number }}
+                        </span>
+                    </div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        {{ [v.make, v.model, v.year].filter(Boolean).join(' · ') }}
+                    </div>
+                </article>
             </div>
-        </header>
+        </section>
 
-        <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
-            <!-- Vehicles -->
-            <section>
-                <h2 class="text-lg font-bold mb-3">
-                    {{ t('customer_portal.dashboard.vehicles') }}
-                </h2>
-                <div
-                    v-if="vehicles.length === 0"
-                    class="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center border border-slate-200 dark:border-slate-800"
+        <!--
+            Recent activity. A compact list of past
+            work orders. We map the raw status keys to
+            friendly labels here, so the customer never
+            sees "ready_for_qc" in their UI.
+        -->
+        <section class="mt-8">
+            <h2 class="text-base sm:text-lg font-bold mb-3">
+                {{ t('customer_portal.dashboard.section_recent') }}
+            </h2>
+            <div
+                v-if="recentWorkOrders.length === 0"
+                class="bg-white dark:bg-slate-900 rounded-2xl p-5 text-center text-sm text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800"
+            >
+                {{ t('customer_portal.dashboard.no_recent') }}
+            </div>
+            <div v-else class="space-y-2">
+                <article
+                    v-for="w in recentWorkOrders"
+                    :key="w.id"
+                    class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800"
                 >
-                    <p class="text-sm text-slate-500 dark:text-slate-400">
-                        {{ t('customer_portal.dashboard.no_vehicles') }}
-                    </p>
-                </div>
-                <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <article
-                        v-for="v in vehicles"
-                        :key="v.id"
-                        class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
-                    >
-                        <div class="font-bold text-base" dir="ltr">{{ v.plate_number }}</div>
-                        <div class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                            {{ [v.make, v.model, v.year].filter(Boolean).join(' · ') }}
-                        </div>
-                        <div v-if="v.color" class="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                            {{ v.color }}
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Upcoming appointments -->
-            <section>
-                <h2 class="text-lg font-bold mb-3">
-                    {{ t('customer_portal.dashboard.upcoming') }}
-                </h2>
-                <div
-                    v-if="upcomingAppointments.length === 0"
-                    class="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center border border-slate-200 dark:border-slate-800"
-                >
-                    <p class="text-sm text-slate-500 dark:text-slate-400">
-                        {{ t('customer_portal.dashboard.no_upcoming') }}
-                    </p>
-                </div>
-                <div v-else class="space-y-2">
-                    <article
-                        v-for="a in upcomingAppointments"
-                        :key="a.id"
-                        class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
-                    >
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                                <div class="font-semibold" dir="ltr">
-                                    {{ formatDate(a.scheduled_at) }}
-                                </div>
-                                <div
-                                    v-if="a.center_name || a.service_bay_name"
-                                    class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-                                >
-                                    {{
-                                        [a.center_name, a.service_bay_name]
-                                            .filter(Boolean)
-                                            .join(' · ')
-                                    }}
-                                </div>
-                                <div
-                                    v-if="a.estimated_end_at"
-                                    class="text-xs text-slate-400 dark:text-slate-500 mt-0.5"
-                                    dir="ltr"
-                                >
-                                    {{ t('customer_portal.dashboard.until') }}
-                                    {{ formatTime(a.estimated_end_at) }}
-                                </div>
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs text-slate-500 dark:text-slate-400">
+                                {{
+                                    t('customer_portal.dashboard.work_order_code', { code: w.code })
+                                }}
                             </div>
-                            <span
-                                class="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded-full flex-shrink-0"
-                                :style="badgeStyle(a.status)"
+                            <div
+                                v-if="w.expected_end_date"
+                                class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
                             >
-                                {{ t('customer_portal.dashboard.status_' + a.status) }}
-                            </span>
-                        </div>
-                    </article>
-                </div>
-            </section>
-
-            <!-- Recent work orders -->
-            <section>
-                <h2 class="text-lg font-bold mb-3">{{ t('customer_portal.dashboard.recent') }}</h2>
-                <div
-                    v-if="recentWorkOrders.length === 0"
-                    class="bg-white dark:bg-slate-900 rounded-2xl p-8 text-center border border-slate-200 dark:border-slate-800"
-                >
-                    <p class="text-sm text-slate-500 dark:text-slate-400">
-                        {{ t('customer_portal.dashboard.no_recent') }}
-                    </p>
-                </div>
-                <div v-else class="space-y-2">
-                    <article
-                        v-for="w in recentWorkOrders"
-                        :key="w.id"
-                        class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800"
-                    >
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                                <div class="font-semibold" dir="ltr">#{{ w.code }}</div>
-                                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                                    {{ t('customer_portal.dashboard.opened') }}
-                                    {{ formatDate(w.created_at) }}
-                                </div>
-                                <div
-                                    v-if="w.expected_end_date"
-                                    class="text-xs text-slate-500 dark:text-slate-400 mt-0.5"
-                                    dir="ltr"
-                                >
-                                    {{ t('customer_portal.dashboard.expected_end') }}
-                                    {{ formatDateOnly(w.expected_end_date) }}
-                                </div>
+                                {{
+                                    t('customer_portal.dashboard.expected_on', {
+                                        date: formatDateOnly(w.expected_end_date),
+                                    })
+                                }}
                             </div>
-                            <span
-                                class="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex-shrink-0"
-                            >
-                                {{ w.status }}
-                            </span>
                         </div>
-                    </article>
-                </div>
-            </section>
-        </main>
-    </div>
+                        <StatusBadge :status="w.status" :label="workOrderStatusLabel(w.status)" />
+                    </div>
+                </article>
+            </div>
+        </section>
+    </CustomerPortalLayout>
 </template>
 
 <script setup>
-import { Head, usePage } from '@inertiajs/vue3';
-import { computed, ref, onMounted } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
+import PrimaryCard from '@/Components/CustomerPortal/PrimaryCard.vue';
+import StatusBadge from '@/Components/CustomerPortal/StatusBadge.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
+    locale: { type: Object, default: () => ({ current: 'ar', is_rtl: true }) },
     customer: { type: Object, required: true },
     vehicles: { type: Array, default: () => [] },
     upcomingAppointments: { type: Array, default: () => [] },
     recentWorkOrders: { type: Array, default: () => [] },
 });
 
-const { t: tRaw, locale } = useI18n();
+const { t: tRaw, locale: i18nLocale } = useI18n();
 const page = usePage();
-const isRtl = computed(() => (page.props.locale || locale.value) === 'ar');
-const t = (key, params) => {
-    const v = tRaw(key, params || {});
-    return v === key ? key.split('.').pop() : v;
+const isRtl = computed(
+    () => props.locale?.is_rtl ?? (page.props.locale || i18nLocale.value || 'ar') === 'ar'
+);
+const t = (path, params) => {
+    const v = tRaw(path, params || {});
+    return v === path ? path.split('.').pop() : v;
 };
-
-const isDark = ref(true);
-
-// CSS variables for the tenant brand. The dashboard
-// itself doesn't have a primary action button — those
-// live on Login/Verify — but the header tile, the logo,
-// and any future CTAs use these.
-const cssVars = computed(() => ({
-    '--tenant-primary': props.tenant?.primary_color || '#4f46e5',
-    '--tenant-secondary': props.tenant?.secondary_color || '#0ea5e9',
-}));
-
-const initial = computed(() => {
-    const n = props.customer?.name || '';
-    return n.trim().charAt(0).toUpperCase() || '?';
-});
 
 // Booking is only offered to customers with at least
 // one vehicle — the booking form rejects requests
@@ -257,13 +244,7 @@ const initial = computed(() => {
 const canBook = computed(() => (props.vehicles?.length ?? 0) > 0);
 const bookUrl = computed(() => `/${props.tenant.slug}/portal/appointments/new`);
 
-const csrf = computed(() => {
-    if (typeof document === 'undefined') {
-        return '';
-    }
-    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-});
-
+// Date / time formatters in the active locale.
 const dateLocale = computed(() => (isRtl.value ? 'ar-SA' : 'en-US'));
 
 function formatDate(iso) {
@@ -280,31 +261,11 @@ function formatDate(iso) {
     }
 }
 
-function formatTime(iso) {
-    if (!iso) {
-        return '';
-    }
-    try {
-        return new Intl.DateTimeFormat(dateLocale.value, {
-            hour: 'numeric',
-            minute: '2-digit',
-        }).format(new Date(iso));
-    } catch (e) {
-        return iso;
-    }
-}
-
 function formatDateOnly(iso) {
     if (!iso) {
         return '';
     }
     try {
-        // expected_end_date arrives as YYYY-MM-DD (a date
-        // string from Carbon's toDateString). Parsing it
-        // as YYYY-MM-DD in UTC and then re-formatting in
-        // the user's locale avoids the timezone shift that
-        // would happen if we let JS interpret it as
-        // local-midnight.
         const d = iso.length === 10 ? new Date(iso + 'T00:00:00') : new Date(iso);
         return new Intl.DateTimeFormat(dateLocale.value, {
             day: 'numeric',
@@ -316,28 +277,117 @@ function formatDateOnly(iso) {
     }
 }
 
-function badgeStyle(status) {
-    const palette = {
-        scheduled: { bg: '#e0e7ff', fg: '#3730a3' },
-        confirmed: { bg: '#dcfce7', fg: '#166534' },
-        checked_in: { bg: '#fef3c7', fg: '#92400e' },
-    };
-    const c = palette[status] || { bg: '#e2e8f0', fg: '#334155' };
-    return {
-        backgroundColor: c.bg,
-        color: c.fg,
-    };
+// Friendly label for an internal appointment status.
+// The customer-facing dictionary lives in
+// `customer_portal.appointment_statuses` so the
+// dashboard never leaks raw keys like "checked_in".
+function appointmentStatusLabel(status) {
+    return t('customer_portal.appointment_statuses.' + (status || 'scheduled'));
 }
 
-onMounted(() => {
-    if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('cp-dark');
-        if (stored !== null) {
-            isDark.value = stored === '1';
-        } else if (window.matchMedia) {
-            isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        document.documentElement.classList.toggle('dark', isDark.value);
+// Same idea for work order statuses.
+function workOrderStatusLabel(status) {
+    return t('customer_portal.work_order_statuses.' + (status || 'open'));
+}
+
+// The PRIMARY CARD is the single most important
+// block on the page. We pick its shape here so the
+// template can render exactly one of three
+// variants. The shape decision is local to the
+// dashboard — the PrimaryCard component does not
+// decide between appointment vs work order.
+const primaryCard = computed(() => {
+    const upcoming = props.upcomingAppointments?.[0];
+    if (upcoming) {
+        const start = upcoming.scheduled_at ? new Date(upcoming.scheduled_at) : null;
+        const now = new Date();
+        const isToday = start && sameDay(start, now);
+        const isTomorrow =
+            start && sameDay(start, new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+
+        const titleKey = isToday
+            ? 'primary_title_appointment_today'
+            : isTomorrow
+              ? 'primary_title_appointment_tomorrow'
+              : 'primary_title_appointment';
+
+        return {
+            kind: 'appointment',
+            title: t('customer_portal.dashboard.' + titleKey),
+            when: formatDate(upcoming.scheduled_at),
+            branch: upcoming.center_name || t('customer_portal.booking.review_branch'),
+            viewHref: `/${props.tenant.slug}/portal/appointment/${upcoming.id}`,
+            editHref: `/${props.tenant.slug}/portal/appointment/${upcoming.id}/edit`,
+        };
     }
+
+    const activeWo = (props.recentWorkOrders || []).find(
+        (w) => w.status && !['done', 'cancelled'].includes(w.status)
+    );
+    if (activeWo) {
+        return {
+            kind: 'work_order',
+            statusLabel: workOrderStatusLabel(activeWo.status),
+            progress: workOrderProgress(activeWo.status),
+        };
+    }
+
+    return { kind: 'empty' };
 });
+
+// The customer can manage (reschedule / cancel) an
+// upcoming appointment only if it is at least 2 hours
+// away and the appointment is in scheduled/confirmed
+// status. We mirror the server's rule on the client so
+// the button is honest. The server re-checks before
+// persisting.
+const MIN_HOURS_BEFORE = 2;
+const canManageAppointment = computed(() => {
+    const a = props.upcomingAppointments?.[0];
+    if (!a?.scheduled_at) {
+        return false;
+    }
+    const start = new Date(a.scheduled_at);
+    const earliest = new Date();
+    earliest.setHours(earliest.getHours() + MIN_HOURS_BEFORE);
+    if (start < earliest) {
+        return false;
+    }
+    return a.status === 'scheduled' || a.status === 'confirmed';
+});
+
+function sameDay(a, b) {
+    return (
+        a.getFullYear() === b.getFullYear() &&
+        a.getMonth() === b.getMonth() &&
+        a.getDate() === b.getDate()
+    );
+}
+
+// Progress for the active work order. We expose a
+// 0..100 estimate so the progress bar is meaningful
+// without leaking the workflow internals. The
+// mapping is conservative — the customer should not
+// see a 100% bar on something that is still in
+// progress.
+function workOrderProgress(status) {
+    switch (status) {
+        case 'draft':
+            return 10;
+        case 'open':
+            return 25;
+        case 'in_progress':
+            return 55;
+        case 'ready_for_qc':
+            return 80;
+        case 'on_hold':
+            return 55;
+        case 'done':
+            return 100;
+        case 'cancelled':
+            return 0;
+        default:
+            return 30;
+    }
+}
 </script>

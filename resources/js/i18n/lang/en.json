@@ -4500,12 +4500,6 @@
     "layout": {
       "mobile_menu": "Menu"
     },
-    "notifications": {
-      "title": "Notifications",
-      "mark_all_read": "Mark all as read",
-      "empty": "No notifications yet",
-      "view_all": "View all"
-    },
     "backups": {
       "title": "Backups",
       "subtitle": "Manage tenant data backups",
@@ -4998,7 +4992,17 @@
       "phone_placeholder": "+966 5x xxx xxxx",
       "phone_hint": "We will send a 6-digit verification code to your phone.",
       "submit": "Send code",
-      "back_to_site": "Back to the public site"
+      "back_to_site": "Back to the public site",
+      "reassure": "Sign in once with your phone number — your vehicles and appointments are waiting for you.",
+      "flag_sa": "Saudi Arabia",
+      "country_code": "+966",
+      "portal_eyebrow": "Your private portal",
+      "hero_title": "Everything about your vehicle in one place",
+      "benefit_appointments": "Book and reschedule with ease",
+      "benefit_tracking": "Follow your service progress",
+      "benefit_security": "Secure one-time-code sign in",
+      "secure_note": "Secure access for service center customers",
+      "local_phone_placeholder": "5X XXX XXXX"
     },
     "verify": {
       "title": "Enter verification code",
@@ -5008,11 +5012,16 @@
       "code_placeholder": "••••••",
       "submit": "Verify",
       "change_number": "Use a different number",
-      "expiry_notice": "The code expires in 10 minutes."
+      "expiry_notice": "The code expires in 10 minutes.",
+      "resend": "Resend code",
+      "resend_in": "Resend in {seconds} s",
+      "resend_now": "Resend the code now",
+      "sent_prefix": "We sent a 6-digit code to",
+      "change_link": "Use a different number"
     },
     "dashboard": {
       "title": "My account",
-      "greeting": "Hi, :name",
+      "greeting": "Hi, {name}",
       "back_to_site": "Public site",
       "logout": "Sign out",
       "vehicles": "My vehicles",
@@ -5027,7 +5036,32 @@
       "status_scheduled": "Scheduled",
       "status_confirmed": "Confirmed",
       "status_checked_in": "Checked in",
-      "book_cta": "Book an appointment"
+      "book_cta": "Book an appointment",
+      "greeting_subtitle": "Here is the latest on your vehicles and appointments.",
+      "primary_kicker_appointment": "Upcoming appointment",
+      "primary_title_appointment": "Your appointment is coming up",
+      "primary_title_appointment_today": "Your appointment is today",
+      "primary_title_appointment_tomorrow": "Your appointment is tomorrow",
+      "primary_subtitle_appointment": "We will see you at the branch. You can reschedule up to 2 hours before.",
+      "primary_kicker_workorder": "Active work order",
+      "primary_title_workorder": "Your vehicle is being serviced",
+      "primary_subtitle_workorder": "Service is in progress. We will message you when it is ready.",
+      "primary_kicker_empty": "Get started",
+      "primary_title_empty": "Book your car service",
+      "primary_subtitle_empty": "All you need is one tap. Pick your vehicle and the time that works for you.",
+      "cta_view": "View appointment",
+      "cta_edit": "Reschedule",
+      "cta_book": "Book an appointment",
+      "cta_reschedule": "Reschedule",
+      "section_vehicles": "My vehicles",
+      "section_vehicles_short": "Vehicles",
+      "section_recent": "Recent activity",
+      "progress_label": "Work progress",
+      "progress_caption": "Work order status: {status}",
+      "work_order_code": "Work order #{code}",
+      "expected_on": "Expected {date}",
+      "view_all": "View all",
+      "no_appointments_secondary": "No upcoming appointments yet."
     },
     "actions": {
       "cancel_button": "Cancel appointment",
@@ -5056,13 +5090,18 @@
         "slot_out_of_window": "This time is outside the booking window. Please pick another time.",
         "slot_no_longer_available": "This time is no longer available. Please pick another time.",
         "cancel_failed": "We could not cancel this appointment. Please try again or contact the center."
-      }
+      },
+      "reschedule_step_1": "Branch",
+      "reschedule_step_2": "Date & time",
+      "reschedule_step_3": "Review",
+      "reschedule_summary_title": "New appointment summary",
+      "current_label": "Currently scheduled for"
     },
     "booking": {
       "title": "Book an appointment",
       "subtitle": "Pick a branch, a vehicle, the services you need, and a time that works for you.",
       "back_to_dashboard": "Back to my account",
-      "step": "Step :current of :total",
+      "step": "Step {current} of {total}",
       "step_center": "Branch",
       "step_vehicle": "Vehicle",
       "step_services": "Services",
@@ -5084,7 +5123,7 @@
       "review_services": "Services",
       "review_date": "Date & time",
       "review_duration": "Estimated duration",
-      "duration_minutes": ":count min",
+      "duration_minutes": "{count} min",
       "submit": "Confirm booking",
       "submitting": "Booking…",
       "confirmed_flash": "Your appointment has been booked.",
@@ -5104,7 +5143,29 @@
         "vehicle_not_owned": "This vehicle is not linked to your account.",
         "slot_out_of_window": "This time is outside the booking window. Please pick another time.",
         "slot_no_longer_available": "This time is no longer available. Please pick another time."
-      }
+      },
+      "step_1": "Vehicle & services",
+      "step_2": "Branch & time",
+      "step_3": "Review & confirm",
+      "btn_back": "Back",
+      "btn_next": "Next",
+      "btn_confirm": "Confirm booking",
+      "select_branch": "Select a branch",
+      "sticky_summary_label": "Booking summary",
+      "sticky_branch": "Branch",
+      "sticky_vehicle": "Vehicle",
+      "sticky_services": "Services",
+      "sticky_when": "When",
+      "sticky_total_duration": "Total duration",
+      "no_branch_picked": "No branch picked yet",
+      "no_vehicle_picked": "No vehicle picked yet",
+      "no_services_picked": "No services picked yet",
+      "no_time_picked": "No time picked yet",
+      "pick_branch_first": "Pick a branch first",
+      "pick_vehicle_first": "Pick a vehicle first",
+      "pick_services_first": "Pick at least one service",
+      "pick_time_first": "Pick a time to continue",
+      "review_intro": "Double-check the details before you confirm."
     },
     "sms": {
       "booking_confirmation": "Your appointment at :site_name (:branch_name) is confirmed for :date at :time. Reference: :ref.",
@@ -5116,6 +5177,30 @@
         "body": "Your :site_name verification code is: :code. The code expires in 10 minutes."
       },
       "site_name_fallback": "the service center"
+    },
+    "nav": {
+      "home": "Home",
+      "bookings": "Book now",
+      "vehicles": "Vehicles",
+      "account": "Account",
+      "bottom_label": "Primary navigation"
+    },
+    "work_order_statuses": {
+      "draft": "Draft",
+      "open": "Open",
+      "in_progress": "In progress",
+      "ready_for_qc": "Awaiting inspection",
+      "on_hold": "On hold",
+      "done": "Ready for pickup",
+      "cancelled": "Cancelled"
+    },
+    "appointment_statuses": {
+      "scheduled": "Scheduled",
+      "confirmed": "Confirmed",
+      "checked_in": "Checked in",
+      "no_show": "Did not show up",
+      "converted": "Converted to a work order",
+      "cancelled": "Cancelled"
     }
   },
   "communications": {

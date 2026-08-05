@@ -1,264 +1,254 @@
 <template>
-    <Head>
-        <title>{{ t('customer_portal.actions.reschedule_title') }} — {{ tenant.site_name }}</title>
-    </Head>
-
-    <div
-        :dir="isRtl ? 'rtl' : 'ltr'"
-        :data-theme="isDark ? 'dark' : 'light'"
-        :style="cssVars"
-        class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100"
+    <CustomerPortalLayout
+        :tenant="tenant"
+        :locale="locale"
+        :title="t('customer_portal.actions.reschedule_title')"
+        :subtitle="t('customer_portal.actions.reschedule_subtitle')"
+        show-logout
+        :language-base-path="`/${tenant.slug}/portal/appointment/${appointment.id}/edit`"
     >
-        <header
-            class="sticky top-0 z-40 backdrop-blur bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800"
+        <!--
+            Reschedule.vue — move an existing appointment.
+
+            Two steps:
+              1. Branch + time
+              2. Review & confirm
+
+            The vehicle and services on the appointment
+            are immutable here — the customer can only
+            move the slot. The current appointment is
+            always visible so the customer can compare
+            their new choice with the existing one.
+        -->
+
+        <WizardStepper
+            :steps="stepDefs"
+            :current-step="currentStep"
+            :step-counter="
+                t('customer_portal.booking.step', {
+                    current: currentStep + 1,
+                    total: stepDefs.length,
+                })
+            "
+        />
+
+        <div
+            v-if="bookingError"
+            class="rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-900/20 p-4 text-sm text-rose-700 dark:text-rose-200 mb-4"
         >
+            {{ bookingError }}
+        </div>
+
+        <!--
+            Current-appointment summary. Visible on
+            every step so the customer always knows
+            what they are moving.
+        -->
+        <section
+            class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 mb-6"
+        >
+            <p
+                class="text-[10px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-2"
+            >
+                {{ t('customer_portal.actions.current_label') }}
+            </p>
+            <div class="flex items-center justify-between gap-3" dir="ltr">
+                <div class="font-semibold">
+                    {{ formatDateTime(appointment.scheduled_at) }}
+                </div>
+                <div class="text-sm text-slate-500 dark:text-slate-400">
+                    {{ appointment.center_name }}
+                </div>
+            </div>
+            <ul
+                v-if="appointment.services && appointment.services.length"
+                class="mt-3 flex flex-wrap gap-2 text-xs"
+            >
+                <li
+                    v-for="s in appointment.services"
+                    :key="s.id"
+                    class="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800"
+                >
+                    {{ s.name }}
+                </li>
+            </ul>
+        </section>
+
+        <!--
+            Step 1: branch + date + time. Slots come
+            from the existing reschedule-availability
+            endpoint.
+        -->
+        <section
+            v-show="currentStep === 0"
+            class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800"
+        >
+            <h2 class="text-lg font-bold mb-1">
+                {{ t('customer_portal.actions.reschedule_step_1') }}
+            </h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                {{ t('customer_portal.booking.step_center') }}
+            </p>
             <div
-                class="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4"
+                v-if="centers.length === 0"
+                class="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-6 text-center text-sm text-slate-500 dark:text-slate-400 mb-6"
             >
-                <div class="flex items-center gap-3 min-w-0">
-                    <div
-                        class="h-9 w-9 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0"
-                        :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
-                    >
-                        {{ initial }}
-                    </div>
-                    <div class="min-w-0">
-                        <h1 class="font-bold text-base truncate">
-                            {{ t('customer_portal.actions.reschedule_title') }}
-                        </h1>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
-                            {{ t('customer_portal.actions.reschedule_subtitle') }}
-                        </p>
-                    </div>
-                </div>
-                <a
-                    :href="backToShow"
-                    class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                    ‹
-                </a>
+                {{ t('customer_portal.booking.no_centers') }}
             </div>
-        </header>
-
-        <main class="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-            <div
-                v-if="bookingError"
-                class="rounded-2xl border border-rose-200 dark:border-rose-900/60 bg-rose-50 dark:bg-rose-900/20 p-4 text-sm text-rose-700 dark:text-rose-200"
-            >
-                {{ bookingError }}
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <SelectionCard
+                    v-for="c in centers"
+                    :key="c.id"
+                    :title="c.name"
+                    :badge="c.is_main ? '★' : ''"
+                    :subtitle="
+                        c.id === appointment.center_id
+                            ? t('customer_portal.actions.reschedule_same_center')
+                            : ''
+                    "
+                    :selected="form.centerId === c.id"
+                    @select="selectCenter(c)"
+                />
             </div>
 
-            <!-- Current appointment summary. The
-                 customer always sees what they are
-                 moving before they pick a new time. -->
-            <section
-                class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800"
-            >
-                <h2 class="text-sm font-semibold text-slate-500 dark:text-slate-400 mb-2">
-                    {{ t('customer_portal.actions.reschedule_current_when') }}
-                </h2>
-                <div class="flex items-center justify-between gap-3" dir="ltr">
-                    <div class="font-semibold">
-                        {{ formatDateTime(appointment.scheduled_at) }}
-                    </div>
-                    <div class="text-sm text-slate-500 dark:text-slate-400">
-                        {{ appointment.center_name }}
-                    </div>
-                </div>
-                <ul class="mt-3 flex flex-wrap gap-2 text-xs">
-                    <li
-                        v-for="s in appointment.services"
-                        :key="s.id"
-                        class="px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800"
-                    >
-                        {{ s.name }}
-                    </li>
-                </ul>
-            </section>
+            <h2 class="text-lg font-bold mb-1">
+                {{ t('customer_portal.booking.pick_date') }}
+            </h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                {{ t('customer_portal.booking.pick_time') }}
+            </p>
 
-            <!-- Step 1: branch. The customer can keep
-                 the same branch or pick another active
-                 branch in the same tenant. -->
-            <section
-                v-show="currentStep === 0"
-                class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800"
-            >
-                <h2 class="text-lg font-bold mb-3">
-                    {{ t('customer_portal.actions.reschedule_step_branch') }}
-                </h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
-                        v-for="c in centers"
-                        :key="c.id"
-                        type="button"
-                        @click="selectCenter(c)"
-                        class="text-left p-4 rounded-2xl border transition"
-                        :class="
-                            form.centerId === c.id
-                                ? 'border-transparent ring-2'
-                                : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                        "
-                        :style="
-                            form.centerId === c.id
-                                ? {
-                                      backgroundColor:
-                                          'color-mix(in srgb, var(--tenant-primary, #4f46e5) 8%, transparent)',
-                                      '--tw-ring-color': 'var(--tenant-primary, #4f46e5)',
-                                  }
-                                : {}
-                        "
-                    >
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="font-bold text-base">{{ c.name }}</span>
-                            <span
-                                v-if="c.is_main"
-                                class="text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded-full"
-                                :style="{
-                                    backgroundColor:
-                                        'color-mix(in srgb, var(--tenant-primary, #4f46e5) 12%, transparent)',
-                                    color: 'var(--tenant-primary, #4f46e5)',
-                                }"
-                            >
-                                ★
-                            </span>
-                        </div>
-                        <div
-                            v-if="c.id === appointment.center_id"
-                            class="text-xs text-slate-500 dark:text-slate-400 mt-1"
-                        >
-                            {{ t('customer_portal.actions.reschedule_same_center') }}
-                        </div>
-                    </button>
-                </div>
-            </section>
+            <div class="mb-4">
+                <input
+                    type="date"
+                    :min="minDateStr"
+                    :max="maxDateStr"
+                    v-model="form.date"
+                    class="rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
+                />
+            </div>
 
-            <!-- Step 2: date + time. The slots come from
-                 the same availability endpoint the
-                 booking flow uses; the wizard never
-                 lets the customer type a time. -->
-            <section
-                v-show="currentStep === 1"
-                class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800"
-            >
-                <div class="flex flex-wrap items-center gap-3 mb-5">
-                    <label class="text-sm font-medium">
-                        {{ t('customer_portal.booking.pick_date') }}
-                    </label>
-                    <input
-                        type="date"
-                        :min="minDateStr"
-                        :max="maxDateStr"
-                        v-model="form.date"
-                        class="rounded-lg border-slate-300 dark:border-slate-700 dark:bg-slate-950 text-sm"
-                    />
-                </div>
-                <h3 class="text-sm font-semibold mb-2">
-                    {{ t('customer_portal.booking.pick_time') }}
-                </h3>
-                <p v-if="loadingSlots" class="text-sm text-slate-500 dark:text-slate-400">
-                    {{ t('customer_portal.booking.loading_slots') }}
-                </p>
-                <p
-                    v-else-if="slots.length === 0"
-                    class="text-sm text-slate-500 dark:text-slate-400"
-                >
-                    {{ t('customer_portal.booking.no_slots') }}
-                </p>
-                <div v-else class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    <button
-                        v-for="slot in slots"
-                        :key="slot"
-                        type="button"
-                        @click="form.scheduledAt = slot"
-                        class="px-3 py-2 rounded-lg text-sm font-semibold border transition"
-                        :class="
-                            form.scheduledAt === slot
-                                ? 'text-white border-transparent'
-                                : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
-                        "
-                        :style="
-                            form.scheduledAt === slot
-                                ? { backgroundColor: 'var(--tenant-primary, #4f46e5)' }
-                                : {}
-                        "
-                        dir="ltr"
-                    >
-                        {{ formatSlotTime(slot) }}
-                    </button>
-                </div>
-            </section>
-
-            <!-- Step 3: review. -->
-            <section
-                v-show="currentStep === 2"
-                class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800"
-            >
-                <h2 class="text-lg font-bold mb-3">
-                    {{ t('customer_portal.actions.reschedule_step_review') }}
-                </h2>
-                <dl class="space-y-3 text-sm">
-                    <div class="flex items-start justify-between gap-3">
-                        <dt class="text-slate-500 dark:text-slate-400">
-                            {{ t('customer_portal.booking.review_branch') }}
-                        </dt>
-                        <dd class="font-semibold text-end">
-                            {{ selectedCenter?.name }}
-                        </dd>
-                    </div>
-                    <div class="flex items-start justify-between gap-3">
-                        <dt class="text-slate-500 dark:text-slate-400">
-                            {{ t('customer_portal.booking.review_date') }}
-                        </dt>
-                        <dd class="font-semibold text-end" dir="ltr">
-                            {{ formatDateTime(form.scheduledAt) }}
-                        </dd>
-                    </div>
-                </dl>
-            </section>
-
-            <!-- Navigation -->
-            <div class="flex items-center justify-between gap-3">
+            <p v-if="loadingSlots" class="text-sm text-slate-500 dark:text-slate-400">
+                {{ t('customer_portal.booking.loading_slots') }}
+            </p>
+            <p v-else-if="slots.length === 0" class="text-sm text-slate-500 dark:text-slate-400">
+                {{ t('customer_portal.booking.no_slots') }}
+            </p>
+            <div v-else class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                 <button
+                    v-for="slot in slots"
+                    :key="slot"
                     type="button"
-                    @click="prev"
-                    :disabled="currentStep === 0"
-                    class="px-4 py-2.5 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    @click="form.scheduledAt = slot"
+                    class="px-3 py-2 rounded-lg text-sm font-semibold border transition"
+                    :class="
+                        form.scheduledAt === slot
+                            ? 'text-white border-transparent'
+                            : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    "
+                    :style="
+                        form.scheduledAt === slot
+                            ? { backgroundColor: 'var(--tenant-primary, #4f46e5)' }
+                            : {}
+                    "
+                    dir="ltr"
                 >
-                    ‹
-                </button>
-                <button
-                    v-if="currentStep < 2"
-                    type="button"
-                    @click="next"
-                    :disabled="!canAdvance"
-                    class="px-5 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
-                    :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
-                >
-                    ›
-                </button>
-                <button
-                    v-else
-                    type="button"
-                    @click="submit"
-                    :disabled="submitting"
-                    class="px-5 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
-                    :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
-                >
-                    {{
-                        submitting
-                            ? t('customer_portal.actions.reschedule_submitting')
-                            : t('customer_portal.actions.reschedule_submit')
-                    }}
+                    {{ formatSlotTime(slot) }}
                 </button>
             </div>
-        </main>
-    </div>
+        </section>
+
+        <!--
+            Step 2: review. The customer sees the
+            chosen branch + new time before they
+            confirm. The button is full text and is
+            the only primary action on this step.
+        -->
+        <section
+            v-show="currentStep === 1"
+            class="bg-white dark:bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-200 dark:border-slate-800"
+        >
+            <h2 class="text-lg font-bold mb-3">
+                {{ t('customer_portal.actions.reschedule_summary_title') }}
+            </h2>
+            <dl class="divide-y divide-slate-100 dark:divide-slate-800">
+                <div class="flex items-start justify-between gap-3 py-3">
+                    <dt class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ t('customer_portal.booking.review_branch') }}
+                    </dt>
+                    <dd class="font-semibold text-end text-sm">
+                        {{ selectedCenter?.name || t('customer_portal.booking.no_branch_picked') }}
+                    </dd>
+                </div>
+                <div class="flex items-start justify-between gap-3 py-3">
+                    <dt class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ t('customer_portal.booking.review_date') }}
+                    </dt>
+                    <dd class="font-semibold text-end text-sm" dir="ltr">
+                        {{
+                            form.scheduledAt
+                                ? formatDateTime(form.scheduledAt)
+                                : t('customer_portal.booking.no_time_picked')
+                        }}
+                    </dd>
+                </div>
+            </dl>
+        </section>
+
+        <div
+            class="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3"
+        >
+            <button
+                v-if="currentStep > 0"
+                type="button"
+                @click="prev"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+                {{ t('customer_portal.booking.btn_back') }}
+            </button>
+            <a
+                v-else
+                :href="backToShow"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+                {{ t('customer_portal.booking.back_to_dashboard') }}
+            </a>
+
+            <button
+                v-if="currentStep < stepDefs.length - 1"
+                type="button"
+                @click="next"
+                :disabled="!canAdvance"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
+                :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
+            >
+                {{ t('customer_portal.booking.btn_next') }}
+            </button>
+            <button
+                v-else
+                type="button"
+                @click="submit"
+                :disabled="submitting"
+                class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg text-sm font-semibold text-white disabled:opacity-40"
+                :style="{ backgroundColor: 'var(--tenant-primary, #4f46e5)' }"
+            >
+                {{
+                    submitting
+                        ? t('customer_portal.actions.reschedule_submitting')
+                        : t('customer_portal.actions.reschedule_submit')
+                }}
+            </button>
+        </div>
+    </CustomerPortalLayout>
 </template>
 
 <script setup>
 import { Head, router, usePage } from '@inertiajs/vue3';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import CustomerPortalLayout from '@/Layouts/CustomerPortalLayout.vue';
+import WizardStepper from '@/Components/CustomerPortal/WizardStepper.vue';
+import SelectionCard from '@/Components/CustomerPortal/SelectionCard.vue';
 
 const props = defineProps({
     tenant: { type: Object, required: true },
@@ -269,27 +259,29 @@ const props = defineProps({
     minHoursBefore: { type: Number, default: 2 },
 });
 
-const { t: tRaw } = useI18n();
+const { t: tRaw, locale: i18nLocale } = useI18n();
 const page = usePage();
-const isRtl = computed(() => props.locale?.is_rtl ?? (page.props.locale || 'ar') === 'ar');
-const t = (key, params) => {
-    const v = tRaw(key, params || {});
-    return v === key ? key.split('.').pop() : v;
+const isRtl = computed(
+    () => props.locale?.is_rtl ?? (page.props.locale || i18nLocale.value || 'ar') === 'ar'
+);
+const t = (path, params) => {
+    const v = tRaw(path, params || {});
+    return v === path ? path.split('.').pop() : v;
 };
-
-const isDark = ref(true);
-const cssVars = computed(() => ({
-    '--tenant-primary': props.tenant?.primary_color || '#4f46e5',
-    '--tenant-secondary': props.tenant?.secondary_color || '#0ea5e9',
-}));
 
 const backToShow = computed(
     () => `/${props.tenant.slug}/portal/appointment/${props.appointment.id}`
 );
-const initial = computed(() => {
-    const n = props.tenant?.site_name || '';
-    return n.trim().charAt(0).toUpperCase() || '?';
-});
+
+// Two steps for reschedule. The customer picks a
+// new branch+time, then confirms. We do NOT use the
+// shared 3-step booking labels because reschedule
+// does not have a "vehicle & services" step — those
+// are immutable.
+const stepDefs = computed(() => [
+    { key: 'time', label: t('customer_portal.actions.reschedule_step_2') },
+    { key: 'review', label: t('customer_portal.actions.reschedule_step_3') },
+]);
 
 const currentStep = ref(0);
 const form = ref({
@@ -333,7 +325,10 @@ async function fetchSlots() {
         params.set('center_id', String(form.value.centerId));
         params.set('date', form.value.date);
         const r = await fetch(`${url}?${params.toString()}`, {
-            headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
             credentials: 'same-origin',
         });
         if (r.ok) {
@@ -350,7 +345,7 @@ async function fetchSlots() {
 watch(
     () => [form.value.centerId, form.value.date],
     () => {
-        if (currentStep.value === 1) {
+        if (currentStep.value === 0) {
             form.value.scheduledAt = null;
             fetchSlots();
         }
@@ -358,7 +353,7 @@ watch(
 );
 
 watch(currentStep, (val) => {
-    if (val === 1) {
+    if (val === 0) {
         if (!form.value.date) {
             form.value.date = minDateStr.value;
         }
@@ -368,10 +363,7 @@ watch(currentStep, (val) => {
 
 const canAdvance = computed(() => {
     if (currentStep.value === 0) {
-        return form.value.centerId !== null;
-    }
-    if (currentStep.value === 1) {
-        return form.value.scheduledAt !== null;
+        return form.value.centerId !== null && form.value.scheduledAt !== null;
     }
     return true;
 });
@@ -381,7 +373,7 @@ function next() {
     if (!canAdvance.value) {
         return;
     }
-    if (currentStep.value < 2) {
+    if (currentStep.value < stepDefs.value.length - 1) {
         currentStep.value += 1;
     }
 }
@@ -448,16 +440,4 @@ function submit() {
         }
     );
 }
-
-onMounted(() => {
-    if (typeof window !== 'undefined') {
-        const stored = localStorage.getItem('cp-dark');
-        if (stored !== null) {
-            isDark.value = stored === '1';
-        } else if (window.matchMedia) {
-            isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        document.documentElement.classList.toggle('dark', isDark.value);
-    }
-});
 </script>
