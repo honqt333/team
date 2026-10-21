@@ -7,7 +7,7 @@
                 class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-xl"
             >
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    إعدادات الأمان
+                    {{ $t('system.tenants.modals.security_title') }}
                 </h3>
                 <form @submit.prevent="$emit('save-security')">
                     <div class="mb-4">
@@ -19,7 +19,7 @@
                                 class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                             />
                             <span class="text-sm font-medium text-gray-900 dark:text-white">
-                                تفعيل المصادقة الثنائية (2FA) للمستأجر
+                                {{ $t('system.tenants.modals.two_factor_label') }}
                             </span>
                         </label>
 
@@ -30,11 +30,10 @@
                                 :options="twoFactorEnforcementOptions"
                                 option-label="label"
                                 option-value="value"
-                                label="مستوى الإلزام"
+                                :label="$t('system.tenants.modals.enforcement_label')"
                             />
                             <p class="text-xs text-gray-500 mt-2">
-                                يحدد هذا الإعداد ما إذا كان يجب على مستخدمي المستأجر تفعيل المصادقة
-                                الثنائية.
+                                {{ $t('system.tenants.modals.enforcement_hint') }}
                             </p>
                         </div>
                     </div>
@@ -44,14 +43,14 @@
                             @click="$emit('close', 'security')"
                             class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                         >
-                            إلغاء
+                            {{ $t('common.cancel') }}
                         </button>
                         <button
                             type="submit"
                             :disabled="securityForm.processing"
                             class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg"
                         >
-                            حفظ التغييرات
+                            {{ $t('common.save_changes') }}
                         </button>
                     </div>
                 </form>
@@ -67,11 +66,11 @@
                 class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-xl"
             >
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    تعليق الحساب
+                    {{ $t('system.tenants.modals.suspend_title') }}
                 </h3>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        سبب التعليق
+                        {{ $t('system.tenants.modals.suspend_reason') }}
                     </label>
                     <textarea
                         v-model="local.suspendReason"
@@ -81,17 +80,19 @@
                 </div>
                 <div class="flex gap-3 justify-end">
                     <button
+                        type="button"
                         @click="$emit('close', 'suspend')"
                         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                     >
-                        إلغاء
+                        {{ $t('common.cancel') }}
                     </button>
                     <button
+                        type="button"
                         @click="emitSuspend"
                         :disabled="!local.suspendReason"
                         class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg disabled:opacity-50"
                     >
-                        تعليق
+                        {{ $t('system.tenants.actions.suspend') }}
                     </button>
                 </div>
             </div>
@@ -106,11 +107,11 @@
                 class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-xl"
             >
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    تمديد الفترة التجريبية
+                    {{ $t('system.tenants.modals.extend_title') }}
                 </h3>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        عدد الأيام
+                        {{ $t('system.tenants.modals.extend_days') }}
                     </label>
                     <input
                         v-model.number="local.extendDays"
@@ -121,22 +122,24 @@
                         dir="ltr"
                     />
                     <p class="text-xs text-gray-500 mt-2">
-                        يمكن أن يكون الرقم سالباً (لتقليص المدة) حتى -90 يوم.
+                        {{ $t('system.tenants.modals.extend_hint') }}
                     </p>
                 </div>
                 <div class="flex gap-3 justify-end">
                     <button
+                        type="button"
                         @click="$emit('close', 'extend')"
                         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                     >
-                        إلغاء
+                        {{ $t('common.cancel') }}
                     </button>
                     <button
+                        type="button"
                         @click="emitExtend"
                         :disabled="!local.extendDays"
                         class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg disabled:opacity-50"
                     >
-                        تمديد
+                        {{ $t('system.tenants.actions.extend_trial') }}
                     </button>
                 </div>
             </div>
@@ -151,31 +154,51 @@
                 class="relative bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full shadow-xl"
             >
                 <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">
-                    ⚠️ حذف نهائي
+                    {{ $t('system.tenants.modals.delete_title') }}
                 </h3>
                 <div
                     class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800"
                 >
                     <p class="text-sm text-red-700 dark:text-red-300">
-                        سيتم حذف المستأجر
-                        <strong>{{ tenant.name }}</strong>
-                        وجميع بياناته نهائياً:
+                        {{ $t('system.tenants.modals.delete_warning', { name: tenant.name }) }}
                     </p>
                     <ul class="mt-2 text-sm text-red-600 dark:text-red-400 list-disc list-inside">
-                        <li>{{ analytics.users }} مستخدم</li>
-                        <li>{{ analytics.centers }} مركز</li>
-                        <li>{{ analytics.customers }} عميل</li>
-                        <li>{{ analytics.work_orders }} كرت</li>
+                        <li>
+                            {{
+                                $t('system.tenants.modals.delete_users', { count: analytics.users })
+                            }}
+                        </li>
+                        <li>
+                            {{
+                                $t('system.tenants.modals.delete_centers', {
+                                    count: analytics.centers,
+                                })
+                            }}
+                        </li>
+                        <li>
+                            {{
+                                $t('system.tenants.modals.delete_customers', {
+                                    count: analytics.customers,
+                                })
+                            }}
+                        </li>
+                        <li>
+                            {{
+                                $t('system.tenants.modals.delete_work_orders', {
+                                    count: analytics.work_orders,
+                                })
+                            }}
+                        </li>
                     </ul>
                     <p class="mt-2 text-sm text-red-700 dark:text-red-300 font-bold">
-                        هذا الإجراء لا يمكن التراجع عنه!
+                        {{ $t('system.tenants.modals.delete_irreversible') }}
                     </p>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        اكتب "
-                        <span class="font-bold text-red-600">{{ tenant.name }}</span>
-                        " للتأكيد
+                        {{
+                            $t('system.tenants.modals.delete_confirm_label', { name: tenant.name })
+                        }}
                     </label>
                     <input
                         v-model="local.deleteConfirmation"
@@ -185,12 +208,14 @@
                 </div>
                 <div class="flex gap-3 justify-end">
                     <button
+                        type="button"
                         @click="$emit('close', 'delete')"
                         class="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                     >
-                        إلغاء
+                        {{ $t('common.cancel') }}
                     </button>
                     <button
+                        type="button"
                         @click="emitDelete"
                         :disabled="local.deleteConfirmation !== tenant.name"
                         :class="
@@ -200,7 +225,7 @@
                         "
                         class="px-4 py-2 text-white rounded-lg"
                     >
-                        حذف نهائي
+                        {{ $t('system.tenants.actions.delete_permanent') }}
                     </button>
                 </div>
             </div>
@@ -209,7 +234,8 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { reactive, watch, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 
 const props = defineProps({
@@ -226,6 +252,8 @@ const emit = defineEmits([
     'confirm-extend',
     'confirm-delete',
 ]);
+
+const { t } = useI18n();
 
 // Local state for modal inputs. We use reactive() so we can v-model
 // directly. Parent owns the form/values that matter for submission;
@@ -260,9 +288,9 @@ const emitSuspend = () => emit('confirm-suspend', local.suspendReason);
 const emitExtend = () => emit('confirm-extend', local.extendDays);
 const emitDelete = () => emit('confirm-delete', local.deleteConfirmation);
 
-const twoFactorEnforcementOptions = [
-    { value: 'disabled', label: 'غير ملزم (اختياري)' },
-    { value: 'optional', label: 'اختياري (ينصح به)' },
-    { value: 'required', label: 'إلزامي (للمستخدمين الجدد)' },
-];
+const twoFactorEnforcementOptions = computed(() => [
+    { value: 'disabled', label: t('system.tenants.modals.enforcement_disabled') },
+    { value: 'optional', label: t('system.tenants.modals.enforcement_optional') },
+    { value: 'required', label: t('system.tenants.modals.enforcement_required') },
+]);
 </script>
