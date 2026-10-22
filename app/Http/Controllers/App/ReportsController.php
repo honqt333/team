@@ -6,6 +6,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Center;
+use App\Models\Customer;
 use App\Models\Payment;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
@@ -80,6 +81,21 @@ class ReportsController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        $tenant = auth()->user()->tenant;
+        $currentCenter = $centerId ? Center::find($centerId) : null;
+
+        $customers = Customer::query()
+            ->where('tenant_id', $tenantId)
+            ->select('id', 'name', 'phone')
+            ->orderBy('name')
+            ->limit(100)
+            ->get();
+
+        $centers = Center::query()
+            ->where('tenant_id', $tenantId)
+            ->select('id', 'name')
+            ->get();
+
         return Inertia::render('Reports/Payments', [
             'filters' => [
                 'range' => $range,
@@ -87,6 +103,7 @@ class ReportsController extends Controller
                 'end_date' => $to?->format('Y-m-d') ?? $endDate,
                 'method' => $method,
                 'type' => $type,
+                'customer_id' => $customerId,
                 'search' => $search,
             ],
             'kpis' => [
@@ -96,6 +113,15 @@ class ReportsController extends Controller
                 'total_count' => $totalCount,
             ],
             'methodsBreakdown' => $methodsBreakdown,
+            'customers' => $customers,
+            'centers' => $centers,
+            'companyInfo' => [
+                'name' => $tenant->legal_name ?: $tenant->name,
+                'vat_number' => $tenant->taxSettings?->tax_number ?? $tenant->vat_number ?? '',
+                'cr_number' => $tenant->cr_number ?? '',
+                'logo_path' => $tenant->logo_path ?? '',
+                'center_name' => $currentCenter?->name ?? '',
+            ],
             'payments' => $payments,
         ]);
     }
@@ -113,11 +139,12 @@ class ReportsController extends Controller
         $endDate = $request->input('end_date');
         $method = $request->input('method', 'all');
         $type = $request->input('type', 'all');
+        $customerId = $request->input('customer_id', 'all');
         $search = trim((string) $request->input('search', ''));
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
 
-        $query = $this->buildPaymentsQuery($tenantId, $centerId, $from, $to, $method, $type, $search)
+        $query = $this->buildPaymentsQuery($tenantId, $centerId, $from, $to, $method, $type, $customerId, $search)
             ->with([
                 'center:id,name',
                 'invoice:id,invoice_number,customer_id',
@@ -212,6 +239,7 @@ class ReportsController extends Controller
         ?Carbon $to,
         string $method,
         string $type,
+        string $customerId,
         string $search
     ) {
         $query = Payment::query()->where('tenant_id', $tenantId);
@@ -232,6 +260,13 @@ class ReportsController extends Controller
 
         if (! empty($type) && $type !== 'all') {
             $query->where('type', $type);
+        }
+
+        if (! empty($customerId) && $customerId !== 'all') {
+            $query->where(function ($q) use ($customerId) {
+                $q->whereHas('invoice', fn ($iq) => $iq->where('customer_id', $customerId))
+                    ->orWhereHas('workOrder', fn ($wq) => $wq->where('customer_id', $customerId));
+            });
         }
 
         if ($search !== '') {
