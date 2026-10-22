@@ -6,6 +6,7 @@ namespace App\Services\Zatca;
 
 use App\Models\Tenant;
 use App\Models\TenantZatcaSetting;
+use App\Support\ArabicNumeralConverter;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -93,19 +94,28 @@ class ZatcaOnboardingService
             throw new InvalidArgumentException('يجب توليد طلب التوقيع (CSR) أولاً قبل طلب شهادة الامتثال.');
         }
 
-        $cleanOtp = trim($otp);
+        $cleanOtp = trim((string) ArabicNumeralConverter::toEnglish($otp));
 
         if (strlen($cleanOtp) < 6) {
             throw new InvalidArgumentException('رمز التحقق (OTP) يجب أن يتكون من 6 أرقام على الأقل.');
         }
 
-        $endpoint = (self::ENDPOINTS[$setting->environment] ?? self::ENDPOINTS['simulation']).'/compliance';
+        $isProduction = ($setting->environment === TenantZatcaSetting::ENV_PRODUCTION || $setting->environment === 'production');
 
-        $csid = '';
-        $secret = '';
+        if ($cleanOtp === '123456' && $isProduction) {
+            $errorMsg = 'الرمز التجريبي (123456) غير مسموح به في بيئة الإنتاج الحية. يجب إدخال رمز OTP حقيقي صادر من بوابة فاتورة لمنشأتك.';
+            $setting->last_onboarding_error = $errorMsg;
+            $setting->save();
+
+            throw new InvalidArgumentException($errorMsg);
+        }
 
         $isDevOrTest = app()->environment('local', 'testing');
-        $isMockOtp = ($cleanOtp === '123456' && $isDevOrTest);
+        $isMockOtp = ($cleanOtp === '123456' && $isDevOrTest && ! $isProduction);
+
+        $endpoint = (self::ENDPOINTS[$setting->environment] ?? self::ENDPOINTS['simulation']).'/compliance';
+        $csid = '';
+        $secret = '';
 
         if ($isMockOtp) {
             $csid = 'CSID_SIM_'.Str::upper(Str::random(32));

@@ -270,7 +270,7 @@
 
                 <!-- Guidance Box -->
                 <div
-                    class="p-4 bg-sky-50 dark:bg-sky-950/20 rounded-xl border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-300 space-y-2"
+                    class="p-4 bg-sky-50 dark:bg-sky-950/20 rounded-xl border border-sky-200 dark:border-sky-800 text-xs text-sky-900 dark:text-sky-300 space-y-3"
                 >
                     <h4 class="font-bold flex items-center gap-1.5">
                         <svg class="w-4 h-4 text-sky-600" fill="currentColor" viewBox="0 0 20 20">
@@ -301,6 +301,26 @@
                         <li>اضغط على "إضافة وحدة حل تقني جديدة" واطلب رمز التحقق (OTP).</li>
                         <li>أدخل الرمز السداسي في الحقل أدناه واضغط على "طلب شهادة الامتثال".</li>
                     </ol>
+
+                    <div
+                        v-if="props.setting.environment === 'production'"
+                        class="p-3 bg-amber-100/70 dark:bg-amber-950/40 rounded-lg border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 font-medium"
+                    >
+                        ⚠️
+                        <strong>وضع الإنتاج الحي:</strong>
+                        الرمز التجريبي (123456) غير مقبول في وضع الإنتاج، ويجب إدخال رمز OTP فعلي
+                        صادر من بوابة فاتورة لمنشأتك.
+                    </div>
+                    <div
+                        v-else
+                        class="p-3 bg-emerald-100/70 dark:bg-emerald-950/40 rounded-lg border border-emerald-300 dark:border-emerald-700 text-emerald-900 dark:text-emerald-200 font-medium"
+                    >
+                        💡
+                        <strong>بيئة المحاكاة:</strong>
+                        يمكنك استخدام الرمز التجريبي
+                        <strong>123456</strong>
+                        لاختبار الربط والامتثال بنجاح.
+                    </div>
                 </div>
 
                 <div class="max-w-md mx-auto py-3 space-y-4 text-center">
@@ -311,7 +331,11 @@
                         v-model="otpForm.otp"
                         type="text"
                         maxlength="6"
-                        placeholder="123456"
+                        :placeholder="
+                            props.setting.environment === 'production'
+                                ? 'أدخل الرمز الفعلي'
+                                : '123456'
+                        "
                         class="w-full text-center text-2xl font-mono font-black tracking-[0.5em] px-4 py-3 rounded-2xl border-2 border-emerald-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-emerald-200 dark:focus:ring-emerald-900/40"
                     />
                     <p v-if="otpForm.errors.otp" class="text-xs text-red-500 font-bold">

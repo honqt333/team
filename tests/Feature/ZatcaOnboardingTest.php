@@ -188,4 +188,79 @@ class ZatcaOnboardingTest extends TestCase
         $this->assertNull($setting->production_csid);
         $this->assertFalse($setting->isPhase2Active());
     }
+
+    public function test_step_2_rejects_mock_otp_123456_in_production_environment(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        // Step 1: CSR in production mode
+        $this->actingAs($user)->post('/app/settings/zatca/csr', [
+            'environment' => 'production',
+        ]);
+
+        // Step 2: Try using mock OTP 123456 in production mode
+        $response = $this->actingAs($user)->post('/app/settings/zatca/compliance', [
+            'otp' => '123456',
+        ]);
+
+        $response->assertSessionHasErrors('otp');
+
+        $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
+        $setting->refresh();
+        $this->assertNull($setting->compliance_csid);
+        $this->assertEquals(TenantZatcaSetting::STATUS_CSR_READY, $setting->onboarding_status);
+        $this->assertStringContainsString('123456', (string) $setting->last_onboarding_error);
+    }
+
+    public function test_step_2_rejects_arabic_mock_otp_in_production_environment(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        // Step 1: CSR in production mode
+        $this->actingAs($user)->post('/app/settings/zatca/csr', [
+            'environment' => 'production',
+        ]);
+
+        // Step 2: Try using Arabic mock OTP ١٢٣٤٥٦ in production mode
+        $response = $this->actingAs($user)->post('/app/settings/zatca/compliance', [
+            'otp' => '١٢٣٤٥٦',
+        ]);
+
+        $response->assertSessionHasErrors('otp');
+
+        $setting = TenantZatcaSetting::where('tenant_id', $tenant->id)->first();
+        $this->assertNull($setting->compliance_csid);
+        $this->assertEquals(TenantZatcaSetting::STATUS_CSR_READY, $setting->onboarding_status);
+    }
+
+    public function test_step_4_rejects_simulated_csid_in_production_environment(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        // Manually place a simulated compliance CSID while setting environment is production
+        $setting = TenantZatcaSetting::firstOrCreate(['tenant_id' => $tenant->id]);
+        $setting->fill([
+            'environment' => 'production',
+            'compliance_csid' => 'CSID_SIM_TEST_DUMMY',
+            'compliance_secret' => 'SECRET_SIM_DUMMY',
+            'onboarding_status' => TenantZatcaSetting::STATUS_COMPLIANCE_PASSED,
+        ]);
+        $setting->save();
+
+        $response = $this->actingAs($user)->post('/app/settings/zatca/production');
+
+        $response->assertSessionHasErrors('error');
+        $setting->refresh();
+        $this->assertNull($setting->production_csid);
+        $this->assertFalse($setting->isPhase2Active());
+    }
 }
