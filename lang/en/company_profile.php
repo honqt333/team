@@ -187,8 +187,11 @@ return [
     ],
     'zatca' => [
         'complete_vat_first' => 'Complete Vat First',
+        'manage_integration' => 'Manage Integration & Certificates',
         'open_vat' => 'Open VAT settings',
         'phase1_title' => 'Phase 1 - E-invoicing issuance',
+        'phase2_active' => 'ZATCA Production Integration is Active',
+        'phase2_active_desc' => 'The system is currently signing, submitting invoices, and issuing digital cryptographic stamps successfully.',
         'phase2_description' => 'Phase 2 includes full integration with the Fatoora platform and digital invoice signing',
         'phase2_title' => 'Phase 2 - Integration and digital signature',
         'qr_enabled' => 'QR code enabled',

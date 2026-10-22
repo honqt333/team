@@ -81,6 +81,10 @@ class CompanyProfileController extends Controller
             ],
             'zatca' => [
                 'qr_enabled' => $tenant->zatcaSettings?->qr_enabled ?? false,
+                'is_phase2_active' => $tenant->zatcaSettings?->isPhase2Active() ?? false,
+                'onboarding_status' => $tenant->zatcaSettings?->onboarding_status ?? 'not_started',
+                'environment' => $tenant->zatcaSettings?->environment ?? 'simulation',
+                'production_csid_expires_at' => $tenant->zatcaSettings?->production_csid_expires_at?->format('Y-m-d'),
             ],
             'numbering' => [
                 'invoice_number_format' => $tenant->invoice_number_format ?? 'INV-{CENTER}-{YYYY}-{SEQ}',

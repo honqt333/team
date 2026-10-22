@@ -970,16 +970,70 @@
                             </div>
                         </div>
 
-                        <!-- Phase 2 Coming Soon -->
+                        <!-- Phase 2 Integration (Active State) -->
                         <div
-                            class="p-6 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800/50"
+                            v-if="props.zatca?.is_phase2_active"
+                            class="p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-50 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 border border-emerald-200 dark:border-emerald-800 shadow-sm"
                         >
-                            <div class="text-center">
-                                <div
-                                    class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center"
+                            <div
+                                class="flex flex-col sm:flex-row sm:items-center justify-between gap-5"
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div
+                                        class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-600/30"
+                                    >
+                                        <svg
+                                            class="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2.5">
+                                            <h3
+                                                class="text-lg font-bold text-gray-900 dark:text-white"
+                                            >
+                                                {{ $t('company_profile.zatca.phase2_active') }}
+                                            </h3>
+                                            <span
+                                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200"
+                                            >
+                                                {{
+                                                    props.zatca?.environment === 'production'
+                                                        ? 'الإنتاج الحي'
+                                                        : 'بيئة المحاكاة (Simulation)'
+                                                }}
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                            {{ $t('company_profile.zatca.phase2_active_desc') }}
+                                        </p>
+                                        <p
+                                            v-if="props.zatca?.production_csid_expires_at"
+                                            class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                                        >
+                                            صلاحية الشهادة حتى:
+                                            {{ props.zatca.production_csid_expires_at }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <a
+                                    href="/app/settings/zatca"
+                                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-xl text-sm shadow-sm transition-colors shrink-0"
                                 >
+                                    <span>
+                                        {{ $t('company_profile.zatca.manage_integration') }}
+                                    </span>
                                     <svg
-                                        class="w-8 h-8 text-gray-400"
+                                        class="w-4 h-4 rtl:rotate-180"
                                         fill="none"
                                         stroke="currentColor"
                                         viewBox="0 0 24 24"
@@ -988,24 +1042,78 @@
                                             stroke-linecap="round"
                                             stroke-linejoin="round"
                                             stroke-width="2"
-                                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
                                         />
                                     </svg>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Phase 2 Setup Available (Not Active Yet) -->
+                        <div
+                            v-else
+                            class="p-6 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/80 shadow-sm"
+                        >
+                            <div
+                                class="flex flex-col sm:flex-row items-center justify-between gap-6"
+                            >
+                                <div class="flex items-start gap-4">
+                                    <div
+                                        class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+                                    >
+                                        <svg
+                                            class="w-6 h-6"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                            />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h3
+                                                class="text-lg font-bold text-gray-900 dark:text-white"
+                                            >
+                                                {{ $t('company_profile.zatca.phase2_title') }}
+                                            </h3>
+                                            <span
+                                                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                                            >
+                                                معالج ذاتي
+                                            </span>
+                                        </div>
+                                        <p
+                                            class="text-sm text-gray-600 dark:text-gray-300 mt-1 max-w-xl"
+                                        >
+                                            {{ $t('company_profile.zatca.phase2_description') }}
+                                        </p>
+                                    </div>
                                 </div>
-                                <h3
-                                    class="text-lg font-semibold text-gray-900 dark:text-white mb-2"
+                                <a
+                                    href="/app/settings/zatca"
+                                    class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm shadow-md shadow-emerald-600/20 transition-all hover:scale-102 shrink-0"
                                 >
-                                    {{ $t('company_profile.zatca.phase2_title') }}
-                                </h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                    {{ $t('company_profile.zatca.phase2_description') }}
-                                </p>
-                                <button
-                                    disabled
-                                    class="px-6 py-2.5 bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 font-medium rounded-lg cursor-not-allowed"
-                                >
-                                    {{ $t('company_profile.zatca.setup_integration') }}
-                                </button>
+                                    <span>{{ $t('company_profile.zatca.setup_integration') }}</span>
+                                    <svg
+                                        class="w-4 h-4 rtl:rotate-180"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                        />
+                                    </svg>
+                                </a>
                             </div>
                         </div>
 

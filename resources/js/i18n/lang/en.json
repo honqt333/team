@@ -572,13 +572,16 @@
     },
     "zatca": {
       "complete_vat_first": "Complete your tax settings first",
+      "manage_integration": "Manage Integration & Certificates",
       "open_vat": "Open tax settings",
-      "phase1_title": "The first stage (QR Code)",
-      "phase2_description": "Direct connection with the Fatawa platform to issue electronic invoices",
-      "phase2_title": "Integration with Fatawa - coming soon",
-      "qr_enabled": "Activate QR on the invoice",
-      "qr_enabled_hint": "A QR code will be added to all invoices",
-      "setup_integration": "Integration setup (coming soon)"
+      "phase1_title": "Phase 1 (QR Code)",
+      "phase2_active": "ZATCA Production Integration is Active",
+      "phase2_active_desc": "The system is currently signing, submitting invoices, and issuing digital cryptographic stamps successfully.",
+      "phase2_description": "Direct automated integration with the Fatoora platform to submit and clear electronic invoices (Phase 2 - Integration).",
+      "phase2_title": "Phase 2 - Integration with Fatoora Platform (ZATCA)",
+      "qr_enabled": "Enable QR Code on Invoices",
+      "qr_enabled_hint": "Cryptographically signed QR codes will be attached to all invoices",
+      "setup_integration": "Launch Onboarding Wizard"
     }
   },
   "customers": {
@@ -2870,6 +2873,10 @@
       "users": {
         "description": "Managing system users and their permissions",
         "title": "Users"
+      },
+      "zatca": {
+        "description": "Phase 2 Self-Onboarding, CSID Compliance & Production Certificates",
+        "title": "ZATCA E-Invoicing"
       }
     },
     "subtitle": "Manage system settings and configuration",
