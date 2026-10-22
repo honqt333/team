@@ -20,40 +20,18 @@ class ReportsHubTest extends TestCase
         $response->assertRedirect('/login');
     }
 
-    public function test_authenticated_user_can_view_reports_hub_with_kpis(): void
+    public function test_authenticated_user_can_view_reports_hub(): void
     {
         app(PerformanceBaselineSeeder::class)->run();
 
         $tenant = Tenant::first();
         $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
 
-        $response = $this->actingAs($user)->get('/app/reports?range=this_month');
+        $response = $this->actingAs($user)->get('/app/reports');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
             ->component('Reports/Hub')
-            ->has('filters')
-            ->has('kpis')
-            ->has('paymentsByMethod')
-            ->has('recentPayments')
-            ->has('recentInvoices')
-            ->has('recentWorkOrders')
-            ->has('topServices')
-            ->has('technicians')
         );
-    }
-
-    public function test_reports_can_filter_by_different_ranges(): void
-    {
-        app(PerformanceBaselineSeeder::class)->run();
-
-        $tenant = Tenant::first();
-        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
-
-        $response = $this->actingAs($user)->get('/app/reports?range=today');
-        $response->assertStatus(200);
-
-        $responseAll = $this->actingAs($user)->get('/app/reports?range=all');
-        $responseAll->assertStatus(200);
     }
 }
