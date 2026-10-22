@@ -149,4 +149,18 @@ class PerformanceBaselineTest extends TestCase
         $this->assertLessThan(400, $duration, "List took {$duration}ms (target 400ms)");
         $this->assertLessThan(25, $queries, "Used {$queries} queries (target 25)");
     }
+
+    /**
+     * @group perf
+     * Endpoint 6: Workshop board
+     * Budget: < 500ms, < 25 queries
+     */
+    public function test_workshop_board_meets_perf_budget(): void
+    {
+        [$duration, $queries, $response] = $this->measure('/app/workshop');
+        fwrite(STDERR, sprintf("\n[RESULT 6] GET /app/workshop: %0.2fms, %d queries\n", $duration, $queries));
+        $response->assertStatus(200);
+        $this->assertLessThan(500, $duration, "Workshop board took {$duration}ms");
+        $this->assertLessThan(25, $queries, "Used {$queries} queries (target 25)");
+    }
 }
