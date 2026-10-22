@@ -104,31 +104,60 @@ class ZatcaOnboardingService
         $csid = '';
         $secret = '';
 
-        try {
-            // Attempt remote call to ZATCA gateway
-            $response = Http::timeout(8)
-                ->withHeaders([
-                    'OTP' => $cleanOtp,
-                    'Accept-Version' => 'V2',
-                    'Content-Type' => 'application/json',
-                ])
-                ->post($endpoint, [
-                    'csr' => base64_encode($setting->csr_content),
-                ]);
+        $isDevOrTest = app()->environment('local', 'testing');
+        $isMockOtp = ($cleanOtp === '123456' && $isDevOrTest);
 
-            if ($response->successful()) {
-                $body = $response->json();
-                $csid = $body['binarySecurityToken'] ?? '';
-                $secret = $body['secret'] ?? '';
-            }
-        } catch (Throwable $e) {
-            // In local/testing environment or if gateway is unreachable, use valid simulation mock
-        }
-
-        // Simulation/Developer fallback
-        if (empty($csid)) {
+        if ($isMockOtp) {
             $csid = 'CSID_SIM_'.Str::upper(Str::random(32));
             $secret = 'SECRET_SIM_'.Str::random(24);
+        } else {
+            try {
+                // Remote call to ZATCA gateway
+                $response = Http::timeout(10)
+                    ->withHeaders([
+                        'OTP' => $cleanOtp,
+                        'Accept-Version' => 'V2',
+                        'Content-Type' => 'application/json',
+                    ])
+                    ->post($endpoint, [
+                        'csr' => base64_encode($setting->csr_content),
+                    ]);
+
+                if ($response->successful()) {
+                    $body = $response->json();
+                    $csid = $body['binarySecurityToken'] ?? '';
+                    $secret = $body['secret'] ?? '';
+
+                    if (empty($csid)) {
+                        throw new InvalidArgumentException('استجابة هيئة الزكاة لم تحتوي على شهادة الامتثال (binarySecurityToken).');
+                    }
+                } else {
+                    $errorBody = $response->json();
+                    $errorMsg = $errorBody['errors'][0]['message']
+                        ?? $errorBody['message']
+                        ?? $errorBody['error']
+                        ?? ('فشل التحقق من هيئة الزكاة (رمز الاستجابة: '.$response->status().'). يرجى التأكد من صحة رمز OTP وصلاحيته.');
+
+                    $setting->last_onboarding_error = $errorMsg;
+                    $setting->save();
+
+                    throw new InvalidArgumentException($errorMsg);
+                }
+            } catch (InvalidArgumentException $e) {
+                throw $e;
+            } catch (Throwable $e) {
+                // If network/connectivity failure occurs in local dev environment, allow simulation fallback
+                if ($isDevOrTest && str_starts_with($setting->environment, 'sim')) {
+                    $csid = 'CSID_SIM_'.Str::upper(Str::random(32));
+                    $secret = 'SECRET_SIM_'.Str::random(24);
+                } else {
+                    $errorMsg = 'تعذر الاتصال ببوابة هيئة الزكاة والضريبة والجمارك: '.$e->getMessage();
+                    $setting->last_onboarding_error = $errorMsg;
+                    $setting->save();
+
+                    throw new InvalidArgumentException($errorMsg);
+                }
+            }
         }
 
         $setting->compliance_csid = $csid;

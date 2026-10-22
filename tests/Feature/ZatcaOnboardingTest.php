@@ -9,6 +9,7 @@ use App\Models\TenantZatcaSetting;
 use App\Models\User;
 use Database\Seeders\PerformanceBaselineSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class ZatcaOnboardingTest extends TestCase
@@ -85,6 +86,32 @@ class ZatcaOnboardingTest extends TestCase
         $this->assertEquals(TenantZatcaSetting::STATUS_COMPLIANCE_PASSED, $setting->onboarding_status);
         $this->assertNotEmpty($setting->compliance_csid);
         $this->assertNotEmpty($setting->compliance_secret);
+    }
+
+    public function test_step_2_handles_zatca_remote_error(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        // Step 1 CSR
+        $this->actingAs($user)->post('/app/settings/zatca/csr', ['environment' => 'production']);
+
+        // Fake ZATCA 400 rejection
+        Http::fake([
+            '*/compliance' => Http::response([
+                'errors' => [
+                    ['message' => 'رمز التحقق غير صالح أو منتهي الصلاحية'],
+                ],
+            ], 400),
+        ]);
+
+        $response = $this->actingAs($user)->post('/app/settings/zatca/compliance', [
+            'otp' => '999888',
+        ]);
+
+        $response->assertSessionHasErrors('otp');
     }
 
     public function test_step_3_run_compliance_checks(): void
