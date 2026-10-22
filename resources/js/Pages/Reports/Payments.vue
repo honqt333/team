@@ -1041,13 +1041,13 @@ const customerOptions = computed(() => [
 
 const exportUrl = computed(() => {
     const params = new URLSearchParams({
-        range: filterForm.range,
+        range: filterForm.range || 'this_month',
         start_date: filterForm.start_date || '',
         end_date: filterForm.end_date || '',
-        method: filterForm.method,
-        type: filterForm.type,
-        customer_id: filterForm.customer_id,
-        search: filterForm.search,
+        method: filterForm.method || 'all',
+        type: filterForm.type || 'all',
+        customer_id: filterForm.customer_id || 'all',
+        search: filterForm.search || '',
     });
     return `/app/reports/payments/export?${params.toString()}`;
 });
@@ -1056,13 +1056,13 @@ const applyFilters = () => {
     router.get(
         '/app/reports/payments',
         {
-            range: filterForm.range,
+            range: filterForm.range || 'this_month',
             start_date: filterForm.start_date || '',
             end_date: filterForm.end_date || '',
-            method: filterForm.method,
-            type: filterForm.type,
-            customer_id: filterForm.customer_id,
-            search: filterForm.search,
+            method: filterForm.method || 'all',
+            type: filterForm.type || 'all',
+            customer_id: filterForm.customer_id || 'all',
+            search: filterForm.search || '',
         },
         {
             preserveState: true,

@@ -85,4 +85,22 @@ class PaymentsReportTest extends TestCase
         $this->assertStringContainsString('text/csv', (string) $response->headers->get('Content-Type'));
         $this->assertStringContainsString('attachment;', (string) $response->headers->get('Content-Disposition'));
     }
+
+    public function test_payments_report_handles_null_or_empty_filter_parameters(): void
+    {
+        app(PerformanceBaselineSeeder::class)->run();
+
+        $tenant = Tenant::first();
+        $user = User::where('tenant_id', $tenant->id)->where('is_system_admin', true)->first();
+
+        // Pass null / empty query parameters to ensure no TypeErrors occur
+        $response = $this->actingAs($user)->get('/app/reports/payments?method=&type=&customer_id=&search=&range=custom&start_date=&end_date=');
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Reports/Payments')
+            ->where('filters.method', 'all')
+            ->where('filters.type', 'all')
+        );
+    }
 }

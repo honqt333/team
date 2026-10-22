@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class ReportsController extends Controller
 {
@@ -33,13 +34,13 @@ class ReportsController extends Controller
         $tenantId = auth()->user()->tenant_id;
         $centerId = TenancyContext::centerId();
 
-        $range = $request->input('range', 'this_month');
+        $range = (string) ($request->input('range') ?: 'this_month');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $method = $request->input('method', 'all');
-        $type = $request->input('type', 'all');
-        $customerId = $request->input('customer_id', 'all');
-        $search = trim((string) $request->input('search', ''));
+        $method = (string) ($request->input('method') ?: 'all');
+        $type = (string) ($request->input('type') ?: 'all');
+        $customerId = (string) ($request->input('customer_id') ?: 'all');
+        $search = trim((string) ($request->input('search') ?? ''));
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
 
@@ -134,13 +135,13 @@ class ReportsController extends Controller
         $tenantId = auth()->user()->tenant_id;
         $centerId = TenancyContext::centerId();
 
-        $range = $request->input('range', 'this_month');
+        $range = (string) ($request->input('range') ?: 'this_month');
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
-        $method = $request->input('method', 'all');
-        $type = $request->input('type', 'all');
-        $customerId = $request->input('customer_id', 'all');
-        $search = trim((string) $request->input('search', ''));
+        $method = (string) ($request->input('method') ?: 'all');
+        $type = (string) ($request->input('type') ?: 'all');
+        $customerId = (string) ($request->input('customer_id') ?: 'all');
+        $search = trim((string) ($request->input('search') ?? ''));
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
 
@@ -237,11 +238,16 @@ class ReportsController extends Controller
         ?int $centerId,
         ?Carbon $from,
         ?Carbon $to,
-        string $method,
-        string $type,
-        string $customerId,
-        string $search
+        ?string $method = 'all',
+        ?string $type = 'all',
+        ?string $customerId = 'all',
+        ?string $search = ''
     ) {
+        $method = $method ?: 'all';
+        $type = $type ?: 'all';
+        $customerId = $customerId ?: 'all';
+        $search = trim((string) $search);
+
         $query = Payment::query()->where('tenant_id', $tenantId);
 
         if ($centerId) {
@@ -306,9 +312,33 @@ class ReportsController extends Controller
     /**
      * Resolve date range presets.
      */
-    private function resolveDateRange(string $range, ?string $start = null, ?string $end = null): array
+    private function resolveDateRange(?string $range = 'this_month', ?string $start = null, ?string $end = null): array
     {
         $now = Carbon::now();
+        $range = $range ?: 'this_month';
+
+        if ($range === 'custom' || (! empty($start) || ! empty($end))) {
+            $parsedStart = null;
+            $parsedEnd = null;
+
+            if (! empty($start)) {
+                try {
+                    $parsedStart = Carbon::parse($start)->startOfDay();
+                } catch (Throwable) {
+                    $parsedStart = null;
+                }
+            }
+
+            if (! empty($end)) {
+                try {
+                    $parsedEnd = Carbon::parse($end)->endOfDay();
+                } catch (Throwable) {
+                    $parsedEnd = null;
+                }
+            }
+
+            return [$parsedStart, $parsedEnd];
+        }
 
         return match ($range) {
             'today' => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
@@ -317,10 +347,6 @@ class ReportsController extends Controller
             'this_month' => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
             'this_year' => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
             'all' => [null, null],
-            'custom' => [
-                $start ? Carbon::parse($start)->startOfDay() : null,
-                $end ? Carbon::parse($end)->endOfDay() : null,
-            ],
             default => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
         };
     }
