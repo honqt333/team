@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
+use App\Models\Center;
 use App\Models\Payment;
 use App\Support\TenancyContext;
 use Carbon\Carbon;
@@ -36,11 +37,12 @@ class ReportsController extends Controller
         $endDate = $request->input('end_date');
         $method = $request->input('method', 'all');
         $type = $request->input('type', 'all');
+        $customerId = $request->input('customer_id', 'all');
         $search = trim((string) $request->input('search', ''));
 
         [$from, $to] = $this->resolveDateRange($range, $startDate, $endDate);
 
-        $query = $this->buildPaymentsQuery($tenantId, $centerId, $from, $to, $method, $type, $search);
+        $query = $this->buildPaymentsQuery($tenantId, $centerId, $from, $to, $method, $type, $customerId, $search);
 
         // Calculate KPIs on filtered dataset
         $kpiQuery = clone $query;
