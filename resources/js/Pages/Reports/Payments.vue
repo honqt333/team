@@ -10,7 +10,7 @@
                     <a
                         href="/app/reports"
                         class="p-2.5 rounded-2xl backdrop-blur-md bg-white/80 dark:bg-gray-800/80 border border-gray-200/80 dark:border-gray-700/80 text-indigo-600 dark:text-indigo-400 hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-300 group shrink-0"
-                        title="الرجوع لكافة التقارير"
+                        :title="$t('reports.payments_report.back_to_reports')"
                     >
                         <svg
                             class="w-5 h-5 rtl:rotate-180 group-hover:-translate-x-0.5 rtl:group-hover:translate-x-0.5 transition-transform"
@@ -34,7 +34,7 @@
                             <span>{{ $t('reports.title') }}</span>
                             <span>/</span>
                             <span class="text-indigo-600 dark:text-indigo-400 font-bold">
-                                {{ $t('reports.payments') }}
+                                {{ $t('reports.payments_report.title') }}
                             </span>
                         </div>
                         <div class="flex items-center gap-3">
@@ -59,10 +59,10 @@
                                 <h1
                                     class="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white"
                                 >
-                                    {{ $t('reports.payments') }}
+                                    {{ $t('reports.payments_report.title') }}
                                 </h1>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    كشف تحليلي وتفصيلي لجميع المقبوضات والمرتجعات وحركات السندات
+                                    {{ $t('reports.payments_report.subtitle') }}
                                 </p>
                             </div>
                         </div>
@@ -89,7 +89,7 @@
                                 d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
                             />
                         </svg>
-                        <span>طباعة التقرير</span>
+                        <span>{{ $t('reports.payments_report.print_report') }}</span>
                     </button>
 
                     <a
@@ -104,7 +104,7 @@
                                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
                             />
                         </svg>
-                        <span>تصدير Excel (CSV)</span>
+                        <span>{{ $t('reports.payments_report.export_excel') }}</span>
                     </a>
                 </div>
             </div>
@@ -119,14 +119,15 @@
                             v-if="companyInfo.center_name && centers?.length > 1"
                             class="font-bold text-gray-700"
                         >
-                            الفرع: {{ companyInfo.center_name }}
+                            {{ $t('reports.payments_report.center') }}:
+                            {{ companyInfo.center_name }}
                         </p>
                         <p v-if="companyInfo.vat_number" class="text-gray-600">
-                            الرقم الضريبي:
+                            {{ $t('common.vat') }}:
                             <span class="font-mono font-bold">{{ companyInfo.vat_number }}</span>
                         </p>
                         <p v-if="companyInfo.cr_number" class="text-gray-600">
-                            السجل التجاري:
+                            CR:
                             <span class="font-mono">{{ companyInfo.cr_number }}</span>
                         </p>
                     </div>
@@ -143,25 +144,27 @@
                             <span class="text-lg font-black tracking-wider text-black">CARAG</span>
                         </div>
                         <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                            Payments Audit Report
+                            {{ $t('reports.payments_report.title') }}
                         </span>
                     </div>
 
                     <!-- Column 3: Report Metadata -->
                     <div class="text-end space-y-1 text-xs text-gray-600">
-                        <p class="font-bold text-black">تقرير سندات القبض والمدفوعات</p>
+                        <p class="font-bold text-black">
+                            {{ $t('reports.payments_report.official_report') }}
+                        </p>
                         <p>
-                            الفترة:
+                            {{ $t('reports.payments_report.report_period') }}:
                             <span class="font-mono">{{ filters.start_date || 'All' }}</span>
-                            إلى
+                            {{ $t('reports.payments_report.to') }}
                             <span class="font-mono">{{ filters.end_date || 'Now' }}</span>
                         </p>
                         <p>
-                            تاريخ الطباعة:
+                            {{ $t('reports.payments_report.printed_at') }}:
                             <span class="font-mono">{{ printDateFormatted }}</span>
                         </p>
                         <p>
-                            إجمالي العمليات:
+                            {{ $t('reports.payments_report.transaction_count') }}:
                             <span class="font-mono font-bold text-black">
                                 {{ kpis.total_count }}
                             </span>
@@ -174,19 +177,25 @@
                     class="grid grid-cols-3 gap-2 mb-4 p-3 bg-gray-100 rounded border border-gray-300 text-center text-xs"
                 >
                     <div>
-                        <span class="text-gray-600 block">إجمالي المقبوضات:</span>
+                        <span class="text-gray-600 block">
+                            {{ $t('reports.payments_report.total_collected') }}:
+                        </span>
                         <strong class="font-mono text-sm">
                             {{ formatMoney(kpis.total_collected) }}
                         </strong>
                     </div>
                     <div>
-                        <span class="text-gray-600 block">إجمالي المرتجعات:</span>
+                        <span class="text-gray-600 block">
+                            {{ $t('reports.payments_report.total_refunded') }}:
+                        </span>
                         <strong class="font-mono text-sm text-red-700">
                             {{ formatMoney(kpis.total_refunded) }}
                         </strong>
                     </div>
                     <div>
-                        <span class="text-gray-600 block">صافي التحصيل:</span>
+                        <span class="text-gray-600 block">
+                            {{ $t('reports.payments_report.net_collected') }}:
+                        </span>
                         <strong class="font-mono text-sm text-black">
                             {{ formatMoney(kpis.net_collected) }}
                         </strong>
@@ -205,7 +214,7 @@
                             <span
                                 class="text-[11px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400"
                             >
-                                صافي التحصيل
+                                {{ $t('reports.payments_report.net_collected') }}
                             </span>
                             <div
                                 class="text-2xl font-black text-gray-900 dark:text-white mt-1 font-mono"
@@ -232,7 +241,8 @@
                         </div>
                     </div>
                     <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                        إجمالي المقبوضات مخصوماً منه المرتجعات
+                        {{ $t('reports.payments_report.total_collected') }} -
+                        {{ $t('reports.payments_report.total_refunded') }}
                     </div>
                 </div>
 
@@ -245,7 +255,7 @@
                             <span
                                 class="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400"
                             >
-                                إجمالي المقبوضات
+                                {{ $t('reports.payments_report.total_collected') }}
                             </span>
                             <div
                                 class="text-2xl font-black text-gray-900 dark:text-white mt-1 font-mono"
@@ -272,7 +282,7 @@
                         </div>
                     </div>
                     <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                        مجموع سندات القبض المدفوعة
+                        {{ $t('reports.payments_report.receipts') }}
                     </div>
                 </div>
 
@@ -285,7 +295,7 @@
                             <span
                                 class="text-[11px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400"
                             >
-                                المرتجعات
+                                {{ $t('reports.payments_report.total_refunded') }}
                             </span>
                             <div
                                 class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-1 font-mono"
@@ -312,7 +322,7 @@
                         </div>
                     </div>
                     <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                        المبالغ المسترجعة للعملاء
+                        {{ $t('reports.payments_report.refunds') }}
                     </div>
                 </div>
 
@@ -325,7 +335,7 @@
                             <span
                                 class="text-[11px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400"
                             >
-                                عدد العمليات
+                                {{ $t('reports.payments_report.transaction_count') }}
                             </span>
                             <div
                                 class="text-2xl font-black text-gray-900 dark:text-white mt-1 font-mono"
@@ -352,7 +362,7 @@
                         </div>
                     </div>
                     <div class="mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                        إجمالي السندات المسجلة في الفترة
+                        {{ $t('reports.payments_report.report_period') }}
                     </div>
                 </div>
             </div>
@@ -363,7 +373,7 @@
                 class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-800 shadow-sm print:hidden"
             >
                 <span class="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-3">
-                    توزيع المبالغ حسب طريقة الدفع:
+                    {{ $t('reports.payments_report.methods_breakdown') }}:
                 </span>
                 <div class="flex flex-wrap items-center gap-3">
                     <div
@@ -386,24 +396,144 @@
                 </div>
             </div>
 
-            <!-- AUDIT_STANDARDS.md Section 6: Advanced Filters Bar with SearchableSelect & CustomDatePicker -->
+            <!-- DEDICATED DATE RANGE BOX (مربع الفترة الزمنية) -->
             <div
-                class="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-800 shadow-sm space-y-4 print:hidden"
+                class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-indigo-100/80 dark:border-gray-700/80 shadow-xl shadow-indigo-500/5 space-y-4 print:hidden"
             >
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                    <!-- Search Input -->
+                <div
+                    class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-gray-100 dark:border-gray-700/60"
+                >
+                    <div class="flex items-center gap-2.5">
+                        <div
+                            class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-inner"
+                        >
+                            <svg
+                                class="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-gray-900 dark:text-white">
+                                {{ $t('reports.payments_report.date_range') }}
+                            </h2>
+                            <p class="text-[11px] text-gray-500 dark:text-gray-400">
+                                {{ activeDateRangeLabel }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Preset Pills -->
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button
+                            type="button"
+                            v-for="preset in presets"
+                            :key="preset.id"
+                            @click="selectPreset(preset.id)"
+                            :class="[
+                                'px-3 py-1.5 rounded-xl text-xs font-bold transition-all',
+                                filterForm.range === preset.id
+                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-500/25'
+                                    : 'bg-gray-100 dark:bg-gray-700/60 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700',
+                            ]"
+                        >
+                            {{ preset.label }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Date Inputs Side-by-Side & Action Buttons -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                    <!-- Date From -->
+                    <div>
+                        <label
+                            class="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('reports.payments_report.date_from') }}
+                        </label>
+                        <CustomDatePicker
+                            v-model="filterForm.start_date"
+                            @update:modelValue="onCustomDateInput"
+                            placeholder="YYYY-MM-DD"
+                            class="!rounded-2xl"
+                        />
+                    </div>
+
+                    <!-- Date To -->
+                    <div>
+                        <label
+                            class="block text-[11px] font-bold text-gray-600 dark:text-gray-300 mb-1"
+                        >
+                            {{ $t('reports.payments_report.date_to') }}
+                        </label>
+                        <CustomDatePicker
+                            v-model="filterForm.end_date"
+                            @update:modelValue="onCustomDateInput"
+                            placeholder="YYYY-MM-DD"
+                            class="!rounded-2xl"
+                        />
+                    </div>
+
+                    <!-- Filter Actions: Apply & Reset -->
+                    <div class="sm:col-span-2 flex items-center gap-2">
+                        <button
+                            type="button"
+                            @click="applyFilters"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition-all hover:-translate-y-0.5"
+                        >
+                            <svg
+                                class="w-4 h-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                                />
+                            </svg>
+                            <span>{{ $t('reports.payments_report.apply_filters') }}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            @click="resetFilters"
+                            class="px-4 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750 text-xs font-bold transition-all shadow-sm"
+                        >
+                            {{ $t('reports.payments_report.reset_filters') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECONDARY FILTERS BAR (SearchableSelect for Methods & Customers) -->
+            <div
+                class="bg-white dark:bg-gray-800 rounded-3xl p-5 border border-gray-200 dark:border-gray-800 shadow-sm space-y-4 print:hidden"
+            >
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <!-- Direct Search Input -->
                     <div>
                         <label
                             class="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1"
                         >
-                            بحث نصي مباشر
+                            {{ $t('reports.payments_report.direct_search') }}
                         </label>
                         <div class="relative">
                             <input
                                 type="text"
                                 v-model="filterForm.search"
                                 @keyup.enter="applyFilters"
-                                placeholder="رقم السند، المرجع، اللوحة، الفاتورة..."
+                                :placeholder="$t('reports.payments_report.search_placeholder')"
                                 class="w-full text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 pe-8 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
                             />
                             <button
@@ -419,41 +549,20 @@
                         </div>
                     </div>
 
-                    <!-- Range Preset Selector -->
-                    <div>
-                        <label
-                            class="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1"
-                        >
-                            الفترة الزمنية
-                        </label>
-                        <select
-                            v-model="filterForm.range"
-                            @change="onRangeChange"
-                            class="w-full text-xs rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none dark:text-white"
-                        >
-                            <option value="today">اليوم</option>
-                            <option value="this_week">هذا الأسبوع</option>
-                            <option value="this_month">هذا الشهر</option>
-                            <option value="this_year">هذا العام</option>
-                            <option value="custom">تاريخ مخصص (Custom Date)</option>
-                            <option value="all">كل الفترات</option>
-                        </select>
-                    </div>
-
                     <!-- SearchableSelect: Payment Method -->
                     <div>
                         <label
                             class="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1"
                         >
-                            طريقة الدفع
+                            {{ $t('reports.payments_report.payment_method') }}
                         </label>
                         <SearchableSelect
                             v-model="filterForm.method"
                             :options="methodOptions"
                             optionLabel="name"
                             optionValue="id"
-                            placeholder="اختر طريقة الدفع..."
-                            searchPlaceholder="بحث في طرق الدفع..."
+                            :placeholder="$t('reports.payments_report.select_method')"
+                            :searchPlaceholder="$t('reports.payments_report.search_method')"
                             @update:modelValue="applyFilters"
                         />
                     </div>
@@ -463,102 +572,60 @@
                         <label
                             class="block text-xs font-bold text-gray-600 dark:text-gray-300 mb-1"
                         >
-                            العميل
+                            {{ $t('reports.payments_report.customer') }}
                         </label>
                         <SearchableSelect
                             v-model="filterForm.customer_id"
                             :options="customerOptions"
                             optionLabel="name"
                             optionValue="id"
-                            placeholder="اختر العميل..."
-                            searchPlaceholder="بحث باسم أو جوال العميل..."
+                            :placeholder="$t('reports.payments_report.select_customer')"
+                            :searchPlaceholder="$t('reports.payments_report.search_customer')"
                             @update:modelValue="applyFilters"
                         />
                     </div>
                 </div>
 
-                <!-- Custom Date Inputs using CustomDatePicker (AUDIT_STANDARDS.md Section 6) -->
+                <!-- Voucher Type Filter Radios -->
                 <div
-                    v-if="filterForm.range === 'custom'"
-                    class="pt-2 border-t border-gray-100 dark:border-gray-700/60 grid grid-cols-1 sm:grid-cols-2 gap-3"
+                    class="flex items-center gap-4 text-xs pt-2 border-t border-gray-100 dark:border-gray-750"
                 >
-                    <div>
-                        <label
-                            class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1"
-                        >
-                            من تاريخ
-                        </label>
-                        <CustomDatePicker
-                            v-model="filterForm.start_date"
-                            placeholder="YYYY-MM-DD"
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                            type="radio"
+                            v-model="filterForm.type"
+                            value="all"
+                            @change="applyFilters"
+                            class="text-indigo-600 focus:ring-indigo-500"
                         />
-                    </div>
-                    <div>
-                        <label
-                            class="block text-[11px] font-semibold text-gray-500 dark:text-gray-400 mb-1"
-                        >
-                            إلى تاريخ
-                        </label>
-                        <CustomDatePicker v-model="filterForm.end_date" placeholder="YYYY-MM-DD" />
-                    </div>
-                </div>
-
-                <div
-                    class="flex items-center justify-between pt-1 border-t border-gray-100 dark:border-gray-700/60"
-                >
-                    <div class="flex items-center gap-4 text-xs">
-                        <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input
-                                type="radio"
-                                v-model="filterForm.type"
-                                value="all"
-                                @change="applyFilters"
-                                class="text-indigo-600 focus:ring-indigo-500"
-                            />
-                            <span class="text-gray-700 dark:text-gray-300 font-medium">الكل</span>
-                        </label>
-                        <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input
-                                type="radio"
-                                v-model="filterForm.type"
-                                value="payment"
-                                @change="applyFilters"
-                                class="text-emerald-600 focus:ring-emerald-500"
-                            />
-                            <span class="text-emerald-700 dark:text-emerald-400 font-bold">
-                                سندات قبض
-                            </span>
-                        </label>
-                        <label class="flex items-center gap-1.5 cursor-pointer">
-                            <input
-                                type="radio"
-                                v-model="filterForm.type"
-                                value="refund"
-                                @change="applyFilters"
-                                class="text-rose-600 focus:ring-rose-500"
-                            />
-                            <span class="text-rose-700 dark:text-rose-400 font-bold">
-                                استرجاعات
-                            </span>
-                        </label>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button
-                            type="button"
-                            @click="resetFilters"
-                            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                        >
-                            إعادة ضبط
-                        </button>
-                        <button
-                            type="button"
-                            @click="applyFilters"
-                            class="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
-                        >
-                            تطبيق الفلتر
-                        </button>
-                    </div>
+                        <span class="text-gray-700 dark:text-gray-300 font-medium">
+                            {{ $t('reports.payments_report.all_types') }}
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                            type="radio"
+                            v-model="filterForm.type"
+                            value="payment"
+                            @change="applyFilters"
+                            class="text-emerald-600 focus:ring-emerald-500"
+                        />
+                        <span class="text-emerald-700 dark:text-emerald-400 font-bold">
+                            {{ $t('reports.payments_report.receipts') }}
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                            type="radio"
+                            v-model="filterForm.type"
+                            value="refund"
+                            @change="applyFilters"
+                            class="text-rose-600 focus:ring-rose-500"
+                        />
+                        <span class="text-rose-700 dark:text-rose-400 font-bold">
+                            {{ $t('reports.payments_report.refunds') }}
+                        </span>
+                    </label>
                 </div>
             </div>
 
@@ -573,15 +640,33 @@
                         >
                             <tr>
                                 <th class="px-4 py-3.5 text-center">#</th>
-                                <th class="px-4 py-3.5 text-center">رقم السند</th>
-                                <th class="px-4 py-3.5 text-center">التاريخ والوقت</th>
-                                <th class="px-4 py-3.5 text-center">الطرف (العميل / المورد)</th>
-                                <th class="px-4 py-3.5 text-center">أمر العمل / الفاتورة</th>
-                                <th class="px-4 py-3.5 text-center">المركبة</th>
-                                <th class="px-4 py-3.5 text-center">طريقة الدفع</th>
-                                <th class="px-4 py-3.5 text-center">نوع السند</th>
-                                <th class="px-4 py-3.5 text-center">المبلغ</th>
-                                <th class="px-4 py-3.5 text-center">المستلم</th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.voucher_no') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.datetime') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.party') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.reference') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.vehicles') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.payment_method') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.voucher_type') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.amount') }}
+                                </th>
+                                <th class="px-4 py-3.5 text-center">
+                                    {{ $t('reports.payments_report.received_by') }}
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 dark:divide-gray-800 font-medium">
@@ -636,7 +721,7 @@
                                         </a>
                                     </div>
                                     <div v-if="payment.invoice" class="text-[11px] text-gray-500">
-                                        <span>فاتورة:</span>
+                                        <span>{{ $t('reports.invoices') }}:</span>
                                         <a
                                             :href="'/app/invoices/' + payment.invoice.id"
                                             class="hover:underline font-mono text-gray-700 dark:text-gray-300 font-semibold"
@@ -684,19 +769,19 @@
                                         v-if="payment.type === 'refund'"
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300"
                                     >
-                                        استرجاع
+                                        {{ $t('reports.payments_report.refund_voucher') }}
                                     </span>
                                     <span
                                         v-else-if="payment.type === 'bad_debt'"
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                                     >
-                                        دين معدوم
+                                        {{ $t('payments.types.bad_debt') }}
                                     </span>
                                     <span
                                         v-else
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
                                     >
-                                        سند قبض
+                                        {{ $t('reports.payments_report.receipt_voucher') }}
                                     </span>
                                 </td>
 
@@ -742,10 +827,10 @@
                                         </svg>
                                     </div>
                                     <p class="text-sm font-bold text-gray-700 dark:text-gray-300">
-                                        لا توجد حركات دفع مسجلة
+                                        {{ $t('reports.payments_report.no_records') }}
                                     </p>
                                     <p class="text-xs text-gray-400 mt-1">
-                                        جرب تغيير الفترة الزمنية أو معايير الفلترة
+                                        {{ $t('reports.payments_report.no_records_hint') }}
                                     </p>
                                 </td>
                             </tr>
@@ -759,13 +844,13 @@
                     class="px-4 py-3 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between text-xs print:hidden"
                 >
                     <span class="text-gray-500">
-                        عرض
+                        {{ $t('reports.payments_report.showing') }}
                         <span class="font-mono">{{ payments.from || 0 }}</span>
-                        إلى
+                        {{ $t('reports.payments_report.to') }}
                         <span class="font-mono">{{ payments.to || 0 }}</span>
-                        من إجمالي
+                        {{ $t('reports.payments_report.of') }}
                         <span class="font-mono font-bold">{{ payments.total }}</span>
-                        سند
+                        {{ $t('reports.payments_report.transaction') }}
                     </span>
                     <div class="flex items-center gap-1">
                         <component
@@ -791,11 +876,11 @@
                 class="print-footer hidden print:block pt-4 mt-6 border-t border-gray-300 text-center text-xs text-gray-600"
             >
                 <p>
-                    Prepared by:
+                    {{ $t('reports.payments_report.prepared_by') }}:
                     <span class="font-bold">
                         {{ $page.props.auth?.user?.name || 'Administrator' }}
                     </span>
-                    | Printed on:
+                    | {{ $t('reports.payments_report.printed_at') }}:
                     <span class="font-mono">{{ printDateFormatted }}</span>
                 </p>
             </div>
@@ -806,15 +891,20 @@
 <script setup>
 import { reactive, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
+import { useI18n } from 'vue-i18n';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SearchableSelect from '@/Components/SearchableSelect.vue';
 import CustomDatePicker from '@/Components/CustomDatePicker.vue';
+
+const { t } = useI18n();
 
 const props = defineProps({
     filters: {
         type: Object,
         default: () => ({
             range: 'this_month',
+            start_date: '',
+            end_date: '',
             method: 'all',
             type: 'all',
             customer_id: 'all',
@@ -868,22 +958,81 @@ const filterForm = reactive({
     search: props.filters.search || '',
 });
 
+const presets = computed(() => [
+    { id: 'today', label: t('reports.payments_report.today') },
+    { id: 'yesterday', label: t('reports.payments_report.yesterday') },
+    { id: 'this_week', label: t('reports.payments_report.this_week') },
+    { id: 'this_month', label: t('reports.payments_report.this_month') },
+    { id: 'this_year', label: t('reports.payments_report.this_year') },
+    { id: 'all', label: t('reports.payments_report.all_time') },
+]);
+
+const activeDateRangeLabel = computed(() => {
+    if (filterForm.start_date && filterForm.end_date) {
+        return `${filterForm.start_date} ${t('reports.payments_report.to')} ${filterForm.end_date}`;
+    }
+    const matched = presets.value.find((p) => p.id === filterForm.range);
+    return matched ? matched.label : t('reports.payments_report.all_time');
+});
+
+const selectPreset = (presetId) => {
+    filterForm.range = presetId;
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const toYmd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    if (presetId === 'today') {
+        const todayStr = toYmd(now);
+        filterForm.start_date = todayStr;
+        filterForm.end_date = todayStr;
+    } else if (presetId === 'yesterday') {
+        const yest = new Date(now);
+        yest.setDate(yest.getDate() - 1);
+        const yestStr = toYmd(yest);
+        filterForm.start_date = yestStr;
+        filterForm.end_date = yestStr;
+    } else if (presetId === 'this_week') {
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1); // Monday/Sunday
+        const start = new Date(now.setDate(diff));
+        filterForm.start_date = toYmd(start);
+        filterForm.end_date = toYmd(new Date());
+    } else if (presetId === 'this_month') {
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        filterForm.start_date = toYmd(start);
+        filterForm.end_date = toYmd(end);
+    } else if (presetId === 'this_year') {
+        filterForm.start_date = `${now.getFullYear()}-01-01`;
+        filterForm.end_date = `${now.getFullYear()}-12-31`;
+    } else if (presetId === 'all') {
+        filterForm.start_date = '';
+        filterForm.end_date = '';
+    }
+
+    applyFilters();
+};
+
+const onCustomDateInput = () => {
+    filterForm.range = 'custom';
+};
+
 const methodOptions = computed(() => [
-    { id: 'all', name: 'جميع الطرق (All Methods)' },
-    { id: 'mada', name: 'مدى (Mada)' },
-    { id: 'cash', name: 'نقداً (Cash)' },
-    { id: 'transfer', name: 'تحويل بنكي (Transfer)' },
+    { id: 'all', name: t('reports.payments_report.all_methods') },
+    { id: 'mada', name: `${t('payments.methods.mada')} (Mada)` },
+    { id: 'cash', name: `${t('payments.methods.cash')} (Cash)` },
+    { id: 'transfer', name: `${t('payments.methods.transfer')} (Transfer)` },
     { id: 'apple_pay', name: 'Apple Pay' },
     { id: 'visa', name: 'Visa' },
     { id: 'mastercard', name: 'MasterCard' },
     { id: 'stc_pay', name: 'STC Pay' },
-    { id: 'tabby', name: 'تابي (Tabby)' },
-    { id: 'tamara', name: 'تمارا (Tamara)' },
-    { id: 'credit', name: 'آجل (Credit)' },
+    { id: 'tabby', name: 'Tabby' },
+    { id: 'tamara', name: 'Tamara' },
+    { id: 'credit', name: t('payments.methods.credit') },
 ]);
 
 const customerOptions = computed(() => [
-    { id: 'all', name: 'جميع العملاء (All Customers)' },
+    { id: 'all', name: t('reports.payments_report.all_customers') },
     ...props.customers.map((c) => ({
         id: c.id,
         name: c.name + (c.phone ? ` (${c.phone})` : ''),
@@ -908,8 +1057,8 @@ const applyFilters = () => {
         '/app/reports/payments',
         {
             range: filterForm.range,
-            start_date: filterForm.range === 'custom' ? filterForm.start_date : '',
-            end_date: filterForm.range === 'custom' ? filterForm.end_date : '',
+            start_date: filterForm.start_date || '',
+            end_date: filterForm.end_date || '',
             method: filterForm.method,
             type: filterForm.type,
             customer_id: filterForm.customer_id,
@@ -920,12 +1069,6 @@ const applyFilters = () => {
             preserveScroll: true,
         }
     );
-};
-
-const onRangeChange = () => {
-    if (filterForm.range !== 'custom') {
-        applyFilters();
-    }
 };
 
 const resetFilters = () => {
@@ -950,7 +1093,9 @@ const formatMoney = (val) => {
         new Intl.NumberFormat('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
-        }).format(num) + ' SAR'
+        }).format(num) +
+        ' ' +
+        t('reports.payments_report.currency')
     );
 };
 
@@ -986,7 +1131,7 @@ const getPartyName = (p) => {
         p.work_order?.customer?.name ||
         p.invoice?.customer?.name ||
         p.purchase_invoice?.supplier?.name ||
-        'عميل نقدي'
+        t('reports.payments_report.unknown_customer')
     );
 };
 
@@ -996,19 +1141,19 @@ const getPartyPhone = (p) => {
 
 const getMethodLabel = (m) => {
     const map = {
-        mada: 'مدى',
-        cash: 'نقداً',
-        transfer: 'تحويل بنكي',
+        mada: t('payments.methods.mada'),
+        cash: t('payments.methods.cash'),
+        transfer: t('payments.methods.transfer'),
         apple_pay: 'Apple Pay',
         visa: 'Visa',
         mastercard: 'MasterCard',
         stc_pay: 'STC Pay',
-        tabby: 'تابي',
-        tamara: 'تمارا',
-        credit: 'آجل',
-        other: 'أخرى',
+        tabby: 'Tabby',
+        tamara: 'Tamara',
+        credit: t('payments.methods.credit'),
+        other: t('payments.methods.other'),
     };
-    return map[m] || m || 'غير محدد';
+    return map[m] || m || '—';
 };
 
 const getMethodBadgeClass = (m) => {

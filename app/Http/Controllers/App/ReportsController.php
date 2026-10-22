@@ -312,6 +312,7 @@ class ReportsController extends Controller
 
         return match ($range) {
             'today' => [$now->copy()->startOfDay(), $now->copy()->endOfDay()],
+            'yesterday' => [$now->copy()->subDay()->startOfDay(), $now->copy()->subDay()->endOfDay()],
             'this_week' => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
             'this_month' => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
             'this_year' => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
