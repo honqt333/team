@@ -466,6 +466,47 @@
                                 </p>
                             </div>
 
+                            <!-- ZATCA Phase 2 Self-Onboarding Banner -->
+                            <div
+                                class="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-2xl border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                            >
+                                <div class="space-y-1">
+                                    <div class="flex items-center gap-2">
+                                        <span
+                                            class="w-2.5 h-2.5 rounded-full bg-emerald-500"
+                                        ></span>
+                                        <h4
+                                            class="text-sm font-bold text-emerald-950 dark:text-emerald-200"
+                                        >
+                                            معالج الربط الذاتي مع هيئة الزكاة (ZATCA Phase 2)
+                                        </h4>
+                                    </div>
+                                    <p class="text-xs text-emerald-800/80 dark:text-emerald-300/80">
+                                        إصدار شهادات الامتثال والإنتاج التلقائية وربط وحدة الفوترة
+                                        بمنصة فاتورة بخطوات ميسرة.
+                                    </p>
+                                </div>
+                                <a
+                                    href="/app/settings/zatca"
+                                    class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition-colors shrink-0"
+                                >
+                                    <span>فتح معالج الربط الذاتي</span>
+                                    <svg
+                                        class="w-4 h-4 rtl:rotate-180"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M14 5l7 7m0 0l-7 7m7-7H3"
+                                        />
+                                    </svg>
+                                </a>
+                            </div>
+
                             <!-- Two Columns: Services & Parts -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Services Column -->

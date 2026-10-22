@@ -93,6 +93,7 @@ use App\Http\Controllers\App\WorkOrders\WorkOrderTechnicianController;
 use App\Http\Controllers\App\WorkOrders\WorkOrderWarrantiesController;
 use App\Http\Controllers\App\WorkOrderSignatureController;
 use App\Http\Controllers\App\WorkshopBoardController;
+use App\Http\Controllers\App\ZatcaOnboardingController;
 use App\Http\Controllers\Auth\PhoneVerificationController;
 use App\Http\Controllers\Auth\SetPasswordController;
 use App\Http\Controllers\LocaleController;
@@ -531,6 +532,16 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::get('/settings/company/contacts/search', [CompanyTransactionController::class, 'searchContacts'])->name('settings.company.contacts.search');
     Route::resource('/settings/company/transactions', CompanyTransactionController::class)->names('settings.company.transactions');
     Route::post('/settings/company/transactions/{transaction}/approve', [CompanyTransactionController::class, 'approve'])->name('settings.company.transactions.approve');
+
+    // ZATCA Phase 2 Self-Onboarding
+    Route::prefix('settings/zatca')->name('settings.zatca.')->group(function () {
+        Route::get('/', [ZatcaOnboardingController::class, 'index'])->name('index');
+        Route::post('/csr', [ZatcaOnboardingController::class, 'generateCsr'])->name('csr');
+        Route::post('/compliance', [ZatcaOnboardingController::class, 'requestCompliance'])->name('compliance');
+        Route::post('/check', [ZatcaOnboardingController::class, 'runChecks'])->name('check');
+        Route::post('/production', [ZatcaOnboardingController::class, 'requestProduction'])->name('production');
+        Route::post('/reset', [ZatcaOnboardingController::class, 'reset'])->name('reset');
+    });
 
     // ─────────────────────────────────────────────────────────────────────
     // Billing Hub (tenant self-service) — unified subscription + payment page
