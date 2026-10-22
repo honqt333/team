@@ -8,6 +8,7 @@ return [
     'customers' => 'العملاء',
     'dashboard' => 'لوحة التحكم',
     'employee_portal' => 'بوابة الموظف',
+    'help' => 'المساعدة والشروحات',
     'integrations' => 'التكاملات',
     'invoices' => 'الفواتير',
     'logout' => 'تسجيل الخروج',

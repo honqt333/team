@@ -20,6 +20,7 @@ use App\Http\Controllers\App\DashboardController;
 use App\Http\Controllers\App\DepartmentController;
 use App\Http\Controllers\App\EmployeePortalController;
 use App\Http\Controllers\App\GoodsReceivedNotesController;
+use App\Http\Controllers\App\HelpController;
 use App\Http\Controllers\App\HR\AttendanceController;
 use App\Http\Controllers\App\HR\BiometricDeviceController;
 use App\Http\Controllers\App\HR\EmployeeContractsController;
@@ -919,6 +920,11 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     Route::prefix('reports')->name('app.reports.')->group(function () {
         Route::get('/', [ReportsController::class, 'hub'])->name('hub');
     });
+
+    // ───────────────────────────────────────────────────────────────
+    // Help & Knowledge Base
+    // ───────────────────────────────────────────────────────────────
+    Route::get('/help', [HelpController::class, 'index'])->name('app.help.index');
 
     // ───────────────────────────────────────────────────────────────
     // Invoices & Payments
