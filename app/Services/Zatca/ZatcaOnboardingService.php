@@ -217,6 +217,16 @@ class ZatcaOnboardingService
             throw new InvalidArgumentException('شهادة الامتثال غير متوفرة لإصدار شهادة الإنتاج.');
         }
 
+        $isProduction = ($setting->environment === TenantZatcaSetting::ENV_PRODUCTION || $setting->environment === 'production');
+
+        if ($isProduction && str_starts_with((string) $setting->compliance_csid, 'CSID_SIM_')) {
+            $errorMsg = 'شهادة الامتثال الحالية هي شهادة محاكاة تجريبية ولا يمكن استخدامها لإصدار شهادة إنتاج حية. يرجى إعادة طلب شهادة الامتثال برمز OTP حقيقي.';
+            $setting->last_onboarding_error = $errorMsg;
+            $setting->save();
+
+            throw new InvalidArgumentException($errorMsg);
+        }
+
         $prodCsid = 'PROD_CSID_'.Str::upper(Str::random(36));
         $prodSecret = 'PROD_SEC_'.Str::random(32);
 

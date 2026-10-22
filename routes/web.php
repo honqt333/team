@@ -930,6 +930,8 @@ Route::prefix('app')->middleware(['auth', 'verified', 'tenant.active', 'center.c
     // ───────────────────────────────────────────────────────────────
     Route::prefix('reports')->name('app.reports.')->group(function () {
         Route::get('/', [ReportsController::class, 'hub'])->name('hub');
+        Route::get('/payments', [ReportsController::class, 'payments'])->name('payments');
+        Route::get('/payments/export', [ReportsController::class, 'exportPayments'])->name('payments.export');
     });
 
     // ───────────────────────────────────────────────────────────────

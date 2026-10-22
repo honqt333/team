@@ -27,10 +27,10 @@
 
             <!-- Report Cards Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                <!-- Payments -->
+                <!-- Payments (Active Unit) -->
                 <a
-                    href="#"
-                    class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-7 border border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center cursor-not-allowed"
+                    href="/app/reports/payments"
+                    class="group relative bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-7 border border-emerald-200 dark:border-emerald-800 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center"
                 >
                     <div
                         class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-all duration-300"
@@ -54,7 +54,11 @@
                     >
                         {{ $t('reports.payments') }}
                     </h3>
-                    <ComingSoonBadge />
+                    <span
+                        class="mt-2 inline-block px-2.5 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300"
+                    >
+                        متاح الآن
+                    </span>
                 </a>
 
                 <!-- Orders (Work Orders) -->
